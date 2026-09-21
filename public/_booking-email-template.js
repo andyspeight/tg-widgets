@@ -616,6 +616,29 @@ export function renderBookingEmail(opts) {
         summaryRows.push({ group: 'flights', label: 'Return flight', value: `${retDate}${returnLine}` });
       }
     }
+
+    // The seats and bags chosen on the flight (21 Sep 2026, ET122149). The
+    // agent could see these in Travelify and the customer could not see them
+    // anywhere of ours. Seats read as "2C Gillian Clark", bags by their
+    // supplier name. No prices: see trimFlightExtras in
+    // api/_lib/travelify-items.js for why.
+    const chosenExtras = Array.isArray(flightItem.flights.extras) ? flightItem.flights.extras : [];
+    const chosenSeats = chosenExtras.filter(x => x && x.seat);
+    const chosenBags = chosenExtras.filter(x => x && x.name && !x.seat);
+    if (chosenSeats.length) {
+      summaryRows.push({
+        group: 'flights',
+        label: chosenSeats.length === 1 ? 'Seat' : 'Seats',
+        value: chosenSeats.map(x => `${x.seat}${x.traveller ? ` ${x.traveller}` : ''}`).join(' · '),
+      });
+    }
+    if (chosenBags.length) {
+      summaryRows.push({
+        group: 'flights',
+        label: 'Baggage and extras',
+        value: chosenBags.map(x => `${x.qty > 1 ? `${x.qty} x ` : ''}${x.name}`).join(' · '),
+      });
+    }
   }
 
   // Transfers — short summary line. Multiple transfers (rare) each get

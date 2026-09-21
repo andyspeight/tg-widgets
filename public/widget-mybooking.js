@@ -3,6 +3,23 @@
  * Self-contained, embeddable widget for retrieving and displaying confirmed bookings
  * Zero dependencies — works on any website via a single script tag
  *
+ * v1.14.0 changes (21 Sep 2026, Exclusively Travel ET122149):
+ *   - The seats and bags the customer chose now show. Travelify sends the
+ *     WHOLE menu for a flight in dataObject.extraGroups (109 seats on
+ *     ET122149's outbound alone, every bag weight, the sports equipment list)
+ *     and marks the chosen rows with qtySelected. Nothing read it, so four
+ *     seats and two hold bags were plain to the agent in Travelify and
+ *     invisible to the customer. Seats sit under the leg they belong to,
+ *     matched on flight number, each named for its traveller via PaxID; bags
+ *     and anything else sit on the flight card. The same rows are in the PDF
+ *     and the confirmation email. No prices: see trimFlightExtras in
+ *     api/_lib/travelify-items.js for why.
+ *   - A discount voucher counts against the balance, like a gift voucher.
+ *     ET122149 used SUNSHINE30 (-£30, isGift false) and read as £30 still to
+ *     pay against Travelify's zero, because our total is the item prices
+ *     summed and the discount is not in them. Guarded by
+ *     npm run test:mybooking-seats and npm run test:order-money.
+ *
  * v1.13.0 changes (16 Sep 2026):
  *   - A booking can be opened straight from a link. When the address carries
  *     the reference, the departure date and the email address, the form is
@@ -215,7 +232,7 @@
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
   const API_AMEND = (typeof window !== 'undefined' && window.__TG_AMEND_API__) || (API_BASE + '/api/amend-order');
   const AMEND_MAX = 1000; // matches the server cap in /api/amend-order
-  const VERSION = '1.13.0';
+  const VERSION = '1.14.0';
 
   // ── Payment deep link ──
   // The balance reminder email links to the client's booking page with
@@ -555,6 +572,9 @@
       stopoverIn: 'Stopover in {iata}',
       stopoverInTimed: '{dur} stopover in {iata}',
       aircraft: 'Aircraft',
+      seat: 'Seat',
+      seatsChosen: 'Seats you chose',
+      bookedExtras: 'Baggage and extras',
       thisProduct: 'this product',
       product: 'product',
       cancelPrefix: 'Cancel',
@@ -811,6 +831,9 @@
       stopoverIn: 'Escale à {iata}',
       stopoverInTimed: 'Escale de {dur} à {iata}',
       aircraft: 'Appareil',
+      seat: 'Siège',
+      seatsChosen: 'Vos sièges',
+      bookedExtras: 'Bagages et extras',
       thisProduct: 'ce produit',
       product: 'produit',
       cancelPrefix: 'Annuler',
@@ -1067,6 +1090,9 @@
       stopoverIn: 'Zwischenstopp in {iata}',
       stopoverInTimed: '{dur} Zwischenstopp in {iata}',
       aircraft: 'Flugzeug',
+      seat: 'Sitzplatz',
+      seatsChosen: 'Ihre Sitzplätze',
+      bookedExtras: 'Gepäck und Extras',
       thisProduct: 'dieses Produkt',
       product: 'Produkt',
       cancelPrefix: 'Stornieren',
@@ -1323,6 +1349,9 @@
       stopoverIn: 'Escala en {iata}',
       stopoverInTimed: 'Escala de {dur} en {iata}',
       aircraft: 'Aeronave',
+      seat: 'Asiento',
+      seatsChosen: 'Tus asientos',
+      bookedExtras: 'Equipaje y extras',
       thisProduct: 'este producto',
       product: 'producto',
       cancelPrefix: 'Cancelar',
@@ -1579,6 +1608,9 @@
       stopoverIn: 'Scalo a {iata}',
       stopoverInTimed: 'Scalo di {dur} a {iata}',
       aircraft: 'Aeromobile',
+      seat: 'Posto',
+      seatsChosen: 'I tuoi posti',
+      bookedExtras: 'Bagagli ed extra',
       thisProduct: 'questo prodotto',
       product: 'prodotto',
       cancelPrefix: 'Annulla',
@@ -1835,6 +1867,9 @@
       stopoverIn: 'Escală în {iata}',
       stopoverInTimed: 'Escală de {dur} în {iata}',
       aircraft: 'Aeronavă',
+      seat: 'Loc',
+      seatsChosen: 'Locurile tale',
+      bookedExtras: 'Bagaje și extra',
       thisProduct: 'acest produs',
       product: 'produs',
       cancelPrefix: 'Anulează',
@@ -1987,6 +2022,7 @@
     car:     'M3 17h2l1 4h12l1-4h2v-7l-2-5H5L3 10zM7 17v2M17 17v2M5 14h14',
     van:     'M3 17h18M3 17V8a1 1 0 0 1 1-1h11l4 5h1a1 1 0 0 1 1 1v4M7 17v2M17 17v2M15 7v5h5',
     ticket:  'M3 7v3a2 2 0 0 1 0 4v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 0 1 0-4V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2zM13 5v14',
+    seat:    'M6 5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v7H6zM4 12h16v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM7 19v2M17 19v2',
   };
   function svg(p, sw, size) {
     sw = sw || 2;
@@ -2757,6 +2793,14 @@
     .tgm-leg-meta-item svg { color: var(--tgm-text-3); }
     .tgm-leg-meta-item strong { color: var(--tgm-text); font-weight: 600; }
 
+    /* The seats and bags the customer chose (ET122149, 21 Sep 2026). */
+    .tgm-leg-extras, .tgm-flight-extras { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--tgm-border-light); }
+    .tgm-flight-extras { margin-top: 16px; }
+    .tgm-leg-extras-head, .tgm-flight-extras-head { font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--tgm-text-3); margin-bottom: 8px; }
+    .tgm-extra-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tgm-extra-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 9999px; background: var(--tgm-bg-2); font-size: 13px; color: var(--tgm-text); }
+    .tgm-extra-chip svg { color: var(--tgm-text-3); flex-shrink: 0; }
+
     .tgm-segs { padding-top: 12px; margin-top: 12px; border-top: 1px solid var(--tgm-border-light); }
     .tgm-seg { display: grid; grid-template-columns: 60px 1fr 60px; gap: 12px; padding: 10px 0; align-items: center; font-size: 13px; }
     .tgm-seg + .tgm-seg { border-top: 1px dashed var(--tgm-border-light); }
@@ -3000,6 +3044,58 @@
     `;
   }
 
+  // The seats and bags the customer chose, split into the ones that belong to a
+  // particular leg and the ones that belong to the whole flight booking
+  // (21 Sep 2026, ET122149). Travelify names a seat group after its flight, so
+  // a seat is matched to a leg by flight number, and by departure airport when
+  // the flight number is missing. Anything that matches no leg still shows,
+  // under the card, so a selection is never silently dropped.
+  function splitFlightExtras(f) {
+    const all = Array.isArray(f && f.extras) ? f.extras : [];
+    const norm = (v) => String(v || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    const legKeys = (route) => {
+      const segs = (route && route.segments) || [];
+      const nos = new Set();
+      const iatas = new Set();
+      for (const seg of segs) {
+        const no = norm(seg.flightNo);
+        if (no) {
+          nos.add(no);
+          const code = norm(seg.marketingCarrier && seg.marketingCarrier.code);
+          if (code && !no.startsWith(code)) nos.add(code + no);
+        }
+        const from = norm(seg.origin && seg.origin.iataCode);
+        if (from) iatas.add(from);
+      }
+      return { nos, iatas };
+    };
+    const routes = Array.isArray(f && f.routes) ? f.routes : [];
+    const keys = routes.map(legKeys);
+    const perLeg = routes.map(() => []);
+    const shared = [];
+    for (const x of all) {
+      if (!x || !x.name) continue;
+      const no = norm(x.flightNo);
+      const dep = norm(x.departure);
+      let at = no ? keys.findIndex(k => k.nos.has(no)) : -1;
+      if (at < 0 && !no && dep) at = keys.findIndex(k => k.iatas.has(dep));
+      if (at >= 0 && x.seat) perLeg[at].push(x); else shared.push(x);
+    }
+    return { perLeg, shared };
+  }
+
+  /** "Seat 2C · Gillian Clark", or "2 x One Large Cabin Bag" for a bag. */
+  function flightExtraLabel(x, c) {
+    const t = (k, v) => (c && c.t ? c.t(k, v) : k);
+    if (x.seat) {
+      const who = x.traveller ? ` · ${x.traveller}` : '';
+      return `${(c.labels && c.labels.seat) || t('seat')} ${x.seat}${who}`;
+    }
+    const qty = x.qty > 1 ? `${x.qty} x ` : '';
+    const who = x.traveller ? ` · ${x.traveller}` : '';
+    return `${qty}${x.name}${who}`;
+  }
+
   function renderFlightCard(item, c) {
     const f = item.flights;
     if (!f || !Array.isArray(f.routes) || f.routes.length === 0) return '';
@@ -3027,6 +3123,9 @@
       return true;
     });
 
+    // Seats and bags, from Travelify's extraGroups (see api/retrieve-order.js).
+    const chosen = splitFlightExtras(f);
+
     return `
       <div class="tgm-flight-card">
         <h3>${svg(IC.plane)}${esc(c.labels?.flights || c.t('flights'))}${
@@ -3034,7 +3133,15 @@
             ? `<span class="tgm-flight-meta">${esc(carrierSummary)}</span>`
             : ''
         }</h3>
-        ${f.routes.map(route => renderFlightLeg(route, c)).join('')}
+        ${f.routes.map((route, i) => renderFlightLeg(route, c, chosen.perLeg[i])).join('')}
+        ${chosen.shared.length ? `
+          <div class="tgm-flight-extras">
+            <div class="tgm-flight-extras-head">${esc(c.labels?.bookedExtras || c.t('bookedExtras'))}</div>
+            <div class="tgm-extra-chips">
+              ${chosen.shared.map(x => `<span class="tgm-extra-chip">${svg(IC.bag, 2, 14)}<span>${esc(flightExtraLabel(x, c))}</span></span>`).join('')}
+            </div>
+          </div>
+        ` : ''}
         ${meaningfulFareInfo.length ? `
           <div class="tgm-collapse" style="margin-top:16px; margin-bottom:0;">
             <button class="tgm-collapse-trig" type="button" aria-expanded="false">
@@ -3055,10 +3162,11 @@
     `;
   }
 
-  function renderFlightLeg(route, c) {
+  function renderFlightLeg(route, c, legExtras) {
     const t = (k, v) => (c && c.t ? c.t(k, v) : k);
     const segs = route.segments || [];
     if (segs.length === 0) return '';
+    const seats = Array.isArray(legExtras) ? legExtras : [];
 
     const first = segs[0];
     const last = segs[segs.length - 1];
@@ -3123,6 +3231,14 @@
           ${cabin ? `<span class="tgm-leg-meta-item">${svg(IC.user, 2, 14)}<span><strong>${esc(cabin)}</strong>${fareName ? ` · ${esc(fareName)}` : ''}</span></span>` : ''}
           ${baggage ? `<span class="tgm-leg-meta-item">${svg(IC.bag, 2, 14)}<span>${esc(baggage)}</span></span>` : ''}
         </div>
+        ${seats.length ? `
+          <div class="tgm-leg-extras">
+            <div class="tgm-leg-extras-head">${esc(c.labels?.seatsChosen || t('seatsChosen'))}</div>
+            <div class="tgm-extra-chips">
+              ${seats.map(x => `<span class="tgm-extra-chip">${svg(IC.seat, 2, 14)}<span>${esc(flightExtraLabel(x, c))}</span></span>`).join('')}
+            </div>
+          </div>
+        ` : ''}
         ${stops > 0 ? renderSegmentDetail(segs, c) : ''}
       </div>
     `;
@@ -3894,7 +4010,7 @@
    *   vouchers       [{ id, code, name, value, isPercent, isGift }]
    *   schedule       { initialAmount, breakdown: [{ amount, dueDate }] } or null
    *   today          'YYYY-MM-DD' (injectable for tests)
-   *   deductNonGift  true to treat discount vouchers as credit too (default false)
+   *   deductNonGift  false to hold discount vouchers back instead (default true)
    *
    * Output carries only masked codes and only rounded, floored figures.
    */
@@ -3904,7 +4020,7 @@
     const digits = minorDigits(currency);
     const totalM = Math.max(0, toMinor(inp.total, digits));
     const paidM = Math.max(0, toMinor(inp.paid, digits));
-    const deductNonGift = inp.deductNonGift === true;
+    const deductNonGift = inp.deductNonGift !== false;
     const today = (typeof inp.today === 'string' && inp.today) ? inp.today : new Date().toISOString().slice(0, 10);
 
     const vouchers = [];
@@ -4070,7 +4186,7 @@
       vouchers,
       schedule: (o.depositOption && typeof o.depositOption === 'object') ? o.depositOption : null,
       today: options.today,
-      deductNonGift: options.deductNonGift === true,
+      deductNonGift: options.deductNonGift !== false,
     });
   }
 

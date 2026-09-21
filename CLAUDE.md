@@ -173,6 +173,34 @@ Time. Guarded by `npm run test:booking-dates-tz`, which re-runs the widget, the
 PDF and the email in four timezones. Fixtures must use the shape the supplier
 really sends: tidy `2026-09-26` strings in the old fixtures are what hid this.
 
+**A discount voucher is money off, not decoration** (21 Sep 2026, Exclusively
+Travel ET122149). Travelify sends `vouchers[]` with an `isGift` flag. Gift
+cards were always credited; discount codes were held back in case the discount
+was already inside the item prices, and ET122149 settled that it is not: a
+booking carrying SUNSHINE30 (-£30, `isGift: false`) reads as a zero balance in
+Travelify and read as £30 still to pay on the customer's page, because our
+total is the item prices summed. Both kinds are credit now. The same sums drive
+the Pay balance button, so this was not only a wrong number on a page, it was
+about to take £30 Travelify does not think it is owed.
+`TG_DEDUCT_NON_GIFT_VOUCHERS=0` is the kill switch. Guarded by
+`npm run test:order-money`.
+
+**What the customer booked is not the same as what the menu offered** (21 Sep
+2026, ET122149). A Travelify flight's `dataObject.extraGroups` is the WHOLE
+menu: 109 seats on that booking's outbound, every bag weight, the sports
+equipment list. The chosen rows are marked with `qtySelected` and nothing else
+tells them apart, so four seats and two hold bags were plain to the agent in
+Travelify and invisible to the customer for as long as the widget has existed.
+Read them with `trimFlightExtras()` from `api/_lib/travelify-items.js`, which
+all three order endpoints call: there are three copies of `trimFlights` and a
+fourth copy of this would have been the Referer story again. It drops the
+placeholder rows Travelify also sends ("I do not want to pre-book my seat",
+marked `SEATID: NONE`) and carries NO prices, because a seat's `pricing.price`
+is a per-unit supplier figure that does not reconcile with the item total the
+customer sees (four seats at 18.49 / 18.49 / 18.99 / 18.99 arrive in the
+breakdown as one "Seat Selection Total" of 122.87). Guarded by
+`npm run test:mybooking-seats`.
+
 **Render must not grab the host page.** A widget's render/`update()` path must
 be side-effect-free for the page: never call `.focus()`, `.select()` or
 `scrollIntoView()` (nor autofocus) as part of drawing itself. Those belong ONLY

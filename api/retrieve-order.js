@@ -32,7 +32,7 @@
 import { travelifyAuthHeaders } from './_lib/travelify.js';
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
 import { moneyOf, moneyOptsFromEnv } from './_lib/order-money.js';
-import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape } from './_lib/travelify-items.js';
+import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape, trimFlightExtras } from './_lib/travelify-items.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
 const WIDGETS_TABLE = 'tblVAThVqAjqtria2';
@@ -486,6 +486,14 @@ function trimFlightSegment(s) {
 }
 
 function trimFlights(d) {
+  const travellers = Array.isArray(d.travellers)
+    ? d.travellers.slice(0, 12).map(t => ({
+        type: safeStr(t.type, 30),
+        title: safeStr(t.title, 30),
+        firstname: safeStr(t.firstname, 80),
+        surname: safeStr(t.surname, 80),
+      }))
+    : [];
   return {
     fareType: safeStr(d.fareType, 40),
     openJaw: !!d.openJaw,
@@ -513,14 +521,10 @@ function trimFlights(d) {
           text: safeStr(f.text, 1000),
         })).filter(f => f.text)
       : [],
-    travellers: Array.isArray(d.travellers)
-      ? d.travellers.slice(0, 12).map(t => ({
-          type: safeStr(t.type, 30),
-          title: safeStr(t.title, 30),
-          firstname: safeStr(t.firstname, 80),
-          surname: safeStr(t.surname, 80),
-        }))
-      : [],
+    travellers,
+    // The seats and bags chosen on this flight; see trimFlightExtras in
+    // api/_lib/travelify-items.js.
+    extras: trimFlightExtras(d, travellers),
   };
 }
 

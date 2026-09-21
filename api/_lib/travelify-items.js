@@ -313,3 +313,94 @@ export function describeOrderShape(raw) {
     sourcesShape: describeStructure(raw && raw.sources, 7),
   };
 }
+
+// Local, deliberately minimal versions of the endpoints' own sanitisers, so
+// this module stays pure and dependency-free.
+function exStr(v, max) {
+  if (v == null) return null;
+  const s = String(v);
+  return s.length > max ? s.slice(0, max) : s;
+}
+function exNum(v) {
+  if (typeof v !== 'number' || !Number.isFinite(v)) return null;
+  return v;
+}
+
+// The seats and bags the customer actually chose (21 Sep 2026, Exclusively
+// Travel ET122149). Travelify hands back the WHOLE menu for a flight in
+// dataObject.extraGroups: every seat on the aircraft, every bag weight, sports
+// equipment. The chosen ones are marked with qtySelected, and nothing else
+// distinguishes them, which is why none of this reached the customer while the
+// agent could see it plainly in Travelify. We keep only what was selected.
+//
+// A real selection always carries bookingData: the "I do not want to pre-book
+// my seat" and "I don't want to add any optional baggage upgrades" rows are
+// placeholders, and the seat one is marked SEATID: NONE. Both are dropped.
+//
+// Prices are deliberately NOT carried. A seat's pricing.price is the supplier's
+// own per-unit figure and it does not reconcile with the item total the
+// customer is shown: on ET122149 four seats priced 18.49 / 18.49 / 18.99 /
+// 18.99 arrive in the order's breakdown as one "Seat Selection Total" of
+// 122.87, and two hold bags at 105.98 each are charged at 106.48. Printing
+// either number next to a total it does not add up to would invent a
+// discrepancy, so these read as WHAT was booked, never what it cost.
+export function trimFlightExtras(d, travellers) {
+  const groups = Array.isArray(d && d.extraGroups) ? d.extraGroups : [];
+  const people = Array.isArray(travellers) ? travellers : [];
+  const seats = [];
+  const others = [];
+
+  groups.slice(0, 12).forEach((g, gi) => {
+    if (!g || typeof g !== 'object') return;
+    if (seats.length + others.length >= 60) return;
+    const bd = (g.bookingData && typeof g.bookingData === 'object') ? g.bookingData : {};
+    const groupName = exStr(g.name, 120);
+    const flightNo = exStr(bd.FlightNumber, 20);
+    const departure = exStr(bd.DeparturePoint, 10);
+    const list = Array.isArray(g.extras) ? g.extras : [];
+
+    for (const e of list) {
+      if (!e || typeof e !== 'object') continue;
+      const qty = exNum(e.qtySelected);
+      if (!(qty > 0)) continue;
+      const ebd = (e.bookingData && typeof e.bookingData === 'object') ? e.bookingData : null;
+      if (!ebd || Object.keys(ebd).length === 0) continue;   // a "no thanks" placeholder
+      if (String(ebd.SEATID || '') === 'NONE') continue;
+
+      // The seat label Travelify prints ("2C"), or the row and column it holds.
+      const seatNum = exStr(ebd.Num, 10)
+        || (e.seat && e.seat.row != null && e.seat.col ? `${e.seat.row}${exStr(e.seat.col, 4)}` : null);
+
+      // PaxID indexes the travellers array on this same flight item.
+      const paxRaw = ebd.PaxID;
+      const paxIndex = (paxRaw != null && paxRaw !== '' && Number.isInteger(Number(paxRaw)) && Number(paxRaw) >= 0)
+        ? Number(paxRaw)
+        : null;
+      const person = (paxIndex != null && people[paxIndex]) ? people[paxIndex] : null;
+      const traveller = person
+        ? exStr([person.firstname, person.surname].filter(Boolean).join(' ').trim(), 160) || null
+        : null;
+
+      const row = {
+        kind: exStr(g.type, 40) || exStr(e.type, 40),
+        group: groupName,
+        name: exStr(e.name, 200),
+        seat: seatNum,
+        flightNo,
+        departure,
+        qty,
+        paxIndex,
+        traveller,
+        payAtPickup: !!e.isPayAtPickup,
+      };
+      if (seatNum) { row.groupIndex = gi; seats.push(row); } else { others.push(row); }
+      if (seats.length + others.length >= 60) break;
+    }
+  });
+
+  // Seats in flight order, then in traveller order, so a party reads down the
+  // page the same way it reads on the ticket.
+  seats.sort((a, b) => (a.groupIndex - b.groupIndex) || ((a.paxIndex == null ? 99 : a.paxIndex) - (b.paxIndex == null ? 99 : b.paxIndex)));
+  for (const s2 of seats) delete s2.groupIndex;
+  return seats.concat(others);
+}
