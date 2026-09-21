@@ -37,6 +37,7 @@ import { setCors, sanitiseForFormula } from './_auth.js';
 import { renderBookingEmail } from './_lib/booking-email-template.js';
 import { sendViaSendGrid, buildFromField, isValidEmail } from './_lib/sendgrid.js';
 import { layoutWantsDestination, resolveBookingDestination } from './_lib/booking-destination.js';
+import { readWidgetSettings, buildEmailBrand, demoEmailBrand } from './_lib/booking-email-brand.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
 const WIDGETS_TABLE = 'tblVAThVqAjqtria2';
@@ -279,52 +280,20 @@ export default async function handler(req, res) {
     }
 
     // ----- 3. Pull branding from the widget Airtable record -----
-    let brandConfig = { name: 'Travelgenix Demo', logoUrl: '', footerLine: '' };
-    let replyToAddress = null;
-    let supportEmail = null;
-    let supportPhone = null;
+    // Brand, reply-to and support all come from the widget record, resolved in
+    // api/_lib/booking-email-brand.js so the staff preview renders the SAME
+    // identity this sender does. A preview that worked it out its own way would
+    // be a mock-up of an email we never send.
+    let { brandConfig, replyToAddress, supportEmail, supportPhone } = demoEmailBrand();
     let widgetSettings = {};
 
     if (widgetId !== DEMO_WIDGET_SENTINEL) {
       const widget = await findWidgetById(widgetId);
       if (widget) {
         const fields = widget.fields || {};
-
-        // Brand config (colours, support, brand name) lives in `Config` — the
-        // field the editor saves and the live widget reads. `Settings` is a
-        // legacy field the widget never writes, so reading it left emails on
-        // Travelgenix defaults. Fall back to Settings for old records.
-        const s = fields.Config || fields.Settings;
-        if (s) {
-          if (typeof s === 'object') widgetSettings = s;
-          else { try { widgetSettings = JSON.parse(s); } catch { widgetSettings = {}; } }
-        }
-
-        const fromName = (fields.FromName || '').toString().trim();
-        const fromEmail = (fields.FromEmail || '').toString().trim().toLowerCase();
-        const logoUrl = (fields.LogoUrl || '').toString().trim();
-        const emailFooter = (fields.EmailFooter || '').toString().trim();
-        const clientName = (fields.ClientName || '').toString().trim();
-
-        brandConfig.name = fromName
-          || widgetSettings?.brand?.name
-          || clientName
-          || 'Travel Team';
-
-        if (fromEmail && isValidEmail(fromEmail)) {
-          replyToAddress = fromEmail;
-        } else {
-          const fallback = (fields.ClientEmail || '').toString().trim().toLowerCase();
-          if (fallback && isValidEmail(fallback)) replyToAddress = fallback;
-        }
-
-        // Only HTTPS logos — embedding HTTP URLs would render as broken images
-        // in many mail clients due to mixed-content blocking.
-        brandConfig.logoUrl = (logoUrl && /^https:\/\//i.test(logoUrl)) ? logoUrl : '';
-        brandConfig.footerLine = emailFooter;
-
-        supportEmail = widgetSettings?.support?.email || replyToAddress || null;
-        supportPhone = widgetSettings?.support?.phone || null;
+        widgetSettings = readWidgetSettings(fields);
+        ({ brandConfig, replyToAddress, supportEmail, supportPhone } =
+          buildEmailBrand(fields, widgetSettings));
       }
     }
 
