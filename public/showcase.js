@@ -611,6 +611,7 @@
 
     /* attract */
     var att = n('div', 'tg-attract');
+    att.appendChild(n('span', 'tg-attract-bg'));   /* its own box, so it can drift */
     var attIn = n('div', 'tg-attract-in');
     attIn.appendChild(n('span', 'tg-kicker', 'Travelgenix'));
     attIn.appendChild(n('h1', null, 'See what your clients would see'));

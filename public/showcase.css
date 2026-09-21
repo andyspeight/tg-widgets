@@ -129,13 +129,56 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
  * Attract
  * ------------------------------------------------------------------ */
 
+/* Attract: the money shot.
+   A stand gets about two seconds to stop someone walking past, and a text card
+   on a pale background does not do it. So the photograph IS the screen. The
+   words sit in a scrim over the quiet side of it, and the picture drifts very
+   slowly, which is what catches an eye from the other end of a hall. The navy
+   underneath is the fallback if the image has not arrived yet. */
 .tg-attract {
-  position: absolute; inset: 0; z-index: 60;
-  display: grid; place-items: center;
-  padding: var(--space-10);
-  background: var(--tg-bg);
+  position: absolute; inset: 0; z-index: 60; overflow: hidden;
+  display: grid; align-items: center; justify-items: start;
+  padding: clamp(28px, 7vw, 132px);
+  background: #0A1626;
 }
-.tg-attract-in { max-width: 30ch; }
+.tg-attract-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background: url(/showcase/img/splash.webp) center / cover no-repeat;
+  transform-origin: 64% 46%;
+  animation: tg-drift 30s var(--ease) infinite alternate;
+}
+@keyframes tg-drift { from { transform: scale(1); } to { transform: scale(1.09); } }
+/* Two scrims: one across so the words have something to sit on, one up from
+   the floor so the picture does not fight the buttons. */
+.tg-attract::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    linear-gradient(100deg, rgba(7,18,32,.93) 0%, rgba(7,18,32,.8) 32%, rgba(7,18,32,.34) 62%, rgba(7,18,32,.04) 100%),
+    linear-gradient(to top, rgba(7,18,32,.55), transparent 42%);
+}
+.tg-attract-in { position: relative; z-index: 2; max-width: 30ch; }
+
+/* The splash is dark whichever theme the stand is in, so its controls are
+   treated once rather than twice. */
+.tg-attract .tg-kicker,
+:root[data-theme="dark"] .tg-attract .tg-kicker { color: var(--tg-accent-light); }
+.tg-attract h1 { color: #fff; text-shadow: 0 2px 30px rgba(0,0,0,.4); }
+.tg-attract p, .tg-attract-note { color: #fff; }   /* see the rules further down */
+.tg-attract .tg-cta,
+:root[data-theme="dark"] .tg-attract .tg-cta {
+  background: #fff; color: var(--tg-primary);
+  box-shadow: 0 12px 34px -12px rgba(0,0,0,.65);
+}
+.tg-attract .tg-cta:hover,
+:root[data-theme="dark"] .tg-attract .tg-cta:hover { background: #E9F7FC; }
+.tg-attract .tg-cta--quiet,
+:root[data-theme="dark"] .tg-attract .tg-cta--quiet {
+  background: rgba(255,255,255,.12); color: #fff;
+  border: 1px solid rgba(255,255,255,.55); box-shadow: none;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+.tg-attract .tg-cta--quiet:hover,
+:root[data-theme="dark"] .tg-attract .tg-cta--quiet:hover { background: rgba(255,255,255,.22); }
 .tg-kicker {
   display: block; margin-bottom: var(--space-5);
   font-size: var(--t-xs); font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
@@ -154,7 +197,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 }
 .tg-attract p {
   margin-top: var(--space-5);
-  font-size: var(--t-lg); color: var(--tg-text-2); line-height: 1.45; max-width: 24ch;
+  font-size: var(--t-lg); color: rgba(255,255,255,.93); line-height: 1.45; max-width: 24ch;
 }
 .tg-attract-ctas { margin-top: var(--space-10); display: flex; flex-wrap: wrap; gap: var(--space-4); }
 .tg-cta {
@@ -171,7 +214,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .tg-cta svg { width: 20px; height: 20px; stroke-width: 1.75; }
 .tg-cta--quiet { background: transparent; color: var(--tg-text); box-shadow: none; border: 1px solid var(--tg-border); }
 .tg-cta--quiet:hover { background: var(--tg-surface); }
-.tg-attract-note { display: block; margin-top: var(--space-6); font-size: var(--t-sm); color: var(--tg-text-3); }
+.tg-attract-note { display: block; margin-top: var(--space-6); font-size: var(--t-sm); color: rgba(255,255,255,.68); }
 
 /* ------------------------------------------------------------------ *
  * The scene: device on the left, one caption on the right.
@@ -862,7 +905,15 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .tg-btn { min-height: 46px; min-width: 46px; padding: 0 var(--space-4); }
   .tg-btn-label { display: none; }
 
-  .tg-attract { position: fixed; padding: var(--space-6) var(--space-5); }
+  .tg-attract {
+    position: fixed; align-items: end; justify-items: stretch;
+    padding: var(--space-6) var(--space-5) calc(var(--space-8) + env(safe-area-inset-bottom));
+  }
+  /* Portrait wants the scrim coming up off the floor, not across. */
+  .tg-attract::after {
+    background: linear-gradient(to top, rgba(7,18,32,.95) 0%, rgba(7,18,32,.82) 34%, rgba(7,18,32,.3) 66%, rgba(7,18,32,.05) 100%);
+  }
+  .tg-attract-in { max-width: none; }
   .tg-attract-ctas { flex-direction: column; align-items: stretch; }
   .tg-cta { justify-content: center; min-height: 62px; }
 

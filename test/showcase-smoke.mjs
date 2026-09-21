@@ -247,6 +247,28 @@ check('the flight path starts and ends on the end pins',
   Math.abs(+nums[nums.length - 1] - last[1]) <= 1,
   d ? `${nums[0]},${nums[1]} to ${nums[nums.length - 2]},${nums[nums.length - 1]}` : 'no path');
 
+/* The attract screen. Andy, 21 Sep 2026: "start it on the image splash screen
+   as that is the hero/money shot". A stand gets seconds to stop someone, so
+   the first thing on screen is the photograph, not a text card. */
+console.log('showcase: the splash');
+check('the splash photograph is committed', existsSync(join(PUB, 'showcase/img/splash.webp')));
+check('the attract screen paints it',
+  /\.tg-attract-bg\s*\{[^}]*url\(\/showcase\/img\/splash\.webp\)/.test(css));
+check('it covers the screen', /\.tg-attract-bg\s*\{[^}]*cover/.test(css));
+check('the engine puts the picture in', /tg-attract-bg/.test(js));
+check('the picture is asked for before the script builds the screen',
+  /rel="preload"[^>]*splash\.webp/.test(html));
+check('there is a scrim so the words are legible over it',
+  /\.tg-attract::after\s*\{[^}]*linear-gradient/.test(css));
+/* Navy on a navy photograph is invisible from across a hall. */
+check('the primary call to action is inverted over the photograph',
+  /\.tg-attract \.tg-cta[^{]*\{[^}]*background:\s*#fff/.test(css));
+check('the copy over the photograph is light, not body grey',
+  !/\.tg-attract p\s*\{[^}]*var\(--tg-text-2\)/.test(css) &&
+  !/\.tg-attract-note\s*\{[^}]*var\(--tg-text-3\)/.test(css));
+check('the drift honours reduced motion',
+  /prefers-reduced-motion[\s\S]*animation-duration:\s*\.001ms/.test(css));
+
 check('the image assets have headers',
   vercel.headers.some(h => /showcase\/img/.test(h.source)));
 
