@@ -239,7 +239,8 @@
     "test:travelify-referer": "node test/travelify-referer-drift-smoke.mjs",
     "test:map-cron-rotation": "node test/map-cron-rotation-smoke.mjs",
     "test:showcase": "node test/showcase-smoke.mjs",
-    "build:showcase-qr": "node scripts/build-showcase-qr.mjs"
+    "build:showcase-qr": "node scripts/build-showcase-qr.mjs",
+    "test:offers-board-referral": "node test/offers-board-referral-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
