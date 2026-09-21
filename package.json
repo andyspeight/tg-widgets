@@ -239,7 +239,8 @@
     "test:travelify-referer": "node test/travelify-referer-drift-smoke.mjs",
     "test:map-cron-rotation": "node test/map-cron-rotation-smoke.mjs",
     "test:offers-board-referral": "node test/offers-board-referral-smoke.mjs",
-    "test:booking-email-preview": "node test/booking-email-preview-smoke.mjs"
+    "test:booking-email-preview": "node test/booking-email-preview-smoke.mjs",
+    "test:offer-builder-loads-offers": "node test/offer-builder-loads-offers-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
