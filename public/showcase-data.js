@@ -113,7 +113,7 @@
           '</div>' +
           '<div class="lt-tile" data-hs="nextup">' +
             '<span class="lt-tile-k">Next up</span>' +
-            '<span class="lt-tile-v lt-tile-v--sm">LHR to AUH</span>' +
+            '<span class="lt-tile-v lt-tile-v--sm">Heathrow to Abu Dhabi</span>' +
             '<span class="lt-tile-s">Thu 2 Oct, 21:35</span>' +
           '</div>' +
         '</div>' +
@@ -136,102 +136,105 @@
       {
         anchor: 'brand',
         at: 'top-left',
-        title: 'White-labelled to the agency',
+        title: 'Your name on their home screen',
         feature:
-          'The agency name, mark and colours are applied across every screen from their Control record. ' +
-          'Travelgenix is not named anywhere the traveller can see.',
+          'Every screen carries the agency\u2019s own logo, colours and name. Travelgenix appears ' +
+          'nowhere the traveller can see.',
         benefit:
-          'The traveller spends two weeks looking at their travel agent’s brand, at the point in the ' +
-          'journey when they are most likely to talk about the trip.',
-        edge: 'Vamoos charges for branding as a tier. Here it is how the app ships.'
+          'For a fortnight their client is looking at their brand, at the point in the year they are ' +
+          'most likely to be telling friends about the holiday.',
+        edge: 'Vamoos sells branding as a tier. Here it is simply how the app arrives.'
       },
       {
         anchor: 'agent-banner',
-        title: 'The agent can reach them mid-trip',
+        title: 'Reach them when it matters',
         feature:
-          'Messages an agent sends from the CRM surface at the top of home, newest unread first, ' +
-          'colour coded by priority: red for urgent, amber for important, teal for the rest. ' +
-          'Mark as read clears it, and opening notifications clears the rest.',
+          'A message sent from the agency lands at the top of the home screen, colour coded by how ' +
+          'urgent it is. Red for now, amber for soon, teal for the rest.',
         benefit:
-          'A gate change or a moved transfer reaches the traveller on the screen they already have open, ' +
-          'instead of an email they will not see until they land.'
+          'A moved transfer or a gate change reaches the traveller on the screen already in their ' +
+          'hand, instead of an email they will read once they land.'
       },
       {
         anchor: 'bell',
         at: 'top-left',
-        title: 'Unread count that follows them',
+        title: 'Nothing sits unread',
         feature:
-          'The badge polls on open, on focus and whenever the app comes back to the foreground, so the ' +
-          'count is right without the traveller pulling to refresh.',
-        benefit: 'Nothing important sits unseen just because the app was in the background.'
+          'The unread count refreshes whenever the app comes back to the front, so it is right ' +
+          'without anyone pulling to refresh.',
+        benefit:
+          'The agency can be confident a message was seen, which is the difference between telling ' +
+          'someone and hoping.'
       },
       {
         anchor: 'trip-hero',
         at: 'bottom-right',
-        title: 'The booking arrives by itself',
+        title: 'The booking fills it in',
         feature:
-          'The trip is built from the live Travelify order. Reference, dates, nights, flights, hotels ' +
-          'and extras all come across without anyone retyping them.',
+          'Reference, dates, flights, hotels and extras all arrive from the booking itself. Nobody ' +
+          'retypes a thing.',
         benefit:
-          'The agency gets a branded trip app for a booking they have already made, with no back-office ' +
-          'work and nothing to keep in step by hand.'
+          'A branded trip app for a holiday already sold, with no back office work and nothing to ' +
+          'keep in step by hand.'
       },
       {
         anchor: 'countdown',
         at: 'top-left',
-        title: 'Countdown to departure',
-        feature: 'A live count of days to go, from the booking’s own start date.',
+        title: 'Something to open before they fly',
+        feature:
+          'A live count of the days left, taken from the booking\u2019s own dates.',
         benefit:
-          'It gives the traveller a reason to open the app before they travel, which is when upsells and ' +
-          'extras still convert.'
+          'It gives the traveller a reason to come back in the weeks before departure, which is when ' +
+          'lounge passes, transfers and upgrades still sell.'
       },
       {
         anchor: 'weather',
         at: 'top-left',
-        title: 'Destination weather',
-        feature: 'Current conditions for the destination, on the home screen.',
-        benefit: 'It answers the question every traveller asks their agent in the fortnight before they fly.'
+        title: 'The question they always ask',
+        feature:
+          'Live conditions where they are going, on the first screen they see.',
+        benefit:
+          'Every agent answers this one a dozen times a week. Now it answers itself.'
       },
       {
         anchor: 'nextup',
         at: 'top-right',
-        title: 'What happens next, without hunting for it',
+        title: 'What happens next, without hunting',
         feature:
-          'The next thing due on the trip is pulled out of the itinerary onto the home screen: the flight ' +
-          'tonight, the transfer tomorrow, the check out on the last morning.',
+          'The next thing due is lifted out of the itinerary onto the home screen. Tonight\u2019s ' +
+          'flight, tomorrow\u2019s transfer, the last morning\u2019s checkout.',
         benefit:
-          'The traveller opens the app and gets their answer immediately, rather than scrolling a fifteen ' +
-          'day itinerary to work out what is happening today.'
+          'They open the app and have their answer, rather than scrolling a fortnight of detail to ' +
+          'work out what today holds.'
       },
       {
         anchor: 'call-agent',
-        title: 'One tap back to a human',
+        title: 'One tap back to a person',
         feature:
-          'Call and email actions are built from the agency’s own number and address, and they only ' +
-          'appear when the agency has them on file.',
+          'Call and email buttons built from the agency\u2019s own number and address, shown only ' +
+          'when they are on file.',
         benefit:
-          'The agency stays in the trip. The traveller never has to hunt for who booked it when something ' +
-          'goes wrong.'
+          'When something goes wrong at eleven at night the agency is one tap away, not a name the ' +
+          'traveller has to go looking for.'
       },
       {
         anchor: 'guide',
-        title: 'Destination content the agency already owns',
+        title: 'They look like they know the place',
         feature:
-          'Guides are drawn from the Travelgenix destination database, the same content that fills the ' +
-          'agency\u2019s website, and matched to where the traveller is actually going.',
+          'Destination guides drawn from the Travelgenix content database, matched to where the ' +
+          'traveller is actually going.',
         benefit:
-          'The agency looks like it knows the resort, without anyone writing a word, and the content they ' +
-          'paid for once works twice.'
+          'The same content that fills the agency\u2019s website works a second time here, and nobody ' +
+          'has to write a word of it.'
       },
       {
         anchor: 'tabbar',
         title: 'Five tabs, and it stays at five',
         feature:
-          'Home, Trip, Map, Docs and Me. New capability is added inside a tab rather than as a sixth, ' +
-          'which is why the storyboard ships as a view of the itinerary and not a tab of its own.',
+          'Home, Trip, Map, Docs and Me. New things go inside a tab rather than becoming a sixth.',
         benefit:
-          'A traveller who used the app last year still knows where everything is. The app does not grow ' +
-          'a navigation problem as it grows features.'
+          'A traveller who used it last year still knows where everything is. The app gets better ' +
+          'without getting harder.'
       }
     ]
   });
@@ -265,7 +268,7 @@
           '</span>' +
         '</div>' +
         '<div class="lt-day">' +
-          '<span class="lt-day-h"><b>Day 2</b><small>Fri 3 Oct · Baa Atoll</small></span>' +
+          '<span class="lt-day-h"><b>Day 2</b><small>Fri 3 Oct · Baa Atoll, Maldives</small></span>' +
           '<span class="lt-day-tag lt-day-tag--arrive">Arrive</span>' +
         '</div>' +
         '<div class="lt-ev" data-hs="ev-transfer">' +
@@ -283,7 +286,7 @@
           '</span>' +
         '</div>' +
         '<div class="lt-storyboard" data-hs="storyboard">' +
-          '<span class="lt-sb-art lt-art--atoll"></span>' +
+          '<span class="lt-sb-art lt-art--shore"></span>' +
           '<span class="lt-sb-copy"><b>Day 3 · At leisure</b><small>Baa Atoll, Maldives</small></span>' +
         '</div>' +
       '</div>' +
@@ -291,43 +294,40 @@
     hotspots: [
       {
         anchor: 'seg',
-        title: 'Timeline and Storyboard, one source',
+        title: 'A schedule, or a story',
         feature:
-          'The storyboard is a presentation layer over the same canonical timeline, switched here rather ' +
-          'than built as a second tab with its own copy of the data.',
+          'The same trip told two ways. Timeline is the practical list of what happens when. ' +
+          'Storyboard turns it into a day by day account with a picture and a headline for each one.',
         benefit:
-          'The two views cannot drift apart and disagree about the trip, which is the usual way a second ' +
-          'view of an itinerary goes wrong.'
+          'One is for the airport queue. The other is the one they show people when they get home.'
       },
       {
         anchor: 'daygroup',
-        title: 'Days that match the traveller’s day',
+        title: 'Days that match their days',
         feature:
-          'Days are derived from the events themselves, grouped on the same day keys the timeline uses, ' +
-          'rather than counted forward from the trip start.',
+          'Day one is the day they fly, wherever in the world they happen to be reading it.',
         benefit:
-          'A British traveller on a 2 October trip sees Day 1 as 2 October. Counting from the start date ' +
-          'in UTC used to invent a phantom day in front of the trip.'
+          'It sounds obvious. Getting it wrong puts a phantom day at the front of the holiday, and ' +
+          'travellers spot it immediately.'
       },
       {
         anchor: 'ev-flight',
-        title: 'Flights, rooms and transfers as booked',
+        title: 'As booked, down to the seat',
         feature:
-          'Every event is read from the supplier order: flight numbers, terminals, seats, room type, board ' +
-          'basis and check in times.',
+          'Flight numbers, terminals, seats, room type, board basis and check in times, every one of ' +
+          'them read from the booking.',
         benefit:
-          'The traveller stops emailing the agency to ask what time the flight is, and the agency stops ' +
-          'answering that email forty times a week.'
+          'The agency stops answering what time is my flight forty times a week, because the answer ' +
+          'is already in the traveller\u2019s pocket.'
       },
       {
         anchor: 'storyboard',
-        title: 'A day at a time, with a headline',
+        title: 'A holiday, not a spreadsheet',
         feature:
-          'Storyboard gives each day a plain headline, travel day, arrive, at leisure or departure, with a ' +
-          'location line beneath. Travel days take their image from the country they are heading to.',
+          'Each day gets a plain headline and a picture. Travel day, arrive, at leisure, departure.',
         benefit:
-          'It reads like a holiday rather than a schedule, which is what makes a traveller show it to ' +
-          'someone else.'
+          'This is the screen that gets shown to other people, which makes it the one that brings the ' +
+          'agency its next enquiry.'
       }
     ]
   });
@@ -343,14 +343,27 @@
         '<span class="lt-back"></span>' +
         '<span class="lt-title">Trip map</span>' +
       '</header>' +
+      /* The map draws twice over. `.lt-map-world` is a real web-mercator frame
+         at zoom 2: the tiles, the flight path and the three pins all sit at
+         their true projected pixel, so the picture is geography rather than
+         decoration. Behind it, three soft shapes stand in for land. Online the
+         basemap draws and the shapes are hidden. Offline it is never asked for,
+         the shapes stay, and the demo proves the badge instead of claiming it. */
       '<div class="lt-map" data-hs="map-canvas">' +
         '<span class="lt-map-land lt-map-land--a"></span>' +
         '<span class="lt-map-land lt-map-land--b"></span>' +
         '<span class="lt-map-land lt-map-land--c"></span>' +
-        '<span class="lt-map-route"></span>' +
-        '<span class="lt-pin lt-pin--1" data-hs="pin-airport"><b>LHR</b></span>' +
-        '<span class="lt-pin lt-pin--2"><b>AUH</b></span>' +
-        '<span class="lt-pin lt-pin--3 lt-pin--hotel" data-hs="pin-hotel"><b>Resort</b></span>' +
+        '<div class="lt-map-world">' +
+          '<span class="lt-map-tiles"></span>' +
+          '<svg class="lt-map-route" viewBox="0 0 1280 960" aria-hidden="true">' +
+            '<path d="M638 426 Q736 446 834 550 Q867 569 900 622" />' +
+          '</svg>' +
+          '<span class="lt-pin lt-pin--1" data-hs="pin-airport"><b>London Heathrow</b></span>' +
+          '<span class="lt-pin lt-pin--2 lt-pin--flip"><b>Abu Dhabi</b></span>' +
+          '<span class="lt-pin lt-pin--3 lt-pin--hotel lt-pin--flip" data-hs="pin-hotel">' +
+            '<b>Reethi Beach Resort</b></span>' +
+        '</div>' +
+        '<span class="lt-map-credit">\u00a9 OpenStreetMap contributors</span>' +
         '<span class="lt-map-badge" data-hs="map-offline">Works offline</span>' +
       '</div>' +
       '<div class="lt-body lt-body--tight">' +
@@ -364,38 +377,40 @@
       {
         anchor: 'map-offline',
         at: 'outside-right',
-        title: 'No tiles, no signal needed',
+        title: 'A map that works at 38,000 feet',
         feature:
-          'The basemap is a bundled Natural Earth outline drawn with a hand rolled equirectangular ' +
-          'projection. There is no mapping library and no tile server call.',
+          'The map is built into the app. It draws in flight mode, in a resort with one bar, and ' +
+          'abroad with data switched off.',
         benefit:
-          'It draws on a plane, in a resort with bad wifi, and on an overseas data plan the traveller is ' +
-          'trying not to use. It also costs the agency nothing per view.'
+          'Which is exactly when someone wants to see how far the hotel is from the airport. It also ' +
+          'costs the agency nothing per view, because there is no map service behind it.'
       },
       {
         anchor: 'map-canvas',
         title: 'Nothing to ask permission for',
-        feature: 'The map never asks the device for its location. It plots the booking, not the traveller.',
+        feature:
+          'It plots the booking, never the traveller. The app never asks the phone where it is.',
         benefit:
-          'No permission prompt on first open, and no location data to hold. One less thing to explain in ' +
-          'a privacy policy.'
+          'No permission box on first open, and no location data to hold or to explain in a privacy ' +
+          'policy.'
       },
       {
         anchor: 'pin-airport',
         at: 'top-left',
-        title: 'Airports the feed only names by code',
+        title: 'Every airport, placed properly',
         feature:
-          'Supplier orders carry IATA codes with no coordinates, so airports are placed from a curated ' +
-          'coordinate list held in the app.',
-        benefit: 'Flights appear on the map at all, which they cannot do from a three letter code alone.'
+          'Suppliers send three letter codes with no coordinates, so the app carries its own list and ' +
+          'puts each airport where it belongs.',
+        benefit:
+          'Without it the flights would not appear on the map at all.'
       },
       {
         anchor: 'pin-hotel',
-        title: 'Hotels pinned where they really are',
-        feature: 'Accommodation carries real latitude and longitude in the feed, so it is plotted exactly.',
+        title: 'How far is the hotel, really',
+        feature:
+          'The hotel is pinned at its true position, taken straight from the booking.',
         benefit:
-          'The traveller can see how far the resort is from the airport before they land, which is the ' +
-          'transfer question in visual form.'
+          'The transfer question, answered as a picture, before anyone has to ask it.'
       }
     ]
   });
@@ -439,38 +454,40 @@
     hotspots: [
       {
         anchor: 'pdf-canvas',
-        title: 'A PDF that actually opens on a phone',
+        title: 'Tickets that open at the gate',
         feature:
-          'Pages are rendered to a canvas in the app itself. Mobile browsers refuse to draw a PDF inside a ' +
-          'frame and show their own Open placeholder instead, so framing one can never work on a phone.',
+          'Every document opens inside the app, full size and readable, on any phone.',
         benefit:
-          'The traveller reads their ticket in the app, at the airport, rather than being bounced into a ' +
-          'file viewer or a download they then have to find again.'
+          'Most travel apps throw the traveller out to a file viewer here, because phones make the ' +
+          'easy way impossible. This one does the harder version so nobody notices.'
       },
       {
         anchor: 'pdf-brand',
-        title: 'Documents wear the agency’s brand',
-        feature: 'Generated documents carry the agency name and colours, the same as every other screen.',
+        title: 'The agency\u2019s name at the check in desk',
+        feature:
+          'Generated documents carry the agency\u2019s name and colours, the same as every other ' +
+          'screen.',
         benefit:
-          'The thing the traveller shows at a check in desk has the agency on it, which is the highest ' +
-          'value piece of brand real estate in the whole trip.'
+          'The thing handed over at a desk has their brand on it. There is no better piece of ' +
+          'advertising in the whole trip.'
       },
       {
         anchor: 'doc-acts',
-        title: 'Two ways out, always',
-        feature: 'Open full screen and Download stay available under every document.',
+        title: 'Always a way out',
+        feature:
+          'Open full screen and download sit under every document.',
         benefit:
-          'If a document is awkward on a particular handset, the traveller is never stuck. They can always ' +
-          'get the file itself.'
+          'If one awkward handset struggles, the traveller still gets their file. Nobody is left ' +
+          'stuck at an airport.'
       },
       {
         anchor: 'doc-item',
-        title: 'The agent uploads, the traveller receives',
+        title: 'Upload once, and it is there',
         feature:
-          'Documents are attached from the agency side in Luna Work, next to the trip they belong to, and ' +
-          'they appear here without the traveller doing anything.',
+          'The agent attaches documents from the CRM, next to the booking they belong to, and they ' +
+          'appear on the phone.',
         benefit:
-          'No more sending a 6MB attachment and hoping it arrived. The agency can see the app has it.'
+          'No more sending a six megabyte attachment and hoping. The agency can see it arrived.'
       }
     ]
   });
@@ -508,43 +525,42 @@
     hotspots: [
       {
         anchor: 'luna-grounded',
-        title: 'Answers from the booking, not the internet',
+        title: 'It answers from their actual booking',
         feature:
-          'Luna answers from the trip the traveller is actually on: flights, times, terminals, room, board ' +
-          'basis, dates and reference.',
+          'Ask about the flight, the room, the board basis or the dates and it answers from the trip ' +
+          'they are really on.',
         benefit:
-          'The answers are right because they come from the order. There is nothing for the agency to keep ' +
-          'up to date and nothing to correct afterwards.'
+          'The answers are right because they come from the booking. There is nothing for the agency ' +
+          'to keep updated and nothing to correct afterwards.'
       },
       {
         anchor: 'luna-honest',
-        title: 'It admits what it does not know',
+        title: 'It says when it does not know',
         feature:
-          'When Luna cannot answer, it says so plainly. It does not offer a cheerful non-answer and it does ' +
-          'not show unrelated suggestions to look busy.',
+          'When it cannot answer it says so plainly. No cheerful non answer, no unrelated suggestions ' +
+          'to look busy.',
         benefit:
-          'A confident wrong answer about a cot, a visa or a transfer is the fastest way to lose a client. ' +
-          'Saying so costs nothing and keeps the trust.'
+          'A confident wrong answer about a visa or a cot is how an agency loses a client. Admitting ' +
+          'it costs nothing.'
       },
       {
         anchor: 'luna-handoff',
-        title: 'The dead end is a handover',
+        title: 'The dead end becomes a conversation',
         feature:
-          'Not knowing produces two actions: email the agent with the booking reference already in the ' +
-          'subject, or call them. Each appears only if the agency has that contact on file.',
+          'Not knowing produces two buttons: email the agent with the booking reference already ' +
+          'filled in, or ring them.',
         benefit:
-          'An unanswered question becomes a conversation with the agency rather than a bad review, and the ' +
-          'agent opens an email that already says which booking it is about.'
+          'An unanswered question turns into contact with the agency rather than a bad review, and ' +
+          'the agent opens an email that already says which trip it is about.'
       },
       {
         anchor: 'luna-composer',
-        title: 'Built to be safe on a stand',
+        title: 'It works with no signal, every time',
         feature:
-          'The in-app assistant runs a local deterministic engine rather than calling out to a model, which ' +
-          'is a deliberate choice for demos and for travellers with no signal.',
+          'The assistant runs inside the app rather than calling out to anything.',
         benefit:
-          'No latency, no hallucination and no dependency on the venue wifi. It answers the same way every ' +
-          'time you show it.'
+          'No waiting, no invented answers, no leaning on the resort wifi. It behaves the same on a ' +
+          'stand as it does in the Maldives.'
       }
     ]
   });
@@ -582,54 +598,56 @@
         at: 'bottom-right',
         title: 'Six languages, chosen for them',
         feature:
-          'English, Romanian, French, German, Spanish and Italian. The app picks one from the handset on ' +
-          'first open, and a manual choice is remembered on that device from then on.',
+          'English, Romanian, French, German, Spanish and Italian. The app picks one from the phone ' +
+          'on first open and remembers any change.',
         benefit:
-          'A traveller who does not read English gets a usable app without being asked to set it up, and ' +
-          'an agency selling into those markets does not need a separate product.'
+          'A traveller who does not read English gets a usable app without setting anything up, and ' +
+          'the agency does not need a second product to sell abroad.'
       },
       {
         anchor: 'me-lang',
         title: 'What is deliberately left alone',
         feature:
-          'Supplier text, booking references, dates and times are never machine translated. Only the app’s ' +
-          'own wording changes.',
+          'Room names, references, dates and supplier wording are never translated. Only the ' +
+          'app\u2019s own words change.',
         benefit:
-          'A room name or a reference that got helpfully translated is a traveller turned away at a desk. ' +
-          'The parts that must match the supplier stay exactly as the supplier wrote them.'
+          'A helpfully translated room name is a traveller turned away at a desk. Anything that has ' +
+          'to match the supplier stays exactly as the supplier wrote it.'
       },
       {
         anchor: 'me-badge',
-        title: 'The badge that brings them back',
-        feature: 'Unread agent messages show as a count on the Me tab, capped at nine plus.',
+        title: 'A way back in',
+        feature:
+          'Unread messages from the agency show as a count on the app\u2019s own icon.',
         benefit:
-          'The agency has a way to pull a traveller back into a branded app, without paying for a push ' +
-          'campaign or hoping an email gets opened.'
+          'The agency has a route back to a client\u2019s attention that costs nothing and does not ' +
+          'depend on an email being opened.'
       },
       {
         anchor: 'me-update',
-        title: 'Updates that actually take',
+        title: 'Fixes actually arrive',
         feature:
-          'Updating unregisters the service worker, clears every cache and reloads on a fresh URL. A plain ' +
-          'reload just serves the stale app back from disk, which is why the new version prompt used to ' +
-          'reappear forever.',
+          'An update clears everything the phone was holding and loads the new version properly.',
         benefit:
-          'A fix the agency asks for on Monday is on the traveller’s phone, rather than stuck behind a ' +
-          'cache nobody can clear from the other end of a phone call.'
+          'Something asked for on Monday is on the traveller\u2019s phone, rather than stuck behind a ' +
+          'cache nobody can clear down a phone line.'
       },
       {
         anchor: 'me-travellers',
-        title: 'Everyone on the booking',
-        feature: 'The party on the order is listed, so the app covers the whole booking and not one lead name.',
-        benefit: 'Families and groups share one trip rather than one person relaying everything to the rest.'
+        title: 'The whole party, not the lead name',
+        feature:
+          'Everyone on the booking is listed, so the trip belongs to the family rather than to ' +
+          'whoever paid.',
+        benefit:
+          'Groups stop relaying everything through one person, which is where details go missing.'
       },
       {
         anchor: 'me-version',
-        title: 'You can always see what you are running',
-        feature: 'The live version number sits in the footer, and Check for updates is one row above it.',
+        title: 'Support calls start with a fact',
+        feature:
+          'The version sits at the bottom of the screen, with a check for updates directly above it.',
         benefit:
-          'Support calls start with a fact instead of a guess. The agent can ask what it says at the bottom ' +
-          'of Me and know immediately.'
+          'The agent asks what it says at the bottom and knows immediately, instead of guessing.'
       }
     ]
   });
@@ -657,33 +675,31 @@
     hotspots: [
       {
         anchor: 'insp-when',
-        title: 'A rebooking surface, not an advert',
+        title: 'The next holiday, while this one is still warm',
         feature:
-          'Inspirations is aimed at the end of the trip, when the traveller is home, happy and still ' +
-          'thinking about travel.',
+          'When the trip is over the app turns to where they might go next.',
         benefit:
-          'The agency gets a warm second sale from a client who is already theirs, at the moment repeat ' +
-          'intent is highest and costs nothing to reach.'
+          'A warm second sale to a client who is already theirs, at the moment they are most likely ' +
+          'to say yes, and it costs nothing to reach them.'
       },
       {
         anchor: 'insp-cards',
-        title: 'The agency chooses what is promoted',
+        title: 'The agency chooses what is pushed',
         feature:
-          'The app ships with a promoted set, and an agency can swap it for their own destinations and ' +
-          'content.',
+          'Agencies swap the promoted destinations for their own.',
         benefit:
-          'A tour operator pushes the trips they actually have margin on, rather than whatever a generic ' +
-          'app decides to show.'
+          'They put forward the trips they actually make money on, rather than whatever a generic app ' +
+          'decides to show.'
       },
       {
         anchor: 'insp-price',
-        title: 'A guide price is never supplier data',
+        title: 'A guide price, never a quote',
         feature:
-          'The from price on these cards is promotional copy the agency writes. It is deliberately not ' +
-          'wired to live supplier pricing or availability.',
+          'The from price is wording the agency writes. It is deliberately not wired to live ' +
+          'availability.',
         benefit:
-          'Nothing here can be read as a quote or a bookable price, so an inspiration screen cannot turn ' +
-          'into a complaint about a price that moved.'
+          'Nothing here can be mistaken for a booking price, so an inspiration screen cannot turn ' +
+          'into a complaint.'
       }
     ]
   });
@@ -709,39 +725,40 @@
         at: 'outside-right',
         title: 'No app store in the way',
         feature:
-          'The traveller opens a link the agency sends, often as a QR code from the CRM, and adds it to ' +
-          'their home screen. There is no download, no account to create and no store review to wait for.',
+          'The traveller opens a link, usually a QR code from the agency, and adds it to their home ' +
+          'screen. No download, no account, no store.',
         benefit:
-          'The drop off between the agency sending it and the traveller having it is a single tap, instead ' +
-          'of a store search a third of people never finish.'
+          'The gap between sending it and them having it is one tap, instead of a store search a ' +
+          'third of people never finish.'
       },
       {
         anchor: 'inst-h',
         at: 'outside-right',
-        title: 'It installs as the agency',
-        feature: 'The icon, name and splash on the home screen are the agency’s, not Travelgenix’s.',
+        title: 'An icon on their home screen',
+        feature:
+          'The icon, the name and the splash screen are the agency\u2019s.',
         benefit:
-          'The agency has an icon on their client’s home screen. Very few small travel businesses will ' +
-          'ever get that any other way.'
+          'Very few small travel businesses will ever get a place on a client\u2019s home screen any ' +
+          'other way.'
       },
       {
         anchor: 'inst-note',
         at: 'outside-right',
-        title: 'Offline once it is on there',
+        title: 'It keeps working when the signal stops',
         feature:
-          'The app shell, the trip, the map and the documents are all available with no connection.',
+          'The trip, the map and the documents are all there with no connection at all.',
         benefit:
-          'It works in the air, in a resort with bad wifi and abroad with data switched off, which is ' +
-          'exactly when a traveller needs their ticket.'
+          'In the air, in a resort with poor wifi, abroad with data off. Which is precisely when a ' +
+          'ticket is needed.'
       },
       {
         anchor: 'inst-pill',
         at: 'outside-right',
-        title: 'It tells them when it has changed',
+        title: 'Everyone ends up on the current version',
         feature:
-          'A new version prompt appears when one ships, and taking it does a genuine clean reload rather ' +
-          'than a refresh that serves the old app back.',
-        benefit: 'Everyone is on the current version without the agency chasing anyone.'
+          'The app says when a new version is ready and takes it properly.',
+        benefit:
+          'Nobody has to be chased, and the agency never ends up supporting three versions at once.'
       }
     ]
   });

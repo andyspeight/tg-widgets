@@ -2108,6 +2108,19 @@
           "value": "text/css; charset=utf-8"
         }
       ]
+    },
+    {
+      "source": "/showcase/img/(.*).webp",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800, s-maxage=31536000, immutable"
+        },
+        {
+          "key": "Content-Type",
+          "value": "image/webp"
+        }
+      ]
     }
   ]
 }

@@ -149,6 +149,33 @@
     poke();
   }
 
+  /* The basemap is ours and it is one file, so there is nothing to negotiate
+     with: draw it as soon as it decodes. Offline we do not draw it at all. The
+     soft map stays and the badge stops being a claim and becomes a demo, which
+     is the whole point of that screen. */
+  var BASEMAP = '/showcase/img/world.webp';
+  var basemap = null;   /* null not asked, 'asking', true ready, false no */
+
+  function liveMap(root) {
+    var map = root.querySelector('.lt-map');
+    if (!map) return;
+    if (basemap === true) { map.classList.add('is-live'); return; }
+    if (basemap !== null) return;                     /* asking, or already refused */
+    if (navigator.onLine === false) { basemap = false; return; }
+    basemap = 'asking';
+    var img = new Image();
+    img.addEventListener('load', function () {
+      basemap = true;
+      var live = el.screen.querySelector('.lt-map');  /* the screen may have moved on */
+      if (live) live.classList.add('is-live');
+    });
+    img.addEventListener('error', function () { basemap = false; });
+    img.src = BASEMAP;
+  }
+
+  /* A show floor loses its wifi and gets it back. Let the next map try again. */
+  window.addEventListener('online', function () { if (basemap === false) basemap = null; });
+
   function goTo(i) {
     var p = st.product;
     if (!p) return;
@@ -164,6 +191,7 @@
       el.screen.className = 'tg-screen lt';
       el.screen.innerHTML = p.screens[item.screen].html;
       el.screen.appendChild(el.spot);   /* innerHTML just removed it */
+      liveMap(el.screen);
       caption(item);
       /* Two frames for the new markup to lay out, then measure it. */
       requestAnimationFrame(function () {
@@ -183,14 +211,11 @@
     el.capTitle.textContent = h.title;
 
     el.capBody.textContent = '';
-    var a = n('p');
-    a.appendChild(n('b', null, 'What it does. '));
-    a.appendChild(document.createTextNode(h.feature));
-    el.capBody.appendChild(a);
-    var b = n('p');
-    b.appendChild(n('b', null, 'Why it matters. '));
-    b.appendChild(document.createTextNode(h.benefit));
-    el.capBody.appendChild(b);
+    /* Two plain paragraphs: what they see, then what it is worth. Labelling
+       them "What it does" and "Why it matters" is what made this read as a
+       spec sheet rather than a pitch. */
+    el.capBody.appendChild(n('p', 'tg-cap-lead', h.feature));
+    el.capBody.appendChild(n('p', null, h.benefit));
     if (h.edge) {
       var e = n('div', 'tg-edge');
       e.appendChild(n('b', null, 'The edge. '));

@@ -35,6 +35,7 @@ const html = readFileSync(join(PUB, 'showcase.html'), 'utf8');
 global.window = {};
 new Function(readFileSync(join(PUB, 'showcase-data.js'), 'utf8'))();
 const data = global.window.TG_SHOWCASE;
+const dataSrc = readFileSync(join(PUB, 'showcase-data.js'), 'utf8');
 
 console.log('showcase: data shape');
 check('TG_SHOWCASE defined', !!data);
@@ -169,6 +170,85 @@ check('the host rewrite is evaluated first', vercel.rewrites[0] === hostRw);
 for (const f of ['/showcase.js', '/showcase-data.js', '/showcase.css']) {
   check(`${f} has headers`, vercel.headers.some(h => h.source === f));
 }
+
+/* Pictures and the map. Andy's note on 21 Sep 2026 was that the thing read as
+   a technical walk through rather than something that sells: gradients where
+   photographs belong, and soft shapes where a map belongs. Both are now real,
+   so both are now guarded. */
+console.log('showcase: real pictures');
+const arts = [...html.matchAll(/lt-art--([a-z]+)/g)].map(m => m[1])
+  .concat([...dataSrc.matchAll(/lt-art--([a-z]+)/g)].map(m => m[1]));
+check('the markup asks for at least three pictures', new Set(arts).size >= 3, [...new Set(arts)].join(','));
+for (const a of new Set(arts)) {
+  const rule = new RegExp(`\\.lt-art--${a}\\s*\\{[^}]*background-image:\\s*url\\(([^)]+)\\)`);
+  const m = css.match(rule);
+  check(`lt-art--${a} names a file`, !!m, 'no background-image');
+  if (m) check(`lt-art--${a} file is committed`, existsSync(join(PUB, m[1].replace(/^\//, ''))), m[1]);
+  check(`lt-art--${a} has a colour under it`,
+    new RegExp(`\\.lt-art--${a}\\s*\\{[^}]*background-color`).test(css));
+}
+check('no gradient is standing in for a photograph any more',
+  !/\.lt-art--[a-z]+\s*\{[^}]*linear-gradient/.test(css));
+
+console.log('showcase: the map is a map');
+check('the basemap is committed, not fetched from a tile service',
+  existsSync(join(PUB, 'showcase/img/world.webp')));
+for (const [label, f] of [['stylesheet', css], ['engine', js], ['content', dataSrc]]) {
+  check(`no third-party tile host in the ${label}`,
+    !/cartocdn|tile\.openstreetmap|arcgisonline|mapbox|maps\.wikimedia/.test(f));
+}
+check('OpenStreetMap is credited', /OpenStreetMap contributors/.test(dataSrc));
+check('offline keeps the soft map', /navigator\.onLine === false/.test(js));
+check('the soft map is hidden only once the basemap is up',
+  /\.lt-map\.is-live \.lt-map-land\s*\{[^}]*display:\s*none/.test(css));
+
+/* The pins are real coordinates, not eyeballed positions. Re-derive them here
+   rather than trusting the numbers in the stylesheet: a nudged pixel is a
+   moved airport, and nothing else in the suite would notice. */
+const Z = 2, SCALE = 1.25, W = 256 * 2 ** Z;
+const project = (lat, lon) => [
+  (lon + 180) / 360 * W * SCALE,
+  (1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * W * SCALE,
+];
+const PLACES = [
+  ['1', 'London Heathrow', 51.4700, -0.4543],
+  ['2', 'Abu Dhabi', 24.4330, 54.6511],
+  ['3', 'Reethi Beach Resort', 5.1167, 73.0833],
+];
+const frame = css.match(/\.lt-map-world\s*\{([^}]*)\}/);
+check('the map frame is declared', !!frame);
+if (frame) {
+  const w = +(frame[1].match(/width:\s*(\d+)px/) || [])[1];
+  const h = +(frame[1].match(/height:\s*(\d+)px/) || [])[1];
+  check('the frame is a whole number of tiles', w === 4 * 256 * SCALE && h === 3 * 256 * SCALE, `${w}x${h}`);
+  const mid = PLACES.map(p => project(p[2], p[3]));
+  const cx = (mid[0][0] + mid[2][0]) / 2, cy = (mid[0][1] + mid[2][1]) / 2;
+  const ml = -+(frame[1].match(/margin-left:\s*-?(\d+)px/) || [])[1];
+  const mt = -+(frame[1].match(/margin-top:\s*-?(\d+)px/) || [])[1];
+  check('the frame is centred on the route', Math.abs(ml + cx) <= 1 && Math.abs(mt + cy) <= 1,
+    `css ${ml},${mt} vs projected ${-Math.round(cx)},${-Math.round(cy)}`);
+}
+for (const [n, name, lat, lon] of PLACES) {
+  const [x, y] = project(lat, lon);
+  const rule = css.match(new RegExp(`\\.lt-pin--${n}\\s*\\{\\s*left:\\s*(\\d+)px;\\s*top:\\s*(\\d+)px`));
+  check(`${name} is pinned where it is`,
+    !!rule && Math.abs(+rule[1] - x) <= 1 && Math.abs(+rule[2] - y) <= 1,
+    rule ? `css ${rule[1]},${rule[2]} vs projected ${Math.round(x)},${Math.round(y)}` : 'no rule');
+  check(`${name} is named in full`, dataSrc.includes(name));
+}
+const d = (dataSrc.match(/<path d="([^"]+)"/) || [])[1] || '';
+const nums = d.match(/\d+/g) || [];
+const first = project(PLACES[0][2], PLACES[0][3]);
+const last = project(PLACES[2][2], PLACES[2][3]);
+check('the flight path starts and ends on the end pins',
+  nums.length >= 4 &&
+  Math.abs(+nums[0] - first[0]) <= 1 && Math.abs(+nums[1] - first[1]) <= 1 &&
+  Math.abs(+nums[nums.length - 2] - last[0]) <= 1 &&
+  Math.abs(+nums[nums.length - 1] - last[1]) <= 1,
+  d ? `${nums[0]},${nums[1]} to ${nums[nums.length - 2]},${nums[nums.length - 1]}` : 'no path');
+
+check('the image assets have headers',
+  vercel.headers.some(h => /showcase\/img/.test(h.source)));
 
 console.log(failures ? `\n${failures} failing check(s)` : '\nshowcase: all checks passed');
 process.exit(failures ? 1 : 0);
