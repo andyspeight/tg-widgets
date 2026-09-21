@@ -68,7 +68,12 @@
     list:  '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>',
     x:     '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
     sun:   '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/>',
-    home:  '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'
+    /* A house says "home". Four tiles says "all of them", which is what is
+       on the other side of it. */
+    grid:  '<rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/>' +
+           '<rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/>' +
+           '<rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/>' +
+           '<rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/>'
   };
   function narrow() { return window.innerWidth <= NARROW_PX; }
 
@@ -266,14 +271,26 @@
    * the device
    * ---------------------------------------------------------------- */
 
+  /* The first used track size, in pixels, or 0 if the grid is not laid out. */
+  function track(v) {
+    var one = parseFloat(String(v || '').split(' ')[0]);
+    return one > 0 ? one : 0;
+  }
+
   function layout() {
     var box = el.deck.getBoundingClientRect();
     var avail = el.scene.getBoundingClientRect();
     var cs = window.getComputedStyle(el.scene);
     var padY = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
 
-    var w = box.width || avail.width;
-    var h = avail.height - padY;
+    /* The scene is a grid: the device beside the caption in landscape, above it
+       in portrait. Ask the grid how big the device's own cell is rather than
+       handing it the whole scene, which is what pushed the phone off the top
+       of a portrait kiosk. Chrome reports used track sizes in pixels; anything
+       else (display:block on a phone, or the scene still hidden) parses to
+       nothing and we fall back to measuring. */
+    var w = track(cs.gridTemplateColumns) || box.width || avail.width;
+    var h = track(cs.gridTemplateRows) || (avail.height - padY);
     /* On a phone the page scrolls, so the device is sized by WIDTH only and
        never magnified past 1:1. Sizing by height there is what shrank it to
        a third of size in the first build. */
@@ -575,9 +592,11 @@
     var restart = n('button', 'tg-btn');
     restart.type = 'button';
     restart.hidden = true;
-    restart.setAttribute('aria-label', 'Start over');
-    restart.appendChild(svg(I.home));
-    restart.appendChild(n('span', 'tg-btn-label', 'Start over'));
+    /* It went to the chooser already, but "Start over" reads as restarting the
+       walk you are standing in, so nobody would press it to leave. */
+    restart.setAttribute('aria-label', 'All walkthroughs');
+    restart.appendChild(svg(I.grid));
+    restart.appendChild(n('span', 'tg-btn-label', 'All walkthroughs'));
     restart.addEventListener('click', function () { toSplash(); });
     top.appendChild(restart);
 
@@ -753,7 +772,8 @@
     again.addEventListener('click', function () { el.end.hidden = true; goTo(0); tourStart(); });
     var browse = n('button', 'tg-cta tg-cta--quiet');
     browse.type = 'button';
-    browse.appendChild(document.createTextNode('Back to the start'));
+    /* The ending covers the top bar, so it carries its own way back. */
+    browse.appendChild(document.createTextNode('All walkthroughs'));
     browse.addEventListener('click', function () { toSplash(); });
     endCtas.appendChild(again); endCtas.appendChild(browse);
     endCopy.appendChild(endCtas);

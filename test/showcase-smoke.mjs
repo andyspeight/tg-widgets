@@ -305,6 +305,20 @@ check('the picture is reserved for a product front door',
   /\.tg-attract-bg\s*\{[^}]*url\(/.test(css));
 check('the headline invites rather than instructs',
   /'Discover [^']+'/.test(js) && !/Pick a walkthrough/.test(js));
+/* Andy, 21 Sep 2026: "each walk-through will need a link back to the splash
+   page". It went there already, but it was labelled Start over, which reads as
+   restarting the walk you are standing in rather than leaving it. */
+check('the way back says where it goes', /'All walkthroughs'/.test(js));
+/* The old labels, as labels. The words may still appear in prose explaining
+   why they went. */
+check('nothing still calls it starting over',
+  !/'Start over'|'Back to the start'/.test(js));
+check('it is a control in the bar, on every screen of a walk',
+  /restart\.addEventListener\('click', function \(\) \{ toSplash\(\); \}\)/.test(js) &&
+  /el\.restartBtn\.hidden = false/.test(js));
+/* The ending covers the bar, so it carries its own. */
+check('the ending offers the same way back',
+  /browse\.appendChild\(document\.createTextNode\('All walkthroughs'\)\)[\s\S]{0,200}toSplash\(\)/.test(js));
 check('the engine boots on the chooser, not on one product',
   /function toSplash/.test(js) && /\n\s*toSplash\(\);/.test(js));
 check('idling returns to the chooser', /setTimeout\(toSplash, IDLE_MS\)/.test(js));
@@ -335,6 +349,18 @@ for (const prod of data.products) {
 check('the walkthrough opens on the hero',
   data.products[0].screens[0].hotspots[0].anchor === 'trip-hero',
   data.products[0].screens[0].hotspots[0].anchor);
+
+/* The device is sized to the cell the grid gives it, not to the whole scene.
+   Handing it the scene drew a 1266px phone in a 902px row on a portrait
+   kiosk, so the hero shot ran off the top of the screen. */
+check('the device asks the grid how big its cell is',
+  /track\(cs\.gridTemplateColumns\)/.test(js) && /track\(cs\.gridTemplateRows\)/.test(js));
+check('and falls back to measuring when there are no tracks',
+  /function track\(v\) \{[\s\S]{0,160}one > 0 \? one : 0/.test(js));
+check('stacked, the caption takes what it needs and the device the rest',
+  /grid-template-rows: minmax\(0, 1fr\) auto;/.test(css));
+check('side by side, the scene is one row',
+  /grid-template-rows: minmax\(0, 1fr\);/.test(css));
 
 check('the image assets have headers',
   vercel.headers.some(h => /showcase\/img/.test(h.source)));

@@ -291,12 +291,18 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   flex: 1; min-height: 0; position: relative;
   display: grid; align-items: center; justify-items: center;
   grid-template-columns: minmax(0, 1fr);
-  grid-auto-rows: minmax(0, 1fr);
+  /* Stacked, the caption takes the room it needs and the device gets the rest.
+     Two equal rows gave the device half the screen whatever it asked for, and
+     it simply overflowed its row: on a 1080x1920 kiosk the phone was drawn
+     1266px tall in a 902px row, so the top of the hero shot was cut off above
+     the screen and the bottom ran under the caption. */
+  grid-template-rows: minmax(0, 1fr) auto;
   padding: 0 var(--space-8) var(--space-8);
 }
 @media (min-width: 1024px) and (orientation: landscape) {
   .tg-scene {
     grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr);
+    grid-template-rows: minmax(0, 1fr);   /* side by side, so one row, not two */
     gap: clamp(32px, 5vw, 96px);
     padding: 0 clamp(32px, 6vw, 120px) var(--space-8);
     justify-items: stretch;
