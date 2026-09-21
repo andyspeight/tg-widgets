@@ -21,7 +21,19 @@
 
   var VERSION = '2.0.0';
   var NARROW_PX = 820;        /* keep in step with showcase.css */
-  var PHONE_W = 390, PHONE_H = 844;
+  /* The frame a product is drawn in. A phone for an app, a browser window for
+     something that lives on somebody's website. The cap is per device on
+     purpose: a phone at 1.5x still reads as a phone, a browser window blown up
+     past life size just looks wrong. A product names one with `device`, and
+     anything unrecognised falls back to the phone the engine started with. */
+  var DEVICES = {
+    phone:   { w: 390,  h: 844, cls: 'tg-phone',   max: 1.5 },
+    /* 1120 rather than a true 1280: the frame has to share the scene with the
+       caption, so a wider canvas only means smaller text on the stand. This is
+       still an honest desktop viewport and it lands near 1:1 on a kiosk. */
+    browser: { w: 1120, h: 746, cls: 'tg-browser', max: 1 }
+  };
+  function deviceOf(p) { return DEVICES[(p && p.device) || 'phone'] || DEVICES.phone; }
   var PIN_GAP = 42;
   var IDLE_MS = 90000;
   var ATTRACT_MS = 20000;
@@ -32,7 +44,7 @@
 
   var el = {};
   var st = {
-    product: null, list: [], i: -1, screen: -1,
+    product: null, list: [], i: -1, screen: -1, dev: null,
     seen: Object.create(null),
     tour: { on: false, paused: false, timer: null, dwell: 0, at: 0, used: 0 }
   };
@@ -169,6 +181,7 @@
   function open(p) {
     disarmAttract();
     st.product = p;
+    setDevice(p);
     st.list = flatten(p);
     st.i = -1; st.screen = -1;
     st.seen = Object.create(null);
@@ -185,6 +198,19 @@
 
     goTo(0);
     poke();
+  }
+
+  /* Dress the frame for this product. Called before the first layout, because
+     the scale is worked out from the device's own size. */
+  function setDevice(p) {
+    var dev = deviceOf(p);
+    st.dev = dev;
+    el.phone.className = 'tg-device ' + dev.cls;
+    el.notch.hidden = dev.cls !== 'tg-phone';
+    el.winbar.hidden = dev.cls !== 'tg-browser';
+    el.winUrl.textContent = (p && p.url) || '';
+    /* A wide frame wants more of the scene than a phone does. */
+    el.scene.classList.toggle('is-wide', dev.cls === 'tg-browser');
   }
 
   /* The basemap is ours and it is one file, so there is nothing to negotiate
@@ -294,17 +320,17 @@
     /* On a phone the page scrolls, so the device is sized by WIDTH only and
        never magnified past 1:1. Sizing by height there is what shrank it to
        a third of size in the first build. */
+    var dev = st.dev || DEVICES.phone;
     var scale = narrow()
-      ? Math.min(w / PHONE_W, 1)
-      /* Capped: a phone drawn 2x life size stops reading as a phone. */
-      : Math.min(w / PHONE_W, Math.max(240, h) / PHONE_H, 1.5);
+      ? Math.min(w / dev.w, 1)
+      : Math.min(w / dev.w, Math.max(240, h) / dev.h, dev.max);
     st.scale = scale;
 
-    el.fit.style.width = (PHONE_W * scale) + 'px';
-    el.fit.style.height = (PHONE_H * scale) + 'px';
+    el.fit.style.width = (dev.w * scale) + 'px';
+    el.fit.style.height = (dev.h * scale) + 'px';
     el.phone.style.transform = 'scale(' + scale + ')';
-    el.pins.style.width = (PHONE_W * scale) + 'px';
-    el.pins.style.height = (PHONE_H * scale) + 'px';
+    el.pins.style.width = (dev.w * scale) + 'px';
+    el.pins.style.height = (dev.h * scale) + 'px';
   }
 
   function anchorPoint(r, at, box) {
@@ -629,10 +655,20 @@
 
     var deck = n('div', 'tg-deck');
     var fit = n('div', 'tg-fit');
-    var phone = n('div', 'tg-phone');
+    var phone = n('div', 'tg-device tg-phone');
     var screen = n('div', 'tg-screen lt');
     phone.appendChild(screen);
-    phone.appendChild(n('div', 'tg-notch'));
+    var notch = n('div', 'tg-notch');
+    phone.appendChild(notch);
+    /* The browser window's own chrome. Built once and hidden rather than made
+       per product, because a device swap mid-session must not leave the old
+       frame's furniture behind. */
+    var winbar = n('div', 'tg-winbar');
+    winbar.hidden = true;
+    winbar.appendChild(n('span', 'tg-windots'));
+    var winUrl = n('span', 'tg-winurl', '');
+    winbar.appendChild(winUrl);
+    phone.appendChild(winbar);
     fit.appendChild(phone);
     var spot = n('div', 'tg-spotlight');
     screen.appendChild(spot);
@@ -642,6 +678,7 @@
     scene.appendChild(deck);
     el.deck = deck; el.fit = fit; el.phone = phone; el.screen = screen;
     el.spot = spot; el.pins = pins;
+    el.notch = notch; el.winbar = winbar; el.winUrl = winUrl;
 
     var cap = n('section', 'tg-caption');
     cap.setAttribute('aria-live', 'polite');
@@ -813,6 +850,13 @@
     if (window.ResizeObserver) {
       var ro = new ResizeObserver(function () { relayout(); });
       ro.observe(el.scene);
+      /* Stacked, the caption takes what it needs and the device gets the rest,
+         so a longer hotspot shrinks the device's cell without the scene itself
+         changing size at all. Watching only the scene left the device drawn at
+         the old scale, overflowing up under the top bar on the wordier steps.
+         The caption's height is its own content, never the device's, so this
+         cannot feed back on itself. */
+      ro.observe(el.caption);
     }
     window.addEventListener('resize', relayout);
     window.addEventListener('orientationchange', function () { setTimeout(relayout, 150); });

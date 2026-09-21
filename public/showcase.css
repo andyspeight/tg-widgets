@@ -309,25 +309,66 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   }
   .tg-deck { justify-self: end; min-height: 0; }
   .tg-caption { justify-self: start; max-width: 30rem; align-self: center; }
+  /* A phone is tall and narrow and the caption can have half the room. A
+     browser window is the other way round: give it the width or the site
+     inside it is unreadable from where somebody is standing. */
+  .tg-scene.is-wide {
+    grid-template-columns: minmax(0, 1.62fr) minmax(300px, .78fr);
+    gap: clamp(24px, 3vw, 56px);
+  }
 }
 
 /* -- device -- */
 .tg-deck { position: relative; }
 .tg-fit { position: relative; }
-.tg-phone {
+/* Every frame sits at the top left of .tg-fit and is scaled from that corner,
+   so the pin and spotlight maths can stay in device pixels whatever is drawn.
+   The variants below only change how the thing looks. */
+.tg-device {
   position: absolute; top: 0; left: 0;
-  width: 390px; height: 844px;
   transform-origin: top left;
-  border-radius: 56px;
   background: #0A1020;
-  padding: 11px;
   box-shadow: var(--lift-lg), 0 0 0 1px rgba(255,255,255,.07) inset;
+}
+.tg-phone {
+  width: 390px; height: 844px;
+  border-radius: 56px;
+  padding: 11px;
+}
+/* A browser window, not a laptop. Luna Chat lives on somebody's website, and a
+   lid and a base would say "a computer" when the point is "your site". */
+.tg-browser {
+  width: 1120px; height: 746px;
+  border-radius: 18px;
+  padding: 46px 0 0;
 }
 .tg-screen {
   position: relative; width: 100%; height: 100%;
   border-radius: 45px; overflow: hidden;
   background: #fff;
   display: flex; flex-direction: column;
+}
+.tg-browser .tg-screen { border-radius: 0 0 18px 18px; }
+
+.tg-winbar {
+  position: absolute; top: 0; left: 0; right: 0; height: 46px;
+  display: flex; align-items: center; gap: var(--space-4);
+  z-index: 6;
+}
+/* Three dots out of one element, so the frame needs no extra markup. */
+.tg-windots {
+  flex: 0 0 auto; margin-left: 20px;
+  width: 11px; height: 11px; border-radius: 50%;
+  background: #FF5F57;
+  box-shadow: 19px 0 0 #FEBC2E, 38px 0 0 #28C840;
+}
+.tg-winurl {
+  flex: 1 1 auto; max-width: 420px; margin: 0 auto;
+  padding: 5px 14px; border-radius: var(--r-full);
+  background: rgba(255,255,255,.09);
+  color: rgba(255,255,255,.62);
+  font-size: 13px; text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .tg-notch {
   position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
@@ -1084,3 +1125,236 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .tg-logo { font-size: var(--t-sm); }
   .tg-topbar { padding: var(--space-2) var(--space-3); }
 }
+
+/* ==================================================================== *
+ * Luna Chat. Drawn at 1280x800 inside the browser frame.
+ *
+ * Two surfaces: the visitor's, which is the agency's own website with the
+ * chat panel open on it, and the agent's, which is the dashboard the chat
+ * lands in. Some screens show one. The ones where the RELATIONSHIP is the
+ * point show both at once, because "it answered them and handed you the
+ * lead" is one event, and cutting between two screens loses it.
+ *
+ * Everything here is a recreation, not a screenshot, so a hotspot can sit on
+ * a real element and the spotlight can find it.
+ * ==================================================================== */
+
+.lc { font-family: Inter, system-ui, sans-serif; color: #0F1A3D; background: #fff; }
+.lc *, .lc *::before, .lc *::after { box-sizing: border-box; }
+
+/* -- the split. Two surfaces, one moment. -- */
+.lc-split { display: grid; grid-template-columns: 1.12fr 1fr; height: 100%; }
+.lc-split > * { min-width: 0; overflow: hidden; }
+.lc-split-seam { border-left: 1px solid rgba(15,26,61,.13); }
+
+/* -- the agency's website -------------------------------------------- */
+.lc-site { position: relative; height: 100%; background: #FAFBFD; overflow: hidden; }
+.lc-sitebar {
+  display: flex; align-items: center; gap: 26px;
+  padding: 0 30px; height: 62px;
+  background: #fff; border-bottom: 1px solid rgba(15,26,61,.09);
+}
+.lc-logo { font-size: 19px; font-weight: 800; letter-spacing: -.02em; color: #0F1A3D; }
+.lc-logo em { font-style: normal; color: #0077B6; }
+.lc-nav { display: flex; gap: 20px; font-size: 13px; color: #5A6785; font-weight: 500; }
+.lc-nav b { color: #0F1A3D; font-weight: 600; }
+.lc-sitecta {
+  margin-left: auto; padding: 8px 16px; border-radius: 999px;
+  background: #0077B6; color: #fff; font-size: 13px; font-weight: 600;
+}
+.lc-hero { position: relative; height: 300px; overflow: hidden; }
+.lc-hero-art {
+  position: absolute; inset: 0;
+  background-color: #1C4B6B;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+.lc-hero-art::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(8,26,44,.82) 0%, rgba(8,26,44,.34) 58%, rgba(8,26,44,.06) 100%);
+}
+.lc-hero-copy { position: absolute; left: 34px; top: 60px; right: 45%; color: #fff; }
+.lc-hero-copy strong { display: block; font-size: 34px; line-height: 1.12; letter-spacing: -.02em; }
+.lc-hero-copy span { display: block; margin-top: 10px; font-size: 14px; color: rgba(255,255,255,.84); }
+/* It overlaps the hero, so it is a flow element pulled up rather than an
+   absolute one, which the hero's own overflow would clip. */
+.lc-searchbar {
+  position: relative; z-index: 2; margin: -26px 34px 0;
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px; border-radius: 14px; background: #fff;
+  box-shadow: 0 18px 40px -20px rgba(15,26,61,.4), 0 0 0 1px rgba(15,26,61,.07);
+}
+.lc-field { flex: 1; padding: 9px 12px; border-radius: 9px; background: #F1F4F9; }
+.lc-field small { display: block; font-size: 10px; letter-spacing: .07em; text-transform: uppercase; color: #8A95AC; }
+.lc-field span { display: block; margin-top: 2px; font-size: 13px; font-weight: 600; color: #0F1A3D; }
+.lc-searchgo { padding: 11px 22px; border-radius: 9px; background: #0077B6; color: #fff; font-size: 13px; font-weight: 700; }
+.lc-offers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 26px 34px 0; }
+.lc-offer { border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 0 0 1px rgba(15,26,61,.07); }
+.lc-offer-art {
+  height: 84px; background-color: #9FC3D6;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+.lc-offer-body { padding: 11px 13px 14px; }
+.lc-offer-body b { display: block; font-size: 13px; color: #0F1A3D; }
+.lc-offer-body small { display: block; margin-top: 3px; font-size: 11px; color: #6B7793; }
+.lc-offer-body i { display: block; margin-top: 7px; font-style: normal; font-size: 15px; font-weight: 800; color: #0077B6; }
+
+/* -- the chat panel. Drawn from the real widget, which renders at about
+      400x620 with the client's own brand colour on the header and the send
+      button. The launcher stays visible behind it, as it does in the product. -- */
+.lc-fab {
+  position: absolute; right: 26px; bottom: 24px;
+  width: 58px; height: 58px; border-radius: 50%;
+  background: #00A7CE; box-shadow: 0 12px 28px -8px rgba(0,119,182,.7);
+  display: flex; align-items: center; justify-content: center;
+}
+.lc-fab::before {
+  content: ''; width: 24px; height: 21px; border-radius: 5px;
+  border: 2.4px solid #fff; border-bottom-width: 2.4px;
+}
+.lc-panel {
+  position: absolute; right: 26px; bottom: 24px;
+  width: 396px; height: 616px;
+  border-radius: 18px; overflow: hidden;
+  background: #fff;
+  box-shadow: 0 30px 70px -24px rgba(15,26,61,.5), 0 0 0 1px rgba(15,26,61,.08);
+  display: flex; flex-direction: column;
+}
+.lc-panel-head {
+  display: flex; align-items: center; gap: 11px;
+  padding: 15px 16px;
+  background: linear-gradient(135deg, #0077B6, #00A7CE);
+  color: #fff;
+}
+.lc-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,.22);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 800;
+}
+.lc-panel-who strong { display: block; font-size: 14px; font-weight: 700; }
+.lc-panel-who small { display: block; font-size: 11px; color: rgba(255,255,255,.8); }
+.lc-live { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 11px; color: rgba(255,255,255,.9); }
+.lc-live::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #3DDC84; }
+
+/* Bottom anchored, like every chat anyone has ever used. Left to fill from
+   the top it reads as a transcript rather than a conversation in progress. */
+.lc-thread {
+  flex: 1; min-height: 0; padding: 16px; background: #F7F9FC; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: flex-end;
+}
+.lc-thread > * { flex: 0 0 auto; }
+.lc-msg { max-width: 82%; margin-bottom: 11px; padding: 10px 13px; border-radius: 14px; font-size: 13px; line-height: 1.46; }
+.lc-msg--luna { background: #fff; color: #21304F; border-bottom-left-radius: 5px; box-shadow: 0 1px 2px rgba(15,26,61,.09); }
+.lc-msg--them { margin-left: auto; background: #0077B6; color: #fff; border-bottom-right-radius: 5px; }
+.lc-msg--agent { background: #EAF6EF; color: #14432B; border-bottom-left-radius: 5px; box-shadow: 0 1px 2px rgba(15,26,61,.07); }
+.lc-msg-by { display: block; margin-bottom: 3px; font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; opacity: .62; }
+.lc-tick { display: block; margin: -6px 0 11px auto; width: fit-content; font-size: 10px; color: #7C89A3; }
+
+.lc-composer { display: flex; align-items: center; gap: 9px; padding: 12px 14px; background: #fff; border-top: 1px solid rgba(15,26,61,.08); }
+.lc-input { flex: 1; padding: 10px 13px; border-radius: 999px; background: #F1F4F9; font-size: 13px; color: #8A95AC; }
+.lc-send { width: 36px; height: 36px; border-radius: 50%; background: #00A7CE; display: flex; align-items: center; justify-content: center; }
+.lc-send::before { content: ''; width: 0; height: 0; border-left: 11px solid #fff; border-top: 7px solid transparent; border-bottom: 7px solid transparent; margin-left: 3px; }
+.lc-foot { padding: 0 14px 10px; background: #fff; font-size: 10px; color: #98A2B7; text-align: center; }
+
+/* -- the cards Luna sends inside the thread -- */
+.lc-card { margin-bottom: 11px; border-radius: 14px; overflow: hidden; background: #fff; box-shadow: 0 2px 8px -2px rgba(15,26,61,.18), 0 0 0 1px rgba(15,26,61,.07); }
+.lc-card-head { padding: 11px 13px 0; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #0077B6; }
+.lc-card-body { padding: 7px 13px 12px; }
+.lc-card-body strong { display: block; font-size: 14px; color: #0F1A3D; }
+.lc-card-body small { display: block; margin-top: 4px; font-size: 11.5px; line-height: 1.5; color: #5A6785; }
+.lc-card-go { display: block; margin: 11px 13px 13px; padding: 10px; border-radius: 9px; background: #0077B6; color: #fff; font-size: 12.5px; font-weight: 700; text-align: center; }
+.lc-card--fcdo { box-shadow: 0 2px 8px -2px rgba(15,26,61,.18), 0 0 0 1px rgba(200,138,0,.34); }
+.lc-card--fcdo .lc-card-head { color: #9A6B00; }
+.lc-brief { margin-bottom: 11px; padding: 10px 12px; border-radius: 11px; background: #EEF3FA; box-shadow: 0 0 0 1px rgba(15,26,61,.06); }
+.lc-brief-t { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #6B7793; }
+.lc-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+.lc-chip { padding: 4px 9px; border-radius: 999px; background: #fff; font-size: 11px; font-weight: 600; color: #21304F; box-shadow: 0 0 0 1px rgba(15,26,61,.09); }
+.lc-chip--empty { color: #98A2B7; font-weight: 500; }
+
+/* -- the agent dashboard. Sized to work both in half a split and across the
+      whole frame, so the same markup serves the side-by-side screens and the
+      ones that are only about the agency's side. -- */
+.lc-dash { display: grid; grid-template-columns: 206px 1fr; height: 100%; background: #F4F6FA; }
+.lc-dash--wide { grid-template-columns: 240px 1fr 268px; }
+.lc-rail { border-right: 1px solid rgba(15,26,61,.09); background: #fff; display: flex; flex-direction: column; }
+.lc-railhead { padding: 13px 14px; border-bottom: 1px solid rgba(15,26,61,.08); }
+.lc-railhead strong { display: block; font-size: 13px; font-weight: 700; color: #0F1A3D; }
+.lc-railhead small { display: flex; align-items: center; gap: 6px; margin-top: 3px; font-size: 11px; color: #4F9E6B; }
+.lc-railhead small::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #3DDC84; }
+.lc-conv { display: flex; gap: 9px; padding: 11px 13px; border-bottom: 1px solid rgba(15,26,61,.055); }
+.lc-conv.is-live { background: #EAF4FB; box-shadow: inset 3px 0 0 #0077B6; }
+.lc-conv-av { flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%; background: #DCE4F0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #4A5773; }
+.lc-conv-av--wa { background: #25D366; color: #fff; }
+.lc-conv-b { min-width: 0; flex: 1; }
+.lc-conv-b b { display: block; font-size: 12.5px; font-weight: 700; color: #0F1A3D; }
+.lc-conv-b span { display: block; margin-top: 2px; font-size: 11px; color: #6B7793; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lc-conv-when { flex: 0 0 auto; font-size: 10px; color: #98A2B7; }
+.lc-unread { flex: 0 0 auto; min-width: 17px; height: 17px; padding: 0 5px; border-radius: 999px; background: #E5484D; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+.lc-stage { display: flex; flex-direction: column; min-width: 0; }
+/* In half a split this row carries a name and two tags in about 300px, so it
+   wraps rather than letting the name break mid-word. */
+.lc-stagehead { display: flex; flex-wrap: wrap; align-items: center; gap: 7px 9px; padding: 11px 14px; background: #fff; border-bottom: 1px solid rgba(15,26,61,.09); }
+.lc-stagehead strong { flex: 1 0 100%; }
+.lc-stagehead strong { font-size: 13.5px; font-weight: 700; color: #0F1A3D; }
+.lc-tag { padding: 3px 9px; border-radius: 999px; background: #EEF3FA; font-size: 10.5px; font-weight: 700; color: #4A5773; }
+.lc-tag--wa { background: #E7FAEE; color: #1B7F45; }
+.lc-tag--ai { background: #F0ECFB; color: #5B44A8; }
+.lc-stagebody { flex: 1; min-height: 0; padding: 15px 16px; overflow: hidden; }
+
+/* Copilot: the agent's own help, which the customer never sees. */
+.lc-copilot { margin: 0 16px 12px; padding: 12px 13px; border-radius: 12px; background: #F6F3FD; box-shadow: 0 0 0 1px rgba(91,68,168,.18); }
+.lc-copilot-t { display: flex; align-items: center; gap: 7px; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #5B44A8; }
+.lc-sugg { margin-top: 9px; padding: 9px 11px; border-radius: 9px; background: #fff; font-size: 12.5px; line-height: 1.5; color: #21304F; box-shadow: 0 0 0 1px rgba(91,68,168,.14); }
+.lc-sugg-src { display: block; margin-top: 6px; font-size: 10px; color: #7A6BA8; }
+.lc-tools { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+.lc-tool { padding: 5px 10px; border-radius: 999px; background: #fff; font-size: 11px; font-weight: 600; color: #5B44A8; box-shadow: 0 0 0 1px rgba(91,68,168,.2); }
+
+/* the lead, and the numbers */
+.lc-lead { margin: 0 16px 12px; border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 0 0 1px rgba(15,26,61,.09); }
+.lc-lead-t { padding: 10px 13px; background: #EAF4FB; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #0077B6; }
+.lc-lead-rows { padding: 4px 13px 11px; }
+.lc-lead-row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 12px; border-bottom: 1px solid rgba(15,26,61,.055); }
+.lc-lead-row:last-child { border-bottom: 0; }
+.lc-lead-row span { color: #6B7793; }
+.lc-lead-row b { color: #0F1A3D; font-weight: 600; text-align: right; }
+.lc-tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 11px; }
+.lc-tile { padding: 13px; border-radius: 12px; background: #fff; box-shadow: 0 0 0 1px rgba(15,26,61,.08); }
+.lc-tile small { display: block; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: #8A95AC; }
+.lc-tile b { display: block; margin-top: 5px; font-size: 25px; font-weight: 800; letter-spacing: -.02em; color: #0F1A3D; }
+.lc-tile i { display: block; margin-top: 3px; font-style: normal; font-size: 11px; color: #6B7793; }
+.lc-bars { display: flex; align-items: flex-end; gap: 5px; height: 46px; margin-top: 9px; }
+.lc-bars span { flex: 1; border-radius: 3px 3px 0 0; background: #BBDCEF; }
+.lc-bars span.is-peak { background: #0077B6; }
+
+/* -- the visitor's half of a split. By the time the walk reaches a
+      side-by-side screen the website has already been established, so
+      repeating it would only make both halves unreadable. Just the panel,
+      drawn bigger, against a plain ground. -- */
+.lc-vpane {
+  height: 100%; padding: 20px;
+  background: #E9EEF6;
+  display: flex; align-items: center; justify-content: center;
+}
+.lc-panel--inline { position: static; width: 100%; max-width: 372px; height: 100%; max-height: 100%; }
+.lc-vlabel {
+  position: absolute; top: 12px; left: 16px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  color: #7A87A3;
+}
+/* The label sits above its pane rather than on top of it, so both halves
+   start at the same line and neither one covers its own first row. */
+.lc-half { position: relative; height: 100%; min-width: 0; padding-top: 30px; }
+.lc-half > .lc-vpane, .lc-half > .lc-dash { height: calc(100% - 30px); }
+.lc-flash { box-shadow: 0 0 0 2px #00A7CE, 0 2px 10px -2px rgba(0,119,182,.5) !important; }
+
+/* -- the third column, when the dashboard has the whole frame to itself -- */
+.lc-side { border-left: 1px solid rgba(15,26,61,.09); background: #fff; padding: 14px; overflow: hidden; }
+.lc-side-t { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #8A95AC; }
+.lc-side-name { margin-top: 7px; font-size: 15px; font-weight: 700; color: #0F1A3D; }
+.lc-side-sub { margin-top: 2px; font-size: 11.5px; color: #6B7793; }
+.lc-hist { margin-top: 13px; padding-top: 12px; border-top: 1px solid rgba(15,26,61,.08); }
+.lc-hist-row { display: flex; gap: 9px; padding: 6px 0; font-size: 11.5px; color: #5A6785; }
+.lc-hist-row b { color: #0F1A3D; font-weight: 600; }
+.lc-stars { margin-top: 13px; padding: 11px 12px; border-radius: 10px; background: #FFF8E6; font-size: 11.5px; color: #6B5200; }
+.lc-stars b { display: block; font-size: 16px; color: #8A6A00; }

@@ -770,5 +770,796 @@
     ]
   });
 
-  window.TG_SHOWCASE = { version: '1.0.0', products: [lunaTravel] };
+
+  /* ================================================================ *
+   * Luna Chat
+   *
+   * Two surfaces, and the walkthrough shows both. Where the point is the
+   * RELATIONSHIP between them, a visitor's question landing in an agent's
+   * inbox, they are drawn side by side: that is one event, and cutting
+   * between two screens loses it.
+   * ================================================================ */
+
+  /* The agency's own website, which is the thing Luna sits on. Reused across
+     every visitor-side screen so the chat is the only thing that moves. */
+  function lcSite(inner) {
+    return '<div class="lc-site">' +
+      '<div class="lc-sitebar">' +
+        '<span class="lc-logo" data-hs="lc-brand">Travel<em>Demo</em></span>' +
+        '<nav class="lc-nav"><b>Holidays</b><span>Flights</span><span>Cruise</span>' +
+          '<span>Offers</span><span>About us</span></nav>' +
+        '<span class="lc-sitecta">01482 123456</span>' +
+      '</div>' +
+      '<div class="lc-hero">' +
+        '<span class="lc-hero-art lt-art--hero"></span>' +
+        '<div class="lc-hero-copy">' +
+          '<strong>Somewhere warm,<br>sorted properly.</strong>' +
+          '<span>Handpicked holidays from people who have actually been.</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="lc-searchbar">' +
+        '<span class="lc-field"><small>Going to</small><span>Anywhere</span></span>' +
+        '<span class="lc-field"><small>When</small><span>Oct 2026</span></span>' +
+        '<span class="lc-field"><small>Who</small><span>2 adults, 2 children</span></span>' +
+        '<span class="lc-searchgo">Search</span>' +
+      '</div>' +
+      '<div class="lc-offers">' +
+        '<span class="lc-offer"><span class="lc-offer-art lt-art--atoll"></span>' +
+          '<span class="lc-offer-body"><b>Maldives</b><small>7 nights, all inclusive</small><i>&pound;1,449pp</i></span></span>' +
+        '<span class="lc-offer"><span class="lc-offer-art lt-art--dunes"></span>' +
+          '<span class="lc-offer-body"><b>Oman</b><small>5 nights, B&amp;B</small><i>&pound;879pp</i></span></span>' +
+        '<span class="lc-offer"><span class="lc-offer-art lt-art--isle"></span>' +
+          '<span class="lc-offer-body"><b>Sri Lanka</b><small>10 nights, tour</small><i>&pound;1,720pp</i></span></span>' +
+      '</div>' +
+      inner +
+    '</div>';
+  }
+
+  function lcPanelHead(who) {
+    return '<div class="lc-panel-head" data-hs="lc-head">' +
+      '<span class="lc-avatar">TD</span>' +
+      '<span class="lc-panel-who"><strong>' + who + '</strong><small>Travel Demo</small></span>' +
+      '<span class="lc-live">Online</span>' +
+    '</div>';
+  }
+
+  var lunaChat = {
+    id: 'luna-chat',
+    name: 'Luna Chat',
+    category: 'Luna Suite',
+    status: 'Live',
+    version: 'v2.4',
+    url: 'traveldemo.co.uk',
+    tagline: 'Answers your visitors all night. Hands you the ones worth a human.',
+    summary:
+      'An AI travel expert on the agency’s own website, answering from knowledge they have ' +
+      'approved, in their own voice. It holds a real conversation, works out what the customer ' +
+      'actually wants, and turns it into a bookable search on their own booking engine. When it ' +
+      'reaches the edge of what it should handle it passes the conversation to a human, in an ' +
+      'inbox that also carries their WhatsApp.',
+    device: 'browser',
+    tile: '/showcase/img/chat-tile.webp',
+    splash: '/showcase/img/chat-splash.webp',
+    qr: {
+      url: 'https://chat.travelify.io/widget-demo.html?client=Travel%20Demo',
+      heading: 'Talk to it yourself',
+      note: 'Scan to open the live demo and ask it anything. It answers from real knowledge.'
+    },
+    screens: []
+  };
+
+  /* -- 1. On your website ------------------------------------------ */
+  lunaChat.screens.push({
+    id: 'site',
+    name: 'On your site',
+    blurb: 'One script tag, and it wears the agency’s name rather than ours.',
+    html: lcSite(
+      '<div class="lc-panel">' +
+        lcPanelHead('Ask Travel Demo') +
+        '<div class="lc-thread">' +
+          '<div class="lc-msg lc-msg--luna" data-hs="lc-welcome">Good evening. I know the places ' +
+            'we sell rather well, so ask me anything. Where are you thinking of going?</div>' +
+          '<div class="lc-chips" data-hs="lc-hints">' +
+            '<span class="lc-chip">Family holiday to Tenerife</span>' +
+            '<span class="lc-chip">Maldives in October</span>' +
+            '<span class="lc-chip">Find my booking</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="lc-composer" data-hs="lc-composer">' +
+          '<span class="lc-input">Ask about anywhere...</span>' +
+          '<span class="lc-send"></span>' +
+        '</div>' +
+        '<div class="lc-foot" data-hs="lc-foot">Powered by Travel Demo</div>' +
+      '</div>'
+    ),
+    hotspots: [
+      {
+        anchor: 'lc-welcome',
+        at: 'top-left',
+        title: 'Open at eleven at night',
+        feature:
+          'Most holiday research happens in the evening and at weekends, long after the phones ' +
+          'stop. Luna is there for all of it, holding a real conversation rather than offering a ' +
+          'menu of four buttons.',
+        benefit:
+          'The enquiry that used to sit in a form until Tuesday gets answered while they are still ' +
+          'interested. Nobody has to sit up for it.'
+      },
+      {
+        anchor: 'lc-brand',
+        at: 'bottom-right',
+        title: 'It is their agency, not ours',
+        feature:
+          'The name, the colours, the greeting and the assistant’s own name are all the ' +
+          'client’s. Their customers need never see the word Luna.',
+        benefit:
+          'A specialist’s whole value is that they know the destination. A bot with somebody ' +
+          'else’s branding on it makes them look like everyone else.'
+      },
+      {
+        anchor: 'lc-hints',
+        title: 'It suggests what to ask',
+        feature:
+          'An empty message box is the commonest reason a chat never starts. These openers are the ' +
+          'agency’s own, and one tap begins a proper conversation.',
+        benefit:
+          'More visitors say something at all, which is the only step that matters before any of ' +
+          'the rest can happen.'
+      },
+      {
+        anchor: 'lc-head',
+        at: 'outside-left',
+        title: 'Installed in a minute',
+        feature:
+          'One script tag on the site, and a setup screen for the colours, the name and the ' +
+          'welcome. No plugin, no developer, no rebuild.',
+        benefit:
+          'Whoever looks after the website can put it live this afternoon, on any platform.'
+      },
+      {
+        anchor: 'lc-foot',
+        at: 'outside-left',
+        title: 'Even the footer is theirs',
+        feature:
+          'The line along the bottom is a setting like everything else, so it can carry the ' +
+          'agency’s own words or nothing at all.',
+        benefit:
+          'Nothing on the widget sells anybody but them.'
+      }
+    ]
+  });
+
+  /* -- 2. The conversation ------------------------------------------ */
+  lunaChat.screens.push({
+    id: 'talk',
+    name: 'The conversation',
+    blurb: 'It works out what they actually want, the way an agent would.',
+    html: lcSite(
+      '<div class="lc-panel">' +
+        lcPanelHead('Ask Travel Demo') +
+        '<div class="lc-thread">' +
+          '<div class="lc-msg lc-msg--them">Somewhere hot in October, two of us and the kids</div>' +
+          '<div class="lc-msg lc-msg--luna">October is a lovely month for it. Are the children ' +
+            'school age, and roughly what were you hoping to spend?</div>' +
+          '<div class="lc-msg lc-msg--them">Yeah, 7 and 11. Maybe two and a half grand all in</div>' +
+          '<div class="lc-msg lc-msg--luna" data-hs="lc-know">Half term then, so the 24th onwards. ' +
+            'For that budget in October I would look at the Canaries or Egypt. We use the Sunrise ' +
+            'in Hurghada a lot for families that age, it has the slides and the shallow pool.</div>' +
+          '<div class="lc-brief" data-hs="lc-brief">' +
+            '<span class="lc-brief-t">Trip so far</span>' +
+            '<span class="lc-chips">' +
+              '<span class="lc-chip">October, half term</span>' +
+              '<span class="lc-chip">2 adults, 2 children</span>' +
+              '<span class="lc-chip">Ages 7 and 11</span>' +
+              '<span class="lc-chip">Around &pound;2,500</span>' +
+              '<span class="lc-chip lc-chip--empty">Airport?</span>' +
+            '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="lc-composer">' +
+          '<span class="lc-input">Ask about anywhere...</span>' +
+          '<span class="lc-send"></span>' +
+        '</div>' +
+        '<div class="lc-foot">Powered by Travel Demo</div>' +
+      '</div>'
+    ),
+    hotspots: [
+      {
+        anchor: 'lc-brief',
+        at: 'top-left',
+        title: 'It is filling in a booking form without asking anyone to',
+        feature:
+          'Destination, dates, who is travelling, ages, budget and departure airport are all ' +
+          'collected as the conversation goes, not demanded up front on a form.',
+        benefit:
+          'A form asks eleven questions before it gives anything back, which is why most of them ' +
+          'are abandoned. This one gives a useful answer at every step and still ends up knowing ' +
+          'everything.'
+      },
+      {
+        anchor: 'lc-know',
+        at: 'outside-left',
+        title: 'It knows what the agency knows',
+        feature:
+          'The hotel it named, and why it suits a 7 and an 11 year old, came out of knowledge the ' +
+          'agency wrote and approved. Anything it cannot ground in that, it says it will find out ' +
+          'rather than guessing.',
+        benefit:
+          'A specialist sounds like a specialist. The thirty years of knowing which resort suits ' +
+          'which family stops living in one person’s head.'
+      },
+      {
+        anchor: 'lc-know',
+        at: 'bottom-right',
+        title: 'And it keeps checking its own facts',
+        feature:
+          'Saved answers are re-read against their sources on a schedule. When one stops being ' +
+          'true it goes into a queue for a human to approve, never silently changed.',
+        benefit:
+          'The honest worry about AI is that it confidently says something wrong. This is the part ' +
+          'that answers it, and nothing else in this market does it.'
+      }
+    ]
+  });
+
+  /* -- 3. The search ------------------------------------------------- */
+  lunaChat.screens.push({
+    id: 'search',
+    name: 'The search',
+    blurb: 'The thing a website chatbot cannot do: produce a real bookable search.',
+    html: lcSite(
+      '<div class="lc-panel">' +
+        lcPanelHead('Ask Travel Demo') +
+        '<div class="lc-thread">' +
+          '<div class="lc-msg lc-msg--them">Manchester would be easiest</div>' +
+          '<div class="lc-msg lc-msg--luna">Then here is exactly that, ready to look at. Prices ' +
+            'are live, so have a scroll and tell me which ones you like.</div>' +
+          '<div class="lc-card" data-hs="lc-deep">' +
+            '<span class="lc-card-head">Your search, ready</span>' +
+            '<span class="lc-card-body">' +
+              '<strong>Hurghada, 24 Oct, 7 nights</strong>' +
+              '<small>From Manchester &middot; 2 adults, 2 children (7, 11) &middot; All inclusive ' +
+              '&middot; Up to &pound;2,500</small>' +
+            '</span>' +
+            '<span class="lc-card-go" data-hs="lc-go">See 34 holidays</span>' +
+          '</div>' +
+          '<div class="lc-msg lc-msg--luna">If none of them land, tell me what is wrong with them ' +
+            'and I will change the search.</div>' +
+        '</div>' +
+        '<div class="lc-composer">' +
+          '<span class="lc-input">Ask about anywhere...</span>' +
+          '<span class="lc-send"></span>' +
+        '</div>' +
+        '<div class="lc-foot">Powered by Travel Demo</div>' +
+      '</div>'
+    ),
+    hotspots: [
+      {
+        anchor: 'lc-deep',
+        at: 'top-left',
+        title: 'This is the one to show people',
+        feature:
+          'That button opens the agency’s own booking engine with every field already filled ' +
+          'in. Not a link to a home page, not a summary of what they said. The search itself.',
+        benefit:
+          'A generic chatbot deflects tickets. This one hands a customer a set of holidays they ' +
+          'can book, on the agency’s own site, at midnight.',
+        edge:
+          'Ask any other chatbot to plan a family holiday to Tenerife in October and see whether ' +
+          'it produces a bookable search. That is the whole demonstration.'
+      },
+      {
+        anchor: 'lc-deep',
+        at: 'outside-left',
+        title: 'And the link still works next week',
+        feature:
+          'The dates are worked out relative to today rather than written into the link, and the ' +
+          'search area is corrected server side against the agency’s own geography so a Luna ' +
+          'search covers the same ground as the same search on their site.',
+        benefit:
+          'A link that has gone stale or lands somewhere slightly wrong costs a booking quietly, ' +
+          'and nobody ever reports it.'
+      },
+      {
+        anchor: 'lc-go',
+        at: 'bottom-right',
+        title: 'It never sends the business anywhere else',
+        feature:
+          'Luna is under an absolute instruction never to name a competitor, asked or unasked, and ' +
+          'every search it builds points at the agency’s own engine.',
+        benefit:
+          'The fear is that an AI helpfully suggests booking elsewhere. It cannot.'
+      }
+    ]
+  });
+
+  /* -- 4. Where it stops ---------------------------------------------- */
+  lunaChat.screens.push({
+    id: 'limits',
+    name: 'Where it stops',
+    blurb: 'The subjects it refuses to have an opinion about.',
+    html: lcSite(
+      '<div class="lc-panel">' +
+        lcPanelHead('Ask Travel Demo') +
+        '<div class="lc-thread">' +
+          '<div class="lc-msg lc-msg--them">Is Egypt actually safe at the moment?</div>' +
+          '<div class="lc-msg lc-msg--luna" data-hs="lc-refuse">That is not mine to judge, and I ' +
+            'would not want you taking my word for it. Here is what the Foreign Office says today, ' +
+            'straight from them.</div>' +
+          '<div class="lc-card lc-card--fcdo" data-hs="lc-fcdo">' +
+            '<span class="lc-card-head">Foreign Office advice</span>' +
+            '<span class="lc-card-body">' +
+              '<strong>Egypt</strong>' +
+              '<small>Advises against all but essential travel to parts of the country. Hurghada ' +
+              'and the Red Sea resorts are not among them.</small>' +
+            '</span>' +
+            '<span class="lc-card-go" data-hs="lc-fcdo-go">Read it on gov.uk</span>' +
+          '</div>' +
+          '<div class="lc-msg lc-msg--luna">If you would rather talk it through with someone here, ' +
+            'say the word and I will fetch them.</div>' +
+        '</div>' +
+        '<div class="lc-composer">' +
+          '<span class="lc-input">Ask about anywhere...</span>' +
+          '<span class="lc-send"></span>' +
+        '</div>' +
+        '<div class="lc-foot">Powered by Travel Demo</div>' +
+      '</div>'
+    ),
+    hotspots: [
+      {
+        anchor: 'lc-refuse',
+        at: 'top-left',
+        title: 'It never gives a safety opinion',
+        feature:
+          'Asked whether somewhere is safe, Luna does not answer. The server attaches the official ' +
+          'Foreign Office status instead and points at the page it came from.',
+        benefit:
+          'This is the question every agency worries about an AI answering. It is the one question ' +
+          'it is not allowed to have a view on.'
+      },
+      {
+        anchor: 'lc-fcdo',
+        at: 'outside-left',
+        title: 'Straight from the source, not from memory',
+        feature:
+          'The status is written to the knowledge base from the Foreign Office itself, word for ' +
+          'word, with no model anywhere near it, and refreshed on a schedule.',
+        benefit:
+          'A model recalling what the advice used to be is worse than useless on this subject. ' +
+          'This is the current text or it is nothing.'
+      },
+      {
+        anchor: 'lc-fcdo-go',
+        at: 'bottom-right',
+        title: 'And it offers a human the moment it matters',
+        feature:
+          'Luna escalates on subjects it should not carry, and whenever the visitor asks.',
+        benefit:
+          'Knowing where to stop is what makes the rest of it trustworthy.'
+      }
+    ]
+  });
+
+  /* -- 5. Handing it over, both sides at once ------------------------ */
+  lunaChat.screens.push({
+    id: 'handover',
+    name: 'The handover',
+    blurb: 'The moment a conversation becomes a lead, from both sides.',
+    html:
+      '<div class="lc-split">' +
+        '<div class="lc-half">' +
+          '<span class="lc-vlabel">Your customer</span>' +
+          '<div class="lc-vpane">' +
+            '<div class="lc-panel lc-panel--inline">' +
+              lcPanelHead('Ask Travel Demo') +
+              '<div class="lc-thread">' +
+                '<div class="lc-msg lc-msg--them" data-hs="lc-ask">Can I speak to an actual ' +
+                  'person about the flights?</div>' +
+                '<div class="lc-msg lc-msg--luna">Of course. Give me one second.</div>' +
+                '<div class="lc-msg lc-msg--agent" data-hs="lc-agent">' +
+                  '<span class="lc-msg-by">Claire, Travel Demo</span>' +
+                  'Hi, Claire here. I have read the whole thread, so no need to start again. ' +
+                  'Manchester flights on the 24th, was it?</div>' +
+              '</div>' +
+              '<div class="lc-composer">' +
+                '<span class="lc-input">Type a message...</span>' +
+                '<span class="lc-send"></span>' +
+              '</div>' +
+              '<div class="lc-foot">Powered by Travel Demo</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="lc-half lc-split-seam">' +
+          '<span class="lc-vlabel">Your inbox</span>' +
+          '<div class="lc-dash">' +
+            '<div class="lc-rail">' +
+              '<div class="lc-railhead"><strong>Travel Demo</strong><small>Claire, online</small></div>' +
+              '<div class="lc-conv is-live" data-hs="lc-arrive">' +
+                '<span class="lc-conv-av">SB</span>' +
+                '<span class="lc-conv-b"><b>Sarah B.</b><span>Can I speak to an actual...</span></span>' +
+                '<span class="lc-unread">1</span>' +
+              '</div>' +
+              '<div class="lc-conv">' +
+                '<span class="lc-conv-av">DM</span>' +
+                '<span class="lc-conv-b"><b>Dan M.</b><span>Thanks, that is great</span></span>' +
+                '<span class="lc-conv-when">14m</span>' +
+              '</div>' +
+              '<div class="lc-conv">' +
+                '<span class="lc-conv-av lc-conv-av--wa">JP</span>' +
+                '<span class="lc-conv-b"><b>Jo P.</b><span>Sent the passport photos</span></span>' +
+                '<span class="lc-conv-when">1h</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="lc-stage">' +
+              '<div class="lc-stagehead">' +
+                '<strong>Sarah B.</strong>' +
+                '<span class="lc-tag" data-hs="lc-context">Hurghada &middot; 24 Oct &middot; 2+2</span>' +
+                '<span class="lc-tag lc-tag--ai">Luna handled 9 messages</span>' +
+              '</div>' +
+              '<div class="lc-stagebody">' +
+                '<div class="lc-msg lc-msg--luna" data-hs="lc-thread-full">' +
+                  '<span class="lc-msg-by">The whole conversation, already here</span>' +
+                  'October, half term, two adults and two children aged 7 and 11, around ' +
+                  '&pound;2,500, flying from Manchester. Searched Hurghada, opened 34 holidays.</div>' +
+                '<div class="lc-msg lc-msg--them">Can I speak to an actual person about the flights?</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>',
+    hotspots: [
+      {
+        anchor: 'lc-arrive',
+        at: 'outside-left',
+        title: 'It only fetches you for the ones worth fetching you for',
+        feature:
+          'Luna handles the conversation on its own and escalates when it should, or the moment ' +
+          'the visitor asks. Out of hours the lead arrives by email instead.',
+        benefit:
+          'Nobody has to watch a chat window all day. The agency is interrupted for the ones that ' +
+          'are actually worth being interrupted for.'
+      },
+      {
+        anchor: 'lc-thread-full',
+        at: 'top-left',
+        title: 'They do not have to start again',
+        feature:
+          'The whole conversation, and everything Luna worked out from it, is already on the ' +
+          'screen when the agent picks it up.',
+        benefit:
+          'The worst handover in any business is the one where the customer repeats themselves to ' +
+          'a second person. This one never happens.'
+      },
+      {
+        anchor: 'lc-agent',
+        at: 'outside-right',
+        title: 'And on their side, a person simply joins in',
+        feature:
+          'No new window, no ticket number, no "your reference is". The same conversation carries ' +
+          'on with a human name on it.',
+        benefit:
+          'The customer never sees the join. They just notice the answers got better.'
+      },
+      {
+        anchor: 'lc-context',
+        title: 'The chat is tagged with what it is about',
+        feature:
+          'Destination, dates and party size are carried on the conversation itself.',
+        benefit:
+          'Somebody scanning a busy inbox can tell what each one is worth before opening it.'
+      }
+    ]
+  });
+
+  /* -- 6. Helping the agent, both sides at once ---------------------- */
+  lunaChat.screens.push({
+    id: 'copilot',
+    name: 'Copilot',
+    blurb: 'The AI carries on helping after a human takes over. The customer never sees it.',
+    html:
+      '<div class="lc-split">' +
+        '<div class="lc-half">' +
+          '<span class="lc-vlabel">Your customer</span>' +
+          '<div class="lc-vpane">' +
+            '<div class="lc-panel lc-panel--inline">' +
+              lcPanelHead('Ask Travel Demo') +
+              '<div class="lc-thread">' +
+                '<div class="lc-msg lc-msg--them">Is the Sunrise any good for an 11 year old? ' +
+                  'He is a fussy eater</div>' +
+                '<div class="lc-msg lc-msg--agent" data-hs="lc-sent">' +
+                  '<span class="lc-msg-by">Claire, Travel Demo</span>' +
+                  'Honestly, yes. There are five restaurants and the buffet always has pasta and ' +
+                  'chips, which covers most fussy eaters. The kids’ club does its own menu ' +
+                  'too.</div>' +
+                '<span class="lc-tick">Read &check;&check;</span>' +
+              '</div>' +
+              '<div class="lc-composer">' +
+                '<span class="lc-input">Type a message...</span>' +
+                '<span class="lc-send"></span>' +
+              '</div>' +
+              '<div class="lc-foot">Powered by Travel Demo</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="lc-half lc-split-seam">' +
+          '<span class="lc-vlabel">What Claire sees</span>' +
+          '<div class="lc-dash">' +
+            '<div class="lc-rail">' +
+              '<div class="lc-railhead"><strong>Travel Demo</strong><small>Claire, online</small></div>' +
+              '<div class="lc-conv is-live">' +
+                '<span class="lc-conv-av">SB</span>' +
+                '<span class="lc-conv-b"><b>Sarah B.</b><span>Is the Sunrise any good...</span></span>' +
+              '</div>' +
+              '<div class="lc-conv">' +
+                '<span class="lc-conv-av lc-conv-av--wa">JP</span>' +
+                '<span class="lc-conv-b"><b>Jo P.</b><span>Sent the passport photos</span></span>' +
+                '<span class="lc-conv-when">1h</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="lc-stage">' +
+              '<div class="lc-stagehead"><strong>Sarah B.</strong>' +
+                '<span class="lc-tag">Hurghada &middot; 24 Oct</span></div>' +
+              '<div class="lc-copilot" data-hs="lc-copilot">' +
+                '<span class="lc-copilot-t">Copilot &middot; suggested reply</span>' +
+                '<span class="lc-sugg">Honestly, yes. There are five restaurants and the buffet ' +
+                  'always has pasta and chips, which covers most fussy eaters. The kids’ ' +
+                  'club does its own menu too.' +
+                  '<span class="lc-sugg-src" data-hs="lc-source">From your own notes on Sunrise ' +
+                  'Hurghada, updated March</span></span>' +
+                '<span class="lc-tools" data-hs="lc-tools">' +
+                  '<span class="lc-tool">Friendlier</span>' +
+                  '<span class="lc-tool">Shorter</span>' +
+                  '<span class="lc-tool">More detail</span>' +
+                  '<span class="lc-tool">Summarise</span>' +
+                  '<span class="lc-tool">Translate</span>' +
+                '</span>' +
+              '</div>' +
+              '<div class="lc-stagebody">' +
+                '<div class="lc-msg lc-msg--them">Is the Sunrise any good for an 11 year old?</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>',
+    hotspots: [
+      {
+        anchor: 'lc-copilot',
+        at: 'outside-left',
+        title: 'A draft reply, waiting',
+        feature:
+          'The moment a human takes over, Copilot writes what it would have said and puts it in ' +
+          'front of them. They send it, change it, or ignore it.',
+        benefit:
+          'A new starter answers like somebody who has worked there ten years, and the person who ' +
+          'has worked there ten years gets their afternoon back.'
+      },
+      {
+        anchor: 'lc-source',
+        at: 'bottom-right',
+        title: 'And it says where it got it',
+        feature:
+          'Every suggestion names the knowledge it came from, so the agent can see whether to ' +
+          'trust it before it goes out.',
+        benefit:
+          'A suggestion with no source behind it is just a guess with good grammar.'
+      },
+      {
+        anchor: 'lc-tools',
+        title: 'Friendlier, shorter, or in their language',
+        feature:
+          'One tap rewrites the draft, summarises a long thread, or translates it. Luna already ' +
+          'replies in whatever language the visitor writes in, unconditionally.',
+        benefit:
+          'A tired agent at five to six writes a reply they would be happy to read.'
+      },
+      {
+        anchor: 'lc-sent',
+        at: 'outside-right',
+        title: 'The customer sees none of this',
+        feature:
+          'Copilot is the agent’s side of the glass. What lands is a message from Claire.',
+        benefit:
+          'The help is invisible, which is the only way it is worth having.'
+      }
+    ]
+  });
+
+  /* -- 7. One inbox ---------------------------------------------------- */
+  lunaChat.screens.push({
+    id: 'whatsapp',
+    name: 'One inbox',
+    blurb: 'Website chat and WhatsApp arrive in the same place, handled the same way.',
+    html:
+      '<div class="lc-dash lc-dash--wide">' +
+        '<div class="lc-rail">' +
+          '<div class="lc-railhead"><strong>Travel Demo</strong><small>Claire, online</small></div>' +
+          '<div class="lc-conv is-live" data-hs="lc-wa-conv">' +
+            '<span class="lc-conv-av lc-conv-av--wa">JP</span>' +
+            '<span class="lc-conv-b"><b>Jo P.</b><span>Sent the passport photos</span></span>' +
+            '<span class="lc-unread">2</span>' +
+          '</div>' +
+          '<div class="lc-conv">' +
+            '<span class="lc-conv-av">SB</span>' +
+            '<span class="lc-conv-b"><b>Sarah B.</b><span>Perfect, thank you</span></span>' +
+            '<span class="lc-conv-when">3m</span>' +
+          '</div>' +
+          '<div class="lc-conv">' +
+            '<span class="lc-conv-av lc-conv-av--wa">RT</span>' +
+            '<span class="lc-conv-b"><b>Ray T.</b><span>What time is the transfer</span></span>' +
+            '<span class="lc-conv-when">22m</span>' +
+          '</div>' +
+          '<div class="lc-conv">' +
+            '<span class="lc-conv-av">DM</span>' +
+            '<span class="lc-conv-b"><b>Dan M.</b><span>Thanks, that is great</span></span>' +
+            '<span class="lc-conv-when">1h</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="lc-stage">' +
+          '<div class="lc-stagehead">' +
+            '<strong>Jo P.</strong>' +
+            '<span class="lc-tag lc-tag--wa" data-hs="lc-wa-tag">WhatsApp</span>' +
+            '<span class="lc-tag">Crete &middot; May</span>' +
+          '</div>' +
+          '<div class="lc-stagebody">' +
+            '<div class="lc-msg lc-msg--them">Do you need the passports before we pay the balance?</div>' +
+            '<div class="lc-msg lc-msg--luna" data-hs="lc-wa-ai">Not before the balance, no. We ' +
+              'need them about six weeks out, so mid March for your May trip. You can send photos ' +
+              'straight here whenever it suits.</div>' +
+            '<div class="lc-msg lc-msg--them">Sent them now</div>' +
+            '<span class="lc-tick">Read &check;&check;</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="lc-side">' +
+          '<span class="lc-side-t">Who this is</span>' +
+          '<div class="lc-side-name">Jo P.</div>' +
+          '<div class="lc-side-sub">On WhatsApp &middot; +44 7700 900412</div>' +
+          '<div class="lc-hist" data-hs="lc-recall">' +
+            '<span class="lc-side-t">Seen before</span>' +
+            '<span class="lc-hist-row"><b>Today</b> asked about passports</span>' +
+            '<span class="lc-hist-row"><b>9 Feb</b> booked Crete, 7 nights</span>' +
+            '<span class="lc-hist-row"><b>2 Feb</b> asked about Crete on the website</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>',
+    hotspots: [
+      {
+        anchor: 'lc-wa-conv',
+        at: 'outside-right',
+        title: 'Their customers already use WhatsApp',
+        feature:
+          'The agency’s WhatsApp number comes into the same inbox as the website chat, with ' +
+          'the same Luna answering and the same people taking over.',
+        benefit:
+          'Most agencies already have a WhatsApp number and no idea what is happening on it. This ' +
+          'is the same conversation, in the place everything else lives.',
+        edge:
+          'Travelgenix connects the number for them. There is no Meta account to set up and ' +
+          'nothing for them to work out.'
+      },
+      {
+        anchor: 'lc-wa-ai',
+        at: 'top-left',
+        title: 'Luna answers there too',
+        feature:
+          'It is not a forwarding inbox. The same assistant, the same approved knowledge, the same ' +
+          'rules about what it will and will not say.',
+        benefit:
+          'A message at ten at night gets the same answer whichever way it arrived.'
+      },
+      {
+        anchor: 'lc-recall',
+        at: 'outside-left',
+        title: 'It remembers them',
+        feature:
+          'A returning visitor is recognised on the same device, and across devices once they have ' +
+          'verified their email with a code.',
+        benefit:
+          'Nobody likes explaining themselves twice. The agent opens the chat already knowing this ' +
+          'is the Crete booking from February.'
+      }
+    ]
+  });
+
+  /* -- 8. What the agency can see ------------------------------------- */
+  lunaChat.screens.push({
+    id: 'proof',
+    name: 'The proof',
+    blurb: 'The leads it produced, and whether the whole thing is working.',
+    html:
+      '<div class="lc-dash lc-dash--wide">' +
+        '<div class="lc-rail">' +
+          '<div class="lc-railhead"><strong>Travel Demo</strong><small>Claire, online</small></div>' +
+          '<div class="lc-conv"><span class="lc-conv-av">SB</span>' +
+            '<span class="lc-conv-b"><b>Sarah B.</b><span>Perfect, thank you</span></span>' +
+            '<span class="lc-conv-when">3m</span></div>' +
+          '<div class="lc-conv"><span class="lc-conv-av lc-conv-av--wa">JP</span>' +
+            '<span class="lc-conv-b"><b>Jo P.</b><span>Sent them now</span></span>' +
+            '<span class="lc-conv-when">8m</span></div>' +
+        '</div>' +
+        '<div class="lc-stage">' +
+          '<div class="lc-stagehead"><strong>This week</strong></div>' +
+          '<div class="lc-stagebody">' +
+            '<div class="lc-tiles" data-hs="lc-tiles">' +
+              '<span class="lc-tile"><small>Conversations</small><b>214</b><i>63 after six o’clock</i></span>' +
+              '<span class="lc-tile"><small>Handed to a human</small><b>28</b><i>13 per cent of them</i></span>' +
+              '<span class="lc-tile"><small>Enquiries</small><b>19</b><i>All in the table below</i></span>' +
+              '<span class="lc-tile"><small>Rated by the customer</small><b>4.6</b><i>Out of five</i></span>' +
+            '</div>' +
+            '<div class="lc-tile" style="margin-top:11px" data-hs="lc-hours">' +
+              '<small>When they come</small>' +
+              '<span class="lc-bars">' +
+                '<span style="height:22%"></span><span style="height:14%"></span>' +
+                '<span style="height:18%"></span><span style="height:34%"></span>' +
+                '<span style="height:46%"></span><span style="height:58%"></span>' +
+                '<span style="height:72%"></span><span class="is-peak" style="height:100%"></span>' +
+                '<span class="is-peak" style="height:88%"></span><span style="height:54%"></span>' +
+                '<span style="height:30%"></span><span style="height:17%"></span>' +
+              '</span>' +
+              '<i>Busiest between eight and ten in the evening</i>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="lc-side">' +
+          '<div class="lc-lead" data-hs="lc-enquiry" style="margin:0 0 12px">' +
+            '<span class="lc-lead-t">New enquiry</span>' +
+            '<span class="lc-lead-rows">' +
+              '<span class="lc-lead-row"><span>Name</span><b>Sarah Bright</b></span>' +
+              '<span class="lc-lead-row"><span>Going to</span><b>Hurghada</b></span>' +
+              '<span class="lc-lead-row"><span>When</span><b>24 Oct, 7 nights</b></span>' +
+              '<span class="lc-lead-row"><span>Party</span><b>2 adults, 2 children</b></span>' +
+              '<span class="lc-lead-row"><span>Budget</span><b>Around &pound;2,500</b></span>' +
+              '<span class="lc-lead-row"><span>From</span><b>Manchester</b></span>' +
+            '</span>' +
+          '</div>' +
+          '<div class="lc-stars" data-hs="lc-csat">' +
+            '<b>&starf;&starf;&starf;&starf;&starf;</b>' +
+            '&ldquo;Answered at half ten at night and actually knew the hotel.&rdquo;' +
+          '</div>' +
+        '</div>' +
+      '</div>',
+    hotspots: [
+      {
+        anchor: 'lc-enquiry',
+        at: 'outside-left',
+        title: 'The enquiry writes itself',
+        feature:
+          'Everything Luna worked out during the conversation arrives as a filled-in enquiry, and ' +
+          'lands by email as well so it is not missed.',
+        benefit:
+          'This is the output the agency actually wanted. Not a transcript to read, a lead to ring.'
+      },
+      {
+        anchor: 'lc-hours',
+        at: 'top-left',
+        title: 'It shows when the agency is closed and the customers are not',
+        feature:
+          'Conversations by hour, by day, and what people asked about.',
+        benefit:
+          'The evening peak is the argument for having it at all, in the agency’s own numbers ' +
+          'rather than ours.'
+      },
+      {
+        anchor: 'lc-tiles',
+        title: 'And how much of it needed a person',
+        feature:
+          'Conversations, escalations, ratings and quality scores. Luna scores its own answers and ' +
+          'flags the weak ones for review.',
+        benefit:
+          'It is possible to tell whether this is working, which is more than most agencies can ' +
+          'say about their website today.'
+      },
+      {
+        anchor: 'lc-csat',
+        at: 'bottom-right',
+        title: 'The customer gets a say',
+        feature:
+          'Every conversation can be rated when it ends, and the comments come through with it.',
+        benefit:
+          'The fastest way to find out the assistant is getting something wrong is to let the ' +
+          'people it is talking to tell you.'
+      }
+    ]
+  });
+
+  window.TG_SHOWCASE = { version: '1.0.0', products: [lunaTravel, lunaChat] };
 })();

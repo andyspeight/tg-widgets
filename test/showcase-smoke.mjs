@@ -122,8 +122,27 @@ check('js has a matching breakpoint', !!jsBp);
 check('the two breakpoints agree', !!cssBp && !!jsBp && cssBp[1] === jsBp[1],
   `css ${cssBp?.[1]} vs js ${jsBp?.[1]}`);
 check('phones size the device by width, never height',
-  /narrow\(\)[\s\S]{0,80}w \/ PHONE_W, 1\)/.test(js));
-check('the device never draws past life size on a kiosk', /1\.5\)/.test(js));
+  /narrow\(\)[\s\S]{0,60}Math\.min\(w \/ dev\.w, 1\)/.test(js));
+
+/* The frame is per product now, so a walkthrough of something that lives on a
+   website is not drawn inside a 390px phone. */
+check('the frame comes from the product, not from a constant',
+  /DEVICES = \{[\s\S]{0,600}browser:/.test(js) && /function deviceOf\(p\)/.test(js));
+check('an unknown device falls back to the phone',
+  /DEVICES\[\(p && p\.device\) \|\| 'phone'\] \|\| DEVICES\.phone/.test(js));
+check('a phone may be drawn larger than life, a browser window may not',
+  /phone:\s*\{[^}]*max: 1\.5/.test(js) && /browser:\s*\{[^}]*max: 1/.test(js));
+check('the scale is taken from the device in play',
+  /Math\.min\(w \/ dev\.w, Math\.max\(240, h\) \/ dev\.h, dev\.max\)/.test(js));
+/* The scale is worked out from the device's size, so the frame has to be
+   dressed before the first layout rather than after it. */
+check('the frame is set before the walk is laid out',
+  /st\.product = p;\s*\n\s*setDevice\(p\);/.test(js));
+check('one frame\'s furniture never shows on another',
+  /el\.notch\.hidden = dev\.cls !== 'tg-phone'/.test(js) &&
+  /el\.winbar\.hidden = dev\.cls !== 'tg-browser'/.test(js));
+check('the browser frame is a real frame in the stylesheet',
+  /\.tg-browser \{[\s\S]{0,120}width: 1120px/.test(css) && /\.tg-winbar \{/.test(css));
 check('scene padding is measured, not assumed', /paddingTop/.test(js));
 check('the caption is bounded so its controls cannot be pushed off',
   /max-height:\s*100%/.test(css));
@@ -361,6 +380,25 @@ check('stacked, the caption takes what it needs and the device the rest',
   /grid-template-rows: minmax\(0, 1fr\) auto;/.test(css));
 check('side by side, the scene is one row',
   /grid-template-rows: minmax\(0, 1fr\);/.test(css));
+
+/* A hotspot whose anchor is not in its screen's markup draws no marker and no
+   spotlight. It fails silently: the walk just has one fewer stop than the
+   count says, which is exactly what happened writing the Luna Chat search
+   screen. Every anchor must exist in the screen it belongs to. */
+for (const p of data.products) {
+  for (const scr of p.screens) {
+    const present = new Set([...scr.html.matchAll(/data-hs="([^"]+)"/g)].map(m => m[1]));
+    const missing = scr.hotspots.map(h => h.anchor).filter(a => !present.has(a));
+    check(`every hotspot on ${p.id}/${scr.id} has something to point at`,
+      missing.length === 0, missing.join(', '));
+  }
+}
+
+/* Stacked, a wordier hotspot shrinks the device's cell without the scene
+   changing size, so watching only the scene left the device at the old scale
+   and overflowing under the top bar. */
+check('a growing caption rescales the device',
+  /ro\.observe\(el\.scene\);/.test(js) && /ro\.observe\(el\.caption\);/.test(js));
 
 check('the image assets have headers',
   vercel.headers.some(h => /showcase\/img/.test(h.source)));
