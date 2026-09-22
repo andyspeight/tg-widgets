@@ -88,6 +88,31 @@ the Scottish Premiership carries Dundee FC and Dundee United, which are two
 clubs. Another 17 pairs sit in the same shape but cannot be decided by
 machine, so they are reported in `teamAliasCandidates` rather than merged.
 
+**That rule is far too narrow, and `api/_lib/events/club-aliases.js` is the
+answer (22 Sep 2026).** It only catches a duplicate whose two spellings NEST.
+Our second supplier spells a whole league its own way, and most of that does not
+nest at all: "Sporting CP" against "Sporting Club Portugal", "Paris SG" against
+"Paris Saint-Germain", "Lille LOSC" against "Lille OSC". A client counted 23
+clubs in the 18-club Primeira and 24 in the 18-club Ligue 1.
+
+Each pair in that table was decided on evidence: a club cannot be at two grounds
+on one day, so for every date a candidate pair share, compare the VENUE.
+Agreement means one club spelled twice; disagreement means two clubs sharing a
+word. It has to be the venue and NOT the opponent, because where a league is
+duplicated the opponent is duplicated too: comparing opponents reported that PSG
+and Paris Saint-Germain were different clubs. Allow a few disagreements, since
+the venue registry still has unapplied aliases (San Siro, El Sadar, Groupama
+Stadium) that show up as false clashes; two genuinely different clubs disagree on
+nearly every shared date (Dundee and Dundee United, 25 of 25).
+
+35 spellings folded, 178 double-listed matches merged, thirteen of fourteen
+leagues now exactly the right size. The dozen pairs that must NEVER merge are
+listed with their reasons in `NEVER_MERGE`.
+
+`CLUB_SPLITS` in the same file handles the opposite fault: a key holding two real
+clubs. A team key carries no country, so Vitória SC of Guimarães and EC Vitória
+of Salvador were one club. A sweep found that is the only such collision.
+
 Time then splits a day's fixtures back apart, so an MLB doubleheader stays two
 events. Placeholder sides never merge: four different volleyball quarter-finals
 all read "To be decided vs To be decided" and folding them together would delete
@@ -163,13 +188,35 @@ Shared assets are `public/events-explorer.css` and `public/events-explorer.js`.
 Nothing off the network reaches `innerHTML`, there are no inline handlers, and
 every list has a loading, empty and error state.
 
+### Where the data comes from (rewritten 22 Sep 2026)
+
+**The sheet is live, and ours went stale.** The feed is a Google Sheet Darren
+keeps up to date, not a file anybody sends us. Andy, 22 Sep 2026: "it's a Google
+Sheet, so it is always being updated, it's not a fixed point in time." The
+committed snapshot was built on 21 Aug from one read of it and never refreshed,
+so by late September the widgets were offering August's inventory. A client
+reported very few matches and tickets that turned out to be gone. Both were
+that, not the sheet.
+
+So `api/cron/refresh-events-snapshot.js` now reads the sheet every six hours,
+rebuilds through `api/_lib/events/build-snapshot.js` and stores the result in
+Vercel Blob at `events/events-snapshot.json`. Same shape as the offer cache: a
+cron fills it on our schedule and a visitor never triggers the read.
+
+It needs the sheet shared with `GOOGLE_SERVICE_ACCOUNT_EMAIL` as a viewer. The
+scope is `spreadsheets.readonly`, so the pass cannot write to anybody's
+spreadsheet.
+
+The committed `api/_data/events-snapshot.json` is still there and is still the
+fallback. Every way the refresh can be absent (never run, unreachable, empty,
+slow) lands on it, so a broken refresh degrades to the old behaviour rather than
+to an empty site. `scripts/build-events-snapshot.mjs` still builds one from a
+CSV and now goes through the same shared builder, so the two cannot drift.
+
 ### The API
 
-`api/events-feed.js` serves slices of a snapshot built by
-`scripts/build-events-snapshot.mjs` and committed at
-`api/_data/events-snapshot.json` (3.8MB, loaded once per cold start, about 70ms).
-The feed is a periodic spreadsheet export rather than a live API, so a snapshot
-is the honest shape for it.
+`api/events-feed.js` serves slices of that snapshot (3.8MB, loaded once per cold
+start, about 70ms from the committed file).
 
 ```
 /api/events-feed                                    index
