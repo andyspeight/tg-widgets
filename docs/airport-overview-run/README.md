@@ -5,9 +5,15 @@ Airports table (base `appuZdlMJ7HKUt6qS`, table `tblI2iVAbIGCtsGa7`,
 field `fldmRELkLWrUGL5Ss`). Written to the repo because it started life in a
 session scratchpad, which does not survive.
 
-**State as of 22 Sep 2026: 599 of 600 records carry an Overview.** The one
-blank is MPC, a small airport in Bengkulu that Andy has said to ignore. Do not
-reopen it and do not count it as a gap.
+**State as of 22 Sep 2026: 599 of the original 600 records carry an Overview.**
+The one blank is MPC, a small airport in Bengkulu that Andy has said to ignore.
+Do not reopen it and do not count it as a gap.
+
+**The table now holds 1,018 records.** 418 were imported on 22 Sep under the
+traffic rule Andy set (peak passengers >= 1m, or busiest in its country with at
+least 100k). Those 418 are thin by design: name, IATA, country, lat/lng,
+Wikipedia URL, Source 1, Status "Todo". They carry no Overview, and they are
+NOT part of the 599 figure above. See `world-coverage-plan.md`.
 
 **Verified Date is blank on all 599, deliberately.** Andy chose finish-first,
 verify-after on 21 Sep. The records meet one traced source plus the three-layer
@@ -19,7 +25,12 @@ that is the next job.
 - `verification-backlog.md` — START HERE for the sweep. Priority order, the
   records that most need a second source, the source self-contradictions that
   were logged rather than silently resolved, and the per-batch notes.
-- `world-coverage-plan.md` — phase 2, extending to every airport worldwide.
+- `world-coverage-plan.md` — phase 2, the 418-record import: the rule, the
+  sources, what was verified afterwards, and the 39 countries still missing.
+- `build-import.mjs` — regenerates that import from OurAirports and Wikidata.
+  Re-run it when OurAirports updates. Verified 22 Sep to reproduce the run
+  exactly: 929 qualifying, 892 over the threshold, 37 on the country floor,
+  180 countries, the same 418 new records.
 - `save.mjs` — the verification harness. Shape check, a name-and-number tracer
   that flags any proper noun or figure absent from the fetched source, and a
   compass check.
@@ -43,6 +54,13 @@ while the script reported a smaller remaining count than the ledger. They were
 found only because two counts disagreed and neither was trusted. Those 30 have
 since been backfilled, but any future runner should reconcile against a live
 Airtable count rather than a local ledger.
+
+**Wikidata's latest passenger figure is not its highest.** Reading P3872 by
+most-recent statement gives Surabaya 340 passengers and Kos 39,000: Wikidata
+holds several statements per year and the newest often lands on a pandemic
+figure. 334 of 2,960 airports read under a fifth of their own historic max that
+way. Take the peak since 2015 instead. In the 22 Sep working set, `joined.json`
+carries the bad figures and `peak.json` the good ones.
 
 **An airport's name is not evidence of international service.** SDF Louisville
 is an International airport with no scheduled international passenger flights.
