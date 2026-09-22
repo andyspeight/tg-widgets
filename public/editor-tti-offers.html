@@ -2639,6 +2639,33 @@
       add('DatesMax', c.DatesMax, 'latest date');
 
       const [pooled, visible] = await Promise.all([ask({}), ask(filters)]);
+
+      /* WHICH filter, and what is it set to.
+       *
+       * "a filter on this widget is hiding them" is true and useless: there are
+       * eight of them and the agent has to guess. So ask again WITHOUT each one
+       * in turn — whichever lets the most offers back in is the one doing it.
+       * Eight extra reads of a public, edge-cached endpoint, and it turns the
+       * message into "your maximum price of £2,000 is hiding 12 of them."
+       * (Andy, 22 Sep 2026: 17 cached, 5 showing, and £2,000 was the whole
+       * story — the twelve it hid ran from £2,011 to £8,933.) */
+      const blame = async () => {
+        const keys = Object.keys(filters);
+        if (!keys.length) return null;
+        const counts = await Promise.all(keys.map((k) => {
+          const without = { ...filters };
+          delete without[k];
+          return ask(without);
+        }));
+        let worst = null;
+        keys.forEach((k, i) => {
+          const back = Number.isFinite(counts[i]) ? counts[i] - visible : 0;
+          if (back > 0 && (!worst || back > worst.back)) {
+            worst = { key: k, label: named[i], value: filters[k], back: back };
+          }
+        });
+        return worst;
+      };
       let msg;
       if (pooled === null) {
         msg = '<span style="color:var(--tgse-warning)">Could not read the cache back just now, '
@@ -2657,18 +2684,32 @@
         // widget could see NOTHING, so a cache holding four hotels and a widget
         // showing two read as a clean success (Andy, 22 Sep 2026 — the two it
         // hid were £2,038 and £2,074 against the default £2,000 budget).
+        const who = await blame();
+        const money = (k, v) => (/budget/i.test(k) ? '\u00a3' + Number(v).toLocaleString('en-GB') : esc(v));
         msg = '<span style="color:var(--tgse-warning)"><strong>' + pooled + ' in your cache, but your '
             + 'widget is showing ' + visible + '.</strong> The other ' + (pooled - visible)
-            + ' priced fine and a filter on this widget is hiding '
-            + (pooled - visible === 1 ? 'it' : 'them')
-            + (named.length ? ': ' + esc(named.join(', ')) : '')
-            + '. Check the maximum price first: it is the usual one.</span>';
+            + ' priced fine'
+            + (who
+                ? ' and your <strong>' + esc(who.label) + ' of ' + money(who.key, who.value)
+                  + '</strong> is hiding ' + who.back + ' of '
+                  + (who.back === 1 ? 'them' : 'them') + '. Clear or raise that field.'
+                : ' and a filter on this widget is hiding '
+                  + (pooled - visible === 1 ? 'it' : 'them')
+                  + (named.length ? ': ' + esc(named.join(', ')) : '') + '.')
+            + '</span>';
       } else {
         msg = '<strong>' + visible + (visible === 1 ? ' offer' : ' offers')
             + ' your widget can see.</strong> The preview below is drawing from exactly this.';
       }
-      out.innerHTML += '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">'
-        + msg + '</div>';
+      // AT THE TOP, and as a node rather than innerHTML: the raw-exchange
+      // buttons are already in here with listeners attached, and re-parsing the
+      // panel would quietly kill them. Appending put the one line that explains
+      // the whole result underneath seventeen hotels and a diagnostics block,
+      // where it may as well not have been written (Andy, 22 Sep 2026).
+      const box = document.createElement('div');
+      box.style.cssText = 'margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--border)';
+      box.innerHTML = msg;
+      out.insertBefore(box, out.firstChild);
     }
 
     /* ---- The Test button ------------------------------------------------
@@ -2889,9 +2930,14 @@
             // their own pace, and a cheaper flight arriving after we stopped
             // polling makes this a "from" price that is not the lowest one.
             if (r.incomplete) {
+              // Named for what this widget actually sells. On a hotel-only
+              // widget there is no flight to be cheaper, and saying so sent an
+              // agent looking for a flight problem on 19 hotels that had none
+              // (Andy, 22 Sep 2026).
               text += '<br><span style="color:var(--tgse-warning)">The search had not finished '
-                    + 'settling when we stopped, so a cheaper flight may exist. Test again to '
-                    + 'see whether the price comes down.</span>';
+                    + 'settling when we stopped, so a cheaper '
+                    + (isPackageConfig(state.config) ? 'flight' : 'rate')
+                    + ' may exist. Test again to see whether the price comes down.</span>';
             }
             // A PACKAGE IS ALREADY PRICED, PER PERSON. Travelify returns the
             // whole holiday and nothing is added to it. Both figures are shown
