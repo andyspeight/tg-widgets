@@ -127,6 +127,41 @@ console.log('\nDiscount vouchers are credit too, like gift vouchers (ET122149)')
   ok('ET122149 never leaks the raw code', et.vouchers[0].code === '******NE30' && !JSON.stringify(et).includes('SUNSHINE30'));
 }
 
+console.log('\nA voucher already inside the plan is not taken off twice (ET122406)');
+{
+  // Exclusively Travel ET122406, 22 Sep 2026. £2,026.00 holiday, £405.20
+  // deposit paid, a £70 discount code, one instalment due 3 Jun 2027. The plan
+  // Travelify sends is NET of the discount: 405.20 + 1550.80 = 1956.00, which
+  // is the holiday less the £70. Crediting that plan with the £70 again put
+  // "Amount payable now" at £1,480.80 on a card that said, two lines above,
+  // that the remaining £1,550.80 was due before travel. The Pay balance button
+  // read the same £1,480.80, so a customer paying in full would have been left
+  // owing £70 nobody had told them about.
+  const v = [{ id: 979, code: 'SUNSHINE70', name: '£70 DISCOUNT ON ACCOMMODATION', value: -70, isPercent: false, isGift: false }];
+  const net = calc({ total: 2026.00, paid: 405.20, vouchers: v, schedule: { initialAmount: 405.20, breakdown: [{ amount: 1550.80, dueDate: '2027-06-03' }] } });
+  ok('the balance is the holiday less the deposit and the discount', net.balance === 1550.80);
+  ok('and the amount payable now AGREES with it', net.payable === 1550.80 && net.payable === net.balance);
+  ok('the discount still shows once, as a £70 credit', net.vouchers.length === 1 && net.voucherCredit === 70);
+  ok('the next payment keeps its date', net.nextDue.dueDate === '2027-06-03' && net.nextDue.amount === 1550.80);
+  ok('and nothing is left over after it', net.nextDue.remainingAmount === 0);
+
+  // The same booking with a plan that still carries the full holiday cost:
+  // there the voucher HAS to come off the plan, and always did.
+  const gross = calc({ total: 2026.00, paid: 405.20, vouchers: v, schedule: { initialAmount: 405.20, breakdown: [{ amount: 1620.80, dueDate: '2027-06-03' }] } });
+  ok('a plan carrying the full cost is credited exactly as before', gross.balance === 1550.80 && gross.payable === 1550.80);
+
+  // Half in, half out: only the part the plan has not already taken off.
+  const half = calc({ total: 500, paid: 0, vouchers: [gift(-50)], schedule: { initialAmount: 0, breakdown: [{ amount: 475, dueDate: '2027-01-01' }] } });
+  ok('a plan short by less than the voucher gets only the remainder', half.balance === 450 && half.payable === 450);
+
+  // A plan short for reasons of its own must never let the voucher land twice,
+  // and payable can never exceed the balance whatever the plan says.
+  const odd = calc({ total: 500, paid: 100, vouchers: [gift(-50)], schedule: { initialAmount: 100, breakdown: [{ amount: 1000, dueDate: '2027-01-01' }] } });
+  ok('an oversized plan is still capped at the balance', odd.balance === 350 && odd.payable <= odd.balance);
+  ok('payable never exceeds the balance across all of these',
+    [net, gross, half, odd].every(m => m.payable <= m.balance));
+}
+
 console.log('\nThe schedule: payments and voucher credit settle the earliest entries first');
 {
   const sched = { initialAmount: 100, breakdown: [{ amount: 200, dueDate: '2026-10-01' }, { amount: 200, dueDate: '2026-11-01' }] };
