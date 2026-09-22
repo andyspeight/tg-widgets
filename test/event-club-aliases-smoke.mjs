@@ -16,9 +16,10 @@
  */
 import { readFileSync } from 'node:fs';
 import {
-  CLUB_ALIASES, CLUB_SPLITS, NEVER_MERGE,
-  aliasLookup, canonicalClubKey, splitClub,
+  CLUB_ALIASES, CLUB_SPLITS, NEVER_MERGE, CLUB_NAMES,
+  aliasLookup, canonicalClubKey, splitClub, pinnedClubName,
 } from '../api/_lib/events/club-aliases.js';
+import { buildSnapshot } from '../api/_lib/events/build-snapshot.js';
 
 const snap = JSON.parse(readFileSync(new URL('../api/_data/events-snapshot.json', import.meta.url), 'utf8'));
 
@@ -139,6 +140,53 @@ ok('every event still carries at least one supplier listing', everyEventHasASupp
 
 const multi = snap.events.filter((e) => Array.isArray(e.s) && e.s.length > 1).length;
 ok('folded matches kept both suppliers rather than dropping one', multi > 0, multi + ' events with two listings');
+
+// ── The name a merged club is shown under ────────────────────────────────────
+// Folding two spellings does not settle which one a visitor reads. The registry
+// picks the feed's most-used spelling, so the winner moves with the supplier's
+// row counts: a refresh on 22 Sep 2026 renamed Sporting CP to "Sporting Club
+// Portugal (Lisbon)" and fixtures started reading "RC Lens vs Sporting Club
+// Portugal (Lisbon)". Pinning it here makes it stop moving.
+console.log('\nthe name a merged club is shown under');
+{
+  ok('a pinned name is returned for a merged club', pinnedClubName('sporting-cp') === 'Sporting CP');
+  ok('an unpinned club is left to the feed', pinnedClubName('arsenal') === '');
+  ok('a key naming a prototype member is inert', pinnedClubName('constructor') === '');
+
+  // Every club that COULD flip should be pinned, or the fix only covers the one
+  // that happened to flip first.
+  const atRisk = [];
+  for (const pairs of Object.values(CLUB_ALIASES)) {
+    for (const [variant, canonical] of Object.entries(pairs)) {
+      if (variant.length > canonical.length + 2 && !pinnedClubName(canonical)) atRisk.push(canonical);
+    }
+  }
+  ok('every merge that could be renamed by a refresh has a pinned name',
+    atRisk.length === 0, atRisk.join(', '));
+
+  // A pinned name has to beat the majority spelling, which is the whole point.
+  const rows = [
+    { Supplier: 'SportsEvents365', 'Event ID For Searchbox': '179:1', 'Event ID For Filters': '1',
+      'Event Name': 'Sporting Club Portugal (Lisbon) vs Benfica (Football (Soccer), Portuguese Primeira Liga)',
+      'Start Date/Time': '2027-03-01 15:00', 'Venue Name': 'Estadio Jose Alvalade', 'Venue ID': '1' },
+    { Supplier: 'SportsEvents365', 'Event ID For Searchbox': '179:2', 'Event ID For Filters': '2',
+      'Event Name': 'Sporting Club Portugal (Lisbon) vs Porto (Football (Soccer), Portuguese Primeira Liga)',
+      'Start Date/Time': '2027-03-08 15:00', 'Venue Name': 'Estadio Jose Alvalade', 'Venue ID': '1' },
+    { Supplier: 'XS2Event', 'Event ID For Searchbox': '144:a_spp', 'Event ID For Filters': 'a',
+      'Event Name': 'Sporting CP vs SL Benfica (Football, Primeira Liga)',
+      'Start Date/Time': '2027-03-01 16:00', 'Venue Name': 'Estadio Jose Alvalade', 'Venue ID': 'g1' },
+  ];
+  const built = buildSnapshot(rows, { generatedAt: '2026-09-22', source: 'test' });
+  const sp = built.teams.find((t) => t.key === 'sporting-cp');
+  ok('the pinned name wins even when the other spelling has more rows',
+    !!sp && sp.name === 'Sporting CP', sp && JSON.stringify(sp.name));
+  ok('the spelling it beat is kept as an alias, so search still finds it',
+    !!sp && (sp.aliases || []).some((a) => /Sporting Club Portugal/.test(a)),
+    sp && JSON.stringify(sp.aliases));
+
+  ok('pinned names are chosen from what the suppliers send, not invented',
+    Object.values(CLUB_NAMES).every((n) => typeof n === 'string' && n.length > 1 && n.length < 40));
+}
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
 process.exit(failed ? 1 : 0);

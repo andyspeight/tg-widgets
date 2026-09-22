@@ -137,6 +137,52 @@ export const CLUB_ALIASES = {
 };
 
 /**
+ * The name a merged club is SHOWN under.
+ *
+ * Folding two spellings into one key does not decide which spelling a visitor
+ * reads. The registry picks whichever the feed uses most, so the winner changes
+ * with the supplier's row counts: on 22 Sep 2026 a refresh renamed Sporting CP
+ * to "Sporting Club Portugal (Lisbon)" and fixtures started reading "RC Lens vs
+ * Sporting Club Portugal (Lisbon)". Thirteen merged clubs sit in that position,
+ * so any week's update could rename a client's own team.
+ *
+ * Pinning the name here makes it stop moving. The other spelling is still kept
+ * as an alias, so searching for it still finds the club.
+ *
+ * These are the cleaner of the two spellings the feed already uses. This table
+ * is not for renaming clubs to taste: the rule is to choose between what the
+ * suppliers actually send, not to invent a third name.
+ */
+export const CLUB_NAMES = {
+  'casa-pia': 'Casa Pia',
+  estoril: 'Estoril',
+  'estrela-amadora': 'Estrela Amadora',
+  'sporting-cp': 'Sporting CP',
+  vitoria: 'Vitória SC',
+  // Paris SG reads too much like Paris FC, which is a different club in the
+  // same league, so the unambiguous spelling wins here.
+  'paris-sg': 'Paris Saint-Germain',
+  troyes: 'Troyes',
+  lyon: 'Lyon',
+  'lille-losc': 'Lille LOSC',
+  'fsv-mainz': 'FSV Mainz 05',
+  paderborn: 'SC Paderborn',
+  lazio: 'SS Lazio',
+  inter: 'Inter',
+  sabadell: 'Sabadell',
+};
+
+/** A Map, because the key looked up comes from the feed. */
+const NAME_TABLE = new Map(Object.entries(CLUB_NAMES));
+
+/** The pinned display name for a club, or '' to let the feed decide. */
+export function pinnedClubName(key) {
+  if (!key) return '';
+  const n = NAME_TABLE.get(key);
+  return typeof n === 'string' ? n : '';
+}
+
+/**
  * The opposite problem: one key holding two real clubs.
  *
  * A team key comes from the name with club words stripped, and nothing in it

@@ -24,6 +24,7 @@
  */
 
 import { normaliseTeamName, slugify, isPlaceholderTeam } from './supplier-normalise.js';
+import { pinnedClubName } from './club-aliases.js';
 import { COMPETITIONS } from './supplier-taxonomy.js';
 
 /** slug -> country, for the "Premier League - England" style menu labels. */
@@ -233,7 +234,11 @@ export function buildEventIndexes(events) {
 
   const teamOut = [...teams.values()]
     .map((t) => {
-      const name = pickDisplayName(t.names);
+      // A pinned name wins over the feed's most-used spelling. Without it the
+      // winner moves with the supplier's row counts, and a refresh renamed
+      // Sporting CP to "Sporting Club Portugal (Lisbon)" mid-season. The other
+      // spelling stays on as an alias, so search is unaffected.
+      const name = pinnedClubName(t.key) || pickDisplayName(t.names);
       // Their home ground is simply the venue they host at most often.
       let homeVenueKey = null;
       let homeVenueName = null;
