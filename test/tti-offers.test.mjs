@@ -2632,7 +2632,8 @@ test('a price from a search that had not finished says so', () => {
   // Polling longer is not a guarantee, so an unsettled price is LABELLED.
   assert.ok(/if \(!r\.complete\) acc\.incomplete = true;/.test(TEST_API));
   assert.ok(/\.\.\.\(acc\.incomplete \? \{ incomplete: true \} : \{\}\)/.test(TEST_API));
-  assert.ok(/so a cheaper flight may exist/.test(EDITOR));
+  // Labelled for the product it actually is: a hotel-only widget has no flight.
+  assert.ok(/so a cheaper '\n                    \+ \(isPackageConfig/.test(EDITOR));
 });
 
 test('a cache reset is scoped to the hotels being tested, on their own account', () => {
@@ -2820,7 +2821,9 @@ test('a filter that hides some of the cache says so, not just all of it', () => 
   // nobody had set (Andy, 22 Sep 2026).
   assert.ok(/visible < pooled/.test(EDITOR), 'a partial loss is still a loss');
   assert.ok(/but your '\n            \+ 'widget is showing ' \+ visible/.test(EDITOR));
-  assert.ok(/Check the maximum price first/.test(EDITOR), 'and it names the usual culprit');
+  // It used to point vaguely at "the maximum price, it is the usual one". It
+  // now works out which field is actually responsible and names its value.
+  assert.ok(/const who = await blame\(\);/.test(EDITOR));
 
   // No ceiling out of the box. Seven nights for two in Dubai clears £2,000
   // before you start, and this widget exists to show the hotels the client
@@ -2833,4 +2836,35 @@ test('a filter that hides some of the cache says so, not just all of it', () => 
   // per-person price, so cached-offers compares the whole-room total.
   assert.ok(!/Max budget \(£pp\)/.test(EDITOR), 'it is not per person on a hotel');
   assert.ok(/whole stay for the room, not per person/.test(EDITOR));
+});
+
+test('the panel names the filter that is hiding offers, and says so at the top', () => {
+  // Andy, 22 Sep 2026: 17 hotels cached, 5 showing. The warning was right and
+  // useless — "a filter on this widget is hiding them" with eight fields to
+  // guess between, printed UNDER seventeen hotel lines and a diagnostics block.
+  // budgetMax was £2,000 and the twelve it hid ran from £2,011 to £8,933.
+
+  // It asks again without each filter in turn; whichever lets the most back in
+  // is the one doing it.
+  assert.ok(/const blame = async \(\) => \{/.test(EDITOR));
+  assert.ok(/const without = \{ \.\.\.filters \};\n          delete without\[k\];/.test(EDITOR));
+  assert.ok(/back > 0 && \(!worst \|\| back > worst\.back\)/.test(EDITOR), 'the biggest contributor wins');
+  // And it says the field AND its value, because "maximum price" without the
+  // number still leaves the agent hunting.
+  assert.ok(/esc\(who\.label\) \+ ' of ' \+ money\(who\.key, who\.value\)/.test(EDITOR));
+  assert.ok(/is hiding ' \+ who\.back/.test(EDITOR));
+  assert.ok(/Clear or raise that field/.test(EDITOR));
+
+  // At the top of the panel, as a node: the raw-exchange buttons are already in
+  // there with listeners on them, so re-parsing the panel would kill them.
+  assert.ok(/out\.insertBefore\(box, out\.firstChild\)/.test(EDITOR));
+  assert.ok(!/out\.innerHTML \+= '<div style="margin-top:10px;padding-top:8px/.test(EDITOR));
+});
+
+test('a hotel-only widget is not told a cheaper flight may exist', () => {
+  // The incomplete-search note was written for packages and shown on every
+  // product. On an Accommodation widget there is no flight, and saying so sent
+  // an agent looking for a flight fault on 19 hotels that had none.
+  assert.ok(/isPackageConfig\(state\.config\) \? 'flight' : 'rate'/.test(EDITOR));
+  assert.ok(!/so a cheaper flight may exist/.test(EDITOR), 'not unconditionally');
 });
