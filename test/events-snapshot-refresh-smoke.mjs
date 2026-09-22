@@ -62,9 +62,13 @@ console.log('the cron and the script build the same thing');
   ok('the script no longer assembles a snapshot object of its own',
     !/const snapshot = \{\s*\n\s*version: 1,/.test(script));
 
+  // The cron reaches the builder through the shared refresh rather than calling
+  // it itself, so the chain is what matters: cron -> refresh -> builder, with
+  // the staff button joining at the same point.
   const cron = readFileSync(new URL('../api/cron/refresh-events-snapshot.js', import.meta.url), 'utf8');
-  ok('the cron builds through the same builder',
-    /from '\.\.\/_lib\/events\/build-snapshot\.js'/.test(cron) && cron.includes('buildSnapshot('));
+  const refresh = readFileSync(new URL('../api/_lib/events/refresh-snapshot.js', import.meta.url), 'utf8');
+  ok('the cron reaches the builder through the shared refresh',
+    /refreshEventsSnapshot/.test(cron) && /from '\.\/build-snapshot\.js'/.test(refresh) && refresh.includes('buildSnapshot('));
 }
 
 // ── What it actually produced ────────────────────────────────────────────────
@@ -120,16 +124,41 @@ console.log('\nthe sheet reader refuses what it should');
     /Object\.create\(null\)/.test(sheet));
 }
 
-// ── The cron ─────────────────────────────────────────────────────────────────
-console.log('\nthe cron');
+// ── The refresh, the cron and the button ─────────────────────────────────────
+// The button exists because a weekly update should not wait six hours to show.
+// It has to run the SAME code as the cron, or "I pressed refresh" and "it
+// refreshed overnight" become two different things.
+console.log('\nthe refresh, and its two doors');
 {
+  const refresh = readFileSync(new URL('../api/_lib/events/refresh-snapshot.js', import.meta.url), 'utf8');
   const cron = readFileSync(new URL('../api/cron/refresh-events-snapshot.js', import.meta.url), 'utf8');
-  ok('it is behind CRON_SECRET like the others', /Bearer \$\{secret\}/.test(cron));
-  ok('a rebuild that collapses in size is not stored', /MIN_KEEP_RATIO/.test(cron) && /stored: false/.test(cron));
-  ok('it writes to one stable path, not a new file each run', /addRandomSuffix: false/.test(cron));
-  ok('it overwrites rather than failing on the second run', /allowOverwrite: true/.test(cron));
+  const admin = readFileSync(new URL('../api/admin/events-refresh.js', import.meta.url), 'utf8');
+
+  ok('a rebuild that collapses in size is not stored',
+    /MIN_KEEP_RATIO/.test(refresh) && /stored: false/.test(refresh));
+  ok('it writes to one stable path, not a new file each run', /addRandomSuffix: false/.test(refresh));
+  ok('it overwrites rather than failing on the second run', /allowOverwrite: true/.test(refresh));
   ok('it says plainly when a credential is missing',
-    /credentials are not set/.test(cron) && /BLOB_READ_WRITE_TOKEN is not set/.test(cron));
+    /credentials are not set/.test(refresh) && /BLOB_READ_WRITE_TOKEN is not set/.test(refresh));
+  ok('it never throws at its caller', !/throw /.test(refresh));
+
+  ok('the cron runs the shared refresh, not its own copy',
+    /refreshEventsSnapshot/.test(cron) && !/buildSnapshot\(/.test(cron));
+  ok('the cron is behind CRON_SECRET like the others', /Bearer \$\{secret\}/.test(cron));
+
+  ok('the button runs the same shared refresh',
+    /refreshEventsSnapshot/.test(admin) && !/buildSnapshot\(/.test(admin));
+  ok('the button is staff-only', /requireAdmin/.test(admin));
+  ok('the button is rate limited, so it cannot be held down', /applyRateLimit/.test(admin));
+  ok('reading the state does not rebuild anything',
+    /currentStoredSnapshot/.test(admin) && admin.indexOf('currentStoredSnapshot') < admin.indexOf('refreshEventsSnapshot('));
+  ok('only POST rebuilds', /req\.method === 'POST'/.test(admin) && /405/.test(admin));
+
+  const page = readFileSync(new URL('../public/admin-events.html', import.meta.url), 'utf8');
+  ok('the page says when no refresh has landed rather than looking fine',
+    /still reading the copy built into the platform/.test(page));
+  ok('the page reports the before and after counts', /previousEvents/.test(page));
+  ok('the page has no inline handlers', !/ on[a-z]+=/.test(page));
 }
 
 console.log('\n  note: the Google read and the blob write need credentials this');
