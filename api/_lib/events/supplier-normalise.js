@@ -60,6 +60,7 @@ import {
   CLUB_TOKENS,
 } from './supplier-taxonomy.js';
 import { aliasLookup, canonicalClubKey, splitClub } from './club-aliases.js';
+import { canonicalVenueKey } from './venue-aliases.js';
 
 // ── Limits ───────────────────────────────────────────────────────────────────
 // Bounds on untrusted input. Applied before any regex runs, so a hostile or
@@ -343,7 +344,13 @@ export function parseStart(raw) {
 export function venueKeyFor(name) {
   const clean = safeText(name, LIMITS.maxVenueLen);
   const compact = (s) => stripDiacritics(s).toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 80);
-  return compact(clean.replace(/\([^)]*\)/g, ' ')) || compact(clean);
+  const key = compact(clean.replace(/\([^)]*\)/g, ' ')) || compact(clean);
+  // Compacting handles the spellings that differ only in punctuation and
+  // accents. It cannot handle a ground the two suppliers call different things
+  // ("Cornellà-El Prat" and "RCDE Stadium") or one that has been renamed, so a
+  // decided table finishes the job. See venue-aliases.js for how each pair was
+  // settled, and for the six that look identical and are two real grounds.
+  return canonicalVenueKey(key);
 }
 
 // ── Team names ───────────────────────────────────────────────────────────────

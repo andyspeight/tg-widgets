@@ -172,6 +172,7 @@ export function buildEventIndexes(events) {
             home: 0,
             away: 0,
             categories: new Set(),
+            categoryCounts: new Map(),
             competitions: new Set(),
             homeVenues: new Map(),
             dates: [],
@@ -181,6 +182,9 @@ export function buildEventIndexes(events) {
         t.events++;
         bump(t.names, raw);
         t.categories.add(catSlug);
+        // How busy each sport is for this club, so the home ground can be the
+        // one they play their MAIN sport at. See the pick below.
+        bump(t.categoryCounts, catSlug);
         if (e.competition) {
           t.competitions.add(e.competition);
           const comp = competitions.get(e.competition);
@@ -190,8 +194,10 @@ export function buildEventIndexes(events) {
         if (side === 'homeTeam') {
           t.home++;
           if (e.venue.key) {
-            const hv = t.homeVenues.get(e.venue.key) || { name: e.venue.name, count: 0 };
+            const hv = t.homeVenues.get(e.venue.key) || { name: e.venue.name, count: 0, categories: new Map() };
             hv.count++;
+            if (!hv.categories) hv.categories = new Map();
+            bump(hv.categories, catSlug);
             t.homeVenues.set(e.venue.key, hv);
           }
         } else {
@@ -239,12 +245,33 @@ export function buildEventIndexes(events) {
       // Sporting CP to "Sporting Club Portugal (Lisbon)" mid-season. The other
       // spelling stays on as an alias, so search is unaffected.
       const name = pinnedClubName(t.key) || pickDisplayName(t.names);
-      // Their home ground is simply the venue they host at most often.
+      // Their home ground is the venue they host their MAIN sport at.
+      //
+      // It used to be simply the venue they host at most often, which is right
+      // for a club that plays one sport and wrong for the handful that do not.
+      // Bayern Munich hosted 19 basketball games at the SAP Garden against 17
+      // football matches at the Allianz Arena, so the Allianz lost and a
+      // football club's page named an indoor arena. Real Madrid, Porto and
+      // Barcelona sit in the same position.
+      //
+      // The main sport is whichever the club plays most across the season, home
+      // and away, which is a steadier measure than home fixtures alone: a cup
+      // run or an odd fixture list can swing a home count by a few games.
+      let primaryCategory = null;
+      let bestCat = -1;
+      for (const [cat, n] of t.categoryCounts) {
+        if (n > bestCat) { bestCat = n; primaryCategory = cat; }
+      }
       let homeVenueKey = null;
       let homeVenueName = null;
       let bestHome = -1;
       for (const [vk, hv] of t.homeVenues) {
-        if (hv.count > bestHome) { bestHome = hv.count; homeVenueKey = vk; homeVenueName = hv.name; }
+        // Count only the games of their main sport at this ground, falling back
+        // to every game when the club has no category at all.
+        const n = primaryCategory && hv.categories
+          ? (hv.categories.get(primaryCategory) || 0)
+          : hv.count;
+        if (n > bestHome) { bestHome = n; homeVenueKey = vk; homeVenueName = hv.name; }
       }
       return {
         key: t.key,

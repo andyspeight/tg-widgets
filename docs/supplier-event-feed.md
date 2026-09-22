@@ -553,8 +553,32 @@ x 8  Ghelamco Arena            == Planet Group arena
 ```
 
 They are not applied automatically because the same signal also catches genuine
-supplier errors, such as one Angels fixture listed at Dodger Stadium. Review the
-list, then add the confirmed pairs to a venue alias table.
+supplier errors, such as one Angels fixture listed at Dodger Stadium.
+
+**Reviewed and applied, 22 Sep 2026: `api/_lib/events/venue-aliases.js`.** What
+separates an alias from a supplier's mistake is WHO PLAYS THERE. A ground
+spelled two ways hosts the same club under both spellings; a misfiled fixture
+puts two different clubs' home grounds together. That splits all 21 candidates
+cleanly, with name overlap as a second signal for the one pair whose two clubs
+read differently (Balaídos). The name test must ignore generic words: "Centre"
+alone merges Centre Bell in Montreal with the Canadian Tire Centre in Ottawa.
+
+Fourteen applied, seven refused and written down with their reasons. One refusal
+is deliberate and not an error: Estadio Benito Villamarín and Estadio de La
+Cartuja pass both tests on 17 fixtures and are two real stadiums in Seville.
+Betis are playing at La Cartuja while Villamarín is rebuilt and one supplier
+still writes the old name. Folding them would tidy a page by claiming something
+untrue.
+
+**A club's home ground is the venue it hosts its MAIN SPORT at** (same date). It
+used to be simply the venue it hosted at most often, which is right for a club
+that plays one sport and wrong for the handful that do not: Bayern Munich hosted
+19 basketball games at the SAP Garden against 17 football matches at the Allianz
+Arena, so a football club's page named an indoor arena. Real Madrid showed the
+Movistar Arena for the same reason, and merging the two Bernabéu spellings fixed
+that one on its own. The main sport is whichever the club plays most across the
+season, home and away, which is steadier than home fixtures alone. Guarded by
+`npm run test:event-venue-aliases`.
 
 ## Contract
 

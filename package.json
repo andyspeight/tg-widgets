@@ -218,6 +218,7 @@
     "test:offer-import-merge": "node test/offer-import-merge-smoke.mjs",
     "test:clubpicker-scroll": "node test/clubpicker-scroll-to-fixtures-smoke.mjs",
     "test:events-refresh": "node test/events-snapshot-refresh-smoke.mjs",
+    "test:event-venue-aliases": "node test/event-venue-aliases-smoke.mjs",
     "test:event-club-aliases": "node test/event-club-aliases-smoke.mjs",
     "test:supplier-events": "node test/supplier-events-normalise-smoke.mjs",
     "build:events-snapshot": "node scripts/build-events-snapshot.mjs",
