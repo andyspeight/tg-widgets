@@ -36,6 +36,7 @@
  */
 
 import { readFileSync } from 'node:fs';
+import { SNAPSHOT_BLOB_PATH } from './_lib/events/build-snapshot.js';
 import { setCors, applyRateLimit } from './_auth.js';
 import { buildEventDeeplink, buildBookingOptions, readyBookingKinds, BOOKING_KINDS, DEEPLINK_STATUS_TEXT, SPEC_VERIFIED } from './_lib/events/event-deeplink.js';
 
@@ -181,11 +182,65 @@ function venueFacts() {
   return FACTS;
 }
 
-function snapshot() {
+/**
+ * The freshest snapshot we can get, as raw JSON.
+ *
+ * The supplier feed is a Google Sheet that is always being updated, so the
+ * committed file is a floor rather than the truth: it was right on the day it
+ * was built and drifts from then on. api/cron/refresh-events-snapshot.js
+ * rebuilds it from the sheet and stores it, and this prefers that.
+ *
+ * Any failure at all falls through to the committed file, because a stale
+ * catalogue is a bad day and an empty one is a broken site. That covers the
+ * refresh never having run, the blob being unreachable, a half-written body,
+ * and the whole thing being slower than a page should wait for.
+ */
+async function storedSnapshotUrl() {
+  // An explicit URL wins and costs nothing to resolve.
+  if (process.env.TG_EVENTS_SNAPSHOT_URL) return process.env.TG_EVENTS_SNAPSHOT_URL;
+  // Otherwise ask the blob store where it put the file the cron writes, so the
+  // refresh works with no setup at all. Requiring an env var here would mean a
+  // cron that runs, succeeds, and is read by nobody.
+  if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
+  try {
+    const { head } = await import('@vercel/blob');
+    const meta = await head(SNAPSHOT_BLOB_PATH);
+    return (meta && meta.url) || null;
+  } catch (err) {
+    // A 404 here is the ordinary state before the first refresh has run.
+    return null;
+  }
+}
+
+async function loadRawSnapshot() {
+  const stored = await storedSnapshotUrl();
+  if (stored) {
+    try {
+      const res = await fetch(stored, { signal: AbortSignal.timeout(5000) });
+      if (res.ok) {
+        const raw = await res.json();
+        if (raw && Array.isArray(raw.events) && raw.events.length) {
+          raw.loadedFrom = 'refresh';
+          return raw;
+        }
+        console.error('[api/events-feed] stored snapshot had no events; using the committed one');
+      } else {
+        console.error('[api/events-feed] stored snapshot HTTP', res.status, '; using the committed one');
+      }
+    } catch (err) {
+      console.error('[api/events-feed] stored snapshot unreachable:', err && err.message, '; using the committed one');
+    }
+  }
+  const url = new URL('./_data/events-snapshot.json', import.meta.url);
+  const raw = JSON.parse(readFileSync(url, 'utf8'));
+  raw.loadedFrom = 'committed';
+  return raw;
+}
+
+async function snapshot() {
   if (SNAP || SNAP_ERROR) return SNAP;
   try {
-    const url = new URL('./_data/events-snapshot.json', import.meta.url);
-    const raw = JSON.parse(readFileSync(url, 'utf8'));
+    const raw = await loadRawSnapshot();
     raw.byCompetition = new Map();
     raw.byTeam = new Map();
     raw.byVenue = new Map();
@@ -484,7 +539,7 @@ function matcher(term) {
 
 // ── Handler ──────────────────────────────────────────────────────────────────
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') { res.status(204).end(); return; }
   if (req.method !== 'GET') {
@@ -497,7 +552,7 @@ export default function handler(req, res) {
   if (!limited) return;
 
   try {
-    const snap = snapshot();
+    const snap = await snapshot();
     if (!snap) {
       res.setHeader('Cache-Control', 'no-store');
       res.status(503).json({ error: 'Events data unavailable' });

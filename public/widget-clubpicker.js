@@ -1184,12 +1184,37 @@
     if (close) close.addEventListener('click', function () { self._close(); });
   };
 
+  // Move to the fixtures panel after a real tap: focus for a keyboard or screen
+  // reader, and bring it into view for everybody else.
+  //
+  // It used to focus with preventScroll and stop there, which is right for a
+  // re-render and wrong for a tap. On a phone the badge grid can be a screenful
+  // on its own, so the panel opened below the fold and the visitor was left
+  // looking at the same grid, with no sign their tap had done anything. Reported
+  // by a client, 22 Sep 2026: "tapping the dots should take you straight down to
+  // the matches, so you don't have to scroll."
+  //
+  // Scrolling is allowed here for the same reason the focus move is: this runs
+  // only from a click or a dropdown change, never from render() or update(),
+  // which an editor calls on every keystroke.
   TGClubPickerWidget.prototype._focusPanel = function () {
     var self = this;
     setTimeout(function () {
       var panel = self.shadow.getElementById ? self.shadow.getElementById('tgcp-panel')
         : self.shadow.querySelector('#tgcp-panel');
-      if (panel && typeof panel.focus === 'function') panel.focus({ preventScroll: true });
+      if (!panel) return;
+      // Focus first and without its own scroll, so the two cannot fight.
+      if (typeof panel.focus === 'function') panel.focus({ preventScroll: true });
+      if (typeof panel.scrollIntoView !== 'function') return;
+      var reduced = false;
+      try {
+        reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      } catch (e) { /* no matchMedia, fall through to an instant jump */ }
+      try {
+        panel.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'nearest', inline: 'nearest' });
+      } catch (e) {
+        panel.scrollIntoView(); // older browsers take no options
+      }
     }, 0);
   };
 

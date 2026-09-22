@@ -59,6 +59,7 @@ import {
   SUPPLIERS,
   CLUB_TOKENS,
 } from './supplier-taxonomy.js';
+import { aliasLookup, canonicalClubKey, splitClub } from './club-aliases.js';
 
 // ── Limits ───────────────────────────────────────────────────────────────────
 // Bounds on untrusted input. Applied before any regex runs, so a hostile or
@@ -450,12 +451,28 @@ function resolveTeamAliases(events) {
     return cur;
   };
 
+  // The decided table runs after the prefix rule and on top of it. The prefix
+  // rule only sees a club whose two spellings nest ("Ipswich" / "Ipswich
+  // Town"); most of what a second supplier does is not nested at all, so
+  // "Sporting CP" and "Sporting Club Portugal" sat side by side in the club
+  // lists until a client counted 23 teams in an 18-team league. See
+  // club-aliases.js for how each pair was decided.
+  const decided = aliasLookup();
+
   const applied = new Map();
   for (const e of events) {
+    // A split comes first: one key can hold two real clubs in two countries,
+    // and folding spellings into it before separating them makes that worse.
     for (const field of ['homeTeamKey', 'awayTeamKey']) {
       const key = e[field];
       if (!key) continue;
-      const c = canonical(key);
+      const split = splitClub(e.competition, key);
+      if (split) { e[field] = split.key; applied.set(`${key}@${e.competition}`, split.key); }
+    }
+    for (const field of ['homeTeamKey', 'awayTeamKey']) {
+      const key = e[field];
+      if (!key) continue;
+      const c = canonicalClubKey(e.competition, canonical(key), decided);
       if (c !== key) { e[field] = c; applied.set(key, c); }
     }
   }

@@ -167,7 +167,8 @@
     {
       "path": "/api/cron/refresh-tti-offers",
       "schedule": "30 2 * * *"
-    }
+    },
+    { "schedule": "0 */6 * * *", "path": "/api/cron/refresh-events-snapshot" }
   ],
   "redirects": [
     {
