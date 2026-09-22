@@ -2786,3 +2786,51 @@ test('a search always carries a location, because Travelify refuses one without'
   // placeholder centre is not a licence to search nowhere in particular.
   assert.equal(buildAccommodationCriteria({ code: '19179004' }, search), null);
 });
+
+test('every hotel gets tested, not the first five over and over', () => {
+  // Andy, 22 Sep 2026: 20 hotels entered, 2 showing. The cache held FOUR,
+  // because rowsFrom ended `out.slice(0, MAX_CODES)` and the endpoint tested
+  // the first five rows on every press. Hotels 6 to 19 could not reach the
+  // cache at all from the editor, and nothing said so.
+  assert.ok(!/return out\.slice\(0, MAX_CODES\);/.test(TEST_API), 'the silent truncation is gone');
+  assert.ok(/const asked = rowsFrom\(body\);/.test(TEST_API));
+  assert.ok(/const rows = asked\.slice\(0, MAX_CODES\);/.test(TEST_API), 'the cap still applies');
+  assert.ok(/const untested = asked\.slice\(MAX_CODES\)\.map\(\(r\) => r\.code\);/.test(TEST_API));
+  assert.ok(/\.\.\.\(untested\.length \? \{ untested, askedFor: asked\.length \} : \{\}\)/.test(TEST_API),
+    'and the response names what it could not reach');
+
+  // The editor sends them all, five at a time, so that field stays empty.
+  assert.ok(/const TTI_BATCH = 5;/.test(EDITOR));
+  assert.ok(/for \(let i = 0; i < rows\.length; i \+= TTI_BATCH\) batches\.push/.test(EDITOR));
+  assert.ok(/function mergeTtiTest\(into, one\)/.test(EDITOR), 'and joins the answers into one run');
+  // A later batch failing must not throw away the ones that worked.
+  assert.ok(/stoppedAt = 'Stopped at hotel '/.test(EDITOR));
+  // 429 is the per-minute budget, not a failure.
+  assert.ok(/if \(one\.wait\) \{/.test(EDITOR));
+  assert.ok(/postTtiBatch\(batches\[b\], reset, true\)/.test(EDITOR), 'it waits and retries that batch');
+  // And the loud fallback if the server ever does report an untested code.
+  assert.ok(/not searched at all<\/strong>/.test(EDITOR));
+  assert.ok(/Array\.isArray\(d\.untested\) && d\.untested\.length/.test(EDITOR));
+});
+
+test('a filter that hides some of the cache says so, not just all of it', () => {
+  // The read-back check only spoke up when the widget could see NOTHING, so a
+  // cache holding four hotels and a widget showing two read as a clean
+  // success. The two it hid were £2,038 and £2,074 against a £2,000 ceiling
+  // nobody had set (Andy, 22 Sep 2026).
+  assert.ok(/visible < pooled/.test(EDITOR), 'a partial loss is still a loss');
+  assert.ok(/but your '\n            \+ 'widget is showing ' \+ visible/.test(EDITOR));
+  assert.ok(/Check the maximum price first/.test(EDITOR), 'and it names the usual culprit');
+
+  // No ceiling out of the box. Seven nights for two in Dubai clears £2,000
+  // before you start, and this widget exists to show the hotels the client
+  // chose rather than to filter them.
+  assert.ok(/budgetMax: 0,/.test(EDITOR));
+  assert.ok(!/budgetMin: 0, budgetMax: 2000/.test(EDITOR));
+  // A saved 0 has to survive a reload, or the next edit writes the ceiling back.
+  assert.ok(/\$\('cfgBudgetMax'\)\.value = c\.budgetMax != null \? c\.budgetMax : 0;/.test(EDITOR));
+  // And the label has to say what it filters: an accommodation offer carries no
+  // per-person price, so cached-offers compares the whole-room total.
+  assert.ok(!/Max budget \(£pp\)/.test(EDITOR), 'it is not per person on a hotel');
+  assert.ok(/whole stay for the room, not per person/.test(EDITOR));
+});

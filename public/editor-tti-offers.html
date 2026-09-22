@@ -1044,12 +1044,14 @@
               </div>
               <div class="field-row">
                 <div class="field">
-                  <label class="field-label" for="cfgBudgetMin">Min budget (£pp)</label>
+                  <label class="field-label" for="cfgBudgetMin">Min price</label>
                   <input id="cfgBudgetMin" type="number" min="0" value="0" />
                 </div>
                 <div class="field">
-                  <label class="field-label" for="cfgBudgetMax">Max budget (£pp)</label>
-                  <input id="cfgBudgetMax" type="number" min="0" value="2000" />
+                  <label class="field-label" for="cfgBudgetMax">Max price</label>
+                  <input id="cfgBudgetMax" type="number" min="0" value="0" />
+                  <div class="field-help">0 for no limit. On a hotel this is the
+                    whole stay for the room, not per person.</div>
                 </div>
               </div>
               <div class="field-row" id="durationRow">
@@ -2067,7 +2069,12 @@
         ttiCodes: [],
         destinations: [], origins: [],
         boardBases: [], cabinClasses: [],
-        ratingMin: 0, budgetMin: 0, budgetMax: 2000,
+        ratingMin: 0, budgetMin: 0,
+        // NO CEILING BY DEFAULT. This shipped at 2000, and on a widget whose
+        // whole point is "show the hotels I chose" a default filter silently
+        // hides them: seven nights for two in Dubai, Doha or Singapore is over
+        // it before you start (Andy, 22 Sep 2026). 0 means no limit.
+        budgetMax: 0,
         durationMin: 0, durationMax: 14,
         DatesMin: 7, DatesMax: 180,
         maxOffers: 100, sort: 'price:asc',
@@ -2645,6 +2652,17 @@
             + 'widget can see none of them.</strong> The filters on this widget are excluding it'
             + (named.length ? ': ' + esc(named.join(', ')) : '')
             + '. Loosen or clear those and the offer will appear.</span>';
+      } else if (Number.isFinite(visible) && visible < pooled) {
+        // A PARTIAL LOSS IS STILL A LOSS. This only ever spoke up when the
+        // widget could see NOTHING, so a cache holding four hotels and a widget
+        // showing two read as a clean success (Andy, 22 Sep 2026 — the two it
+        // hid were £2,038 and £2,074 against the default £2,000 budget).
+        msg = '<span style="color:var(--tgse-warning)"><strong>' + pooled + ' in your cache, but your '
+            + 'widget is showing ' + visible + '.</strong> The other ' + (pooled - visible)
+            + ' priced fine and a filter on this widget is hiding '
+            + (pooled - visible === 1 ? 'it' : 'them')
+            + (named.length ? ': ' + esc(named.join(', ')) : '')
+            + '. Check the maximum price first: it is the usual one.</span>';
       } else {
         msg = '<strong>' + visible + (visible === 1 ? ' offer' : ' offers')
             + ' your widget can see.</strong> The preview below is drawing from exactly this.';
@@ -2659,6 +2677,76 @@
        empty widget tomorrow morning. The endpoint caps how many codes one
        click can test and is rate limited: it is the only place in the product
        where an agent action spends live Travelify searches. */
+    /* ONE CLICK TESTS EVERY HOTEL, FIVE AT A TIME.
+     *
+     * The endpoint tests five codes per call, because each one is a live
+     * Travelify search against a 42 second deadline. It used to take the FIRST
+     * five rows and say nothing about the rest, so a widget with 19 hotels
+     * tested the same five on every press and hotels 6 to 19 could never reach
+     * the cache at all (Andy, 22 Sep 2026: 20 hotels, 2 showing, 4 cached).
+     * The cap is right. Taking it as the whole job was not. */
+    const TTI_BATCH = 5;
+
+    /* Responses joined so the panel reads as one run. Sums what counts, keeps
+       the first of what is the same on every call, and concatenates the rows. */
+    function mergeTtiTest(into, one) {
+      if (!into) return one;
+      const sum = (a, b) => (Number(a) || 0) + (Number(b) || 0);
+      return {
+        ...into, ...one,
+        found: sum(into.found, one.found),
+        cached: sum(into.cached, one.cached),
+        searches: sum(into.searches, one.searches),
+        elapsedMs: sum(into.elapsedMs, one.elapsedMs),
+        ...(into.cleared || one.cleared ? { cleared: sum(into.cleared, one.cleared) } : {}),
+        ...(into.dropped || one.dropped ? { dropped: sum(into.dropped, one.dropped) } : {}),
+        droppedNote: into.droppedNote || one.droppedNote,
+        results: (into.results || []).concat(one.results || []),
+        // The exchange is a file to send to somebody, and one search is enough
+        // to show the shape. Keep the first that carried one.
+        raw: into.raw || one.raw,
+        shape: into.shape || one.shape,
+        searchedAs: into.searchedAs || one.searchedAs,
+      };
+    }
+
+    /* One call. Owns its own deadline: a live search can be slow and a platform
+       timeout can return nothing at all, so the UI never waits on a response
+       that is not coming. A 429 is the per-minute budget, not a failure, so it
+       waits the time the server names and tries that batch once more. */
+    async function postTtiBatch(rows, reset, retried) {
+      const ctl = new AbortController();
+      const giveUp = setTimeout(() => ctl.abort(), 45000);
+      try {
+        const res = await fetch('/api/tti-test', {
+          method: 'POST',
+          headers: window.tgse.authHeaders(),
+          body: JSON.stringify({
+            rows,
+            widgetId: state.widgetId || '',
+            ...(reset ? { reset: true } : {}),
+            type: state.config.type,
+            checkinDate: state.config.checkinDate || '',
+            nights: state.config.nights,
+            DatesMin: state.config.DatesMin,
+            origins: state.config.origins || [],
+            cabinClass: (state.config.cabinClasses || [])[0],
+          }),
+          signal: ctl.signal,
+        });
+        if (res.status === 401) return { auth: true };
+        const d = await res.json().catch(() => ({}));
+        if (res.status === 429 && !retried) {
+          const wait = Math.min(75, Math.max(5, Number(d && d.retryAfter) || 20));
+          return { wait, d };
+        }
+        if (!res.ok || (d && d.error)) return { error: (d && d.error) || 'The test could not run.' };
+        return { data: d };
+      } finally {
+        clearTimeout(giveUp);
+      }
+    }
+
     async function runTtiTest(reset) {
       // Busy on the button that was clicked, but BOTH go dead for the duration:
       // two live runs at once would double the Travelify searches and race each
@@ -2676,44 +2764,47 @@
       const label = btn.textContent;
       btn.disabled = true;
       if (other) other.disabled = true;
-      btn.textContent = 'Testing\u2026';
       out.hidden = false;
-      out.innerHTML = 'Searching Travelify for each hotel\u2026';
-      // Whatever the server does, the button comes back. A live search can be
-      // slow and a platform timeout can return nothing at all, so the UI owns
-      // its own deadline rather than trusting the response to arrive.
-      const ctl = new AbortController();
-      const giveUp = setTimeout(() => ctl.abort(), 45000);
+
+      // Every hotel, in batches the endpoint can finish inside its deadline.
+      const batches = [];
+      for (let i = 0; i < rows.length; i += TTI_BATCH) batches.push(rows.slice(i, i + TTI_BATCH));
+      const many = batches.length > 1;
+      let d = null;
+      let stoppedAt = '';
       try {
-        const res = await fetch('/api/tti-test', {
-          method: 'POST',
-          headers: window.tgse.authHeaders(),
-          // Origins ride along: a package search cannot be built without a
-          // departure airport, and the endpoint says so by name rather than
-          // pricing the hotel on its own.
-          body: JSON.stringify({
-            rows,
-            // Which widget this is, so the search runs under its owner's
-            // Travelify account rather than the signed-in session's.
-            widgetId: state.widgetId || '',
-            ...(reset ? { reset: true } : {}),
-            type: state.config.type,
-            // The dates: a fixed departure for the whole widget, and the
-            // rolling window for anything without one.
-            checkinDate: state.config.checkinDate || '',
-            nights: state.config.nights,
-            DatesMin: state.config.DatesMin,
-            origins: state.config.origins || [],
-            cabinClass: (state.config.cabinClasses || [])[0],
-          }),
-          signal: ctl.signal,
-        });
-        if (res.status === 401) { window.tgse.showLogin(); return; }
-        const d = await res.json();
-        if (!res.ok || d.error) {
-          out.innerHTML = '<span style="color:var(--tgse-danger)">' + esc(d.error || 'The test could not run.') + '</span>';
-          return;
+        for (let b = 0; b < batches.length; b++) {
+          const from = b * TTI_BATCH + 1;
+          const to = Math.min(rows.length, (b + 1) * TTI_BATCH);
+          btn.textContent = many ? 'Testing ' + (b + 1) + '/' + batches.length + '\u2026' : 'Testing\u2026';
+          out.innerHTML = many
+            ? 'Searching Travelify. Hotel ' + from + ' to ' + to + ' of ' + rows.length + '\u2026'
+            : 'Searching Travelify for each hotel\u2026';
+
+          let one = await postTtiBatch(batches[b], reset);
+          if (one.wait) {
+            out.innerHTML = 'Travelify limits how many searches one account can run at once. '
+                          + 'Waiting ' + one.wait + ' seconds, then carrying on with hotel '
+                          + from + ' to ' + to + '\u2026';
+            await new Promise((r) => setTimeout(r, one.wait * 1000));
+            one = await postTtiBatch(batches[b], reset, true);
+          }
+          if (one.auth) { window.tgse.showLogin(); return; }
+          if (one.error) {
+            // A later batch failing does not throw away the ones that worked.
+            // Half the hotels priced and a line saying where it stopped beats
+            // an error message and an empty panel.
+            if (!d) {
+              out.innerHTML = '<span style="color:var(--tgse-danger)">' + esc(one.error) + '</span>';
+              return;
+            }
+            stoppedAt = 'Stopped at hotel ' + from + ' of ' + rows.length + ': ' + one.error
+                      + ' The hotels above were tested. Press Test again to carry on.';
+            break;
+          }
+          d = mergeTtiTest(d, one.data);
         }
+        if (!d) return;
         const dot = { found: 'tti-ok', 'not-in-results': 'tti-warn', 'no-price': 'tti-warn',
                       incomplete: 'tti-warn', skipped: 'tti-warn', failed: 'tti-err' };
         const money = (n, cur) => (cur === 'EUR' ? '\u20ac' : cur === 'USD' ? '$' : '\u00a3') + Math.round(n);
@@ -2862,6 +2953,19 @@
                     : '.')
                 + '</div>';
         }
+        if (stoppedAt) {
+          head += '<div style="color:var(--tgse-danger);margin-bottom:6px">' + esc(stoppedAt) + '</div>';
+        }
+        // The endpoint tests five at a time and names anything it could not
+        // reach. The editor batches so this should never fire, which is exactly
+        // why it is drawn loudly if it ever does.
+        if (Array.isArray(d.untested) && d.untested.length) {
+          head += '<div style="color:var(--tgse-danger);margin-bottom:6px"><strong>'
+                + d.untested.length + ' hotel' + (d.untested.length === 1 ? ' was' : 's were')
+                + ' not searched at all</strong> (' + esc(d.untested.slice(0, 8).join(', '))
+                + (d.untested.length > 8 ? ' and more' : '') + '). They will show nothing '
+                + 'until they are.</div>';
+        }
         if (d.cleared) {
           head += '<div style="color:var(--tgse-ink-3);margin-bottom:6px">Cleared the cache and the '
                 + 'remembered locations for ' + d.cleared
@@ -2936,7 +3040,6 @@
           : 'Test failed: ' + (err && err.message ? err.message : 'unknown error');
         out.innerHTML = '<span style="color:var(--tgse-danger)">' + esc(why) + '</span>';
       } finally {
-        clearTimeout(giveUp);
         btn.disabled = false;
         if (other) other.disabled = false;
         btn.textContent = label;
@@ -3136,7 +3239,7 @@
       $('cfgCabin').value = (c.cabinClasses && c.cabinClasses[0]) || '';
       $('cfgRating').value = c.ratingMin || 0;
       $('cfgBudgetMin').value = c.budgetMin || 0;
-      $('cfgBudgetMax').value = c.budgetMax || 2000;
+      $('cfgBudgetMax').value = c.budgetMax != null ? c.budgetMax : 0;
       $('cfgDurationMin').value = c.durationMin || 0;
       $('cfgDurationMax').value = c.durationMax || 14;
       $('cfgDatesMin').value = c.DatesMin || 7;
