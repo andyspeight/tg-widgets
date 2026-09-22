@@ -85,8 +85,11 @@ console.log('\nClub Picker: a tap goes to the matches\n');
   ok('the tap scrolled to the panel', scrolls.length === 1, JSON.stringify(scrolls));
   ok('it scrolled the panel itself, not the page top',
     scrolls.length === 1 && scrolls[0].id === 'tgcp-panel', JSON.stringify(scrolls));
-  ok('it asks for the nearest edge, so it does not overshoot',
-    scrolls.length === 1 && scrolls[0].opts && scrolls[0].opts.block === 'nearest',
+  // 'start', not 'nearest'. 'nearest' scrolls the least it can, and for a panel
+  // taller than the screen it counts any sliver as in view and does nothing,
+  // which is exactly the phone case this was meant to fix.
+  ok('it puts the panel heading at the top, so the first fixtures show',
+    scrolls.length === 1 && scrolls[0].opts && scrolls[0].opts.block === 'start',
     JSON.stringify(scrolls[0] && scrolls[0].opts));
 }
 
@@ -126,6 +129,30 @@ console.log('\nClub Picker: a tap goes to the matches\n');
   } else {
     ok('choosing a club from the dropdown scrolls too (no select in this layout)', true);
   }
+}
+
+// ── A panel already in view ──────────────────────────────────────────────────
+// On a desktop the fixtures usually open in full view under the grid. Yanking
+// the page then is its own annoyance, so the scroll has to measure first.
+{
+  const { window, scrolls, w } = await build();
+  // Pretend the panel is sitting comfortably on screen already.
+  const panel = w.shadow.getElementById
+    ? w.shadow.getElementById('tgcp-panel') : w.shadow.querySelector('#tgcp-panel');
+  window.Element.prototype.getBoundingClientRect = function () {
+    return { top: 40, bottom: 600, left: 0, right: 900, width: 900, height: 560, x: 0, y: 40 };
+  };
+  w.shadow.querySelector('.tgcp-tile[data-key="arsenal"]').dispatchEvent(new window.Event('click'));
+  await sleep(20);
+  ok('a panel already on screen is left where it is', scrolls.length === 0, JSON.stringify(scrolls));
+
+  // And one pushed below the fold still gets the scroll.
+  window.Element.prototype.getBoundingClientRect = function () {
+    return { top: 900, bottom: 1600, left: 0, right: 900, width: 900, height: 700, x: 0, y: 900 };
+  };
+  w.shadow.querySelector('.tgcp-tile[data-key="chelsea"]').dispatchEvent(new window.Event('click'));
+  await sleep(20);
+  ok('a panel below the fold is scrolled to', scrolls.length === 1, JSON.stringify(scrolls));
 }
 
 // ── Closing ──────────────────────────────────────────────────────────────────

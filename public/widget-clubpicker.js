@@ -1197,6 +1197,20 @@
   // Scrolling is allowed here for the same reason the focus move is: this runs
   // only from a click or a dropdown change, never from render() or update(),
   // which an editor calls on every keystroke.
+  //
+  // block:'start', not 'nearest'. 'nearest' scrolls the least it can, and for a
+  // panel taller than the screen it counts any sliver as "in view" and does
+  // nothing at all. On a phone the panel's heading sits right on the fold under
+  // the badge grid, which is exactly that case: the tap scrolled by nothing and
+  // the visitor still saw no fixtures (Tailor Events, 22 Sep 2026, "on small
+  // screens you don't see anything"). 'start' puts the panel heading at the top
+  // with the first fixtures under it.
+  //
+  // But only when it is actually needed. On a desktop the panel is usually in
+  // full view beside or below the grid already, and yanking the page then is
+  // its own annoyance. So measure first and leave a settled page alone.
+  var ENOUGH_VISIBLE = 160;   // px of panel on screen that counts as "they can see it"
+
   TGClubPickerWidget.prototype._focusPanel = function () {
     var self = this;
     setTimeout(function () {
@@ -1206,12 +1220,26 @@
       // Focus first and without its own scroll, so the two cannot fight.
       if (typeof panel.focus === 'function') panel.focus({ preventScroll: true });
       if (typeof panel.scrollIntoView !== 'function') return;
+
+      var needed = true;
+      try {
+        if (typeof panel.getBoundingClientRect === 'function') {
+          var r = panel.getBoundingClientRect();
+          var h = window.innerHeight || 0;
+          // How much of the panel is on screen right now.
+          var shown = Math.min(r.bottom, h) - Math.max(r.top, 0);
+          // Its top being above the fold means they are already reading it.
+          needed = !(r.top >= 0 && shown >= Math.min(ENOUGH_VISIBLE, r.height || ENOUGH_VISIBLE));
+        }
+      } catch (e) { /* no layout to measure, so scroll and be sure */ }
+      if (!needed) return;
+
       var reduced = false;
       try {
         reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
       } catch (e) { /* no matchMedia, fall through to an instant jump */ }
       try {
-        panel.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'nearest', inline: 'nearest' });
+        panel.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start', inline: 'nearest' });
       } catch (e) {
         panel.scrollIntoView(); // older browsers take no options
       }
