@@ -38,6 +38,14 @@
  *     the VISITOR's timezone, so this booking's same-day outbound wore a "+1"
  *     for anyone in Sydney; it compares calendar dates now, and the PDF has
  *     the marker too. Guarded by npm run test:booking-dates-tz.
+ *
+ * v1.14.1 (22 Sep 2026, Exclusively Travel ET122406):
+ *   - A voucher the payment plan has already taken off is no longer taken off
+ *     twice. Travelify sometimes sends depositOption NET of the voucher, and
+ *     voucher credit settles the plan's entries, so ET122406 showed "Amount
+ *     payable now £1,480.80" on a card that said the remaining £1,550.80 was
+ *     due. The Pay balance button read the same low figure. The schedule is now
+ *     credited only with the part of the voucher it is actually short by.
  *   - A discount voucher counts against the balance, like a gift voucher.
  *     ET122149 used SUNSHINE30 (-£30, isGift false) and read as £30 still to
  *     pay against Travelify's zero, because our total is the item prices
@@ -256,7 +264,7 @@
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
   const API_AMEND = (typeof window !== 'undefined' && window.__TG_AMEND_API__) || (API_BASE + '/api/amend-order');
   const AMEND_MAX = 1000; // matches the server cap in /api/amend-order
-  const VERSION = '1.14.0';
+  const VERSION = '1.14.1';
 
   // ── Payment deep link ──
   // The balance reminder email links to the client's booking page with
@@ -4320,8 +4328,8 @@
     const status = (totalM === 0 && !applied) ? 'none' : (balanceM === 0 ? 'settled' : (applied ? 'partly' : 'open'));
 
     // The payment schedule: the deposit initialAmount (due at once) plus every
-    // breakdown instalment, earliest first. Payments AND voucher credit settle
-    // the earliest entries first; what is left is what we show and charge.
+    // breakdown instalment, earliest first. Payments settle the earliest entries
+    // first; what is left is what we show and charge.
     const sched = (inp.schedule && typeof inp.schedule === 'object') ? inp.schedule : null;
     const entries = [];
     if (sched) {
@@ -4339,7 +4347,20 @@
       entries.sort((a, b) => a.due - b.due);
     }
     const hasSchedule = entries.length > 0;
-    let left = paidM + creditM;
+
+    // Voucher credit settles the schedule too, but ONLY the part of it the plan
+    // has not already taken off (22 Sep 2026, Exclusively Travel ET122406).
+    // Travelify sends that booking's plan NET of its £70 discount: a £405.20
+    // deposit plus one £1,550.80 instalment, which is £1,956.00 against a
+    // £2,026.00 holiday. Settling that plan with the £70 a second time made
+    // "Amount payable now" £1,480.80 on a card that said, two lines above, that
+    // the remaining £1,550.80 was due. A plan that still carries the full cost
+    // is credited exactly as before. What the plan is short by is the measure;
+    // payable is capped at the balance either way, so this can only ever correct
+    // an undercharge.
+    const scheduleTotalM = entries.reduce((sum, e) => sum + e.amountM, 0);
+    const creditInScheduleM = hasSchedule ? Math.min(creditM, Math.max(0, totalM - scheduleTotalM)) : 0;
+    let left = paidM + (creditM - creditInScheduleM);
     let outstandingM = 0;
     let dueNowM = 0;
     let firstFuture = null;

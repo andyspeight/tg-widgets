@@ -197,7 +197,18 @@ Travelify and read as £30 still to pay on the customer's page, because our
 total is the item prices summed. Both kinds are credit now. The same sums drive
 the Pay balance button, so this was not only a wrong number on a page, it was
 about to take £30 Travelify does not think it is owed.
-`TG_DEDUCT_NON_GIFT_VOUCHERS=0` is the kill switch. Guarded by
+`TG_DEDUCT_NON_GIFT_VOUCHERS=0` is the kill switch.
+
+**And a voucher the payment plan has already taken off must not come off
+twice** (22 Sep 2026, ET122406). Travelify sometimes sends `depositOption` NET
+of the voucher: that booking's plan is a £405.20 deposit plus one £1,550.80
+instalment, £1,956.00 against a £2,026.00 holiday, the £70 discount already
+gone. Voucher credit settles the plan's entries, so crediting it again put
+"Amount payable now" at £1,480.80 on a card that said two lines above that the
+remaining £1,550.80 was due, and the Pay balance button would have taken the
+lower figure and left the customer £70 short. Measure what the plan is short by
+(`total - scheduleTotal`) and credit it only with the remainder. A plan that
+still carries the full holiday cost is credited exactly as before. Guarded by
 `npm run test:order-money`.
 
 **What the customer booked is not the same as what the menu offered** (21 Sep
