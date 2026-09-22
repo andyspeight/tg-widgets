@@ -130,7 +130,12 @@ function rowsFrom(body) {
   for (const raw of (Array.isArray(body.rows) ? body.rows : [])) {
     if (raw && typeof raw === 'object') add(raw);
   }
-  return out.slice(0, MAX_CODES);
+  // NOT TRUNCATED HERE. This used to end `out.slice(0, MAX_CODES)`, which took
+  // the FIRST five rows and said nothing about the rest — so a widget with 19
+  // hotels tested the same five on every press and hotels 6 to 19 could never
+  // be cached at all (Andy, 22 Sep 2026: 20 hotels, 4 in the cache). The cap is
+  // real and it protects the deadline, but the caller has to know it applied.
+  return out;
 }
 
 export default async function handler(req, res) {
@@ -157,8 +162,13 @@ export default async function handler(req, res) {
   }
 
   const body = req.body || {};
-  const rows = rowsFrom(body);
-  if (!rows.length) return res.status(400).json({ error: 'No properties to test.' });
+  const asked = rowsFrom(body);
+  if (!asked.length) return res.status(400).json({ error: 'No properties to test.' });
+  // One click is one batch. The editor sends the rest in further calls, and the
+  // response names what this call did not reach so a caller that does not batch
+  // still cannot mistake five tested hotels for all of them.
+  const rows = asked.slice(0, MAX_CODES);
+  const untested = asked.slice(MAX_CODES).map((r) => r.code);
   // Start from nothing for these hotels, on this account.
   //
   // Re-testing already replaces the offers key, so that half is automatic. What
@@ -677,6 +687,9 @@ export default async function handler(req, res) {
     cached: results.filter((r) => r && r.cached).length,
     searches: jobs.length + locateSearches,
     ...(reset ? { cleared: rows.length } : {}),
+    // What this call could not reach. Always present when it applies, even
+    // though the editor batches: silence here is how 14 hotels went missing.
+    ...(untested.length ? { untested, askedFor: asked.length } : {}),
     ...(isDp ? { airports: useOrigins } : {}),
     ...(dropped ? {
       dropped,
