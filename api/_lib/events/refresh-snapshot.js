@@ -22,12 +22,29 @@ import { buildSnapshot, SNAPSHOT_BLOB_PATH } from './build-snapshot.js';
  */
 const MIN_KEEP_RATIO = 0.5;
 
+/**
+ * The PUBLIC blob store's token.
+ *
+ * The project has two stores: tg-widgets-public and tg-widgets-blob. The
+ * default BLOB_READ_WRITE_TOKEN points at the PRIVATE one, which rejects an
+ * access:'public' write with "Cannot use public access on a private store".
+ * The offer photo and logo uploads already hit this and already resolve it the
+ * same way, so the snapshot does too rather than inventing a third answer.
+ *
+ * It has to be the public store: the feed reads the snapshot back over plain
+ * HTTP on a cold start, with no token to hand.
+ */
+function blobToken() {
+  return process.env.TG_Blob_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN || '';
+}
+
 /** What is stored right now, without rebuilding anything. */
 export async function currentStoredSnapshot() {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
+  const token = blobToken();
+  if (!token) return null;
   try {
     const { head } = await import('@vercel/blob');
-    const meta = await head(SNAPSHOT_BLOB_PATH);
+    const meta = await head(SNAPSHOT_BLOB_PATH, { token });
     if (!meta || !meta.url) return null;
     const res = await fetch(meta.url, { signal: AbortSignal.timeout(10000) });
     if (!res.ok) return null;
@@ -58,7 +75,7 @@ export async function refreshEventsSnapshot() {
   const fail = (error, extra = {}) => ({ ok: false, stored: false, error, ms: Date.now() - started, ...extra });
 
   if (!sheetConfigured()) return fail('Google service account credentials are not set.');
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return fail('BLOB_READ_WRITE_TOKEN is not set, so there is nowhere to put the snapshot.');
+  if (!blobToken()) return fail('No Blob read-write token is set, so there is nowhere to put the snapshot.');
 
   let previous = null;
   try {
@@ -93,6 +110,7 @@ export async function refreshEventsSnapshot() {
       addRandomSuffix: false,    // one stable path the feed can find without being told
       allowOverwrite: true,
       cacheControlMaxAge: 300,
+      token: blobToken(),        // the PUBLIC store, see above
     });
 
     return {

@@ -139,7 +139,19 @@ console.log('\nthe refresh, and its two doors');
   ok('it writes to one stable path, not a new file each run', /addRandomSuffix: false/.test(refresh));
   ok('it overwrites rather than failing on the second run', /allowOverwrite: true/.test(refresh));
   ok('it says plainly when a credential is missing',
-    /credentials are not set/.test(refresh) && /BLOB_READ_WRITE_TOKEN is not set/.test(refresh));
+    /credentials are not set/.test(refresh) && /No Blob read-write token is set/.test(refresh));
+
+  // The project has two blob stores and the default token is the PRIVATE one,
+  // which refuses a public write. The photo and logo uploads were both bitten
+  // by this before; this keeps the snapshot on the public store, which it has
+  // to be, because the feed reads it back with no token on a cold start.
+  const feed = readFileSync(new URL('../api/events-feed.js', import.meta.url), 'utf8');
+  ok('the snapshot is written to the public store, not the private default',
+    /TG_Blob_READ_WRITE_TOKEN/.test(refresh));
+  ok('the write passes that token rather than relying on the default',
+    /token: blobToken\(\)/.test(refresh));
+  ok('reading it back looks in the same store',
+    /TG_Blob_READ_WRITE_TOKEN/.test(feed) && /head\(SNAPSHOT_BLOB_PATH, \{ token \}\)/.test(feed));
   ok('it never throws at its caller', !/throw /.test(refresh));
 
   ok('the cron runs the shared refresh, not its own copy',

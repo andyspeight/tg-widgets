@@ -201,10 +201,13 @@ async function storedSnapshotUrl() {
   // Otherwise ask the blob store where it put the file the cron writes, so the
   // refresh works with no setup at all. Requiring an env var here would mean a
   // cron that runs, succeeds, and is read by nobody.
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
+  // The PUBLIC store, not the project default: that one is private and the
+  // feed reads this back over plain HTTP with no token to hand.
+  const token = process.env.TG_Blob_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) return null;
   try {
     const { head } = await import('@vercel/blob');
-    const meta = await head(SNAPSHOT_BLOB_PATH);
+    const meta = await head(SNAPSHOT_BLOB_PATH, { token });
     return (meta && meta.url) || null;
   } catch (err) {
     // A 404 here is the ordinary state before the first refresh has run.
