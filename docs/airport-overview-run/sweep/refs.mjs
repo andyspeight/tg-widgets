@@ -12,7 +12,7 @@ import fs from 'node:fs';
 
 const SNAPSHOT = process.env.SWEEP_SNAPSHOT ||
   '/tmp/claude-0/-home-user-tg-widgets/aa74082d-0375-5ea9-97e1-bfee8cc3073d/scratchpad/sweep/snapshot-0923.json';
-const UA = 'tg-widgets airport verification sweep (andy.speight@agendas.group)';
+const UA = 'tg-widgets-airport-sweep/1.0 (https://widgets.travelify.io; Travelgenix content verification, low volume)';
 const [code, filter] = [String(process.argv[2] || '').toUpperCase(), process.argv[3]];
 const rec = JSON.parse(fs.readFileSync(SNAPSHOT, 'utf8')).records.find(r => r.cellValuesByFieldId.fldcS9uu4NWMVaIVP === code);
 if (!rec || !rec.cellValuesByFieldId.fldRqtt44nsacJCwq) { console.error(code + ': no Wikipedia URL'); process.exit(1); }

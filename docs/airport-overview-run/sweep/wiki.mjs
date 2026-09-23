@@ -23,7 +23,7 @@ const EVIDENCE = process.env.SWEEP_EVIDENCE ||
   '/tmp/claude-0/-home-user-tg-widgets/aa74082d-0375-5ea9-97e1-bfee8cc3073d/scratchpad/sweep/evidence';
 const SNAPSHOT = process.env.SWEEP_SNAPSHOT ||
   '/tmp/claude-0/-home-user-tg-widgets/aa74082d-0375-5ea9-97e1-bfee8cc3073d/scratchpad/sweep/snapshot-0923.json';
-const UA = 'tg-widgets airport verification sweep (andy.speight@agendas.group)';
+const UA = 'tg-widgets-airport-sweep/1.0 (https://widgets.travelify.io; Travelgenix content verification, low volume)';
 
 const snap = JSON.parse(fs.readFileSync(SNAPSHOT, 'utf8')).records;
 const archive = new Map();

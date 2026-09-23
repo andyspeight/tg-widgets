@@ -6,7 +6,7 @@ const SP='/tmp/claude-0/-home-user-tg-widgets/aa74082d-0375-5ea9-97e1-bfee8cc307
 const DONE = new Set(JSON.parse(fs.readFileSync(SP+'/done.json','utf8')));
 const left = JSON.parse(fs.readFileSync(SP+'/blank-overview.json','utf8'))
   .filter(r => !r.wiki && !DONE.has(r.id));
-const UA='tg-widgets destination content (andy.speight@agendas.group)';
+const UA='tg-widgets-destination-content/1.0 (https://widgets.travelify.io; Travelgenix content verification, low volume)';
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 async function search(q){
