@@ -1,0 +1,357 @@
+{
+ "iata": "SYX",
+ "id": "recIvRdJYle3nSmrs",
+ "name": "Sanya Phoenix International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Sanya_Phoenix_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Sanya on Hainan, China's tropical beach destination, about 15 km north west of the city. It is the twenty fourth busiest in the country and second on the island behind Haikou.\n\nIt is built for size. The runway is around 3,400 metres by 60 metres and takes a fully loaded 747 or A340, on a site of close to ten thousand acres.\n\nHigh speed rail sits right next door. Sanya Phoenix Airport station on the Hainan Western Ring line opened in December 2015 and connects to Sanya Railway Station on the Eastern Ring line 10 km away, putting both coasts of the island within easy reach without a car.\n\nThe Russian market is the one to watch here. This was the first airport in Hainan to take a transcontinental flight, when Transaero flew non-stop from Moscow in 2007, and since 2017 IrAero, Alrosa and Azur Air have all flown in from Russian cities.",
+ "after": "The airport for Sanya on Hainan, about 15 km north west of the city. In 2025 it was the 24th busiest in China and second on the island behind Haikou.\n\nThe airport is built for size: the runway is around 3,400 metres and takes a fully loaded 747 and other large aircraft.\n\nHigh speed rail sits right next door. Sanya Phoenix Airport station on the Hainan Western Ring line connects to Sanya Railway Station on the Eastern Ring line, putting both coasts of the island within easy reach without a car.\n\nRussia is the market to watch here: the airport lists routes to Moscow, Novosibirsk, Irkutsk and Vladivostok, among other Russian cities.",
+ "claims": [
+  {
+   "claim": "the airport for Sanya on Hainan",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Sanya on Hainan",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-09",
+     "quote": "is an international airport serving the city of Sanya in South Central China's Hainan province."
+    },
+    {
+     "file": "caac-2025-hainan",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row: 三亚/凤凰 | 24 | 22685734"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Sanya (Tianya)"
+    }
+   ]
+  },
+  {
+   "claim": "about 15 km north west of the city",
+   "verdict": "confirmed",
+   "inAfter": "about 15 km north west of the city",
+   "note": "Coordinates: 11.6 km in a straight line at 298 degrees (north west); ratio 1.29.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-09",
+     "quote": "It is located about 15 km (9 mi) northwest of the city center."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 11.6 km (7.2 miles)",
+      "Bearing from the city centre: 298 degrees, which is north west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "24th busiest in China in 2025",
+   "verdict": "confirmed",
+   "inAfter": "In 2025 it was the 24th busiest in China",
+   "note": "Was 'the twenty fourth busiest in the country'; the year is added because the rank is CAAC's for 2025 (22,685,734 passengers).",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 三亚/凤凰: passenger rank 24 in China; passengers 2025: 22,685,734"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-09",
+     "quote": "In 2025, it was the 24th busiest airport in China."
+    }
+   ]
+  },
+  {
+   "claim": "second on the island behind Haikou",
+   "verdict": "confirmed",
+   "inAfter": "second on the island behind Haikou",
+   "note": "CAAC's 2025 table has three Hainan airports: Haikou Meilan 26,851,102, Sanya 22,685,734 and Qionghai Bo'ao 848,808.",
+   "sources": [
+    {
+     "file": "caac-2025-hainan",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "Row: 海口/美兰 | 20 | 26851102",
+      "Row: 三亚/凤凰 | 24 | 22685734",
+      "Row: 琼海/博鳌 | 122 | 848808"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-09",
+     "quote": "It is the second busiest airport in Hainan, the busiest being Haikou Meilan International Airport."
+    }
+   ]
+  },
+  {
+   "claim": "runway around 3,400 metres",
+   "verdict": "confirmed",
+   "inAfter": "the runway is around 3,400 metres",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 08/26: 3,400 m (11,155 ft), CON",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-09",
+     "quote": "The runway is about 3,400 metres (11,200 feet) long"
+    }
+   ]
+  },
+  {
+   "claim": "takes a fully loaded 747 and other large aircraft",
+   "verdict": "softened",
+   "inAfter": "takes a fully loaded 747 and other large aircraft",
+   "note": "Was 'takes a fully loaded 747 or A340'. The operator names the Boeing 747-400 and other large aircraft at full load (class 4E); the A340 rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "op-intro",
+     "org": "Sanya Phoenix International Airport (the operator, sanyaairport.com)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": [
+      "飞行区等级为4E级",
+      "可满足波音747-400等大型飞机全载起降"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-09",
+     "quote": "which satisfies the take off and landing requirements of a fully weighted Boeing 747, Airbus A340 or other large aircraft"
+    }
+   ]
+  },
+  {
+   "claim": "high speed rail right next door",
+   "verdict": "confirmed",
+   "inAfter": "High speed rail sits right next door.",
+   "note": "The operator says the round-island high-speed railway's Phoenix Airport station is joined to the terminal's drop-off level, with the main entrance on the west side of Terminal 1.",
+   "sources": [
+    {
+     "file": "op-rail",
+     "org": "Sanya Phoenix International Airport (the operator, sanyaairport.com)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": [
+      "环岛高铁凤凰机场站与凤凰机场候机楼送客平台相连",
+      "T1航站楼西侧为主要入口"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-09",
+     "quote": "is located just north of the airport"
+    }
+   ]
+  },
+  {
+   "claim": "Sanya Phoenix Airport station on the Western Ring line connects to Sanya Railway Station on the Eastern Ring line",
+   "verdict": "confirmed",
+   "inAfter": "Sanya Phoenix Airport station on the Hainan Western Ring line connects to Sanya Railway Station on the Eastern Ring line",
+   "note": "On the operator's line list the Western Ring runs through Phoenix Airport station to Sanya station, where the Eastern Ring ends.",
+   "sources": [
+    {
+     "file": "op-rail",
+     "org": "Sanya Phoenix International Airport (the operator, sanyaairport.com)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": [
+      "崖州站— 凤凰机场站 —三亚站",
+      "亚龙湾站—三亚站"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-09",
+     "quote": [
+      "Sanya Phoenix Airport Railway Station of the Hainan Western Ring High-Speed Railway",
+      "Initially, it connects on the Sanya Railway Station on the Hainan Eastern Ring High-Speed Railway"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "both coasts of the island within easy reach without a car",
+   "verdict": "confirmed",
+   "inAfter": "putting both coasts of the island within easy reach without a car",
+   "note": "The operator lists the stations of both lines: the Eastern Ring by Wenchang, Qionghai and Wanning to Haikou, the Western Ring by Dongfang and Lingao to Haikou. 'Easy' is the old text's judgement, kept.",
+   "sources": [
+    {
+     "file": "op-rail",
+     "org": "Sanya Phoenix International Airport (the operator, sanyaairport.com)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": [
+      "东环线 海口东站—美兰站—文昌站—琼海站—博鳌站—万宁站—神州站—陵水站—亚龙湾站—三亚站",
+      "西环线 海口站—老城镇站—福山镇站—临高南站—银滩站—白马井站—棋子湾站—东方站"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-09",
+     "quote": [
+      "provides frequent high-speed rail service to a number of points along Hainan's eastern coast",
+      "rail service from Sanya Station become available to stations on the island's west coast as well"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the airport lists routes to Moscow, Novosibirsk, Irkutsk and Vladivostok, among other Russian cities",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "the airport lists routes to Moscow, Novosibirsk, Irkutsk and Vladivostok, among other Russian cities",
+   "note": "Replaces 'since 2017 IrAero, Alrosa and Azur Air have all flown in from Russian cities', which nothing current confirms. The operator's live route list names Moscow (莫斯科), Novosibirsk (新西伯利亚), Irkutsk (伊尔库茨克) and Vladivostok (海参崴), and also Khabarovsk, Yekaterinburg, Kazan, St Petersburg, Ufa, Krasnoyarsk and Ulan-Ude: eleven Russian cities, the largest group among its international routes. Its introduction counts 36 international and regional routes at 30 June 2026. Attributed, as it is the airport's own list; Wikipedia's current revision also describes Russian airlines flying in from various Russian cities.",
+   "sources": [
+    {
+     "file": "op-routes",
+     "org": "Sanya Phoenix International Airport (the operator, sanyaairport.com)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": [
+      "国际航线",
+      "三亚-伊尔库茨克",
+      "哈巴罗夫斯克-三亚-新西伯利亚",
+      "新西伯利亚-三亚-海参崴",
+      "三亚-莫斯科"
+     ]
+    },
+    {
+     "file": "op-intro",
+     "org": "Sanya Phoenix International Airport (the operator, sanyaairport.com)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": "截至2026年6月30日，三亚机场已运营航线162条（其中国际及地区航线36条）"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-09",
+     "quote": "several Russian airlines including IrAero, Alrosa and Azur Air have begun operating from various Russian cities"
+    }
+   ]
+  },
+  {
+   "claim": "China's tropical beach destination",
+   "verdict": "cut",
+   "wasBefore": "China's tropical beach destination",
+   "why": "No source read here describes Sanya or Hainan so, Wikipedia's airport article included."
+  },
+  {
+   "claim": "60 metres wide",
+   "verdict": "cut",
+   "wasBefore": "by 60 metres",
+   "why": "Wikipedia alone: OurAirports' page for the airport was saved but its runway table did not come through as text, and the operator gives no width."
+  },
+  {
+   "claim": "takes an A340",
+   "verdict": "cut",
+   "wasBefore": "takes a fully loaded 747 or A340",
+   "why": "The A340 rests on Wikipedia alone; the operator names the 747-400 and other large aircraft, which is what the text now says."
+  },
+  {
+   "claim": "a site of close to ten thousand acres",
+   "verdict": "cut",
+   "wasBefore": "on a site of close to ten thousand acres",
+   "why": "Wikipedia alone, and doubtful: ten thousand acres is about 40 square kilometres for a one-runway airport. Chinese sources usually measure land in mu (ten thousand mu is about 6.7 square kilometres), so this may be a unit slip; nothing read here settles it."
+  },
+  {
+   "claim": "the rail station opened in December 2015",
+   "verdict": "cut",
+   "wasBefore": "opened in December 2015",
+   "why": "Wikipedia alone (30 December 2015); the operator's rail page gives no date."
+  },
+  {
+   "claim": "Sanya Railway Station 10 km away",
+   "verdict": "cut",
+   "wasBefore": "on the Eastern Ring line 10 km away",
+   "why": "The 10 km rests on Wikipedia alone. The connection itself is kept (see above)."
+  },
+  {
+   "claim": "first in Hainan to take a transcontinental flight: Transaero from Moscow in 2007",
+   "verdict": "cut",
+   "wasBefore": "This was the first airport in Hainan to take a transcontinental flight, when Transaero flew non-stop from Moscow in 2007",
+   "why": "Wikipedia alone: the Sina aviation page its article cites answered 503, and nothing else read here mentions Transaero."
+  },
+  {
+   "claim": "IrAero, Alrosa and Azur Air since 2017",
+   "verdict": "cut",
+   "wasBefore": "since 2017 IrAero, Alrosa and Azur Air have all flown in from Russian cities",
+   "why": "Wikipedia alone, and nothing current names these airlines: the operator's airline list covers only the 36 Chinese airlines that check in there. Replaced by the airport's own current list of Russian routes, attributed (see above)."
+  },
+  {
+   "claim": "Terminal 3 open since 6 February 2026; capacity now 30 million a year",
+   "verdict": "cut",
+   "note": "Found in the operator's current introduction, which also gives the terminals' areas: 231,900 square metres in all, T3 124,300, T1 58,300, T2 20,000, an international terminal 16,300 and a VIP terminal 13,000.",
+   "sources": [
+    {
+     "file": "op-intro",
+     "org": "Sanya Phoenix International Airport (the operator, sanyaairport.com)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": [
+      "随着2026年2月6日T3航站楼正式投运 ，机场保障能力提升至 3000万人次/年",
+      "现有航站楼面积23.19万㎡（其中T1航站楼5.83万㎡、T2航站楼2.0万㎡、T3航站楼12.43万㎡、国际航站楼1.63万㎡、贵宾航站楼1.3万㎡）"
+     ]
+    }
+   ],
+   "why": "Held back: a new fact that replaces nothing in the old text (which describes no terminals), and it has one source so far, the operator (Wikipedia's article does not mention Terminal 3; the operator's news items are WeChat posts). Worth adding once a second source is read, with which terminal a client will use."
+  },
+  {
+   "claim": "direct links to Europe from 2025: Frankfurt via Bangkok, and Prague",
+   "verdict": "cut",
+   "note": "The operator says that in 2025 it opened Hainan's first fifth-freedom passenger route to Europe (Frankfurt to Sanya via Bangkok) and China's first seventh-freedom passenger route (Sanya to Prague); both are on its live route list. It does not name the airlines.",
+   "sources": [
+    {
+     "file": "op-intro",
+     "org": "Sanya Phoenix International Airport (the operator, sanyaairport.com)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": [
+      "海南首条直通欧洲的第五航权客运航线（法兰克福⇌曼谷⇌三亚）",
+      "全国首条第七航权客运航线（三亚⇌布拉格）"
+     ]
+    },
+    {
+     "file": "op-routes",
+     "org": "Sanya Phoenix International Airport (the operator, sanyaairport.com)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": [
+      "三亚-布拉格",
+      "三亚-曼谷-法兰克福"
+     ]
+    }
+   ],
+   "why": "Held back: a new fact that replaces nothing (the old text's only European link was the 2007 Transaero flight, now cut), with one organisation as its source so far. Of more use to a UK agent than the Russian routes, so worth confirming for Andy."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The airport is built for size",
+   "why": "The old text's judgement, kept on the confirmed 3,400 m runway and the operator's statement that it takes a fully loaded 747-400."
+  },
+  {
+   "text": "Russia is the market to watch here",
+   "why": "The old text's judgement ('The Russian market is the one to watch here'), kept: Russian cities are the largest group on the airport's current list of international routes (eleven of them)."
+  }
+ ],
+ "tracerOk": {}
+}

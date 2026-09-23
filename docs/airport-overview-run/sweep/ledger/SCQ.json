@@ -1,0 +1,292 @@
+{
+ "iata": "SCQ",
+ "id": "recV9WzB8IbTNJUnD",
+ "name": "Santiago-Rosalía de Castro Airport",
+ "country": "Spain",
+ "wikipedia": "https://en.wikipedia.org/wiki/Santiago%E2%80%93Rosal%C3%ADa_de_Castro_Airport",
+ "audited": "2026-09-23",
+ "before": "Galicia's main airport, and the busiest in the north west of Spain after Bilbao. It handled 3.6 million passengers in 2024 and sits 12 km east of Santiago de Compostela, in the parish of Lavacolla. The Camino de Santiago runs close by.\n\nEverything works from one terminal, opened in October 2011 and covering 74,000 square metres, which replaced a 1969 building next door on the same site.\n\nThe route map is worth watching rather than assuming. Vueling treats the airport as a focus city for the north west of the peninsula, and in July 2026 Wizz Air announced it would open a base here in December 2026, its first in the Galicia and north Portugal region. That is a meaningful amount of new capacity for an airport this size, so check current schedules rather than working from last season.\n\nIt took the name of the Galician poet Rosalía de Castro in 2020 and is still widely listed as Santiago de Compostela.",
+ "after": "Galicia's busiest airport, 12 km east of Santiago de Compostela at Lavacolla. It handled about 3.1 million passengers in 2025, 14 per cent fewer than in 2024.\n\nEverything works from one terminal, opened in October 2011 to replace the 1969 building.\n\nThe route map is worth watching rather than assuming. In July 2026 Wizz Air announced a base here: it says one aircraft will be based at the airport from 1 February 2027, with seven new routes. That is a meaningful amount of new capacity for an airport this size, so check current schedules rather than working from last season.\n\nIt took the name of the Galician writer Rosalía de Castro in 2020 and is still widely listed as Santiago de Compostela.",
+ "claims": [
+  {
+   "claim": "Galicia's busiest airport",
+   "verdict": "corrected",
+   "inAfter": "Galicia's busiest airport",
+   "note": "Was 'Galicia's main airport, and the busiest in the north west of Spain after Bilbao'. Aena's 2025 figures put Santiago well ahead of Galicia's other airports (A Coruña 1,292,166, Vigo 1,114,810); Eurostat agrees. The Bilbao comparison is cut: Wikipedia says 'second busiest in northern Spain after Bilbao', which the old text turned into 'north west', and Bilbao is not in the north west.",
+   "sources": [
+    {
+     "file": "aena-annual-2025",
+     "org": "Aena (the airport operator, aena.es)",
+     "dated": "Aena's 2025 annual traffic statistics",
+     "quote": [
+      "AÑO 2025",
+      "SANTIAGO-ROSALÍA DE CASTRO 3.120.759 -14,3%",
+      "A CORUÑA 1.292.166 4,4%",
+      "VIGO 1.114.810 5,3%"
+     ]
+    },
+    {
+     "file": "eurostat-es",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat ES_LEST SANTIAGO airport: passengers carried in 2025: 3,107,973",
+      "Eurostat ES_LECO A CORUNA airport: passengers carried in 2025: 1,295,581",
+      "Eurostat ES_LEVX VIGO airport: passengers carried in 2025: 1,113,519"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "It is the biggest and busiest airport in Galicia"
+    }
+   ]
+  },
+  {
+   "claim": "12 km east of Santiago de Compostela, at Lavacolla",
+   "verdict": "confirmed",
+   "inAfter": "12 km east of Santiago de Compostela at Lavacolla.",
+   "note": "Coordinates: 10.8 km from the GeoNames centre at 81 degrees (ratio 1.11, inside the check for east). Aena says about ten kilometres to the north east; Wikipedia 12 km east. Aena's history puts the aerodrome at Lavacolla, which Wikipedia calls a parish; the text says only 'at Lavacolla'.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 10.8 km (6.7 miles)",
+      "Bearing from the city centre: 81 degrees, which is east"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "The airport is located in the parish of Lavacolla, 12 km east of Santiago de Compostela"
+    },
+    {
+     "file": "aena-history",
+     "org": "Aena (the airport operator, aena.es)",
+     "dated": "read 2026-09-23 (the airport's history page)",
+     "quote": "select the land for the establishment of an aerodrome in the area called Crucero Bonito, in the municipality of Lavacolla"
+    },
+    {
+     "file": "aena-presentation",
+     "org": "Aena (the airport operator, aena.es)",
+     "dated": "read 2026-09-23 (the airport's presentation page)",
+     "quote": "located approximately ten kilometres to the Northeast of the city"
+    }
+   ]
+  },
+  {
+   "claim": "about 3.1 million passengers in 2025, 14 per cent fewer than in 2024",
+   "verdict": "corrected",
+   "inAfter": "It handled about 3.1 million passengers in 2025, 14 per cent fewer than in 2024.",
+   "note": "Was '3.6 million passengers in 2024'. A passenger total replaces a passenger total: Aena 3,120,759 for 2025, down 14.3 per cent; Eurostat 3,107,973 against 3,628,032 in 2024.",
+   "sources": [
+    {
+     "file": "aena-annual-2025",
+     "org": "Aena (the airport operator, aena.es)",
+     "dated": "Aena's 2025 annual traffic statistics",
+     "quote": "SANTIAGO-ROSALÍA DE CASTRO 3.120.759 -14,3%"
+    },
+    {
+     "file": "aena-presentation",
+     "org": "Aena (the airport operator, aena.es)",
+     "dated": "read 2026-09-23 (the airport's presentation page)",
+     "quote": [
+      "3,120,759",
+      "passengers in 2025"
+     ]
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "dated": "annual data to 2025",
+     "quote": [
+      "Eurostat ES_LEST Santiago-Rosalía de Castro Airport: passengers carried in 2024: 3,628,032",
+      "Eurostat ES_LEST Santiago-Rosalía de Castro Airport: passengers carried in 2025: 3,107,973"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "one terminal, opened in October 2011, replacing the 1969 building",
+   "verdict": "confirmed",
+   "inAfter": "Everything works from one terminal, opened in October 2011 to replace the 1969 building.",
+   "note": "Aena dates the old passenger terminal to 1969 and the new terminal to October 2011; Wikipedia says the old one closed on 13 October 2011 when operations moved to the new one.",
+   "sources": [
+    {
+     "file": "aena-history",
+     "org": "Aena (the airport operator, aena.es)",
+     "dated": "read 2026-09-23 (the airport's history page)",
+     "quote": [
+      "The passenger terminal, built in 1969, has been enlarged on several occasions.",
+      "In October 2011, the Ministry of Public Works, through Aena, opened a new infrastructure"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": [
+      "The airport currently has one operating terminal.",
+      "The old terminal closed on the night of 13 October 2011 when operations transferred to the new terminal."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in July 2026 Wizz Air announced a base here",
+   "verdict": "confirmed",
+   "inAfter": "In July 2026 Wizz Air announced a base here",
+   "sources": [
+    {
+     "file": "wizz-santiago-base",
+     "org": "Wizz Air (wizzair.com news)",
+     "dated": "release of 30 Jul 2026",
+     "quote": [
+      "Jul 30, 2026, 11:00",
+      "Wizz Air today announces the opening of a new base at Santiago de Compostela Airport"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "In July 2026, Wizz Air announced that it will open a base at the airport"
+    }
+   ]
+  },
+  {
+   "claim": "Wizz Air says one aircraft will be based here from 1 February 2027, with seven new routes",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Wizz Air",
+   "inAfter": "In July 2026 Wizz Air announced a base here: it says one aircraft will be based at the airport from 1 February 2027, with seven new routes.",
+   "note": "Was 'would open a base here in December 2026, its first in the Galicia and north Portugal region' (Wikipedia). Wizz Air's own release gives base operations from 1 February 2027 with one aircraft and seven routes (two inbound routes start in December 2026), and makes no claim about the region; the airline's word on its own base, attributed.",
+   "sources": [
+    {
+     "file": "wizz-santiago-base",
+     "org": "Wizz Air (wizzair.com news)",
+     "dated": "release of 30 Jul 2026",
+     "quote": [
+      "with operations scheduled to begin on 1 February 2027",
+      "The airline will base one aircraft at Santiago Airport and launch seven new routes, enhancing Galicia's connectivity with the rest of Spain and Europe."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after the Galician writer Rosalía de Castro in 2020",
+   "verdict": "confirmed",
+   "inAfter": "It took the name of the Galician writer Rosalía de Castro in 2020",
+   "note": "Was 'the Galician poet': Aena calls her the most celebrated writer in the Galician language, and Wikipedia a writer and poet. Aena dates the name to the Official State Gazette of 2 April 2020; Wikipedia to 12 March 2020.",
+   "sources": [
+    {
+     "file": "aena-history",
+     "org": "Aena (the airport operator, aena.es)",
+     "dated": "read 2026-09-23 (the airport's history page)",
+     "quote": [
+      "On 2 April 2020, the Official State Gazette published the new name of the airport",
+      "in recognition of the most celebrated writer in the Galician language"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "It has been named after the Galician romanticist writer and poet Rosalía de Castro, since 12 March 2020."
+    }
+   ]
+  },
+  {
+   "claim": "still widely listed as Santiago de Compostela",
+   "verdict": "confirmed",
+   "inAfter": "and is still widely listed as Santiago de Compostela.",
+   "sources": [
+    {
+     "file": "wizz-santiago-base",
+     "org": "Wizz Air (wizzair.com news)",
+     "dated": "release of 30 Jul 2026",
+     "quote": "Santiago de Compostela Airport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "also known as Santiago de Compostela Airport"
+    },
+    {
+     "file": "eurostat-es",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat ES_LEST SANTIAGO airport"
+    }
+   ]
+  },
+  {
+   "claim": "the busiest in the north west of Spain after Bilbao",
+   "verdict": "cut",
+   "wasBefore": "Galicia's main airport, and the busiest in the north west of Spain after Bilbao.",
+   "why": "Wikipedia says second busiest in northern Spain after Bilbao; 'north west' misreads it, and Bilbao is not in the north west. Corrected to Galicia's busiest (see above)."
+  },
+  {
+   "claim": "3.6 million passengers in 2024",
+   "verdict": "cut",
+   "wasBefore": "It handled 3.6 million passengers in 2024",
+   "why": "Superseded by the 2025 figure (see above)."
+  },
+  {
+   "claim": "in the parish of Lavacolla",
+   "verdict": "cut",
+   "wasBefore": "in the parish of Lavacolla",
+   "why": "Aena calls Lavacolla a municipality or town, Wikipedia a parish; the text says only 'at Lavacolla'."
+  },
+  {
+   "claim": "the Camino de Santiago runs close by",
+   "verdict": "cut",
+   "wasBefore": "The Camino de Santiago runs close by.",
+   "why": "Wikipedia alone. The Galician government's Camino site (caminodesantiago.gal) answered, but its stage pages sit several links deep behind encoded addresses, so no second source was saved."
+  },
+  {
+   "claim": "74,000 square metres; the old terminal next door",
+   "verdict": "cut",
+   "wasBefore": "covering 74,000 square metres, which replaced a 1969 building next door on the same site",
+   "why": "The size and the next-door position rest on Wikipedia alone; Aena confirms the 1969 terminal and the 2011 opening, which are kept."
+  },
+  {
+   "claim": "Vueling treats the airport as a focus city for the north west",
+   "verdict": "cut",
+   "wasBefore": "Vueling treats the airport as a focus city for the north west of the peninsula",
+   "why": "Wikipedia alone: Aena's airline list confirms that Vueling flies here, but no source other than Wikipedia calls Santiago a focus city."
+  },
+  {
+   "claim": "Wizz Air's base in December 2026, its first in Galicia and north Portugal",
+   "verdict": "cut",
+   "wasBefore": "and in July 2026 Wizz Air announced it would open a base here in December 2026, its first in the Galicia and north Portugal region",
+   "why": "Wizz Air's own release gives 1 February 2027 and makes no regional claim. Corrected (see above)."
+  },
+  {
+   "claim": "the Galician poet",
+   "verdict": "cut",
+   "wasBefore": "the Galician poet Rosalía de Castro",
+   "why": "Aena calls her a writer; 'writer' is supported by both sources. Reworded (see above)."
+  },
+  {
+   "claim": "the runway closed from 23 April to 27 May 2026; United to Newark from May 2026",
+   "verdict": "cut",
+   "why": "Held back: new facts that replace nothing, on Wikipedia alone so far (a runway closure for renovation from 23 April to 27 May 2026, and United's Newark route from May 2026)."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The route map is worth watching rather than assuming.",
+   "why": "The old text's framing, kept; traffic fell 14 per cent in 2025 (Aena) and Wizz Air's base is coming (sourced)."
+  },
+  {
+   "text": "That is a meaningful amount of new capacity for an airport this size, so check current schedules rather than working from last season.",
+   "why": "The old text's advice, kept: one based aircraft and seven routes at an airport of about 3.1 million passengers."
+  }
+ ],
+ "tracerOk": {}
+}

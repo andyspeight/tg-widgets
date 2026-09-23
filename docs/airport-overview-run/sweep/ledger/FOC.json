@@ -1,0 +1,360 @@
+{
+ "iata": "FOC",
+ "id": "recCiz2ESCT5jRJOa",
+ "name": "Fuzhou Changle International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Fuzhou_Changle_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Fujian's provincial capital airport, on the shore of the Taiwan Strait at Changle, about 50 km east of central Fuzhou. It is a major hub for Fuzhou Airlines and XiamenAir, and in 2025 it handled 16.117 million passengers across 112,326 movements, both up on the year.\n\nThe transfer is the thing to plan for, because 50 km is a long way. Several expressways reach the airport directly, shuttle buses run from 4.30 in the morning until 10.30 at night, and since September 2025 the Binhai Express has connected Fuzhou Railway Station with the airport.\n\nThe weather is worth a word. The site has the sea on three sides with hills inland, and the local pattern is low cloud, plenty of rain and a lot of wind, averaging 4.5 metres a second across the year. Spring brings long rainy spells and summer brings typhoons and heavy downpours. Winter is the settled, sunny season.\n\nThe airport opened in June 1997.",
+ "after": "Fujian's provincial capital airport, at Changle, about 50 km east of central Fuzhou. It is a hub for XiamenAir, and in 2025 it handled 16.117 million passengers across 112,326 movements, both up on the year.\n\nThe transfer is the thing to plan for, because 50 km is a long way. Airport buses run into the city and to surrounding areas, and since September 2025 the Binhai Express has connected Fuzhou Railway Station with the airport.\n\nThe weather is worth a word, as summer brings typhoons.\n\nIt opened in June 1997.",
+ "claims": [
+  {
+   "claim": "Fujian's provincial capital airport",
+   "verdict": "confirmed",
+   "inAfter": "Fujian's provincial capital airport",
+   "note": "CAAC's 2025 table lists one Fuzhou airport, Changle.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "is an international airport serving Fuzhou, the capital of East China's Fujian province"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "GeoNames class PPLA, the capital of a first-order division (state, province or region)"
+    },
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 福州/长乐: passenger rank 31 in China"
+    }
+   ]
+  },
+  {
+   "claim": "at Changle",
+   "verdict": "confirmed",
+   "inAfter": "at Changle",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "in Zhanggang Subdistrict, Changle, about 50 km (31 mi) east of central Fuzhou"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Fuzhou (Changle)"
+    },
+    {
+     "file": "iport-industry",
+     "org": "Xiamen Xiangye Group (the operator's parent group, iport.com.cn)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": [
+      "翔业(福州) 国际航空港有限公司",
+      "福州长乐国际机场的运营管理机构",
+      "福州长乐国际机场位于福州市长乐区"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 50 km east of central Fuzhou",
+   "verdict": "confirmed",
+   "inAfter": "about 50 km east of central Fuzhou",
+   "note": "Coordinates: 39.5 km in a straight line at 112 degrees (east); ratio 1.27, so 50 km reads as the road distance.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "about 50 km (31 mi) east of central Fuzhou"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 39.5 km (24.5 miles)",
+      "Bearing from the city centre: 112 degrees, which is east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a hub for XiamenAir",
+   "verdict": "softened",
+   "inAfter": "It is a hub for XiamenAir",
+   "note": "Was 'a major hub for Fuzhou Airlines and XiamenAir'. XiamenAir's own site lists Fuzhou among its six transfer hubs (Xiamen, Fuzhou, Quanzhou, Beijing, Hangzhou, Chongqing). Fujian provincial TV news (1 Sep 2026) confirms XiamenAir's domestic flights here, moving with those of its Hebei Airlines and Jiangxi Air to the new Terminal 2 on 16 Sep 2026. 'Major' rests on Wikipedia alone; Fuzhou Airlines is cut (see below).",
+   "sources": [
+    {
+     "file": "mf-branches",
+     "org": "Xiamen Airlines (XiamenAir)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Transfer Services Xiamen Hub Fuzhou Hub Quanzhou Hub"
+    },
+    {
+     "file": "qq-20260901",
+     "org": "Fujian News Broadcast (Fujian provincial TV news, official account on Tencent News)",
+     "dated": "2026-09-01",
+     "quote": [
+      "2026-09-01 10:51 发布于 福建 福建新闻联播官方账号",
+      "实际承运人为 厦门航空 、河北航空"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "The airport is also a major hub for the namesake Fuzhou Airlines and XiamenAir."
+    }
+   ]
+  },
+  {
+   "claim": "16.117 million passengers and 112,326 movements in 2025, both up on the year",
+   "verdict": "confirmed",
+   "inAfter": "in 2025 it handled 16.117 million passengers across 112,326 movements, both up on the year",
+   "note": "CAAC: 16,117,180 passengers (15,299,802 in 2024, up 5.3 per cent) and 112,326 movements (108,080 in 2024); 31st in China for passengers.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 福州/长乐: passenger rank 31 in China; passengers 2025: 16,117,180; passengers 2024: 15,299,802; change 5.3%; aircraft movements rank 33; movements 2025: 112,326; movements 2024: 108,080"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "in 2025, Fuzhou Changle International Airport recorded 112,326 flight take offs and landings, and 16.117 million passenger movements, representing a year-on-year increases of 3.9% and 5.3% respectively"
+    }
+   ]
+  },
+  {
+   "claim": "airport buses into the city and to surrounding areas",
+   "verdict": "softened",
+   "inAfter": "Airport buses run into the city and to surrounding areas",
+   "note": "Was 'shuttle buses run from 4.30 in the morning until 10.30 at night'. The operator's bus page, which already gives the new Terminal 2's bus stop, names city buses and long-distance buses but gives no hours in its text (its timetable is an image). The hours rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "op-bus",
+     "org": "Yuanxiang (Fuzhou) International Airport Co. (the operator, fuzhouairport.com.cn)",
+     "dated": "read 2026-09-23 (live page, names Terminal 2, open since 16 Sep 2026)",
+     "quote": [
+      "乘坐市区巴士的旅客可至 6 号门快线乘车点处乘车",
+      "长途巴士可至长途客运站购票乘车"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "The airport passenger terminal has a number of fixed shuttle routes to Fuzhou city and surrounding areas."
+    }
+   ]
+  },
+  {
+   "claim": "Binhai Express from Fuzhou Railway Station to the airport since September 2025",
+   "verdict": "confirmed",
+   "inAfter": "since September 2025 the Binhai Express has connected Fuzhou Railway Station with the airport",
+   "note": "Opened 29 September 2025; the Fuzhou New Area committee says the fastest trains take about half an hour from the railway station (not added).",
+   "sources": [
+    {
+     "file": "fzxq-20250929",
+     "org": "Fuzhou New Area Management Committee (Fuzhou government, fzxq.fuzhou.gov.cn)",
+     "dated": "2025-09-29",
+     "quote": [
+      "时间：2025-09-29 15:20",
+      "福州滨海快线定于29日14时开通初期运营！以后去外地就可以坐上轨道交通去机场！",
+      "该列车由福州火车站始发，经停机场站，终到文岭站"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "Binhai Express opened at 2:00 pm on 29 September 2025 directly connected from Fuzhou Railway Station to the airport"
+    }
+   ]
+  },
+  {
+   "claim": "summer brings typhoons",
+   "verdict": "confirmed",
+   "inAfter": "summer brings typhoons",
+   "note": "The FCDO names no province; its typhoon belt, the southern and eastern coast, takes in coastal Fujian. The rest of the weather paragraph rests on Wikipedia alone and is cut.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "Due to typhoon and subtropical high pressure, there are often strong winds and heavy rains in summer."
+    },
+    {
+     "file": "fcdo-china-safety",
+     "org": "FCDO (UK Foreign, Commonwealth and Development Office)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The typhoon season in China normally runs from May to November, affecting southern and eastern coastal regions."
+    }
+   ]
+  },
+  {
+   "claim": "opened in June 1997",
+   "verdict": "confirmed",
+   "inAfter": "It opened in June 1997.",
+   "note": "Wikipedia gives 23 June 1997.",
+   "sources": [
+    {
+     "file": "fzcl-2022",
+     "org": "Changle District People's Government (fzcl.gov.cn, from the Fuzhou New Area release)",
+     "dated": "2022-05-30",
+     "quote": [
+      "2022-05-30 14:16",
+      "1997年6月，长乐国际机场正式通航"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "It was inaugurated on 23 June 1997"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "opened = {{start date and age|1997|06|23|df=yes}}"
+    }
+   ]
+  },
+  {
+   "claim": "on the shore of the Taiwan Strait",
+   "verdict": "cut",
+   "wasBefore": "on the shore of the Taiwan Strait",
+   "why": "Wikipedia alone. The operator's parent group and OurAirports place it in Changle without mentioning the coast."
+  },
+  {
+   "claim": "a major hub for Fuzhou Airlines",
+   "verdict": "cut",
+   "wasBefore": "It is a major hub for Fuzhou Airlines and XiamenAir",
+   "why": "Fuzhou Airlines rests on Wikipedia alone for today. Its own site builds its pages by script: the company profile came back empty to a plain fetch and to the browser, and so did the contact page (three attempts). The Changle government (May 2022) calls it the city's own airline, first flying from Changle on 30 October 2014, but that is four years old. 'Major' rests on Wikipedia alone. XiamenAir is kept as a hub (see above)."
+  },
+  {
+   "claim": "several expressways reach the airport directly",
+   "verdict": "cut",
+   "wasBefore": "Several expressways reach the airport directly",
+   "why": "Wikipedia alone. The Changle government (May 2022) mentions a second airport expressway as planned, which does not settle how many reach it now."
+  },
+  {
+   "claim": "shuttle buses 4.30am to 10.30pm",
+   "verdict": "cut",
+   "wasBefore": "shuttle buses run from 4.30 in the morning until 10.30 at night",
+   "why": "The hours rest on Wikipedia alone; the operator's current bus page gives no hours in its text. Softened to the buses themselves (see above)."
+  },
+  {
+   "claim": "sea on three sides with hills inland",
+   "verdict": "cut",
+   "wasBefore": "The site has the sea on three sides with hills inland",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "low cloud, rain and wind averaging 4.5 metres a second",
+   "verdict": "cut",
+   "wasBefore": "the local pattern is low cloud, plenty of rain and a lot of wind, averaging 4.5 metres a second across the year",
+   "why": "Wikipedia alone. The paper the article cites (Strait Science, abstract on xueshu.com) covers only thunderstorms at the airport: mainly in spring and summer, most often from the west."
+  },
+  {
+   "claim": "spring rainy spells",
+   "verdict": "cut",
+   "wasBefore": "Spring brings long rainy spells",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "summer heavy downpours",
+   "verdict": "cut",
+   "wasBefore": "typhoons and heavy downpours",
+   "why": "The downpours rest on Wikipedia alone (the FCDO speaks only of typhoons). Typhoons are kept (see above)."
+  },
+  {
+   "claim": "winter settled and sunny",
+   "verdict": "cut",
+   "wasBefore": "Winter is the settled, sunny season.",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "new Terminal 2 open since 16 September 2026, with all international flights",
+   "verdict": "cut",
+   "note": "Found while checking the airlines and buses: Terminal 2 opened at 05:00 on 16 September 2026 and took all international, Hong Kong, Macau and Taiwan flights, plus the domestic flights of XiamenAir, Hebei Airlines and Jiangxi Air (Fujian provincial TV news, 1 Sep 2026; Wikipedia). The operator's bus page already gives Terminal 2's bus stop. This is exactly what a UK agent needs, since any international arrival now uses Terminal 2.",
+   "sources": [
+    {
+     "file": "qq-20260901",
+     "org": "Fujian News Broadcast (Fujian provincial TV news, official account on Tencent News)",
+     "dated": "2026-09-01",
+     "quote": [
+      "2026-09-01 10:51 发布于 福建 福建新闻联播官方账号",
+      "T2航站楼将正式投运",
+      "实际承运人为 厦门航空 、河北航空",
+      "机场所有国际、港澳台地区航班",
+      "转至T2航站楼运营"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "Starting from 5:00 am on 16 September 2026, the new Terminal 2 of Changle Airport will be officially put into operation."
+    },
+    {
+     "file": "op-bus",
+     "org": "Yuanxiang (Fuzhou) International Airport Co. (the operator, fuzhouairport.com.cn)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "T2 航站楼：",
+      "乘车：乘坐巴士的旅客可从到达厅 30 号门离开，至 32 号门快线乘车点处乘车。"
+     ]
+    }
+   ],
+   "why": "Held back: verified with two sources, but a new fact that replaces nothing in the old text (which says nothing about terminals), so the sweep's rule keeps it out. Andy can add it; the sources stay listed here. Would read: \"Terminal 2 opened on 16 September 2026 and takes all international flights and XiamenAir's domestic ones, so check which terminal a client will use.\""
+  },
+  {
+   "claim": "second runway in June 2026",
+   "verdict": "cut",
+   "note": "Wikipedia: put into operation on 11 June 2026, making Changle Fujian's first 4F airport. A finance blogger on Tencent News (21 Jun 2026, low tier) gives the first flight on it as 18 June and wrongly has Terminal 2 opening on 11 June too. OurAirports lists two runways.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "On 11 June 2026, the new second runway was officially put into operation."
+    },
+    {
+     "file": "qq-20260621",
+     "org": "Tencent News creator account (finance blogger; low tier)",
+     "dated": "2026-06-21",
+     "quote": [
+      "2026-06-21 20:40 发布于 上海 财经领域创作者",
+      "6月18日，福州长乐国际机场新建第二跑道首航成功，标志着福州长乐机场正式成为福建省首个具备双跑道运行能力的机场。"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runways listed: 2"
+    }
+   ],
+   "why": "Held back: a new fact that replaces nothing in the old text, and the day is not settled (11 or 18 June) on anything better than a blogger. Of less use to an agent than Terminal 2."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The transfer is the thing to plan for, because 50 km is a long way.",
+   "why": "The old text's advice, kept on the confirmed distance (about 50 km, 39.5 km in a straight line)."
+  },
+  {
+   "text": "The weather is worth a word",
+   "why": "The old text's lead-in, kept for the confirmed typhoon season."
+  }
+ ],
+ "tracerOk": {}
+}

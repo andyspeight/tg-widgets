@@ -1,0 +1,250 @@
+{
+ "iata": "LJG",
+ "id": "recDHbscNU2A7OtHn",
+ "name": "Lijiang Sanyi International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Lijiang_Sanyi_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Lijiang in Yunnan, 25 km south of the city, and one of the clearest examples of Chinese domestic tourism at work. It handled 8,631,218 passengers in 2025, against 4.2 million in 2021.\n\nThat growth has outrun the building more than once. The airport opened in July 1995 with a 2,500 metre runway. The Kunming World Horticultural Exposition in 1999 pushed it past half a million passengers for the first time and triggered the first expansion. A second, in 2007, added 500 metres of runway, a parallel taxiway, thirteen more stands and a 33,300 square metre domestic terminal, all built to a 4.5 million passenger standard it has long since passed.\n\nThe runway now measures 3,000 metres with turning bases at both ends. The airport was cleared for international traffic in March 2012, the third in Yunnan to hold that status.",
+ "after": "The airport for Lijiang in Yunnan, 25 km south of the city. It has grown on the back of Lijiang's tourism, and in 2025 it handled 8,631,218 passengers, up 6.7 per cent on 2024.\n\nThat growth has outrun the building more than once. It opened in July 1995, and the Kunming World Horticultural Exposition in 1999 pushed it past half a million passengers for the first time and triggered the first expansion. A second, begun at the end of 2007, left it with the 3,000 metre runway it has today.\n\nThe airport opened to international traffic in 2012.",
+ "claims": [
+  {
+   "claim": "the airport for Lijiang in Yunnan",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Lijiang in Yunnan",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "is an airport serving Lijiang, Yunnan province, China."
+    },
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 丽江/三义: passenger rank 44 in China"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Lijiang"
+    }
+   ]
+  },
+  {
+   "claim": "25 km south of the city",
+   "verdict": "confirmed",
+   "inAfter": "25 km south of the city",
+   "note": "Coordinates: 21.4 km in a straight line at 174 degrees (south); ratio 1.17.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "the civil airport is 25 km (16 mi) to the south of the city proper."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 21.4 km (13.3 miles)",
+      "Bearing from the city centre: 174 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "grown on the back of Lijiang's tourism",
+   "verdict": "softened",
+   "inAfter": "It has grown on the back of Lijiang's tourism",
+   "note": "Was 'one of the clearest examples of Chinese domestic tourism at work'. China News Service (2013) says the fast growth of Lijiang's tourism market drove the airport's golden period and that the second expansion was built to meet it; Wikipedia ties the first growth spurt to the 1999 Expo and Lijiang tourism.",
+   "sources": [
+    {
+     "file": "ce-20131029",
+     "org": "China News Service (on China Economic Net, ce.cn)",
+     "dated": "2013-10-29",
+     "quote": [
+      "2013年10月29日 19:54 来源：中国新闻网",
+      "近年来，云南丽江旅游市场快速发展，带动丽江机场进入发展黄金期。",
+      "为满足丽江旅游业快速发展的需求，2007年底丽江机场实施第二次改扩建。"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "which propelled Lijiang tourism to a new peak"
+    }
+   ]
+  },
+  {
+   "claim": "8,631,218 passengers in 2025, up 6.7 per cent on 2024",
+   "verdict": "corrected",
+   "inAfter": "in 2025 it handled 8,631,218 passengers, up 6.7 per cent on 2024",
+   "note": "The 2025 figure is confirmed; the comparison was 'against 4.2 million in 2021' and is now the latest year on year (CAAC: 8,092,935 in 2024, up 6.7 per cent; Wikipedia gives the same two figures).",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 丽江/三义: passenger rank 44 in China; passengers 2025: 8,631,218; passengers 2024: 8,092,935; change 6.7%"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "8,092,935 in 2024 and 8,631,218 in 2025 respectively"
+    }
+   ]
+  },
+  {
+   "claim": "opened in July 1995",
+   "verdict": "confirmed",
+   "inAfter": "It opened in July 1995",
+   "sources": [
+    {
+     "file": "ce-20131029",
+     "org": "China News Service (on China Economic Net, ce.cn)",
+     "dated": "2013-10-29",
+     "quote": "1995年7月，丽江机场正式通航。"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "in July 1995, the airport officially opened to the air"
+    }
+   ]
+  },
+  {
+   "claim": "the 1999 Kunming Expo pushed it past half a million passengers and triggered the first expansion",
+   "verdict": "confirmed",
+   "inAfter": "the Kunming World Horticultural Exposition in 1999 pushed it past half a million passengers for the first time and triggered the first expansion",
+   "note": "A Baidu Baike text copied onto the airport's advertising site (lijiangairport.com, low tier) dates the first expansion to 1998; China News Service and Wikipedia both put it after the 1999 milestone, and are followed.",
+   "sources": [
+    {
+     "file": "ce-20131029",
+     "org": "China News Service (on China Economic Net, ce.cn)",
+     "dated": "2013-10-29",
+     "quote": [
+      "伴随着1999年昆明“世博会”对外宣传的“重鼓”，丽江机场迎来了持续增长的发展期",
+      "1999年丽江机场旅客吞吐量首次突破50万人次大关，根据发展情况机场进行第一次改扩建。"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "Driven by the Kunming World Horticultural Exposition in 1999, the passenger throughput of Lijiang Airport exceeded 500,000 for the first time"
+    }
+   ]
+  },
+  {
+   "claim": "second expansion from the end of 2007, which left the 3,000 m runway it has today",
+   "verdict": "softened",
+   "inAfter": "A second, begun at the end of 2007, left it with the 3,000 metre runway it has today.",
+   "note": "Was 'A second, in 2007, added 500 metres of runway, a parallel taxiway, thirteen more stands and a 33,300 square metre domestic terminal'. China News Service gives the airport after the work as class 4D with a 3,000 m runway; OurAirports lists one runway of 3,000 m today.",
+   "sources": [
+    {
+     "file": "ce-20131029",
+     "org": "China News Service (on China Economic Net, ce.cn)",
+     "dated": "2013-10-29",
+     "quote": [
+      "2007年底丽江机场实施第二次改扩建",
+      "改扩建后的丽江机场等级由4C级提升至4D级，拥有停机位19个，8座登机廊桥，跑道长度3000米"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 02/20: 3,000 m (9,843 ft), ASPH",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": [
+      "In 2007, the airport carried out a second renovation and expansion.",
+      "The airport has one runway numbered 02/20, 3,000 metres (9,843 ft) in length"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "opened to international traffic in 2012",
+   "verdict": "softened",
+   "inAfter": "The airport opened to international traffic in 2012.",
+   "note": "Was 'cleared for international traffic in March 2012, the third in Yunnan to hold that status'. The steps differ by source: State Council approval on 11 November 2011 and the first Hong Kong route on 31 May 2012 (China News Service), national acceptance on 6 March 2012 (Wikipedia), so only the year is given.",
+   "sources": [
+    {
+     "file": "ce-20131029",
+     "org": "China News Service (on China Economic Net, ce.cn)",
+     "dated": "2013-10-29",
+     "quote": [
+      "2011年11月11日，丽江机场航空口岸被国务院批准对外开放",
+      "2012年5月31日，丽江—香港航线开通，从此结束了丽江没有对外开放口岸的历史"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "On March 6, 2012, Yunnan Lijiang Airport aviation port opening to the outside world officially passed the national acceptance"
+    }
+   ]
+  },
+  {
+   "claim": "one of the clearest examples of Chinese domestic tourism at work",
+   "verdict": "cut",
+   "wasBefore": "one of the clearest examples of Chinese domestic tourism at work",
+   "why": "No source describes it so, and nothing current gives the domestic share. Softened to its growth on Lijiang's tourism (see above)."
+  },
+  {
+   "claim": "against 4.2 million in 2021",
+   "verdict": "cut",
+   "wasBefore": "against 4.2 million in 2021",
+   "why": "Replaced by the latest year-on-year comparison (see above). 2021 sits in the dip of the pandemic years (Wikipedia's own series: 4.22 million in 2021, 2.88 million in 2022, 7.44 million in 2023), so set against 2025 it overstated the growth."
+  },
+  {
+   "claim": "opened with a 2,500 metre runway",
+   "verdict": "cut",
+   "wasBefore": "The airport opened in July 1995 with a 2,500 metre runway.",
+   "why": "The opening month is kept (see above); the 2,500 m rests on Wikipedia alone, as China News Service gives only the 3,000 m after the second expansion."
+  },
+  {
+   "claim": "the 2007 expansion's 500 m of runway, parallel taxiway, 13 more stands and 33,300 m2 domestic terminal",
+   "verdict": "cut",
+   "wasBefore": "added 500 metres of runway, a parallel taxiway, thirteen more stands and a 33,300 square metre domestic terminal",
+   "why": "Wikipedia alone for the taxiway and the 13 more stands (China News Service gives 19 stands in all afterwards). The domestic terminal's size disagrees: 33,300 square metres (Wikipedia) or 33,000 (China News Service). The runway's end state is kept (see above)."
+  },
+  {
+   "claim": "built to a 4.5 million passenger standard it has long since passed",
+   "verdict": "cut",
+   "wasBefore": "all built to a 4.5 million passenger standard it has long since passed",
+   "why": "Wikipedia and a Baidu Baike text copied onto the airport's advertising site (lijiangairport.com), which is not good enough for a capacity claim; nothing current says what the building is rated for now. The operator's own site (lijiang-airport.com) answered 503."
+  },
+  {
+   "claim": "turning bases at both ends",
+   "verdict": "cut",
+   "wasBefore": "with turning bases at both ends",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "cleared in March 2012, third in Yunnan",
+   "verdict": "cut",
+   "wasBefore": "The airport was cleared for international traffic in March 2012, the third in Yunnan to hold that status.",
+   "why": "The month depends on which step is meant (approval November 2011, acceptance March 2012, first Hong Kong flight May 2012), so only the year is kept (see above). 'The third in Yunnan' rests on Wikipedia alone."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "That growth has outrun the building more than once.",
+   "why": "The old text's judgement, kept: China News Service says the first expansion followed the 1999 jump in traffic and the second was built to meet the fast growth of Lijiang's tourism."
+  }
+ ],
+ "tracerOk": {}
+}
