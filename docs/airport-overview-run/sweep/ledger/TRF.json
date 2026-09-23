@@ -1,0 +1,278 @@
+{
+ "iata": "TRF",
+ "id": "rec7wuM541u04TU2d",
+ "name": "Sandefjord Airport, Torp",
+ "country": "Norway",
+ "wikipedia": "https://en.wikipedia.org/wiki/Sandefjord_Airport,_Torp",
+ "audited": "2026-09-23",
+ "before": "Branded as an Oslo airport and 110 km away from it, which is the single most important thing to tell a client before they book. Torp sits 7 km north east of Sandefjord, and while it works as the low cost gateway for eastern Norway and the capital, the transfer to central Oslo is a long one.\n\nFor Vestfold itself it is simply the local airport, and a good one. The runway is 2,989 metres and airBaltic, Ryanair, Wizz Air, SAS and Norwegian all run scheduled services, with Wideroe keeping a base here for domestic and short international flying.\n\nSince Rygge closed in 2016 it has been the second largest airport in eastern Norway.\n\nIts origins are military. It was built largely with NATO funding in the 1950s as a base the United States Air Force could use in wartime, opened in July 1956 and took its first civilian flights in 1958.",
+ "after": "Ryanair sells it as Oslo Torp, but it is well over 100 km from Oslo, which is the single most important thing to tell a client before they book. Torp sits 7 km north east of Sandefjord, and while it works as the low cost airport for eastern Norway and the capital, the transfer to central Oslo is a long one.\n\nFor Vestfold itself it is simply the local airport, and a good one. Widerøe, Ryanair, Wizz Air, SAS, airBaltic and Norwegian all fly from here.\n\nSince Rygge closed in 2016 it has been the second largest airport in eastern Norway.\n\nIts origins are military. It was built largely with NATO funding in the 1950s as a base the United States Air Force could use in wartime, opened in July 1956 and took its first civilian flights in 1958.",
+ "claims": [
+  {
+   "claim": "Ryanair sells it as Oslo Torp",
+   "verdict": "corrected",
+   "inAfter": "Ryanair sells it as Oslo Torp",
+   "note": "Was 'Branded as an Oslo airport'. The airport markets itself as TORP Sandefjord Airport; it is Ryanair that names it Oslo Torp and files it under Oslo's city code, as Wikipedia says it has since 1997.",
+   "sources": [
+    {
+     "file": "ryanair-api",
+     "org": "Ryanair (its own airport data, ryanair.com)",
+     "dated": "read 2026-09-23",
+     "quote": [
+      "\"name\":\"Oslo Torp\"",
+      "\"macCityCode\":\"OSLO\""
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": [
+      "in 1997 became a Ryanair destination, which marketed it as an airport serving Oslo as Oslo Torp and Oslo South",
+      "The airport markets itself as TORP Sandefjord Airport"
+     ]
+    },
+    {
+     "file": "op-about",
+     "org": "Sandefjord Lufthavn AS (the airport operator, torp.no)",
+     "dated": "read 2026-09-23 (the airport's About page)",
+     "quote": "Sandefjord Lufthavn AS owns and operates TORP Sandefjord airport"
+    }
+   ]
+  },
+  {
+   "claim": "well over 100 km from Oslo",
+   "verdict": "softened",
+   "inAfter": "but it is well over 100 km from Oslo",
+   "note": "Was '110 km away from it'. Wikipedia says 110 km and SNL about 120 km; the straight line is 85.3 km (ratios 1.29 and 1.41, both road distances), so the text says 'well over 100 km'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "110 kilometers (68 mi) south of Oslo"
+    },
+    {
+     "file": "snl",
+     "org": "Store norske leksikon (the Norwegian encyclopaedia, snl.no)",
+     "dated": "read 2026-09-23",
+     "quote": "rundt 120 kilometer fra Oslo"
+    },
+    {
+     "file": "geo-oslo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the airport to Oslo: 85.3 km"
+    }
+   ]
+  },
+  {
+   "claim": "7 km north east of Sandefjord",
+   "verdict": "confirmed",
+   "inAfter": "Torp sits 7 km north east of Sandefjord",
+   "note": "Coordinates: 6.6 km from the GeoNames centre at 21 degrees (inside the check for north east). SNL gives about 10 km north, which reads as a road distance.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 6.6 km (4.1 miles)",
+      "Bearing from the city centre: 21 degrees"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "4 nautical miles (7.4 km; 4.6 mi) northeast of Sandefjord"
+    }
+   ]
+  },
+  {
+   "claim": "the low cost airport for eastern Norway and the capital",
+   "verdict": "corrected",
+   "inAfter": "and while it works as the low cost airport for eastern Norway and the capital",
+   "note": "Was 'the low cost gateway' (house style). Wikipedia calls it in part a low-cost airport for eastern Norway and Oslo; Ryanair files it under Oslo, and the airport lists Ryanair and Wizz Air among its airlines.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "in part as a low-cost airport for Eastern Norway and the capital, Oslo"
+    },
+    {
+     "file": "ryanair-api",
+     "org": "Ryanair (its own airport data, ryanair.com)",
+     "dated": "read 2026-09-23",
+     "quote": "\"macCityCode\":\"OSLO\""
+    },
+    {
+     "file": "op-about",
+     "org": "Sandefjord Lufthavn AS (the airport operator, torp.no)",
+     "dated": "read 2026-09-23 (the airport's About page)",
+     "quote": "operated by Widerøe, Ryanair, Wizz Air, SAS, airBaltic and Norwegian"
+    }
+   ]
+  },
+  {
+   "claim": "Widerøe, Ryanair, Wizz Air, SAS, airBaltic and Norwegian fly from here",
+   "verdict": "confirmed",
+   "inAfter": "Widerøe, Ryanair, Wizz Air, SAS, airBaltic and Norwegian all fly from here.",
+   "note": "The airport's own list. Widerøe's base, which the old text mentioned, rests on Wikipedia alone and is cut.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Sandefjord Lufthavn AS (the airport operator, torp.no)",
+     "dated": "read 2026-09-23 (the airport's About page)",
+     "quote": "network of routes operated by Widerøe, Ryanair, Wizz Air, SAS, airBaltic and Norwegian"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "It also sees scheduled flights by airBaltic, Ryanair, Wizz Air, Scandinavian Airlines, and Norwegian Air Shuttle."
+    }
+   ]
+  },
+  {
+   "claim": "since Rygge closed in 2016, the second largest airport in eastern Norway",
+   "verdict": "confirmed",
+   "inAfter": "Since Rygge closed in 2016 it has been the second largest airport in eastern Norway.",
+   "note": "Eurostat's Rygge series stops after 1,175,434 passengers in 2016; for 2025 it lists no airport in eastern Norway between Oslo Gardermoen (26,958,409) and Torp (1,789,282).",
+   "sources": [
+    {
+     "file": "eurostat-series-rygge",
+     "org": "Eurostat",
+     "dated": "annual data to 2025",
+     "quote": [
+      "Eurostat NO_ENRY MOSS/RYGGE airport: passengers carried in 2016: 1,175,434",
+      "Highest year in the series: 2013"
+     ]
+    },
+    {
+     "file": "eurostat-no",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat NO_ENGM OSLO/GARDERMOEN airport: passengers carried in 2025: 26,958,409",
+      "Eurostat NO_ENTO SANDEFJORD/TORP airport: passengers carried in 2025: 1,789,282"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "it was the second-largest airport in eastern Norway in terms of flights after Rygge shut down in 2016"
+    }
+   ]
+  },
+  {
+   "claim": "built largely with NATO funding in the 1950s as a base for the US Air Force in wartime",
+   "verdict": "confirmed",
+   "inAfter": "It was built largely with NATO funding in the 1950s as a base the United States Air Force could use in wartime",
+   "note": "SNL: paid for by NATO, which, and especially the USA, wanted an air base in Norway for American aircraft in a crisis; never used for that purpose.",
+   "sources": [
+    {
+     "file": "snl",
+     "org": "Store norske leksikon (the Norwegian encyclopaedia, snl.no)",
+     "dated": "read 2026-09-23",
+     "quote": [
+      "Oppbyggingen av Torp flystasjon ble betalt av NATO, men ble altså aldri benyttet til sitt opprinnelige formål.",
+      "NATO, og spesielt USA , ønsket en flybase i Norge"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "The airport was built largely with NATO funding as one of several bases to be used by the United States Air Force in case of war."
+    }
+   ]
+  },
+  {
+   "claim": "opened in July 1956; first civilian flights in 1958",
+   "verdict": "confirmed",
+   "inAfter": "opened in July 1956 and took its first civilian flights in 1958.",
+   "sources": [
+    {
+     "file": "snl",
+     "org": "Store norske leksikon (the Norwegian encyclopaedia, snl.no)",
+     "dated": "read 2026-09-23",
+     "quote": [
+      "Torp flystasjon ble offisielt åpnet 2. juli 1956.",
+      "Fred Olsens flyselskap allerede i 1958 hadde landet med et DC-3 på charterflyvning"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": [
+      "the airport was opened on 2 July 1956",
+      "Civilian flights commenced in 1958"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "branded as an Oslo airport; 110 km",
+   "verdict": "cut",
+   "wasBefore": "Branded as an Oslo airport and 110 km away from it",
+   "why": "Corrected and softened (see above): the airport brands itself TORP Sandefjord; Ryanair sells it as Oslo Torp."
+  },
+  {
+   "claim": "the low cost gateway",
+   "verdict": "cut",
+   "wasBefore": "the low cost gateway for eastern Norway and the capital",
+   "why": "House style: 'gateway' reworded to 'airport' (see above)."
+  },
+  {
+   "claim": "runway 2,989 metres",
+   "verdict": "cut",
+   "wasBefore": "The runway is 2,989 metres",
+   "why": "Sources disagree: Wikipedia (citing the Norwegian AIP) gives 2,989 m, OurAirports 2,809 m, and SNL gives take-off distances of 2,859 and 2,939 m."
+  },
+  {
+   "claim": "Widerøe keeps a base here for domestic and short international flying",
+   "verdict": "cut",
+   "wasBefore": "with Wideroe keeping a base here for domestic and short international flying",
+   "why": "Wikipedia alone: the airport's own page lists Widerøe among its airlines but says nothing of a base."
+  },
+  {
+   "claim": "Ryanair to Manchester and Liverpool",
+   "verdict": "cut",
+   "why": "Held back: new facts that replace nothing. Ryanair's own airport data lists routes from Torp to Manchester and Liverpool, among others; one source.",
+   "sources": [
+    {
+     "file": "ryanair-api",
+     "org": "Ryanair (its own airport data, ryanair.com)",
+     "dated": "read 2026-09-23",
+     "quote": [
+      "\"airport:MAN\"",
+      "\"airport:LPL\""
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which is the single most important thing to tell a client before they book",
+   "why": "The old text's advice, kept: the airline's Oslo name against a road distance of 110 to 120 km (sourced)."
+  },
+  {
+   "text": "the transfer to central Oslo is a long one.",
+   "why": "The old text's judgement, kept; the distance is sourced."
+  },
+  {
+   "text": "For Vestfold itself it is simply the local airport, and a good one.",
+   "why": "The old text's judgement, kept."
+  },
+  {
+   "text": "Its origins are military.",
+   "why": "The old text's framing, kept; the NATO history that follows is sourced."
+  }
+ ],
+ "tracerOk": {
+  "Since Rygge": "The tracer reads the opening word with the name; Rygge is in Eurostat's series (MOSS/RYGGE) and in Wikipedia."
+ }
+}

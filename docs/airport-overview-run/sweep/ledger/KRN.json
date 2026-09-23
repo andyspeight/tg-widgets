@@ -1,0 +1,262 @@
+{
+ "iata": "KRN",
+ "id": "recNACmB1aIsinAvM",
+ "name": "Kiruna Airport",
+ "country": "Sweden",
+ "wikipedia": "https://en.wikipedia.org/wiki/Kiruna_Airport",
+ "audited": "2026-09-23",
+ "before": "Sweden's northernmost airport, and the way into the far north of the country. It handled 217,075 passengers in 2023.\n\nKiruna is a town in the middle of being moved, so the distances are worth getting right: the airport is about 10 km from the old town centre and about 4 km from the new one.\n\nOnward transport runs to the mountains rather than just the town. A transfer bus operated by Falcks Omnibus on behalf of the municipality runs into Kiruna all year for the Stockholm flights. Bus 91 heads once a day to Abisko, Riksgränsen and on to Narvik, roughly February to May and June to September. The Nikkaluoktaexpressen runs once or twice a day on the same seasons to Nikkaluokta.\n\nFor the high mountains there are scheduled helicopter flights, including a twice daily summer service from Nikkaluokta to the Kebnekaise mountain lodge, flown by Kallax Flyg.",
+ "after": "Sweden's northernmost airport, and the way into the far north of the country. It handled just over 250,000 passengers in 2025.\n\nKiruna is a town in the middle of being moved, so check which part of town a client is heading for before quoting a transfer.\n\nOnward transport runs to the mountains rather than just the town. An airport coach, run by Kiruna's public transport and operated by Falcks Omnibus, is timed to the flights and runs into central Kiruna. Bus 91 runs between Kiruna and Riksgränsen, and the Nikkaluokta express runs to Nikkaluokta in spring, summer and autumn.\n\nFor the high mountains there are scheduled helicopter flights, including Kallax Flyg's route from Nikkaluokta to Kebnekaise.",
+ "claims": [
+  {
+   "claim": "Sweden's northernmost airport",
+   "verdict": "confirmed",
+   "inAfter": "Sweden's northernmost airport",
+   "note": "OurAirports: no Swedish airport with scheduled service lies further north (Pajala and Gällivare are next). Swedavia's own table lists its airports from north to south, with Kiruna first.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "Kiruna Airport is the northernmost airport in Sweden."
+    },
+    {
+     "file": "ourairports-se-north",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Kiruna Airport (OurAirports ESNQ, IATA KRN, large airport): latitude 67.8220",
+      "Pajala Airport (OurAirports ESUP, IATA PJA, small airport): latitude 67.2446"
+     ]
+    },
+    {
+     "file": "swedavia-ar2025",
+     "org": "Swedavia (the airport operator, 2025 annual report)",
+     "dated": "annual and sustainability report 2025",
+     "quote": [
+      "Swedavia’s airports from north to south:",
+      "Kiruna Airport 2,502 2,221 251,591 3 international"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "just over 250,000 passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled just over 250,000 passengers in 2025.",
+   "note": "Was '217,075 passengers in 2023'. A passenger total replaces a passenger total: Swedavia 251,591 and Eurostat 251,519 for 2025.",
+   "sources": [
+    {
+     "file": "swedavia-ar2025",
+     "org": "Swedavia (the airport operator, 2025 annual report)",
+     "dated": "annual and sustainability report 2025",
+     "quote": "Kiruna Airport 2,502 2,221 251,591 3 international"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "dated": "annual data to 2025",
+     "quote": "Eurostat SE_ESNQ Kiruna Airport: passengers carried in 2025: 251,519"
+    }
+   ]
+  },
+  {
+   "claim": "Kiruna is a town in the middle of being moved",
+   "verdict": "confirmed",
+   "inAfter": "Kiruna is a town in the middle of being moved",
+   "note": "LKAB, whose iron ore mine lies beneath the town, describes an urban transformation and relocation that will continue for many years (its church has already been moved); Wikipedia's airport article distinguishes the old and new town centres.",
+   "sources": [
+    {
+     "file": "lkab-community",
+     "org": "LKAB (the state mining company, lkab.com)",
+     "dated": "read 2026-09-23",
+     "quote": [
+      "The urban transformation is a large and complex process that will continue for many years at our locations.",
+      "more information about the relocation process",
+      "the church was moved to its new location"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "It lies around 10 km (6.2 mi) from the old town centre of Kiruna and around 4 km from the new town centre."
+    }
+   ]
+  },
+  {
+   "claim": "an airport coach run by Kiruna public transport, operated by Falcks Omnibus, timed to flights, into central Kiruna",
+   "verdict": "corrected",
+   "inAfter": "An airport coach, run by Kiruna's public transport and operated by Falcks Omnibus, is timed to the flights and runs into central Kiruna.",
+   "note": "Was 'runs into Kiruna all year for the Stockholm flights' (Wikipedia). Swedavia: timed to the airport's departures and arrivals, run by Kiruna's public transport and operated by Falcks Omnibus.",
+   "sources": [
+    {
+     "file": "swedavia-bus",
+     "org": "Swedavia (the airport operator, swedavia.com)",
+     "dated": "read 2026-09-23 (Kiruna Airport's bus page)",
+     "quote": [
+      "The airport coach runs between the airport and central Kiruna",
+      "The timetable is adjusted in accordance with departures and arrivals to and from Kiruna Airport.",
+      "The airport coach is run by Kiruna's public transport and operated by Falcks Omnibus."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "Airport Transfer to and from Kiruna City Center available year-round for flights to and from Stockholm, operated by Falcks Omnibus on behalf of Kiruna Municipality"
+    }
+   ]
+  },
+  {
+   "claim": "bus 91 between Kiruna and Riksgränsen",
+   "verdict": "softened",
+   "inAfter": "Bus 91 runs between Kiruna and Riksgränsen",
+   "note": "Was 'heads once a day to Abisko, Riksgränsen and on to Narvik, roughly February to May and June to September'. Swedavia gives only Kiruna to Riksgränsen; Narvik, the frequency and the seasons rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "swedavia-bus",
+     "org": "Swedavia (the airport operator, swedavia.com)",
+     "dated": "read 2026-09-23 (Kiruna Airport's bus page)",
+     "quote": [
+      "Norrbottens länstrafik (Norrboten",
+      "bus 91.",
+      "Bus 91 operates between Kiruna and Riksgränsen."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "Bus 91 to Abisko - Riksgränsen - Narvik departs one time per day from the airport"
+    }
+   ]
+  },
+  {
+   "claim": "the Nikkaluokta express to Nikkaluokta in spring, summer and autumn",
+   "verdict": "softened",
+   "inAfter": "and the Nikkaluokta express runs to Nikkaluokta in spring, summer and autumn.",
+   "note": "Was 'once or twice a day on the same seasons'. Swedavia: it stops at the airport and runs only in spring, summer and autumn; the frequency rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "swedavia-bus",
+     "org": "Swedavia (the airport operator, swedavia.com)",
+     "dated": "read 2026-09-23 (Kiruna Airport's bus page)",
+     "quote": [
+      "The bus runs between Kiruna and Nikkaluokta, and always makes a stop at Kiruna Airport.",
+      "Please note that the bus only runs during spring, summer and autumn."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "Nikkaluoktaexpressen to Nikkaluokta departs once or twice per day in march - may and June - September"
+    }
+   ]
+  },
+  {
+   "claim": "scheduled helicopter flights, including Kallax Flyg's route from Nikkaluokta to Kebnekaise",
+   "verdict": "softened",
+   "inAfter": "For the high mountains there are scheduled helicopter flights, including Kallax Flyg's route from Nikkaluokta to Kebnekaise.",
+   "note": "Was 'a twice daily summer service from Nikkaluokta to the Kebnekaise mountain lodge'. Kallax Flyg calls it its line between Nikkaluokta and Kebnekaise; the frequency and the lodge rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "kallax",
+     "org": "Kallax Flyg (the helicopter operator, kallaxflyg.se)",
+     "dated": "read 2026-09-23",
+     "quote": "vår linje mellan Nikkaluokta och Kebnekaise tar dig till foten av Sveriges högsta berg på minuter"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "There are additional scheduled helicopter flights for paying passengers in the mountain region of Kiruna. One such is Nikkaluokta-Kebnekaise mountain lodge, which goes twice daily in the summer season operated by Kallax Flyg."
+    }
+   ]
+  },
+  {
+   "claim": "217,075 passengers in 2023",
+   "verdict": "cut",
+   "wasBefore": "It handled 217,075 passengers in 2023.",
+   "why": "Superseded by the 2025 total (see above)."
+  },
+  {
+   "claim": "about 10 km from the old centre and 4 km from the new one",
+   "verdict": "cut",
+   "wasBefore": "so the distances are worth getting right: the airport is about 10 km from the old town centre and about 4 km from the new one.",
+   "why": "Sources disagree: Swedavia's taxi page puts the airport about nine kilometres from central Kiruna, while Wikipedia gives 10 km from the old centre and 4 km from the new one. The text now tells agents to check which part of town a client needs.",
+   "sources": [
+    {
+     "file": "swedavia-taxi",
+     "org": "Swedavia (the airport operator, swedavia.com)",
+     "dated": "read 2026-09-23",
+     "quote": "Kiruna Airport is located approximately nine kilometres from central Kiruna."
+    }
+   ]
+  },
+  {
+   "claim": "all year for the Stockholm flights",
+   "verdict": "cut",
+   "wasBefore": "runs into Kiruna all year for the Stockholm flights",
+   "why": "Wikipedia alone; Swedavia says the coach is timed to the flights. Corrected (see above)."
+  },
+  {
+   "claim": "bus 91 on to Narvik, once a day, February to May and June to September",
+   "verdict": "cut",
+   "wasBefore": "Bus 91 heads once a day to Abisko, Riksgränsen and on to Narvik, roughly February to May and June to September.",
+   "why": "Wikipedia alone beyond Kiruna to Riksgränsen. Softened (see above)."
+  },
+  {
+   "claim": "Nikkaluokta express once or twice a day",
+   "verdict": "cut",
+   "wasBefore": "The Nikkaluoktaexpressen runs once or twice a day on the same seasons to Nikkaluokta.",
+   "why": "The frequency rests on Wikipedia alone. Softened (see above)."
+  },
+  {
+   "claim": "twice daily summer helicopter to the Kebnekaise mountain lodge",
+   "verdict": "cut",
+   "wasBefore": "including a twice daily summer service from Nikkaluokta to the Kebnekaise mountain lodge, flown by Kallax Flyg.",
+   "why": "The frequency and the lodge rest on Wikipedia alone. Softened (see above)."
+  },
+  {
+   "claim": "the Visit Abisko door-to-door shuttle; routes",
+   "verdict": "cut",
+   "why": "Held back: new facts that replace nothing. Swedavia's bus page lists a door-to-door shuttle by Visit Abisko to hotels in Kiruna, Abisko and Björkliden, and its 2025 report gives three international routes and one domestic.",
+   "sources": [
+    {
+     "file": "swedavia-bus",
+     "org": "Swedavia (the airport operator, swedavia.com)",
+     "dated": "read 2026-09-23 (Kiruna Airport's bus page)",
+     "quote": "Visit Abisko offers a door to door airport shuttle to hotels in Kiruna, Abisko and Bjorkliden."
+    },
+    {
+     "file": "swedavia-ar2025",
+     "org": "Swedavia (the airport operator, 2025 annual report)",
+     "dated": "annual and sustainability report 2025",
+     "quote": [
+      "3 international",
+      "1 domestic"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and the way into the far north of the country.",
+   "why": "The old text's framing, kept; the airport is the northernmost in Sweden (sourced)."
+  },
+  {
+   "text": "so check which part of town a client is heading for before quoting a transfer.",
+   "why": "Advice following from the town move and the disputed distances (sourced)."
+  },
+  {
+   "text": "Onward transport runs to the mountains rather than just the town.",
+   "why": "The old text's framing, kept; the routes that follow are sourced."
+  }
+ ],
+ "tracerOk": {
+  "Kallax Flyg's": "Possessive; Kallax Flyg is named in its own site and in Wikipedia.",
+  "250,000": "Rounded down from Swedavia 251,591 and Eurostat 251,519 (just over 250,000)."
+ }
+}
