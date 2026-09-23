@@ -1,0 +1,360 @@
+{
+ "iata": "INC",
+ "id": "recUkY9DB4Qj32iKl",
+ "name": "Yinchuan Hedong International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Yinchuan_Hedong_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Ningxia's main aviation gateway, 25 km south east of Yinchuan in the town of Linghe. It handled 9,860,514 passengers in 2025, forty second in China, and reaches 57 cities either directly or by connecting at Xi'an or Beijing.\n\nGetting into the city is cheap and clear. Shuttle buses run from the Yinchuan Civil Aviation Building and the Yuehai Urban Terminal for 20 yuan, and there are three daily round trips from the Wuzhong Hotel. A taxi to the city centre usually costs about 80 yuan, on a base fare of 7 yuan for the first 3 km. There is also a station on the Yinchuan to Lanzhou high speed railway, opened in 2019.\n\nCheck which terminal a flight uses. Terminal 1 handles international flights along with Hong Kong, Macau and Taiwan services. Terminal 2 is closed for renovation. There are also four satellite city terminals away from the airport itself.\n\nThe runway is 3,600 metres, and the airport doubles as an important alternate for Lanzhou and Xi'an.\n\nThe name Hedong means east of the river, after its position east of the Yellow River.",
+ "after": "Ningxia's main airport, 25 km south east of Yinchuan at Linhe, in Lingwu City. It handled about 9.86 million passengers in 2025, making it the 42nd busiest airport in China.\n\nAirport buses to the Yuehai city terminal cost 20 yuan. There is also a station on the Yinchuan to Lanzhou high speed railway, opened in 2019.\n\nDomestic flights use Terminal 3, opened in December 2016. International flights, along with those to Hong Kong, Macau and Taiwan, moved into a new hall in Terminal 2 in February 2018.\n\nThe runway is 3,600 metres.",
+ "claims": [
+  {
+   "claim": "Ningxia's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Ningxia's main airport",
+   "note": "Wording plainer than 'main aviation gateway'. Ningxia's three airports passed 10 million passengers together in 2025, of which Yinchuan handled 9.86 million; Zhongwei expected about 320,000.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "it nevertheless is the autonomous region's main aviation gateway"
+    },
+    {
+     "file": "chinanews-nx",
+     "org": "China News Service",
+     "quote": [
+      "银川河东国际机场持续优化航线布局、升级中转服务，筑牢核心枢纽地位",
+      "中卫沙坡头机场深挖“航空+旅游”融合潜力"
+     ],
+     "dated": "2025-12-17"
+    }
+   ]
+  },
+  {
+   "claim": "25 km south east of Yinchuan",
+   "verdict": "confirmed",
+   "inAfter": "25 km south east of Yinchuan",
+   "note": "Coordinates put the airport 19.3 km in a straight line at 147 degrees (south east) from the GeoNames centre, so 25 km is inside the 0.8 to 1.6 tolerance for a road distance. Two guides (Travel China Guide and a Tencent profile) give 19 km, which is the straight-line figure. Left at 25 km as the method allows; the owner may prefer 'about 20 km'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is located 25 kilometres (16 mi) southeast of downtown Yinchuan"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 19.3 km (12.0 miles)",
+      "Bearing from the city centre: 147 degrees, which is south east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "at Linhe, in Lingwu City",
+   "verdict": "corrected",
+   "inAfter": "at Linhe, in Lingwu City",
+   "note": "Was 'the town of Linghe'. The Chinese name is 临河镇, which romanises as Linhe; Wikipedia's 'Linghe' is a misspelling.",
+   "sources": [
+    {
+     "file": "travelchinaguide",
+     "org": "Travel China Guide",
+     "quote": "Yinchuan Hedong Airport is located in Linhe Village of Lingwu City",
+     "dated": "2025-08-13"
+    },
+    {
+     "file": "qq-cnairport-2021",
+     "org": "Tencent News",
+     "quote": "位于中国宁夏回族自治区银川市灵武市临河镇"
+    }
+   ]
+  },
+  {
+   "claim": "about 9.86 million passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "It handled about 9.86 million passengers in 2025",
+   "note": "Rounded from 9,860,514. The CAAC's own 2025 ranking spreadsheet (caac.gov.cn P020260226360830390937.xlsx, published 26 Feb 2026) gives 9,860,514 and rank 42; it was read directly as a cross-check but grab.mjs cannot save an .xlsx as text, so it is not cited.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The passenger movements of Yinchuan Hedong International Airport in 2025 were 9,860,514"
+    },
+    {
+     "file": "stcn-flows",
+     "org": "Securities Times (reprinting 21st Century Business Herald)",
+     "quote": "2025年，银川河东国际机场旅客吞吐量达到986万人次",
+     "dated": "2026-01-14"
+    },
+    {
+     "file": "netease-top50",
+     "org": "NetEase (Quanqiu Qiye Dongtai account)",
+     "quote": "42、银川河东 986万人次/9.8%",
+     "dated": "2026-01-08"
+    }
+   ]
+  },
+  {
+   "claim": "42nd busiest airport in China",
+   "verdict": "confirmed",
+   "inAfter": "making it the 42nd busiest airport in China",
+   "note": "The second source is a NetEase self-media post; the rank matches the CAAC's 2025 spreadsheet (see the passenger claim).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "making it the 42nd busiest airport in China"
+    },
+    {
+     "file": "netease-top50",
+     "org": "NetEase (Quanqiu Qiye Dongtai account)",
+     "quote": "42、银川河东 986万人次/9.8%",
+     "dated": "2026-01-08"
+    }
+   ]
+  },
+  {
+   "claim": "airport buses to the Yuehai city terminal cost 20 yuan",
+   "verdict": "softened",
+   "inAfter": "Airport buses to the Yuehai city terminal cost 20 yuan",
+   "note": "Narrowed to the one fare all three sources agree on. Travel China Guide (Aug 2025) lists 30 yuan on its Line 1 and 35 yuan to Wuzhong; Sina's January 2026 guide says every airport bus is 20 yuan.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Yuehai Urban Terminal – Hedong Airport: ¥20"
+    },
+    {
+     "file": "travelchinaguide",
+     "org": "Travel China Guide",
+     "quote": [
+      "City Terminal (Yuehai Xintiandi)",
+      "Duration: 45-50 minutes; Ticket Fare: CNY20/person"
+     ],
+     "dated": "2025-08-13"
+    },
+    {
+     "file": "sina-taxi-guide",
+     "org": "Sina (Sina Wenlv Zhinan)",
+     "quote": "票价统一为20元/人",
+     "dated": "2026-01-30"
+    }
+   ]
+  },
+  {
+   "claim": "station on the Yinchuan to Lanzhou high speed railway, opened in 2019",
+   "verdict": "confirmed",
+   "inAfter": "There is also a station on the Yinchuan to Lanzhou high speed railway, opened in 2019.",
+   "note": "The station opened on 29 December 2019 with the first (Yinchuan to Zhongwei) section of the line; it also serves the Yinchuan to Xi'an line. China News reports more than 1.2 million air-rail passengers in 2025, so it is in current use.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On December 29, 2019, with the opening of the Yinchuan–Lanzhou high-speed railway, the Hedong Airport railway station on the west side of the airport terminal began operation."
+    },
+    {
+     "file": "thepaper-hsr-flight",
+     "org": "China Railway Lanzhou Group (official account on The Paper)",
+     "quote": [
+      "2019年12月29日开通运营",
+      "是银西高铁、银兰高铁上"
+     ],
+     "dated": "2023-12-12"
+    },
+    {
+     "file": "seeningxia-hsr",
+     "org": "seeningxia.com (Ningxia government portal)",
+     "quote": "Hedong Airport Railway Station in Yinchuan",
+     "dated": "2019-12-30"
+    },
+    {
+     "file": "chinanews-nx",
+     "org": "China News Service",
+     "quote": "空铁联运客流量突破120万人次",
+     "dated": "2025-12-17"
+    }
+   ]
+  },
+  {
+   "claim": "domestic flights use Terminal 3",
+   "verdict": "confirmed",
+   "inAfter": "Domestic flights use Terminal 3",
+   "note": "The Agricultural Bank of China's February 2026 lounge list places the Yinchuan lounge in T3, so T3 is in current use.",
+   "sources": [
+    {
+     "file": "ceair-y-airports",
+     "org": "China Eastern Airlines",
+     "quote": "国内航线在T3运行"
+    },
+    {
+     "file": "travelchinaguide",
+     "org": "Travel China Guide",
+     "quote": "It is mainly used for domestic flights",
+     "dated": "2025-08-13"
+    },
+    {
+     "file": "abc-lounges-2026",
+     "org": "Agricultural Bank of China",
+     "quote": "安检前，机场T3航站楼商务贵宾区农行贵宾厅",
+     "dated": "2026-02"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 3 opened in December 2016",
+   "verdict": "confirmed",
+   "inAfter": "opened in December 2016",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Terminal 3 was put into operation on December 27, 2016"
+    },
+    {
+     "file": "caac-t3-2016",
+     "org": "CAAC (regulator)",
+     "quote": "12月27日，银川机场T3航站楼竣工投运",
+     "dated": "2016-12-30"
+    }
+   ]
+  },
+  {
+   "claim": "international and Hong Kong, Macau and Taiwan flights moved to a new hall in Terminal 2 in February 2018",
+   "verdict": "corrected",
+   "inAfter": "International flights, along with those to Hong Kong, Macau and Taiwan, moved into a new hall in Terminal 2 in February 2018.",
+   "note": "Replaces 'Terminal 1 handles international flights' and 'Terminal 2 is closed for renovation'. T2 closed for rebuilding when T3 opened in December 2016 and reopened with the new international hall on 8 February 2018, when the old hall in T1 closed. The article's own facilities section, and Travel China Guide which repeats it, still describe the 2016 to 2018 interval. No source from the last 12 months names the international terminal, so this is written as a dated event; China Eastern's airport guide still gives this layout. Worth a check with the operator before it is served.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On February 8, 2018, the new international hall (T2 terminal) of Yinchuan Hedong International Airport was officially opened, and the original international hall (T1 terminal) was closed."
+    },
+    {
+     "file": "sina-2018",
+     "org": "Sina News",
+     "quote": [
+      "自2018年2月8日起，银川河东国际机场新国际厅正式启用，原国际厅停用",
+      "航站楼1、2号门为国际/港澳台旅客出入口"
+     ],
+     "dated": "2018-02-08"
+    },
+    {
+     "file": "ceair-y-airports",
+     "org": "China Eastern Airlines",
+     "quote": "T1未投入使用，国际及地区航线在T2运行"
+    }
+   ]
+  },
+  {
+   "claim": "runway 3,600 metres",
+   "verdict": "confirmed",
+   "inAfter": "The runway is 3,600 metres.",
+   "note": "A runway overlay was approved by the Ningxia development and reform commission in September 2025, reported as due to run from May to October 2026. Not added (no second source saved); flagged for the owner.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It has a runway that is 3,600 meters long and 45 meters wide."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runway 03/21: 3,600 m (11,811 ft)"
+    },
+    {
+     "file": "caacnews-2019",
+     "org": "CAAC News",
+     "quote": "3600米的跑道",
+     "dated": "2019-12-18"
+    }
+   ]
+  },
+  {
+   "claim": "main aviation gateway",
+   "verdict": "cut",
+   "wasBefore": "Ningxia's main aviation gateway",
+   "why": "Reworded to 'Ningxia's main airport', which carries the same checked claim."
+  },
+  {
+   "claim": "in the town of Linghe",
+   "verdict": "cut",
+   "wasBefore": "in the town of Linghe",
+   "why": "Misspelt. The town is 临河 (Linhe); corrected with two sources."
+  },
+  {
+   "claim": "57 cities direct or via Xi'an or Beijing",
+   "verdict": "cut",
+   "wasBefore": "reaches 57 cities either directly or by connecting at Xi'an or Beijing",
+   "why": "Out of date and no second source. The only current network figures (81 cities and 131 routes at the end of 2025) cover all three Ningxia airports together."
+  },
+  {
+   "claim": "cheap and clear",
+   "verdict": "cut",
+   "wasBefore": "Getting into the city is cheap and clear.",
+   "why": "Opinion, and the taxi fare it rested on is disputed."
+  },
+  {
+   "claim": "shuttle from the Yinchuan Civil Aviation Building for 20 yuan",
+   "verdict": "cut",
+   "wasBefore": "Shuttle buses run from the Yinchuan Civil Aviation Building and the Yuehai Urban Terminal for 20 yuan",
+   "why": "Travel China Guide (Aug 2025) lists 30 yuan for the line to the city's airline hotel, so only the Yuehai fare is kept."
+  },
+  {
+   "claim": "three daily round trips from the Wuzhong Hotel",
+   "verdict": "cut",
+   "wasBefore": "there are three daily round trips from the Wuzhong Hotel",
+   "why": "Only Travel China Guide confirms it, and that page is 13 months old; timetables are time-sensitive."
+  },
+  {
+   "claim": "taxi about 80 yuan",
+   "verdict": "cut",
+   "wasBefore": "A taxi to the city centre usually costs about 80 yuan",
+   "why": "Sources disagree: Travel China Guide (Aug 2025) says about 60 yuan, Sina (Jan 2026) says 80 to 120 yuan including tolls."
+  },
+  {
+   "claim": "base fare 7 yuan for the first 3 km",
+   "verdict": "cut",
+   "wasBefore": "on a base fare of 7 yuan for the first 3 km",
+   "why": "No second source."
+  },
+  {
+   "claim": "check which terminal",
+   "verdict": "cut",
+   "wasBefore": "Check which terminal a flight uses.",
+   "why": "Advice resting on the out-of-date terminal split; replaced by the dated terminal facts."
+  },
+  {
+   "claim": "Terminal 1 handles international flights",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 handles international flights along with Hong Kong, Macau and Taiwan services.",
+   "why": "Out of date since 8 February 2018, when the international hall moved to Terminal 2."
+  },
+  {
+   "claim": "Terminal 2 closed for renovation",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 is closed for renovation.",
+   "why": "Out of date. The renovation ran from December 2016 to February 2018."
+  },
+  {
+   "claim": "four satellite city terminals",
+   "verdict": "cut",
+   "wasBefore": "There are also four satellite city terminals away from the airport itself.",
+   "why": "Count not confirmed: China Eastern's guide lists a different set of city terminals."
+  },
+  {
+   "claim": "important alternate for Lanzhou and Xi'an",
+   "verdict": "cut",
+   "wasBefore": "the airport doubles as an important alternate for Lanzhou and Xi'an",
+   "why": "No second source."
+  },
+  {
+   "claim": "name Hedong means east of the river",
+   "verdict": "cut",
+   "wasBefore": "The name Hedong means east of the river, after its position east of the Yellow River.",
+   "why": "Only Wikipedia and sites repeating its wording explain the name."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

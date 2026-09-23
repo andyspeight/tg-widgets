@@ -1,0 +1,502 @@
+{
+ "iata": "MEM",
+ "id": "recxzAhnnhRjvoNQo",
+ "name": null,
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Memphis_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Memphis is a freight airport with passenger flights attached, not the other way round. FedEx runs its superhub here with nearly 400 flights a day, mostly at night, reaching the continental United States, Canada, Europe, the Middle East, Asia and South America. The airport averages about 80 passenger flights a day by comparison.\n\nIt used to be a passenger hub, from 1985 to 2013. Republic Airlines started it, Northwest continued it after the 1986 merger, and when Northwest merged with Delta in 2008 the hub was judged redundant and closed. The airport went from three passenger concourses to one.\n\nThe name changed very recently. On 11 August 2026 it was renamed Frederick W. Smith International Airport after the founder of FedEx, so most systems and most people will still say Memphis International.\n\nIt sits seven miles south east of downtown on 3,900 acres with four runways, the longest 11,120 feet, and is shared with a Tennessee Air National Guard base flying C-17s.",
+ "after": "Memphis is a freight airport with passenger flights attached, not the other way round. FedEx runs its superhub here, and much of its flying is at night. By comparison, the airport handled 4.8 million passengers in 2025.\n\nIt used to be a passenger hub, from 1985 to 2013. Republic Airlines started it and Northwest continued it after the two merged in 1986. Delta took over Northwest in 2008 and closed the hub in 2013, and the airport went from three passenger concourses to one.\n\nOn 11 August 2026 it was renamed Frederick W. Smith International Airport, after the founder of FedEx. The airport code stays MEM.\n\nIt sits south east of downtown Memphis with four runways, the longest 11,120 feet, and is shared with a Tennessee Air National Guard base flying C-17s.",
+ "claims": [
+  {
+   "claim": "a freight airport first, passengers second",
+   "verdict": "confirmed",
+   "inAfter": "Memphis is a freight airport with passenger flights attached, not the other way round",
+   "note": "A characterisation, kept because every source frames the airport this way: the busiest cargo airport in the US by tonnage against 4.8 million passengers a year.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is the \"superhub\" for FedEx Express"
+    },
+    {
+     "file": "flymemphis-cargo",
+     "org": "Memphis-Shelby County Airport Authority (operator)",
+     "quote": "is one of the busiest cargo airports in North America and the the world"
+    },
+    {
+     "file": "freightwaves-hub",
+     "org": "FreightWaves",
+     "quote": "Memphis handles more cargo tonnage than any airport in the nation because of the FedEx operation",
+     "dated": "2026-02-05"
+    }
+   ]
+  },
+  {
+   "claim": "FedEx superhub at the airport",
+   "verdict": "confirmed",
+   "inAfter": "FedEx runs its superhub here",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is the \"superhub\" for FedEx Express"
+    },
+    {
+     "file": "fedex-dedication",
+     "org": "FedEx (newsroom)",
+     "quote": [
+      "Memphis World Hub",
+      "located at the newly dedicated airport"
+     ],
+     "dated": "2026-08-11"
+    },
+    {
+     "file": "aircargonews-ups",
+     "org": "Air Cargo News (DePaul University study)",
+     "quote": "exceeds FedEx's superhub",
+     "dated": "2026-02"
+    }
+   ]
+  },
+  {
+   "claim": "much of the flying is at night",
+   "verdict": "softened",
+   "inAfter": "much of its flying is at night",
+   "note": "Was 'mostly at night'. The DePaul study counts 82 departures before 6am out of 164.7 on a peak day, which does not clearly make a majority, so the claim is softened to what both sources support.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "mostly at night"
+    },
+    {
+     "file": "aircargonews-ups",
+     "org": "Air Cargo News (DePaul University study)",
+     "quote": [
+      "an increasing share of its departures occur at night",
+      "The hub at MEM also has the greatest number of nighttime departures before 6am"
+     ],
+     "dated": "2026-02"
+    }
+   ]
+  },
+  {
+   "claim": "4.8 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "the airport handled 4.8 million passengers in 2025",
+   "note": "Replaces 'about 80 passenger flights a day', which had no second source. The operator's exact count is 4,751,026.",
+   "sources": [
+    {
+     "file": "flymemphis-2025",
+     "org": "Memphis-Shelby County Airport Authority (operator)",
+     "quote": [
+      "served 4.8 million passengers",
+      "Total passengers: 4,751,026"
+     ],
+     "dated": "2026-01-22"
+    },
+    {
+     "file": "dailymemphian-2025",
+     "org": "Daily Memphian",
+     "quote": "Memphis airport sees 4.8 million passengers",
+     "dated": "2026-01-22"
+    }
+   ]
+  },
+  {
+   "claim": "passenger hub from 1985 to 2013",
+   "verdict": "confirmed",
+   "inAfter": "It used to be a passenger hub, from 1985 to 2013",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Memphis also served as a passenger hub from 1985 to 2013"
+    },
+    {
+     "file": "flymemphis-history",
+     "org": "Memphis-Shelby County Airport Authority (operator)",
+     "quote": [
+      "In 1985, Republic Airlines chose Memphis International Airport as one of its hubs",
+      "In June 2013, Delta Air Lines announced that it would no longer maintain hub operations in Memphis"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Republic started the hub, Northwest continued it after the 1986 merger",
+   "verdict": "confirmed",
+   "inAfter": "Republic Airlines started it and Northwest continued it after the two merged in 1986",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Republic Airlines established the hub",
+      "After Republic merged with Northwest Airlines in 1986, Northwest continued to operate the hub"
+     ]
+    },
+    {
+     "file": "flymemphis-history",
+     "org": "Memphis-Shelby County Airport Authority (operator)",
+     "quote": [
+      "In 1985, Republic Airlines chose Memphis International Airport as one of its hubs",
+      "In 1986, Republic merged with Northwest Airlines"
+     ]
+    },
+    {
+     "file": "simpleflying-delta",
+     "org": "Simple Flying",
+     "quote": [
+      "Republic went on to establish a large hub there in 1985, before it merged with Northwest Airlines in 1986",
+      "Northwest established a fortress hub at Memphis"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Delta took over Northwest in 2008",
+   "verdict": "confirmed",
+   "inAfter": "Delta took over Northwest in 2008",
+   "note": "Simple Flying gives 2010 for the takeover. The Commercial Appeal's report from the time and Wikipedia both say 2008, so 2008 stands.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "When Northwest subsequently merged with Delta Air Lines in 2008"
+    },
+    {
+     "file": "aviationpros-dehub",
+     "org": "The Commercial Appeal (via Aviation Pros)",
+     "quote": "since inheriting it in the 2008 buyout of bankrupt Northwest",
+     "dated": "2013-09-03"
+    }
+   ]
+  },
+  {
+   "claim": "Delta closed the hub in 2013",
+   "verdict": "corrected",
+   "inAfter": "closed the hub in 2013",
+   "note": "The old text ran the 2008 merger and the closure together, as if the hub shut in 2008. Delta scaled it back from 2008 and ended it in 2013.",
+   "sources": [
+    {
+     "file": "flymemphis-history",
+     "org": "Memphis-Shelby County Airport Authority (operator)",
+     "quote": "In June 2013, Delta Air Lines announced that it would no longer maintain hub operations in Memphis"
+    },
+    {
+     "file": "aviationpros-dehub",
+     "org": "The Commercial Appeal (via Aviation Pros)",
+     "quote": "Delta's declaration that it no longer considers Memphis a hub",
+     "dated": "2013-09-03"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Delta closed the hub in September 2013"
+    }
+   ]
+  },
+  {
+   "claim": "three passenger concourses down to one",
+   "verdict": "confirmed",
+   "inAfter": "the airport went from three passenger concourses to one",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport subsequently reduced its passenger facilities from three concourses to one."
+    },
+    {
+     "file": "flymemphis-history",
+     "org": "Memphis-Shelby County Airport Authority (operator)",
+     "quote": [
+      "All passenger and plane traffic was moved to the remodeled concourse B",
+      "Concourses A and C were closed for future development"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "renamed on 11 August 2026",
+   "verdict": "confirmed",
+   "inAfter": "On 11 August 2026 it was renamed",
+   "note": "Confirmed by the operator, FedEx and local television, all dated 11 or 12 August 2026. The board voted for the new name in July 2025; it took effect on 11 August 2026.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "On August 11, 2026, the airport was renamed for Frederick W. Smith, founder of FedEx."
+    },
+    {
+     "file": "flymemphis-history",
+     "org": "Memphis-Shelby County Airport Authority (operator)",
+     "quote": "The name became official during a ceremony on August 11, 2026."
+    },
+    {
+     "file": "flymemphis-rename",
+     "org": "Memphis-Shelby County Airport Authority (operator)",
+     "quote": "the official name, brand, and logo will take effect on August 11",
+     "dated": "2026-08-12"
+    },
+    {
+     "file": "actionnews5-rename",
+     "org": "Action News 5 (WMC)",
+     "quote": [
+      "Published : Aug. 11, 2026",
+      "Memphis International Airport officially transitions to Frederick W. Smith International Airport"
+     ],
+     "dated": "2026-08-11"
+    },
+    {
+     "file": "fedex-dedication",
+     "org": "FedEx (newsroom)",
+     "quote": [
+      "August 11, 2026",
+      "celebrated the renaming of the Memphis International Airport in his honor"
+     ],
+     "dated": "2026-08-11"
+    }
+   ]
+  },
+  {
+   "claim": "new name is Frederick W. Smith International Airport",
+   "verdict": "confirmed",
+   "inAfter": "Frederick W. Smith International Airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "officially known as Frederick W. Smith International Airport"
+    },
+    {
+     "file": "flymemphis-rename",
+     "org": "Memphis-Shelby County Airport Authority (operator)",
+     "quote": "the renaming of Memphis International Airport to Frederick W. Smith International Airport",
+     "dated": "2026-08-12"
+    },
+    {
+     "file": "actionnews5-rename",
+     "org": "Action News 5 (WMC)",
+     "quote": "officially transitions to Frederick W. Smith International Airport",
+     "dated": "2026-08-11"
+    }
+   ]
+  },
+  {
+   "claim": "named after the founder of FedEx",
+   "verdict": "confirmed",
+   "inAfter": "after the founder of FedEx",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "renamed for Frederick W. Smith, founder of FedEx"
+    },
+    {
+     "file": "fedex-dedication",
+     "org": "FedEx (newsroom)",
+     "quote": "honor the legacy of the late FedEx founder Frederick W. Smith",
+     "dated": "2026-08-11"
+    },
+    {
+     "file": "actionnews5-rename",
+     "org": "Action News 5 (WMC)",
+     "quote": "paid tribute to the late FedEx founder Frederick Smith",
+     "dated": "2026-08-11"
+    }
+   ]
+  },
+  {
+   "claim": "the code stays MEM",
+   "verdict": "corrected",
+   "inAfter": "The airport code stays MEM.",
+   "note": "Replaces the guess that 'most systems and most people will still say Memphis International' with the fact that matters for bookings.",
+   "sources": [
+    {
+     "file": "flymemphis-rename",
+     "org": "Memphis-Shelby County Airport Authority (operator)",
+     "quote": "the airport's three-letter IATA code, MEM, will remain unchanged",
+     "dated": "2026-08-12"
+    },
+    {
+     "file": "actionnews5-rename",
+     "org": "Action News 5 (WMC)",
+     "quote": "the three-letter code MEM will remain unchanged",
+     "dated": "2026-08-11"
+    }
+   ]
+  },
+  {
+   "claim": "south east of downtown",
+   "verdict": "confirmed",
+   "inAfter": "It sits south east of downtown Memphis",
+   "note": "Coordinates put it at 151 degrees from the GeoNames centre, which is south east. The distance was cut (see below).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "southeast of downtown Memphis"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 151 degrees, which is south east"
+    },
+    {
+     "file": "mscaa-acfr-fy2024",
+     "org": "Memphis-Shelby County Airport Authority (operator)",
+     "quote": "13 miles by road southeast of downtown"
+    }
+   ]
+  },
+  {
+   "claim": "four runways",
+   "verdict": "confirmed",
+   "inAfter": "with four runways",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "has four runways"
+    },
+    {
+     "file": "mscaa-acfr-fy2024",
+     "org": "Memphis-Shelby County Airport Authority (operator)",
+     "quote": "has four runways equipped with precision instrument landing systems"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runways listed: 4"
+    }
+   ]
+  },
+  {
+   "claim": "longest runway 11,120 feet",
+   "verdict": "confirmed",
+   "inAfter": "the longest 11,120 feet",
+   "note": "FAA data on AirNav lists the four runways at 11,120, 9,320, 9,000 and 8,946 feet.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "18C/36C is the longest at 11,120 feet"
+    },
+    {
+     "file": "airnav-kmem",
+     "org": "AirNav (FAA data)",
+     "quote": [
+      "Dimensions: 11120 x 150 ft",
+      "Dimensions: 9320 x 150 ft",
+      "Dimensions: 9000 x 150 ft",
+      "Dimensions: 8946 x 150 ft"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runway 18C/36C: 3,389 m (11,120 ft)"
+    }
+   ]
+  },
+  {
+   "claim": "shares the airfield with a Tennessee Air National Guard base",
+   "verdict": "confirmed",
+   "inAfter": "is shared with a Tennessee Air National Guard base",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The Memphis Air National Guard Base is located at the airport"
+    },
+    {
+     "file": "flymemphis-history",
+     "org": "Memphis-Shelby County Airport Authority (operator)",
+     "quote": [
+      "the historic land swap between the Tennessee Air National Guard (TANG) and FedEx",
+      "The land swap provided TANG the space it needed to construct new facilities"
+     ]
+    },
+    {
+     "file": "dvids-164aw",
+     "org": "DVIDS (US Department of Defense)",
+     "quote": "at the Memphis Air National Guard base, Tennessee, February 1, 2025"
+    }
+   ]
+  },
+  {
+   "claim": "the Guard wing flies C-17s",
+   "verdict": "confirmed",
+   "inAfter": "flying C-17s",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "which operates C-17 Globemaster III transport aircraft"
+    },
+    {
+     "file": "tngov-164aw",
+     "org": "Tennessee Military Department (tn.gov)",
+     "quote": "The 164AW operates the USAF's premier strategic airlifter, the C-17 Globemaster III"
+    },
+    {
+     "file": "dvids-164aw",
+     "org": "DVIDS (US Department of Defense)",
+     "quote": "Two C-17 pilots from the 155th Airlift Squadron, 164th Airlift Wing, Memphis, Tenn."
+    }
+   ]
+  },
+  {
+   "claim": "nearly 400 FedEx flights a day",
+   "verdict": "cut",
+   "wasBefore": "with nearly 400 flights a day",
+   "why": "Good sources disagree. The operator's cargo page says almost 400 a day and Wikipedia's lead agrees, but Wikipedia's own body says 250, the Commercial Appeal said about 250 in 2013, and a DePaul University study reported by Air Cargo News in February 2026 counts 164.7 peak-day flights. The operator's page also carries old sorting figures. Cut rather than pick one."
+  },
+  {
+   "claim": "FedEx reaches the US, Canada, Europe, the Middle East, Asia and South America",
+   "verdict": "cut",
+   "wasBefore": "reaching the continental United States, Canada, Europe, the Middle East, Asia and South America",
+   "why": "No independent second source for the region list."
+  },
+  {
+   "claim": "about 80 passenger flights a day",
+   "verdict": "cut",
+   "wasBefore": "The airport averages about 80 passenger flights a day by comparison.",
+   "why": "No second source. Replaced by the 2025 passenger total, which the operator and the Daily Memphian both give."
+  },
+  {
+   "claim": "the hub was judged redundant",
+   "verdict": "cut",
+   "wasBefore": "the hub was judged redundant and closed",
+   "why": "Only Wikipedia gives this reason. The closure itself is kept and dated 2013 with two sources."
+  },
+  {
+   "claim": "the name changed very recently",
+   "verdict": "cut",
+   "wasBefore": "The name changed very recently.",
+   "why": "A relative date that will go stale. The exact date is kept."
+  },
+  {
+   "claim": "most systems and people will still say Memphis International",
+   "verdict": "cut",
+   "wasBefore": "so most systems and most people will still say Memphis International",
+   "why": "A guess, not a sourced fact. OurAirports (in the coordinates check) already lists the new name. Replaced by the unchanged MEM code, which two sources give."
+  },
+  {
+   "claim": "seven miles from downtown",
+   "verdict": "cut",
+   "wasBefore": "seven miles south east of downtown",
+   "why": "Sources disagree. Wikipedia and the operator's history page say seven miles, but the Wikipedia wording follows that page, which is describing the 1929 site. The operator's FY2024 financial report says 13 miles by road, FAA data on AirNav says 3 miles, and the computed straight line from the city centre is 8.4 miles. The bearing is kept."
+  },
+  {
+   "claim": "3,900 acres",
+   "verdict": "cut",
+   "wasBefore": "on 3,900 acres",
+   "why": "Sources disagree. Wikipedia says 3,900 acres; the operator's FY2024 financial report says about 4,600 acres."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

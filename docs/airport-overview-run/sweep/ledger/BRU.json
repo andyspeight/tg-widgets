@@ -1,0 +1,253 @@
+{
+ "iata": "BRU",
+ "id": "recZ6CdklosKHh529",
+ "name": "Brussels Airport",
+ "country": "Belgium",
+ "wikipedia": "https://en.wikipedia.org/wiki/Brussels_Airport",
+ "audited": "2026-09-23",
+ "before": "Belgium's main airport, at Zaventem 12 km north east of Brussels, and home base for Brussels Airlines and TUI fly Belgium. It handled more than 26 million passengers in 2019, twenty sixth busiest in Europe.\n\nEverything works under one roof, on stacked levels. The railway station is below ground, buses and taxis at street level, arrivals on level 2 and departures on level 3, with two piers, A and B, running off the top two levels.\n\nThe connection between those piers used to be the weak point. Pier A was reached by a 400 metre tunnel under the apron and each pier had its own security zone, so moving between them meant clearing security again and the airport worked in practice as two terminals. That changed in March 2015 when the Connector opened, an above ground building joining the two.\n\nPier A handles Schengen flights, plus Brussels Airlines services to Africa and to New York, which is why some of its gates were renumbered from A to T.\n\nThe departures hall was severely damaged by two bombings in March 2016 and the airport was closed until 3 April. It has since returned to full operation, reaching a record 96,000 passengers in one day in August 2019.",
+ "after": "Belgium's main airport, at Zaventem 12 km north east of Brussels. It handled 24.4 million passengers in 2025, and it is the hub for Brussels Airlines, Belgium's home carrier, as well as a base for TUI fly Belgium.\n\nSince March 2015 an above-ground building, the Connector, has linked the terminal with Pier A. Before that, passengers reached Pier A through a tunnel under the apron.\n\nThe departure hall was hit by suicide bombings on 22 March 2016, and the airport stayed closed to passenger flights until 3 April.",
+ "claims": [
+  {
+   "claim": "Belgium's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Belgium's main airport",
+   "note": "Eurostat 2025: Brussels 23.75 million, Charleroi 11.24 million, every other Belgian airport under 0.4 million.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "airport of Belgium. It is located in the municipality of Zaventem"
+    },
+    {
+     "file": "eurostat-belgium",
+     "org": "Eurostat",
+     "quote": [
+      "BE_EBBR BRUSSELS airport: passengers carried 23,754,209",
+      "BE_EBCI CHARLEROI/BRUSSELS SOUTH airport: passengers carried 11,244,536",
+      "BE_EBOS OOSTENDE/BRUGGE airport: passengers carried 393,731"
+     ],
+     "dated": "2025"
+    }
+   ]
+  },
+  {
+   "claim": "at Zaventem",
+   "verdict": "confirmed",
+   "inAfter": "at Zaventem",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is located in the municipality of Zaventem"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "OurAirports municipality: Zaventem"
+    }
+   ]
+  },
+  {
+   "claim": "12 km north east of Brussels",
+   "verdict": "confirmed",
+   "inAfter": "12 km north east of Brussels",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "12 km (7 miles) northeast of Brussels"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Brussels (GeoNames 2800866): 11.1 km (6.9 miles), bearing 59 degrees, which is north east"
+    }
+   ]
+  },
+  {
+   "claim": "24.4 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled 24.4 million passengers in 2025",
+   "note": "Was more than 26 million in 2019. Eurostat counts 23.75 million for 2025 on its own definition; the operator's figure is used, as elsewhere.",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "stat1_data = 24,383,115"
+    },
+    {
+     "file": "traveltomorrow-2025",
+     "org": "Travel Tomorrow",
+     "quote": "Brussels Airport handled 24.4 million passengers in 2025, representing a 3.3% increase compared to 2024.",
+     "dated": "2026-01"
+    }
+   ]
+  },
+  {
+   "claim": "hub for Brussels Airlines, Belgium's home carrier",
+   "verdict": "confirmed",
+   "inAfter": "it is the hub for Brussels Airlines, Belgium's home carrier",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "serves as the home base for Brussels Airlines and TUI fly Belgium"
+    },
+    {
+     "file": "press-brusselsairlines",
+     "org": "Brussels Airlines",
+     "quote": "Brussels Airlines is Belgium's home carrier and one of the network airlines of the Lufthansa Group. From its hub at Brussels Airport",
+     "dated": "2026"
+    }
+   ]
+  },
+  {
+   "claim": "a base for TUI fly Belgium",
+   "verdict": "softened",
+   "inAfter": "a base for TUI fly Belgium",
+   "note": "Wikipedia says home base; Routes lists Brussels among four Belgian bases. Softened to what both support.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "serves as the home base for Brussels Airlines and TUI fly Belgium"
+    },
+    {
+     "file": "routes-tuifly-about",
+     "org": "Routes (routesonline.com)",
+     "quote": "from its bases at Brussels, Ostend, Liège and Charleroi airports"
+    }
+   ]
+  },
+  {
+   "claim": "Connector since March 2015 links terminal and Pier A above ground",
+   "verdict": "confirmed",
+   "inAfter": "Since March 2015 an above-ground building, the Connector, has linked the terminal with Pier A",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "This tunnel was replaced by the \"Connector\", a new building that links both piers above gro"
+    },
+    {
+     "file": "bru-modernising",
+     "org": "Brussels Airport Company (operator)",
+     "quote": [
+      "Connector, the building which links the passenger terminal to Pier A above-ground",
+      "Connector was officially opened on 24 March 2015"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "tunnel under the apron before",
+   "verdict": "confirmed",
+   "inAfter": "Before that, passengers reached Pier A through a tunnel under the apron.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Pier A was connected to the main building via a 400-metre-long (1,300 ft) tunnel under the apron"
+    },
+    {
+     "file": "bru-modernising",
+     "org": "Brussels Airport Company (operator)",
+     "quote": "Before Connector passengers had to use a tunnel to go to their gate in Pier A."
+    }
+   ]
+  },
+  {
+   "claim": "departure hall hit by suicide bombings on 22 March 2016",
+   "verdict": "confirmed",
+   "inAfter": "The departure hall was hit by suicide bombings on 22 March 2016",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "by two terrorist bomb blasts"
+    },
+    {
+     "file": "aljazeera-reopen",
+     "org": "Al Jazeera",
+     "quote": "after suicide bombings hit the airport's departure hall and a Brussels subway train"
+    },
+    {
+     "file": "bru-modernising",
+     "org": "Brussels Airport Company (operator)",
+     "quote": "the terrorist attacks of 22nd March 2016"
+    }
+   ]
+  },
+  {
+   "claim": "closed to passenger flights until 3 April",
+   "verdict": "confirmed",
+   "inAfter": "the airport stayed closed to passenger flights until 3 April",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport was closed until 3 April 2016"
+    },
+    {
+     "file": "aljazeera-reopen",
+     "org": "Al Jazeera",
+     "quote": [
+      "the first passenger flight to depart from the airport 12 days after suicide bombings",
+      "3 Apr 2016"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "26 million in 2019, 26th busiest in Europe",
+   "verdict": "cut",
+   "wasBefore": "It handled more than 26 million passengers in 2019, twenty sixth busiest in Europe.",
+   "why": "Six years stale. Replaced with the 2025 figure."
+  },
+  {
+   "claim": "home base for TUI fly Belgium",
+   "verdict": "cut",
+   "wasBefore": "home base for Brussels Airlines and TUI fly Belgium",
+   "why": "Kept for Brussels Airlines; TUI softened to a base."
+  },
+  {
+   "claim": "levels: station below, arrivals level 2, departures level 3",
+   "verdict": "cut",
+   "wasBefore": "The railway station is below ground, buses and taxis at street level, arrivals on level 2 and departures on level 3",
+   "why": "No second source reachable for the level-by-level layout."
+  },
+  {
+   "claim": "under one roof on stacked levels",
+   "verdict": "cut",
+   "wasBefore": "Everything works under one roof, on stacked levels.",
+   "why": "Goes with the layout sentence."
+  },
+  {
+   "claim": "two piers running off the top two levels",
+   "verdict": "cut",
+   "wasBefore": "with two piers, A and B, running off the top two levels",
+   "why": "Goes with the layout sentence."
+  },
+  {
+   "claim": "400 metre tunnel, separate security zones, two terminals in practice",
+   "verdict": "cut",
+   "wasBefore": "Pier A was reached by a 400 metre tunnel under the apron and each pier had its own security zone",
+   "why": "Tunnel kept with two sources; its length and the security-zone detail have one."
+  },
+  {
+   "claim": "Pier A Schengen plus Brussels Airlines Africa and New York, T gates",
+   "verdict": "cut",
+   "wasBefore": "Pier A handles Schengen flights, plus Brussels Airlines services to Africa and to New York",
+   "why": "Current pier use not confirmed by a second source."
+  },
+  {
+   "claim": "record 96,000 passengers in a day, August 2019",
+   "verdict": "cut",
+   "wasBefore": "reaching a record 96,000 passengers in one day in August 2019",
+   "why": "Stale; one source."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

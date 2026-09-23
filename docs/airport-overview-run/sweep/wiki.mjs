@@ -6,6 +6,10 @@
      wikipedia-archived.txt  the exact text the Overview was drafted from, when
                              it is in ../evidence/batch-NN.json (batches 7-13)
      wikipedia-now.txt       the article as it reads today, fetched fresh
+     wikipedia-infobox.txt   today's infobox as plain "key = value" lines, which
+                             is where passenger figures, runways, operator and
+                             opening dates usually live (the plain-text article
+                             leaves the infobox out)
 
    The archived copy is what the Overview was traced against. The fresh copy
    shows whether the article has moved since, which matters for anything
@@ -44,6 +48,32 @@ async function articleText(url) {
   return null;
 }
 
+async function infobox(url) {
+  const title = decodeURIComponent(new URL(url).pathname.replace(/^\/wiki\//, ''));
+  const api = 'https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&redirects=1' +
+    '&prop=revisions&rvprop=content|timestamp|ids&rvslots=main&titles=' + encodeURIComponent(title);
+  const r = await fetch(api, { headers: { 'User-Agent': UA } });
+  if (!r.ok) return null;
+  const j = await r.json();
+  const rev = j.query && j.query.pages && j.query.pages[0] && j.query.pages[0].revisions && j.query.pages[0].revisions[0];
+  if (!rev) return null;
+  const w = rev.slots.main.content;
+  const start = w.search(/\{\{\s*Infobox[ _]airport/i);
+  if (start < 0) return { rev, lines: [] };
+  let depth = 0, i = start;
+  for (; i < w.length; i++) {
+    if (w.startsWith('{{', i)) { depth++; i++; }
+    else if (w.startsWith('}}', i)) { depth--; i++; if (!depth) break; }
+  }
+  const body = w.slice(start, i + 1)
+    .replace(/<ref[^>]*\/>/g, '').replace(/<ref[\s\S]*?<\/ref>/g, '').replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<br\s*\/?>/gi, '; ').replace(/\{\{(increase|decrease|steady|nowrap|small)\}\}/gi, '')
+    .replace(/\{\{convert\|([\d.,]+)\|(\w+)[^}]*\}\}/gi, '$1 $2').replace(/\{\{(?:nowrap|small|lang\|\w+)\|([^{}]*)\}\}/gi, '$1')
+    .replace(/\[\[(?:[^|\]]*\|)?([^\]]*)\]\]/g, '$1').replace(/'''?/g, '');
+  const lines = body.split(/\n\s*\|/).slice(1).map(l => l.replace(/\s+/g, ' ').trim()).filter(l => /=\s*\S/.test(l));
+  return { rev, lines };
+}
+
 for (const code of process.argv.slice(2).map(s => s.toUpperCase())) {
   const rec = snap.find(r => r.cellValuesByFieldId.fldcS9uu4NWMVaIVP === code);
   if (!rec) { console.log(code + '  not in snapshot'); continue; }
@@ -62,7 +92,12 @@ for (const code of process.argv.slice(2).map(s => s.toUpperCase())) {
     fs.writeFileSync(path.join(dir, 'wikipedia-now.txt'),
       `URL: ${wiki}\nFETCHED: ${new Date().toISOString()}\nHTTP: 200\nKIND: wikipedia (revision ${now.rev ? now.rev.revid + ' of ' + now.rev.timestamp : '?'})\n----\n${now.text}`);
   }
-  console.log(code.padEnd(4) + ' ' + (a ? 'archived ' + a.file : 'no archive      ') + '  now: ' +
+  const box = wiki ? await infobox(wiki).catch(() => null) : null;
+  if (box && box.lines.length) {
+    fs.writeFileSync(path.join(dir, 'wikipedia-infobox.txt'),
+      `URL: ${wiki}\nFETCHED: ${new Date().toISOString()}\nHTTP: 200\nKIND: wikipedia infobox (revision ${box.rev.revid} of ${box.rev.timestamp})\n----\n${box.lines.join('\n')}\n`);
+  }
+  console.log(code.padEnd(4) + ' ' + (a ? 'archived ' + a.file : 'no archive      ') + '  infobox: ' + (box ? box.lines.length + ' lines' : 'none') + '  now: ' +
     (now ? now.text.length + ' chars, rev ' + (now.rev ? now.rev.timestamp : '?') : 'FAILED') + '  ' + (f.fldlT6eApAdQHGYED || '(no name)'));
   await new Promise(s => setTimeout(s, 400));
 }

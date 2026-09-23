@@ -40,7 +40,7 @@ const airports = csv(fs.readFileSync(SP + '/airports.csv', 'utf8'));
 const runways = csv(fs.readFileSync(SP + '/runways.csv', 'utf8'));
 const cities = fs.readFileSync(SP + '/cities15000.txt', 'utf8').split('\n').filter(Boolean).map(l => {
   const c = l.split('\t');
-  return { id: c[0], name: c[1], ascii: c[2], alt: c[3], lat: +c[4], lng: +c[5], cc: c[8], pop: +c[14] };
+  return { id: c[0], name: c[1], ascii: c[2], alt: c[3], lat: +c[4], lng: +c[5], fcode: c[7], cc: c[8], pop: +c[14] };
 });
 
 const R = 6371.0088, rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
@@ -105,10 +105,13 @@ for (const code of codes) {
   const lines = [];
   lines.push(`Airport: ${oa.name} (OurAirports ${oa.ident}, IATA ${oa.iata_code}) at ${ap.lat.toFixed(4)}, ${ap.lng.toFixed(4)}` +
     (oa.elevation_ft ? `, elevation ${(+oa.elevation_ft).toLocaleString('en-GB')} ft (${Math.round(+oa.elevation_ft * 0.3048).toLocaleString('en-GB')} m)` : ''));
+  if (oa.municipality) lines.push(`OurAirports municipality: ${oa.municipality}`);
   let d = null, b = null;
   if (city) {
     d = dist(city, ap); b = bearing(city, ap);
-    lines.push(`City centre: ${city.name} (GeoNames ${city.id}) at ${city.lat.toFixed(4)}, ${city.lng.toFixed(4)}, population ${city.pop.toLocaleString('en-GB')}`);
+    const FEAT = { PPLC: 'the national capital', PPLA: 'the capital of a first-order division (state, province or region)', PPLA2: 'the seat of a second-order division' };
+    lines.push(`City centre: ${city.name} (GeoNames ${city.id}) at ${city.lat.toFixed(4)}, ${city.lng.toFixed(4)}, population ${city.pop.toLocaleString('en-GB')}` +
+      (FEAT[city.fcode] ? `; GeoNames class ${city.fcode}, ${FEAT[city.fcode]}` : ''));
     lines.push(`Straight-line distance from the city centre: ${d.toFixed(1)} km (${(d / 1.609344).toFixed(1)} miles)`);
     lines.push(`Bearing from the city centre: ${Math.round(b)} degrees, which is ${point8(b)}`);
   } else lines.push(`City centre: no GeoNames match for "${cityName}" in ${oa.iso_country}`);

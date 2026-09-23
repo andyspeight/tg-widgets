@@ -1,0 +1,274 @@
+{
+ "iata": "KWE",
+ "id": "rec5O7CJkuH90rS2y",
+ "name": "Guiyang Longdongbao International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Guiyang_Longdongbao_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Guizhou's gateway, 11 km south east of Guiyang, and busier than most people expect: just over 30.2 million passengers in 2025, which makes it the twenty third busiest airport in mainland China.\n\nGetting into the city is easy in two different ways. A metro station on Line 2 serves the terminal directly, and there is a railway station underneath the airport itself, so onward travel into the province does not need a road transfer at all.\n\nThe runway is 3,200 metres and takes wide bodies up to a 747 or an A330. The terminal covers around 34,000 square metres and is rated for more than two thousand passengers an hour in each direction.\n\nIt is the hub for Colorful Guizhou Airlines. The airport opened in 1997 and took its current name in 2006, and has been expanding more or less continuously since it passed its original five million passenger design capacity in 2010.",
+ "after": "The airport for Guiyang, the capital of Guizhou province, sits 11 km south east of the city centre. It handled 22.7 million passengers in 2025, the twenty third highest total in mainland China.\n\nRail links are good. Guiyang Metro Line 2 has run to the airport since April 2021, and high-speed trains call at Longdongbao railway station, which serves the airport.\n\nThere are two runways, the longer at 4,000 metres, and the airport is the base for Colorful Guizhou Airlines. Commercial flights began on 28 May 1997.",
+ "claims": [
+  {
+   "claim": "11 km south east of the city centre",
+   "verdict": "confirmed",
+   "inAfter": "11 km south east of the city centre",
+   "note": "Straight line from the GeoNames centre is 9.8 km at 118 degrees, south east; 11 km is within the road-distance tolerance.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is located 11 km (6.8 mi) southeast from Guiyang's city center."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 9.8 km",
+      "Bearing from the city centre: 118 degrees, which is south east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "serves Guiyang, capital of Guizhou",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Guiyang, the capital of Guizhou province",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is an international airport serving Guiyang, the capital of Southwest China's Guizhou province"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "GeoNames class PPLA, the capital of a first-order division (state, province or region)"
+    }
+   ]
+  },
+  {
+   "claim": "22.7 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled 22.7 million passengers in 2025",
+   "note": "The Overview said just over 30.2 million. That came from the article body, which contradicts the article's own infobox. CAAC's official table gives 22,731,681, and the infobox cites that table.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "quote": "passengers 2025: 22,731,681",
+     "dated": "2026-02-26"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "stat1_data = 22,731,681"
+    }
+   ]
+  },
+  {
+   "claim": "twenty third busiest in mainland China",
+   "verdict": "confirmed",
+   "inAfter": "the twenty third highest total in mainland China",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "quote": "passenger rank 23 in China",
+     "dated": "2026-02-26"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "was the 23rd busiest airport in mainland China"
+    }
+   ]
+  },
+  {
+   "claim": "Metro Line 2 to the airport since April 2021",
+   "verdict": "confirmed",
+   "inAfter": "Guiyang Metro Line 2 has run to the airport since April 2021",
+   "sources": [
+    {
+     "file": "guiyang-gov-hub",
+     "org": "Guiyang Municipal People's Government",
+     "quote": [
+      "On April 28, 2021, Guiyang Metro Line 2 was opened.",
+      "Guiyang Metro Line 2 connects Guiyangbei Railway Station, Guiyang Railway Station, Longdongbao Bus Station, and the airport"
+     ],
+     "dated": "2023-12-15"
+    },
+    {
+     "file": "chinatrain12306-kwe",
+     "org": "China Train 12306 (travel guide)",
+     "quote": "Guiyang's metro Line 2 has been opened for servince on April 28 of 2021, connecting Guiyang Airport"
+    }
+   ]
+  },
+  {
+   "claim": "high-speed trains at Longdongbao railway station, which serves the airport",
+   "verdict": "softened",
+   "inAfter": "high-speed trains call at Longdongbao railway station, which serves the airport",
+   "note": "The Overview said the station is underneath the airport. Only one source says underneath; another says close to. Softened to what both support.",
+   "sources": [
+    {
+     "file": "guiyang-gov-hub",
+     "org": "Guiyang Municipal People's Government",
+     "quote": "Since Sept 20, 2015, Longdongbao Railway Station has been in operation, with high-speed trains heading to Guiyangbei, Congjiang, Guilinbei, Guangzhou South, and other directions."
+    },
+    {
+     "file": "chinatrain12306-kwe",
+     "org": "China Train 12306 (travel guide)",
+     "quote": "there is also a train station called Longdongbao Railway Station (Longdongbao) that serves Guiyang Longdongbao Airport"
+    },
+    {
+     "file": "tcg-airport-transport",
+     "org": "Travel China Guide",
+     "quote": "The Longdongbao Railway Station is close to the airport"
+    }
+   ]
+  },
+  {
+   "claim": "two runways",
+   "verdict": "corrected",
+   "inAfter": "There are two runways",
+   "note": "The Overview said the runway is 3,200 metres. A second runway came with the Terminal 3 phase in 2021.",
+   "sources": [
+    {
+     "file": "guiyang-gov-hub",
+     "org": "Guiyang Municipal People's Government",
+     "quote": "ushering Guizhou into a new era with a dual-runway airport at its disposal"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "Runways listed: 2"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "r1_number = 01L/19R",
+      "r2_number = 01R/19L"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the longer runway is 4,000 metres",
+   "verdict": "corrected",
+   "inAfter": "the longer at 4,000 metres",
+   "note": "The sources disagree on the shorter runway (3,200 m in OurAirports, 3,500 m in the infobox), so only the longer one, where they agree, is stated.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "Runway 01R/19L: 4,000 m"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "r2_length_m = 4000"
+    }
+   ]
+  },
+  {
+   "claim": "base for Colorful Guizhou Airlines",
+   "verdict": "confirmed",
+   "inAfter": "the airport is the base for Colorful Guizhou Airlines",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "hub = Colorful Guizhou Airlines"
+    },
+    {
+     "file": "caac-gy-licence",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "quote": [
+      "多彩贵州航空有限公司",
+      "三、基地机场：贵阳龙洞堡国际机场"
+     ],
+     "dated": "2015-12-16"
+    }
+   ]
+  },
+  {
+   "claim": "commercial flights began on 28 May 1997",
+   "verdict": "confirmed",
+   "inAfter": "Commercial flights began on 28 May 1997.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport was opened on 28 May 1997"
+    },
+    {
+     "file": "guiyang-gov-hub",
+     "org": "Guiyang Municipal People's Government",
+     "quote": "On May 28, 1997, Guiyang Longdongbao Airport began its commercial operations"
+    }
+   ]
+  },
+  {
+   "claim": "gateway, busier than most people expect",
+   "verdict": "cut",
+   "wasBefore": "Guizhou's gateway, 11 km south east of Guiyang, and busier than most people expect",
+   "why": "Opinion, and 'gateway' is on the banned list. Replaced with what the airport is."
+  },
+  {
+   "claim": "30.2 million passengers in 2025",
+   "verdict": "cut",
+   "wasBefore": "just over 30.2 million passengers in 2025",
+   "why": "Wrong. Official figure is 22,731,681."
+  },
+  {
+   "claim": "railway station underneath the airport",
+   "verdict": "cut",
+   "wasBefore": "there is a railway station underneath the airport itself",
+   "why": "Only one source says underneath. Softened."
+  },
+  {
+   "claim": "no road transfer needed",
+   "verdict": "cut",
+   "wasBefore": "so onward travel into the province does not need a road transfer at all",
+   "why": "An inference, not a sourced fact."
+  },
+  {
+   "claim": "runway 3,200 m",
+   "verdict": "cut",
+   "wasBefore": "The runway is 3,200 metres",
+   "why": "Out of date: there are two runways now."
+  },
+  {
+   "claim": "takes a 747 or an A330",
+   "verdict": "cut",
+   "wasBefore": "takes wide bodies up to a 747 or an A330",
+   "why": "Describes the old single runway; one source."
+  },
+  {
+   "claim": "terminal 34,000 square metres, 2,000 passengers an hour",
+   "verdict": "cut",
+   "wasBefore": "The terminal covers around 34,000 square metres and is rated for more than two thousand passengers an hour in each direction.",
+   "why": "Describes the original terminal; Terminal 3 opened in 2021. One source."
+  },
+  {
+   "claim": "took its current name in 2006",
+   "verdict": "cut",
+   "wasBefore": "took its current name in 2006",
+   "why": "Only Wikipedia says so."
+  },
+  {
+   "claim": "expanding since passing 5 million design capacity in 2010",
+   "verdict": "cut",
+   "wasBefore": "has been expanding more or less continuously since it passed its original five million passenger design capacity in 2010",
+   "why": "Only Wikipedia gives the year; not needed."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Rail links are good.",
+   "why": "A heading sentence for the two sourced rail facts that follow it."
+  }
+ ],
+ "tracerOk": {}
+}

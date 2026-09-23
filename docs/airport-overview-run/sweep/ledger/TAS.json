@@ -1,0 +1,385 @@
+{
+ "iata": "TAS",
+ "id": "recRKaca2fRtnwWa5",
+ "name": "Tashkent International Airport",
+ "country": "Uzbekistan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Tashkent_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Uzbekistan's main airport and second busiest in Central Asia after Almaty, only 12 km from the centre of Tashkent. It is the hub for Uzbekistan Airways.\n\nThere are two runways, both built to take large aircraft including the 787 and the A380, the longer at 4,000 metres. Since 2024 there has been a 24 room hotel for passengers inside the airport.\n\nOne thing to warn a driver about. Cars may pull up on the first floor for drop-offs but only for ten minutes. Cameras linked to the traffic control system issue an automatic fine after that, so a long goodbye is expensive.\n\nThe bigger news is that this airport has a closing date. A new Tashkent International Airport is being built in the Tashkent Region near Yangiyo'l, due to open in late 2030, and the existing airport is set to close once it does.\n\nIt is named after Islam Karimov, the first president of independent Uzbekistan.",
+ "after": "Uzbekistan's main airport and one of the busiest in Central Asia, handling almost 10 million passengers in 2025. It is about 6 km from the centre of Tashkent and is the hub for Uzbekistan Airways.\n\nThere are two runways, and the longer, at 4,000 metres, can take the A380. A 24 room hotel for transit passengers opened in the departure terminal in January 2024.\n\nThe bigger news is that work has started on a new Tashkent International Airport in the Tashkent Region, near Yangiyul. It is due to open in late 2030, and the existing airport is expected to close once it does.\n\nThe airport is named after Islam Karimov, the first president of independent Uzbekistan.",
+ "claims": [
+  {
+   "claim": "Uzbekistan's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Uzbekistan's main airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the main international airport in Uzbekistan"
+    },
+    {
+     "file": "uzdaily-2025-pax",
+     "org": "UzDaily (Uzbekistan Airports data)",
+     "quote": "Tashkent International Airport reaffirmed its status as the country's largest aviation hub",
+     "dated": "2026-01-01"
+    },
+    {
+     "file": "trend-2025-pax",
+     "org": "Trend News Agency (Uzbekistan Airports data)",
+     "quote": "сохранил позицию крупнейшего авиационного хаба страны",
+     "dated": "2026-01-01"
+    }
+   ]
+  },
+  {
+   "claim": "one of the busiest in Central Asia",
+   "verdict": "softened",
+   "inAfter": "one of the busiest in Central Asia",
+   "note": "Was 'second busiest in Central Asia after Almaty'. Only Wikipedia states the ranking outright. It held in 2025 but narrowly: Almaty 11.93 million (Astana Times, file astanatimes-almaty-2026), Tashkent almost 10 million, Astana 9.2 million (Qazinform, file qazinform-astana-2025), so it could flip within a year. Softened to what the WFP Logistics Cluster also says.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the second busiest airport in Central Asia"
+    },
+    {
+     "file": "logcluster-lca",
+     "org": "WFP Logistics Cluster (Logistics Capacity Assessment)",
+     "quote": "Tashkent International Airport is one of the largest and busiest airports in Central Asia"
+    }
+   ]
+  },
+  {
+   "claim": "almost 10 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "handling almost 10 million passengers in 2025",
+   "note": "Replaces the unconfirmed Central Asia ranking with the operator's figure, which is what tells an agent how busy it is. Wikipedia's article text still gives 8.7 million for 2024; its infobox gives 9,986,445 for 2025 against the operator's 9,964,602 as reported. Both round to almost 10 million.",
+   "sources": [
+    {
+     "file": "uzdaily-2025-pax",
+     "org": "UzDaily (Uzbekistan Airports data)",
+     "quote": [
+      "Tashkent International Airport Served Nearly 10 Million Passengers in 2025",
+      "handling 40,153 flights and 9,964,602 passengers, according to Uzbekistan Airports"
+     ],
+     "dated": "2026-01-01"
+    },
+    {
+     "file": "trend-2025-pax",
+     "org": "Trend News Agency (Uzbekistan Airports data)",
+     "quote": "Аэропорт Ташкента в 2025 году обслужил почти 10 млн пассажиров",
+     "dated": "2026-01-01"
+    }
+   ]
+  },
+  {
+   "claim": "about 6 km from the centre",
+   "verdict": "corrected",
+   "inAfter": "It is about 6 km from the centre of Tashkent",
+   "note": "Was 'only 12 km'. The coordinates put the airport 5.5 km in a straight line from the GeoNames centre, so 12 km is 2.2 times the straight line, outside the sweep's tolerance. The WFP assessment says about 6 km. Travel pages range from 4 to 14 km, and the ones that say 12 km follow Wikipedia. No direction is given: from the GeoNames point the airport is east, from Amir Timur Square it is south, so a compass point would mislead one way or the other.",
+   "sources": [
+    {
+     "file": "logcluster-lca",
+     "org": "WFP Logistics Cluster (Logistics Capacity Assessment)",
+     "quote": "Located approximately 6 kilometers from the city center of Tashkent"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 5.5 km"
+    }
+   ]
+  },
+  {
+   "claim": "hub for Uzbekistan Airways",
+   "verdict": "confirmed",
+   "inAfter": "is the hub for Uzbekistan Airways",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Tashkent International Airport is the hub for Uzbekistan Airways, the national carrier of Uzbekistan"
+    },
+    {
+     "file": "uzairways-flydubai",
+     "org": "Uzbekistan Airways",
+     "quote": [
+      "Based in Tashkent, the airline operates flights to more than 100 destinations",
+      "the expansive route network of Uzbekistan Airways through Tashkent"
+     ],
+     "dated": "2026-09-16"
+    },
+    {
+     "file": "logcluster-lca",
+     "org": "WFP Logistics Cluster (Logistics Capacity Assessment)",
+     "quote": "It is a primary hub for Uzbekistan Airways, the national carrier"
+    }
+   ]
+  },
+  {
+   "claim": "two runways",
+   "verdict": "confirmed",
+   "inAfter": "There are two runways",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "features two runways"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runways listed: 2"
+    },
+    {
+     "file": "logcluster-lca",
+     "org": "WFP Logistics Cluster (Logistics Capacity Assessment)",
+     "quote": "Tashkent International Airport has two runways"
+    }
+   ]
+  },
+  {
+   "claim": "the longer at 4,000 metres",
+   "verdict": "confirmed",
+   "inAfter": "the longer, at 4,000 metres",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "measuring 4,000 metres (13,123 ft) in length"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runway 08L/26R: 4,000 m (13,123 ft)"
+    }
+   ]
+  },
+  {
+   "claim": "the 4,000 metre runway can take the A380",
+   "verdict": "softened",
+   "inAfter": "can take the A380",
+   "note": "Was 'both built to take large aircraft including the 787 and the A380'. The WFP assessment says only the 4,000 metre runway takes the A380 and the second is used for smaller aircraft, so 'both' goes and only what the two sources share is kept.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "both of which meet international standards for accommodating large aircraft, including Boeing 787 and Airbus A380 models"
+    },
+    {
+     "file": "logcluster-lca",
+     "org": "WFP Logistics Cluster (Logistics Capacity Assessment)",
+     "quote": "measuring 4,000 meters in length, capable of accommodating large aircraft such as the Boeing 747 and Airbus A380"
+    }
+   ]
+  },
+  {
+   "claim": "24 room hotel opened in the departure terminal in January 2024",
+   "verdict": "softened",
+   "inAfter": "A 24 room hotel for transit passengers opened in the departure terminal in January 2024",
+   "note": "Was 'Since 2024 there has been a 24 room hotel', which says it is still open. The opening is confirmed twice; no source from the last 12 months confirms the hotel under its opening name (Khamsa Hotel), so the sentence now gives the opening only. Gazeta (June 2025) reports a capsule hotel under the Qo'noq brand opening in the sterile zone in 2024 and a second one landside in 2025, which suggests the airside hotel may have been rebranded.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Since 2024, a 24-room hotel for passengers has been operational at Tashkent International Airport."
+    },
+    {
+     "file": "gazeta-hotel",
+     "org": "Gazeta.uz (Uzbekistan Airports press service)",
+     "quote": [
+      "24-room hotel has opened in the departure terminal of Tashkent International Airport",
+      "29 January 2024",
+      "during the transfer without leaving the airport and the transit zone"
+     ],
+     "dated": "2024-01-29"
+    },
+    {
+     "file": "kunuz-hotel",
+     "org": "Kun.uz",
+     "quote": [
+      "The hotel has 24 rooms",
+      "The hotel complex is located in the waiting area of the departure terminal",
+      "29.01.2024"
+     ],
+     "dated": "2024-01-29"
+    }
+   ]
+  },
+  {
+   "claim": "work has started on a new airport",
+   "verdict": "confirmed",
+   "inAfter": "work has started on a new Tashkent International Airport",
+   "note": "Groundbreaking was 15 October 2025; the PPP contract with the Vision Invest consortium was signed on 17 June 2026 and site preparation has begun.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Construction of a New Tashkent International Airport is currently underway"
+    },
+    {
+     "file": "timesca-contract",
+     "org": "The Times of Central Asia",
+     "quote": [
+      "The project began with a ceremonial groundbreaking in October 2025",
+      "site preparation work has already begun"
+     ],
+     "dated": "2026-07-07"
+    },
+    {
+     "file": "kursiv-new-2030",
+     "org": "Kursiv Uzbekistan",
+     "quote": "the initial phases of construction to commence this month",
+     "dated": "2026-06-18"
+    }
+   ]
+  },
+  {
+   "claim": "in the Tashkent Region near Yangiyul",
+   "verdict": "confirmed",
+   "inAfter": "in the Tashkent Region, near Yangiyul",
+   "note": "Spelled Yangiyul, as in the English-language press, rather than the Uzbek Latin Yangiyo'l.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "districts of the Tashkent Region, 7 km from Yangiyoʻl"
+    },
+    {
+     "file": "uzbuild-yangiyul",
+     "org": "UzBuild (Iteca Exhibitions), from Gazeta.uz",
+     "quote": "the future facility will be located approximately 7 km east of the city of Yangiyul"
+    },
+    {
+     "file": "timesca-contract",
+     "org": "The Times of Central Asia",
+     "quote": "located in the Urtachirchik and Kuyichirchik districts of the Tashkent region"
+    }
+   ]
+  },
+  {
+   "claim": "due to open in late 2030",
+   "verdict": "confirmed",
+   "inAfter": "It is due to open in late 2030",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is scheduled to open in late 2030."
+    },
+    {
+     "file": "timesca-contract",
+     "org": "The Times of Central Asia",
+     "quote": "Construction is scheduled from 2026 to 2030, with commissioning planned for late 2030.",
+     "dated": "2026-07-07"
+    },
+    {
+     "file": "asiaplus-aug2026",
+     "org": "Asia-Plus",
+     "quote": "The airport is expected to begin operations in 2030.",
+     "dated": "2026-08-20"
+    }
+   ]
+  },
+  {
+   "claim": "existing airport expected to close when the new one opens",
+   "verdict": "softened",
+   "inAfter": "the existing airport is expected to close once it does",
+   "note": "Was 'set to close'. Every source puts it as an expectation tied to the new airport opening; no closing date has been fixed.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the existing Islam Karimov Tashkent International Airport is slated to close"
+    },
+    {
+     "file": "timesca-contract",
+     "org": "The Times of Central Asia",
+     "quote": "after which it is expected to close once the new facility opens",
+     "dated": "2026-07-07"
+    },
+    {
+     "file": "astanatimes-june",
+     "org": "The Astana Times",
+     "quote": "The existing airport is expected to be decommissioned once the new facility becomes operational.",
+     "dated": "2026-05-07"
+    }
+   ]
+  },
+  {
+   "claim": "named after Islam Karimov, first president of independent Uzbekistan",
+   "verdict": "confirmed",
+   "inAfter": "named after Islam Karimov, the first president of independent Uzbekistan",
+   "note": "Renamed in 2017. The UzBuild piece (2026) still calls it the Islam Karimov airport, so the name is current.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It was named after Islam Karimov, the first president of independent Uzbekistan"
+    },
+    {
+     "file": "rferl-karimov",
+     "org": "RFE/RL",
+     "quote": "has signed a resolution to name Tashkent International airport after the Central Asian nation's first president, Islam Karimov",
+     "dated": "2017-05-04"
+    },
+    {
+     "file": "uzbuild-yangiyul",
+     "org": "UzBuild (Iteca Exhibitions), from Gazeta.uz",
+     "quote": "the existing Islam Karimov International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "second busiest in Central Asia after Almaty",
+   "verdict": "cut",
+   "wasBefore": "second busiest in Central Asia after Almaty",
+   "why": "Only Wikipedia states the ranking and the margin over Astana is small. Softened to one of the busiest in Central Asia, with the 2025 passenger figure."
+  },
+  {
+   "claim": "only 12 km from the centre",
+   "verdict": "cut",
+   "wasBefore": "only 12 km from the centre of Tashkent",
+   "why": "Twice the straight-line distance from the coordinates; the WFP assessment says about 6 km. Replaced."
+  },
+  {
+   "claim": "both runways built for the 787 and A380",
+   "verdict": "cut",
+   "wasBefore": "both built to take large aircraft including the 787 and the A380",
+   "why": "The WFP assessment says the second runway is used for smaller aircraft. Kept only that the 4,000 metre runway takes the A380."
+  },
+  {
+   "claim": "hotel still open since 2024",
+   "verdict": "cut",
+   "wasBefore": "Since 2024 there has been a 24 room hotel for passengers inside the airport",
+   "why": "No source from the last 12 months confirms it is still trading as opened. Reframed as the January 2024 opening."
+  },
+  {
+   "claim": "warning to drivers",
+   "verdict": "cut",
+   "wasBefore": "One thing to warn a driver about.",
+   "why": "Lead-in to the drop-off rule, which is cut."
+  },
+  {
+   "claim": "ten-minute drop-off on the first floor",
+   "verdict": "cut",
+   "wasBefore": "Cars may pull up on the first floor for drop-offs but only for ten minutes",
+   "why": "Confirmed only for August 2024 (UzDaily, 31 Aug 2024, and Wikipedia). The forecourt has been rebuilt since: in September 2025 Uzbekistan Airports described new arrival lanes with ten minutes free and more changes when the halls merge (Gazeta, 17 Sep 2025, just outside the 12-month window). Nothing from the last 12 months confirms the rule as it stands."
+  },
+  {
+   "claim": "automatic camera fines",
+   "verdict": "cut",
+   "wasBefore": "Cameras linked to the traffic control system issue an automatic fine after that, so a long goodbye is expensive",
+   "why": "Same age problem, and Gazeta (Sep 2025) calls the departures system 'similar but not fully automated', which contradicts 'automatic'."
+  },
+  {
+   "claim": "the airport has a closing date",
+   "verdict": "cut",
+   "wasBefore": "this airport has a closing date",
+   "why": "No closing date has been set. It is expected to close once the new airport opens."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

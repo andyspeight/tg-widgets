@@ -76,10 +76,27 @@ committed, in the ledgers.
 | Script | Does |
 |---|---|
 | `start.mjs <IATA>` | Opens an airport: prints the record, saves source 1, runs the coordinates check, creates `ledger/<IATA>.json` with the old text copied from the snapshot |
-| `wiki.mjs <IATA>` | Saves the Wikipedia text: the archived copy the Overview was drafted from, and the article as it reads today |
+| `wiki.mjs <IATA>` | Saves the Wikipedia text: the archived copy the Overview was drafted from, the article as it reads today, and today's infobox as `key = value` lines (where passenger figures, runways, hubs and opening dates usually live) |
 | `geo.mjs <IATA>` or `--all` | The coordinates check above, plus runway lengths and elevation from OurAirports |
 | `grab.mjs <IATA> <label> <url> [regex]` | Saves one source page as text, with its URL and fetch time, and prints the matching lines |
+| `grabb.mjs <IATA> <label> <url> [regex]` | The same through a real Chromium browser, for the many official and news sites that answer a plain request with 403. Certificate checking stays on: the session's proxy CA was added to Chromium's trust store (`certutil`, 23 Sep), never bypassed |
 | `check.mjs <IATA>` | The gate. Every quote on its saved page, two organisations per kept claim, every sentence of the new text carried by a checked claim, tracer, bearings, house style |
+
+## Bulk second sources, fetched once for many airports
+
+| Source | Airports | Evidence file | What it settles |
+|---|---:|---|---|
+| CAAC 2025 airport throughput table (published 26 Feb 2026) | 47 Chinese | `caac-2025.txt` | passengers 2025 and 2024, national rank, aircraft movements |
+| Eurostat `avia_paoa`, passengers carried, 2022 to 2025 | 68 European and Turkish | `eurostat.txt` | annual passengers; note Eurostat's own definition can sit 1 to 3 per cent off an operator's figure |
+
+First pass, 23 Sep: CAAC matched the passenger figure, rank or movements in
+22 Chinese Overviews to within rounding and caught one outright error (KWE
+Guiyang said 30.2 million; the official figure is 22,731,681, which Wikipedia's
+own infobox also gives while its body text says 30.2). Eurostat matched 21
+European figures within 3 per cent and showed 11 Overviews quoting 2015 to 2019
+figures where 2025 ones now exist (BGO BRU CFR GOA NTE OSD PTP RTM SDR STR TRD).
+The coordinates check confirmed 186 stated distances or bearings and flagged 54
+for a look in context.
 
 ## The ledger
 
@@ -105,3 +122,5 @@ two sources is `Done`, and Done is servable. That is Andy's call, asked on
 | Date | Airport | Result |
 |---|---|---|
 | 23 Sep 2026 | TBS Tbilisi | Verified and pushed. 16 claims kept (6 corrected), 8 cut. Caught: the Russian flight ban was lifted in May 2023; traffic and airline counts were a year and a half stale |
+| 23 Sep 2026 | KWE Guiyang | Verified and pushed. 10 kept, 9 cut. Caught: passengers 30.2 million should be 22.7 million; "the runway is 3,200 metres" when there have been two since 2021 |
+| 23 Sep 2026 | BRU Brussels | Verified and pushed. 10 kept, 8 cut. Caught: a 2019 passenger figure where 2025's (24.4 million) exists; TUI fly Belgium's "home base" softened to a base |
