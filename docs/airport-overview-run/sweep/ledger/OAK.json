@@ -1,0 +1,384 @@
+{
+ "iata": "OAK",
+ "id": "recLH5MGmvR3asrBU",
+ "name": "Oakland San Francisco Bay Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Oakland_San_Francisco_Bay_Airport",
+ "audited": "2026-09-23",
+ "before": "The East Bay's airport, seven miles south of downtown Oakland and twelve miles east of San Francisco, and a genuine alternative for a client staying anywhere on that side of the bay. It is a Southwest Airlines operating base.\n\nThe layout works well for connections. There are two terminals and 29 gates, and the two are joined beyond security, so a connecting passenger never has to clear again. International arrivals without pre-clearance are handled in Terminal 1, which is also where Alaska, Delta, Frontier, Hawaiian, Volaris and Viva sit. Terminal 2 is Southwest only.\n\nThere are four runways across 2,600 acres, one long commercial runway on the south field and three shorter general aviation runways on the north. Taxiway B joins the two over a bridge across Ron Cowan Parkway. Winds come from the west or north more than 95 per cent of the time, so aircraft almost always arrive from the south east.\n\nTwo runways were renumbered in 2013 because the Earth's magnetic field had shifted.",
+ "after": "The main airport for the East Bay, seven miles south of downtown Oakland and a genuine alternative for a client staying anywhere on that side of the bay. Southwest Airlines carries the great majority of its passengers.\n\nThere are two terminals. Alaska, Delta, Hawaiian and Volaris check in at Terminal 1, and Southwest at Terminal 2.\n\nThe airfield covers 2,600 acres, with one long commercial runway on the south field and three shorter general aviation runways on the north.",
+ "claims": [
+  {
+   "claim": "the main airport for the East Bay",
+   "verdict": "confirmed",
+   "inAfter": "The main airport for the East Bay",
+   "note": "Was 'The East Bay's airport'; reworded in the operator's own terms.",
+   "sources": [
+    {
+     "file": "op-facts",
+     "org": "Port of Oakland (operator, iflyoak.com)",
+     "quote": "Oakland San Francisco Bay Airport (OAK) is the main airport for the greater East Bay, the most populated area in the metropolitan San Francisco Bay area.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "serving the East Bay of the San Francisco Bay Area"
+    }
+   ]
+  },
+  {
+   "claim": "seven miles from downtown Oakland",
+   "verdict": "confirmed",
+   "inAfter": "seven miles south of downtown Oakland",
+   "note": "Passes the coordinates check: 6.4 miles in a straight line from the GeoNames centre, a ratio of 1.09. The FAA master record gives '04 S' in nautical miles (about 4.6 miles) from its own business-district point, which is shorter than even the straight line, so it was not followed (same pattern as ORF).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is located seven miles (11 km) south of downtown Oakland"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 10.3 km (6.4 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "south of downtown Oakland",
+   "verdict": "confirmed",
+   "inAfter": "south of downtown Oakland",
+   "note": "The coordinates give 155 degrees, south east, one point from south; the FAA says south.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "seven miles (11 km) south of downtown Oakland"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "3 CBD TO AIRPORT (NM): 04 S",
+      "AIRPORT MASTER RECORD",
+      "09/03/2026"
+     ],
+     "dated": "2026-09-03 (date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 155 degrees, which is south east"
+    }
+   ]
+  },
+  {
+   "claim": "Southwest carries the great majority of passengers",
+   "verdict": "softened",
+   "inAfter": "Southwest Airlines carries the great majority of its passengers.",
+   "note": "Was 'It is a Southwest Airlines operating base'. Only Wikipedia says base (its infobox and a line on the 1990s crew base); the Southwest release it cites is gone (404) and Southwest's own 2025 fact sheet lists no bases, so 'base' could not be confirmed within twelve months. What both sources support is Southwest's dominance: BTS gives it 87.12 per cent of passengers on US flights in the twelve months to June 2026, and Wikipedia calls it the airport's dominant passenger carrier.",
+   "sources": [
+    {
+     "file": "bts-carrier-shares",
+     "org": "Bureau of Transportation Statistics (US Department of Transportation)",
+     "quote": [
+      "Oakland, CA: Oakland International (OAK) Scheduled Services except Freight/Mail BTS Data as of 9/23/2026",
+      "Carrier Shares for July 2025 - June 2026",
+      "Southwest 6,500 87.12%"
+     ],
+     "dated": "2026-09-23 (data July 2025 to June 2026)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "expanded its flights to become the airport's dominant passenger carrier"
+    }
+   ]
+  },
+  {
+   "claim": "two terminals",
+   "verdict": "confirmed",
+   "inAfter": "There are two terminals.",
+   "sources": [
+    {
+     "file": "op-map",
+     "org": "Port of Oakland (operator, iflyoak.com)",
+     "quote": [
+      "Terminal 1 Gates 1-17",
+      "Terminal 2 Gates 20-32"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Oakland San Francisco Bay Airport has two terminals"
+    }
+   ]
+  },
+  {
+   "claim": "Alaska, Delta, Hawaiian and Volaris in Terminal 1; Southwest in Terminal 2",
+   "verdict": "corrected",
+   "inAfter": "Alaska, Delta, Hawaiian and Volaris check in at Terminal 1, and Southwest at Terminal 2.",
+   "note": "Was 'Terminal 1, which is also where Alaska, Delta, Frontier, Hawaiian, Volaris and Viva sit. Terminal 2 is Southwest only.' The airport's live terminal map gives the check-in terminal for each airline; its FAQ puts Southwest in Terminal 2 and the other airlines in Terminal 1. Viva is no longer on the airport's airline lists; Frontier's terminal is not on the map (see the cuts). The airline list (Buy Tickets page) is current: Alaska, Advanced Air, Delta, Frontier, Hawaiian, JSX, Southwest and Volaris.",
+   "sources": [
+    {
+     "file": "op-map",
+     "org": "Port of Oakland (operator, iflyoak.com)",
+     "quote": [
+      "Alaska Airlines Terminal 1 Pre-Security Delta Airlines Terminal 1 Pre-Security",
+      "Hawaiian Airlines operates out of Terminal 1.",
+      "Southwest Airlines Terminal 2 Pre-Security",
+      "Volaris Terminal 1 Pre-Security"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-faq",
+     "org": "Port of Oakland (operator, iflyoak.com)",
+     "quote": [
+      "Southwest Airlines in Terminal 2 offers wheelchair assistance from the curbside.",
+      "Airlines in Terminal 1 provide wheelchair assistance at the ticket counters"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-buy-tickets",
+     "org": "Port of Oakland (operator, iflyoak.com)",
+     "quote": "Alaska Airlines Buy Tickets Advanced Air Buy Tickets Delta Air Lines Buy Tickets Frontier Airlines Buy Tickets Hawaiian Airlines Buy Tickets JSX Buy Tickets Southwest Airlines Buy Tickets Volaris Airlines",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Terminal 1 has 16 gates serving Advanced Air, Alaska, Delta, Frontier, Hawaiian, Southwest, Viva, Volaris, and Volaris El Salvador.",
+      "Terminal 2 has 13 gates serving Southwest."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "2,600 acres",
+   "verdict": "confirmed",
+   "inAfter": "The airfield covers 2,600 acres",
+   "sources": [
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "22 ACREAGE: 2,600",
+      "AIRPORT MASTER RECORD",
+      "09/03/2026"
+     ],
+     "dated": "2026-09-03 (date on the record)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport covers 2,600 acres (1,100 ha) of land."
+    }
+   ]
+  },
+  {
+   "claim": "one long commercial runway on the south field, three shorter general aviation runways on the north",
+   "verdict": "confirmed",
+   "inAfter": "with one long commercial runway on the south field and three shorter general aviation runways on the north",
+   "note": "Four runways on the FAA record: 12/30 at 10,520 feet, then 10R/28L 6,213, 10L/28R 5,457 and 15/33 3,376 (Wikipedia gives 5,458 for 10L/28R). The Port's pilot sheet sets out North Field procedures for 10L/R, 28L/R, 15 and 33 and sends larger aircraft to 12/30; the FAA bars scheduled airline flights from 15/33.",
+   "sources": [
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "10L/28R 10R/28L 12/30 15/33 5,457 6,213 10,520 3,376",
+      "RWY 15/33 NOT AVBL FOR PART 121/PART 380 OPS WITH SKED PAX CARRYING OPS MORE THAN 9 PAX SEATS"
+     ],
+     "dated": "2026-09-03 (date on the record)"
+    },
+    {
+     "file": "op-pilot-sheet-2025",
+     "org": "Port of Oakland (operator, iflyoak.com)",
+     "quote": [
+      "North Field Noise Abatement Procedures",
+      "All aircraft over 75,000 pounds are directed to use Runways 12/30."
+     ],
+     "dated": "2025-07 (date in the file's URL)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "South Field (commercial and cargo operations):",
+      "Runway 12/30: 10,520 ft",
+      "North Field (general aviation operations):"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "twelve miles east of San Francisco",
+   "verdict": "cut",
+   "wasBefore": "and twelve miles east of San Francisco",
+   "why": "Wikipedia alone. The coordinates check covers only the distance to Oakland, and no second written source was found in two tries (the Port's 2021 fact sheet the article cites is gone, 404; the Port's current pages give no distance)."
+  },
+  {
+   "claim": "Southwest operating base",
+   "verdict": "cut",
+   "wasBefore": "It is a Southwest Airlines operating base.",
+   "why": "'Base' rests on Wikipedia alone within the last twelve months; softened to Southwest carrying the great majority of passengers (BTS, Wikipedia). The San Francisco Chronicle's report on Southwest's pullback at Oakland, which Wikipedia cites, is blocked by this session's egress policy and was not tried another way."
+  },
+  {
+   "claim": "the layout works well for connections; terminals joined beyond security",
+   "verdict": "cut",
+   "wasBefore": "The layout works well for connections.",
+   "why": "Rests on the airside link between the terminals, which is Wikipedia alone: the Port's map, FAQ and releases list each terminal's post-security areas separately and never say they connect."
+  },
+  {
+   "claim": "29 gates, joined beyond security",
+   "verdict": "cut",
+   "wasBefore": "There are two terminals and 29 gates, and the two are joined beyond security, so a connecting passenger never has to clear again",
+   "why": "The gate count is disputed: Wikipedia 29 (16 and 13), the Port's live map 28 gate labels (Terminal 1 gates 1 to 17, Terminal 2 gates 20 to 32, with no gate 28 shown). The airside link is Wikipedia alone (see above). The two terminals are kept."
+  },
+  {
+   "claim": "international arrivals in Terminal 1",
+   "verdict": "cut",
+   "wasBefore": "International arrivals without pre-clearance are handled in Terminal 1",
+   "why": "Wikipedia alone; the Port's map, FAQ and airline releases do not say where customs is."
+  },
+  {
+   "claim": "Frontier and Viva in Terminal 1",
+   "verdict": "cut",
+   "wasBefore": "which is also where Alaska, Delta, Frontier, Hawaiian, Volaris and Viva sit",
+   "why": "Viva is no longer on the airport's airline list or terminal map (read 23 Sep 2026), though Wikipedia still lists it. Frontier left Oakland after 2023 and came back on 20 August 2026 (see the held-back note); the map gives no terminal for it. The four airlines the map places in Terminal 1 are kept."
+  },
+  {
+   "claim": "Terminal 2 is Southwest only",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 is Southwest only.",
+   "why": "Reworded to what the airport's map says: Southwest checks in at Terminal 2. Wikipedia also has Southwest using Terminal 1 gates."
+  },
+  {
+   "claim": "four runways across 2,600 acres (sentence form)",
+   "verdict": "cut",
+   "wasBefore": "There are four runways across 2,600 acres",
+   "why": "Reworded ('The airfield covers 2,600 acres, with one long ... and three shorter ...'): the count of four is carried by the one-plus-three description, and 'There are' no longer opens two sentences close together."
+  },
+  {
+   "claim": "Taxiway B bridge over Ron Cowan Parkway",
+   "verdict": "cut",
+   "wasBefore": "Taxiway B joins the two over a bridge across Ron Cowan Parkway.",
+   "why": "Wikipedia alone; not on the FAA record or the Port's pages read. Not something a travel agent needs."
+  },
+  {
+   "claim": "winds from the west or north more than 95 per cent of the time",
+   "verdict": "cut",
+   "wasBefore": "Winds come from the west or north more than 95 per cent of the time, so aircraft almost always arrive from the south east.",
+   "why": "Wikipedia alone. The Port's noise site (flyquietoak.com) answered a plain request with 403 and, read through the browser, carried no runway-use figures on its home page; the Port's pilot sheet covers North Field procedures only."
+  },
+  {
+   "claim": "runways renumbered in 2013",
+   "verdict": "cut",
+   "wasBefore": "Two runways were renumbered in 2013 because the Earth's magnetic field had shifted.",
+   "why": "Wikipedia alone: the KQED report it cites is on a blog host that no longer connects (503, upstream connection failure)."
+  },
+  {
+   "claim": "the name Oakland San Francisco Bay Airport, settled in April 2026",
+   "verdict": "cut",
+   "why": "Held back: verified, but the old text never gave a name, so this adds a fact. The Port adopted the name in July 2025 and on 28 April 2026 settled San Francisco's trademark lawsuit; the name stays Oakland San Francisco Bay Airport (Port release; Wikipedia adds that 'International' may not be used). The record's Airport Name already matches. Worth a line for agents, since older material says Metropolitan Oakland International.",
+   "sources": [
+    {
+     "file": "op-settlement",
+     "org": "Port of Oakland (operator, iflyoak.com)",
+     "quote": [
+      "04/28/2026",
+      "have agreed to resolve a trademark lawsuit over the Oakland airport's official name, which will remain \"Oakland San Francisco Bay Airport.\""
+     ],
+     "dated": "2026-04-28"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "In 2026, the lawsuit was settled, allowing Oakland to call the airport Oakland San Francisco Bay Airport.",
+      "approved a new name in July 2025, Oakland San Francisco Bay Airport"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "traffic: 9.2 million in 2025, down about 15 per cent, and still falling in 2026",
+   "verdict": "cut",
+   "why": "Held back: new facts (the old text gave no traffic figure). The Port counted 9,210,509 passengers in 2025, down 14.74 per cent on 2024's 10,803,382; the FAA's boardings fell 14.36 per cent (4,532,494). January to July 2026 is down another 15.01 per cent on the Port's July report. This is the biggest recent change at Oakland and worth a sentence if Andy agrees.",
+   "sources": [
+    {
+     "file": "op-stats-2025-12",
+     "org": "Port of Oakland (operator, iflyoak.com)",
+     "quote": [
+      "TOTAL 740,588 859,284 -13.81% 9,210,509 10,803,382 -14.74%",
+      "JAN 1, 2025 THRU DEC 31, 2025 9,210,509"
+     ],
+     "dated": "December 2025 (the report's period)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "48 WP CA OAK Oakland Oakland San Francisco Bay P M 4,532,494 5,292,736 -14.36%",
+      "July 8, 2026"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "op-stats-2026-07",
+     "org": "Port of Oakland (operator, iflyoak.com)",
+     "quote": [
+      "OAKLAND SAN FRANCISCO BAY AIRPORT",
+      "JUL 26 JUL 25 INC/DEC 2026 2025 INC/DEC",
+      "TOTAL 711,393 828,346 -14.12% 4,618,652 5,434,656 -15.01%"
+     ],
+     "dated": "July 2026 (the report's period)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat1_header = Aircraft operations",
+      "stat2_header = Total passengers",
+      "stat2_data = 9,210,509"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Frontier back from August 2026",
+   "verdict": "cut",
+   "why": "Held back: new. Frontier left Oakland after 2023 and returned on 20 August 2026 with Las Vegas flights, 11 a week (the Port; Frontier's own release of 9 June 2026).",
+   "sources": [
+    {
+     "file": "op-frontier-return",
+     "org": "Port of Oakland (operator, iflyoak.com)",
+     "quote": [
+      "08/20/2026",
+      "Frontier initially announced its return to Oakland in June 2026, establishing nonstop service to Las Vegas after previously operating at OAK through 2023.",
+      "Frontier will operate the Las Vegas route 11 times weekly"
+     ],
+     "dated": "2026-08-20"
+    },
+    {
+     "file": "frontier-return",
+     "org": "Frontier Airlines",
+     "quote": "announced two new routes today launching this summer, which include its return to Oakland San Francisco Bay Airport (OAK).",
+     "dated": "2026-06-09"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and a genuine alternative for a client staying anywhere on that side of the bay",
+   "why": "The old text's advice, kept as judgement. The Port calls OAK the main airport for the greater East Bay and 'the closest airport to a majority of Bay Area residents'."
+  }
+ ],
+ "tracerOk": {}
+}

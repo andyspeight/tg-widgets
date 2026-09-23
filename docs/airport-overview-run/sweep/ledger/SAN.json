@@ -1,0 +1,422 @@
+{
+ "iata": "SAN",
+ "id": "recNDtSco9tlKs387",
+ "name": "San Diego International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/San_Diego_International_Airport",
+ "audited": "2026-09-23",
+ "before": "San Diego's airport, three miles north west of downtown, and the busiest single runway airport in the United States. It is a hub for Alaska Airlines and squeezes all of that onto 663 acres.\n\nThe approach is worth knowing about. Aircraft come in close to the skyscrapers of downtown and drop steeply over the crest of Bankers Hill, with shifting wind currents in the last moments and a relatively short usable landing area.\n\nThe practical consequence is delays. Almost all traffic uses Runway 27, because the winds usually come from the west. When Santa Ana winds blow from the east, or when the marine layer brings the cloud base down, operations reverse onto Runway 9, because Runway 27 has no instrument landing system and the terrain makes one infeasible. With only one taxiway running the length of the runway, those reversals back things up.\n\nThere are two terminals and 52 gates, with nine more due in Terminal 1 by 2028. Terminal 2's West concourse holds the international arrivals facility.",
+ "after": "San Diego's airport, three miles north west of downtown and the busiest single runway airport in the United States. It is a base for Alaska Airlines and squeezes all of that onto 663 acres.\n\nThe approach is worth knowing about. Aircraft come in close to the tall buildings of downtown on an unusually steep descent, onto a relatively short usable landing area.\n\nThere are two terminals. The first phase of the new Terminal 1 opened in September 2025, and the airport says the next phase will add 11 more gates by 2028.",
+ "claims": [
+  {
+   "claim": "three miles from downtown",
+   "verdict": "confirmed",
+   "inAfter": "three miles north west of downtown",
+   "note": "Passes the coordinates check: 1.9 miles in a straight line from the GeoNames centre, a ratio of 1.58, so three miles reads as the road distance. The FAA master record gives '02 W' in nautical miles (about 2.3 miles) from its business-district point.",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "San Diego County Regional Airport Authority (operator, san.org)",
+     "quote": "The airport sits on 661 acres, 3 miles northwest of downtown San Diego.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is located three miles (4.8 km; 2.6 nmi) northwest of downtown San Diego."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 3.1 km (1.9 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "north west of downtown",
+   "verdict": "confirmed",
+   "inAfter": "north west of downtown",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "San Diego County Regional Airport Authority (operator, san.org)",
+     "quote": "3 miles northwest of downtown San Diego",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 310 degrees, which is north west"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "northwest of downtown San Diego"
+    }
+   ]
+  },
+  {
+   "claim": "the busiest single runway airport in the United States",
+   "verdict": "confirmed",
+   "inAfter": "the busiest single runway airport in the United States",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "San Diego County Regional Airport Authority (operator, san.org)",
+     "quote": [
+      "to its current status as the busiest single-runway airport in the United States",
+      "It is the busiest single-runway airport in the nation."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is the busiest single-runway airport in the United States"
+    }
+   ]
+  },
+  {
+   "claim": "a base for Alaska Airlines",
+   "verdict": "softened",
+   "inAfter": "It is a base for Alaska Airlines",
+   "note": "Was 'a hub for Alaska Airlines'. Alaska's own release of 3 September 2026 names Seattle and Honolulu as its largest hubs and says it is the only airline with both a pilot and a flight attendant base in the San Diego region; it also says it flies to more destinations from San Diego (50 with Loreto from December) than any other airline. By passengers Southwest is far bigger: BTS gives Southwest 35.89 per cent and Alaska 13.70 per cent for the twelve months to June 2026. 'Base' is what the airline itself says and what Wikipedia's 'hub' at least implies.",
+   "sources": [
+    {
+     "file": "alaska-40-years",
+     "org": "Alaska Airlines",
+     "quote": [
+      "September 3, 2026",
+      "the only carrier with both a pilot and flight attendant base in the region",
+      "including connecting through Alaska's largest hubs in Seattle and Honolulu"
+     ],
+     "dated": "2026-09-03"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is a hub for Alaska Airlines."
+    },
+    {
+     "file": "bts-carrier-shares",
+     "org": "Bureau of Transportation Statistics (US Department of Transportation)",
+     "quote": [
+      "San Diego, CA: San Diego International (SAN) Scheduled Services except Freight/Mail BTS Data as of 9/23/2026",
+      "Southwest 9,139 35.89%",
+      "Alaska 3,489 13.70%"
+     ],
+     "dated": "2026-09-23 (data July 2025 to June 2026)"
+    }
+   ]
+  },
+  {
+   "claim": "663 acres",
+   "verdict": "confirmed",
+   "inAfter": "squeezes all of that onto 663 acres",
+   "note": "The FAA record and Wikipedia say 663; the airport's own history page says 661. The FAA's master record is followed.",
+   "sources": [
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "22 ACREAGE: 663",
+      "AIRPORT MASTER RECORD",
+      "09/03/2026"
+     ],
+     "dated": "2026-09-03 (date on the record)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "covering 663 acres (268 ha; 1.036 sq mi) of land"
+    }
+   ]
+  },
+  {
+   "claim": "the approach passes close to downtown's tall buildings",
+   "verdict": "confirmed",
+   "inAfter": "Aircraft come in close to the tall buildings of downtown",
+   "note": "Was 'close to the skyscrapers of downtown'. The FAA record notes terrain and buildings up to 500 feet within a mile and a half to the north and east, the side the Runway 27 approach comes from.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport's landing approach is close to the skyscrapers of downtown San Diego",
+      "over 200-foot-tall (61 m) buildings within 2 miles (3.2 km; 1.7 nmi) of the runway threshold"
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "TERRAIN & BLDGS TO 500' MSL N & E WITHIN 1 1/2 MI.",
+     "dated": "2026-09-03 (date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "an unusually steep descent",
+   "verdict": "confirmed",
+   "inAfter": "on an unusually steep descent",
+   "note": "The airport's noise study says obstruction clearance requires a 3.5-degree glide slope on the Runway 27 approach; the FAA record gives 3.50 degrees for Runway 27's approach lights. 'Over the crest of Bankers Hill' is dropped (Wikipedia alone).",
+   "sources": [
+    {
+     "file": "op-part150-appE",
+     "org": "San Diego County Regional Airport Authority (Part 150 noise study, technical memorandum)",
+     "quote": [
+      "Aircraft Noise Modeling Approach and Input Assumptions Technical Memorandum",
+      "Due to obstruct ion clearance requirements,",
+      "the final approach to Runway 27 requires a 3.5-degree glide slope on final approach"
+     ],
+     "dated": "2020-09-15 (memo date), published in the May 2022 study"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "45 VISUAL GLIDE ANGLE:",
+      "3.30 / 3.50"
+     ],
+     "dated": "2026-09-03 (date on the record)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The approach to Runway 27 is unusually steep"
+    }
+   ]
+  },
+  {
+   "claim": "a relatively short usable landing area",
+   "verdict": "confirmed",
+   "inAfter": "onto a relatively short usable landing area",
+   "note": "The runway is 9,401 feet, but both ends have displaced thresholds (1,000 and 1,810 feet), leaving 7,280 and 7,591 feet for landing (FAA record).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "relatively short usable landing area"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "09/27 9,401 200",
+      "> 51 DISPLACED THR:",
+      "1,000 / 1,810",
+      "> 63 LNDG DIST AVBL (LDA):",
+      "7,280 / 7,591"
+     ],
+     "dated": "2026-09-03 (date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "two terminals",
+   "verdict": "confirmed",
+   "inAfter": "There are two terminals.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "San Diego County Regional Airport Authority (operator, san.org)",
+     "quote": [
+      "Check-in Desk: Terminal 1",
+      "Check-in Desk: Terminal 2"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "San Diego International Airport has two terminals"
+    }
+   ]
+  },
+  {
+   "claim": "the first phase of the new Terminal 1 opened in September 2025",
+   "verdict": "corrected",
+   "inAfter": "The first phase of the new Terminal 1 opened in September 2025",
+   "note": "New to the text, replacing the old gate sentence: the rebuild the old text anticipated has partly happened. Phase 1 (19 gates) opened on 23 September 2025 (Wikipedia); the airport marked a year on 11 September 2026.",
+   "sources": [
+    {
+     "file": "op-t1-one-year",
+     "org": "San Diego County Regional Airport Authority (operator, san.org)",
+     "quote": [
+      "September 11, 2026",
+      "It's hard to believe it's already been a year since the first phase of the new Terminal 1 opened at San Diego International Airport."
+     ],
+     "dated": "2026-09-11"
+    },
+    {
+     "file": "op-history",
+     "org": "San Diego County Regional Airport Authority (operator, san.org)",
+     "quote": "New Terminal 1, opening September 2025, features:",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On September 23, 2025, Phase 1 of the new Terminal 1 opened with 19 gates."
+    }
+   ]
+  },
+  {
+   "claim": "the next phase will add 11 more gates by 2028 (the airport says)",
+   "verdict": "corrected",
+   "inAfter": "the airport says the next phase will add 11 more gates by 2028",
+   "note": "Was 'with nine more due in Terminal 1 by 2028'. The airport's article of 11 September 2026 says Phase 1B is under way and will add 11 more gates when completed in 2028, and its project page says 30 gates in all (19 in 2025, 11 by 2028); Wikipedia's history section also says 11. Wikipedia's facilities section instead says 21 gates in use with 9 more to come (two opened in 2026), so the text follows the airport and names it.",
+   "sources": [
+    {
+     "file": "op-t1-one-year",
+     "org": "San Diego County Regional Airport Authority (operator, san.org)",
+     "quote": "Phase 1B is now underway and will add 11 more gates to Terminal 1 when it's completed in 2028.",
+     "dated": "2026-09-11"
+    },
+    {
+     "file": "op-terminal-projects",
+     "org": "San Diego County Regional Airport Authority (operator, san.org)",
+     "quote": "The terminal will feature 30 gates, with 19 opening in 2025 and the remaining 11 by 2028, replacing the outdated 1967 facility.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "planned for completion in 2028, will demolish the original Terminal 1 and add 11 additional gates to the new Terminal 1 in its place"
+    }
+   ]
+  },
+  {
+   "claim": "a hub for Alaska Airlines",
+   "verdict": "cut",
+   "wasBefore": "It is a hub for Alaska Airlines",
+   "why": "Alaska itself names Seattle and Honolulu as its largest hubs and describes San Diego as a crew base; softened to 'a base' (see above)."
+  },
+  {
+   "claim": "close to the skyscrapers (wording)",
+   "verdict": "cut",
+   "wasBefore": "Aircraft come in close to the skyscrapers of downtown",
+   "why": "Reworded to 'tall buildings', as the FAA record puts it; Wikipedia's own runway section says the skyscrapers are not formally an obstacle."
+  },
+  {
+   "claim": "Bankers Hill and shifting winds",
+   "verdict": "cut",
+   "wasBefore": "and drop steeply over the crest of Bankers Hill, with shifting wind currents in the last moments and a relatively short usable landing area",
+   "why": "Bankers Hill and the wind currents are Wikipedia alone. The steep descent and the short landing area are kept, with the airport's noise study and the FAA record."
+  },
+  {
+   "claim": "the practical consequence is delays",
+   "verdict": "cut",
+   "wasBefore": "The practical consequence is delays.",
+   "why": "Rests on the reversal paragraph below, which is Wikipedia alone."
+  },
+  {
+   "claim": "almost all traffic uses Runway 27 because of westerly winds",
+   "verdict": "cut",
+   "wasBefore": "Almost all traffic uses Runway 27, because the winds usually come from the west.",
+   "why": "The share is confirmed (the airport's noise study models 98.02 per cent of operations on Runway 27; Wikipedia) but the westerly-wind reason is Wikipedia alone, and without the reversal paragraph it is pilot detail. Cut; can go back with the reversal paragraph if a second source for it turns up.",
+   "sources": [
+    {
+     "file": "op-part150-appE",
+     "org": "San Diego County Regional Airport Authority (Part 150 noise study, technical memorandum)",
+     "quote": [
+      "employing 98.02% of operations on",
+      "Runway 27 and the remaining 1.98% on Runway 09."
+     ],
+     "dated": "2020-09-15 (memo date)"
+    }
+   ]
+  },
+  {
+   "claim": "Santa Ana and marine-layer reversals; no ILS on Runway 27",
+   "verdict": "cut",
+   "wasBefore": "When Santa Ana winds blow from the east, or when the marine layer brings the cloud base down, operations reverse onto Runway 9, because Runway 27 has no instrument landing system and the terrain makes one infeasible.",
+   "why": "The reversals and their causes are Wikipedia alone. The FAA's current procedures confirm that only Runway 09 has ILS approaches (Runway 27 has a localizer and satellite approaches), but nothing read ties the reversals or delays to it, and 'infeasible' is Wikipedia alone. The airport's quarterly noise reports, which would show runway use, are encrypted PDFs the tools cannot read.",
+   "sources": [
+    {
+     "file": "faa-dtpp",
+     "org": "Federal Aviation Administration (terminal procedures)",
+     "quote": [
+      "Procedure effective date: 0901Z September 03 to 0901Z September 30, 2026 (2609)",
+      "ILS Y OR LOC Y RWY 09",
+      "LOC RWY 27",
+      "RNAV (GPS) Y RWY 27"
+     ],
+     "dated": "2026-09-03 to 2026-09-30 (cycle 2609)"
+    }
+   ]
+  },
+  {
+   "claim": "one taxiway the length of the runway",
+   "verdict": "cut",
+   "wasBefore": "With only one taxiway running the length of the runway, those reversals back things up.",
+   "why": "Wikipedia alone, and possibly out of date: Wikipedia's own history says the new Terminal 1 project included an expanded Taxiway A to pair with Taxiway B."
+  },
+  {
+   "claim": "52 gates, nine more by 2028",
+   "verdict": "cut",
+   "wasBefore": "There are two terminals and 52 gates, with nine more due in Terminal 1 by 2028.",
+   "why": "The gate total is not settled: Wikipedia 52 (21 plus 31) with nine more to come; the airport's history page still says 51, and its 11 September 2026 article says the next phase adds 11. No total is given; the next phase follows the airport."
+  },
+  {
+   "claim": "international arrivals facility in Terminal 2 West",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2's West concourse holds the international arrivals facility.",
+   "why": "Wikipedia alone within the last twelve months: none of the airport's pages read (airlines, travel tips, terminal projects) says where international arrivals are processed, and its interactive map did not render any text."
+  },
+  {
+   "claim": "a record 25.3 million passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: verified, but a new fact (the old text gave no traffic figure). The airport says 25.32 million passengers in 2025, a record (25.24 million in 2024); Wikipedia's infobox gives 25,320,556. The FAA counted 12,675,684 boardings, 0.82 per cent down on 2024, so the record rests on the airport's total-passenger count.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "San Diego County Regional Airport Authority (operator, san.org)",
+     "quote": "SAN served 25.32 million passengers in 2025, surpassing its previous record of 25.24 million set in 2024.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat1_header = Total passengers",
+      "stat1_data = 25,320,556 0.3%"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "24 WP CA SAN San Diego San Diego International P L 12,675,684 12,780,013 -0.82%",
+      "July 8, 2026"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "night curfew on departures, 11.30pm to 6.30am",
+   "verdict": "cut",
+   "why": "Held back: verified, but new. Departures are banned from 11.30pm to 6.30am (the airport; Wikipedia, which adds that arrivals are allowed at any hour). Worth a line for agents booking late departures.",
+   "sources": [
+    {
+     "file": "op-noise",
+     "org": "San Diego County Regional Airport Authority (operator, san.org)",
+     "quote": "San Diego International Airport operates under a nighttime noise curfew that prohibits departures between 11:30 p.m. and 6:30 a.m.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "takeoffs are only allowed between 6:30 a.m. and 11:30 p.m."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The approach is worth knowing about.",
+   "why": "A lead-in to the next sentence, whose facts are each checked."
+  }
+ ],
+ "tracerOk": {}
+}

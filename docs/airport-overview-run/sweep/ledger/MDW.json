@@ -1,0 +1,581 @@
+{
+ "iata": "MDW",
+ "id": "recKB2tuAjoAjK5XU",
+ "name": "Chicago Midway International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Midway_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Chicago's other airport, twelve miles from the Loop on the south west side, and often the better choice for a client who wants to be in the city quickly. The CTA Orange Line runs from the terminal straight downtown.\n\nSouthwest Airlines carries more than 90 per cent of the passengers here, so this is the airport to price when a client is flying Southwest. It handled 22,050,489 passengers in 2023, second in Illinois after O'Hare.\n\nThe constraint is space. The whole airport fits into just over one square mile, boxed in by streets on all four sides, and the city has grown right up to the fence. The runways are short by big airport standards, the longest being 6,522 feet, and the landing thresholds are displaced to clear obstacles, so aircraft have less runway available for landing than for take off.\n\nMidway opened in 1927 and was Chicago's main airport until O'Hare opened in 1944. It is named after the Battle of Midway. The current terminal was completed in 2001 with 43 gates.",
+ "after": "Chicago's other airport, about eight miles south west of the Loop and often the better choice for a client who wants to be in the city quickly. The CTA Orange Line runs straight downtown from beside the terminal.\n\nSouthwest Airlines carries about 90 per cent of the passengers here, so this is the airport to price when a client is flying Southwest. It handled about 19.4 million passengers in 2025, second in Illinois after O'Hare.\n\nSpace is the constraint. The whole airport fits into just over one square mile, surrounded by city neighbourhoods. Its runways are short by big airport standards, the longest being 6,522 feet.\n\nMidway was dedicated in 1927 and was Chicago's main airport until the early 1960s, when the airlines moved to O'Hare. It is named after the Battle of Midway. The current terminal building opened in 2001, and there are 43 gates.",
+ "claims": [
+  {
+   "claim": "Chicago's other airport (second to O'Hare)",
+   "verdict": "confirmed",
+   "inAfter": "Chicago's other airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Midway is the second-busiest airport in both the Chicago metropolitan area and the state of Illinois"
+    },
+    {
+     "file": "city-acfr-2025",
+     "org": "City of Chicago (owner; Midway annual financial report, prepared with the CDA)",
+     "quote": [
+      "HISTORICAL ENPLANED PASSENGERS",
+      "CHICAGO REGION AIRPORTS",
+      "9,661,786 18.6 42,317,469 81.4 51,979,255"
+     ],
+     "dated": "2026-06-30 (report for the year ended 31 December 2025)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "3 GL IL ORD Chicago Chicago O'Hare International P L 40,680,735 38,575,693 5.46%",
+      "31 GL IL MDW Chicago Chicago Midway International P M 9,367,712 10,360,093 -9.58%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "about eight miles from the Loop",
+   "verdict": "corrected",
+   "inAfter": "about eight miles south west of the Loop",
+   "note": "Was 'twelve miles from the Loop', which fails the coordinates check: the straight line from the GeoNames centre is 6.9 miles, a ratio of 1.74. The written sources differ: Wikipedia about 12 miles (likely by road), the FAA master record 9 nautical miles (about 10.4 miles) from its business-district point, the City's own 2025 report about eight miles from the central business district, which Wikipedia calls the Loop. The text follows the owner, whose figure passes the check (ratio 1.16), as the AUS ledger did.",
+   "sources": [
+    {
+     "file": "city-acfr-2025",
+     "org": "City of Chicago (owner; Midway annual financial report, prepared with the CDA)",
+     "quote": "The Airport is located approximately eight miles southwest of the City's central business district",
+     "dated": "2026-06-30 (report for the year ended 31 December 2025)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 11.1 km (6.9 miles)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "located approximately 12 miles (19 km) from the city's Loop business district"
+    }
+   ]
+  },
+  {
+   "claim": "south west of the Loop",
+   "verdict": "confirmed",
+   "inAfter": "south west of the Loop",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is a major commercial airport on the southwest side of Chicago"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 230 degrees, which is south west"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "3 CBD TO AIRPORT (NM): 09 SW",
+      "AIRPORT MASTER RECORD",
+      "09/03/2026"
+     ],
+     "dated": "2026-09-03 (date on the record)"
+    },
+    {
+     "file": "city-acfr-2025",
+     "org": "City of Chicago (owner; Midway annual financial report, prepared with the CDA)",
+     "quote": "approximately eight miles southwest of the City's central business district",
+     "dated": "2026-06-30 (report for the year ended 31 December 2025)"
+    }
+   ]
+  },
+  {
+   "claim": "the Orange Line runs downtown from beside the terminal",
+   "verdict": "corrected",
+   "inAfter": "The CTA Orange Line runs straight downtown from beside the terminal.",
+   "note": "Was 'runs from the terminal straight downtown'. The station is just east of the terminal building, joined to it by an enclosed walkway (CDA, Wikipedia). The CTA's own page, read today, still shows trains from about 4am to just after 1am: the 24-hour service Wikipedia expects in late 2026 has not started.",
+   "sources": [
+    {
+     "file": "cda-transit",
+     "org": "Chicago Department of Aviation (operator, flychicago.com)",
+     "quote": [
+      "Orange Line trains operate from Midway to downtown via elevated tracks.",
+      "The fully-accessible station is located just east of the airport terminal building at the Midway Transportation Center and is connected to the airport via an enclosed walkway."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "cta-orange",
+     "org": "Chicago Transit Authority",
+     "quote": [
+      "The Orange Line provides rapid transit train service between Midway Airport and downtown (Loop)",
+      "4:00a-1:05a"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The CTA rapid transit Orange Line provides transit to Downtown Chicago",
+      "there is an enclosed walkway connecting the station with the terminal area"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Southwest carries about 90 per cent of passengers",
+   "verdict": "softened",
+   "inAfter": "Southwest Airlines carries about 90 per cent of the passengers here",
+   "note": "Was 'more than 90 per cent'. The operator's own table gives Southwest 89.6 per cent of all boardings in 2025 (8,658,624 of 9,661,786) and 88.1 per cent in 2024. BTS gives 93.71 per cent for the twelve months to June 2026, but counts only US flights on US airlines, so it leaves out Volaris and international flying. About 90 per cent fits both.",
+   "sources": [
+    {
+     "file": "city-acfr-2025",
+     "org": "City of Chicago (owner; Midway annual financial report, prepared with the CDA)",
+     "quote": "Southwest Airlines accounted for 89.6% and 88.1% during 2025 and 2024, respectively, of total enplanements at the Airport.",
+     "dated": "2026-06-30 (report for the year ended 31 December 2025)"
+    },
+    {
+     "file": "bts-carrier-shares",
+     "org": "Bureau of Transportation Statistics (US Department of Transportation)",
+     "quote": [
+      "Chicago, IL: Chicago Midway International (MDW) Scheduled Services except Freight/Mail BTS Data as of 9/23/2026",
+      "Carrier Shares for July 2025 - June 2026",
+      "Southwest 17,182 93.71%"
+     ],
+     "dated": "2026-09-23 (data July 2025 to June 2026)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "which carries over 90% of the passengers at the airport"
+    }
+   ]
+  },
+  {
+   "claim": "about 19.4 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled about 19.4 million passengers in 2025",
+   "note": "Was '22,050,489 passengers in 2023'. TOTAL passengers. The City's report says 'more than 19.4 million'; Wikipedia's infobox gives 19,379,940, just under; 'about 19.4 million' fits both. The FAA counted 9,367,712 boardings (about half the total), consistent. Traffic fell in 2025: see the held-back note below.",
+   "sources": [
+    {
+     "file": "city-acfr-2025",
+     "org": "City of Chicago (owner; Midway annual financial report, prepared with the CDA)",
+     "quote": "More than 19.4 million passengers traveled through Midway in 2025.",
+     "dated": "2026-06-30 (report for the year ended 31 December 2025)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat2_header = Passenger volume",
+      "stat2_data = 19,379,940"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "31 GL IL MDW Chicago Chicago Midway International P M 9,367,712 10,360,093 -9.58%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "second in Illinois after O'Hare",
+   "verdict": "confirmed",
+   "inAfter": "second in Illinois after O'Hare",
+   "note": "FAA CY2025: O'Hare 3rd in the US, Midway 31st, and the next Illinois airport, Peoria, 156th.",
+   "sources": [
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "3 GL IL ORD Chicago Chicago O'Hare International P L 40,680,735",
+      "31 GL IL MDW Chicago Chicago Midway International P M 9,367,712",
+      "156 GL IL PIA Peoria"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Midway is the second-busiest airport in both the Chicago metropolitan area and the state of Illinois"
+    }
+   ]
+  },
+  {
+   "claim": "just over one square mile",
+   "verdict": "confirmed",
+   "inAfter": "The whole airport fits into just over one square mile",
+   "note": "The acreage is disputed (FAA master record and Wikipedia 650, the CDA's facility page about 775.4, the City's report about 840), so no acreage is given; all agree on about a square mile.",
+   "sources": [
+    {
+     "file": "city-acfr-2025",
+     "org": "City of Chicago (owner; Midway annual financial report, prepared with the CDA)",
+     "quote": "occupies approximately 840 acres on slightly more than a one-mile square area",
+     "dated": "2026-06-30 (report for the year ended 31 December 2025)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "covers just over one square mile"
+    }
+   ]
+  },
+  {
+   "claim": "surrounded by city neighbourhoods",
+   "verdict": "softened",
+   "inAfter": "surrounded by city neighbourhoods",
+   "note": "Was 'boxed in by streets on all four sides, and the city has grown right up to the fence'. Both sources say the airport is surrounded by the city; only Wikipedia names the four boundary streets.",
+   "sources": [
+    {
+     "file": "cda-noise",
+     "org": "Chicago Department of Aviation (operator, flychicago.com)",
+     "quote": [
+      "recognizes that neighborhoods surrounding Chicago",
+      "Midway International Airport (Midway) are affected by noise from aircraft operations."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Midway is surrounded by buildings and other development"
+    }
+   ]
+  },
+  {
+   "claim": "runways short by big airport standards, longest 6,522 feet",
+   "verdict": "confirmed",
+   "inAfter": "Its runways are short by big airport standards, the longest being 6,522 feet.",
+   "note": "The CDA's own facility table shows the contrast: Midway's longest runway is 6,522 feet, while every one of O'Hare's eight active runways is 7,500 feet or more (up to 13,000). The runway was renamed from 13C/31C in 2025 (City report).",
+   "sources": [
+    {
+     "file": "cda-facility",
+     "org": "Chicago Department of Aviation (operator, flychicago.com)",
+     "quote": [
+      "Runway 13L-31R",
+      "6,522 ft 150 ft",
+      "Runway 4L/22R 7,500 ft 150 ft 1943",
+      "Runway 10L/28R 13,000 ft 150 ft 1968"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "13L/31R",
+      "6,522",
+      "AIRPORT MASTER RECORD",
+      "09/03/2026"
+     ],
+     "dated": "2026-09-03 (date on the record)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "13L/31R: 6,522 ft",
+      "its runways were too short to safely handle larger four-engine jetliners"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "dedicated in 1927",
+   "verdict": "corrected",
+   "inAfter": "Midway was dedicated in 1927",
+   "note": "Was 'opened in 1927'. The CDA says Chicago Municipal Airport opened on 8 May 1926 and was dedicated in 1927; Wikipedia says the field was built in 1923 as Chicago Air Park and named Chicago Municipal Airport on 12 December 1927. Both put the dedication in 1927.",
+   "sources": [
+    {
+     "file": "cda-history",
+     "org": "Chicago Department of Aviation (operator, flychicago.com)",
+     "quote": [
+      "Chicago Municipal Airport opened on May 8, 1926",
+      "Dedicated in 1927 by Mayor William H. Thompson"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "on December 12, 1927 named it Chicago Municipal Airport"
+    }
+   ]
+  },
+  {
+   "claim": "Chicago's main airport until the early 1960s, when the airlines moved to O'Hare",
+   "verdict": "corrected",
+   "inAfter": "was Chicago's main airport until the early 1960s, when the airlines moved to O'Hare",
+   "note": "Was 'until O'Hare opened in 1944', copied from Wikipedia's opening paragraph, which its own history section contradicts. Passenger service at O'Hare began in 1955; O'Hare passed Midway by 1961 and United, the last airline, left Midway in 1962 (CDA); O'Hare's new terminal opened in 1962 and the airlines consolidated there (Wikipedia).",
+   "sources": [
+    {
+     "file": "cda-history",
+     "org": "Chicago Department of Aviation (operator, flychicago.com)",
+     "quote": [
+      "In 1955, passenger service began at O'Hare",
+      "By 1961, commercial flights at O'Hare soared past Midway causing it to relinquish the \"World's Busiest Airport\" title.",
+      "United Airlines, the first airline to institute service at Midway, was now the last to move out, with its last flight departing to Toledo, Ohio, in 1962."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "which had opened to airlines in 1955",
+      "O'Hare's new terminal opened in 1962, allowing airlines to consolidate their flights"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after the Battle of Midway",
+   "verdict": "confirmed",
+   "inAfter": "It is named after the Battle of Midway.",
+   "sources": [
+    {
+     "file": "cda-history",
+     "org": "Chicago Department of Aviation (operator, flychicago.com)",
+     "quote": "In 1949, the airport was renamed Midway in honor of the hard fought Battle of Midway",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport was named in honor of the Battle of Midway"
+    }
+   ]
+  },
+  {
+   "claim": "the current terminal building opened in 2001",
+   "verdict": "corrected",
+   "inAfter": "The current terminal building opened in 2001",
+   "note": "Was 'completed in 2001 with 43 gates'. The building opened in 2001, but the Terminal Development Program was completed in June 2004, which is when the gate count reached 43 (from 29).",
+   "sources": [
+    {
+     "file": "cda-history",
+     "org": "Chicago Department of Aviation (operator, flychicago.com)",
+     "quote": [
+      "In 2001, the Midway Airport Terminal Building opened",
+      "In June 2004, Chicago leadership and airline officials celebrated the completion of the Terminal Development Program."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Midway Airport terminal building opened to the public",
+      "resulted in the addition of 14 gates (from 29 to 43)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "43 gates",
+   "verdict": "confirmed",
+   "inAfter": "there are 43 gates",
+   "note": "The CDA's facility page gives the count as of January 2025 and is still live; Wikipedia (revised 21 September 2026) gives the same, on three concourses.",
+   "sources": [
+    {
+     "file": "cda-facility",
+     "org": "Chicago Department of Aviation (operator, flychicago.com)",
+     "quote": "there were 43 gates at Midway.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Midway has 43 aircraft gates on three concourses."
+    }
+   ]
+  },
+  {
+   "claim": "twelve miles from the Loop",
+   "verdict": "cut",
+   "wasBefore": "twelve miles from the Loop on the south west side",
+   "why": "Fails the coordinates check (6.9 miles in a straight line, a ratio of 1.74). Corrected to the City's own figure, about eight miles; the direction is kept."
+  },
+  {
+   "claim": "runs from the terminal",
+   "verdict": "cut",
+   "wasBefore": "runs from the terminal straight downtown",
+   "why": "Reworded: the station is beside the terminal, joined by an enclosed walkway (CDA, Wikipedia)."
+  },
+  {
+   "claim": "more than 90 per cent",
+   "verdict": "cut",
+   "wasBefore": "Southwest Airlines carries more than 90 per cent of the passengers here",
+   "why": "The operator's own figure for 2025 is 89.6 per cent of all boardings (88.1 in 2024). BTS's 93.71 per cent covers only US flights on US airlines. Softened to about 90 per cent."
+  },
+  {
+   "claim": "22,050,489 passengers in 2023",
+   "verdict": "cut",
+   "wasBefore": "It handled 22,050,489 passengers in 2023",
+   "why": "Two years old; replaced by the 2025 total."
+  },
+  {
+   "claim": "boxed in by streets, city up to the fence",
+   "verdict": "cut",
+   "wasBefore": "boxed in by streets on all four sides, and the city has grown right up to the fence",
+   "why": "The four boundary streets (55th, 63rd, Central, Cicero) are Wikipedia alone: the Encyclopedia of Chicago entry it cites is on plain HTTP, which this session's proxy does not carry, so it could not be read. Softened to 'surrounded by city neighbourhoods', which the CDA and Wikipedia both say."
+  },
+  {
+   "claim": "The constraint is space (word order)",
+   "verdict": "cut",
+   "wasBefore": "The constraint is space.",
+   "why": "Reworded to 'Space is the constraint.' so that three sentences in a row no longer start with 'The' (house rule)."
+  },
+  {
+   "claim": "displaced landing thresholds",
+   "verdict": "cut",
+   "wasBefore": "and the landing thresholds are displaced to clear obstacles, so aircraft have less runway available for landing than for take off",
+   "why": "True (the FAA master record shows displaced thresholds, and 13L/31R offers 6,522 feet for take-off but 6,059 and 5,826 feet for landing; Wikipedia says the same), but it is pilot detail and the text was over 150 words. Cut for length; can go back if Andy wants it.",
+   "sources": [
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "> 51 DISPLACED THR:",
+      "> 63 LNDG DIST AVBL (LDA):",
+      "6,059 / 5,826",
+      "RWY 13L APCH RATIO 16:1 AT DSPLCD THLD."
+     ],
+     "dated": "2026-09-03 (date on the record)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Because of the displaced landing thresholds, the runways have shorter distances available for landings than for takeoffs."
+    }
+   ]
+  },
+  {
+   "claim": "opened in 1927",
+   "verdict": "cut",
+   "wasBefore": "Midway opened in 1927",
+   "why": "The opening date is disputed: the CDA says 8 May 1926, Wikipedia says built in 1923 as Chicago Air Park. Both put the dedication in 1927, which the text now says."
+  },
+  {
+   "claim": "main airport until O'Hare opened in 1944",
+   "verdict": "cut",
+   "wasBefore": "was Chicago's main airport until O'Hare opened in 1944",
+   "why": "Misleading: O'Hare took no passenger flights until 1955 and Midway stayed the busier airport until about 1961 (CDA; Wikipedia's own history section). Corrected to the early 1960s."
+  },
+  {
+   "claim": "terminal completed in 2001 with 43 gates",
+   "verdict": "cut",
+   "wasBefore": "The current terminal was completed in 2001 with 43 gates",
+   "why": "The building opened in 2001; the programme that brought the gates to 43 finished in June 2004 (CDA, Wikipedia). Reworded."
+  },
+  {
+   "claim": "2025 traffic fell almost 10 per cent",
+   "verdict": "cut",
+   "why": "Held back: verified, but new context that replaces nothing (the text was over 150 words). Midway's boardings fell 9.7 per cent in 2025 on the operator's own table (9,661,786, from 10,707,000 in 2024) and 9.58 per cent on the FAA's. Worth adding if space allows: it explains why the 2025 figure is lower than the old 2023 one.",
+   "sources": [
+    {
+     "file": "city-acfr-2025",
+     "org": "City of Chicago (owner; Midway annual financial report, prepared with the CDA)",
+     "quote": [
+      "332,152 9,661,786 (9.7)",
+      "10,707,000"
+     ],
+     "dated": "2026-06-30 (report for the year ended 31 December 2025)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "31 GL IL MDW Chicago Chicago Midway International P M 9,367,712 10,360,093 -9.58%",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "the other airlines: Frontier, Volaris, Delta",
+   "verdict": "cut",
+   "why": "Held back: new facts. After Southwest, the next largest in 2025 were Frontier (3.4 per cent of boardings), Volaris (2.0) and Delta (1.7) on the operator's own table (rows in the order its 2016 to 2019 page names them); BTS confirms Frontier and Delta for US flights. The CDA's year-end release (31 December 2025) says Frontier added Newark in 2025 and a Cancún route for 2026.",
+   "sources": [
+    {
+     "file": "city-acfr-2025",
+     "org": "City of Chicago (owner; Midway annual financial report, prepared with the CDA)",
+     "quote": [
+      "ENPLANED COMMERCIAL PASSENGERS BY AIRLINE",
+      "Frontier",
+      "Volaris",
+      "Delta",
+      "552,900 5.2 331,377 3.4",
+      "220,107 2.1 197,892 2.0",
+      "158,451 1.5 160,592 1.7"
+     ],
+     "dated": "2026-06-30 (report for the year ended 31 December 2025)"
+    },
+    {
+     "file": "bts-carrier-shares",
+     "org": "Bureau of Transportation Statistics (US Department of Transportation)",
+     "quote": [
+      "Frontier 541 2.95%",
+      "Delta 291 1.59%"
+     ],
+     "dated": "2026-09-23 (data July 2025 to June 2026)"
+    },
+    {
+     "file": "cda-landmark-2025",
+     "org": "Chicago Department of Aviation (operator, flychicago.com)",
+     "quote": [
+      "12/31/2025 | Source: Chicago Department of Aviation Media",
+      "while Frontier Airlines added new nonstop service to Newark",
+      "Frontier's introduction of new nonstop service to Cancun"
+     ],
+     "dated": "2025-12-31"
+    }
+   ]
+  },
+  {
+   "claim": "Midway Modernization Program finished: one security checkpoint",
+   "verdict": "cut",
+   "why": "Held back: new facts. The CDA says the Midway Modernization Program was completed in 2023; the City's 2025 report lists a new security pavilion with a single checkpoint area.",
+   "sources": [
+    {
+     "file": "cda-history",
+     "org": "Chicago Department of Aviation (operator, flychicago.com)",
+     "quote": "The Midway Modernization Program was completed in 2023 with the reopening of Midway's overhauled Central Market at the intersection of Concourses A and B.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "city-acfr-2025",
+     "org": "City of Chicago (owner; Midway annual financial report, prepared with the CDA)",
+     "quote": "These improvements include a new security pavilion; a streamlined, single checkpoint area",
+     "dated": "2026-06-30 (report for the year ended 31 December 2025)"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and often the better choice for a client who wants to be in the city quickly",
+   "why": "The old text's advice, kept as judgement. It rests on kept facts: about eight miles from the Loop and the Orange Line beside the terminal; the CDA puts the ride downtown at 20 to 25 minutes and calls Midway 'Chicago's close-in and convenient airport'."
+  },
+  {
+   "text": "so this is the airport to price when a client is flying Southwest",
+   "why": "The old text's advice, kept as judgement: it follows from Southwest carrying about 90 per cent of Midway's passengers (operator, BTS)."
+  },
+  {
+   "text": "Space is the constraint.",
+   "why": "A lead-in summarising the two sentences that follow (one square mile, surrounded by the city, short runways), each checked."
+  }
+ ],
+ "tracerOk": {}
+}

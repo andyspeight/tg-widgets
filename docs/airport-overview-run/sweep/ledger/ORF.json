@@ -1,0 +1,588 @@
+{
+ "iata": "ORF",
+ "id": "recJyeEW5ADrN1xVn",
+ "name": "Norfolk International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Norfolk_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Hampton Roads in south east Virginia, seven miles north east of downtown Norfolk, and it also draws from north east North Carolina. It carried 2,444,897 passengers in 2024, third in Virginia behind Dulles and Reagan National.\n\nIt is a compact site of 1,300 acres, with a main runway of 9,001 feet and a shorter crosswind runway. There are two passenger concourses, with American, Southwest and Breeze Airways using Concourse A.\n\nAir traffic control here is busier than the passenger figure suggests. The Norfolk tower, built in 1995 and standing 134 feet high, handles around 1,100 aircraft a day, round the clock, every day of the year.\n\nGeneral aviation is looked after by Signature Flight Support, with a 54,000 square foot facility covering everything from aircraft hire and sightseeing flights to maintenance.",
+ "after": "The main airport for Hampton Roads in Virginia, seven miles north east of downtown Norfolk, and it also serves the Outer Banks of North Carolina. It handled almost 4.9 million passengers in 2025, fourth in Virginia behind Dulles, Reagan National and, narrowly, Richmond.\n\nThe site covers 1,300 acres, with a single runway of 9,001 feet since the shorter crosswind runway closed in August 2025. There are two passenger concourses, with American and Southwest using Concourse A.\n\nGeneral aviation is looked after by Signature Aviation.",
+ "claims": [
+  {
+   "claim": "the main airport for Hampton Roads",
+   "verdict": "softened",
+   "inAfter": "The main airport for Hampton Roads",
+   "note": "Was 'The airport for Hampton Roads'. Wikipedia says it serves Hampton Roads along with Newport News/Williamsburg, so 'main' rather than 'the'. The FAA's 2025 table shows how far ahead it is (2,466,474 boardings against 59,297 at Newport News). The operator calls itself 'the major airport serving Coastal Virginia', and Signature's page names Hampton Roads outright.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport serves the Hampton Roads metropolitan area of southeast Virginia (along with Newport News/Williamsburg International Airport in Newport News)"
+    },
+    {
+     "file": "signature-orf",
+     "org": "Signature Aviation",
+     "quote": "serving as the essential gateway to the historic Hampton Roads area",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "65 EA VA ORF Norfolk Norfolk International P M 2,466,474 2,444,897 0.88%",
+      "272 EA VA PHF Newport News",
+      "International P N 59,297 68,787 -13.80%",
+      "July 8, 2026"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "op-history",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": "Norfolk International Airport is the major airport serving Coastal Virginia and the Outer Banks of North Carolina.",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "seven miles from downtown Norfolk",
+   "verdict": "confirmed",
+   "inAfter": "seven miles north east of downtown Norfolk",
+   "note": "Passes the coordinates check: 5.7 miles in a straight line from the GeoNames centre, a ratio of 1.23, so seven miles reads as the road distance. The FAA's master record gives '03 NE' in nautical miles (about 3.5 statute miles) from its own central-business-district point, which is shorter than even the straight line from the city centre, so it was not followed.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "located seven miles (11 km) northeast of downtown Norfolk, Virginia"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 9.2 km (5.7 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "north east of downtown Norfolk",
+   "verdict": "confirmed",
+   "inAfter": "north east of downtown Norfolk",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "northeast of downtown Norfolk, Virginia"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 54 degrees, which is north east"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "3 CBD TO AIRPORT (NM): 03 NE",
+      "AFD EFF",
+      "09/03/2026"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "also serves the Outer Banks of North Carolina",
+   "verdict": "softened",
+   "inAfter": "it also serves the Outer Banks of North Carolina",
+   "note": "Was 'it also draws from north east North Carolina'. The operator names the Outer Banks, and so does Wikipedia's infobox; the Outer Banks are in north east North Carolina.",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": "Norfolk International Airport is the major airport serving Coastal Virginia and the Outer Banks of North Carolina.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "area_served = Hampton Roads, Outer Banks"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "as well as northeast North Carolina"
+    }
+   ]
+  },
+  {
+   "claim": "almost 4.9 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled almost 4.9 million passengers in 2025",
+   "note": "Was 'It carried 2,444,897 passengers in 2024'. That figure is the FAA's count of BOARDINGS (enplanements) for 2024, about half the airport's total; the operator's 2024 total was 4,864,752. The new figure is TOTAL passengers, arriving plus departing: 4,892,594 in 2025 on the operator's December 2025 report (2,450,773 enplaned). The FAA's preliminary CY2025 table counts 2,466,474 boardings, consistent with it, and Wikipedia's infobox now gives the operator's total.",
+   "sources": [
+    {
+     "file": "op-dec2025",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": [
+      "Norfolk Airport Authority",
+      "Passenger Activity Report",
+      "December 2025",
+      "Total 2,450,773 2,441,821 4,892,594 2,431,986 2,432,766 4,864,752 27,842 0.6%"
+     ],
+     "dated": "December 2025, year to date (the report's period)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "65 EA VA ORF Norfolk Norfolk International P M 2,466,474 2,444,897 0.88%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_header = Total passengers",
+      "stat1_data = 4,892,594 0.6%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "fourth in Virginia behind Dulles, Reagan National and, narrowly, Richmond",
+   "verdict": "corrected",
+   "inAfter": "fourth in Virginia behind Dulles, Reagan National and, narrowly, Richmond",
+   "note": "Was 'third in Virginia behind Dulles and Reagan National'. Both measures put Richmond just ahead in 2025: FAA boardings 2,481,863 against 2,466,474, and the two operators' own totals 4,922,994 against 4,892,594 (0.6 per cent apart either way). Dulles (13.9 million boardings) and Reagan National (12.0 million) are far ahead, as Wikipedia also says. No other Virginia airport comes between them in the FAA table.",
+   "sources": [
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "22 EA VA IAD Dulles Washington Dulles International P L 13,859,569 13,003,234 6.59%",
+      "28 EA VA DCA Arlington Ronald Reagan Washington Ntl P L 12,003,594 12,750,892 -5.86%",
+      "64 EA VA RIC Highland Springs Richmond International P M 2,481,863 2,456,422 1.04%",
+      "65 EA VA ORF Norfolk Norfolk International P M 2,466,474 2,444,897 0.88%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "ric-dec2025",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": [
+      "RICHMOND INTERNATIONAL AIRPORT",
+      "AVIATION ACTIVITY REPORT",
+      "Total 418,762 421,064 -0.55% 4,922,994 4,884,093 0.80%",
+      "December Calendar Year to Date Fiscal Year to Date"
+     ],
+     "dated": "December 2025, calendar year to date (the report's period)"
+    },
+    {
+     "file": "op-dec2025",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": "Total 2,450,773 2,441,821 4,892,594",
+     "dated": "December 2025, year to date (the report's period)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "behind Dulles International Airport and Ronald Reagan Washington National Airport"
+    }
+   ]
+  },
+  {
+   "claim": "the site covers 1,300 acres",
+   "verdict": "confirmed",
+   "inAfter": "The site covers 1,300 acres",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport covers 1,300 acres (530 hectares)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "22 ACREAGE: 1,300",
+      "AFD EFF",
+      "09/03/2026"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "a single runway of 9,001 feet",
+   "verdict": "corrected",
+   "inAfter": "with a single runway of 9,001 feet",
+   "note": "Was 'a main runway of 9,001 feet and a shorter crosswind runway'. The FAA's master record (AFD effective 3 September 2026) and its airport diagram (valid 3 September to 1 October 2026) list only runway 05/23. OurAirports still lists 14/32 (see geo), which is out of date.",
+   "sources": [
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "05/23",
+      "9,001",
+      "AFD EFF",
+      "09/03/2026"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "faa-diagram-2609",
+     "org": "Federal Aviation Administration (airport diagram)",
+     "quote": [
+      "RWY 05-23",
+      "9001 X 150",
+      "03 SEP 2026 to 01 OCT 2026"
+     ],
+     "dated": "valid 2026-09-03 to 2026-10-01"
+    },
+    {
+     "file": "aimp-runway-closes",
+     "org": "Airport Improvement",
+     "quote": "At 9,001 feet, ORF's adjacent Runway 05/23 has sufficient capacity",
+     "dated": "2025-08-15"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Its main runway, 5–23, is 9,001 by 150 feet"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "r2_number = 14/32 [CLOSED]"
+    }
+   ]
+  },
+  {
+   "claim": "the shorter crosswind runway closed in August 2025",
+   "verdict": "corrected",
+   "inAfter": "since the shorter crosswind runway closed in August 2025",
+   "note": "New to the text, replacing 'and a shorter crosswind runway'. The day is disputed: Airport Improvement's copy of the airport's notice is dated 15 August 2025, a Friday, which matches WTKR's 'closed Friday'; Wikipedia says 25 August. Only the month is given. The FAA's September 2026 master record and diagram confirm it is still closed (neither lists 14/32).",
+   "sources": [
+    {
+     "file": "aimp-runway-closes",
+     "org": "Airport Improvement",
+     "quote": [
+      "Aug 15, 2025 | News",
+      "Norfolk International Airport (ORF) has informed pilots they can no longer utilize its Runway 14/32 for takeoffs or landings.",
+      "its little-used crosswind runway",
+      "Spanning only 4,876 feet in length, Runway 14/32 is too short"
+     ],
+     "dated": "2025-08-15"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On August 25, 2025, it was announced that Norfolk International Airport would be closing the crosswind Runway 14/32, effective immediately."
+    },
+    {
+     "file": "wtkr-runway-closes",
+     "org": "WTKR News 3 (Scripps)",
+     "quote": "A runway with a history dating back more than 80 years was closed Friday to make room for major developments at Norfolk International Airport."
+    }
+   ]
+  },
+  {
+   "claim": "two passenger concourses",
+   "verdict": "confirmed",
+   "inAfter": "There are two passenger concourses",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Norfolk International Airport has two passenger concourses"
+    },
+    {
+     "file": "op-concourse-a-2026",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": [
+      "Norfolk, VA — (April 17, 2026)",
+      "easier post-security movement between Concourses A and B"
+     ],
+     "dated": "2026-04-17"
+    }
+   ]
+  },
+  {
+   "claim": "American and Southwest use Concourse A",
+   "verdict": "corrected",
+   "inAfter": "with American and Southwest using Concourse A",
+   "note": "Was 'American, Southwest and Breeze Airways using Concourse A'. American and Southwest are at A gates on the airport's live board (read 23 Sep 2026) and on its August 2025 terminal map; the airport's April 2026 release has American in Concourse A's newest gates. Breeze is dropped: see the cut.",
+   "sources": [
+    {
+     "file": "op-arrivals",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": [
+      "American Airlines 5017 Gate: A11",
+      "Southwest Airlines 673 Gate: A5",
+      "American Airlines 6055 Gate: A12"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-departures",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": [
+      "Southwest Airlines 159 Gate: A5",
+      "Southwest Airlines 1457 Gate: A3",
+      "American Airlines 2282 Gate: A7"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-concourse-a-2026",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": "American Airlines is using Concourse A",
+     "dated": "2026-04-17"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Concourse A (gates 1-9) are used by American Airlines, Breeze Airways, and Southwest Airlines"
+    }
+   ]
+  },
+  {
+   "claim": "Signature Aviation runs general aviation",
+   "verdict": "corrected",
+   "inAfter": "General aviation is looked after by Signature Aviation.",
+   "note": "Was 'Signature Flight Support'. The company now trades as Signature Aviation (its own page, read 23 Sep 2026); the airport's general aviation page still uses the old name. Same treatment as the BUF ledger.",
+   "sources": [
+    {
+     "file": "signature-orf",
+     "org": "Signature Aviation",
+     "quote": [
+      "ORF / KORF",
+      "Signature Norfolk",
+      "Signature Aviation at Norfolk Int'l Airport (ORF) provides world-class private aviation services"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-general-aviation",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": [
+      "the general aviation facility, operated by Signature Flight Support",
+      "As the fixed base operator (FBO), Signature Flight Support provides all facets of general aviation services."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "General aviation services, or fixed-base operations, are provided by Signature Flight Support"
+    }
+   ]
+  },
+  {
+   "claim": "in south east Virginia",
+   "verdict": "cut",
+   "wasBefore": "in south east Virginia",
+   "why": "Wikipedia alone for the regional description; no second source found in two tries (the operator's pages and Signature's page do not use it). The place is now given as Norfolk, Virginia, with Hampton Roads and the Outer Banks."
+  },
+  {
+   "claim": "draws from north east North Carolina",
+   "verdict": "cut",
+   "wasBefore": "it also draws from north east North Carolina",
+   "why": "Softened to the operator's own wording, the Outer Banks of North Carolina (see above)."
+  },
+  {
+   "claim": "2,444,897 passengers in 2024",
+   "verdict": "cut",
+   "wasBefore": "It carried 2,444,897 passengers in 2024",
+   "why": "Mislabelled and a year old. 2,444,897 is the FAA's count of 2024 boardings (FAA final CY2024 table: '65 EA VA ORF Norfolk Norfolk International P S 2,444,897'), about half of the passengers the airport handled (operator: 4,864,752 in 2024). Replaced by the 2025 total."
+  },
+  {
+   "claim": "third in Virginia behind Dulles and Reagan National",
+   "verdict": "cut",
+   "wasBefore": "third in Virginia behind Dulles and Reagan National",
+   "why": "Wrong for 2025 and for 2024. The FAA's final CY2024 table (15 September 2025) already had Richmond 64th with 2,456,422 boardings and Norfolk 65th with 2,444,897, and the two operators' 2024 totals agree (Richmond 4,884,093, Norfolk 4,864,752). Wikipedia's 'just ahead of Richmond' is not borne out. Replaced by fourth, narrowly behind Richmond, for 2025.",
+   "sources": [
+    {
+     "file": "faa-cy2024-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Source: CY2024 ACAIS Cy2024 Enplanements at All Commercial Service Airports (by Rank) 9/15/2025",
+      "64 EA VA RIC Highland Springs Richmond International P S 2,456,422 2,399,239 2.38%",
+      "65 EA VA ORF Norfolk Norfolk International P S 2,444,897 2,307,899 5.94%"
+     ],
+     "dated": "2025-09-15"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is the third-busiest airport in Virginia in terms of passengers served annually, behind Dulles International Airport and Ronald Reagan Washington National Airport, but just ahead of Richmond International."
+    }
+   ]
+  },
+  {
+   "claim": "a compact site",
+   "verdict": "cut",
+   "wasBefore": "It is a compact site of 1,300 acres",
+   "why": "'Compact' is a judgement with nothing behind it; the acreage is kept with two sources."
+  },
+  {
+   "claim": "a shorter crosswind runway (as current)",
+   "verdict": "cut",
+   "wasBefore": "and a shorter crosswind runway",
+   "why": "Out of date: runway 14/32 closed in August 2025 and is off the FAA's September 2026 master record and diagram."
+  },
+  {
+   "claim": "Breeze Airways uses Concourse A",
+   "verdict": "cut",
+   "wasBefore": "with American, Southwest and Breeze Airways using Concourse A",
+   "why": "Breeze's concourse cannot be confirmed as current. The airport's August 2025 terminal map lists American and Southwest under Concourse A and Breeze among the other airlines; the airport said on 17 April 2026 that Breeze 'will relocate into Concourse A later this spring'; the live board read on 23 September 2026 shows no gate for either Breeze flight. Wikipedia's sentence still describes Concourse A as gates 1 to 9, the layout before gates A10 to A12 opened in April 2026, so it cannot settle it.",
+   "sources": [
+    {
+     "file": "op-concourse-a-2026",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": [
+      "Breeze Airways will relocate into",
+      "Concourse A later this spring",
+      "gates",
+      "A10, A11 and A12"
+     ],
+     "dated": "2026-04-17"
+    },
+    {
+     "file": "op-terminal-map-2025-08",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": [
+      "CONCOURSE A",
+      "GATES 1-9",
+      "AMERICAN",
+      "SOUTHWEST",
+      "CONCOURSE B",
+      "GATES 16-30",
+      "BREEZE"
+     ],
+     "dated": "2025-08 (date in the file's URL)"
+    },
+    {
+     "file": "op-arrivals",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": [
+      "Breeze Airways 1711",
+      "Breeze Airways 2773"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "air traffic control busier than the passenger figure suggests",
+   "verdict": "cut",
+   "wasBefore": "Air traffic control here is busier than the passenger figure suggests.",
+   "why": "Rests on the 1,100 aircraft a day figure, which is Wikipedia alone. The operator counts over 92,000 flight operations at the airport in 2025, about 250 a day.",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": "with nearly 5 million passengers and over 92,000 flight operations in 2025",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "tower built in 1995, 134 feet high",
+   "verdict": "cut",
+   "wasBefore": "The Norfolk tower, built in 1995 and standing 134 feet high",
+   "why": "The year is contradicted by the operator's own history, which says a new FAA air traffic control tower began operation in 1991 (Wikipedia's own history section says 1991 as well). The height is Wikipedia alone.",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": "A new state-of-the-art fire station and new FAA air traffic control tower facility also began operation.",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "tower handles about 1,100 aircraft a day, round the clock",
+   "verdict": "cut",
+   "wasBefore": "handles around 1,100 aircraft a day, round the clock, every day of the year",
+   "why": "Wikipedia alone (an unreferenced paragraph); no FAA page for the tower was found. Not what a travel agent needs."
+  },
+  {
+   "claim": "Signature Flight Support (old name)",
+   "verdict": "cut",
+   "wasBefore": "General aviation is looked after by Signature Flight Support",
+   "why": "Reworded with the company's current name, Signature Aviation (see above)."
+  },
+  {
+   "claim": "54,000 square foot facility, aircraft hire, sightseeing flights, maintenance",
+   "verdict": "cut",
+   "wasBefore": "with a 54,000 square foot facility covering everything from aircraft hire and sightseeing flights to maintenance",
+   "why": "Wikipedia alone. Signature's own ORF page lists hangar storage, de-icing, ramp access, on-site customs and conference rooms, with no floor area and no aircraft hire or sightseeing flights; the airport's page describes Signature's services in general terms only."
+  },
+  {
+   "claim": "Breeze Airways flies seasonally to Cancún",
+   "verdict": "cut",
+   "why": "Held back: verified, but a new fact that replaces nothing in the old text. Breeze started seasonal Saturday flights to Cancún on 10 January 2026 (WTKR), the airport lists them as seasonal, one to two a week, and its home page says they resume in December. Worth adding: it is the airport's only international route. The airport's own FAQ still says its airlines fly no nonstop international routes, which is out of date. WAVY and WYDaily reports on the route answered with bot checks and were not tried again.",
+   "sources": [
+    {
+     "file": "wtkr-cancun",
+     "org": "WTKR News 3 (Scripps)",
+     "quote": "Starting Jan. 10, 2026, Breeze Airways will have direct flights from Norfolk International Airport to Cancun, Mexico seasonally on Saturdays."
+    },
+    {
+     "file": "op-where-we-fly",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": "Breeze Airways has flights to Cancun seasonally one to two times a week.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-home",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": "Breeze weekly nonstops to Cancún resume in December.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-nonstops-2026-05",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": [
+      "May 2026",
+      "Breeze Airways – MX",
+      "+*Cancún, Mexico (CUN)"
+     ],
+     "dated": "2026-05"
+    }
+   ]
+  },
+  {
+   "claim": "TransformORF works: new international arrivals facility, gates A10 to A12, two security checkpoints for now",
+   "verdict": "cut",
+   "why": "Held back: new facts that replace nothing, and they rest mostly on the airport's own release of 17 April 2026 (Wikipedia describes the same works as planned). Customs has processed international arrivals in an upgraded facility since March 2026; three gates (A10 to A12) opened on Concourse A in April 2026; screening happens at two separate checkpoints until a single one opens, so a traveller must use the checkpoint for the right concourse. Andy may want the checkpoint point in the text once a second source confirms it.",
+   "sources": [
+    {
+     "file": "op-concourse-a-2026",
+     "org": "Norfolk Airport Authority (operator, norfolkairport.com / flyorf.com)",
+     "quote": [
+      "This week, it opened a three-",
+      "gate expansion of Concourse A",
+      "U.S. Customs and Border Protection is now processing international arrivals.",
+      "Passenger screening now occurs at two separate checkpoints but will soon relocate into a single"
+     ],
+     "dated": "2026-04-17"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "a new Customs and Border Patrol facility is being constructed",
+      "a new expansion for Concourse A with additional departures"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "Reagan National": "Short form of Ronald Reagan Washington National Airport, as Wikipedia names it (the FAA table: 'Ronald Reagan Washington Ntl'). See the Virginia ranking claim."
+ }
+}
