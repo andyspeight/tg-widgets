@@ -206,22 +206,119 @@ export function placeOf(order, destIata) {
   return null;
 }
 
-/** Heads on the booking, for the search's party size. */
+/**
+ * The Travelify deep linking spec's own limits, so a link is never rejected for
+ * a number out of range: adt 1-9, chd 0-9, inf 0 to the number of adults.
+ */
+const MAX_ADULTS = 9;
+const MAX_CHILDREN = 9;
+
+/**
+ * The age to search a child at when the booking does not say.
+ *
+ * Travelify's order carries a traveller's TYPE (Adult / Child / Infant) and,
+ * often, no age at all: `trimAccommodation` and the flight trimmers keep title,
+ * name and type because that is all the supplier reliably sends. The deep
+ * linking spec meanwhile is firm that children need "an age for each child
+ * searched", so a party of two adults and two children cannot be searched
+ * honestly and completely at the same time.
+ *
+ * Searching the right NUMBER of people at an assumed age beats searching the
+ * wrong number of people, which is what the first version did: it dropped every
+ * child it had no age for, so a family of four opened a search for two. The
+ * customer lands on a live results page where the party is on screen and can be
+ * changed, so an age that is a year or two out costs them a click; a missing
+ * child costs them a price that was never for their family.
+ *
+ * 8 is the same default the Travel Offers widget's own party picker starts a
+ * child at, so the two agree. A real age always wins over this.
+ */
+export const CHILD_AGE_WHEN_UNKNOWN = 8;
+
+/** A traveller's age, when the supplier gave one we can believe. */
+function ageOf(person) {
+  if (!person) return null;
+  const raw = person.age != null ? person.age
+    : (person.paxAge != null ? person.paxAge : person.childAge);
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 0 || n > 17) return null;
+  return Math.round(n);
+}
+
+/**
+ * The people on this booking.
+ *
+ * `order.summary.travellers` is where they really are: /api/retrieve-order
+ * builds it with `aggregateTravellers`, which reads every product's own list
+ * and de-dupes the same person appearing on the hotel and the flight. An
+ * earlier version of this file read `order.travellers`, a key no order has, so
+ * every upsell search asked for the fallback two adults however many people
+ * were actually going. `order.travellers` is kept as a second look only because
+ * it is the shape a hand-written fixture reaches for.
+ */
+export function travellerList(order) {
+  if (!order) return [];
+  const summary = order.summary;
+  if (summary && Array.isArray(summary.travellers) && summary.travellers.length) return summary.travellers;
+  if (Array.isArray(order.travellers) && order.travellers.length) return order.travellers;
+  // A booking whose summary came back empty may still have a hotel that knows
+  // who is sleeping in the room.
+  const items = Array.isArray(order.items) ? order.items : [];
+  for (const it of items) {
+    const guests = it && it.accommodation && it.accommodation.guests;
+    if (Array.isArray(guests) && guests.length) return guests;
+  }
+  return [];
+}
+
+const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
+
+/**
+ * The party to search for: how many, and of which kind.
+ *
+ * Adults, children and infants are three different things to Travelify and to
+ * the price. An infant is NOT a child: it has its own `inf` parameter, it needs
+ * no age, and it is capped at one per adult. Counting infants as children, as
+ * the first version did, both overstated the child count and searched a lap
+ * infant as a seated eight-year-old.
+ */
 export function partySize(order) {
-  const t = (order && Array.isArray(order.travellers)) ? order.travellers : [];
+  const people = travellerList(order);
   let adults = 0;
   let children = 0;
+  let infants = 0;
   const childAges = [];
-  for (const p of t) {
-    const type = String((p && (p.type || p.paxType)) || '').toLowerCase();
-    if (type.indexOf('child') !== -1 || type.indexOf('infant') !== -1) {
+
+  for (const p of people) {
+    // Travelify types a traveller Adult / Child / Infant. An untyped traveller
+    // is an adult, which is the same assumption the booking summary makes.
+    const type = String((p && (p.type || p.paxType)) || 'Adult').toLowerCase();
+    if (type.indexOf('infant') !== -1) { infants++; continue; }
+    if (type.indexOf('child') !== -1 || type.indexOf('youth') !== -1) {
       children++;
-      const age = Number(p && (p.age != null ? p.age : p.paxAge));
-      if (Number.isFinite(age) && age >= 0 && age < 18) childAges.push(Math.round(age));
-    } else adults++;
+      const age = ageOf(p);
+      childAges.push(age == null ? CHILD_AGE_WHEN_UNKNOWN : age);
+      continue;
+    }
+    adults++;
   }
-  // A booking with no traveller list still has to search for somebody.
-  return { adults: adults || 2, children, childAges };
+
+  // No traveller list at all. A search still has to be for somebody, and two
+  // adults is the deep link's own default, so say plainly that it was assumed
+  // rather than counted.
+  if (!adults && !children && !infants) {
+    return { adults: 2, children: 0, infants: 0, childAges: [], counted: false };
+  }
+  // A list of children with no adult on it is a booking we have read wrong
+  // rather than a party that can travel, and adt has a floor of 1 either way.
+  if (!adults) adults = 1;
+
+  adults = clamp(adults, 1, MAX_ADULTS);
+  children = clamp(children, 0, MAX_CHILDREN);
+  infants = clamp(infants, 0, adults);
+  childAges.length = children;
+
+  return { adults, children, infants, childAges, counted: true };
 }
 
 /**
@@ -280,7 +377,9 @@ export function upsellTiles(order, opts = {}) {
       ...anchor,
       adults: party.adults,
       children: party.children,
+      infants: party.infants,
       childAges: party.childAges,
+      partyCounted: party.counted,
     });
   }
   return tiles;
@@ -301,16 +400,23 @@ export function upsellUrl(tile, appId) {
   if (tile.pup) { p.set('pup', tile.pup); if (tile.pupctry) p.set('pupctry', tile.pupctry); if (tile.pupt) p.set('pupt', tile.pupt); }
   if (tile.fr) p.set('fr', tile.fr);
   if (tile.to && tile.to !== tile.fr) p.set('to', tile.to);
+  // The party, as three separate counts, because Travelify prices them as three
+  // separate things. Adults always; children and infants only when there are
+  // any, since the spec defaults both to zero.
   p.set('adt', String(tile.adults || 2));
-  // Children need an AGE EACH or the search is invalid, per the spec: "must
-  // specify an age for each child searched". Without every age we search for
-  // the adults alone rather than send a request Travelify will reject. The
-  // offers widget reached the same conclusion on the same sentence.
+  // Children need an AGE EACH, per the spec: "must specify an age for each
+  // child searched". partySize has already filled any the booking did not state
+  // with CHILD_AGE_WHEN_UNKNOWN, so the search is for the right number of
+  // people either way and the customer can adjust an age on the results page.
   const ages = Array.isArray(tile.childAges) ? tile.childAges.filter((n) => Number.isFinite(n)) : [];
   if (tile.children && ages.length === tile.children) {
     p.set('chd', String(tile.children));
     for (const a of ages) p.append('chdage', String(a));
   }
+  // An infant travels on a lap, has no age parameter and is capped at one per
+  // adult. Counting one as a child would both overstate the children and price
+  // a babe in arms as a seated eight-year-old.
+  if (tile.infants) p.set('inf', String(tile.infants));
   return 'https://dl.tvllnk.com/deeplink/' + encodeURIComponent(String(appId)) + '?' + p.toString();
 
 }
