@@ -1,0 +1,540 @@
+{
+ "iata": "ZQN",
+ "id": "rece5w2YkU4nE9naa",
+ "name": "Queenstown Airport",
+ "country": "New Zealand",
+ "wikipedia": "https://en.wikipedia.org/wiki/Queenstown_Airport",
+ "audited": "2026-09-23",
+ "before": "Queenstown's airport, at Frankton, and fourth busiest in New Zealand with 2.7 million passengers in 2025. For a resort town that is remarkable traffic.\n\nIt is known for two things. The first is the approach, which is genuinely demanding: high terrain close in and housing near the field. The second is the scenery on the way down, which clients tend to remember.\n\nThe terminal is a single level building with nine gates handling both domestic and international flights, and there are no jet bridges, so every boarding is on foot. A 2015 expansion of the international departures area built a mezzanine so jet bridges could be added later.\n\nAir New Zealand and Jetstar fly domestically to Auckland, Wellington and Christchurch, and the trans-Tasman routes to Sydney, Melbourne, Brisbane and the Gold Coast are flown by Air New Zealand, Jetstar, Qantas and Virgin Australia. Sightseeing flights to Milford Sound and Aoraki Mount Cook also leave from here.\n\nAuckland Airport has held a 24.99 per cent stake since 2010.",
+ "after": "Queenstown's airport at Frankton is New Zealand's fourth busiest. The airport says it handled a record 2.82 million passengers in the year to June 2026. For a resort town that is remarkable traffic.\n\nThe approach is demanding, with high terrain close in and housing near the field. Clients tend to remember the scenery on the way down.\n\nThe airport's single-level terminal has nine gates and handles domestic and international flights. There are no jet bridges: passengers walk between aircraft and terminal. A 2015 expansion of the international terminal added a mezzanine to allow for jet bridges later.\n\nBetween them, Air New Zealand, Jetstar, Qantas and Virgin Australia fly to Auckland, Wellington and Christchurch and across the Tasman to Sydney, Melbourne, Brisbane and the Gold Coast. Sightseeing flights to Milford Sound and Aoraki Mount Cook also leave from here.\n\nAuckland Airport has held a 24.99 per cent stake since 2010.",
+ "claims": [
+  {
+   "claim": "Queenstown's airport, at Frankton",
+   "verdict": "confirmed",
+   "inAfter": "Queenstown's airport at Frankton",
+   "sources": [
+    {
+     "file": "qac-about",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "02 Feb 2026 (About Us page)",
+     "quote": [
+      "02 Feb 2026",
+      "Located in Frankton, just 8km from Queenstown’s town centre"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "an international airport located in Frankton, Otago, New Zealand, which serves the resort town of Queenstown"
+    }
+   ]
+  },
+  {
+   "claim": "fourth busiest in New Zealand",
+   "verdict": "confirmed",
+   "inAfter": "is New Zealand's fourth busiest",
+   "note": "The airport says so on two of its own pages, both dated in 2026; Wikipedia gives the same rank for calendar 2025. Reworded in review (23 Sep) from 'Queenstown's airport, at Frankton, and fourth busiest in New Zealand', which the gate read as a possible serial comma.",
+   "sources": [
+    {
+     "file": "qac-about",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "02 Feb 2026 (About Us page)",
+     "quote": "It is New Zealand's fourth-busiest airport"
+    },
+    {
+     "file": "qac-history",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "19 Jan 2026 (Our History page)",
+     "quote": [
+      "19 Jan 2026",
+      "Queenstown Airport is now the fourth busiest airport in the country by passenger numbers"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "making it the fourth busiest airport in New Zealand by passenger total passenger traffic"
+    }
+   ]
+  },
+  {
+   "claim": "the airport says it handled a record 2.82 million passengers in the year to June 2026",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport says it handled a record 2.82 million passengers in the year to June 2026.",
+   "note": "Was '2.7 million passengers in 2025'. Wikipedia's calendar-2025 figure (2,717,113, from Auckland Airport's monthly traffic updates) could not be checked against a second organisation: Auckland Airport's corporate site and NZX both refused the link lister (403) and were not tried again, and the Otago Daily Times' Queenstown page carried no airport story. The airport's own figure for the financial year to 30 June 2026 is newer, so it replaces the calendar figure (a passenger total for a passenger total), attributed to the airport. Its 'passenger movements' count arriving and departing passengers together, the usual airport total. Its June release had forecast about 2.8 million.",
+   "sources": [
+    {
+     "file": "qac-fy26",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "release of 19 Aug 2026",
+     "quote": [
+      "19 Aug 2026",
+      "Queenstown Airport has reported a strong financial result for the year ended 30 June 2026",
+      "handled a record 2.82 million passenger movements during the year",
+      "Passenger movements include both arriving and departing passengers."
+     ]
+    },
+    {
+     "file": "qac-bne-services",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "release of 08 Jun 2026",
+     "quote": [
+      "08 Jun 2026",
+      "Total passenger movements in FY26 are expected to total about 2.8 million."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the approach is demanding, with high terrain close in and housing near the field",
+   "verdict": "confirmed",
+   "inAfter": "The approach is demanding, with high terrain close in and housing near the field.",
+   "note": "'Genuinely demanding' is now 'demanding', the Civil Aviation Authority's word. Its booklet In, out, and around Queenstown (revised September 2024, hosted on the airport's operations page) is written for visiting pilots, but its introduction is about flying into the aerodrome as a whole. The housing: the booklet tells pilots to avoid overflying residential areas, 'in particular over Frankton Arm and the town', and the airport's history says homes and businesses have grown up around it at Frankton.",
+   "sources": [
+    {
+     "file": "caa-in-out-around",
+     "org": "Civil Aviation Authority of New Zealand (booklet In, out, and around Queenstown, hosted on the airport's site)",
+     "dated": "revised September 2024",
+     "quote": [
+      "The mountainous terrain, changeable weather, and high-density traffic make it one of the more demanding destinations to fly into.",
+      "with high terrain surrounding the immediate area",
+      "Avoid directly overflying residential areas",
+      "in particular over Frankton Arm and the town",
+      "All photos in this booklet are CAA images unless otherwise stated.",
+      "In, out, and around Queenstown was revised in September 2024."
+     ]
+    },
+    {
+     "file": "qac-history",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "19 Jan 2026 (Our History page)",
+     "quote": "A vibrant mix of commercial and residential communities has developed over the years in Frankton and the surrounding areas."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is known for its scenery and challenging approach to land due to the nearby high terrain and proximity to housing."
+    }
+   ]
+  },
+  {
+   "claim": "the scenery on the way down",
+   "verdict": "confirmed",
+   "inAfter": "the scenery on the way down",
+   "sources": [
+    {
+     "file": "caa-in-out-around",
+     "org": "Civil Aviation Authority of New Zealand (booklet In, out, and around Queenstown, hosted on the airport's site)",
+     "dated": "revised September 2024",
+     "quote": [
+      "Queenstown serves as a gateway to some of New Zealand’s most renowned scenery and tourist experiences.",
+      "flying into an aerodrome enveloped by nature presents specific challenges"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is known for its scenery"
+    }
+   ]
+  },
+  {
+   "claim": "a single-level terminal with nine gates",
+   "verdict": "confirmed",
+   "inAfter": "The airport's single-level terminal has nine gates",
+   "note": "Was 'a single level building'. The airport says its terminal 'consists of multiple buildings that have been added incrementally over many years', with the two lounges on the first floor, so 'building' is dropped and the airport's own 'single-level terminal' is used.",
+   "sources": [
+    {
+     "file": "qac-accessible",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "12 Mar 2026 (Accessibility page)",
+     "quote": [
+      "12 Mar 2026",
+      "Queenstown Airport is compact with a single-level terminal and 9 gates"
+     ]
+    },
+    {
+     "file": "qac-terminal-programme",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "11 Mar 2026 (Terminal Programme page)",
+     "quote": "Our current terminal consists of multiple buildings that have been added incrementally over many years."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The terminal consists of a single level with nine gates."
+    }
+   ]
+  },
+  {
+   "claim": "the terminal handles both domestic and international flights",
+   "verdict": "confirmed",
+   "inAfter": "handles domestic and international flights",
+   "sources": [
+    {
+     "file": "qac-about",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "02 Feb 2026 (About Us page)",
+     "quote": "A modern terminal with international and domestic facilities"
+    },
+    {
+     "file": "qac-arrivals",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "16 Mar 2026 (Arrivals Guide)",
+     "quote": [
+      "The Domestic Arrivals Process",
+      "The international arrivals process"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Queenstown Airport has a single terminal that handles both international and domestic flights."
+    }
+   ]
+  },
+  {
+   "claim": "no jet bridges: passengers walk between the aircraft and the terminal",
+   "verdict": "softened",
+   "inAfter": "There are no jet bridges: passengers walk between aircraft and terminal.",
+   "note": "Was 'so every boarding is on foot'. Only Wikipedia says in words that there are no jet bridges. The airport's own arrivals guide bears it out: domestic and international arrivals alike disembark and follow marked pathways to the terminal, which is not how a jet bridge works, and the 2015 mezzanine was built to allow for air bridges 'if and when appropriate' (see below). The text now says what both support: passengers walk between aircraft and terminal.",
+   "sources": [
+    {
+     "file": "qac-arrivals",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "16 Mar 2026 (Arrivals Guide)",
+     "quote": [
+      "16 Mar 2026",
+      "Once the aircraft has parked, disembark and enter the terminal using the clearly marked pathways.",
+      "Once the aircraft has parked, disembark and follow the clearly marked pathways to the terminal."
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The terminal does not utilise jet bridges"
+    }
+   ]
+  },
+  {
+   "claim": "a 2015 expansion of the international terminal added a mezzanine to allow for jet bridges later",
+   "verdict": "confirmed",
+   "inAfter": "A 2015 expansion of the international terminal added a mezzanine to allow for jet bridges later.",
+   "note": "Was 'of the international departures area'; the airport and the trade press call it the international terminal expansion. The opening day differs (Wikipedia 23 June 2015, the airport's history 1 July 2015; Passenger Terminal Today reported the opening on 23 June and an official opening on 1 July), so only the year is given.",
+   "sources": [
+    {
+     "file": "pttoday-2015",
+     "org": "Passenger Terminal Today (trade press)",
+     "dated": "23 June 2015",
+     "quote": [
+      "By Helen Norman June 23, 2015",
+      "doubling the size of the airport's international operations",
+      "A new mezzanine floor has also been built to allow for future developments such as gate lounges, retail space and air bridges if and when appropriate."
+     ]
+    },
+    {
+     "file": "qac-history",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "19 Jan 2026 (Our History page)",
+     "quote": "2015: On 1 July 2015, the $17 million international terminal expansion opened"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "an expansion of the international departures area in 2015 included the construction of a mezzanine level to allow for the possible future provision of jet bridges"
+    }
+   ]
+  },
+  {
+   "claim": "between them, Air New Zealand, Jetstar, Qantas and Virgin Australia fly the scheduled routes",
+   "verdict": "softened",
+   "inAfter": "Between them, Air New Zealand, Jetstar, Qantas and Virgin Australia fly",
+   "note": "Was 'Air New Zealand and Jetstar fly domestically to Auckland, Wellington and Christchurch'. Which airline flies which domestic route rests on Wikipedia alone (Air New Zealand to all three, Jetstar to Auckland and Wellington): the airport names its four airlines and its destinations but not who flies where, its live departures board showed no flights when read, and Jetstar's site answered 502. Air New Zealand's own release does say Queenstown tops its list of domestic destinations. So the four airlines are named together ('between them') for the whole network.",
+   "sources": [
+    {
+     "file": "qac-about",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "02 Feb 2026 (About Us page)",
+     "quote": "supporting a wide network of domestic and trans-Tasman flights, with regular services from Air New Zealand, Jetstar, Qantas, and Virgin Australia"
+    },
+    {
+     "file": "qac-fy26",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "release of 19 Aug 2026",
+     "quote": "our four airline partners, Air New Zealand, Qantas, Jetstar and Virgin Australia"
+    },
+    {
+     "file": "airnz-bne-2026",
+     "org": "Air New Zealand (airnewzealandnewsroom.com)",
+     "dated": "release of 1 July 2026",
+     "quote": [
+      "1 July 2026",
+      "Queenstown is a favourite with travellers over the holiday period, with the winter playground topping the list of domestic destinations."
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Air New Zealand currently operate domestic flights to Auckland, Wellington and Christchurch, while Jetstar operates domestic services to Auckland and Wellington.",
+      "services to Sydney, Melbourne, Brisbane, and the Gold Coast operated by Air New Zealand, Jetstar, Qantas and Virgin Australia"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "domestic flights to Auckland, Wellington and Christchurch",
+   "verdict": "confirmed",
+   "inAfter": "fly to Auckland, Wellington and Christchurch",
+   "sources": [
+    {
+     "file": "qac-dest-dom",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Queenstown Airport offers direct daily flights to New Zealand’s three largest cities.",
+      "Auckland is New Zealand’s largest and most diverse city",
+      "Sitting at the heart of New Zealand, the capital city has a little bit of everything.",
+      "A short flight from Queenstown, Christchurch combines rich heritage with urban regeneration and modern architecture."
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Air New Zealand currently operate domestic flights to Auckland, Wellington and Christchurch"
+    }
+   ]
+  },
+  {
+   "claim": "across the Tasman to Sydney, Melbourne, Brisbane and the Gold Coast",
+   "verdict": "confirmed",
+   "inAfter": "across the Tasman to Sydney, Melbourne, Brisbane and the Gold Coast",
+   "note": "The airport's live page lists exactly these four Australian destinations. Brisbane is seasonal for two of the four airlines: Air New Zealand flies it from 22 June to 23 October 2026 and Jetstar to the end of September, while Qantas and Virgin Australia fly it year-round (the airport, 8 June 2026). All four airlines served Brisbane over winter 2026.",
+   "sources": [
+    {
+     "file": "qac-dest-intl",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "There are daily flights from Queenstown to Australia",
+      "Melbourne is a very cool city with a busy events calendar",
+      "Australia’s first city is famous for its distinctive opera house",
+      "‘Play the day away’ is the slogan used to promote the Gold Coast.",
+      "Brisbane is the obvious choice for those seeking sunshine."
+     ]
+    },
+    {
+     "file": "qac-destinations",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "four airlines fly from Queenstown to a range of Australian destinations."
+    },
+    {
+     "file": "qac-bne-services",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "release of 08 Jun 2026",
+     "quote": [
+      "over winter all four international airplines operating at Queenstown will be serving the Brisbane route",
+      "Qantas and Virgin Australia operate year-round direct services between Queenstown and Brisbane."
+     ]
+    },
+    {
+     "file": "airnz-bne-2026",
+     "org": "Air New Zealand (airnewzealandnewsroom.com)",
+     "dated": "release of 1 July 2026",
+     "quote": "Air New Zealand launched its new seasonal service between Queenstown and Brisbane last week"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "International services have increased over recent years with services to Sydney, Melbourne, Brisbane, and the Gold Coast operated by Air New Zealand, Jetstar, Qantas and Virgin Australia."
+    }
+   ]
+  },
+  {
+   "claim": "sightseeing flights to Milford Sound and Aoraki Mount Cook leave from here",
+   "verdict": "confirmed",
+   "inAfter": "Sightseeing flights to Milford Sound and Aoraki Mount Cook also leave from here.",
+   "sources": [
+    {
+     "file": "qac-flightseeing",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Flying from Queenstown to Milford Sound is a popular choice",
+      "Glacier helicopter tours from Queenstown to Mount Cook, Franz Josef, and Fox Glacier"
+     ]
+    },
+    {
+     "file": "caa-in-out-around",
+     "org": "Civil Aviation Authority of New Zealand (booklet In, out, and around Queenstown, hosted on the airport's site)",
+     "dated": "revised September 2024",
+     "quote": "The main traffic flow of scenic aircraft to Milford Sound now departs via Skippers Saddle"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Queenstown Airport is also used for sightseeing flights, especially to Milford Sound and Aoraki Mount Cook."
+    }
+   ]
+  },
+  {
+   "claim": "Auckland Airport has held a 24.99 per cent stake since 2010",
+   "verdict": "confirmed",
+   "inAfter": "Auckland Airport has held a 24.99 per cent stake since 2010.",
+   "note": "The airport's history dates the purchase to 2010; the rest (75.01 per cent) belongs to Queenstown Lakes District Council. Auckland Airport received its share of the FY26 dividend as minority shareholder, so the stake still stands.",
+   "sources": [
+    {
+     "file": "qac-history",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "19 Jan 2026 (Our History page)",
+     "quote": [
+      "2010: The airport’s runway was resealed in a $5 million project",
+      "Auckland International Airport Limited (AIAL) acquired a 24.99% shareholding in Queenstown Airport Corporation Limited."
+     ]
+    },
+    {
+     "file": "qac-about",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "02 Feb 2026 (About Us page)",
+     "quote": "QAC is jointly owned by Queenstown Lakes District Council (75.01%) and Auckland International Airport Limited (24.99%)."
+    },
+    {
+     "file": "qac-fy26",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "release of 19 Aug 2026",
+     "quote": "Auckland International Airport, as the minority shareholder, receives $5.1 million"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "On 8 July 2010, Auckland International Airport Limited, the operator of Auckland Airport, announced it had agreed to take a 24.99% shareholding in Queenstown Airport Corporation Limited"
+    }
+   ]
+  },
+  {
+   "claim": "2.7 million passengers in 2025",
+   "verdict": "cut",
+   "wasBefore": "with 2.7 million passengers in 2025",
+   "why": "Wikipedia alone: Auckland Airport's traffic updates, which Wikipedia cites, could not be read (its corporate site and NZX refused the link lister with 403 and were left alone). Replaced by the airport's own figure for the year to June 2026, attributed (see above)."
+  },
+  {
+   "claim": "known for two things; 'genuinely' demanding",
+   "verdict": "cut",
+   "wasBefore": "It is known for two things. The first is the approach, which is genuinely demanding",
+   "why": "Reworded: the reputation line rests on Wikipedia, and 'genuinely' adds nothing the Civil Aviation Authority's 'demanding' does not say. The approach and the scenery are kept (see above)."
+  },
+  {
+   "claim": "a single level building",
+   "verdict": "cut",
+   "wasBefore": "The terminal is a single level building",
+   "why": "The airport says its terminal is several buildings added over many years, with lounges on the first floor; now 'single-level terminal', the airport's own words (see above)."
+  },
+  {
+   "claim": "every boarding is on foot",
+   "verdict": "cut",
+   "wasBefore": "so every boarding is on foot",
+   "why": "Softened to passengers walking between aircraft and terminal, which the airport's arrivals guide describes (see above)."
+  },
+  {
+   "claim": "the international departures area",
+   "verdict": "cut",
+   "wasBefore": "A 2015 expansion of the international departures area built a mezzanine so jet bridges could be added later.",
+   "why": "Reworded to the international terminal expansion, as the airport and Passenger Terminal Today describe it (see above)."
+  },
+  {
+   "claim": "Air New Zealand and Jetstar fly domestically to Auckland, Wellington and Christchurch",
+   "verdict": "cut",
+   "wasBefore": "Air New Zealand and Jetstar fly domestically to Auckland, Wellington and Christchurch",
+   "why": "The split by airline rests on Wikipedia alone (and Wikipedia has Jetstar on only two of the three routes): the airport lists airlines and destinations separately, its live board showed no flights, and Jetstar's site answered 502. Softened to the four airlines together (see above)."
+  },
+  {
+   "claim": "the airport operates 7am to 10pm under Civil Aviation Authority rules",
+   "verdict": "cut",
+   "why": "Held back: verified but replaces nothing in the old text. The airport says that under Civil Aviation Authority rules it operates between 07:00 and 22:00 daily (Airport Operations, 20 Jan 2026), and Wikipedia calls 10pm its noise abatement curfew. Worth adding for late arrivals if Andy agrees.",
+   "sources": [
+    {
+     "file": "qac-operations",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "20 Jan 2026 (Airport Operations page)",
+     "quote": [
+      "20 Jan 2026",
+      "Under Civil Aviation Authority rules, Queenstown Airport operates between 07:00 and 22:00 daily."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-30",
+     "quote": "The runway lighting allowed the airport to extend operations beyond sunset to its 10:00 pm noise abatement curfew."
+    }
+   ]
+  },
+  {
+   "claim": "Brisbane is seasonal for Air New Zealand and Jetstar",
+   "verdict": "cut",
+   "why": "Held back: verified but replaces nothing. Air New Zealand flies Queenstown to Brisbane three times a week from 22 June to 23 October 2026 (its own releases) and Jetstar three times a week from 15 June to the end of September; Qantas and Virgin Australia fly the route year-round (the airport, 8 June 2026).",
+   "sources": [
+    {
+     "file": "airnz-bne-2025",
+     "org": "Air New Zealand (airnewzealandnewsroom.com)",
+     "dated": "release of 17 November 2025",
+     "quote": [
+      "17 November 2025",
+      "Launching 22 June 2026, the new route will operate three times a week through to 23 October 2026"
+     ]
+    },
+    {
+     "file": "qac-bne-services",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "release of 08 Jun 2026",
+     "quote": [
+      "Jetstar’s first direct flight from Brisbane is due to arrive on Monday, 15 June, and the seasonal service will then operate three times a week until the end of September.",
+      "Qantas and Virgin Australia operate year-round direct services between Queenstown and Brisbane."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a terminal expansion and upgrade is being designed",
+   "verdict": "cut",
+   "why": "Held back: new, and on the airport's word alone. The airport calls its current terminal 'inadequate for a modern international airport welcoming thousands of people a day'; Warren & Mahoney and Hassell are designing an expansion to the south, with the concept design expected by mid-2027. A $65 million airfield programme (a heavy taxiway and a runway overlay) began in July 2026, due by summer 2027.",
+   "sources": [
+    {
+     "file": "qac-terminal-programme",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "11 Mar 2026 (Terminal Programme page)",
+     "quote": "It is now inadequate for a modern international airport welcoming thousands of people a day."
+    },
+    {
+     "file": "qac-terminal-concept",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "release of 17 Dec 2025",
+     "quote": [
+      "The programme of works is anchored by an expansion of the terminal to the south",
+      "The terminal concept design is expected to be completed by mid-2027."
+     ]
+    },
+    {
+     "file": "qac-fy26",
+     "org": "Queenstown Airport Corporation (the airport operator, queenstownairport.co.nz)",
+     "dated": "release of 19 Aug 2026",
+     "quote": "A $65 million programme of airfield improvements – incorporating the construction of a Code C heavy taxiway and a complete overlay of the main runway – has just started and will be completed by summer next year."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "For a resort town that is remarkable traffic.",
+   "why": "The old text's comment, kept: the airport says 2.82 million passengers in a year (sourced above)."
+  },
+  {
+   "text": "Clients tend to remember the scenery on the way down.",
+   "why": "The old text's advice, kept, resting on the confirmed scenery (CAA, Wikipedia)."
+  }
+ ],
+ "tracerOk": {}
+}

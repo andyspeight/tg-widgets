@@ -1,0 +1,263 @@
+{
+ "iata": "BOJ",
+ "id": "rec6Wit7Y7b6sGtOz",
+ "name": "Burgas Airport",
+ "country": "Bulgaria",
+ "wikipedia": "https://en.wikipedia.org/wiki/Burgas_Airport",
+ "audited": "2026-09-23",
+ "before": "Bulgaria's second airport and the one that matters for the southern coast. It serves Burgas and the seaside resorts along that stretch, so summer traffic dominates and the terminal is busiest between June and September.\n\nThe building is newer than most clients expect. Terminal 2 opened in December 2013 and replaced a 1950s terminal, and now handles all passenger traffic. It has 31 check in counters, nine security lanes and eight departure gates, with a rated capacity of 2.7 million passengers a year across 21,000 square metres.\n\nArrivals are split into Schengen and non-Schengen zones with twelve immigration positions and four baggage carousels, which is worth knowing when quoting transfer times for a UK client, since the non-Schengen queue is the one they will join.\n\nThe airport is near the Sarafovo neighbourhood, about 10 km from the centre of Burgas.",
+ "after": "The airport that matters for Bulgaria's southern coast. It serves Burgas and the seaside resorts along that stretch, so summer traffic dominates and many routes run only in season. On Eurostat's figures it was the country's second busiest airport in 2024 and a close third, just behind Varna, in 2025.\n\nBulgaria is in the Schengen area, so UK clients go through passport control on arrival, and the FCDO warns that the EU's new Entry/Exit System can mean a longer wait at the border. Worth knowing when quoting transfer times.\n\nThe airport is about 10 km from the centre of Burgas.",
+ "claims": [
+  {
+   "claim": "the airport for Bulgaria's southern coast",
+   "verdict": "confirmed",
+   "inAfter": "The airport that matters for Bulgaria's southern coast.",
+   "note": "The operator calls it a key gateway to Bulgaria's Southern Black Sea coast; Wikipedia says it serves the resorts of the Bulgarian south coast. 'That matters' is the old text's emphasis.",
+   "sources": [
+    {
+     "file": "fraport-bg-summer2026",
+     "org": "Fraport Twin Star Airport Management (the airport operator, fraport-bulgaria.com)",
+     "dated": "2026-03-26 (press release)",
+     "quote": "further strengthening the airport’s role as a key air gateway to Bulgaria’s Southern Black Sea coast"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-02",
+     "quote": "other seaside resorts of the Bulgarian south coast"
+    }
+   ]
+  },
+  {
+   "claim": "serves Burgas and the seaside resorts along that stretch",
+   "verdict": "confirmed",
+   "inAfter": "It serves Burgas and the seaside resorts along that stretch",
+   "note": "The operator calls it a key gateway to Bulgaria's Southern Black Sea coast and speaks of the tourism flow to the Southern Black Sea region; Wikipedia says it principally serves Burgas and the resorts of the south coast.",
+   "sources": [
+    {
+     "file": "fraport-bg-summer2026",
+     "org": "Fraport Twin Star Airport Management (the airport operator, fraport-bulgaria.com)",
+     "dated": "2026-03-26 (press release)",
+     "quote": [
+      "further strengthening the airport’s role as a key air gateway to Bulgaria’s Southern Black Sea coast",
+      "which traditionally support the tourism flow to the Southern Black Sea region"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-02",
+     "quote": "The airport principally serves Burgas and other seaside resorts of the Bulgarian south coast which attract many tourists during the summer leisure season."
+    }
+   ]
+  },
+  {
+   "claim": "summer traffic dominates and many routes run only in season",
+   "verdict": "softened",
+   "inAfter": "so summer traffic dominates and many routes run only in season.",
+   "note": "Was 'so summer traffic dominates and the terminal is busiest between June and September'. The months rest on no source read. The operator's summer 2026 release has Wizz Air and Ryanair resuming in May, easyJet's summer programme starting in June and the charter programme from the first half of May.",
+   "sources": [
+    {
+     "file": "fraport-bg-summer2026",
+     "org": "Fraport Twin Star Airport Management (the airport operator, fraport-bulgaria.com)",
+     "dated": "2026-03-26 (press release)",
+     "quote": [
+      "is also resuming its flight program in May with routes to",
+      "is launching its summer program to Burgas at the beginning of June",
+      "The charter program for the summer season is expected to start as early as the first half of May"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-02",
+     "quote": "which attract many tourists during the summer leisure season"
+    }
+   ]
+  },
+  {
+   "claim": "second busiest in Bulgaria in 2024, a close third behind Varna in 2025 (Eurostat)",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Eurostat",
+   "inAfter": "On Eurostat's figures it was the country's second busiest airport in 2024 and a close third, just behind Varna, in 2025.",
+   "note": "Was 'Bulgaria's second airport'. Eurostat's tables of every Bulgarian airport it reports: 2024 Sofia 7,884,976, Burgas 1,781,239, Varna 1,534,753; 2025 Sofia 8,382,684, Varna 1,851,453, Burgas 1,824,539. The two swap places, so the text gives both years, attributed. The operator's own site refused (403 to a plain request and to the browser) and Fraport's traffic page gives only the two airports together (more than 3.7 million a year). Wikipedia calls it the second largest airport in the country.",
+   "sources": [
+    {
+     "file": "eurostat-bg-2024",
+     "org": "Eurostat",
+     "dated": "2024 (annual data)",
+     "quote": [
+      "Eurostat BG_LBSF SOFIA airport: passengers carried in 2024: 7,884,976",
+      "Eurostat BG_LBBG BURGAS airport: passengers carried in 2024: 1,781,239",
+      "Eurostat BG_LBWN VARNA airport: passengers carried in 2024: 1,534,753"
+     ]
+    },
+    {
+     "file": "eurostat-bg",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat BG_LBSF SOFIA airport: passengers carried in 2025: 8,382,684",
+      "Eurostat BG_LBWN VARNA airport: passengers carried in 2025: 1,851,453",
+      "Eurostat BG_LBBG BURGAS airport: passengers carried in 2025: 1,824,539"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-02",
+     "quote": "the second largest airport in the country"
+    }
+   ]
+  },
+  {
+   "claim": "Bulgaria is in the Schengen area",
+   "verdict": "corrected",
+   "inAfter": "Bulgaria is in the Schengen area",
+   "note": "Replaces 'Arrivals are split into Schengen and non-Schengen zones' (the terminal's zones and counts rest on Wikipedia alone). Bulgaria joined the Schengen area fully on 1 January 2025 (the Commission).",
+   "sources": [
+    {
+     "file": "fcdo-bulgaria-entry",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "read 2026-09-23 (live page, entry requirements)",
+     "quote": "You can travel without a visa to the Schengen area , which includes Bulgaria"
+    },
+    {
+     "file": "ec-schengen",
+     "org": "European Commission (Migration and Home Affairs, home-affairs.ec.europa.eu)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Over the years, the Schengen area was expanded multiple times, with Bulgaria and Romania being the last countries to join on 1 January 2025."
+    }
+   ]
+  },
+  {
+   "claim": "UK clients go through passport control on arrival",
+   "verdict": "confirmed",
+   "inAfter": "so UK clients go through passport control on arrival",
+   "note": "Carries the old 'the non-Schengen queue is the one they will join'. The Commission's list of the 29 Schengen countries (25 EU members and Iceland, Norway, Switzerland and Liechtenstein) leaves out the UK, and the FCDO describes Bulgarian border control for British visitors.",
+   "sources": [
+    {
+     "file": "fcdo-bulgaria-entry",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "read 2026-09-23 (live page, entry requirements)",
+     "quote": [
+      "At Bulgarian border control, you may also need to:",
+      "before proceeding to the immigration desk"
+     ]
+    },
+    {
+     "file": "ec-schengen",
+     "org": "European Commission (Migration and Home Affairs, home-affairs.ec.europa.eu)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The Schengen area is composed of 29 countries : 25 EU Member States and 4 non-EU countries (Iceland, Norway, Switzerland and Liechtenstein)"
+    }
+   ]
+  },
+  {
+   "claim": "the FCDO warns the EU's Entry/Exit System can mean a longer wait at the border",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "and the FCDO warns that the EU's new Entry/Exit System can mean a longer wait at the border.",
+   "note": "Replaces the twelve immigration positions (a count on Wikipedia alone) with what now matters at the border for a UK client.",
+   "sources": [
+    {
+     "file": "fcdo-bulgaria-entry",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "read 2026-09-23 (live page, entry requirements)",
+     "quote": [
+      "The European Union’s (EU) new Entry/Exit System (EES) is now being implemented across the Schengen area.",
+      "EES may take each passenger extra time to complete so be prepared to wait longer than usual at the border"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 10 km from the centre of Burgas",
+   "verdict": "confirmed",
+   "inAfter": "The airport is about 10 km from the centre of Burgas.",
+   "note": "Coordinates: 8.0 km in a straight line (ratio 1.25, inside the check for a road distance).",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 8.0 km (5.0 miles)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-02",
+     "quote": "approximately 10 km (6.2 mi) from the city centre"
+    }
+   ]
+  },
+  {
+   "claim": "Bulgaria's second airport",
+   "verdict": "cut",
+   "wasBefore": "Bulgaria's second airport and the one that matters for the southern coast.",
+   "why": "Varna edged ahead in 2025 on Eurostat's figures. Corrected to both years, attributed (see above); the southern coast is kept."
+  },
+  {
+   "claim": "the terminal busiest between June and September",
+   "verdict": "cut",
+   "wasBefore": "and the terminal is busiest between June and September",
+   "why": "No source read gives the months. Softened to routes that run only in season (see above)."
+  },
+  {
+   "claim": "Terminal 2 of December 2013 replaced a 1950s terminal; its counters, lanes, gates, capacity and floor area",
+   "verdict": "cut",
+   "wasBefore": "The building is newer than most clients expect. Terminal 2 opened in December 2013 and replaced a 1950s terminal, and now handles all passenger traffic. It has 31 check in counters, nine security lanes and eight departure gates, with a rated capacity of 2.7 million passengers a year across 21,000 square metres.",
+   "why": "Wikipedia alone. The operator's site (burgas-airport.bg) refused both a plain request and the browser (403), Fraport's own pages do not describe the terminal, Airport World's 2013 report that Wikipedia cites now returns 404, and the only other cited source is a car hire firm's blog. The counts could only come back as the airport's own, attributed."
+  },
+  {
+   "claim": "arrivals split into Schengen and non-Schengen zones, with twelve immigration positions and four carousels",
+   "verdict": "cut",
+   "wasBefore": "Arrivals are split into Schengen and non-Schengen zones with twelve immigration positions and four baggage carousels, which is worth knowing when quoting transfer times for a UK client, since the non-Schengen queue is the one they will join.",
+   "why": "The zones and counts rest on Wikipedia alone. Replaced by Bulgaria's Schengen membership and the FCDO's border advice (see above); the advice about transfer times is kept."
+  },
+  {
+   "claim": "near the Sarafovo neighbourhood",
+   "verdict": "cut",
+   "wasBefore": "The airport is near the Sarafovo neighbourhood",
+   "why": "Wikipedia alone (the operator's site could not be read). The distance is kept (see above)."
+  },
+  {
+   "claim": "the runway rebuilt from November 2025 to April 2026; UK airlines for summer 2026; the Fraport concession",
+   "verdict": "cut",
+   "why": "Held back: new facts that replace nothing. The operator's release of 23 July 2026 says the runway was fully rehabilitated between November 2025 and April 2026 for more than 60 million euros (the operator alone). Its summer 2026 release lists Jet2 with 11 routes including a new one from Gatwick, easyJet from Manchester and Gatwick, and Wizz Air from Luton (the operator alone). Fraport's own page dates the 40-year concession for Varna and Burgas to 10 September 2006, and Wikipedia's infobox names Fraport Twin Star as operator.",
+   "sources": [
+    {
+     "file": "fraport-bg-documentary",
+     "org": "Fraport Twin Star Airport Management (the airport operator, fraport-bulgaria.com)",
+     "dated": "2026-07-23 (press release)",
+     "quote": "the project was successfully completed between   November  2025 and April  2026"
+    },
+    {
+     "file": "fraport-bg-summer2026",
+     "org": "Fraport Twin Star Airport Management (the airport operator, fraport-bulgaria.com)",
+     "dated": "2026-03-26 (press release)",
+     "quote": [
+      "Jet2.com   is expanding its presence with a new route from   London /Gatwick/   (United Kingdom)",
+      "is launching its summer program to Burgas at the beginning of June with flights from   Manchester   (United Kingdom)"
+     ]
+    },
+    {
+     "file": "fraport-twinstar",
+     "org": "Fraport AG (fraport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The concessionary contract, signed on September 10, 2006, runs for 40 years."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Worth knowing when quoting transfer times.",
+   "why": "The old text's advice, kept: it follows from the border control and the FCDO's warning (sourced)."
+  }
+ ],
+ "tracerOk": {
+  "On Eurostat's": "The tracer reads the opening word with the name; Eurostat is the source's org and its tables are saved (eurostat-bg, eurostat-bg-2024)."
+ }
+}

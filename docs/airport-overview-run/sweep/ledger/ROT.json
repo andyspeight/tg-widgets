@@ -1,0 +1,376 @@
+{
+ "iata": "ROT",
+ "id": "recyirWPnkmeQsJns",
+ "name": "Rotorua Regional Airport",
+ "country": "New Zealand",
+ "wikipedia": "https://en.wikipedia.org/wiki/Rotorua_Airport",
+ "audited": "2026-09-23",
+ "before": "Sitting on Te Ngae Road about 6km north east of the Rotorua town centre, this is a small regional airport that does a straightforward job well. The terminal is a two-storey building with six tarmac gates, a cafe, a book store and a conference room, so there is enough to keep you occupied for the half hour you are likely to spend here and not much more. General aviation hangars sit to the north and south of the main terminal, with an avgas pump at the southern end of the apron.\n\nMost arrivals come in on Air New Zealand's regional services from Auckland, Wellington and Christchurch. Beyond the scheduled flights, a steady stream of charter and scenic operators work out of the airport, which suits a town where a lot of visitors have come to see the geothermal country and the lakes from above.\n\nThe main runway runs 2,114m and is sealed with asphalt. A shorter grass strip runs parallel to it, though the two sit close enough together that only one can be in use at a time. International flights from Sydney ran between 2009 and 2015 but the airport is domestic now.",
+ "after": "Sitting on Te Ngae Road about 6km north east of the Rotorua town centre, this is a small regional airport that does a straightforward job well. The airport has a cafe, a conference room and a shop selling books and magazines, so there is enough to keep you occupied for the half hour you are likely to spend here and not much more. General aviation hangars sit to the north and south of the main terminal.\n\nMost arrivals come in on Air New Zealand's regional services from Auckland, Wellington and Christchurch. Beyond the scheduled flights, charter and scenic operators also work from the airport.\n\nThe main runway is sealed, with a shorter grass runway parallel to it. Air New Zealand flew to Sydney from 2009 to 2015. Scheduled flights are domestic now, though the airport says it can still handle trans-Tasman charters.",
+ "claims": [
+  {
+   "claim": "on Te Ngae Road",
+   "verdict": "confirmed",
+   "inAfter": "Sitting on Te Ngae Road",
+   "sources": [
+    {
+     "file": "rot-flights",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "837 Te Ngae Road, Ōwhata,",
+      "State Highway 30,"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "located on Te Ngae Road (SH30)"
+    }
+   ]
+  },
+  {
+   "claim": "about 6km north east of the Rotorua town centre",
+   "verdict": "confirmed",
+   "inAfter": "about 6km north east of the Rotorua town centre",
+   "note": "Coordinates: 7.1 km in a straight line at 62 degrees (north east), a ratio of 0.85, inside the check.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 7.1 km (4.4 miles)",
+      "Bearing from the city centre: 62 degrees, which is north east"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "approximately 6 km north east of Rotorua CBD"
+    }
+   ]
+  },
+  {
+   "claim": "a small regional airport",
+   "verdict": "confirmed",
+   "inAfter": "this is a small regional airport",
+   "note": "The airport calls itself primarily a regional airport and OurAirports lists it as Rotorua Regional Airport. 'Small' rests on Wikipedia's figure of 219,948 passengers in 2023 (Queenstown handles about 2.8 million). 'Does a straightforward job well' is the old text's judgement (see opinion).",
+   "sources": [
+    {
+     "file": "rot-masterplan",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "Master Plan, October 2022",
+     "quote": [
+      "Master Plan | October 2022",
+      "Rotorua Airport has primarily been a regional airport"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Airport: Rotorua Regional Airport (OurAirports NZRO, IATA ROT)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": [
+      "stat_year = 2023",
+      "stat1_data = 219,948"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a cafe, a conference room and a shop selling books and magazines",
+   "verdict": "softened",
+   "inAfter": "The airport has a cafe, a conference room and a shop selling books and magazines",
+   "note": "Was 'The terminal is ... a cafe, a book store and a conference room'. The airport's live pages list The Hangar Cafe, a Relay store selling newspapers, magazines and books, and a Business Hub for hire with conference seating. The airport does not say where the Business Hub is, so the text says 'the airport has' rather than 'the terminal'.",
+   "sources": [
+    {
+     "file": "rot-terminal",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "The Hangar Cafe",
+      "Relay is a well-established newspaper, magazine, book, and convenience store"
+     ]
+    },
+    {
+     "file": "rot-businesshub",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Our Business Hub is available for booking for your next meeting, function or event",
+      "comfortable conference style seating for larger groups"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "is home to a cafe, book store and conference room"
+    }
+   ]
+  },
+  {
+   "claim": "general aviation hangars to the north and south of the main terminal",
+   "verdict": "confirmed",
+   "inAfter": "General aviation hangars sit to the north and south of the main terminal.",
+   "sources": [
+    {
+     "file": "rot-masterplan",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "Master Plan, October 2022",
+     "quote": [
+      "Previously known as Precinct B, the Air Park sits to the north of the terminal",
+      "It has traditionally been used for general aviation and private hangars"
+     ]
+    },
+    {
+     "file": "rot-gapilots",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "They are located in the first hangar to the South of the main Apron"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "general aviation hangars located to both the north and the south of the main terminal"
+    }
+   ]
+  },
+  {
+   "claim": "Air New Zealand's regional services from Auckland, Wellington and Christchurch",
+   "verdict": "confirmed",
+   "inAfter": "Most arrivals come in on Air New Zealand's regional services from Auckland, Wellington and Christchurch.",
+   "note": "Air New Zealand is the only airline on the airport's flight pages and in its directory, on ATR 72-600 and Q300 turboprops.",
+   "sources": [
+    {
+     "file": "rot-travellers",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Travelling on an Air New Zealand regional or domestic flight?",
+      "Air New Zealand services domestic flights to a wide range of destinations around New Zealand, including direct flights from Rotorua to Wellington, Auckland and Christchurch.",
+      "Services are operated on a range of different aircraft including ATR 72-600 and Q300."
+     ]
+    },
+    {
+     "file": "rot-history",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "providing direct flights daily to Auckland, Wellington and Christchurch"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "Currently, the airport is served by Air New Zealand's regional subsidiaries with flights to Auckland, Wellington and Christchurch"
+    }
+   ]
+  },
+  {
+   "claim": "charter and scenic operators also work from the airport",
+   "verdict": "softened",
+   "inAfter": "Beyond the scheduled flights, charter and scenic operators also work from the airport.",
+   "note": "'A steady stream' dropped. The airport's business directory includes a scenic operator (Volcanic Air Safaris) among its aviation firms, and it keeps a dedicated gate for private charters.",
+   "sources": [
+    {
+     "file": "rot-directory",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Rotorua Airport Directory",
+      "Volcanic Air Safaris"
+     ]
+    },
+    {
+     "file": "rot-charters",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "We have a dedicated gate for our private charters"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "as well as a number of charter and scenic airlines also operate on a regular basis"
+    }
+   ]
+  },
+  {
+   "claim": "the main runway is sealed, with a shorter grass runway parallel to it",
+   "verdict": "softened",
+   "inAfter": "The main runway is sealed, with a shorter grass runway parallel to it.",
+   "note": "Was 'The main runway runs 2,114m and is sealed with asphalt'. The length rests on Wikipedia alone: OurAirports still lists 1,622 m (the length after the 2002 extension, per Wikipedia's history), the airport's pages give no length, and the AIP could not be read (its old chart address returns an empty page and its home page is built by script). The sealed main runway and the parallel grass one are confirmed by OurAirports (18R/36L asphalt, 18L/36R grass and shorter) and the airport's master plan.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 18L/36R: 833 m (2,732 ft), GRS",
+      "Runway 18R/36L: 1,622 m (5,321 ft), ASP"
+     ]
+    },
+    {
+     "file": "rot-masterplan",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "Master Plan, October 2022",
+     "quote": [
+      "the northern end of our sealed runway",
+      "has convenient access onto the grass runway"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "is sealed with asphalt, accompanied with a shorter grass runway (18L/36R) which runs parallel to the main runway"
+    }
+   ]
+  },
+  {
+   "claim": "Air New Zealand flew to Sydney from 2009 to 2015",
+   "verdict": "confirmed",
+   "inAfter": "Air New Zealand flew to Sydney from 2009 to 2015.",
+   "note": "Was 'International flights from Sydney ran between 2009 and 2015'; now names the airline, as both sources do. The airport's master plan and Wikipedia (first flight December 2009, last on 25 April 2015) agree on 2015. The airport's own history timeline lists the end under 2014, the year Wikipedia says the council decided to stop funding the route; the two dated accounts are followed. Stuff's 2014 report could not be read (see the report).",
+   "sources": [
+    {
+     "file": "rot-masterplan",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "Master Plan, October 2022",
+     "quote": "International services to Sydney were operated by Air New Zealand between 2009 and 2015."
+    },
+    {
+     "file": "rot-history",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Trans Tasman flights to Sydney begin from Rotorua Airport",
+      "Trans Tasman flights from Rotorua Airport finish"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": [
+      "The airport received international services for the first time in December 2009 when Air New Zealand began flights from Sydney",
+      "the final international flight from the airport was on 25 April 2015"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "scheduled flights are domestic now",
+   "verdict": "confirmed",
+   "inAfter": "Scheduled flights are domestic now",
+   "sources": [
+    {
+     "file": "rot-travellers",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Air New Zealand services domestic flights to a wide range of destinations around New Zealand, including direct flights from Rotorua to Wellington, Auckland and Christchurch."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "Currently, the airport is served by Air New Zealand's regional subsidiaries with flights to Auckland, Wellington and Christchurch"
+    }
+   ]
+  },
+  {
+   "claim": "the airport says it can still handle trans-Tasman charters",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "though the airport says it can still handle trans-Tasman charters.",
+   "note": "Was 'the airport is domestic now'. The scheduled flights are domestic, but the airport says it can take trans-Tasman charter flights through its customs and biosecurity (MPI) clearance facility, and its charter page takes arrivals 'domestically or internationally'. The airport's own word on its own facilities, attributed.",
+   "sources": [
+    {
+     "file": "rot-history",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The airport can cater for domestic jets, as well as trans-Tasman charter flights through a fully enabled MPI and Custom Clearance facility."
+    },
+    {
+     "file": "rot-charters",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "whether you are arriving domestically or internationally"
+    }
+   ]
+  },
+  {
+   "claim": "a two-storey building with six tarmac gates",
+   "verdict": "cut",
+   "wasBefore": "The terminal is a two-storey building with six tarmac gates",
+   "why": "Wikipedia alone: the airport's pages give neither the storeys nor a gate count (its charter page mentions a 'Gate 5/6 Lounge', nothing more), and its master plan says a terminal redevelopment was completed in early 2020, so an older description may no longer hold."
+  },
+  {
+   "claim": "an avgas pump at the southern end of the apron",
+   "verdict": "cut",
+   "wasBefore": "with an avgas pump at the southern end of the apron",
+   "why": "Wikipedia alone, and not borne out: the airport lists two fuel suppliers (GoFuel, and Air BP reached by a taxiway from the main apron) and mentions the GoFuel pump beside the general aviation parking north of the main apron."
+  },
+  {
+   "claim": "the main runway runs 2,114m",
+   "verdict": "cut",
+   "wasBefore": "The main runway runs 2,114m and is sealed with asphalt.",
+   "why": "The length rests on Wikipedia alone (OurAirports gives 1,622 m; the airport gives none; the AIP could not be read). Softened to a sealed main runway (see above)."
+  },
+  {
+   "claim": "only one runway can be in use at a time",
+   "verdict": "cut",
+   "wasBefore": "though the two sit close enough together that only one can be in use at a time",
+   "why": "Wikipedia alone; the airport's pages and master plan do not say it, and the AIP could not be read."
+  },
+  {
+   "claim": "a steady stream of operators; visitors come to see the geothermal country and lakes from above",
+   "verdict": "cut",
+   "wasBefore": "a steady stream of charter and scenic operators work out of the airport, which suits a town where a lot of visitors have come to see the geothermal country and the lakes from above",
+   "why": "Colour with nothing behind it. Softened to charter and scenic operators working from the airport (see above)."
+  },
+  {
+   "claim": "the airport is domestic now",
+   "verdict": "cut",
+   "wasBefore": "but the airport is domestic now",
+   "why": "The airport says it can still handle trans-Tasman charters; corrected to scheduled flights being domestic (see above)."
+  },
+  {
+   "claim": "the terminal was redeveloped, finishing in early 2020",
+   "verdict": "cut",
+   "why": "Held back: on the airport's word alone (its master plan and its pilots' page), and it replaces nothing that survives. The airport says its terminal redevelopment was completed in early 2020 and calls the terminal newly renovated.",
+   "sources": [
+    {
+     "file": "rot-masterplan",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "Master Plan, October 2022",
+     "quote": "In early 2020, Rotorua Airport’s terminal redevelopment was completed"
+    },
+    {
+     "file": "rot-gapilots",
+     "org": "Rotorua Airport (the airport operator, rotorua-airport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Our Terminal is newly renovated and we welcome you to come visit!"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "that does a straightforward job well",
+   "why": "The old text's judgement, kept: a regional airport with one airline to three cities (sourced above)."
+  },
+  {
+   "text": "so there is enough to keep you occupied for the half hour you are likely to spend here and not much more",
+   "why": "The old text's advice, kept: the airport's page says Air New Zealand check-in closes 30 minutes before departure ('check in must be completed at least 30 minutes prior to the scheduled departure')."
+  }
+ ],
+ "tracerOk": {}
+}

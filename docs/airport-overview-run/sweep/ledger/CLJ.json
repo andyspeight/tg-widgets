@@ -1,0 +1,344 @@
+{
+ "iata": "CLJ",
+ "id": "rec4b7SnZS331QiRJ",
+ "name": "Avram Iancu Cluj International Airport",
+ "country": "Romania",
+ "wikipedia": "https://en.wikipedia.org/wiki/Cluj_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Transylvania's airport, and the second busiest in Romania after Bucharest. It handled 3.24 million passengers in 2023, which for a regional airport is substantial, and it is the obvious arrival point for anything in the historic region rather than routing clients through the capital.\n\nIt is 9 km east of Cluj-Napoca, in the Somesheni area now inside the city limits, and the drive in takes about twenty minutes. Public transport is good for a city this size: trolleybus 8 runs to Mihai Viteazul Square in the centre, trolleybus 5 to the main railway station, and the A1E express runs from the airport exit into the square without stopping.\n\nIt sits on the European route E576 and close to the A3 Transylvania Motorway, so onward driving is straightforward.\n\nThe airport was originally Somesheni and is named after Avram Iancu, the Romanian revolutionary, so both names appear in older material.",
+ "after": "Transylvania's main airport, and the second busiest in Romania after Bucharest. It handled more than 3.5 million passengers in 2025, which for a regional airport is substantial, and it is the obvious arrival point for anything in the historic region rather than routing clients through the capital.\n\nAbout 9 km east of the centre of Cluj-Napoca, it sits inside the city limits. The airport allows about 30 minutes for the drive in. Public transport is good for a city this size: line 8 runs to Mihai Viteazul Square in the centre and line 5 to the railway station, and the airport puts either ride at about 26 minutes.\n\nThe airport is named after Avram Iancu, though its own releases often shorten the name to Cluj International Airport, so expect to see both.",
+ "claims": [
+  {
+   "claim": "Transylvania's main airport",
+   "verdict": "corrected",
+   "inAfter": "Transylvania's main airport",
+   "note": "Was 'Transylvania's airport'. Sibiu and Targu Mures also fly from Transylvania, so 'main' is added. The operator speaks of its position among the competing airports of the Transylvania region and calls itself the country's most important regional airport; Wikipedia calls it the most important airport in the historical region. Eurostat's 2025 table has Sibiu at 694,215 and Targu Mures at 151,124 against Cluj's 3,547,053.",
+   "sources": [
+    {
+     "file": "op-despre",
+     "org": "Aeroportul Internațional Avram Iancu Cluj R.A. (the airport operator, airportcluj.ro)",
+     "dated": "read 2026-09-23 (the airport's about page, with its 2025 total)",
+     "quote": [
+      "o consolidare a poziției Aeroportului Internațional  Avram Iancu  Cluj în rândul aeroporturilor concurente din regiunea Transilvaniei",
+      "cel mai important aeroport regional al ţării"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "make it the most important airport in the historical region of Transylvania"
+    },
+    {
+     "file": "eurostat-ro",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat RO_LRSB SIBIU airport: passengers carried in 2025: 694,215",
+      "Eurostat RO_LRTM TARGU MURES/TRANSILVANIA airport: passengers carried in 2025: 151,124"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the second busiest in Romania after Bucharest",
+   "verdict": "confirmed",
+   "inAfter": "and the second busiest in Romania after Bucharest.",
+   "note": "Eurostat's 2025 table of every Romanian airport it reports: Bucharest Henri Coanda 16,998,844, then Cluj 3,547,053, then Iasi 2,242,921. The operator calls itself the country's second airport.",
+   "sources": [
+    {
+     "file": "eurostat-ro",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat RO_LROP BUCURESTI/HENRI COANDA airport: passengers carried in 2025: 16,998,844",
+      "Eurostat RO_LRCL CLUJ NAPOCA/AVRAM IANCU airport: passengers carried in 2025: 3,547,053",
+      "Eurostat RO_LRIA IASI airport: passengers carried in 2025: 2,242,921"
+     ]
+    },
+    {
+     "file": "op-despre",
+     "org": "Aeroportul Internațional Avram Iancu Cluj R.A. (the airport operator, airportcluj.ro)",
+     "dated": "read 2026-09-23 (the airport's about page, with its 2025 total)",
+     "quote": "este al doilea aeroport al ţării și primul aeroport regional din România"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "Cluj Airport is the second busiest airport in Romania, after Bucharest Henri Coandă"
+    }
+   ]
+  },
+  {
+   "claim": "more than 3.5 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled more than 3.5 million passengers in 2025",
+   "note": "Was '3.24 million passengers in 2023' (the airport's 3,240,750). A passenger total replaces a passenger total: the airport's own 2025 figure is 3,582,134, which Wikipedia's infobox repeats, and Eurostat's is 3,547,053.",
+   "sources": [
+    {
+     "file": "op-despre",
+     "org": "Aeroportul Internațional Avram Iancu Cluj R.A. (the airport operator, airportcluj.ro)",
+     "dated": "read 2026-09-23 (the airport's about page, with its 2025 total)",
+     "quote": "În anul 2025, traficul de pasageri al Aeroportului Internațional Avram Iancu Cluj a crescut semnificativ, înregistrându-se un număr total de 3.582.134 de pasageri"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "dated": "annual data to 2025",
+     "quote": "Eurostat RO_LRCL Avram Iancu Cluj International Airport: passengers carried in 2025: 3,547,053"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 3,582,134"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 9 km east of the centre of Cluj-Napoca, inside the city limits",
+   "verdict": "confirmed",
+   "inAfter": "About 9 km east of the centre of Cluj-Napoca, it sits inside the city limits.",
+   "note": "Coordinates: 6.9 km in a straight line at 72 degrees, east (ratio 1.31, inside the check for a road distance). Wikipedia gives 9 km in its lead and 8 km in its body, so 'about'. The airport's own address is in Cluj-Napoca (postcode 400397).",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Cluj-Napoca",
+      "Straight-line distance from the city centre: 6.9 km (4.3 miles)",
+      "Bearing from the city centre: 72 degrees, which is east"
+     ]
+    },
+    {
+     "file": "op-transport-public",
+     "org": "Aeroportul Internațional Avram Iancu Cluj R.A. (the airport operator, airportcluj.ro)",
+     "dated": "read 2026-09-23 (the airport's public transport page, updated 23 February 2026)",
+     "quote": "Adresa: Traian Vuia, Nr. 149-151, 400397 Cluj-Napoca, România"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": [
+      "it is located 9 km (5.6 mi) east of the city centre, in the Someșeni area, which is now within the Cluj-Napoca city limits",
+      "The airport is located 8 km (5.0 mi) east of the city centre"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the airport allows about 30 minutes for the drive in",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport allows about 30 minutes for the drive in.",
+   "note": "Was 'the drive in takes about twenty minutes' (Wikipedia). The airport's own access pages give about 30 minutes by car from the city centre; attributed.",
+   "sources": [
+    {
+     "file": "op-localizare",
+     "org": "Aeroportul Internațional Avram Iancu Cluj R.A. (the airport operator, airportcluj.ro)",
+     "dated": "read 2026-09-23 (the airport's location and access page)",
+     "quote": "Se poate ajunge în aproximativ 30 de minute din centrul orașului la aeroport."
+    },
+    {
+     "file": "op-transport-public",
+     "org": "Aeroportul Internațional Avram Iancu Cluj R.A. (the airport operator, airportcluj.ro)",
+     "dated": "read 2026-09-23 (the airport's public transport page, updated 23 February 2026)",
+     "quote": "Se poate ajunge în aproximativ 30 de minute din centrul orașului la aeroport."
+    }
+   ]
+  },
+  {
+   "claim": "line 8 to Mihai Viteazul Square and line 5 to the railway station",
+   "verdict": "corrected",
+   "inAfter": "line 8 runs to Mihai Viteazul Square in the centre and line 5 to the railway station",
+   "note": "Was 'trolleybus 8' and 'trolleybus 5'. The lines and their ends are confirmed: CTP runs line 8 between P.M. Viteazul and Str. Traian Vuia (the airport's street) and line 5 between Piata Garii (the station square) and Str. Traian Vuia, and the airport lists both. The vehicle is disputed (Wikipedia says trolleybus, the airport's page calls them buses, CTP's pages say neither), so the text says 'line'.",
+   "sources": [
+    {
+     "file": "ctp-linia-8",
+     "org": "CTP Cluj-Napoca (the city public transport company, ctpcj.ro)",
+     "dated": "read 2026-09-23 (live line page)",
+     "quote": [
+      "Linia 8",
+      "Capăt 1:",
+      "P.M. Viteazul",
+      "Capăt 2:",
+      "Str.Traian Vuia"
+     ]
+    },
+    {
+     "file": "ctp-linia-5",
+     "org": "CTP Cluj-Napoca (the city public transport company, ctpcj.ro)",
+     "dated": "read 2026-09-23 (live line page)",
+     "quote": [
+      "Capăt 1:",
+      "P-ța Gării",
+      "Str.Traian Vuia"
+     ]
+    },
+    {
+     "file": "op-transport-public",
+     "org": "Aeroportul Internațional Avram Iancu Cluj R.A. (the airport operator, airportcluj.ro)",
+     "dated": "read 2026-09-23 (the airport's public transport page, updated 23 February 2026)",
+     "quote": [
+      "Transport public Aeroport Cluj, Autobuze A1E, 5 si 8",
+      "Linia de transport în comun nr. 5",
+      "Linia de transport în comun nr. 8"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "operates its trolleybus No. 8 that connects the airport with the Mihai Viteazul Square in the City Center and trolleybus No. 5 to the Main Rail Station"
+    }
+   ]
+  },
+  {
+   "claim": "the airport puts either ride at about 26 minutes",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "and the airport puts either ride at about 26 minutes.",
+   "note": "Replaces the A1E express 'without stopping' (cut below). The airport gives about 26 minutes from the airport to the central area for each of its listed lines.",
+   "sources": [
+    {
+     "file": "op-transport-public",
+     "org": "Aeroportul Internațional Avram Iancu Cluj R.A. (the airport operator, airportcluj.ro)",
+     "dated": "read 2026-09-23 (the airport's public transport page, updated 23 February 2026)",
+     "quote": "Durata călătoriei: Aeroport → Cluj-Napoca – Zona centrală: cca 26 min."
+    }
+   ]
+  },
+  {
+   "claim": "named after Avram Iancu; the airport often shortens its name to Cluj International Airport",
+   "verdict": "corrected",
+   "inAfter": "The airport is named after Avram Iancu, though its own releases often shorten the name to Cluj International Airport, so expect to see both.",
+   "note": "Was 'The airport was originally Somesheni and is named after Avram Iancu, the Romanian revolutionary, so both names appear in older material'. The Someseni name and the description of Iancu rest on Wikipedia alone (cut below). The operator's legal name carries Avram Iancu, and its own releases and about page also say plain Aeroportul Internațional Cluj.",
+   "sources": [
+    {
+     "file": "op-despre",
+     "org": "Aeroportul Internațional Avram Iancu Cluj R.A. (the airport operator, airportcluj.ro)",
+     "dated": "read 2026-09-23 (the airport's about page, with its 2025 total)",
+     "quote": [
+      "Numele instituţiei: Aeroportul Internațional Avram Iancu Cluj R.A.",
+      "În anul 2022, Aeroportul Internațional Cluj a reușit"
+     ]
+    },
+    {
+     "file": "op-2m-2026",
+     "org": "Aeroportul Internațional Avram Iancu Cluj R.A. (the airport operator, airportcluj.ro)",
+     "dated": "2026-07-22 (press release)",
+     "quote": [
+      "22 iulie 2026",
+      "COMUNICAT DE PRESĂ Aeroportul Internațional Cluj sărbătorește pasagerul cu numărul 2 milioane în anul 2026"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": [
+      "Avram Iancu Cluj International Airport (IATA: CLJ, ICAO: LRCL)",
+      "The airport is named in honour of Romanian revolutionary Avram Iancu."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Transylvania's airport (the only one)",
+   "verdict": "cut",
+   "wasBefore": "Transylvania's airport",
+   "why": "Sibiu and Targu Mures also serve Transylvania. Corrected to its main airport (see above)."
+  },
+  {
+   "claim": "3.24 million passengers in 2023",
+   "verdict": "cut",
+   "wasBefore": "It handled 3.24 million passengers in 2023",
+   "why": "Superseded by the 2025 total. Corrected (see above)."
+  },
+  {
+   "claim": "in the Someseni area",
+   "verdict": "cut",
+   "wasBefore": "in the Somesheni area now inside the city limits",
+   "why": "The district's name rests on Wikipedia alone (the airport's own pages and CTP's lines give the street, Traian Vuia). 'Inside the city limits' is kept (see above)."
+  },
+  {
+   "claim": "the drive in about twenty minutes",
+   "verdict": "cut",
+   "wasBefore": "and the drive in takes about twenty minutes",
+   "why": "Wikipedia alone; the airport itself allows about 30 minutes. Corrected (see above)."
+  },
+  {
+   "claim": "trolleybuses 8 and 5",
+   "verdict": "cut",
+   "wasBefore": "trolleybus 8 runs to Mihai Viteazul Square in the centre, trolleybus 5 to the main railway station",
+   "why": "The vehicle is disputed: the airport's page calls the lines buses, Wikipedia trolleybuses, and CTP's line pages say neither. The lines and their ends are kept (see above)."
+  },
+  {
+   "claim": "the A1E express runs into the square without stopping",
+   "verdict": "cut",
+   "wasBefore": "and the A1E express runs from the airport exit into the square without stopping.",
+   "why": "The airport still lists an A1E line, but CTP's A1E link now opens a page headed Linia A1 with no ends or stops, and the non-stop running rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "ctp-linia-a1e",
+     "org": "CTP Cluj-Napoca (the city public transport company, ctpcj.ro)",
+     "dated": "read 2026-09-23 (the A1E link from the airport page)",
+     "quote": "Linia A1"
+    }
+   ]
+  },
+  {
+   "claim": "on the E576 and close to the A3 Transylvania Motorway; onward driving straightforward",
+   "verdict": "cut",
+   "wasBefore": "It sits on the European route E576 and close to the A3 Transylvania Motorway, so onward driving is straightforward.",
+   "why": "Wikipedia alone: the airport's location and access page names neither road. The judgement leans on it, so it goes too."
+  },
+  {
+   "claim": "originally Someseni; Avram Iancu the Romanian revolutionary",
+   "verdict": "cut",
+   "wasBefore": "The airport was originally Somesheni and is named after Avram Iancu, the Romanian revolutionary, so both names appear in older material.",
+   "why": "The old name and the description of Iancu rest on Wikipedia alone; the airport's own history starts in 1917 and 1932 with neither. The name itself is kept, with the airport's own short form (see above)."
+  },
+  {
+   "claim": "the extended terminal opened in 2024",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing. The airport's history has the extended terminal and four more aircraft stands inaugurated in 2024; Wikipedia dates the 7,200 m2 departures extension to 31 May 2024, adding three gates to the nine.",
+   "sources": [
+    {
+     "file": "op-despre",
+     "org": "Aeroportul Internațional Avram Iancu Cluj R.A. (the airport operator, airportcluj.ro)",
+     "dated": "read 2026-09-23 (the airport's about page, with its 2025 total)",
+     "quote": "A fost inaugurat noul terminal extins și o platformă cu 4 locuri suplimentare pentru staționarea aeronavelor."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "Opened on 31 May 2024, the 7,200 m2 (77,500 sq ft) extension added three more gates to the previous nine."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which for a regional airport is substantial",
+   "why": "The old text's judgement, kept; the 2025 total is sourced."
+  },
+  {
+   "text": "and it is the obvious arrival point for anything in the historic region rather than routing clients through the capital.",
+   "why": "The old text's advice, kept; it follows from its being Transylvania's main airport (sourced)."
+  },
+  {
+   "text": "Public transport is good for a city this size:",
+   "why": "The old text's judgement, kept; the two lines that follow are sourced."
+  }
+ ],
+ "tracerOk": {}
+}

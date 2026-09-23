@@ -1,0 +1,353 @@
+{
+ "iata": "HKK",
+ "id": "rec2Xzu746HzU5G0j",
+ "name": "Hokitika Airfield",
+ "country": "New Zealand",
+ "wikipedia": "https://en.wikipedia.org/wiki/Hokitika_Airport",
+ "audited": "2026-09-23",
+ "before": "The West Coast's air link, just under 2 km from Hokitika and the nearest scheduled airport to Greymouth, 40 km up the coast and the largest settlement on that side of the island. For a South Island itinerary taking in the glaciers it saves a long drive across the island.\n\nIt is small and honest about it: one terminal, two tarmac gates, and aircraft up to ATR 72 size flown by Air New Zealand. There are car hire desks and a cafe, which is the whole of it. Two sealed runways cross the site, the longer at 1,152 metres.\n\nThe aerodrome is uncontrolled and owned by the local district council through Destination Westland.\n\nIt has a good claim to being where scheduled flying in New Zealand started. Air Travel (NZ) Ltd, founded by Bert Mercer in 1934, flew the country's first scheduled service from here to Haast on 18 December 1934.",
+ "after": "Hokitika's airport, which also serves Greymouth, up the coast to the north. According to the Department of Conservation it is the closest commercial airport to Westland Tai Poutini National Park, home of the Franz Josef and Fox glaciers, so for a glacier itinerary it saves a long drive across the island.\n\nIt is small and honest about it: one terminal and daily Air New Zealand flights to Christchurch. There are car hire desks and a cafe, which is the whole of it.\n\nDestination Westland, a company controlled by Westland District Council, runs the airport.",
+ "claims": [
+  {
+   "claim": "Hokitika's airport",
+   "verdict": "confirmed",
+   "inAfter": "Hokitika's airport",
+   "note": "The airport's own address is Airport Drive, Hokitika. The helper's 'at Seaview' was taken out in review (23 Sep): it rests on Wikipedia and an aviation history blog only, and the brief takes blogs only as a last-resort tie-breaker, never as the second source.",
+   "sources": [
+    {
+     "file": "hkk-contact",
+     "org": "Hokitika Airport (the airport's own site, hokitikaairport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Airport Drive",
+      "Hokitika 7810"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "located 1.9 km north east of Hokitika"
+    }
+   ]
+  },
+  {
+   "claim": "Greymouth's airport too, up the coast to the north",
+   "verdict": "softened",
+   "inAfter": "which also serves Greymouth, up the coast to the north",
+   "note": "Was 'the nearest scheduled airport to Greymouth, 40 km up the coast'. The district council calls Hokitika the regional airport of both Westland and Grey districts (Greymouth is Grey's main town) and puts Greymouth to the north. The 40 km rests on Wikipedia alone, as neither town is in the GeoNames file behind the coordinates check. (OurAirports lists Greymouth's own airfield as having no scheduled service.)",
+   "sources": [
+    {
+     "file": "wdc-airport",
+     "org": "Westland District Council (westlanddc.govt.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Hokitika Airport is Westland and Grey Districts' regional airport.",
+      "the town of Greymouth which lies to the north of Hokitika"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "It is also the closest domestic airport with scheduled flights to the town of Greymouth 40 km further north"
+    }
+   ]
+  },
+  {
+   "claim": "according to the Department of Conservation, the closest commercial airport to Westland Tai Poutini National Park, home of the Franz Josef and Fox glaciers",
+   "verdict": "confirmed",
+   "primary": true,
+   "attribution": "Department of Conservation",
+   "inAfter": "According to the Department of Conservation it is the closest commercial airport to Westland Tai Poutini National Park, home of the Franz Josef and Fox glaciers",
+   "note": "The old sentence assumed Hokitika is the airport for the glaciers; it now rests on the Department of Conservation's own page for the park, attributed. The district council likewise says the airport leads to the Tai Poutini National Park further south. The advice that follows is kept (see opinion).",
+   "sources": [
+    {
+     "file": "doc-westland-np",
+     "org": "Department of Conservation (doc.govt.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "The closest commercial airport is in Hokitika, which has daily flights from Christchurch.",
+      "including Fox Glacier/Te Moeka o Tuawe and Franz Josef Glacier/Kā Roimata o Hine Hukatere",
+      "Westland Tai Poutini National Park is located about halfway down the rugged West Coast of the South Island."
+     ]
+    },
+    {
+     "file": "wdc-airport",
+     "org": "Westland District Council (westlanddc.govt.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Arriving at Hokitika Airport is your gateway to the West Coast, including the town of Greymouth which lies to the north of Hokitika and the Tai Poutini National Park located further south"
+    }
+   ]
+  },
+  {
+   "claim": "one terminal",
+   "verdict": "confirmed",
+   "inAfter": "one terminal",
+   "sources": [
+    {
+     "file": "hkk-services",
+     "org": "Hokitika Airport (the airport's own site, hokitikaairport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "The terminal has broad automated entry doors",
+      "Free Wifi is available throughout the airport terminal."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "The airport has a single terminal"
+    }
+   ]
+  },
+  {
+   "claim": "daily Air New Zealand flights to Christchurch",
+   "verdict": "corrected",
+   "inAfter": "daily Air New Zealand flights to Christchurch",
+   "note": "Was 'aircraft up to ATR 72 size flown by Air New Zealand'. The aircraft size rests on Wikipedia alone, so the text now says who flies and where, from the airport, the Department of Conservation and the council. The council's organisations page says twice daily; the airport and the Department of Conservation say daily, so 'daily'.",
+   "sources": [
+    {
+     "file": "hkk-flights",
+     "org": "Hokitika Airport (the airport's own site, hokitikaairport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Daily flights are operated by Air New Zealand between Hokitika and Christchurch."
+    },
+    {
+     "file": "doc-westland-np",
+     "org": "Department of Conservation (doc.govt.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The closest commercial airport is in Hokitika, which has daily flights from Christchurch."
+    },
+    {
+     "file": "wdc-airport",
+     "org": "Westland District Council (westlanddc.govt.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The airport is serviced by Air New Zealand with daily flights to and from Hokitika, via Christchurch."
+    },
+    {
+     "file": "wdc-cco",
+     "org": "Westland District Council (westlanddc.govt.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Air New Zealand is the main carrier into the airport on a twice-daily basis from Christchurch."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "The airport handles aircraft up to ATR 72-600 size that are operated by the national airline, Air New Zealand."
+    }
+   ]
+  },
+  {
+   "claim": "car hire desks and a cafe",
+   "verdict": "confirmed",
+   "inAfter": "There are car hire desks and a cafe",
+   "sources": [
+    {
+     "file": "hkk-services",
+     "org": "Hokitika Airport (the airport's own site, hokitikaairport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Services at the airport l include; licensed cafe, staffed vehicle rental terminal"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "The airport has a number of car rental firms represented, and a cafe."
+    }
+   ]
+  },
+  {
+   "claim": "Destination Westland, a company controlled by Westland District Council, runs the airport",
+   "verdict": "confirmed",
+   "inAfter": "Destination Westland, a company controlled by Westland District Council, runs the airport.",
+   "note": "Was 'owned by the local district council through Destination Westland'; now in the council's own terms. The council lists Destination Westland as one of its two council-controlled organisations and says it operates Hokitika Airport; Hokitika Airport Ltd was renamed Destination Westland Ltd in 2018, and Westland Holdings Ltd was merged into it on 30 June 2024.",
+   "sources": [
+    {
+     "file": "wdc-cco",
+     "org": "Westland District Council (westlanddc.govt.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Council has two Council Controlled Organisations.",
+      "Destination Westland operates the Hokitika Airport",
+      "In 2018, Westland District Property Ltd was amalgamated into Hokitika Airport Ltd and the name of Hokitika Airport Ltd was changed to Destination Westland Ltd.",
+      "Westland Holdings Ltd was amalgamated into Destination Westland on 30 June 2024."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": [
+      "The aerodrome is operated by Destination Westland Ltd.",
+      "The airport company is owned by the Westland District Council."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the West Coast's air link",
+   "verdict": "cut",
+   "wasBefore": "The West Coast's air link",
+   "why": "Overstated: OurAirports lists Westport as a second West Coast airport with scheduled flights. The council calls Hokitika the principal airport on the West Coast, but it controls the airport's company, so the text now says what the council and Wikipedia both support: Hokitika's airport and Greymouth's."
+  },
+  {
+   "claim": "just under 2 km from Hokitika",
+   "verdict": "cut",
+   "wasBefore": "just under 2 km from Hokitika",
+   "why": "Wikipedia alone (1.9 km). The record's City Served is blank and Hokitika is not in the GeoNames file, so the coordinates check could not run; no other source gives a distance. The airport's address is Airport Drive, Hokitika, so the text says it is in Seaview."
+  },
+  {
+   "claim": "the nearest scheduled airport to Greymouth, 40 km up the coast",
+   "verdict": "cut",
+   "wasBefore": "the nearest scheduled airport to Greymouth, 40 km up the coast",
+   "why": "The 40 km rests on Wikipedia alone (no GeoNames entry for Greymouth). Softened to the airport for Greymouth too, to the north (see above)."
+  },
+  {
+   "claim": "Greymouth is the largest settlement on that side of the island",
+   "verdict": "cut",
+   "wasBefore": "and the largest settlement on that side of the island",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "two tarmac gates; aircraft up to ATR 72 size",
+   "verdict": "cut",
+   "wasBefore": "one terminal, two tarmac gates, and aircraft up to ATR 72 size flown by Air New Zealand",
+   "why": "The gate count and the aircraft size rest on Wikipedia alone (the airport's pages mention only Stand 1, kept clear for Air New Zealand and air ambulances). The terminal and the airline are kept, with the route (see above)."
+  },
+  {
+   "claim": "two sealed runways cross the site, the longer at 1,152 metres",
+   "verdict": "cut",
+   "wasBefore": "Two sealed runways cross the site, the longer at 1,152 metres.",
+   "why": "Wrong on Wikipedia's own figures: runway 03/21 is 1,152 m but 12/30 is 1,176 m. OurAirports gives 03/21 as 1,314 m, which is Wikipedia's 1,152 m plus its 81 m starter extension at each end. The AIP chart could not be read: the plain fetch returned an empty page and the browser was sent on to a plain-HTTP address, which the session's proxy refuses. That both runways are sealed is confirmed (OurAirports lists 03/21 and 12/30 as asphalt; Wikipedia says two sealed runways) but is left out for length."
+  },
+  {
+   "claim": "the aerodrome is uncontrolled",
+   "verdict": "cut",
+   "wasBefore": "The aerodrome is uncontrolled",
+   "why": "Wikipedia alone; the AIP could not be read and the airport's pages do not say."
+  },
+  {
+   "claim": "owned by the district council through Destination Westland",
+   "verdict": "cut",
+   "wasBefore": "and owned by the local district council through Destination Westland.",
+   "why": "Reworded to the council's own terms: a council-controlled company that runs the airport (see above)."
+  },
+  {
+   "claim": "the country's first scheduled service, from here to Haast, on 18 December 1934",
+   "verdict": "cut",
+   "wasBefore": "It has a good claim to being where scheduled flying in New Zealand started. Air Travel (NZ) Ltd, founded by Bert Mercer in 1934, flew the country's first scheduled service from here to Haast on 18 December 1934.",
+   "why": "Good sources disagree on the destination: Wikipedia says the first flight went from Hokitika to Haast, but the aviation history blog, quoting the Christchurch Press, has the inaugural service on 18 December 1934 flying Inchbonnie, Hokitika and Franz Josef, with the Hokitika to Haast mail service starting on 31 December. 'From here' was wrong: the company flew from the old Southside aerodrome, and today's airport opened in 1951. Rewritten to what both sources support (see above).",
+   "sources": [
+    {
+     "file": "thirdlevel-airtravel",
+     "org": "3rd Level New Zealand (aviation history blog, 3rdlevelnz.blogspot.com)",
+     "dated": "post of 11 September 2016, updated April 2026",
+     "quote": [
+      "The machine left Hokitika at 3.55pm and after flying over the glacier, arrived at the hostel at Franz Josef at 4.50pm",
+      "The start of the mail service - Hokitika-Haast, 31 December 1934"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "terminal opening hours; the drive to the national park",
+   "verdict": "cut",
+   "why": "Held back: new, and each on one organisation's word. The airport's site gives terminal opening hours of 8am to 10am and 4pm to 6pm on weekdays, 8am to 10am on Saturdays and 4pm to 6pm on Sundays (so the building opens around the flights), and the Department of Conservation puts Westland Tai Poutini National Park about an hour and a half's drive south of Hokitika.",
+   "sources": [
+    {
+     "file": "hkk-home",
+     "org": "Hokitika Airport (the airport's own site, hokitikaairport.co.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Monday - Friday: 8am - 10am | 4pm - 6pm",
+      "Saturday: 8am - 10am",
+      "Sunday: 4pm - 6pm"
+     ]
+    },
+    {
+     "file": "doc-westland-np",
+     "org": "Department of Conservation (doc.govt.nz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The only road access is on SH6, via Hokitika in the north (approximately one and a half hours drive)"
+    }
+   ]
+  },
+  {
+   "claim": "the Air Travel (NZ) history: first airline, Bert Mercer, services from 18 December 1934, the older aerodrome, today's airport of 1951",
+   "verdict": "cut",
+   "wasBefore": "It has a good claim to being where scheduled flying in New Zealand started.",
+   "why": "Held back for Andy (cut in review, 23 Sep): the helper's corrected history rests on Wikipedia and the 3rd Level New Zealand aviation history blog, which quotes the Christchurch Press of 1934. The brief takes blogs only as a last-resort tie-breaker, and Te Ara and NZHistory refused (403). It also shows the old text was wrong twice: the 1934 flights used the older Southside aerodrome (today's Seaview airport opened in 1951), and the sources disagree on where the first service went. Could come back with Te Ara, NZHistory or a museum as the second source.",
+   "sources": [
+    {
+     "file": "thirdlevel-airtravel",
+     "org": "3rd Level New Zealand (aviation history blog, 3rdlevelnz.blogspot.com)",
+     "dated": "post of 11 September 2016, updated April 2026",
+     "quote": [
+      "11 September 2016",
+      "UPDATED April 2026",
+      "Mercer was that man who was to form Air Travel (NZ) Ltd, New Zealand's first airline.",
+      "Based in Hokitika the company planned to inaugurate services"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "Air Travel (NZ) Ltd was the first airline in New Zealand to fly scheduled air services."
+    },
+    {
+     "file": "thirdlevel-airtravel",
+     "org": "3rd Level New Zealand (aviation history blog, 3rdlevelnz.blogspot.com)",
+     "dated": "post of 11 September 2016, updated April 2026",
+     "quote": [
+      "Flight-Lieutenant J C (Bert) Mercer was that man who was to form Air Travel (NZ) Ltd",
+      "Based in Hokitika the company planned to inaugurate services",
+      "the company announced that its services would commence on the 18th of December"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "Founded by Bert Mercer in 1934, its first scheduled flight took place on 18 December 1934"
+    },
+    {
+     "file": "thirdlevel-airtravel",
+     "org": "3rd Level New Zealand (aviation history blog, 3rdlevelnz.blogspot.com)",
+     "dated": "post of 11 September 2016, updated April 2026",
+     "quote": [
+      "at Hokitika's Southside aerodrome on the 15th of September 1936",
+      "In 1951 the building was moved to Hokitika's new Seaview Airport"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": [
+      "Hokitika originally had an aerodrome on the south side of town just over the Hokitika River.",
+      "The new Seaview airport opened on 17 December 1951."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so for a glacier itinerary it saves a long drive across the island",
+   "why": "The old text's advice, kept: the Department of Conservation names Hokitika as the closest commercial airport to the glaciers' national park, with daily flights from Christchurch (sourced above)."
+  },
+  {
+   "text": "It is small and honest about it",
+   "why": "The old text's framing, kept: one terminal, one airline and one route (sourced above), and a terminal that opens only around the flights (the airport's own hours)."
+  },
+  {
+   "text": "which is the whole of it",
+   "why": "The old text's framing: the airport's services list adds only wifi, trolleys, baby changing and wheelchairs."
+  }
+ ],
+ "tracerOk": {}
+}
