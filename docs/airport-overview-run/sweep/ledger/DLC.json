@@ -1,0 +1,142 @@
+{
+ "iata": "DLC",
+ "id": "recaOsDo6Dn3uakUq",
+ "name": "Dalian Zhoushuizi International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Dalian_Zhoushuizi_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The busiest airport in north east China, in Ganjingzi District about 10 km north west of central Dalian. It handled 19,787,716 passengers in 2025, twenty seventh in the country, and is the hub for Dalian Airlines.\n\nThe Japanese and Korean links are what set it apart. Japan Airlines flies daily from Narita, Korean Air and Asiana both fly daily from Incheon, and Air China stops here on its Beijing to Japan services. China Southern runs many of its Japanese destinations through Dalian as a focus city.\n\nGetting into the city is easy. Dalian Metro Line 2 serves the airport, along with a number of bus lines, an airport bus into the central district and a taxi hub on the ground level.\n\nThe airport has reached its design capacity, and a replacement, Dalian Jinzhouwan International, is being built on an artificial island in the same district.\n\nThe name has a history. The site was a marsh known locally as smelly waters, became a racecourse under the late Qing, and was renamed after a nearby village once it was drained.",
+ "after": "Dalian's airport, in Ganjingzi District about 10 km north west of the city centre. It handled 19,787,716 passengers in 2025, 27th in China.\n\nA replacement, Dalian Jinzhouwan International, is being built in the same district.",
+ "claims": [
+  {
+   "claim": "Dalian's airport",
+   "verdict": "confirmed",
+   "inAfter": "Dalian's airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport serving the city of Dalian"
+    },
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 大连/周水子: passenger rank 27 in China"
+    }
+   ]
+  },
+  {
+   "claim": "in Ganjingzi District about 10 km north west of the city centre",
+   "verdict": "confirmed",
+   "inAfter": "in Ganjingzi District about 10 km north west of the city centre",
+   "note": "Coordinates: 8.1 km in a straight line at 317 degrees, which is north west; ratio 1.23. OurAirports gives the municipality as Dalian (Ganjingzi).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is located in Ganjingzi District, about 10 km (6.2 mi) northwest of the city center."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Dalian (Ganjingzi)",
+      "Straight-line distance from the city centre: 8.1 km",
+      "Bearing from the city centre: 317 degrees, which is north west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "19,787,716 passengers in 2025, 27th in China",
+   "verdict": "confirmed",
+   "inAfter": "It handled 19,787,716 passengers in 2025, 27th in China.",
+   "note": "CAAC: 19,787,716, up 2.6 per cent, 27th.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "passenger rank 27 in China",
+      "passengers 2025: 19,787,716"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In 2025, the airport handled 19,787,716 passengers, making it the busiest airport in Northeast China and the 27th busiest nationwide."
+    }
+   ]
+  },
+  {
+   "claim": "replacement, Dalian Jinzhouwan International, being built in the same district",
+   "verdict": "confirmed",
+   "inAfter": "A replacement, Dalian Jinzhouwan International, is being built in the same district.",
+   "note": "OurAirports lists Dalian Jinzhouwan International Airport as under construction in Dalian (Ganjingzi). 'On an artificial island' and the opening date are not stated: Wikipedia alone for the island, and no source for a date.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the new Dalian Jinzhouwan International Airport is being built on an artificial island in Ganjingzi District to replace it"
+    },
+    {
+     "file": "ourairports-jinzhouwan",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": [
+      "Dalian Jinzhouwan International Airport (Under Construction)",
+      "\"Dalian (Ganjingzi)\""
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the busiest airport in north east China",
+   "verdict": "cut",
+   "wasBefore": "The busiest airport in north east China",
+   "why": "Wrong. CAAC's 2025 table puts Shenyang (24,938,062) and Harbin (24,650,717) ahead of Dalian (19,787,716); Wikipedia's claim does not survive its own source. Dalian's place in the region is not stated instead, as only CAAC gives it; the national rank, which Wikipedia and CAAC both give, is kept.",
+   "sources": [
+    {
+     "file": "caac-2025-northeast",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "In words: Shenyang 24,938,062 (21st); Harbin 24,650,717 (22nd); Dalian 19,787,716 (27th); Changchun 17,759,299 (28th)"
+    }
+   ]
+  },
+  {
+   "claim": "hub for Dalian Airlines",
+   "verdict": "cut",
+   "wasBefore": "and is the hub for Dalian Airlines",
+   "why": "Wikipedia alone; no airline source reached."
+  },
+  {
+   "claim": "Japan and Korea links: JAL daily from Narita, Korean Air and Asiana daily from Incheon, Air China's Beijing to Japan stop, China Southern's Japanese routes",
+   "verdict": "cut",
+   "wasBefore": "The Japanese and Korean links are what set it apart. Japan Airlines flies daily from Narita, Korean Air and Asiana both fly daily from Incheon, and Air China stops here on its Beijing to Japan services. China Southern runs many of its Japanese destinations through Dalian as a focus city.",
+   "why": "Time-sensitive airline services resting on Wikipedia alone. JAL's route index loads but its regional route pages refused the link tool (403); the other airlines' sites were not reached. Asiana is also being merged into Korean Air, so Wikipedia's wording may be out of date."
+  },
+  {
+   "claim": "getting into the city: Metro Line 2, buses, airport bus, taxi hub",
+   "verdict": "cut",
+   "wasBefore": "Getting into the city is easy. Dalian Metro Line 2 serves the airport, along with a number of bus lines, an airport bus into the central district and a taxi hub on the ground level.",
+   "why": "Wikipedia alone: Dalian Metro's and the airport's own sites did not connect."
+  },
+  {
+   "claim": "reached design capacity; replacement on an artificial island",
+   "verdict": "cut",
+   "wasBefore": "The airport has reached its design capacity, and a replacement, Dalian Jinzhouwan International, is being built on an artificial island in the same district.",
+   "why": "Reworded: the replacement and its district are kept with OurAirports as the second source. The design capacity and the artificial island rest on Wikipedia alone."
+  },
+  {
+   "claim": "name history: marsh, smelly waters, Qing racecourse, renamed after a village",
+   "verdict": "cut",
+   "wasBefore": "The name has a history. The site was a marsh known locally as smelly waters, became a racecourse under the late Qing, and was renamed after a nearby village once it was drained.",
+   "why": "History resting on Wikipedia alone."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

@@ -1,0 +1,124 @@
+{
+ "iata": "XNN",
+ "id": "recYQiw6EZ8M8A5Mm",
+ "name": "Xining Caojiabao International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Xining_Caojiapu_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Qinghai's airport, on the Tibetan Plateau about 30 km east of Xining. It handled 7.88 million passengers in 2025 across 63,344 movements, both up around 12 per cent on the year.\n\nAltitude and runway length go together here. A new 3,800 metre runway came into service in October 2011, and the original runway now works as a taxiway.\n\nThe airport opened in December 1991, replacing a field at Lejiawan 17 km to the west that had been built on the orders of the military governor Ma Bufang in 1931 and was still working off a one-way gravel runway in the 1970s. In the 1950s that older airport carried fewer than a thousand passengers a year on a route to Lanzhou, Baotou and Beijing. Its site is now a military base.",
+ "after": "The main airport for Qinghai, serving its capital, Xining, from about 30 km east of the city. It handled 7.88 million passengers in 2025 and 63,344 take-offs and landings, both up about 12 per cent on 2024.\n\nIts single runway is 3,800 m long.",
+ "claims": [
+  {
+   "claim": "the main airport for Qinghai, serving its capital, Xining",
+   "verdict": "softened",
+   "inAfter": "The main airport for Qinghai, serving its capital, Xining",
+   "note": "Was \"Qinghai's airport\"; Qinghai has several. CAAC 2025: Xining 7,877,903 passengers, Yushu 405,531, Golmud 362,343, the rest under 110,000.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an airport serving Xining, the capital of Qinghai Province, China"
+    },
+    {
+     "file": "caac-2025-qinghai",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "Row: 西宁/曹家堡 | 46 | 7877903",
+      "Row: 玉树/巴塘 | 158 | 405531",
+      "In words: Xining 7,877,903 passengers; Yushu 405,531; Golmud 362,343"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 30 km east of the city",
+   "verdict": "confirmed",
+   "inAfter": "about 30 km east of the city",
+   "note": "Coordinates: 27.5 km in a straight line from the GeoNames centre of Xining at 113 degrees, which is south east on the 8-point rose, one point from east and inside the tolerance; ratio 1.09.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "about 30 kilometres (19 mi) east of downtown Xining"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Xining (GeoNames 1788852): 27.5 km (17.1 miles), bearing 113 degrees"
+    }
+   ]
+  },
+  {
+   "claim": "7.88 million passengers and 63,344 movements in 2025, both up about 12 per cent",
+   "verdict": "confirmed",
+   "inAfter": "It handled 7.88 million passengers in 2025 and 63,344 take-offs and landings, both up about 12 per cent on 2024.",
+   "note": "CAAC: passengers 7,877,903 (up 12.1 per cent, 46th in China); movements 63,344 against 56,596 in 2024 (up 11.9 per cent). Wikipedia swaps the two percentages; both round to about 12.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "passengers 2025: 7,877,903",
+      "change 12.1%",
+      "movements 2025: 63,344",
+      "movements 2024: 56,596"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "recorded 63,344 flight takeoffs and landings, and 7.88 million passenger movements, representing a year-on-year increases of 12.1% and 11.9% respectively"
+    }
+   ]
+  },
+  {
+   "claim": "a single runway, 3,800 m",
+   "verdict": "confirmed",
+   "inAfter": "Its single runway is 3,800 m long.",
+   "note": "Wikipedia: the 3,800 m runway opened in October 2011 and the older one is now a taxiway; OurAirports lists the one runway. The October 2011 date rests on Wikipedia alone and is not in the text.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "a new 3,800-meter runway entered service",
+      "The older runway now serves as a taxiway."
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "dated": "2026-09-23",
+     "quote": [
+      "Runway 11/29: 3,800 m",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Qinghai's airport, on the Tibetan Plateau",
+   "verdict": "cut",
+   "wasBefore": "Qinghai's airport, on the Tibetan Plateau about 30 km east of Xining.",
+   "why": "Reworded. 'Qinghai's airport' became 'the main airport for Qinghai' (it has several, CAAC). 'On the Tibetan Plateau' rests on Wikipedia alone; OurAirports gives the elevation (2,170 m) but not the plateau, and one source for the altitude is not enough to state it."
+  },
+  {
+   "claim": "altitude and runway length go together; new runway October 2011; old runway a taxiway",
+   "verdict": "cut",
+   "wasBefore": "Altitude and runway length go together here. A new 3,800 metre runway came into service in October 2011, and the original runway now works as a taxiway.",
+   "why": "The single 3,800 m runway is kept (OurAirports). The October 2011 date and the taxiway rest on Wikipedia alone, and the altitude point falls with the plateau."
+  },
+  {
+   "claim": "opened December 1991, replacing the Lejiawan field of 1931 (Ma Bufang), gravel runway, 1950s route, now a military base",
+   "verdict": "cut",
+   "wasBefore": "The airport opened in December 1991, replacing a field at Lejiawan 17 km to the west that had been built on the orders of the military governor Ma Bufang in 1931 and was still working off a one-way gravel runway in the 1970s. In the 1950s that older airport carried fewer than a thousand passengers a year on a route to Lanzhou, Baotou and Beijing. Its site is now a military base.",
+   "why": "History resting on Wikipedia alone, with Wikipedia unreachable for its references (blocked since 15:27) and no Qinghai source found."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "7.88": "7,877,903 (CAAC) and 7.88 million (Wikipedia)"
+ }
+}
