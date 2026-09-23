@@ -1,0 +1,236 @@
+{
+ "iata": "BRI",
+ "id": "rec1J86hYQh8CTAau",
+ "name": "Bari Karol Wojtyła International Airport",
+ "country": "Italy",
+ "wikipedia": "https://en.wikipedia.org/wiki/Bari_Karol_Wojty%C5%82a_Airport",
+ "audited": "2026-09-23",
+ "before": "Puglia's main airport, 8 km north west of Bari and well connected for a regional field. The metropolitan railway runs into Bari Centrale, AMTAB bus line 16 covers the same ground, and a shuttle service operates alongside them. By car it is reached from the Bari ring road and the A14.\n\nFor clients touring the region there is a useful extra. Pugliairbus runs seasonal coaches linking the airport to Brindisi and Foggia airports and to holiday towns, which makes an itinerary across Puglia workable without hiring a car.\n\nIt handled just under 6.5 million passengers in 2023.\n\nThe airport is named after Karol Wojtyła, Pope John Paul II, and is still often listed as Palese after the neighbourhood beside it, so expect to see both names. It began as a military airfield in the 1930s and was taken by the British Eighth Army in September 1943.",
+ "after": "Puglia's main airport, 8 km north west of Bari and well connected for a regional field. The metropolitan railway runs into Bari Centrale and AMTAB bus line 16 covers the same ground, with a shuttle service alongside them.\n\nIt handled about 8 million passengers in 2025.\n\nThe airport is named after Karol Wojtyła, Pope John Paul II. It is still often listed as Palese, so expect to see both names.",
+ "claims": [
+  {
+   "claim": "Puglia's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Puglia's main airport",
+   "note": "Busiest of the three Puglia airports with scheduled service (Bari, Brindisi, Foggia) in both 2025 tables.",
+   "sources": [
+    {
+     "file": "assaeroporti-2025",
+     "org": "Assaeroporti (Italian airports association; Puglia rows sourced from Aeroporti2030)",
+     "dated": "2025 (year totals to December 2025)",
+     "quote": [
+      "3 | Bari (^) | 56700 | 4.4 | 7977881",
+      "8 | Brindisi (^) | 24703 | -2 | 3444438",
+      "15 | Foggia (^) | 2033 | -12.7 | 69151"
+     ]
+    },
+    {
+     "file": "eurostat-it",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat IT_LIBD BARI/PALESE airport: passengers carried in 2025: 8,018,794",
+      "Eurostat IT_LIBR BRINDISI/CASALE airport: passengers carried in 2025: 3,467,702"
+     ]
+    },
+    {
+     "file": "ourairports-puglia",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "LIBD BRI Bari Karol Wojtyła International Airport",
+      "LIBF FOG Foggia Gino Lisa Airport",
+      "LIBR BDS Brindisi Airport"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "8 km north west of Bari",
+   "verdict": "confirmed",
+   "inAfter": "8 km north west of Bari",
+   "note": "Coordinates: 9.4 km at 283 degrees (ratio 0.85; the bearing is 32 degrees off north west, inside the check's tolerance). Kept as Wikipedia gives it.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-17",
+     "quote": "It is approximately 8 km (5 mi) northwest from the city centre."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 9.4 km (5.8 miles)",
+      "Bearing from the city centre: 283 degrees"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "The metropolitan railway runs into Bari Centrale",
+   "verdict": "confirmed",
+   "inAfter": "The metropolitan railway runs into Bari Centrale",
+   "note": "Ferrotramviaria runs the airport line (open since 2013, 17 minutes from Bari).",
+   "sources": [
+    {
+     "file": "fnb-airport",
+     "org": "Ferrotramviaria (the railway operator, ferrotramviaria.it)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "il passante ferroviario che collega l’Aeroporto di Bari , sia verso Bari Centrale sia verso Barletta"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-17",
+     "quote": "The Bari metropolitan railway service connects the airport with the Bari Centrale railway station in the city centre."
+    }
+   ]
+  },
+  {
+   "claim": "AMTAB bus line 16",
+   "verdict": "confirmed",
+   "inAfter": "AMTAB bus line 16 covers the same ground",
+   "note": "AMTAB's timetable search lists line 16 as Bari Centrale to the airport.",
+   "sources": [
+    {
+     "file": "amtab-lines",
+     "org": "AMTAB (Bari city buses; timetable search hosted on autobus.it)",
+     "dated": "read 2026-09-23 (live timetable search, lines for the day)",
+     "quote": "16 Bari Centrale - Aeroporto Amtab S.p.A"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-17",
+     "quote": "AMTAB buses provide public transportation to the airport from the city centre (Line 16)."
+    }
+   ]
+  },
+  {
+   "claim": "a shuttle service operates alongside them",
+   "verdict": "confirmed",
+   "inAfter": "with a shuttle service alongside them",
+   "note": "Tempesta's shuttle, Bari Centrale station to the airport in 30 minutes.",
+   "sources": [
+    {
+     "file": "tempesta",
+     "org": "Autoservizi Tempesta (the shuttle operator)",
+     "dated": "read 2026-09-23 (live page; it carries shuttle times for 24 December 2025 to 1 January 2026)",
+     "quote": [
+      "I nostri bus-navetta garantiscono, in soli 30 minuti, il collegamento comodo e sicuro dalla Stazione Centrale di Bari all’Aeroporto di Bari.",
+      "Orari Bus Navetta 24-25-31 dicembre 2025 - 1º Gennaio 2026"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-17",
+     "quote": "Tempesta auto servizi also offers a shuttle between the airport and city centre."
+    }
+   ]
+  },
+  {
+   "claim": "about 8 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled about 8 million passengers in 2025.",
+   "note": "Was 'just under 6.5 million passengers in 2023' (stale; Eurostat actually has 6,512,753 for 2023). The two 2025 counts differ slightly (7,977,881 and 8,018,794), so rounded to about 8 million.",
+   "sources": [
+    {
+     "file": "assaeroporti-2025",
+     "org": "Assaeroporti (Italian airports association; Puglia rows sourced from Aeroporti2030)",
+     "dated": "2025 (year totals to December 2025)",
+     "quote": "3 | Bari (^) | 56700 | 4.4 | 7977881"
+    },
+    {
+     "file": "eurostat-it",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat IT_LIBD BARI/PALESE airport: passengers carried in 2025: 8,018,794"
+    }
+   ]
+  },
+  {
+   "claim": "named after Karol Wojtyła, Pope John Paul II",
+   "verdict": "confirmed",
+   "inAfter": "The airport is named after Karol Wojtyła, Pope John Paul II.",
+   "note": "The rail and shuttle operators both call it the Karol Wojtyla airport; Wikipedia gives the Pope.",
+   "sources": [
+    {
+     "file": "fnb-airport",
+     "org": "Ferrotramviaria (the railway operator, ferrotramviaria.it)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "COLLEGAMENTO FERROVIARIO PASSANTE PER L’AEROPORTO KAROL WOJTYLA"
+    },
+    {
+     "file": "tempesta",
+     "org": "Autoservizi Tempesta (the shuttle operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "AEROPORTO DI BARI KAROL WOJTYLA"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-17",
+     "quote": "Named after Pope John Paul II (1920–2005), who was born Karol Wojtyła."
+    }
+   ]
+  },
+  {
+   "claim": "still often listed as Palese",
+   "verdict": "confirmed",
+   "inAfter": "It is still often listed as Palese, so expect to see both names.",
+   "note": "Eurostat's own label for the airport is still BARI/PALESE.",
+   "sources": [
+    {
+     "file": "eurostat-it",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat IT_LIBD BARI/PALESE airport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-17",
+     "quote": "The airport is also known as Palese Airport (Italian: Aeroporto di Bari-Palese) after a nearby neighbourhood."
+    }
+   ]
+  },
+  {
+   "claim": "Palese is the neighbourhood beside the airport",
+   "verdict": "cut",
+   "wasBefore": "after the neighbourhood beside it",
+   "why": "Only Wikipedia says it ('a nearby neighbourhood'). The operator's site (aeroportidipuglia.it) answered both grab.mjs and grabb.mjs with a security check, so no second source."
+  },
+  {
+   "claim": "reached by car from the Bari ring road and the A14",
+   "verdict": "cut",
+   "wasBefore": "By car it is reached from the Bari ring road and the A14.",
+   "why": "Only Wikipedia. The operator's access pages sit behind the same security check (aeroportidipuglia.it refused grab.mjs and grabb.mjs), and no road authority page was found."
+  },
+  {
+   "claim": "Pugliairbus seasonal coaches to Brindisi and Foggia airports and holiday towns",
+   "verdict": "cut",
+   "wasBefore": "For clients touring the region there is a useful extra. Pugliairbus runs seasonal coaches linking the airport to Brindisi and Foggia airports and to holiday towns, which makes an itinerary across Puglia workable without hiring a car.",
+   "why": "Only Wikipedia, and nothing dated in the last 12 months. Pugliairbus is run by the airport operator, whose site answered with a security check; pugliairbus.aeroportidipuglia.it gave no answer to grab.mjs and a tunnel connection failure to grabb.mjs. The sentence introducing it goes too."
+  },
+  {
+   "claim": "began as a military airfield in the 1930s",
+   "verdict": "cut",
+   "wasBefore": "It began as a military airfield in the 1930s",
+   "why": "Only Wikipedia. The operator's history page is behind the security check, and the Italian Air Force site (aeronautica.difesa.it) answered 502 to links.mjs and nothing to grab.mjs."
+  },
+  {
+   "claim": "taken by the British Eighth Army in September 1943",
+   "verdict": "cut",
+   "wasBefore": "was taken by the British Eighth Army in September 1943",
+   "why": "Only Wikipedia, as above. No second source reached."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "well connected for a regional field",
+   "why": "The old text's judgement, kept; the rail, bus and shuttle links behind it are sourced."
+  }
+ ],
+ "tracerOk": {}
+}
