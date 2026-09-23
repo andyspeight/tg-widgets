@@ -1,0 +1,115 @@
+{
+ "iata": "OUA",
+ "id": "rec10Dd8ya0AiEXlL",
+ "name": "Ouagadougou Thomas Sankara International Airport",
+ "country": "Burkina Faso",
+ "wikipedia": "https://en.wikipedia.org/wiki/Thomas_Sankara_International_Airport_Ouagadougou",
+ "audited": "2026-09-23",
+ "before": "Burkina Faso's only real air link. This one airport handles around 98 per cent of the country's scheduled commercial traffic, and Air Burkina and Air France between them carry about 60 per cent of the passengers.\n\nIt is remarkably close to town, roughly 1.5 km from the main commercial area, which makes for a fast transfer. That closeness is also the problem. The airport was built in the 1960s on what was then the southern edge of the city, and Ouagadougou has grown around it, so it now sits surrounded by development it has outgrown. The government has plans for a replacement 30 km to the north.\n\nThe site is long and narrow, about 4.8 km end to end, with a single 3,000 metre runway and a military sector alongside the civilian one.\n\nTraffic grew steadily through the 2000s, passing 400,000 passengers in 2011.",
+ "after": "Ouagadougou's international airport, on the south east side of the city and close to the centre. It has a single 3,000 metre runway.\n\nThe FCDO advises against all travel to Burkina Faso.",
+ "claims": [
+  {
+   "claim": "Ouagadougou's international airport, south east side of the city, close to the centre",
+   "verdict": "corrected",
+   "inAfter": "Ouagadougou's international airport, on the south east side of the city and close to the centre.",
+   "note": "Was 'roughly 1.5 km from the main commercial area'. Coordinates give 2.7 km at 121 degrees (south east) from the GeoNames centre; Wikipedia measures to a different point, so the figure is replaced by what both support.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "is an international airport serving Ouagadougou, the capital of Burkina Faso",
+      "approximately 1.5 kilometres (1 mi) southeast of the main commercial area"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Ouagadougou",
+      "Straight-line distance from the city centre: 2.7 km (1.7 miles)",
+      "Bearing from the city centre: 121 degrees, which is south east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "single 3,000 metre runway",
+   "verdict": "confirmed",
+   "inAfter": "It has a single 3,000 metre runway.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Its runway is 3,000 metres (9,800 ft) long."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": [
+      "Runway 04/22: 3,000 m (9,843 ft), ASP",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FCDO advises against all travel to Burkina Faso",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "The FCDO advises against all travel to Burkina Faso.",
+   "note": "Attributed statement, checked against the FCDO page (updated 10 December 2025, still current 23 September 2026). New to the text, as for the other airports under this advice.",
+   "sources": [
+    {
+     "file": "fcdo-bf",
+     "org": "UK Foreign, Commonwealth and Development Office (FCDO)",
+     "quote": [
+      "FCDO advises against all travel to Burkina Faso.",
+      "23 September 2026",
+      "10 December 2025"
+     ],
+     "dated": "2025-12-10"
+    }
+   ]
+  },
+  {
+   "claim": "only real air link; 98 per cent; Air Burkina and Air France 60 per cent",
+   "verdict": "cut",
+   "wasBefore": "Burkina Faso's only real air link. This one airport handles around 98 per cent of the country's scheduled commercial traffic, and Air Burkina and Air France between them carry about 60 per cent of the passengers.",
+   "why": "Undated shares from about 2011, on Wikipedia alone, and overtaken: AeroRoutes (24 July 2025) reports Air France's Ouagadougou flights suspended, with any resumption no earlier than mid-January 2026. No source found on whether it has resumed."
+  },
+  {
+   "claim": "1.5 km from the main commercial area, fast transfer",
+   "verdict": "cut",
+   "wasBefore": "It is remarkably close to town, roughly 1.5 km from the main commercial area, which makes for a fast transfer.",
+   "why": "Reworded to 'close to the centre' with the coordinates; the figure has one source."
+  },
+  {
+   "claim": "closeness is the problem; built 1960s on the southern edge; outgrown",
+   "verdict": "cut",
+   "wasBefore": "That closeness is also the problem. The airport was built in the 1960s on what was then the southern edge of the city, and Ouagadougou has grown around it, so it now sits surrounded by development it has outgrown.",
+   "why": "Only Wikipedia; the World Bank project document it draws on did not load."
+  },
+  {
+   "claim": "replacement 30 km to the north",
+   "verdict": "cut",
+   "wasBefore": "The government has plans for a replacement 30 km to the north.",
+   "why": "Wikipedia contradicts itself (30 km north, and 35 km north east at Donsin, due for 2025), and every second source tried refused the fetcher or said nothing (Express, Airports International, Egis). Its current state is unknown."
+  },
+  {
+   "claim": "site 4.8 km long; single 3,000 m runway; military sector",
+   "verdict": "cut",
+   "wasBefore": "The site is long and narrow, about 4.8 km end to end, with a single 3,000 metre runway and a military sector alongside the civilian one.",
+   "why": "Runway kept with OurAirports. The site length and the military sector rest on Wikipedia alone (the Washington Post report it cites is paywalled before it reaches the airport)."
+  },
+  {
+   "claim": "traffic passed 400,000 in 2011",
+   "verdict": "cut",
+   "wasBefore": "Traffic grew steadily through the 2000s, passing 400,000 passengers in 2011.",
+   "why": "Fifteen years stale and single-source."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

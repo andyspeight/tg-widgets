@@ -1,0 +1,194 @@
+{
+ "iata": "FIH",
+ "id": "recicuVAKEwuvPYTZ",
+ "name": "Ndjili International Airport",
+ "country": "Congo - Kinshasa",
+ "wikipedia": "https://en.wikipedia.org/wiki/N'djili_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Kinshasa's principal international airport and the busiest in the country, about 20 km east of Kinshasa in the commune of Nsele, on the edge of the Pool Malebo and reached by Lumumba Boulevard. It is named after the nearby Ndjili River.\n\nThe runway has an unusual history. When the airport was inaugurated in 1959 its runway measured 4,700 metres and was among the longest in the world. Modernisation since the early 2000s has shortened it to about 3,300 metres.\n\nOne passenger terminal handles both domestic and international flights. The aprons are divided by purpose: the central one for airlines, an eastern apron for the Congolese air force and charter work, and a western apron for maintenance.\n\nThe airport is run by the state-owned Régie des Voies Aériennes, which handles air traffic control and meteorology as well as the terminal.\n\nIt ranked 39th busiest in Africa in 2009 and 43rd by 2016. Construction began in 1953, replacing the older Ndolo Airport.",
+ "after": "N'djili is Kinshasa's international airport, about 20 km east of the city centre. It is run by the state-owned Régie des Voies Aériennes (RVA).\n\nIt is being rebuilt. In June 2025 the government gave the project to Infrarose for 36 months, with a new terminal for 5 million passengers a year, and on 30 June 2026 President Tshisekedi reopened the renovated rotunda, the original terminal hall of 1959.\n\nThe FCDO advises against all but essential travel to the districts of N'djili and Kimbanseke south of the airport's main access road.",
+ "claims": [
+  {
+   "claim": "N'djili is Kinshasa's international airport, about 20 km east of the city centre",
+   "verdict": "confirmed",
+   "inAfter": "N'djili is Kinshasa's international airport, about 20 km east of the city centre.",
+   "note": "Coordinates give 15.9 km in a straight line at 114 degrees from the GeoNames centre (south east, one point from east, inside the tolerance); ratio 1.26.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "is the principal international airport serving Kinshasa",
+      "about 20 kilometers east of the city"
+     ]
+    },
+    {
+     "file": "acp-rotonde",
+     "org": "Agence Congolaise de Presse (ACP)",
+     "dated": "2026-06-30",
+     "quote": "l'aéroport international de N'Djili, dans l'Est de Kinshasa"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Kinshasa",
+      "Straight-line distance from the city centre: 15.9 km (9.9 miles)",
+      "Bearing from the city centre: 114 degrees, which is south east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "run by the state-owned RVA",
+   "verdict": "confirmed",
+   "inAfter": "It is run by the state-owned Régie des Voies Aériennes (RVA).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Operated by the state-owned Régie des Voies Aériennes (RVA)"
+    },
+    {
+     "file": "acp-rotonde",
+     "org": "Agence Congolaise de Presse (ACP)",
+     "dated": "2026-06-30",
+     "quote": "directeur général adjoint de la RVA, opérateur public, gestionnaire des aéroports de la RDC"
+    }
+   ]
+  },
+  {
+   "claim": "it is being rebuilt",
+   "verdict": "corrected",
+   "inAfter": "It is being rebuilt.",
+   "note": "The RVA said on 30 June 2026 that works are under way and the rotunda is a small part of them.",
+   "sources": [
+    {
+     "file": "acp-rotonde",
+     "org": "Agence Congolaise de Presse (ACP)",
+     "quote": "Ce que vous voyez ici n'est qu' une petite partie des travaux qui sont en train d'être réalisés.",
+     "dated": "2026-06-30"
+    },
+    {
+     "file": "deskeco-2025",
+     "org": "DeskEco",
+     "quote": "le projet de réhabilitation de l'aéroport de N'djili est confié à l'entreprise Infrarose pour une durée de 36 mois",
+     "dated": "2025-06-10"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "By April 2026, renovation work on parts of the existing terminal had progressed"
+    }
+   ]
+  },
+  {
+   "claim": "being rebuilt: June 2025, Infrarose, 36 months, terminal for 5 million",
+   "verdict": "corrected",
+   "inAfter": "In June 2025 the government gave the project to Infrarose for 36 months, with a new terminal for 5 million passengers a year",
+   "note": "Replaces the old terminal and runway description, which the rebuild overtakes. DeskEco gives the terminal as 48,000 square metres, Wikipedia about 50,000, so the area is not stated. The RVA said on 30 June 2026 that the rotunda is only a small part of works under way (ACP).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "In June 2025, the rehabilitation project was awarded to Kinshasa-based company Infrarose for a period of 36 months.",
+      "with capacity for five million passengers annually"
+     ]
+    },
+    {
+     "file": "deskeco-2025",
+     "org": "DeskEco",
+     "dated": "2025-06-10",
+     "quote": [
+      "le projet de réhabilitation de l'aéroport de N'djili est confié à l'entreprise Infrarose pour une durée de 36 mois",
+      "pourra accueillir initialement 5 millions de passagers par an"
+     ]
+    },
+    {
+     "file": "acp-rotonde",
+     "org": "Agence Congolaise de Presse (ACP)",
+     "dated": "2026-06-30",
+     "quote": "Ce que vous voyez ici n'est qu' une petite partie des travaux qui sont en train d'être réalisés."
+    }
+   ]
+  },
+  {
+   "claim": "30 June 2026: Tshisekedi reopened the renovated rotunda, the 1959 terminal hall",
+   "verdict": "corrected",
+   "inAfter": "and on 30 June 2026 President Tshisekedi reopened the renovated rotunda, the original terminal hall of 1959.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The renovated rotunda was inaugurated on 30 June by President Tshisekedi",
+      "The N'djili airport officially opened in February 1959"
+     ]
+    },
+    {
+     "file": "acp-rotonde",
+     "org": "Agence Congolaise de Presse (ACP)",
+     "dated": "2026-06-30",
+     "quote": [
+      "La rotonde réhabilitée de l'aéroport international de N'Djili, dans l'Est de Kinshasa, a été inaugurée le 30 juin par le Président Tshisekedi",
+      "elle a été inaugurée, si mes souvenirs sont exacts, en février 1959. Cela signifie qu'aujourd'hui, cette aérogare est âgée de 67 ans"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: against all but essential travel to N'djili and Kimbanseke south of the airport access road",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "The FCDO advises against all but essential travel to the districts of N'djili and Kimbanseke south of the airport's main access road.",
+   "note": "Attributed statement, checked against the FCDO page (updated 16 September 2026, still current 23 September 2026). New to the text: it concerns the airport's own approach.",
+   "sources": [
+    {
+     "file": "fcdo-drc",
+     "org": "UK Foreign, Commonwealth and Development Office (FCDO)",
+     "quote": [
+      "FCDO  advises against all but essential travel to:",
+      "The districts of N’djili and Kimbanseke in Kinshasa city south of the main access road to N’djili airport",
+      "23 September 2026",
+      "16 September 2026"
+     ],
+     "dated": "2026-09-16"
+    }
+   ]
+  },
+  {
+   "claim": "principal, busiest, Nsele, Pool Malebo, Lumumba Boulevard, Ndjili River",
+   "verdict": "cut",
+   "wasBefore": "Kinshasa's principal international airport and the busiest in the country, about 20 km east of Kinshasa in the commune of Nsele, on the edge of the Pool Malebo and reached by Lumumba Boulevard. It is named after the nearby Ndjili River.",
+   "why": "Distance and direction kept. The ranking, the setting, the road and the naming rest on Wikipedia alone."
+  },
+  {
+   "claim": "runway 4,700 m in 1959, shortened to about 3,300 m",
+   "verdict": "cut",
+   "wasBefore": "The runway has an unusual history. When the airport was inaugurated in 1959 its runway measured 4,700 metres and was among the longest in the world. Modernisation since the early 2000s has shortened it to about 3,300 metres.",
+   "why": "Sources disagree on the length now (Wikipedia about 3,300 m, OurAirports 4,000 m), and the rebuild includes rehabilitating the old runway and building new ones (DeskEco)."
+  },
+  {
+   "claim": "one terminal; aprons by purpose",
+   "verdict": "cut",
+   "wasBefore": "One passenger terminal handles both domestic and international flights. The aprons are divided by purpose: the central one for airlines, an eastern apron for the Congolese air force and charter work, and a western apron for maintenance.",
+   "why": "Only Wikipedia, and overtaken by the rebuild."
+  },
+  {
+   "claim": "RVA handles ATC, meteorology, terminal",
+   "verdict": "cut",
+   "wasBefore": "The airport is run by the state-owned Régie des Voies Aériennes, which handles air traffic control and meteorology as well as the terminal.",
+   "why": "Operator kept with ACP; the list of functions has one source."
+  },
+  {
+   "claim": "39th in Africa 2009, 43rd 2016; construction 1953 replacing Ndolo",
+   "verdict": "cut",
+   "wasBefore": "It ranked 39th busiest in Africa in 2009 and 43rd by 2016. Construction began in 1953, replacing the older Ndolo Airport.",
+   "why": "The rankings are ten years stale. The start of construction is disputed: Wikipedia says 1953, the RVA's deputy director general told ACP 1954."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
