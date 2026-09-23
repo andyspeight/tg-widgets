@@ -1,0 +1,367 @@
+{
+ "iata": "DTM",
+ "id": "recUoTEcoP2tcM88P",
+ "name": "Dortmund Airport",
+ "country": "Germany",
+ "wikipedia": "https://en.wikipedia.org/wiki/Dortmund_Airport",
+ "audited": "2026-09-23",
+ "before": "Dortmund's airport, 10 km east of the city, serving the eastern side of the Rhine-Ruhr, Germany's largest urban area. It is mostly low cost and leisure charter flying and carried nearly 3 million passengers in 2023.\n\nOnward travel has two good options and it is worth knowing both. An express bus runs to Dortmund main station, from which frequent regional and long distance trains reach Düsseldorf. Alternatively a shuttle leaves the terminal every twenty minutes for Holzwickede station, where the hourly RE 13 runs direct to Düsseldorf in about an hour. There are also buses to the U47 metro line and to Unna.\n\nDüsseldorf Airport, the region's main one, is about 70 km to the south west.\n\nThe airport has a long history in two places. Commercial flights began in 1925 from a field at Brackel, with Aero Lloyd flying to Paris, but that site became a German air base in the war and was held by British forces until the 1990s. The civil airfield moved to Dortmund-Wickede in 1960.",
+ "after": "Dortmund's airport, 10 km east of the city and the third busiest in North Rhine-Westphalia, with just over 3.2 million passengers in 2025. Most of its flying is low cost, with Wizz Air the biggest airline and many routes to Central and Eastern Europe.\n\nOnward travel has two good options. The AirportExpress bus runs to Dortmund main station, and the AirportShuttle to Holzwickede station, where the RE 13 runs direct to Düsseldorf. There are also buses towards the U47 metro line and to Unna.\n\nDüsseldorf Airport, the region's main one, is about 70 km to the south west.\n\nThe airport has a long history in two places. Commercial flying began at Brackel in 1925, when an Aero Lloyd aircraft was the first to land, but the military took the site over in 1939 and it later passed to British forces. Flying moved to the present site at Dortmund-Wickede in 1960.",
+ "claims": [
+  {
+   "claim": "10 km east of the city",
+   "verdict": "confirmed",
+   "inAfter": "Dortmund's airport, 10 km east of the city",
+   "note": "Coordinates: 10.1 km in a straight line at 88 degrees, east (ratio 0.99).",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 10.1 km (6.3 miles)",
+      "Bearing from the city centre: 88 degrees, which is east"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "located 10 km (6.2 mi) east of Dortmund, North Rhine-Westphalia"
+    }
+   ]
+  },
+  {
+   "claim": "third busiest in North Rhine-Westphalia",
+   "verdict": "corrected",
+   "inAfter": "and the third busiest in North Rhine-Westphalia",
+   "note": "Replaces 'serving the eastern side of the Rhine-Ruhr, Germany's largest urban area', which rests on Wikipedia alone. The operator calls it the third largest commercial airport in the state; ADV's 2025 table puts it behind Dusseldorf and Cologne Bonn and ahead of Weeze, Munster/Osnabruck and Paderborn, the other airports OurAirports lists for the state.",
+   "sources": [
+    {
+     "file": "op-zahlen",
+     "org": "Flughafen Dortmund GmbH (the airport operator, dortmund-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Der ursprüngliche Regionalflughafen Dortmund-Wickede hat sich so zum drittgrößten Verkehrsflughafen in Nordrhein-Westfalen entwickelt, dem Dortmund Airport."
+    },
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": [
+      "Düsseldorf 21.031.429 +4,9 %",
+      "Köln/Bonn 10.060.452 +0,5 %",
+      "Dortmund 3.242.429 +3,5 %",
+      "Weeze 2.245.473 +14,0 %"
+     ]
+    },
+    {
+     "file": "ourairports-nw",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "EDDL DUS Düsseldorf Airport (Düsseldorf)",
+      "EDDK CGN Cologne Bonn Airport (Köln (Cologne))",
+      "EDLW DTM Dortmund Airport (Dortmund)",
+      "EDLV NRN Weeze (Niederrhein) Airport (Weeze)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "just over 3.2 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "with just over 3.2 million passengers in 2025.",
+   "note": "Was 'carried nearly 3 million passengers in 2023'. A passenger total replaces a passenger total: ADV 3,242,429, the operator 3,242,569 and Eurostat 3,237,621 for 2025.",
+   "sources": [
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": [
+      "Kumuliertes Gesamtaufkommen in Deutschland: Passagiere (an+ab) | Januar bis Dezember 2025",
+      "Dortmund 3.242.429 +3,5 %"
+     ]
+    },
+    {
+     "file": "op-zahlen",
+     "org": "Flughafen Dortmund GmbH (the airport operator, dortmund-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "2021 2022 2023 2024 2025",
+      "Fluggäste 1.692.960 2.586.342 2.934.316 3.132.707 3.242.569"
+     ]
+    },
+    {
+     "file": "eurostat-de",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat DE_EDLW DORTMUND airport: passengers carried in 2025: 3,237,621"
+    }
+   ]
+  },
+  {
+   "claim": "mostly low cost, Wizz Air the biggest airline, many routes to Central and Eastern Europe",
+   "verdict": "corrected",
+   "inAfter": "Most of its flying is low cost, with Wizz Air the biggest airline and many routes to Central and Eastern Europe.",
+   "note": "Was 'mostly low cost and leisure charter flying'. The routes are mostly not holiday charters: Eurostat's 2024 figures (the latest by route) have Katowice, Bucharest, Gdansk, Tirana, Sofia and Skopje among the seven busiest, with Palma the one leisure route near the top. Wizz Air flights fill most of the airport's current timetable (its name appears 547 times, against 113 for SunExpress and 99 for Eurowings), and Wikipedia calls it the biggest contributor to the airport's growth.",
+   "sources": [
+    {
+     "file": "eurostat-routes",
+     "org": "Eurostat",
+     "dated": "2024 (annual data, the latest by route)",
+     "quote": [
+      "Eurostat DE_EDLW_PL_EPKT DORTMUND airport - KATOWICE/PYRZOWICE airport: 433,337 passengers in 2024",
+      "Eurostat DE_EDLW_ES_LEPA DORTMUND airport - PALMA DE MALLORCA airport: 217,659 passengers in 2024",
+      "Eurostat DE_EDLW_RO_LROP DORTMUND airport - BUCURESTI/HENRI COANDA airport: 191,352 passengers in 2024",
+      "Eurostat DE_EDLW_PL_EPGD DORTMUND airport - GDANSK IM LECHA WALESY airport: 157,261 passengers in 2024"
+     ]
+    },
+    {
+     "file": "op-flugplan-pdf",
+     "org": "Flughafen Dortmund GmbH (the airport operator, dortmund-airport.com)",
+     "dated": "the airport's current timetable (PDF), read 2026-09-23",
+     "quote": [
+      "Flugplan",
+      "08:50 10:40 W4 4354 Wizz Air Malta A320"
+     ]
+    },
+    {
+     "file": "op-reiseziele",
+     "org": "Flughafen Dortmund GmbH (the airport operator, dortmund-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Mit Wizz Air geht es täglich direkt von Dortmund nach Belgrad"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": [
+      "is mainly used for low-cost and leisure charter flights",
+      "However, Wizz Air has been the most significant contributor to the airport's resurgence."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the AirportExpress to Dortmund main station and the AirportShuttle to Holzwickede station",
+   "verdict": "confirmed",
+   "inAfter": "The AirportExpress bus runs to Dortmund main station, and the AirportShuttle to Holzwickede station",
+   "note": "The operator gives about 25 minutes for the express (non-stop) and about six for the shuttle; its timetable has the shuttle every 20 minutes on weekday daytimes and every 30 at weekends and in the evening, so the old 'every twenty minutes' is cut (below).",
+   "sources": [
+    {
+     "file": "op-bus-bahn",
+     "org": "Flughafen Dortmund GmbH (the airport operator, dortmund-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "der AirportExpress , als direkte Verbindung ab dem Dortmunder Hauptbahnhof sowie der AirportShuttle , als direkte Verbindung ab dem Bahnhof Holzwickede zur Verfügung.",
+      "Zwischen dem Dortmunder Hauptbahnhof und dem Terminal verkehrt zu den Betriebszeiten des Flughafens der AirportExpress, die Fahrzeit beträgt ca. 25 Minuten (non-stop)."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "Dortmund Airport is served by an express bus to Dortmund main station, a shuttle bus to the nearby railway station Holzwickede/Dortmund Flughafen"
+    }
+   ]
+  },
+  {
+   "claim": "the RE 13 runs direct from Holzwickede to Dusseldorf",
+   "verdict": "confirmed",
+   "inAfter": "where the RE 13 runs direct to Düsseldorf.",
+   "note": "eurobahn, which runs the RE 13, lists Holzwickede and Dusseldorf Hbf among the line's stops between Hamm and Venlo. The hourly frequency and the journey time rest on Wikipedia alone (cut below).",
+   "sources": [
+    {
+     "file": "eurobahn-re13",
+     "org": "eurobahn (the operator of the RE 13, eurobahn.de)",
+     "dated": "read 2026-09-23 (live page; timetable from 3 Jan 2026)",
+     "quote": [
+      "RE 13: Maas-Wupper-Express",
+      "Düsseldorf Hbf",
+      "Holzwickede"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "From Holzwickede station taking the RE 13 (Maas-Wupper-Express) towards Venlo."
+    }
+   ]
+  },
+  {
+   "claim": "buses towards the U47 metro line and to Unna",
+   "verdict": "confirmed",
+   "inAfter": "There are also buses towards the U47 metro line and to Unna.",
+   "note": "Line 490 runs to Dortmund-Aplerbeck for the U47; VKU line 57 runs to Unna station.",
+   "sources": [
+    {
+     "file": "op-bus-bahn",
+     "org": "Flughafen Dortmund GmbH (the airport operator, dortmund-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "(via Buslinie 440 oder U47 mit Umstieg in Dortmund-Aplerbeck) können Sie die Buslinie 490 nutzen.",
+      "Für die Anfahrt vom Bahnhof Unna können Sie die VKU-Buslinie 57 nutzen."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "a bus to the city's metro line U47, as well as a bus to the city of Unna"
+    }
+   ]
+  },
+  {
+   "claim": "Dusseldorf Airport, the region's main one, about 70 km south west",
+   "verdict": "confirmed",
+   "inAfter": "Düsseldorf Airport, the region's main one, is about 70 km to the south west.",
+   "note": "Airport to airport: 63.9 km in a straight line at 247 degrees, south west (ratio 1.10). Dusseldorf is by far the state's busiest (ADV 2025: 21.0 million).",
+   "sources": [
+    {
+     "file": "geo-dus",
+     "org": "OurAirports (computed)",
+     "quote": "Straight-line distance from Dortmund Airport to Dusseldorf Airport: 63.9 km (39.7 miles), bearing 247 degrees, which is south west"
+    },
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": "Düsseldorf 21.031.429 +4,9 %"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": [
+      "The nearest major international airport is Düsseldorf Airport approx.",
+      "70 km (43 mi) to the southwest."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "commercial flying began at Brackel in 1925, an Aero Lloyd aircraft the first to land",
+   "verdict": "corrected",
+   "inAfter": "Commercial flying began at Brackel in 1925, when an Aero Lloyd aircraft was the first to land",
+   "note": "Was 'Commercial flights began in 1925 from a field at Brackel, with Aero Lloyd flying to Paris'. The operator's centenary history has a Deutsche Aero Lloyd Dornier from Bremen as the first aircraft on 27 April 1925; the Paris route rests on Wikipedia alone (cut below).",
+   "sources": [
+    {
+     "file": "op-100jahre",
+     "org": "Flughafen Dortmund GmbH (the airport operator, dortmund-airport.com)",
+     "dated": "read 2026-09-23 (the airport's centenary site)",
+     "quote": [
+      "Zur Inbetriebnahme des Dortmunder Flughafens landet eine Dornier der Deutschen Aero Lloyd als erste Maschine in Dortmund.",
+      "1925 wurde von der Firma Jucho die erste Flugzeughalle auf dem Gelände in Dortmund-Brackel fertiggestellt."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "The airport, originally located in the suburb of Brackel, was first served by commercial flights in 1925 by Aero Lloyd"
+    }
+   ]
+  },
+  {
+   "claim": "the military took the site over in 1939; it later passed to British forces",
+   "verdict": "corrected",
+   "inAfter": "but the military took the site over in 1939 and it later passed to British forces.",
+   "note": "Was 'that site became a German air base in the war and was held by British forces until the 1990s'. The operator: the military took over the civil airport in 1939, and British missile units were stationed there from 1958. 'Until the 1990s' rests on Wikipedia alone (cut below).",
+   "sources": [
+    {
+     "file": "op-100jahre",
+     "org": "Flughafen Dortmund GmbH (the airport operator, dortmund-airport.com)",
+     "dated": "read 2026-09-23 (the airport's centenary site)",
+     "quote": [
+      "Mit Beginn des Zweiten Weltkrieges 1939 übernimmt das Militär den Zivilflughafen Dortmund-Brackel",
+      "Im Jahr 1958 werden in Dortmund-Brackel britische Raketeneinheiten stationiert"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "During World War II the airport was used as a German air base, and was subsequently used by the British Royal Air Force."
+    }
+   ]
+  },
+  {
+   "claim": "flying moved to Dortmund-Wickede in 1960",
+   "verdict": "confirmed",
+   "inAfter": "Flying moved to the present site at Dortmund-Wickede in 1960.",
+   "sources": [
+    {
+     "file": "op-zahlen",
+     "org": "Flughafen Dortmund GmbH (the airport operator, dortmund-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Kriegsbedingt startete die zivile Luftfahrt erst wieder im Jahr 1960 am heutigen Standort in Dortmund-Wickede."
+    },
+    {
+     "file": "op-100jahre",
+     "org": "Flughafen Dortmund GmbH (the airport operator, dortmund-airport.com)",
+     "dated": "read 2026-09-23 (the airport's centenary site)",
+     "quote": "Am 1. Januar 1960 landet die erste Sportmaschine des Aero Club Dortmund auf der Graslandebahn."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "In 1960, the civil airfield was relocated to Dortmund-Wickede."
+    }
+   ]
+  },
+  {
+   "claim": "serving the eastern Rhine-Ruhr, Germany's largest urban area",
+   "verdict": "cut",
+   "wasBefore": "serving the eastern side of the Rhine-Ruhr, Germany's largest urban area",
+   "why": "Wikipedia alone; the operator's pages read do not describe its catchment. Replaced by the operator's own 'third largest in North Rhine-Westphalia', which ADV confirms (see above)."
+  },
+  {
+   "claim": "leisure charter flying; nearly 3 million in 2023",
+   "verdict": "cut",
+   "wasBefore": "It is mostly low cost and leisure charter flying and carried nearly 3 million passengers in 2023.",
+   "why": "Corrected (see above): the busiest routes are low-cost flights to Central and Eastern Europe rather than charters, and 2025 supersedes 2023."
+  },
+  {
+   "claim": "frequent regional and long distance trains from Dortmund main station to Dusseldorf",
+   "verdict": "cut",
+   "wasBefore": "An express bus runs to Dortmund main station, from which frequent regional and long distance trains reach Düsseldorf.",
+   "why": "The onward trains to Dusseldorf rest on Wikipedia alone (the operator says only that both stations are on Deutsche Bahn's regional and long distance network). The express bus is kept (see above)."
+  },
+  {
+   "claim": "the shuttle every twenty minutes; the hourly RE 13 in about an hour",
+   "verdict": "cut",
+   "wasBefore": "Alternatively a shuttle leaves the terminal every twenty minutes for Holzwickede station, where the hourly RE 13 runs direct to Düsseldorf in about an hour.",
+   "why": "The operator's own timetable has the shuttle every 20 minutes only on weekday daytimes (every 30 at weekends and in the evening), and the RE 13's hourly frequency and journey time rest on Wikipedia alone. The shuttle and the direct RE 13 are kept (see above)."
+  },
+  {
+   "claim": "Aero Lloyd flying to Paris; British forces until the 1990s",
+   "verdict": "cut",
+   "wasBefore": "Commercial flights began in 1925 from a field at Brackel, with Aero Lloyd flying to Paris, but that site became a German air base in the war and was held by British forces until the 1990s.",
+   "why": "The Paris route and 'until the 1990s' rest on Wikipedia alone; the operator's centenary history has the first aircraft arriving from Bremen and the British from 1958. Corrected (see above)."
+  },
+  {
+   "claim": "the express and shuttle buses do not take VRR tickets",
+   "verdict": "cut",
+   "why": "Held back: a practical warning that replaces nothing, from the operator alone: neither bus is part of the VRR network, so local public transport tickets are not valid (Rail&Fly tickets are accepted on the shuttle but not on the express).",
+   "sources": [
+    {
+     "file": "op-bus-bahn",
+     "org": "Flughafen Dortmund GmbH (the airport operator, dortmund-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Bitte beachten Sie, dass die Busse AirportExpress und AirportShuttle nicht im Verkehrsverbund Rhein Ruhr betrieben werden und ein separates Ticket erworben werden muss."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Onward travel has two good options.",
+   "why": "The old text's advice, kept; the two buses that follow are sourced."
+  },
+  {
+   "text": "The airport has a long history in two places.",
+   "why": "The old text's framing, kept; the two sites and dates that follow are sourced."
+  }
+ ],
+ "tracerOk": {}
+}
