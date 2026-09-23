@@ -1,0 +1,176 @@
+{
+ "iata": "PKX",
+ "id": "rec0IQbJfraqqpN6j",
+ "name": "Beijing Daxing International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Beijing_Daxing_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Beijing's second international airport, and the one that decides which alliance your client flies. SkyTeam carriers and some Oneworld members work from here, while Hainan Airlines and most of Star Alliance stayed at Beijing Capital, 65 km to the north. Check the alliance before booking a connection, because the two airports are nowhere near each other.\n\nIt opened in September 2019 and is hard to mistake for anywhere else. The terminal is a single building of 700,000 square metres, the largest of its kind anywhere, laid out in the starfish shape that gave it its nickname, with four runways across 2,679 hectares.\n\nGetting in is straightforward if you use the right line. A ground transport centre sits directly beneath the terminal, with the Daxing Airport Express metro and the Beijing to Xiong'an intercity railway both running from it. More rail is built but not yet open. By road it is 46 km south of central Beijing on its own expressway, and it serves the wider Beijing, Tianjin and Hebei region.",
+ "after": "Beijing's second international airport, 46 km south of the city centre, opened in September 2019. Its star-shaped terminal of about 700,000 square metres was the world's largest single airport terminal building when it opened.\n\nBeijing Capital, the city's other main airport, is about 65 km to the north. Airlines are split between the two, so check which airport a client's flight uses, particularly for a connection.\n\nThere are four runways.",
+ "claims": [
+  {
+   "claim": "Beijing's second international airport",
+   "verdict": "confirmed",
+   "inAfter": "Beijing's second international airport",
+   "sources": [
+    {
+     "file": "scmp-worlds-largest",
+     "org": "South China Morning Post",
+     "dated": "2019-09-25",
+     "quote": "the Chinese capital’s second international airport is open for business"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is one of two international airports serving Beijing"
+    }
+   ]
+  },
+  {
+   "claim": "46 km south of the city centre",
+   "verdict": "confirmed",
+   "inAfter": "46 km south of the city centre",
+   "note": "Straight line 45.2 km at 178 degrees (south); ratio 1.02.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is 46 kilometers (29 mi) south of Beijing"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 45.2 km (28.1 miles)",
+      "Bearing from the city centre: 178 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "opened in September 2019",
+   "verdict": "confirmed",
+   "inAfter": "opened in September 2019.",
+   "sources": [
+    {
+     "file": "scmp-star",
+     "org": "South China Morning Post",
+     "dated": "2019-09-25",
+     "quote": [
+      "Beijing’s new 7-runway, star-shaped Daxing airport opened by Xi Jinping",
+      "Published: 4:47pm, 25 Sep 2019"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It was completed on 30 June 2019 and began operations on 26 September 2019."
+    }
+   ]
+  },
+  {
+   "claim": "star-shaped terminal of about 700,000 m2, the world's largest single airport terminal building when it opened",
+   "verdict": "softened",
+   "inAfter": "Its star-shaped terminal of about 700,000 square metres was the world's largest single airport terminal building when it opened.",
+   "note": "Was 'the largest of its kind anywhere', stated as current; SCMP's claim is from the opening. 7.53 million sq ft is about 699,600 square metres. The 'starfish' nickname itself is Wikipedia's alone.",
+   "sources": [
+    {
+     "file": "scmp-star",
+     "org": "South China Morning Post",
+     "dated": "2019-09-25",
+     "quote": "The world’s biggest single-terminal airport building, at 7.53 million sq ft, it has a distinctive star-shaped layout"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "features a 700,000 m2 (7,500,000 sq ft) terminal, the world's largest single-building airport terminal",
+      "owing to its unique starfish-shaped terminal"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Beijing Capital about 65 km to the north",
+   "verdict": "confirmed",
+   "inAfter": "Beijing Capital, the city's other main airport, is about 65 km to the north",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "65 kilometers (40 mi) south of Beijing Capital International Airport"
+    },
+    {
+     "file": "geo-pek",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Straight-line distance between the two airports: 65.9 km (41.0 miles)",
+      "Bearing from Capital to Daxing: 194 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "airlines are split between the two airports",
+   "verdict": "softened",
+   "inAfter": "Airlines are split between the two, so check which airport a client's flight uses, particularly for a connection.",
+   "note": "Was 'SkyTeam carriers and some Oneworld members work from here, while Hainan Airlines and most of Star Alliance stayed at Beijing Capital', a 2019 plan. SCMP reported Air China also winning a foothold at Daxing, and China Daily that China Southern would move all its Beijing flights there; no source from the last 12 months gives the current split, so the text says check.",
+   "sources": [
+    {
+     "file": "scmp-jostle",
+     "org": "South China Morning Post",
+     "dated": "2019",
+     "quote": "Air China gets a foothold at Daxing International Airport to escalate competition with China Eastern and China Southern"
+    },
+    {
+     "file": "cd-2019-12",
+     "org": "China Daily",
+     "dated": "2019-12-23",
+     "quote": "China Southern Airlines, which will gradually move all of its flights to Daxing airport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is a hub for SkyTeam alliance airlines and some Oneworld members, while Hainan Airlines and most Star Alliance members have remained at Beijing Capital International Airport."
+    }
+   ]
+  },
+  {
+   "claim": "four runways",
+   "verdict": "confirmed",
+   "inAfter": "There are four runways.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runways listed: 4"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "has four civilian runways"
+    }
+   ]
+  },
+  {
+   "claim": "alliance split: SkyTeam and some Oneworld here, Hainan and most Star at Capital; the airports nowhere near each other",
+   "verdict": "cut",
+   "wasBefore": "Beijing's second international airport, and the one that decides which alliance your client flies. SkyTeam carriers and some Oneworld members work from here, while Hainan Airlines and most of Star Alliance stayed at Beijing Capital, 65 km to the north. Check the alliance before booking a connection, because the two airports are nowhere near each other.",
+   "why": "Kept as 'airlines are split' with the distance; the alliance-by-alliance split is a 2019 picture with no current second source."
+  },
+  {
+   "claim": "opened September 2019; hard to mistake; 700,000 m2, largest of its kind anywhere; starfish nickname; four runways across 2,679 hectares",
+   "verdict": "cut",
+   "wasBefore": "It opened in September 2019 and is hard to mistake for anywhere else. The terminal is a single building of 700,000 square metres, the largest of its kind anywhere, laid out in the starfish shape that gave it its nickname, with four runways across 2,679 hectares.",
+   "why": "Kept except the site area and the nickname, which rest on Wikipedia alone; 'largest' is now tied to the opening."
+  },
+  {
+   "claim": "ground transport centre; Daxing Airport Express; Beijing to Xiong'an intercity railway; more rail built; own expressway; serves Beijing, Tianjin and Hebei",
+   "verdict": "cut",
+   "wasBefore": "Getting in is straightforward if you use the right line. A ground transport centre sits directly beneath the terminal, with the Daxing Airport Express metro and the Beijing to Xiong'an intercity railway both running from it. More rail is built but not yet open. By road it is 46 km south of central Beijing on its own expressway, and it serves the wider Beijing, Tianjin and Hebei region.",
+   "why": "The distance is kept. The rail lines, the expressway and the catchment rest on Wikipedia alone: the operator's sites (bdia.com.cn) returned nothing or failed to connect. Restore with a second source."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
