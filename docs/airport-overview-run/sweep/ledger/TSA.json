@@ -1,0 +1,266 @@
+{
+ "iata": "TSA",
+ "id": "rec0YJWlHCUdsaAbu",
+ "name": "Taipei Songshan International Airport",
+ "country": "Taiwan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Songshan_Airport",
+ "audited": "2026-09-23",
+ "before": "The city airport, right inside Taipei and a world away from Taoyuan for convenience. The Wenhu line of the Taipei Metro stops at the door, and several city buses connect on to the Tamsui and Wenshan lines, which for a client staying in the city can save a long transfer.\n\nWhat it does not do is long haul. Taoyuan took that role in 1979, and Songshan now runs domestic services across Taiwan plus a short international list: Tokyo, Seoul and a handful of Chinese cities. It handled just over 6.2 million passengers in 2018.\n\nThe busiest single route is domestic. Taipei Songshan to Kinmen carried more than 1.2 million travellers in 2018, more than any other domestic route in Taiwan.\n\nIt is also an active air force base. Songshan Base Command's main job is flying the president and vice president, so part of the 182 hectare site is military and the civilian terminal is one corner of it.",
+ "after": "The city airport, right inside Taipei and a world away from Taoyuan for convenience. It has its own station on the Wenhu line of the Taipei Metro, which for a client staying in the city can save a long transfer.\n\nWhat it does not do is long haul, which means Taoyuan. Songshan runs domestic flights to Hualien, Taitung and the offshore islands, plus a short international list: Tokyo, Seoul and a handful of cities in mainland China.\n\nIt is also an air force base, home to the Songshan Base Command, which flies the president.",
+ "claims": [
+  {
+   "claim": "the city airport, right inside Taipei",
+   "verdict": "confirmed",
+   "inAfter": "The city airport, right inside Taipei",
+   "note": "The airport's own address is in Songshan District, Taipei City; the coordinates put it 3.1 km from the city centre; Taipei Metro describes it as right in the city core.",
+   "sources": [
+    {
+     "file": "metro-wenhu-stamps",
+     "org": "Taipei Rapid Transit Corporation (Taipei Metro, 'Stamps of Wenhu Line', on the Taipei City Government file server)",
+     "dated": "undated PDF read 2026-09-23",
+     "quote": "Located right in the city core, Taipei Songshan Airport sends out jets"
+    },
+    {
+     "file": "tsa-home",
+     "org": "Taipei International Airport Office (Civil Aeronautics Administration, operator; tsa.gov.tw)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "地址： 臺北國際航空站 105008台北市松山區敦化北路340之9號1樓"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "is a city airport and military airbase located in Songshan District, Taipei, Taiwan"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 3.1 km (1.9 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "its own station on the Wenhu line of the Taipei Metro",
+   "verdict": "confirmed",
+   "inAfter": "It has its own station on the Wenhu line of the Taipei Metro",
+   "note": "Was 'The Wenhu line of the Taipei Metro stops at the door'. Taipei Metro's guide to the Wenhu Line's stations includes Songshan Airport station (松山機場站).",
+   "sources": [
+    {
+     "file": "metro-wenhu-stamps",
+     "org": "Taipei Rapid Transit Corporation (Taipei Metro, 'Stamps of Wenhu Line', on the Taipei City Government file server)",
+     "dated": "undated PDF read 2026-09-23",
+     "quote": [
+      "Stamps of Wenhu Line",
+      "松山機場站 Songshan Airport"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "The airport is served by the Songshan Airport metro station on the Wenhu line of the Taipei Metro."
+    }
+   ]
+  },
+  {
+   "claim": "no long haul; long haul uses Taoyuan",
+   "verdict": "confirmed",
+   "inAfter": "What it does not do is long haul, which means Taoyuan.",
+   "note": "MOTC's schedule of every international flight leaving Songshan (23 September to 23 October 2026) is regional only (see below); CNA reports the operator's 2025 markets at Taoyuan as including North America (more than 360 flights a week), Europe and the Middle East.",
+   "sources": [
+    {
+     "file": "tdx-intl-schedule",
+     "org": "MOTC Transport Data eXchange (tdx.transportdata.tw, international flight schedules)",
+     "dated": "updated 2026-09-24 (Taiwan time)",
+     "quote": [
+      "\"DepartureAirportID\":\"TSA\"",
+      "\"UpdateTime\":\"2026-09-24T04:25:36+08:00\""
+     ]
+    },
+    {
+     "file": "cna-20260312",
+     "org": "Central News Agency (CNA, cna.com.tw)",
+     "dated": "2026-03-12 (dateline 桃園機場12日電)",
+     "quote": [
+      "（中央社記者 吳睿騏 桃園機場12日電）",
+      "東北亞、東南亞、北美、歐洲及中東等市場旅客量均已超越108年同期",
+      "尤以北美航線每週往返航班數超過360班"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "Songshan serves only a small portion of the international flights for Taipei compared to the larger Taoyuan International Airport which replaced Songshan as Taipei's main airport in 1979"
+    }
+   ]
+  },
+  {
+   "claim": "domestic flights to Hualien, Taitung and the offshore islands",
+   "verdict": "corrected",
+   "inAfter": "Songshan runs domestic flights to Hualien, Taitung and the offshore islands",
+   "note": "Was 'domestic services across Taiwan', which was too broad: MOTC's schedule for flights leaving Songshan lists only Hualien (HUN), Taitung (TTT), Magong in Penghu (MZG), Kinmen (KNH), Nangan (LZN) and Beigan (MFK), the same six the Tourism Administration lists; there are no flights to the cities of the west coast. The Tourism Administration files Penghu, Kinmen and Matsu under 'Offshore Islands'.",
+   "sources": [
+    {
+     "file": "twtourism-domestic",
+     "org": "Tourism Administration, MOTC (eng.taiwan.net.tw)",
+     "dated": "2026-07-20 (page's last update)",
+     "quote": [
+      "Taipei Songshan Airport",
+      "The planes fly to Hualien, Taitung, Penghu, Kinmen, Nangan and Beigan.",
+      "Offshore Islands",
+      "Last update time: Jul 20, 2026"
+     ]
+    },
+    {
+     "file": "tdx-dom-schedule",
+     "org": "MOTC Transport Data eXchange (tdx.transportdata.tw, domestic flight schedules)",
+     "dated": "September 2026 schedule, updated 2026-09-24 (Taiwan time)",
+     "quote": [
+      "\"DepartureAirportID\":\"TSA\"",
+      "\"ArrivalAirportID\":\"HUN\"",
+      "\"ArrivalAirportID\":\"TTT\"",
+      "\"ArrivalAirportID\":\"MZG\"",
+      "\"ArrivalAirportID\":\"KNH\"",
+      "\"ArrivalAirportID\":\"LZN\"",
+      "\"ArrivalAirportID\":\"MFK\"",
+      "\"UpdateTime\":\"2026-09-24T04:25:36+08:00\""
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "has scheduled flights to domestic destinations in Taiwan"
+    }
+   ]
+  },
+  {
+   "claim": "a short international list: Tokyo, Seoul and a handful of cities in mainland China",
+   "verdict": "confirmed",
+   "inAfter": "plus a short international list: Tokyo, Seoul and a handful of cities in mainland China",
+   "note": "MOTC's schedule of international flights leaving Songshan (23 September to 23 October 2026) lists Tokyo Haneda (HND), Seoul Gimpo (GMP) and seven airports in six mainland Chinese cities: Shanghai (Hongqiao SHA and Pudong PVG), Chongqing (CKG), Chengdu (CTU), Fuzhou (FOC), Wuhan (WUH) and Xiamen (XMN). 'Chinese cities' made 'cities in mainland China'.",
+   "sources": [
+    {
+     "file": "tdx-intl-schedule",
+     "org": "MOTC Transport Data eXchange (tdx.transportdata.tw, international flight schedules)",
+     "dated": "schedule 2026-09-21 to 2026-10-23, updated 2026-09-24 (Taiwan time)",
+     "quote": [
+      "\"DepartureAirportID\":\"TSA\"",
+      "\"ArrivalAirportID\":\"HND\"",
+      "\"ArrivalAirportID\":\"GMP\"",
+      "\"ArrivalAirportID\":\"SHA\"",
+      "\"ArrivalAirportID\":\"PVG\"",
+      "\"ArrivalAirportID\":\"CKG\"",
+      "\"ArrivalAirportID\":\"CTU\"",
+      "\"ArrivalAirportID\":\"FOC\"",
+      "\"ArrivalAirportID\":\"WUH\"",
+      "\"ArrivalAirportID\":\"XMN\""
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "international destinations including Tokyo, Seoul, and select cities in China"
+    }
+   ]
+  },
+  {
+   "claim": "an air force base, home to the Songshan Base Command, which flies the president",
+   "verdict": "softened",
+   "inAfter": "It is also an air force base, home to the Songshan Base Command, which flies the president.",
+   "note": "Was 'an active air force base. Songshan Base Command's main job is flying the president and vice president'. The Air Force's own history of the command says its aircraft (a Boeing 737-800, Fokker 50s and Beech 1900s) fly the presidential aircraft missions and other special flights; the 737-800 has flown as the presidential aircraft since March 2000 (ROC year 89). The vice president rests on Wikipedia alone, and 'active' is dropped as a judgement.",
+   "sources": [
+    {
+     "file": "af-songshan-history",
+     "org": "Republic of China Air Force (air.mnd.gov.tw)",
+     "dated": "site updated 2026-09-23 (page footer)",
+     "quote": [
+      "直至55年6月1日，始擴編成立「空軍松山基地指揮部」",
+      "89年2月7日新購B-737-800型機乙架返國，並於89年3月20日成軍正式執行總統座機任務",
+      "圓滿執行總統座機及各項專機與演訓任務",
+      "網站更新日期： 2026/09/23"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "The Songshan Base Command's main mission is to serve the president and vice president of Taiwan."
+    }
+   ]
+  },
+  {
+   "claim": "the Wenhu line stops at the door (old wording)",
+   "verdict": "cut",
+   "wasBefore": "The Wenhu line of the Taipei Metro stops at the door",
+   "why": "Reworded (see above), which also avoids two sentences in a row starting with 'The'."
+  },
+  {
+   "claim": "city buses connect to the Tamsui and Wenshan lines",
+   "verdict": "cut",
+   "wasBefore": "and several city buses connect on to the Tamsui and Wenshan lines",
+   "why": "Wikipedia alone. The airport's own transport page is built by script (a plain fetch returns no text and the browser got 502), and no bus operator's page was checked."
+  },
+  {
+   "claim": "Taoyuan took the long haul role in 1979",
+   "verdict": "cut",
+   "wasBefore": "Taoyuan took that role in 1979",
+   "why": "The move of Taipei's international flights to Taoyuan in 1979 rests on Wikipedia alone (Taipei Times, 2006, confirms only that Taoyuan's Terminal 1 opened on 26 February 1979; see the TPE ledger). Replaced by 'which means Taoyuan', checked against current schedules (see above)."
+  },
+  {
+   "claim": "domestic services across Taiwan; Tokyo, Seoul and a handful of Chinese cities",
+   "verdict": "cut",
+   "wasBefore": "and Songshan now runs domestic services across Taiwan plus a short international list: Tokyo, Seoul and a handful of Chinese cities",
+   "why": "Made specific from MOTC's schedules and the Tourism Administration (see above)."
+  },
+  {
+   "claim": "just over 6.2 million passengers in 2018",
+   "verdict": "cut",
+   "wasBefore": "It handled just over 6.2 million passengers in 2018.",
+   "why": "Eight years old. Wikipedia's infobox gives 5,429,862 for 2024, but no second source could be read: caa.gov.tw did not connect and the airport's own site loads its content by script. So no figure is given."
+  },
+  {
+   "claim": "the busiest single route is domestic",
+   "verdict": "cut",
+   "wasBefore": "The busiest single route is domestic.",
+   "why": "Rests on 2018 route statistics on Wikipedia alone (see below)."
+  },
+  {
+   "claim": "Songshan to Kinmen, more than 1.2 million travellers in 2018, the busiest domestic route",
+   "verdict": "cut",
+   "wasBefore": "Taipei Songshan to Kinmen carried more than 1.2 million travellers in 2018, more than any other domestic route in Taiwan.",
+   "why": "Eight years old and Wikipedia alone; no current route table could be read (the Civil Aeronautics Administration did not connect). Kinmen is still served (MOTC's schedule)."
+  },
+  {
+   "claim": "an active air force base",
+   "verdict": "cut",
+   "wasBefore": "It is also an active air force base.",
+   "why": "Reworded (see above); 'active' dropped as a judgement."
+  },
+  {
+   "claim": "Songshan Base Command flies the president and vice president",
+   "verdict": "cut",
+   "wasBefore": "Songshan Base Command's main job is flying the president and vice president",
+   "why": "Softened to 'flies the president' (see above): the vice president rests on Wikipedia alone."
+  },
+  {
+   "claim": "182 hectare site; the civilian terminal is one corner of it",
+   "verdict": "cut",
+   "wasBefore": "so part of the 182 hectare site is military and the civilian terminal is one corner of it",
+   "why": "The 182 hectares rest on Wikipedia alone, and nothing read describes the terminal as one corner of the site."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and a world away from Taoyuan for convenience",
+   "why": "The old text's judgement, kept: Songshan is right in the city core (Taipei Metro) and 3.1 km from the centre, while Taoyuan is about 40 km west of Taipei (TPE ledger); Wikipedia says it saves travellers about 30 minutes."
+  },
+  {
+   "text": "which for a client staying in the city can save a long transfer",
+   "why": "Advice following from the confirmed metro station in the city."
+  }
+ ],
+ "tracerOk": {}
+}

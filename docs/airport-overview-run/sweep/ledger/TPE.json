@@ -1,0 +1,510 @@
+{
+ "iata": "TPE",
+ "id": "rechBxFTVPsHjHBbm",
+ "name": "Taiwan Taoyuan International Airport",
+ "country": "Taiwan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Taoyuan_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Taiwan's busiest and largest airport, at Dayuan in Taoyuan about 40 km west of Taipei. It handled a record 46.5 million passengers in 2018, making it eleventh busiest in the world for international passengers and eighth for international freight.\n\nThere are two airports serving Taipei and the difference matters. Taoyuan handles the international traffic. Taipei Songshan sits inside the city limits and now mainly handles charter, intra-island and limited international flights, so it is far more convenient but far less useful for a long haul itinerary.\n\nTwo terminals are linked by short people movers, and the Taoyuan Airport MRT connects them underground and runs into the city. A third terminal is under construction and a fourth is planned, though those plans may be halted.\n\nIt is the main international hub for China Airlines, EVA Air and Starlux, and a hub for Mandarin Airlines, Uni Air and Tigerair Taiwan.\n\nThe airport opened in 1979 as Chiang Kai-shek International Airport and was renamed in 2006, so the old name still appears in older material.",
+ "after": "Taiwan's main international airport, in Taoyuan about 40 km west of Taipei. It handled 47.8 million passengers in 2025.\n\nThere are two airports serving Taipei and the difference matters. Taipei Songshan sits inside the city but flies only within Taiwan and to Tokyo, Seoul and mainland China, so long haul means Taoyuan.\n\nThe Taoyuan Airport MRT stops at both terminals and runs into Taipei Main Station. Since 1 July 2026 the Skytrain between them runs only airside, so passengers changing terminals before security take the free 24-hour shuttle bus or the MRT. A third terminal is due to be finished by the end of 2027.\n\nChina Airlines, EVA Air and Starlux all fly from here, as do Mandarin Airlines, Uni Air and Tigerair Taiwan.\n\nThe airport opened in 1979 as Chiang Kai-shek International Airport and was renamed in 2006, so the old name still appears in older material.",
+ "claims": [
+  {
+   "claim": "Taiwan's main international airport",
+   "verdict": "softened",
+   "inAfter": "Taiwan's main international airport",
+   "note": "Was 'Taiwan's busiest and largest airport'. The national traffic table that would rank it (the Civil Aeronautics Administration's statistics) could not be reached: caa.gov.tw did not connect. So the claim is softened to what CNA and Taiwan News say: CNA quotes the transport minister calling Terminal 3 an important project for Taiwan's national gateway (國門), and Taiwan News calls it 'Taiwan main airport'. For scale: 47.8 million passengers in 2025 (CNA) against just under 7 million at Kaohsiung (the Kaohsiung airport's own monthly table, see the KHH ledger).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "is the main international airport serving Taipei, the capital of Taiwan, as well as the northern region",
+      "the airport is the busiest and largest in Taiwan"
+     ]
+    },
+    {
+     "file": "cna-20260709",
+     "org": "Central News Agency (CNA, cna.com.tw)",
+     "dated": "2026-07-09 (dateline 台北9日電; edit tag 1150709, ROC year 115 = 2026)",
+     "quote": [
+      "（中央社記者 黃巧雯 台北9日電）",
+      "第三航廈和機捷A14站是台灣國門的重要建設"
+     ]
+    },
+    {
+     "file": "taiwannews-6373278",
+     "org": "Taiwan News (taiwannews.com.tw)",
+     "dated": "2026-05-30",
+     "quote": [
+      "Chinese technicians visited MRT construction site at Taiwan main airport",
+      "May. 30, 2026 19:20"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in Taoyuan, about 40 km west of Taipei",
+   "verdict": "confirmed",
+   "inAfter": "in Taoyuan about 40 km west of Taipei",
+   "note": "Coordinates: 29.7 km from Taipei in a straight line at 275 degrees (west); 40 km stated gives a ratio of 1.35, inside the 0.8 to 1.6 allowance for a road distance. OurAirports gives the municipality as Taoyuan.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Taoyuan",
+      "Straight-line distance from Taipei (GeoNames 1668341): 29.7 km (18.4 miles), bearing 275 degrees, which is west"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Located in Dayuan, Taoyuan, approximately 40 km (25 mi) west of Taipei"
+    }
+   ]
+  },
+  {
+   "claim": "47.8 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled 47.8 million passengers in 2025.",
+   "note": "Was 'a record 46.5 million passengers in 2018'. CNA reports the operator's release: 47.80 million in 2025 (ROC year 114), up 6 per cent on 44.92 million in 2024 and 98 per cent of the 2019 figure, so 2025 was not a record and 'record' goes. Wikipedia's infobox, citing the Civil Aeronautics Administration, gives 47,795,969. The operator's own site (taoyuan-airport.com) answered with a Cloudflare check and was not tried again.",
+   "sources": [
+    {
+     "file": "cna-20260312",
+     "org": "Central News Agency (CNA, cna.com.tw)",
+     "dated": "2026-03-12 (dateline 桃園機場12日電; photo caption 115年3月12日, ROC year 115 = 2026)",
+     "quote": [
+      "（中央社記者 吳睿騏 桃園機場12日電）",
+      "回顧桃機114年全年客運量達4780萬人次，較113年的4492萬人次成長6%，與108年疫情前相較已恢復98%"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": [
+      "stat1_data = 47,795,969 ; 6.40%",
+      "stat_year = 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "two airports serve Taipei",
+   "verdict": "confirmed",
+   "inAfter": "There are two airports serving Taipei",
+   "note": "JAL's release (30 October 2025) speaks of its Taipei (Taoyuan and Songshan) routes.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is one of two international airports that serves Taipei"
+    },
+    {
+     "file": "jal-202510",
+     "org": "Japan Airlines and Japan Transocean Air (joint press release, press.jal.co.jp)",
+     "dated": "2025-10-30",
+     "quote": [
+      "October 30, 2025",
+      "Multi-City Travel with Taipei (Taoyuan and Songshan) Routes"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Taipei Songshan is inside the city",
+   "verdict": "confirmed",
+   "inAfter": "Taipei Songshan sits inside the city",
+   "note": "Taipei Metro's own guide to its Wenhu Line stations; the Songshan coordinates put it 3.1 km from the centre of Taipei (TSA ledger).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The other, Taipei Songshan Airport, is located within the city limits"
+    },
+    {
+     "file": "metro-wenhu-stamps",
+     "org": "Taipei Rapid Transit Corporation (Taipei Metro, 'Stamps of Wenhu Line', on the Taipei City Government file server)",
+     "dated": "undated PDF read 2026-09-23",
+     "quote": [
+      "松山機場站",
+      "Located right in the city core, Taipei Songshan Airport sends out jets"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Songshan flies only within Taiwan and to Tokyo, Seoul and mainland China",
+   "verdict": "corrected",
+   "inAfter": "flies only within Taiwan and to Tokyo, Seoul and mainland China",
+   "note": "Was 'now mainly handles charter, intra-island and limited international flights'. MOTC's Transport Data eXchange schedule for flights leaving TSA (23 September to 23 October 2026, updated 24 September Taiwan time) lists every international route: Tokyo Haneda (HND), Seoul Gimpo (GMP) and seven airports in mainland China (Shanghai Hongqiao SHA and Pudong PVG, Chongqing CKG, Chengdu CTU, Fuzhou FOC, Wuhan WUH, Xiamen XMN). The Tourism Administration lists the domestic ones (Hualien, Taitung, Penghu, Kinmen, Nangan, Beigan). No charter programme was seen, so 'charter' goes, and 'mainly' goes because no source splits Songshan's traffic.",
+   "sources": [
+    {
+     "file": "tdx-intl-schedule",
+     "org": "MOTC Transport Data eXchange (tdx.transportdata.tw, international flight schedules)",
+     "dated": "schedule 2026-09-21 to 2026-10-23, updated 2026-09-24 (Taiwan time)",
+     "quote": [
+      "\"DepartureAirportID\":\"TSA\"",
+      "\"ArrivalAirportID\":\"HND\"",
+      "\"ArrivalAirportID\":\"GMP\"",
+      "\"ArrivalAirportID\":\"SHA\"",
+      "\"ArrivalAirportID\":\"PVG\"",
+      "\"ArrivalAirportID\":\"CKG\"",
+      "\"ArrivalAirportID\":\"CTU\"",
+      "\"ArrivalAirportID\":\"FOC\"",
+      "\"ArrivalAirportID\":\"WUH\"",
+      "\"ArrivalAirportID\":\"XMN\"",
+      "\"UpdateTime\":\"2026-09-24T04:25:36+08:00\""
+     ]
+    },
+    {
+     "file": "twtourism-domestic",
+     "org": "Tourism Administration, MOTC (eng.taiwan.net.tw)",
+     "dated": "2026-07-20 (page's last update)",
+     "quote": [
+      "Taipei Songshan Airport",
+      "The planes fly to Hualien, Taitung, Penghu, Kinmen, Nangan and Beigan.",
+      "Last update time: Jul 20, 2026"
+     ]
+    },
+    {
+     "file": "wikipedia-songshan",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12 (the Songshan Airport article)",
+     "quote": "The civilian section of Songshan Airport has scheduled flights to domestic destinations in Taiwan and international destinations including Tokyo, Seoul, and select cities in China."
+    }
+   ]
+  },
+  {
+   "claim": "long haul means Taoyuan",
+   "verdict": "confirmed",
+   "inAfter": "so long haul means Taoyuan",
+   "note": "Carries the old 'Taoyuan handles the international traffic' and 'far less useful for a long haul itinerary'. Songshan's complete international schedule is regional (MOTC, above); CNA reports the operator's 2025 markets at Taoyuan as including North America (more than 360 flights a week), Europe and the Middle East.",
+   "sources": [
+    {
+     "file": "tdx-intl-schedule",
+     "org": "MOTC Transport Data eXchange (tdx.transportdata.tw, international flight schedules)",
+     "dated": "updated 2026-09-24 (Taiwan time)",
+     "quote": [
+      "\"DepartureAirportID\":\"TSA\"",
+      "\"UpdateTime\":\"2026-09-24T04:25:36+08:00\""
+     ]
+    },
+    {
+     "file": "cna-20260312",
+     "org": "Central News Agency (CNA, cna.com.tw)",
+     "dated": "2026-03-12",
+     "quote": [
+      "東北亞、東南亞、北美、歐洲及中東等市場旅客量均已超越108年同期",
+      "尤以北美航線每週往返航班數超過360班"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Songshan now mainly serves chartered flights, intra-island flights, and limited international flights."
+    }
+   ]
+  },
+  {
+   "claim": "the Taoyuan Airport MRT stops at both terminals and runs into Taipei Main Station",
+   "verdict": "confirmed",
+   "inAfter": "The Taoyuan Airport MRT stops at both terminals and runs into Taipei Main Station.",
+   "note": "Was 'connects them underground and runs into the city'. Taoyuan Metro's timetable has express trains calling at A1 Taipei Main Station and at A12 and A13, the two terminal stations. 'Underground' rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "tymetro-timetable",
+     "org": "Taoyuan Metro Corporation (tymetro.com.tw)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "A1 Taipei Main Station A2",
+      "A12 Airport Terminal 1 Station A13 Airport Terminal 2 Station",
+      "Express Train (Stops at A1、A3、A8、A12、A13)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "Express train: 38-minute link between the airport and downtown Taipei. Stops at both airport terminals, Chang Gung Memorial Hospital, New Taipei Industrial Park, and Taipei Main Station."
+    }
+   ]
+  },
+  {
+   "claim": "since 1 July 2026 the Skytrain between the terminals runs only airside",
+   "verdict": "corrected",
+   "inAfter": "Since 1 July 2026 the Skytrain between them runs only airside",
+   "note": "Was 'Two terminals are linked by short people movers'. The landside (before security) Skytrain between Terminals 1 and 2 stopped on 1 July 2026 for Terminal 3 works; the airside one still runs, so transfer passengers are unaffected. CNA reports the operator's release of 30 June; Taiwan News's report of 12 June cites Liberty Times and UDN, so the two are independent accounts. The operator's own Skytrain page (taoyuan-airport.com) is behind a Cloudflare check.",
+   "sources": [
+    {
+     "file": "cna-20260630",
+     "org": "Central News Agency (CNA, cna.com.tw)",
+     "dated": "2026-06-30 (photo caption 115年6月30日, ROC year 115 = 2026)",
+     "quote": [
+      "配合第三航廈工程，第一、第二航廈管制區外航廈電車7月1日起停止服務",
+      "管制區內航廈電車則維持正常營運",
+      "115年6月30日"
+     ]
+    },
+    {
+     "file": "taiwannews-6381960",
+     "org": "Taiwan News (taiwannews.com.tw)",
+     "dated": "2026-06-12",
+     "quote": [
+      "Taiwan Taoyuan International Airport will suspend its landside Skytrain service linking Terminal 1 and 2 from July 1 due to Terminal 3 connection work.",
+      "The company said that while landside inter-terminal service will cease in July, Skytrain operations within the airside will continue.",
+      "Jun. 12, 2026 16:52"
+     ]
+    },
+    {
+     "file": "taiwannews-6393065",
+     "org": "Taiwan News (taiwannews.com.tw)",
+     "dated": "2026-07-01",
+     "quote": [
+      "The Skytrain airside post-security trains are still operating after July 1.",
+      "Jul. 1, 2026 13:57"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "passengers changing terminals before security take the free 24-hour shuttle bus or the MRT",
+   "verdict": "corrected",
+   "inAfter": "so passengers changing terminals before security take the free 24-hour shuttle bus or the MRT",
+   "note": "Replaces the landside Skytrain. CNA adds that the MRT is free between the A12, A13 and A14a stations with an electronic ticket, a credit card or mobile payment, and that the bus runs every 15 minutes by day and every 20 at night.",
+   "sources": [
+    {
+     "file": "cna-20260630",
+     "org": "Central News Agency (CNA, cna.com.tw)",
+     "dated": "2026-06-30",
+     "quote": [
+      "旅客可使用「桃園機場捷運」及「24小時航廈巡迴巴士」免費往返2航廈",
+      "A12機場第一航廈站、A13機場第二航廈站及A14a機場旅館站，均可享免費搭乘優惠"
+     ]
+    },
+    {
+     "file": "taiwannews-6381960",
+     "org": "Taiwan News (taiwannews.com.tw)",
+     "dated": "2026-06-12",
+     "quote": "passengers traveling between terminals 1 and 2 in the non-controlled area can instead use the Taoyuan Airport MRT or a 24-hour shuttle bus service"
+    },
+    {
+     "file": "taiwannews-6393065",
+     "org": "Taiwan News (taiwannews.com.tw)",
+     "dated": "2026-07-01",
+     "quote": "A free 24-hour shuttle bus service operates between terminals at Taiwan Taoyuan International Airport."
+    }
+   ]
+  },
+  {
+   "claim": "a third terminal is due to be finished by the end of 2027",
+   "verdict": "corrected",
+   "inAfter": "A third terminal is due to be finished by the end of 2027.",
+   "note": "Was 'A third terminal is under construction'; Wikipedia's current revision still gives the end of 2026. CNA (July, quoting the transport minister) gives the end of ROC year 116, which is 2027; Taiwan News has the operator (2 September) and the ministry (4 August) giving the end of 2027. Its north concourse opened in December 2025 (held back, below).",
+   "sources": [
+    {
+     "file": "cna-20260709",
+     "org": "Central News Agency (CNA, cna.com.tw)",
+     "dated": "2026-07-09",
+     "quote": [
+      "預計在116年底完工",
+      "1150709"
+     ]
+    },
+    {
+     "file": "taiwannews-6432447",
+     "org": "Taiwan News (taiwannews.com.tw)",
+     "dated": "2026-09-02",
+     "quote": [
+      "Taoyuan International Airport Corporation confirmed on Wednesday that the Terminal 3 project will be completed by the end of 2027.",
+      "Sep. 2, 2026 15:37"
+     ]
+    },
+    {
+     "file": "taiwannews-6414479",
+     "org": "Taiwan News (taiwannews.com.tw)",
+     "dated": "2026-08-04",
+     "quote": [
+      "more detailed plans will not be released until work on Terminal 3 is completed at the end of 2027, the ministry said",
+      "Aug. 4, 2026 17:55"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "China Airlines, EVA Air, Starlux, Mandarin Airlines, Uni Air and Tigerair Taiwan fly from here",
+   "verdict": "softened",
+   "inAfter": "China Airlines, EVA Air and Starlux all fly from here, as do Mandarin Airlines, Uni Air and Tigerair Taiwan.",
+   "note": "Was 'the main international hub for China Airlines, EVA Air and Starlux, and a hub for Mandarin Airlines, Uni Air and Tigerair Taiwan'. The hub labels rest on Wikipedia alone: china-airlines.com refused the link lister (403) and was not tried again, and EVA Air's release of 5 August 2026 speaks of 'our Taipei hub' without naming the airport. Taoyuan Metro's in-town check-in page lists all six airlines for flights leaving Taoyuan the same day.",
+   "sources": [
+    {
+     "file": "tymetro-checkin",
+     "org": "Taoyuan Metro Corporation (tymetro.com.tw)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Flights departing from Taoyuan International Airport on the same day",
+      "China Airlines(CI) Mandarin Airlines(AE)",
+      "EVA Air(BR) Uni Air(B7)",
+      "STARLUX Airlines(JX/SJX)",
+      "Tigerair Taiwan(IT)"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the main international hub for China Airlines, EVA Air and Starlux Airlines. It is also a hub of Mandarin Airlines, Uni Air and Tigerair Taiwan."
+    },
+    {
+     "file": "eva-2026-08-05",
+     "org": "EVA Air (evaair.com)",
+     "dated": "2026-08-05",
+     "quote": "strengthens connectivity between India and North America through our Taipei hub"
+    }
+   ]
+  },
+  {
+   "claim": "opened in 1979 as Chiang Kai-shek International Airport, renamed in 2006",
+   "verdict": "confirmed",
+   "inAfter": "The airport opened in 1979 as Chiang Kai-shek International Airport and was renamed in 2006",
+   "note": "Taipei Times, 7 September 2006: renamed the day before (6 September 2006); Terminal 1 opened on 26 February 1979.",
+   "sources": [
+    {
+     "file": "tt-2006-09-07",
+     "org": "Taipei Times",
+     "dated": "2006-09-07",
+     "quote": [
+      "Thu, Sep 07, 2006 page1",
+      "Chiang Kai-shek International Airport was officially renamed Taiwan Taoyuan International Airport yesterday.",
+      "Terminal I of the airport was completed and opened on Feb. 26, 1979"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport opened for commercial operations in 1979 as Chiang Kai-shek International Airport (中正國際機場) and was renamed in 2006."
+    }
+   ]
+  },
+  {
+   "claim": "Taiwan's busiest and largest airport",
+   "verdict": "cut",
+   "wasBefore": "Taiwan's busiest and largest airport",
+   "why": "Softened to 'Taiwan's main international airport' (see above): the ranking rests on Wikipedia alone, because the Civil Aeronautics Administration's national table could not be reached (caa.gov.tw did not connect)."
+  },
+  {
+   "claim": "at Dayuan",
+   "verdict": "cut",
+   "wasBefore": "at Dayuan in Taoyuan",
+   "why": "The district rests on Wikipedia alone (the operator's site, which carries its address, answered with a Cloudflare check). 'In Taoyuan' is kept (OurAirports, Wikipedia)."
+  },
+  {
+   "claim": "a record 46.5 million passengers in 2018",
+   "verdict": "cut",
+   "wasBefore": "It handled a record 46.5 million passengers in 2018",
+   "why": "Eight years old. Replaced by 47.8 million in 2025 (see above), which the operator puts at 98 per cent of 2019, so no record is claimed."
+  },
+  {
+   "claim": "eleventh in the world for international passengers, eighth for international freight",
+   "verdict": "cut",
+   "wasBefore": "making it eleventh busiest in the world for international passengers and eighth for international freight",
+   "why": "ACI's 2018 rankings, via Wikipedia; the ACI pages it cites are copies in the web archive, which the network policy blocks, and no current ranking was found on a page that could be read."
+  },
+  {
+   "claim": "Taoyuan handles the international traffic",
+   "verdict": "cut",
+   "wasBefore": "Taoyuan handles the international traffic.",
+   "why": "Overstated: Songshan has international flights too (MOTC's schedule). The point is now 'so long haul means Taoyuan' (see above)."
+  },
+  {
+   "claim": "Songshan mainly handles charter, intra-island and limited international flights",
+   "verdict": "cut",
+   "wasBefore": "Taipei Songshan sits inside the city limits and now mainly handles charter, intra-island and limited international flights",
+   "why": "Replaced by the network MOTC's schedule and the Tourism Administration show (see above); no charter programme was seen and no source splits the traffic, so 'charter' and 'mainly' go."
+  },
+  {
+   "claim": "far more convenient but far less useful for a long haul itinerary",
+   "verdict": "cut",
+   "wasBefore": "so it is far more convenient but far less useful for a long haul itinerary",
+   "why": "Shortened to 'so long haul means Taoyuan', now a checked claim (see above)."
+  },
+  {
+   "claim": "two terminals linked by short people movers",
+   "verdict": "cut",
+   "wasBefore": "Two terminals are linked by short people movers",
+   "why": "Out of date since 1 July 2026, when the landside Skytrain stopped for Terminal 3 works (see above)."
+  },
+  {
+   "claim": "the MRT connects the terminals underground and runs into the city",
+   "verdict": "cut",
+   "wasBefore": "and the Taoyuan Airport MRT connects them underground and runs into the city",
+   "why": "Reworded from Taoyuan Metro's own timetable (see above); 'underground' rests on Wikipedia alone."
+  },
+  {
+   "claim": "a third terminal is under construction",
+   "verdict": "cut",
+   "wasBefore": "A third terminal is under construction",
+   "why": "Made specific: due to be finished by the end of 2027 (see above)."
+  },
+  {
+   "claim": "a fourth terminal is planned, though the plans may be halted",
+   "verdict": "cut",
+   "wasBefore": "and a fourth is planned, though those plans may be halted",
+   "why": "Wikipedia alone. Taiwan News (4 August 2026) reports the ministry will decide whether to rebuild or upgrade Terminal 1 once Terminal 3 is finished, and mentions no fourth terminal."
+  },
+  {
+   "claim": "main international hub for China Airlines, EVA Air and Starlux; a hub for Mandarin Airlines, Uni Air and Tigerair Taiwan",
+   "verdict": "cut",
+   "wasBefore": "It is the main international hub for China Airlines, EVA Air and Starlux, and a hub for Mandarin Airlines, Uni Air and Tigerair Taiwan.",
+   "why": "Softened to 'fly from here' (see above): the hub labels rest on Wikipedia alone."
+  },
+  {
+   "claim": "2.5 million tonnes of cargo in 2025, the third highest ever",
+   "verdict": "cut",
+   "why": "Held back: verified but replaces nothing like for like (the old text gave a 2018 world freight ranking, not a tonnage). CNA reports the operator's 2.5 million tonnes for 2025, up 10 per cent and its third highest; Wikipedia's infobox gives 2,499,898.5 tonnes.",
+   "sources": [
+    {
+     "file": "cna-20260312",
+     "org": "Central News Agency (CNA, cna.com.tw)",
+     "dated": "2026-03-12",
+     "quote": "桃機114年貨運總量達250萬公噸，較113年成長10%"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "stat3_data = 2,499,898.5 tonnes ; 10.08%"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 3's north concourse opened in December 2025",
+   "verdict": "cut",
+   "why": "Held back: verified, but left out to keep the text within length; the Terminal 3 sentence now gives the completion date. CNA (the operator's figures) dates the north concourse's opening to 25 December 2025; Taiwan News says it opened for trial operations in December.",
+   "sources": [
+    {
+     "file": "cna-20260312",
+     "org": "Central News Agency (CNA, cna.com.tw)",
+     "dated": "2026-03-12",
+     "quote": "第三航廈北廊廳在去年12月25日啟用"
+    },
+    {
+     "file": "taiwannews-6432447",
+     "org": "Taiwan News (taiwannews.com.tw)",
+     "dated": "2026-09-02",
+     "quote": "The north boarding concourse of Terminal 3, designed by British-Italian architect Richard Rogers, opened for trial operations in December."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and the difference matters",
+   "why": "Framing carried over from the old text; the two airports' networks are confirmed (MOTC, Tourism Administration, CNA)."
+  },
+  {
+   "text": "so the old name still appears in older material",
+   "why": "Advice following from the confirmed 2006 renaming."
+  }
+ ],
+ "tracerOk": {}
+}

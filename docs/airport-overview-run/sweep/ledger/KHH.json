@@ -1,0 +1,327 @@
+{
+ "iata": "KHH",
+ "id": "recFS7wjOnFfNlLGI",
+ "name": "Kaohsiung International Airport",
+ "country": "Taiwan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Kaohsiung_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Taiwan's second airport after Taoyuan, in Siaogang District on the south side of Kaohsiung. It handled 5.8 million passengers in 2024 and works from a single east to west runway with two terminals, one domestic and one international.\n\nFor getting around it is unusually well connected. The Kaohsiung Metro Red line has a station at the airport, which reaches the Taiwan Railway at Kaohsiung Main Station and the high speed rail at Zuoying. There is also a direct coach south to Fangliao and Kenting, which is the practical way to the southern beaches.\n\nThe airport was built as a Japanese army air base in 1942 and stayed military until 1965. International status followed in 1969 and regular international flights in 1972, though for two decades Hong Kong and Tokyo were the only destinations. The international terminal opened in 1997, and traffic has grown since 2009 on cross strait flights and low cost carriers.",
+ "after": "Kaohsiung's international airport, in Siaogang District on the south side of the city. It handled almost 7 million passengers in 2025 and works from a single east to west runway with two terminals, one domestic and one international.\n\nFor getting around it is unusually well connected. The airport has its own station on the Kaohsiung Metro Red line, which reaches the Taiwan Railway at Kaohsiung Main Station and the high speed rail at Zuoying. Coaches also run south to Fangliao and Kenting, the practical way to the southern beaches.",
+ "claims": [
+  {
+   "claim": "Kaohsiung's international airport",
+   "verdict": "softened",
+   "inAfter": "Kaohsiung's international airport",
+   "note": "Was 'Taiwan's second airport after Taoyuan'. The ranking rests on Wikipedia's 2024 figures alone: the Civil Aeronautics Administration's national table could not be reached (caa.gov.tw did not connect), so no rank is given.",
+   "sources": [
+    {
+     "file": "kia-en-trans",
+     "org": "Kaohsiung International Airport (Civil Aeronautics Administration, operator; kia.gov.tw)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Transportation - Kaohsiung International Airport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "is an international airport located in Siaogang District, Kaohsiung, Taiwan"
+    }
+   ]
+  },
+  {
+   "claim": "in Siaogang District, on the south side of the city",
+   "verdict": "confirmed",
+   "inAfter": "in Siaogang District on the south side of the city",
+   "note": "Siaogang and Xiaogang are two spellings of 小港. The airport gives its own address in Xiaogang District; the coordinates put it 5.8 km from the city centre at 139 degrees (south east), within 45 degrees of south.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "is an international airport located in Siaogang District, Kaohsiung, Taiwan, also known as Siaogang Airport (小港機場)"
+    },
+    {
+     "file": "kia-trans",
+     "org": "Kaohsiung International Airport (Civil Aeronautics Administration, operator; kia.gov.tw)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "機場位置：高雄市小港區中山四路二號"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Kaohsiung (Xiaogang)",
+      "Straight-line distance from the city centre: 5.8 km (3.6 miles)",
+      "Bearing from the city centre: 139 degrees, which is south east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "almost 7 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled almost 7 million passengers in 2025",
+   "note": "Was '5.8 million passengers in 2024'. The airport's own operating-results table (linked from kol.kia.gov.tw as 高雄國際航空站營運實績 and hosted on ragic.com; read as a page and, for all rows, in its public data view) gives monthly passengers for domestic and international flights: the 24 rows for 2025 add up to 6,973,459 (international 5,741,629, domestic 1,231,830). Wikipedia's infobox, citing the Civil Aeronautics Administration, gives 6,971,162. CNA's report of 26 August 2026 quotes the aviation authority's director giving 5.74 million for 2025 and 3.96 million for January to July 2026: both match the table's international rows (5,741,629 and 3,956,194), so those are international passengers only and are not used for the total.",
+   "sources": [
+    {
+     "file": "kia-results",
+     "org": "Kaohsiung International Airport (Civil Aeronautics Administration, operator; its operating-results table on ragic.com)",
+     "dated": "table read 2026-09-23 (monthly rows to July 2026)",
+     "quote": [
+      "高雄國際航空站營運實績",
+      "2012年度前以年為統計單位，2012年度以後(含)以月為統計單位"
+     ]
+    },
+    {
+     "file": "kia-results-api",
+     "org": "Kaohsiung International Airport (Civil Aeronautics Administration, operator; its operating-results table on ragic.com)",
+     "dated": "table read 2026-09-23 (monthly rows to July 2026)",
+     "quote": [
+      "\"航線\": \"國際\", \"年度-月份\": \"2025 - 1\", \"_index_title_\": \"2025 - 1\", \"人次\": \"444386\"",
+      "\"航線\": \"國內\", \"年度-月份\": \"2025 - 1\", \"_index_title_\": \"2025 - 1\", \"人次\": \"85128\"",
+      "\"航線\": \"國際\", \"年度-月份\": \"2025 - 12\", \"_index_title_\": \"2025 - 12\", \"人次\": \"567843\"",
+      "\"航線\": \"國內\", \"年度-月份\": \"2025 - 12\", \"_index_title_\": \"2025 - 12\", \"人次\": \"89694\""
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": [
+      "stat1_data = 6,971,162 ; 18.85%",
+      "stat_year = 2025"
+     ]
+    },
+    {
+     "file": "cna-20260826",
+     "org": "Central News Agency (CNA, cna.com.tw)",
+     "dated": "2026-08-26 (photo caption 115年8月26日, ROC year 115 = 2026)",
+     "quote": [
+      "去年高雄機場旅客量574萬人次，今年1至7月旅客量396萬人次",
+      "115年8月26日"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a single east to west runway",
+   "verdict": "confirmed",
+   "inAfter": "works from a single east to west runway",
+   "note": "OurAirports lists one runway, 09/27 (headings of 90 and 270 degrees, so east and west), 3,150 m.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "The airport has a single east–west runway"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 09/27: 3,150 m (10,335 ft), CON",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "two terminals, one domestic and one international",
+   "verdict": "confirmed",
+   "inAfter": "with two terminals, one domestic and one international",
+   "note": "The airport's pages give each terminal its own opening hours and metro exit. A new single terminal is planned (held back, below).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "two terminals: one international and one domestic"
+    },
+    {
+     "file": "kia-en-fac",
+     "org": "Kaohsiung International Airport (Civil Aeronautics Administration, operator; kia.gov.tw)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Domestic Terminal: Daily 05:00 to 21:30",
+      "International Terminal: Daily 04:20 to 24:00 (Extended for delayed flights)"
+     ]
+    },
+    {
+     "file": "kia-en-trans",
+     "org": "Kaohsiung International Airport (Civil Aeronautics Administration, operator; kia.gov.tw)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Exit 2 connects to the Domestic Terminal; Exit 6 connects to the International Terminal."
+    }
+   ]
+  },
+  {
+   "claim": "the airport has its own station on the Kaohsiung Metro Red line",
+   "verdict": "confirmed",
+   "inAfter": "The airport has its own station on the Kaohsiung Metro Red line",
+   "note": "Reworded from 'The Kaohsiung Metro Red line has a station at the airport'. The station is R4, Kaohsiung International Airport.",
+   "sources": [
+    {
+     "file": "kia-en-trans",
+     "org": "Kaohsiung International Airport (Civil Aeronautics Administration, operator; kia.gov.tw)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The airport is served by Kaohsiung International Airport Station (R4) on the Red Line."
+    },
+    {
+     "file": "krtc-stations",
+     "org": "Kaohsiung Rapid Transit Corporation (Kaohsiung Metro, krtc.com.tw)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Red Line",
+      "R4 Kaohsiung International Airport"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "The airport is served by Kaohsiung Metro Red line at Kaohsiung International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "the Red line reaches the Taiwan Railway at Kaohsiung Main Station and the high speed rail at Zuoying",
+   "verdict": "confirmed",
+   "inAfter": "which reaches the Taiwan Railway at Kaohsiung Main Station and the high speed rail at Zuoying",
+   "note": "Kaohsiung Metro's own station pages: R11 Kaohsiung Main Station (Red Line) has exits marked TR (Taiwan Railway); R16 Zuoying (Red Line) has an exit to THSR Zuoying Station and one to the railway's New Zuoying Station.",
+   "sources": [
+    {
+     "file": "krtc-main",
+     "org": "Kaohsiung Rapid Transit Corporation (Kaohsiung Metro, krtc.com.tw)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "R11 Kaohsiung Main Station",
+      "Operating Routes: Red Line",
+      "Exit 1 TR"
+     ]
+    },
+    {
+     "file": "krtc-zuoying",
+     "org": "Kaohsiung Rapid Transit Corporation (Kaohsiung Metro, krtc.com.tw)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Operating Routes: Red Line",
+      "Exit 1 THSR Zuoying Station",
+      "TRA New Zuoying Station"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "providing access to Taiwan Railway at Kaohsiung Main Station and Taiwan High Speed Rail at Zuoying"
+    }
+   ]
+  },
+  {
+   "claim": "coaches run south to Fangliao and Kenting",
+   "verdict": "softened",
+   "inAfter": "Coaches also run south to Fangliao and Kenting",
+   "note": "Was 'a direct coach'. The airport lists three southbound routes (9117 and 9117A by Highway 17, and the 9117B Kenting Airport Express), which stop on the way, so 'direct' goes; tickets are sold at the Pingtung Bus counter in the international arrivals hall.",
+   "sources": [
+    {
+     "file": "kia-en-trans",
+     "org": "Kaohsiung International Airport (Civil Aeronautics Administration, operator; kia.gov.tw)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Southbound - To Kenting, Fangliao (via Hwy 17)",
+      "9117 [Kaohsiung - Hwy 17 - Kenting]",
+      "9117A [Kaohsiung - Hwy 17 - Fangliao]",
+      "9117B Kenting Airport Express [Kaohsiung Zili Stn. - Airport - Dongliu Ferry - Kenting]"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "There is a one-way coach from Kaohsiung International Airport to Fangliao and Kenting."
+    }
+   ]
+  },
+  {
+   "claim": "Taiwan's second airport after Taoyuan",
+   "verdict": "cut",
+   "wasBefore": "Taiwan's second airport after Taoyuan",
+   "why": "Wikipedia alone (its 2024 figures); the Civil Aeronautics Administration's national table could not be reached, so no rank is given. Replaced by 'Kaohsiung's international airport' (see above)."
+  },
+  {
+   "claim": "5.8 million passengers in 2024",
+   "verdict": "cut",
+   "wasBefore": "It handled 5.8 million passengers in 2024",
+   "why": "Replaced by the 2025 total (see above)."
+  },
+  {
+   "claim": "the Red line has a station at the airport (old wording)",
+   "verdict": "cut",
+   "wasBefore": "The Kaohsiung Metro Red line has a station at the airport",
+   "why": "Reworded, not dropped (see above)."
+  },
+  {
+   "claim": "a direct coach",
+   "verdict": "cut",
+   "wasBefore": "There is also a direct coach south to Fangliao and Kenting",
+   "why": "Reworded: the coaches stop on the way, so 'direct' goes (see above)."
+  },
+  {
+   "claim": "built as a Japanese army air base in 1942, military until 1965",
+   "verdict": "cut",
+   "wasBefore": "The airport was built as a Japanese army air base in 1942 and stayed military until 1965.",
+   "why": "Wikipedia alone. The airport's pages carry no history, its annual reports page loaded no list (502 through the browser) and caa.gov.tw did not connect."
+  },
+  {
+   "claim": "international status 1969, international flights 1972, only Hong Kong and Tokyo for two decades",
+   "verdict": "cut",
+   "wasBefore": "International status followed in 1969 and regular international flights in 1972, though for two decades Hong Kong and Tokyo were the only destinations.",
+   "why": "Wikipedia alone (as above)."
+  },
+  {
+   "claim": "international terminal opened in 1997; growth since 2009 from cross strait flights and low cost carriers",
+   "verdict": "cut",
+   "wasBefore": "The international terminal opened in 1997, and traffic has grown since 2009 on cross strait flights and low cost carriers.",
+   "why": "Wikipedia alone (as above)."
+  },
+  {
+   "claim": "a new single terminal is being built in two phases while the airport stays open",
+   "verdict": "cut",
+   "why": "Held back: verified but replaces nothing in the old text. CNA (26 August 2026) quotes the aviation authority: a new centralised terminal for 16.5 million passengers a year, built in two phases while the airport keeps running; CNA (16 July 2026) reports that after approval of phase one the taxiway move and car park works have begun, with the terminal building to follow once detailed design is done; Taiwan News (4 August 2026) lists a new terminal at Kaohsiung among the ministry's airport projects. Worth adding if Andy wants the works mentioned.",
+   "sources": [
+    {
+     "file": "cna-20260826",
+     "org": "Central News Agency (CNA, cna.com.tw)",
+     "dated": "2026-08-26",
+     "quote": [
+      "高雄小港機場目前正進行新航廈建設計畫",
+      "在高雄機場分兩期建設年容量達1650萬人次的全新集中式航廈"
+     ]
+    },
+    {
+     "file": "cna-20260716",
+     "org": "Central News Agency (CNA, cna.com.tw)",
+     "dated": "2026-07-16",
+     "quote": "高雄機場在核定新航廈第一期工程後，已展開滑行道北移與停車場主體工程，並於細設完成後接續航廈主體工程"
+    },
+    {
+     "file": "taiwannews-6414479",
+     "org": "Taiwan News (taiwannews.com.tw)",
+     "dated": "2026-08-04",
+     "quote": "a new terminal at Kaohsiung’s Xiaogang Airport"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "For getting around it is unusually well connected.",
+   "why": "The old text's judgement, kept: the metro station at the terminals, the Red line's links to the railway and the high speed rail, and the southbound coaches are all confirmed."
+  },
+  {
+   "text": "the practical way to the southern beaches",
+   "why": "Advice carried over from the old text, resting on the confirmed coaches to Kenting and Fangliao."
+  }
+ ],
+ "tracerOk": {}
+}
