@@ -6,8 +6,529 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Ninoy_Aquino_International_Airport",
  "audited": "2026-09-23",
  "before": "The main gateway to the Philippines, between Pasay and Parañaque about 7 km south of Manila proper. It is the hub for Philippine Airlines and PAL Express and the main base for Cebu Pacific and Philippines AirAsia.\n\nBe honest with clients about the congestion. The airport handled more than 50 million passengers in 2024, a record and 47 per cent up on the year before, against a design capacity of 35 million. That overload clogs air traffic and delays flights, and the airport has consistently been named among the worst in the world. Build slack into connections here.\n\nChange is under way. Operations and maintenance were privatised in September 2024 and handed to a consortium led by San Miguel Corporation, which is responsible for rehabilitating the airport. Two further projects, a new airport at Bulakan in Bulacan and an upgrade to Sangley Point in Cavite City, are meant to take pressure off, and Clark International already shares the Greater Manila market.\n\nThere are three passenger terminals with two more planned. Terminal 1 was designed for six million passengers a year.\n\nThe airport is named after Benigno Aquino Jr, who was assassinated here in August 1983.",
- "after": "The main gateway to the Philippines, between Pasay and Parañaque about 7 km south of Manila proper. It is the hub for Philippine Airlines and PAL Express and the main base for Cebu Pacific and Philippines AirAsia.\n\nBe honest with clients about the congestion. The airport handled more than 50 million passengers in 2024, a record and 47 per cent up on the year before, against a design capacity of 35 million. That overload clogs air traffic and delays flights, and the airport has consistently been named among the worst in the world. Build slack into connections here.\n\nChange is under way. Operations and maintenance were privatised in September 2024 and handed to a consortium led by San Miguel Corporation, which is responsible for rehabilitating the airport. Two further projects, a new airport at Bulakan in Bulacan and an upgrade to Sangley Point in Cavite City, are meant to take pressure off, and Clark International already shares the Greater Manila market.\n\nThere are three passenger terminals with two more planned. Terminal 1 was designed for six million passengers a year.\n\nThe airport is named after Benigno Aquino Jr, who was assassinated here in August 1983.",
- "claims": [],
- "opinion": [],
+ "after": "The Philippines' main gateway, south of central Manila. It is the hub for Philippine Airlines and PAL Express and the main base for Cebu Pacific and Philippines AirAsia.\n\nBe honest with clients about the congestion. The airport handled a record 52 million passengers in 2025 against a design capacity of about 35 million, and it has long been called one of the world's worst airports. Build slack into connections here.\n\nNew NAIA Infra Corp, a consortium led by San Miguel Corporation, took over operations and maintenance on 14 September 2024 and is modernising the airport. Most turboprop island flights have since moved to other airports.\n\nThere are three passenger terminals, with a new Terminal 4 being built and a Terminal 5 planned. Airlines were moved between them in March 2026, with more moves planned, so check the terminal before setting off.\n\nIt was renamed after Ninoy Aquino in 1987.",
+ "claims": [
+  {
+   "claim": "main gateway to the Philippines",
+   "verdict": "confirmed",
+   "inAfter": "The Philippines' main gateway",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "it is the main gateway for travelers to the Philippines"
+    },
+    {
+     "file": "nnic-2025-record",
+     "org": "New NAIA Infra Corp (operator)",
+     "quote": "the private operator of the country's main gateway",
+     "dated": "2026-01-01"
+    },
+    {
+     "file": "gma-2025-record",
+     "org": "GMA News",
+     "quote": "as the country's primary aviation hub",
+     "dated": "2026-01-01"
+    }
+   ]
+  },
+  {
+   "claim": "south of central Manila",
+   "verdict": "softened",
+   "inAfter": "south of central Manila",
+   "note": "Was 'between Pasay and Parañaque about 7 km south of Manila proper'. The coordinates put the airport 11.4 km from the GeoNames centre of Manila, so 7 km (ratio 0.62) fails the check: Wikipedia measures from the city boundary, which would mislead a reader. The direction holds (159 degrees, south).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "south of Manila proper"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 159 degrees, which is south"
+    }
+   ]
+  },
+  {
+   "claim": "hub for Philippine Airlines",
+   "verdict": "confirmed",
+   "inAfter": "It is the hub for Philippine Airlines",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It serves as a hub for Philippine Airlines"
+    },
+    {
+     "file": "chicago-pal",
+     "org": "Chicago Department of Aviation (PAL president quoted)",
+     "quote": "through our Manila hub",
+     "dated": "2026-04-16"
+    },
+    {
+     "file": "capa-pal",
+     "org": "CAPA Centre for Aviation (airline profiles)",
+     "quote": "Main hub : Manila Ninoy Aquino International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "hub for PAL Express",
+   "verdict": "confirmed",
+   "inAfter": "Philippine Airlines and PAL Express",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "its regional subsidiary PAL Express"
+    },
+    {
+     "file": "capa-pal-express",
+     "org": "CAPA Centre for Aviation (airline profiles)",
+     "quote": [
+      "Main hub : Manila Ninoy Aquino International Airport",
+      "PAL Express (formerly Airphil Express)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "main base for Cebu Pacific",
+   "verdict": "confirmed",
+   "inAfter": "the main base for Cebu Pacific",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is also the main operating base for Cebu Pacific, and Philippines AirAsia."
+    },
+    {
+     "file": "capa-cebupacific",
+     "org": "CAPA Centre for Aviation (airline profiles)",
+     "quote": [
+      "Main hub : Manila Ninoy Aquino International Airport",
+      "The carrier operates from its hub at Manila Ninoy Aquino International Airport"
+     ]
+    },
+    {
+     "file": "jgsummit-cebupacific",
+     "org": "JG Summit Holdings (Cebu Pacific parent)",
+     "quote": "The airline flies from three strategically placed hubs: Manila, Cebu and Clark."
+    }
+   ]
+  },
+  {
+   "claim": "main base for Philippines AirAsia",
+   "verdict": "confirmed",
+   "inAfter": "Cebu Pacific and Philippines AirAsia",
+   "note": "The airline's own advisory (February 2026) puts all its international flights at Terminal 1 and all its domestic flights at Terminal 2 from 29 March 2026.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is also the main operating base for Cebu Pacific, and Philippines AirAsia."
+    },
+    {
+     "file": "capa-airasia-ph",
+     "org": "CAPA Centre for Aviation (airline profiles)",
+     "quote": "Main hub : Manila Ninoy Aquino International Airport"
+    },
+    {
+     "file": "airasia-newsroom-t1",
+     "org": "AirAsia (airline newsroom)",
+     "quote": "All AirAsia Philippines’ domestic flights will continue to operate from NAIA Terminal 2 (T2)",
+     "dated": "2026-02-25"
+    }
+   ]
+  },
+  {
+   "claim": "record 52 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "The airport handled a record 52 million passengers in 2025",
+   "note": "Was 'more than 50 million passengers in 2024'. The operator's 2025 figure (52.02 million) is out and is the newer record.",
+   "sources": [
+    {
+     "file": "nnic-2025-record",
+     "org": "New NAIA Infra Corp (operator)",
+     "quote": "passenger traffic reached 52.02 million during the year, the highest annual total recorded for the airport",
+     "dated": "2026-01-01"
+    },
+    {
+     "file": "gma-2025-record",
+     "org": "GMA News",
+     "quote": "posted its highest annual passenger traffic in 2025 with 52.02 million passengers",
+     "dated": "2026-01-01"
+    },
+    {
+     "file": "philstar-slow-2026",
+     "org": "The Philippine Star",
+     "quote": "handled a record 52 million passengers in 2025",
+     "dated": "2026-01-05"
+    }
+   ]
+  },
+  {
+   "claim": "design capacity of about 35 million",
+   "verdict": "confirmed",
+   "inAfter": "against a design capacity of about 35 million",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is operating beyond its designed capacity of 35 million passengers"
+    },
+    {
+     "file": "rappler-two-years",
+     "org": "Rappler",
+     "quote": "The airport was designed to accommodate roughly 35 million passengers a year. In 2025, it handled around 52 million.",
+     "dated": "2026-08-27"
+    },
+    {
+     "file": "philstar-takeover",
+     "org": "The Philippine Star",
+     "quote": "its capacity will increase from 35 million passengers to 62 million passengers",
+     "dated": "2024-09-14"
+    }
+   ]
+  },
+  {
+   "claim": "long called one of the world's worst airports",
+   "verdict": "softened",
+   "inAfter": "it has long been called one of the world's worst airports",
+   "note": "Was 'has consistently been named among the worst in the world'. Rappler (August 2026) describes it as long derided as one of the worst, while reporting improvements since privatisation, so the text states the reputation, not a current ranking.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "it has consistently been cited as one of the world's worst airports"
+    },
+    {
+     "file": "rappler-two-years",
+     "org": "Rappler",
+     "quote": "NAIA, long derided as one of the world's worst airports",
+     "dated": "2026-08-27"
+    }
+   ]
+  },
+  {
+   "claim": "NNIC (San Miguel-led) took over on 14 September 2024",
+   "verdict": "confirmed",
+   "inAfter": "New NAIA Infra Corp, a consortium led by San Miguel Corporation, took over operations and maintenance on 14 September 2024",
+   "note": "The drafting note to check this is answered: confirmed by the Philippine Star report of the handover ceremony and by AvGeek Philippines two years on. The concession runs 15 years with an option of 10 more (Philippine Star).",
+   "sources": [
+    {
+     "file": "philstar-takeover",
+     "org": "The Philippine Star",
+     "quote": [
+      "is now under the management of the San Miguel-led New NAIA Infra Corp. (NNIC)",
+      "attended the handover ceremony at Terminal 3 on Saturday, September 14",
+      "September 14, 2024"
+     ],
+     "dated": "2024-09-14"
+    },
+    {
+     "file": "avgeek-two-years",
+     "org": "AvGeek Philippines",
+     "quote": "New NAIA Infrastructure Corporation (NNIC), led by San Miguel Corporation (SMC), took over the operations and management of Ninoy Aquino International Airport (NAIA) on 14 September 2024",
+     "dated": "2026-09-14"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the airport’s operations and maintenance were privatized on September 14, 2024, with responsibility transferred to NNIC"
+    }
+   ]
+  },
+  {
+   "claim": "is modernising the airport",
+   "verdict": "confirmed",
+   "inAfter": "is modernising the airport",
+   "sources": [
+    {
+     "file": "nnic-2025-record",
+     "org": "New NAIA Infra Corp (operator)",
+     "quote": "NNIC is responsible for the operations, maintenance, and modernization of the airport, while ownership remains with the government",
+     "dated": "2026-01-01"
+    },
+    {
+     "file": "philstar-takeover",
+     "org": "The Philippine Star",
+     "quote": "marking the start of a major modernization effort",
+     "dated": "2024-09-14"
+    }
+   ]
+  },
+  {
+   "claim": "most turboprop island flights moved to other airports",
+   "verdict": "corrected",
+   "inAfter": "Most turboprop island flights have since moved to other airports",
+   "note": "Replaces the Bulacan, Sangley Point and Clark sentence (cut below) with the congestion measure that has actually happened. Philippine Star says all turboprops were to leave by March 2026; Rappler (August 2026) says most have, so the text says 'most'.",
+   "sources": [
+    {
+     "file": "rappler-two-years",
+     "org": "Rappler",
+     "quote": "One step was removing most turboprop operations from the airport.",
+     "dated": "2026-08-27"
+    },
+    {
+     "file": "philstar-slow-2026",
+     "org": "The Philippine Star",
+     "quote": [
+      "the transfer of turboprop flights to secondary airports",
+      "By March, all turboprop aircraft will be withdrawn from NAIA",
+      "typically island destinations"
+     ],
+     "dated": "2026-01-05"
+    }
+   ]
+  },
+  {
+   "claim": "three passenger terminals",
+   "verdict": "confirmed",
+   "inAfter": "There are three passenger terminals",
+   "note": "Terminal 4 closed in November 2024 and has not reopened, so three are in use.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Ninoy Aquino International Airport has three passenger terminals, with plans to build another two."
+    },
+    {
+     "file": "philstar-reshuffle-2025",
+     "org": "The Philippine Star",
+     "quote": [
+      "Currently, Terminal 1 houses primarily the international flights of PAL, while Terminal 2 serves as a domestic terminal",
+      "Terminal 3, the largest in NAIA"
+     ],
+     "dated": "2025-09-01"
+    },
+    {
+     "file": "avgeek-two-years",
+     "org": "AvGeek Philippines",
+     "quote": [
+      "Terminal 4 was closed in November 2024 for rehabilitation.",
+      "While Terminal 4 remains unavailable"
+     ],
+     "dated": "2026-09-14"
+    }
+   ]
+  },
+  {
+   "claim": "new Terminal 4 being built",
+   "verdict": "corrected",
+   "inAfter": "with a new Terminal 4 being built",
+   "note": "Was 'two more planned'. Terminal 4 was due by mid-2026 (Philippine Star, September 2025) but AvGeek says in September 2026 it is still unavailable, so no date is given.",
+   "sources": [
+    {
+     "file": "philstar-reshuffle-2026",
+     "org": "The Philippine Star",
+     "quote": "The NNIC is building a new Terminal 4",
+     "dated": "2026-02-25"
+    },
+    {
+     "file": "avgeek-two-years",
+     "org": "AvGeek Philippines",
+     "quote": "what exactly is being built, what stage the project has reached",
+     "dated": "2026-09-14"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 5 planned",
+   "verdict": "confirmed",
+   "inAfter": "a Terminal 5 planned",
+   "sources": [
+    {
+     "file": "rappler-two-years",
+     "org": "Rappler",
+     "quote": "Terminal 5 still has to be built",
+     "dated": "2026-08-27"
+    },
+    {
+     "file": "avgeek-two-years",
+     "org": "AvGeek Philippines",
+     "quote": "Then there is the proposed Terminal 5.",
+     "dated": "2026-09-14"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Terminal 5 is expected to be completed by 2029"
+    }
+   ]
+  },
+  {
+   "claim": "airlines moved between terminals in March 2026",
+   "verdict": "corrected",
+   "inAfter": "Airlines were moved between them in March 2026",
+   "note": "The drafting note asked for the terminal assignments to be checked. The old text stated none, only the terminal count. As of 29 March 2026: AirAsia international moved from Terminal 3 to Terminal 1 (domestic stays at Terminal 2); Air China, China Eastern, Vietnam Airlines, Royal Brunei and Shenzhen Airlines moved from Terminal 1 to Terminal 3, and Japan Airlines on 1 April. Philippine Airlines stays at Terminal 1 (international) and Terminal 2 (domestic), and Cebu Pacific at Terminal 3. Because more moves are planned, the text warns rather than lists them.",
+   "sources": [
+    {
+     "file": "philstar-reshuffle-2026",
+     "org": "The Philippine Star",
+     "quote": [
+      "Air China, China Eastern, Vietnam Airlines, Royal Brunei and Shenzhen Airlines will be relocated from Terminal 1 to Terminal 3 by March 29.",
+      "AirAsia Philippines will transfer its international flights to Terminal 1, from Terminal 3."
+     ],
+     "dated": "2026-02-25"
+    },
+    {
+     "file": "insiderph-airasia-t1",
+     "org": "Inquirer Insider (insiderph.com)",
+     "quote": "AirAsia Philippines has officially completed the transfer of its international flight operations to Ninoy Aquino International Airport Terminal 1 as of March 29",
+     "dated": "2026-03-29"
+    },
+    {
+     "file": "chaviation-reshuffle",
+     "org": "ch-aviation",
+     "quote": "Effective March 29, 2026, Shenzhen Airlines , Air China , China Eastern Airlines , Royal Brunei Airlines , and Vietnam Airlines will relocate flight operations from Terminal 1 to Terminal 3",
+     "dated": "2026-02-27"
+    }
+   ]
+  },
+  {
+   "claim": "more moves planned",
+   "verdict": "corrected",
+   "inAfter": "with more moves planned",
+   "note": "NNIC told Rappler that Philippine Airlines could move all its flights to Terminal 3 as early as February 2027.",
+   "sources": [
+    {
+     "file": "rappler-two-years",
+     "org": "Rappler",
+     "quote": "NNIC officials told Rappler that Philippine Airlines could move both its international and domestic flights to Terminal 3 as early as February 2027",
+     "dated": "2026-08-27"
+    },
+    {
+     "file": "philstar-reshuffle-2026",
+     "org": "The Philippine Star",
+     "quote": "has initiated a first round of airline reassignments",
+     "dated": "2026-02-25"
+    }
+   ]
+  },
+  {
+   "claim": "check the terminal before setting off",
+   "verdict": "corrected",
+   "inAfter": "so check the terminal before setting off",
+   "note": "The operator's own advice at the March 2026 moves.",
+   "sources": [
+    {
+     "file": "philstar-reshuffle-2026",
+     "org": "The Philippine Star",
+     "quote": "the NNIC advised passengers to check their terminal assignment with their airlines before going to NAIA",
+     "dated": "2026-02-25"
+    },
+    {
+     "file": "avgeek-two-years",
+     "org": "AvGeek Philippines",
+     "quote": "increasingly need to double-check where their airline is operating before heading to the airport",
+     "dated": "2026-09-14"
+    }
+   ]
+  },
+  {
+   "claim": "renamed after Ninoy Aquino in 1987",
+   "verdict": "softened",
+   "inAfter": "It was renamed after Ninoy Aquino in 1987",
+   "note": "Was 'named after Benigno Aquino Jr, who was assassinated here in August 1983'. The renaming is confirmed by the operator authority and the Act itself. The assassination at the airport is well known but only Wikipedia could be saved: Britannica, the Philippine Senate, Interaksyon, Esquire and Manila Bulletin all refused the fetcher, and the Wayback Machine was blocked.",
+   "sources": [
+    {
+     "file": "miaa-history",
+     "org": "Manila International Airport Authority",
+     "quote": "On August 17, 1987, Republic Act No. 6639 was enacted and the MIA was renamed the Ninoy Aquino International Airport."
+    },
+    {
+     "file": "lawphil-ra6639",
+     "org": "LawPhil (Arellano Law Foundation), text of RA 6639",
+     "quote": [
+      "AN ACT RENAMING THE MANILA INTERNATIONAL AIRPORT AS THE NINOY AQUINO INTERNATIONAL AIRPORT",
+      "November 27, 1987"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Republic Act No. 6639 was enacted without executive approval, renaming the airport in Ninoy's honor"
+    }
+   ]
+  },
+  {
+   "claim": "between Pasay and Parañaque",
+   "verdict": "cut",
+   "wasBefore": "between Pasay and Parañaque",
+   "why": "True per Wikipedia, but no second source could be saved: the MIAA terminal pages now return 404, the Inquirer refused the fetcher, and OurAirports gives Pasay only. Replaced by 'south of central Manila'."
+  },
+  {
+   "claim": "about 7 km south of Manila proper",
+   "verdict": "cut",
+   "wasBefore": "about 7 km south of Manila proper",
+   "why": "Fails the coordinates check: 11.4 km in a straight line from the centre of Manila (ratio 0.62). No second written source."
+  },
+  {
+   "claim": "more than 50 million in 2024",
+   "verdict": "cut",
+   "wasBefore": "The airport handled more than 50 million passengers in 2024",
+   "why": "Superseded by the 2025 record of 52 million."
+  },
+  {
+   "claim": "47 per cent up on the year before",
+   "verdict": "cut",
+   "wasBefore": "a record and 47 per cent up on the year before",
+   "why": "Wrong for 2024: Wikipedia's own infobox gives 50,356,465 passengers in 2024, up 11.16 per cent. Replaced by the 2025 figure."
+  },
+  {
+   "claim": "overload clogs air traffic and delays flights",
+   "verdict": "cut",
+   "wasBefore": "That overload clogs air traffic and delays flights",
+   "why": "Only Wikipedia states it. Rappler (August 2026) reports runway throughput up to 40 to 42 movements an hour since privatisation, so the claim is not confirmed as current."
+  },
+  {
+   "claim": "consistently named among the worst",
+   "verdict": "cut",
+   "wasBefore": "the airport has consistently been named among the worst in the world",
+   "why": "Softened to its long-standing reputation (see above)."
+  },
+  {
+   "claim": "Change is under way",
+   "verdict": "cut",
+   "wasBefore": "Change is under way.",
+   "why": "Lead-in dropped for length; the changes themselves are kept."
+  },
+  {
+   "claim": "new airports at Bulakan and Sangley Point",
+   "verdict": "cut",
+   "wasBefore": "Two further projects, a new airport at Bulakan in Bulacan and an upgrade to Sangley Point in Cavite City, are meant to take pressure off",
+   "why": "No source from the last 12 months on either project's status. The newest cited source (Philippine Star, April 2024) says San Miguel was prioritising NAIA over Bulacan, and the Sangley source dates from 2014. Web search was exhausted before a current source could be found."
+  },
+  {
+   "claim": "Clark shares the Greater Manila market",
+   "verdict": "cut",
+   "wasBefore": "Clark International already shares the Greater Manila market",
+   "why": "No second source that states it. Clark's role in taking NAIA's island flights appears only in a Philippine Star piece from January 2025. The turboprop move is kept in general form."
+  },
+  {
+   "claim": "Terminal 1 designed for six million",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 was designed for six million passengers a year.",
+   "why": "Sources disagree (built for about 4.5 million and later raised to 6 million, against designed for 6 million), and the figure says nothing useful about the terminal now."
+  },
+  {
+   "claim": "assassinated here in August 1983",
+   "verdict": "cut",
+   "wasBefore": "who was assassinated here in August 1983",
+   "why": "Only Wikipedia could be saved; every independent page tried refused the fetcher. The owner may want to restore this with a source."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Be honest with clients about the congestion.",
+   "why": "Advice kept from the old text; the congestion facts that follow are sourced."
+  },
+  {
+   "text": "Build slack into connections here.",
+   "why": "Advice that follows from the sourced overload (52 million against a design capacity of 35 million)."
+  }
+ ],
  "tracerOk": {}
 }
