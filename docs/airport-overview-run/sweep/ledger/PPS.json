@@ -1,0 +1,119 @@
+{
+ "iata": "PPS",
+ "id": "recUc3secwim4UHWG",
+ "name": "Puerto Princesa International Airport / PAF Antonio Bautista Air Base",
+ "country": "Philippines",
+ "wikipedia": "https://en.wikipedia.org/wiki/Puerto_Princesa_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Puerto Princesa in Palawan, and the main gateway to the Puerto Princesa Underground River, a UNESCO World Heritage Site and one of the New 7 Wonders of Nature.\n\nThe terminal is newer and larger than the destination's reputation suggests. A 13,000 square metre two-level building rated for two million passengers a year replaced an old 3,000 square metre terminal that could handle only 350,000. Six aircraft bays take aircraft as large as an A330, A350 or 787, there are two lounges, parking for 200 cars and free wifi since 2019.\n\nThe single 2,601 metre runway is shared with Antonio Bautista Air Base and is equipped with an instrument landing system and approach lighting.",
+ "after": "The airport for Puerto Princesa in Palawan, and the one to fly into for the Puerto Princesa Underground River, a UNESCO World Heritage Site and one of the New 7 Wonders of Nature.\n\nIts apron takes aircraft as large as an Airbus A330.\n\nThe single runway, about 2,600 metres long, is shared with Antonio Bautista Air Base.",
+ "claims": [
+  {
+   "claim": "the airport for Puerto Princesa in Palawan",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Puerto Princesa in Palawan",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is an airport serving the general area of Puerto Princesa, located in the province of Palawan in the Philippines"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Puerto Princesa",
+      "Straight-line distance from the city centre: 2.6 km (1.6 miles)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the one to fly into for the Underground River, a UNESCO World Heritage Site and one of the New 7 Wonders of Nature",
+   "verdict": "softened",
+   "inAfter": "and the one to fly into for the Puerto Princesa Underground River, a UNESCO World Heritage Site and one of the New 7 Wonders of Nature.",
+   "note": "Was 'the main gateway to' (a phrase the house style bans). UNESCO puts the park about 76 km north west of Puerto Princesa and New7Wonders about 80 km north, so no distance is given.",
+   "sources": [
+    {
+     "file": "unesco",
+     "org": "UNESCO World Heritage Centre",
+     "quote": [
+      "Puerto-Princesa Subterranean River National Park encompasses one of the world’s most impressive cave systems",
+      "approximately 76 km northwest of Puerto Princesa"
+     ]
+    },
+    {
+     "file": "n7w",
+     "org": "New7Wonders Foundation",
+     "quote": [
+      "On November 11, 2011, Puerto Princesa Underground River was provisionally chosen as one of the New7Wonders of Nature. This selection was officially confirmed on January 28, 2012.",
+      "located about 80 kilometres (50 mi) north of the city centre of Puerto Princesa, Palawan"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is the main gateway to the Puerto Princesa Underground River, a UNESCO World Heritage Site and one of the New 7 Wonders of Nature."
+    }
+   ]
+  },
+  {
+   "claim": "apron takes aircraft as large as an Airbus A330",
+   "verdict": "softened",
+   "inAfter": "Its apron takes aircraft as large as an Airbus A330.",
+   "note": "Was 'Six aircraft bays take aircraft as large as an A330, A350 or 787'. The Daily Tribune reports Cebu Pacific's A330neo flying Manila to Puerto Princesa four times a week from 2 November 2025; the bay count and the A350 and 787 rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Its apron has six aircraft bays designed to accommodate aircraft as large as the Airbus A330, Airbus A350 and Boeing 787."
+    },
+    {
+     "file": "tribune-2025",
+     "org": "Daily Tribune (Philippines)",
+     "dated": "2025-11-02",
+     "quote": "Flight 5J 637 from Manila touched down at Puerto Princesa International Airport Sunday morning and returned to Manila the same day."
+    }
+   ]
+  },
+  {
+   "claim": "single runway about 2,600 m, shared with Antonio Bautista Air Base",
+   "verdict": "confirmed",
+   "inAfter": "The single runway, about 2,600 metres long, is shared with Antonio Bautista Air Base.",
+   "note": "Wikipedia gives 2,601 m, OurAirports 2,600 m.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Airport: Puerto Princesa International Airport / PAF Antonio Bautista Air Base",
+      "Runway 09/27: 2,600 m (8,530 ft), CON",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport consists of a single 2,601-meter-long",
+      "The airport shares its single runway with Antonio Bautista Air Base."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "terminal: 13,000 m2, two levels, two million a year, replacing a 3,000 m2 terminal for 350,000; two lounges, 200 cars, wifi since 2019",
+   "verdict": "cut",
+   "wasBefore": "The terminal is newer and larger than the destination's reputation suggests. A 13,000 square metre two-level building rated for two million passengers a year replaced an old 3,000 square metre terminal that could handle only 350,000. Six aircraft bays take aircraft as large as an A330, A350 or 787, there are two lounges, parking for 200 cars and free wifi since 2019.",
+   "why": "Wikipedia alone: the Philippine News Agency answered 403 to both fetchers and the Palawan News report it cites is only in the web archive, which the network policy blocks. The A330 point is kept with the Daily Tribune."
+  },
+  {
+   "claim": "instrument landing system and approach lighting",
+   "verdict": "cut",
+   "wasBefore": "The single 2,601 metre runway is shared with Antonio Bautista Air Base and is equipped with an instrument landing system and approach lighting.",
+   "why": "The runway and the air base are kept; the landing aids rest on Wikipedia alone and are no use to an agent."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
