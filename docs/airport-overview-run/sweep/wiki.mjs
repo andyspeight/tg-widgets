@@ -25,6 +25,13 @@ const SNAPSHOT = process.env.SWEEP_SNAPSHOT ||
   '/tmp/claude-0/-home-user-tg-widgets/aa74082d-0375-5ea9-97e1-bfee8cc3073d/scratchpad/sweep/snapshot-0923.json';
 const UA = 'tg-widgets-airport-sweep/1.0 (https://widgets.travelify.io; Travelgenix content verification, low volume)';
 
+// If Wikimedia refuses us (403, "Please respect our robot policy"), stop asking
+// for two hours rather than knocking once per airport. The marker file is shared
+// with refs.mjs, so helpers running in parallel back off together.
+const BLOCK = path.join(EVIDENCE, '..', 'wikimedia-blocked.txt');
+const blocked = () => { try { return Date.now() - fs.statSync(BLOCK).mtimeMs < 2 * 3600e3; } catch { return false; } };
+const noteBlock = s => fs.writeFileSync(BLOCK, `Wikimedia answered ${s} at ${new Date().toISOString()}; wiki.mjs and refs.mjs skip it for two hours.\n`);
+
 const snap = JSON.parse(fs.readFileSync(SNAPSHOT, 'utf8')).records;
 const archive = new Map();
 for (const f of fs.readdirSync(path.join(HERE, '..', 'evidence'))) {
@@ -39,6 +46,7 @@ async function articleText(url) {
     '&prop=extracts|revisions&rvprop=timestamp|ids&explaintext=1&redirects=1&titles=' + encodeURIComponent(title);
   for (let attempt = 0; attempt < 3; attempt++) {
     const r = await fetch(api, { headers: { 'User-Agent': UA } });
+    if (r.status === 403) { noteBlock(403); return null; }
     if (r.status === 429) { await new Promise(s => setTimeout(s, 3000 * (attempt + 1))); continue; }
     const j = await r.json();
     const p = j.query && j.query.pages && j.query.pages[0];
@@ -53,6 +61,7 @@ async function infobox(url) {
   const api = 'https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&redirects=1' +
     '&prop=revisions&rvprop=content|timestamp|ids&rvslots=main&titles=' + encodeURIComponent(title);
   const r = await fetch(api, { headers: { 'User-Agent': UA } });
+  if (r.status === 403) { noteBlock(403); return null; }
   if (!r.ok) return null;
   const j = await r.json();
   const rev = j.query && j.query.pages && j.query.pages[0] && j.query.pages[0].revisions && j.query.pages[0].revisions[0];
@@ -87,12 +96,14 @@ for (const code of process.argv.slice(2).map(s => s.toUpperCase())) {
   }
   const wiki = f.fldRqtt44nsacJCwq;
   let now = null;
-  if (wiki) now = await articleText(wiki).catch(() => null);
+  const skip = blocked();
+  if (skip) console.log(code + '  Wikipedia skipped: ' + fs.readFileSync(BLOCK, 'utf8').trim());
+  if (wiki && !skip) now = await articleText(wiki).catch(() => null);
   if (now) {
     fs.writeFileSync(path.join(dir, 'wikipedia-now.txt'),
       `URL: ${wiki}\nFETCHED: ${new Date().toISOString()}\nHTTP: 200\nKIND: wikipedia (revision ${now.rev ? now.rev.revid + ' of ' + now.rev.timestamp : '?'})\n----\n${now.text}`);
   }
-  const box = wiki ? await infobox(wiki).catch(() => null) : null;
+  const box = wiki && !blocked() ? await infobox(wiki).catch(() => null) : null;
   if (box && box.lines.length) {
     fs.writeFileSync(path.join(dir, 'wikipedia-infobox.txt'),
       `URL: ${wiki}\nFETCHED: ${new Date().toISOString()}\nHTTP: 200\nKIND: wikipedia infobox (revision ${box.rev.revid} of ${box.rev.timestamp})\n----\n${box.lines.join('\n')}\n`);

@@ -1,0 +1,287 @@
+{
+ "iata": "LAU",
+ "id": "recimofDsDAVoCqsm",
+ "name": "Manda Airport",
+ "country": "Kenya",
+ "wikipedia": "https://en.wikipedia.org/wiki/Manda_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Lamu, on Manda Island off the Kenyan coast, about 450 km by air south east of Nairobi.\n\nThe transfer is the thing to build into an itinerary. The airport is not on Lamu Island itself, so arriving clients take a short boat ride across to Lamu Town, a UNESCO World Heritage Site, or on to Shela.\n\nIt is a small operation with basic facilities, handling domestic flights from Nairobi, Mombasa and Malindi. There is a paved runway of 6,330 feet and a shorter unpaved strip, at an elevation of just 6 metres.\n\nThe airport is also known as Lamu Airport, so both names turn up in supplier systems.",
+ "after": "The airport for Lamu, on Manda Island off the Kenyan coast. It is also known as Lamu Airport, so both names turn up in supplier systems.\n\nThe transfer is the thing to build into an itinerary. Clients land on Manda Island, not on Lamu Island itself, so the onward journey is by boat. Lamu Old Town, a UNESCO World Heritage Site, is on Lamu Island.\n\nDomestic flights come in from Nairobi, Mombasa and Malindi.\n\nThe FCDO advises against all travel to Lamu County except Lamu Island and Manda Island, and says visitors to the islands should fly into Lamu airport rather than travel by road.",
+ "claims": [
+  {
+   "claim": "the airport for Lamu",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Lamu",
+   "note": "The FCDO calls it the only commercial air option for Lamu Island and Manda Island; Jambojet sells the route as Nairobi to 'Lamu (Manda Airport)'.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Manda Airport is a small domestic airport located on Manda Island, serving the Lamu Archipelago in Kenya's coastal region."
+    },
+    {
+     "file": "fcdo-kenya-safety",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-09-04",
+     "quote": "The only commercial option for air travel to or from Lamu Island and Manda Island is through Lamu airport"
+    },
+    {
+     "file": "jambojet-lamu",
+     "org": "Jambojet",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Jambojet operates one daily flight from Nairobi’s Jomo Kenyatta International Airport (JKIA) to Lamu’s Manda Airport",
+      "Route: Nairobi (JKIA) to Lamu (Manda Airport)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "on Manda Island",
+   "verdict": "confirmed",
+   "inAfter": "on Manda Island off the Kenyan coast",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Manda Airport is located on Manda Island in the Lamu Archipelago of Lamu County on the western shore of the Indian Ocean, on the Kenyan coast."
+    },
+    {
+     "file": "fcdo-kenya-regional",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-09-04",
+     "quote": "Lamu Airport (a civilian airport on Manda Island)"
+    }
+   ]
+  },
+  {
+   "claim": "off the Kenyan coast",
+   "verdict": "confirmed",
+   "inAfter": "off the Kenyan coast",
+   "note": "Lamu County and National Museums of Kenya both place Manda among the Lamu Archipelago islands on Kenya's northern coast.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "on the western shore of the Indian Ocean, on the Kenyan coast"
+    },
+    {
+     "file": "lamucounty-tourism",
+     "org": "County Government of Lamu",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "The lamu Archipelago is a small group of Island situated on Kenya´s Northen Coast line, near Somali.",
+      "It is made up of Lamu, Manda, pate and Kiwayuu islands."
+     ]
+    },
+    {
+     "file": "nmk-lamu-old-town",
+     "org": "National Museums of Kenya",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Lamu Island is part of a chain of islands known by the name: Lamu Archipelago that includes Manda, Pate and Kiwayu."
+    }
+   ]
+  },
+  {
+   "claim": "also known as Lamu Airport",
+   "verdict": "confirmed",
+   "inAfter": "It is also known as Lamu Airport",
+   "note": "Moved up from the last paragraph. The FCDO uses only the name Lamu Airport.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Manda Airport (IATA: LAU, ICAO: HKLU), also called Lamu Airport, is an airport in Kenya."
+    },
+    {
+     "file": "fcdo-kenya-regional",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-09-04",
+     "quote": "If you travel to Lamu Island or Manda Island, you should fly to Lamu Airport (a civilian airport on Manda Island)."
+    }
+   ]
+  },
+  {
+   "claim": "the airport is on Manda Island, not on Lamu Island",
+   "verdict": "confirmed",
+   "inAfter": "Clients land on Manda Island, not on Lamu Island itself",
+   "note": "Lamu Old Town is on Lamu Island (National Museums of Kenya, Lamu County) and the airport on Manda Island (FCDO, Wikipedia).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "located on Manda Island",
+      "Access to Lamu Island from the airport is via a short boat ride."
+     ]
+    },
+    {
+     "file": "fcdo-kenya-safety",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-09-04",
+     "quote": "You should only travel to the islands by air to Lamu airport (a civilian airport on Manda Island), and not by road."
+    },
+    {
+     "file": "nmk-lamu-old-town",
+     "org": "National Museums of Kenya",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Located on an island by the same name, Lamu Old Town"
+    }
+   ]
+  },
+  {
+   "claim": "onward transfer by boat",
+   "verdict": "softened",
+   "inAfter": "so the onward journey is by boat",
+   "note": "Was 'a short boat ride across to Lamu Town ... or on to Shela'. Wikipedia gives the boat to Lamu Island; the second source is a resort on Manda Island itself (The Majlis, live FAQ), which meets guests at Manda Airport by speedboat. That is a hotel page, the lowest tier; the airline and tourist-board pages that would say the same (Safarilink, Airkenya, Kenya Airways, Magical Kenya) sit behind bot checks. 'Short' and the Shela leg are dropped.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Access to Lamu Island from the airport is via a short boat ride."
+    },
+    {
+     "file": "majlis-faq",
+     "org": "The Majlis resort, Manda Island",
+     "dated": "2026-09-23 (live page)",
+     "quote": "The Majlis provides complimentary speedboat transfers from Manda Airport to the resort."
+    }
+   ]
+  },
+  {
+   "claim": "Lamu Old Town, a UNESCO World Heritage Site, is on Lamu Island",
+   "verdict": "confirmed",
+   "inAfter": "Lamu Old Town, a UNESCO World Heritage Site, is on Lamu Island",
+   "note": "Was 'Lamu Town, a UNESCO World Heritage Site'. Old Town is the inscribed name (2001). UNESCO's own page answers with a Cloudflare challenge, so the national museums body that manages the site stands in for it.",
+   "sources": [
+    {
+     "file": "nmk-lamu-old-town",
+     "org": "National Museums of Kenya",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Located on an island by the same name, Lamu Old Town occupying 16 hectares is a living town",
+      "It was inscribed on the World Heritage List in 2001"
+     ]
+    },
+    {
+     "file": "lamucounty-tourism",
+     "org": "County Government of Lamu",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "The Lamu old town on Lamu Island is a unique living heritage",
+      "This saw UNESCO declare the town a world heritage site in 2001"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Lamu Town, a UNESCO World Heritage Site"
+    }
+   ]
+  },
+  {
+   "claim": "domestic flights from Nairobi, Mombasa and Malindi",
+   "verdict": "confirmed",
+   "inAfter": "Domestic flights come in from Nairobi, Mombasa and Malindi.",
+   "note": "Nairobi is confirmed by the airline itself (Jambojet, one daily flight from JKIA). Mombasa and Malindi rest on Wikipedia and a resort's live FAQ only: the sites of the airlines that fly them (Safarilink: Imperva check; Airkenya: captcha; Kenya Airways: Cloudflare; Skyward: certificate for another host; fly540.com: now a parked page) could not be read. The resort names the same three cities in the same order as Wikipedia; nothing shows it copied Wikipedia, but the owner may prefer to cut Mombasa and Malindi.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "mainly handling domestic flights from Nairobi, Mombasa, and Malindi"
+    },
+    {
+     "file": "majlis-faq",
+     "org": "The Majlis resort, Manda Island",
+     "dated": "2026-09-23 (live page)",
+     "quote": "You can fly to Manda Island (Lamu) from Nairobi, Mombasa, or Malindi."
+    },
+    {
+     "file": "jambojet-destinations",
+     "org": "Jambojet",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "From our Nairobi hub at Jomo Kenyatta International Airport",
+      "Malindi and Lamu"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: against all travel to Lamu County except Lamu Island and Manda Island; fly to Lamu airport, not by road",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "The FCDO advises against all travel to Lamu County except Lamu Island and Manda Island, and says visitors to the islands should fly into Lamu airport rather than travel by road.",
+   "note": "Added: the old text said nothing on security. Attributed statement, checked against the FCDO's Kenya pages (updated 4 September 2026, still current 23 September 2026). The advice does not contradict anything kept: the airport is on Manda Island, inside the excepted area, and the FCDO names it as the way in.",
+   "sources": [
+    {
+     "file": "fcdo-kenya",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-09-04",
+     "quote": [
+      "Due to the risk of terrorism from groups based in Somalia, FCDO advises against all travel to:",
+      "Lamu County, except for Lamu Island and Manda Island",
+      "Still current at:",
+      "23 September 2026",
+      "Updated:",
+      "4 September 2026"
+     ]
+    },
+    {
+     "file": "fcdo-kenya-regional",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-09-04",
+     "quote": "If you travel to Lamu Island or Manda Island, you should fly to Lamu Airport (a civilian airport on Manda Island). Do not travel by road."
+    },
+    {
+     "file": "fcdo-kenya-safety",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-09-04",
+     "quote": "You should only travel to the islands by air to Lamu airport (a civilian airport on Manda Island), and not by road."
+    }
+   ]
+  },
+  {
+   "claim": "about 450 km by air south east of Nairobi",
+   "verdict": "cut",
+   "wasBefore": "about 450 km by air south east of Nairobi",
+   "why": "Wikipedia alone (it cites an online distance calculator). The coordinates check measures from Lamu, not Nairobi, and no second written source gives the distance or bearing."
+  },
+  {
+   "claim": "short boat ride to Lamu Town or on to Shela",
+   "verdict": "cut",
+   "wasBefore": "so arriving clients take a short boat ride across to Lamu Town, a UNESCO World Heritage Site, or on to Shela",
+   "why": "Reworded. The boat is kept, with the resort's airport speedboat as the second source. No source says clients go from the airport on to Shela (Jambojet says only that Shela Beach is a short boat ride from Lamu Town, and Wikipedia calls Shela an island), so Shela goes. The UNESCO site is named as Lamu Old Town."
+  },
+  {
+   "claim": "small operation with basic facilities",
+   "verdict": "cut",
+   "wasBefore": "It is a small operation with basic facilities",
+   "why": "Wikipedia alone. The Kenya Airports Authority's page for the airport (kaa.go.ke) answers with a Cloudflare challenge."
+  },
+  {
+   "claim": "paved runway of 6,330 feet and a shorter unpaved strip",
+   "verdict": "cut",
+   "wasBefore": "There is a paved runway of 6,330 feet and a shorter unpaved strip",
+   "why": "Not settled, as the drafting note asked. Wikipedia contradicts itself (a single runway in its lead, two runways in its body), and it and OurAirports disagree on the paved runway (1,930 m or 6,330 ft against 2,000 m or 6,561 ft), though they agree on an unpaved 931 m strip. The Kenya Airports Authority site is behind a Cloudflare challenge and Kenya's eAIP (eaip.kcaa.or.ke) needs a login, so neither official source could be read."
+  },
+  {
+   "claim": "elevation of 6 metres",
+   "verdict": "cut",
+   "wasBefore": "at an elevation of just 6 metres",
+   "why": "OurAirports gives the same 6 m (20 ft) as Wikipedia, so it is confirmed, but it went with the runway sentence it belonged to and is of no use for booking."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so both names turn up in supplier systems.",
+   "why": "Advice kept from the old text. The FCDO calls it Lamu Airport and Jambojet sells it as 'Lamu (Manda Airport)'."
+  },
+  {
+   "text": "The transfer is the thing to build into an itinerary.",
+   "why": "Advice kept from the old text; follows from the airport being on Manda Island with the onward journey by boat."
+  }
+ ],
+ "tracerOk": {}
+}

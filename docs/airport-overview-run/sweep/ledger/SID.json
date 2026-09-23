@@ -1,0 +1,331 @@
+{
+ "iata": "SID",
+ "id": "recK5m3Rj4NNQhkTX",
+ "name": "Amílcar Cabral International Airport",
+ "country": "Cape Verde",
+ "wikipedia": "https://en.wikipedia.org/wiki/Am%C3%ADlcar_Cabral_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Cape Verde's main international airport, on Sal, 2 km from Espargos and on the road down to Santa Maria where most of the resorts are. It is the hub for Cabo Verde Airlines and the base for Cabo Verde Express.\n\nTransfers need arranging. There is no scheduled public transport at all, so it is taxis, hire cars or the shared cars known locally as aluguer.\n\nThe runway is 3,272 metres, the longest in the country, which is what allows the long haul flying. It was also one of the designated emergency landing strips for the Space Shuttle, and the airport was one of NASA's chosen sites to handle a Shuttle after re-entry.\n\nThe terminal is a single two storey building and passengers are bussed out to the aircraft. Duty free, kiosks and refreshments sit beyond security and passport control.\n\nIt has been an airport since 1939, built by Italy as a fuel and provisions stop on the route from Europe to South America, with the first flight arriving from Rome and Seville that December.",
+ "after": "Cape Verde's main international airport, on Sal, 2 km from Espargos, with direct flights to Europe.\n\nTransfers need arranging. Taxis meet arrivals and there are hire car desks. The FCDO advises using only authorised taxis, which on Sal are blue and yellow. Informal shared minibuses also run on the island.\n\nThe airport dates from 1939, when it was built as an Italian airfield. It has the longest runway in Cape Verde.\n\nAccording to the FCDO, visitors must pre-register and pay the airport security fee (TSA) online at least five days before arrival, and since 1 July 2026 anyone who cannot show proof pays double at the border.",
+ "claims": [
+  {
+   "claim": "Cape Verde's main international airport",
+   "verdict": "confirmed",
+   "inAfter": "Cape Verde's main international airport",
+   "note": "The operator's 2025 traffic table (VINCI Airports, in thousands of passengers) gives Sal 1,588, Praia 753, Boa Vista 670 and São Vicente 354. No second source for the figure itself was found (INE Cabo Verde's tables are script-driven and the Cape Verdean papers reached have no usable index), so no passenger number is stated, as the drafting note allowed.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the main international airport of Cape Verde"
+    },
+    {
+     "file": "cva-sid",
+     "org": "Cabo Verde Airports (VINCI Airports, operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "é considerado a maior infraestrutura aeroportuária do País"
+    },
+    {
+     "file": "vinci-traffic-2025",
+     "org": "Cabo Verde Airports (VINCI Airports, operator)",
+     "dated": "2026-01",
+     "quote": [
+      "In thousands of passengers",
+      "Sal (SID) 100 430 +14% 1,588 +19%",
+      "Praia (RAI) 100 197 +16% 753 +13%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "on Sal, 2 km from Espargos",
+   "verdict": "confirmed",
+   "inAfter": "on Sal, 2 km from Espargos",
+   "note": "Coordinates put it 1.6 km from the GeoNames centre of Espargos (ratio 1.25, inside the tolerance), at 198 degrees (south). Wikipedia's 'west-southwest' is not used.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is located 2 kilometres (1.2 mi) west-southwest from Espargos on Sal Island."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Espargos",
+      "Straight-line distance from the city centre: 1.6 km (1.0 miles)"
+     ]
+    },
+    {
+     "file": "cva-sid",
+     "org": "Cabo Verde Airports (VINCI Airports, operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "O Aeroporto Internacional Amílcar Cabral , na ilha do Sal"
+    }
+   ]
+  },
+  {
+   "claim": "direct flights to Europe",
+   "verdict": "corrected",
+   "inAfter": "with direct flights to Europe",
+   "note": "Replaces the stale Cabo Verde Airlines hub and Cabo Verde Express base (see the cuts). The operator's live arrivals board on 23 September 2026 shows TAP from Lisbon; its airline list includes easyJet, TUI, TAP, Transavia, Vueling, Binter, Luxair and others, but it covers all seven airports, so no airline is named for Sal.",
+   "sources": [
+    {
+     "file": "cva-sal",
+     "org": "Cabo Verde Airports (VINCI Airports, operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "existem várias rotas aéreas que fazem a ligação direta entre o Aeroporto Internacional Amílcar Cabral e a Europa"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Other international destinations include inter alia Amsterdam, Lisbon, Luxembourg, Madrid, Paris, and Porto."
+    },
+    {
+     "file": "cva-sid",
+     "org": "Cabo Verde Airports (VINCI Airports, operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Lisbonne",
+      "23-09-2026",
+      "TP475",
+      "TAP Air Portugal"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "taxis meet arrivals; hire car desks",
+   "verdict": "confirmed",
+   "inAfter": "Taxis meet arrivals and there are hire car desks.",
+   "note": "The operator says formal taxis are found on arrival at its airports on most islands, and car hire at its four international airports, of which Sal is one.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "There is no scheduled public transport; taxicabs, shared cars known as \"aluguer\", and rental cars are available."
+    },
+    {
+     "file": "cva-transport",
+     "org": "Cabo Verde Airports (VINCI Airports, operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Poderá encontrar serviços formais de taxi à chegada nos nossos aeroportos, na maior parte das ilhas."
+    },
+    {
+     "file": "cva-carhire",
+     "org": "Cabo Verde Airports (VINCI Airports, operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "nos quatro aeroportos internacionais, empresas de rent-a car"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: use only authorised taxis, blue and yellow on Sal",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "The FCDO advises using only authorised taxis, which on Sal are blue and yellow.",
+   "note": "Added to the transfer advice. Attributed statement, checked against the FCDO's Cape Verde page (updated 28 July 2026, still current 23 September 2026).",
+   "sources": [
+    {
+     "file": "fcdo-cape-verde-safety",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-28",
+     "quote": "Only hire authorised taxis from taxi ranks or by asking your hotel to call one. On the islands of Sal and Boa Vista, authorised taxis are coloured blue and yellow."
+    },
+    {
+     "file": "fcdo-cape-verde",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-28",
+     "quote": [
+      "Still current at:",
+      "23 September 2026",
+      "Updated:",
+      "28 July 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "informal shared minibuses",
+   "verdict": "confirmed",
+   "inAfter": "Informal shared minibuses also run on the island.",
+   "note": "Wikipedia calls them 'aluguer'; the operator calls the service 'hiace'. Neither local name is used.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "shared cars known as \"aluguer\""
+    },
+    {
+     "file": "cva-transport",
+     "org": "Cabo Verde Airports (VINCI Airports, operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Serviço de hiace",
+      "Todas as ilhas possuem serviços informais de transporte, que nalguns casos substituem taxis e autocarros."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "dates from 1939, built as an Italian airfield",
+   "verdict": "confirmed",
+   "inAfter": "The airport dates from 1939, when it was built as an Italian airfield",
+   "note": "Wikipedia says built by Italy; the operator says built for the Italian airline LATI, completed in 1939.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The first airport on Sal Island was built in 1939 by Italy"
+    },
+    {
+     "file": "cva-sid",
+     "org": "Cabo Verde Airports (VINCI Airports, operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Inicialmente concebido como um aeródromo, propriedade da empresa italiana, LATI",
+      "teve a sua construção concluída em 1939"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the longest runway in Cape Verde",
+   "verdict": "confirmed",
+   "inAfter": "It has the longest runway in Cape Verde.",
+   "note": "The operator does not say 'longest' in words, but its own pages give Sal 3,000 m against 2,100 m at Praia and Boa Vista, 2,000 m at São Vicente, 1,500 m at São Filipe, 1,400 m at São Nicolau and 1,200 m at Maio, which are all the country's working airports (its concession). The length itself is disputed (operator 3,000 m, Wikipedia 3,272 m, OurAirports 3,280 m), so it is not stated.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport's main runway is 3,272 m (10,734 ft) long and is the longest in Cape Verde."
+    },
+    {
+     "file": "cva-sid",
+     "org": "Cabo Verde Airports (VINCI Airports, operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Com uma pista de 3. 000 metros de comprimento"
+    },
+    {
+     "file": "cva-aeroporto-internacional-nelson-mandela",
+     "org": "Cabo Verde Airports (VINCI Airports, operator)",
+     "quote": "Dispõe de uma pista com 2.100 m de comprimento"
+    },
+    {
+     "file": "cva-aeroporto-internacional-aristides-pereira",
+     "org": "Cabo Verde Airports (VINCI Airports, operator)",
+     "quote": "Com uma pista de 2.100 m de comprimento"
+    },
+    {
+     "file": "cva-aeroporto-internacional-cesaria-evora",
+     "org": "Cabo Verde Airports (VINCI Airports, operator)",
+     "quote": "Com uma pista de 2.000m de comprimento"
+    },
+    {
+     "file": "cva-aerodromo-de-sao-filipe",
+     "org": "Cabo Verde Airports (VINCI Airports, operator)",
+     "quote": "Este aeródromo conta com uma pista de 1.500m de comprimento"
+    },
+    {
+     "file": "cva-aerodromo-de-sao-nicolau",
+     "org": "Cabo Verde Airports (VINCI Airports, operator)",
+     "quote": "conta com uma pista com 1.400m de comprimento"
+    },
+    {
+     "file": "cva-aerodromo-do-maio",
+     "org": "Cabo Verde Airports (VINCI Airports, operator)",
+     "quote": "A pista tem 1.200m de comprimento"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: pre-register and pay the TSA online five days ahead; double at the border from 1 July 2026",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "According to the FCDO, visitors must pre-register and pay the airport security fee (TSA) online at least five days before arrival, and since 1 July 2026 anyone who cannot show proof pays double at the border.",
+   "note": "Added: it will catch travellers out and the penalty is new. Attributed statement, checked against the FCDO's Cape Verde entry page (guide updated 28 July 2026, still current 23 September 2026). The FCDO adds that children aged one and under are exempt and that tour operators may do it for the traveller; not stated.",
+   "sources": [
+    {
+     "file": "fcdo-cape-verde-entry",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-28",
+     "quote": [
+      "You must fill in a traveller entry form at least 5 days before you arrive in the country. Complete the pre-registration and pay the airport security fee ('TSA') on the official online platform. Bring proof of confirmation to show when you arrive.",
+      "From 1 July 2026, if you do not complete the pre-registration or cannot show proof, you will have to pay double the TSA fee at border control."
+     ]
+    },
+    {
+     "file": "fcdo-cape-verde",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-28",
+     "quote": [
+      "Still current at:",
+      "23 September 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "on the road down to Santa Maria where most of the resorts are",
+   "verdict": "cut",
+   "wasBefore": "and on the road down to Santa Maria where most of the resorts are",
+   "why": "Wikipedia alone. The operator's Sal page names Santa Maria only for its pier; a September 2026 report places one resort (the Hilton) in Santa Maria and RIU names its three Sal hotels, but no source reached says most resorts are there or describes the road. The Sal municipality's site reset the connection and then presented a self-signed certificate, so it was left."
+  },
+  {
+   "claim": "hub for Cabo Verde Airlines",
+   "verdict": "cut",
+   "wasBefore": "It is the hub for Cabo Verde Airlines",
+   "why": "Out of date or at least unconfirmed. Cabo Verde Airlines' own site (live, 23 September 2026) features only routes from Praia (Lisbon, Providence, Recife) and offers check-in from Praia, São Vicente and Sal alike; Wikipedia's hub label dates from the 2019 Sal hub. Replaced by the direct flights to Europe."
+  },
+  {
+   "claim": "base for Cabo Verde Express",
+   "verdict": "cut",
+   "wasBefore": "and the base for Cabo Verde Express",
+   "why": "No current source. The operator's airline list (live, 23 September 2026) does not include Cabo Verde Express; Wikipedia alone says it is based here."
+  },
+  {
+   "claim": "no scheduled public transport at all",
+   "verdict": "cut",
+   "wasBefore": "There is no scheduled public transport at all, so it is taxis, hire cars or the shared cars known locally as aluguer.",
+   "why": "Taxis, hire cars and informal shared transport are kept with the operator's pages. 'No scheduled public transport at all' rests on Wikipedia alone: the operator says only that informal services in some cases replace taxis and buses."
+  },
+  {
+   "claim": "runway 3,272 metres, which allows the long-haul flying",
+   "verdict": "cut",
+   "wasBefore": "The runway is 3,272 metres, the longest in the country, which is what allows the long haul flying.",
+   "why": "'Longest in the country' is kept. The length is disputed (operator 3,000 m, Wikipedia 3,272 m, OurAirports 3,280 m), and the link to long-haul flying is Wikipedia's alone."
+  },
+  {
+   "claim": "Space Shuttle emergency landing strip; NASA site",
+   "verdict": "cut",
+   "wasBefore": "It was also one of the designated emergency landing strips for the Space Shuttle, and the airport was one of NASA's chosen sites to handle a Shuttle after re-entry.",
+   "why": "Wikipedia alone, and history of no use for booking (the Shuttle retired in 2011)."
+  },
+  {
+   "claim": "single two-storey terminal; bussed to aircraft; duty free after security",
+   "verdict": "cut",
+   "wasBefore": "The terminal is a single two storey building and passengers are bussed out to the aircraft. Duty free, kiosks and refreshments sit beyond security and passport control.",
+   "why": "Wikipedia alone. The operator says the terminals were modernised in its first phase of works, finished in 2025, and that a new three-year phase (from January 2026) includes terminal expansions, so the description may already be out of date."
+  },
+  {
+   "claim": "1939 fuel stop on the Europe to South America route; first flight from Rome and Seville in December",
+   "verdict": "cut",
+   "wasBefore": "It has been an airport since 1939, built by Italy as a fuel and provisions stop on the route from Europe to South America, with the first flight arriving from Rome and Seville that December.",
+   "why": "The 1939 Italian origin is kept with the operator. The purpose and the first flight (15 December 1939, from Rome and Seville) rest on Wikipedia alone."
+  },
+  {
+   "claim": "gate count (four or six)",
+   "verdict": "cut",
+   "why": "Not in the Overview, and none is added: Wikipedia says both 'four gates' and 'six departure gates', and the operator gives no count, as the drafting note required."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Transfers need arranging.",
+   "why": "Advice kept from the old text; follows from the taxi, hire car and minibus options."
+  }
+ ],
+ "tracerOk": {}
+}

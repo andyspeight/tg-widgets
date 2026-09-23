@@ -1,0 +1,334 @@
+{
+ "iata": "HRE",
+ "id": "recpb3ScFfzzVWDIB",
+ "name": "Robert Gabriel Mugabe International Airport",
+ "country": "Zimbabwe",
+ "wikipedia": "https://en.wikipedia.org/wiki/Robert_Gabriel_Mugabe_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Zimbabwe's largest airport and the base for Air Zimbabwe, serving Harare.\n\nThe names are a problem for searching. It is now Robert Gabriel Mugabe International, is widely called Harare Airport or just RGM, and was previously Harare International and before that Salisbury Airport. Older supplier records may use any of them, and its ICAO code changed from FVHA to FVRG.\n\nThe airport was commissioned in 1956 and opened on 5 February 1957, replacing Belvedere Airport, whose runway was badly aligned. Aircraft had to approach through a gap in the Warren Hills and take off over the city centre, which was dangerous, and the growing number of tall buildings made it worse.\n\nThe Civil Aviation Authority of Zimbabwe has its head office on level 3 of the international terminal.",
+ "after": "Zimbabwe's largest airport, serving the capital, Harare. It is run by the Airports Company of Zimbabwe.\n\nThe official name is Robert Gabriel Mugabe International Airport. Its name until November 2017 was Harare International Airport, so older supplier records may still use that name. It began as Salisbury Airport in 1956. The ICAO code is FVRG, though some databases still carry the old code, FVHA.\n\nAir Zimbabwe, the national airline, resumed direct flights from Harare to London Gatwick in July 2026, flown for it by the Spanish airline Plus Ultra.\n\nThe FCDO warns of smash-and-grab robberies from vehicles at the main intersections on the route to the airport.",
+ "claims": [
+  {
+   "claim": "Zimbabwe's largest airport",
+   "verdict": "confirmed",
+   "inAfter": "Zimbabwe's largest airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the largest airport in the country"
+    },
+    {
+     "file": "acz-rgm",
+     "org": "Airports Company of Zimbabwe (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Robert Gabriel Mugabe International Airport is the largest in Zimbabwe"
+    }
+   ]
+  },
+  {
+   "claim": "serving the capital, Harare",
+   "verdict": "confirmed",
+   "inAfter": "serving the capital, Harare",
+   "note": "The operator puts it 15 km south of Harare; the coordinates check gives 12.3 km in a straight line at 160 degrees (south), so the operator's figure passes (ratio 1.22). The distance is not added to the text.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport serving Harare, the capital of Zimbabwe"
+    },
+    {
+     "file": "acz-rgm",
+     "org": "Airports Company of Zimbabwe (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "is located 15 kilometres south of Harare, the capital city of Zimbabwe"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 12.3 km (7.6 miles)",
+      "Bearing from the city centre: 160 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "run by the Airports Company of Zimbabwe",
+   "verdict": "corrected",
+   "inAfter": "It is run by the Airports Company of Zimbabwe.",
+   "note": "Replaces the line about the Civil Aviation Authority's head office (see the cut below). ACZ was set up by the Civil Aviation Amendment Act, 2018, and lists the airport first among the airports it runs.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is operated by the Airports Company of Zimbabwe."
+    },
+    {
+     "file": "acz-home",
+     "org": "Airports Company of Zimbabwe (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Airports Robert Gabriel Mugabe International Airport Buffalo Range Airport Victoria Falls International Airport"
+    },
+    {
+     "file": "acz-about",
+     "org": "Airports Company of Zimbabwe (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "The Airport Company of Zimbabwe (Private) Limited (ACZ) was established in 2018 through an Act of Parliament."
+    },
+    {
+     "file": "acz-rgm",
+     "org": "Airports Company of Zimbabwe (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Airports Company of Zimbabwe (Private) Limited develops, manages and operates airports"
+    }
+   ]
+  },
+  {
+   "claim": "official name Robert Gabriel Mugabe International Airport",
+   "verdict": "confirmed",
+   "inAfter": "The official name is Robert Gabriel Mugabe International Airport.",
+   "note": "Settles the drafting note: the operator, the airline and the FCDO all use this name in 2026.",
+   "sources": [
+    {
+     "file": "acz-rgm",
+     "org": "Airports Company of Zimbabwe (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Robert Gabriel Mugabe International Airport Tagline: Zimbabwe’s Premier Gateway to Southern Africa"
+    },
+    {
+     "file": "airzimbabwe-london",
+     "org": "Air Zimbabwe",
+     "dated": "2026-08-07",
+     "quote": "Route: Harare (Robert Gabriel Mugabe International Airport) to London Gatwick (South Terminal)."
+    },
+    {
+     "file": "fcdo-zimbabwe-safety",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-15",
+     "quote": "at the main intersections along the route to Robert Gabriel Mugabe International Airport"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Robert Gabriel Mugabe International Airport (IATA: HRE, ICAO: FVRG, formerly FVHA)"
+    }
+   ]
+  },
+  {
+   "claim": "Harare International Airport until November 2017",
+   "verdict": "confirmed",
+   "inAfter": "Its name until November 2017 was Harare International Airport",
+   "note": "africanews quotes the Civil Aviation Authority of Zimbabwe's AIRAC notice: renamed with effect from 9 November 2017.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On 9 November 2017, Harare International Airport was officially, and controversially, renamed after the second President of Zimbabwe"
+    },
+    {
+     "file": "africanews-rename",
+     "org": "Africanews",
+     "dated": "2017-11-09",
+     "quote": [
+      "With effect from 9 November 2017 Harare International Airport will be renamed R. G. Mugabe International Airport.",
+      "The Harare International Airport – one of the biggest in the country, is now known as the Robert Gabriel Mugabe International Airport."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "began as Salisbury Airport in 1956",
+   "verdict": "confirmed",
+   "inAfter": "It began as Salisbury Airport in 1956.",
+   "note": "Wikipedia says commissioned on 1 July 1956 and officially opened on 5 February 1957; the operator says established in 1956. Only the year both give is used.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The new Salisbury Airport was finally commissioned on 1 July 1956 by the Government of Rhodesia and Nyasaland."
+    },
+    {
+     "file": "acz-rgm",
+     "org": "Airports Company of Zimbabwe (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Established in 1956 as Salisbury Airport"
+    }
+   ]
+  },
+  {
+   "claim": "ICAO code FVRG, old code FVHA still in some databases",
+   "verdict": "confirmed",
+   "inAfter": "The ICAO code is FVRG, though some databases still carry the old code, FVHA.",
+   "note": "FVRG is the operator's own code for the airport. FVHA as the old code rests on Wikipedia ('formerly FVHA') and OurAirports, whose current record for the airport still carries FVHA, which is the point of the warning. The Civil Aviation Authority's AIP (caaz.co.zw) dropped the connection, so the date of the change is not given.",
+   "sources": [
+    {
+     "file": "acz-rgm",
+     "org": "Airports Company of Zimbabwe (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "ICAO: FVRG | IATA: HRE"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "ICAO: FVRG, formerly FVHA"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "Airport: Robert Gabriel Mugabe International Airport (OurAirports FVHA, IATA HRE)"
+    }
+   ]
+  },
+  {
+   "claim": "Air Zimbabwe, the national airline",
+   "verdict": "confirmed",
+   "inAfter": "Air Zimbabwe, the national airline",
+   "sources": [
+    {
+     "file": "airzimbabwe-about",
+     "org": "Air Zimbabwe",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Air Zimbabwe stands as the flag carrier of Zimbabwe"
+    },
+    {
+     "file": "aviationweek-london",
+     "org": "Aviation Week",
+     "dated": "2026-06-09",
+     "quote": "the Zimbabwean flag carrier"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Air Zimbabwe, the national flag carrier"
+    }
+   ]
+  },
+  {
+   "claim": "resumed direct flights Harare to London Gatwick in July 2026, flown by Plus Ultra",
+   "verdict": "corrected",
+   "inAfter": "resumed direct flights from Harare to London Gatwick in July 2026, flown for it by the Spanish airline Plus Ultra",
+   "note": "Added: the most important change for a UK agent, and the subject of the FCDO's latest update. Dates differ in detail (Aviation Week: the wet lease starts 1 July; the FCDO said 'has resumed' in its 15 July update; Air Zimbabwe gives 22 July as the resumption date), so only the month is given. Air Zimbabwe says three flights a week and an A330-300, Aviation Week an A330-200, so neither the frequency nor the aircraft is stated. Air Zimbabwe says the return flights use Gatwick's South Terminal; one source, not stated.",
+   "sources": [
+    {
+     "file": "airzimbabwe-london",
+     "org": "Air Zimbabwe",
+     "dated": "2026-08-07",
+     "quote": [
+      "Air Zimbabwe has resumed direct scheduled flights between Harare and London",
+      "Resumption Date: 22 July 2026",
+      "Route: Harare (Robert Gabriel Mugabe International Airport) to London Gatwick (South Terminal).",
+      "under an Aircraft, Crew, Maintenance and Insurance (ACMI) wet lease agreement with Spanish carrier Plus Ultra Líneas Aéreas"
+     ]
+    },
+    {
+     "file": "aviationweek-london",
+     "org": "Aviation Week",
+     "dated": "2026-06-09",
+     "quote": [
+      "Under a 13-month agreement starting July 1, Plus Ultra will operate services between Harare and London Gatwick Airport (LGW) on behalf of Air Zimbabwe.",
+      "David Casey June 09, 2026"
+     ]
+    },
+    {
+     "file": "fcdo-zimbabwe-safety",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-15",
+     "quote": "Air Zimbabwe has resumed direct flights between London and Harare. This service is operated by Spanish carrier Plus Ultra Líneas Aéreas on behalf of Air Zimbabwe."
+    },
+    {
+     "file": "fcdo-zimbabwe",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-15",
+     "quote": [
+      "Updated:",
+      "15 July 2026",
+      "Addition of information about direct flights between London and Harare"
+     ]
+    },
+    {
+     "file": "wikipedia-html",
+     "org": "Wikimedia",
+     "quote": "Air Zimbabwe Dar es Salaam , [ citation needed ] London–Gatwick"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: smash-and-grab robberies at main intersections on the airport route",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "The FCDO warns of smash-and-grab robberies from vehicles at the main intersections on the route to the airport.",
+   "note": "Added: it bears on every transfer. Attributed statement, checked against the FCDO's Zimbabwe page (updated 15 July 2026, still current 23 September 2026).",
+   "sources": [
+    {
+     "file": "fcdo-zimbabwe-safety",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-15",
+     "quote": [
+      "There have been smash-and-grab robberies from vehicles, including:",
+      "at the main intersections along the route to Robert Gabriel Mugabe International Airport"
+     ]
+    },
+    {
+     "file": "fcdo-zimbabwe",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-15",
+     "quote": [
+      "Still current at:",
+      "23 September 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the base for Air Zimbabwe",
+   "verdict": "cut",
+   "wasBefore": "and the base for Air Zimbabwe",
+   "why": "Only Wikipedia says 'base' in so many words. Air Zimbabwe's about page does not, and its contact page was down (Sucuri 502, twice). Its own pages do show its London and domestic flights starting in Harare, which the new text says instead."
+  },
+  {
+   "claim": "widely called Harare Airport or just RGM",
+   "verdict": "cut",
+   "wasBefore": "is widely called Harare Airport or just RGM",
+   "why": "Wikipedia alone. The operator writes 'RG Mugabe Int. Airport' and the aviation authority's 2017 notice 'R. G. Mugabe International Airport', neither 'RGM'. The Zimbabwean papers that use the nicknames (Herald, Chronicle, Sunday Mail, ZBC, ZimLive) answer with a Cloudflare challenge and NewsDay refused the request."
+  },
+  {
+   "claim": "older supplier records may use any of them",
+   "verdict": "cut",
+   "wasBefore": "Older supplier records may use any of them",
+   "why": "Reworded as advice about the Harare International name, the one still in use (Aviation Week tagged its June 2026 report 'Harare International Airport'). Salisbury Airport is kept as history."
+  },
+  {
+   "claim": "ICAO code changed from FVHA to FVRG",
+   "verdict": "cut",
+   "wasBefore": "its ICAO code changed from FVHA to FVRG",
+   "why": "Reworded, not removed: 'The ICAO code is FVRG, though some databases still carry the old code, FVHA.'"
+  },
+  {
+   "claim": "commissioned 1956, opened 5 February 1957, replacing Belvedere Airport",
+   "verdict": "cut",
+   "wasBefore": "The airport was commissioned in 1956 and opened on 5 February 1957, replacing Belvedere Airport, whose runway was badly aligned.",
+   "why": "The 1956 start is kept with the operator. The 5 February 1957 opening and the Belvedere story rest on Wikipedia alone: the 1957 Flight report and the University of Zimbabwe paper it cites are reachable only through web.archive.org, which the network policy blocks."
+  },
+  {
+   "claim": "approach through the Warren Hills, take-off over the city, tall buildings",
+   "verdict": "cut",
+   "wasBefore": "Aircraft had to approach through a gap in the Warren Hills and take off over the city centre, which was dangerous, and the growing number of tall buildings made it worse.",
+   "why": "Wikipedia alone (from a 1950 report it paraphrases), and history of no use for booking."
+  },
+  {
+   "claim": "Civil Aviation Authority of Zimbabwe head office on level 3",
+   "verdict": "cut",
+   "wasBefore": "The Civil Aviation Authority of Zimbabwe has its head office on level 3 of the international terminal.",
+   "why": "Out of date or at least unconfirmed. The airport has been run since the 2018 Act by the Airports Company of Zimbabwe, which gives its OWN head office as '3rd Level, Int. Terminal Building'; nothing current places the Civil Aviation Authority there, and its site (caaz.co.zw) dropped the connection. Replaced by who runs the airport."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so older supplier records may still use that name",
+   "why": "Advice: the name changed in November 2017, and Aviation Week still tagged its June 2026 report 'Harare International Airport'."
+  }
+ ],
+ "tracerOk": {}
+}

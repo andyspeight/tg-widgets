@@ -1,0 +1,210 @@
+{
+ "iata": "TAB",
+ "id": "recplvsVvyN6ctsPz",
+ "name": "A.N.R. Robinson International Airport",
+ "country": "Trinidad and Tobago",
+ "wikipedia": "https://en.wikipedia.org/wiki/A._N._R._Robinson_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Tobago's airport, at Crown Point in the south west of the island, 11 km from the capital Scarborough. It is one of two international airports in Trinidad and Tobago, the other being Piarco on Trinidad.\n\nThere are two terminals and the split is not the usual one. The International Terminal handles international traffic, cargo, general aviation and helicopters, with seven parking positions. The Regional or North Terminal is the main passenger building and takes everything to and from Trinidad and the rest of the Caribbean, with six positions. Most clients arriving from a Caribbean hub will use the regional building, not the international one.\n\nAn expansion programme has been running since February 2004. The instrument landing system, the new domestic terminal and the air traffic control modernisation are complete, while a new control tower and a landside transit mall were still pending.\n\nIt was formerly Crown Point International, so both names appear in supplier systems.",
+ "after": "Tobago's airport, 11 km from the capital, Scarborough. It is one of two international airports in Trinidad and Tobago, the other being Piarco on Trinidad.\n\nThe airports authority said in September 2025 that a new terminal was in its final stages, with airside works still under way. In its budget that October, the government said the airport would be fully operational by mid-2026. Check which terminal a client will use.\n\nIt was formerly Crown Point International, so both names appear in supplier systems.",
+ "claims": [
+  {
+   "claim": "Tobago's airport",
+   "verdict": "confirmed",
+   "inAfter": "Tobago's airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport located in Crown Point, Tobago in Trinidad and Tobago"
+    },
+    {
+     "file": "aatt-tour-nov2025",
+     "org": "Airports Authority of Trinidad and Tobago (operator)",
+     "dated": "2025-09-22",
+     "quote": "conducted an official tour of the new Eastern Terminal at the ANR Robinson International Airport, Tobago"
+    },
+    {
+     "file": "cal-scarborough",
+     "org": "Caribbean Airlines",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Scarborough (TAB)",
+      "ANR Robinson International"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "11 km from the capital, Scarborough",
+   "verdict": "confirmed",
+   "inAfter": "11 km from the capital, Scarborough",
+   "note": "Coordinates give 11.1 km in a straight line from the GeoNames centre of Scarborough (ratio 0.99).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "and 11 km (6.8 mi) from the capital, Scarborough"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Scarborough",
+      "Straight-line distance from the city centre: 11.1 km (6.9 miles)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "one of two international airports, the other Piarco",
+   "verdict": "confirmed",
+   "inAfter": "It is one of two international airports in Trinidad and Tobago, the other being Piarco on Trinidad.",
+   "note": "The national airports authority runs exactly these two airports and lists no other.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is one of two international airports serving the twin isle republic of Trinidad and Tobago. The other airport is located on the island of Trinidad, Piarco International Airport."
+    },
+    {
+     "file": "aatt-anr",
+     "org": "Airports Authority of Trinidad and Tobago (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Piarco International Airport",
+      "ANR Robinson International Airport"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a new terminal",
+   "verdict": "corrected",
+   "inAfter": "a new terminal",
+   "note": "Replaces the two-terminal description and the undated expansion list (see the cuts).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "As of July 2024, work is underway on the new airport terminal."
+    },
+    {
+     "file": "aatt-tour-nov2025",
+     "org": "Airports Authority of Trinidad and Tobago (operator)",
+     "dated": "2025-09-22",
+     "quote": "conducted an official tour of the new Eastern Terminal at the ANR Robinson International Airport, Tobago"
+    }
+   ]
+  },
+  {
+   "claim": "airports authority, September 2025: new terminal in final stages, airside works ongoing",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airports authority",
+   "inAfter": "The airports authority said in September 2025 that a new terminal was in its final stages, with airside works still under way.",
+   "note": "Attributed statement, checked against the authority's own release of 22 September 2025 (a year and a day old, so it is dated in the text). It also says the handover from NIDCO, the project manager, to the authority was under way and that the terminal would be commissioned 'at the earliest possible time'. Wikipedia's 'slated for completion in February 2025' was overtaken.",
+   "sources": [
+    {
+     "file": "aatt-tour-nov2025",
+     "org": "Airports Authority of Trinidad and Tobago (operator)",
+     "dated": "2025-09-22",
+     "quote": [
+      "22nd September, 2025",
+      "The Eastern Terminal project is now in its final stages",
+      "Critical airside works, which are crucial to the completi on of the project, remain ongoing",
+      "to ensure that the new terminal is commissioned and becomes fully operational at the earliest possible time"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "government budget, October 2025: airport fully operational by mid-2026",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "government",
+   "inAfter": "In its budget that October, the government said the airport would be fully operational by mid-2026.",
+   "note": "Attributed statement, checked against the Budget Statement 2026 (13 October 2025). Its words are 'by the second quarter of Fiscal 2026'; the statement does not define its fiscal year, and 'by mid-2026' holds whether that quarter is January to March or April to June 2026. Nothing from 2026 was found to say whether the terminal has opened: the authority's releases since September 2025 and Caribbean Airlines' releases from October 2025 to September 2026 carry no notice of a terminal move at Tobago; the Tobago House of Assembly site refused the connection and Newsday answered 502. Hence the advice to check.",
+   "sources": [
+    {
+     "file": "budget-fy2026",
+     "org": "Government of Trinidad and Tobago (Ministry of Finance, Budget Statement 2026)",
+     "dated": "2025-10-13",
+     "quote": [
+      "Monday, October 13, 2025",
+      "The A.N.R. Robinson International Airport will be fully operationalized by the second quarter of Fiscal 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "formerly Crown Point International",
+   "verdict": "confirmed",
+   "inAfter": "It was formerly Crown Point International",
+   "note": "Renamed after A. N. R. Robinson in May 2011 (Trinidad Express, 8 May 2011; Wikipedia gives 19 May 2011). The date is not stated.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "formerly Crown Point International Airport"
+    },
+    {
+     "file": "express-rename",
+     "org": "Trinidad Express",
+     "dated": "2011-05-08",
+     "quote": [
+      "THE CROWN POINT International Airport in Tobago will be renamed the Arthur Napoleon Raymond Robinson Airport",
+      "May 8, 2011"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "at Crown Point in the south west of the island",
+   "verdict": "cut",
+   "wasBefore": "at Crown Point in the south west of the island",
+   "why": "Wikipedia alone for the location. The Trinidad Express confirms the old name, Crown Point International, which the text keeps, but not where on the island the airport is; the coordinates check gives a bearing from Scarborough (251 degrees, west), not a position on the island. The Tobago Tourism Agency's site refused the request (403)."
+  },
+  {
+   "claim": "two terminals: International Terminal (international, cargo, general aviation, helicopters, seven positions) and Regional or North Terminal (Trinidad and Caribbean, six positions)",
+   "verdict": "cut",
+   "wasBefore": "There are two terminals and the split is not the usual one.",
+   "why": "The whole terminal paragraph rests on Wikipedia alone and cannot be confirmed as current: the authority said in September 2025 that a new terminal was in its final stages, and the government expected the airport to be fully operational by mid-2026. Replaced by that position and the advice to check."
+  },
+  {
+   "claim": "International Terminal handles international traffic, cargo, general aviation and helicopters",
+   "verdict": "cut",
+   "wasBefore": "The International Terminal handles international traffic, cargo, general aviation and helicopters, with seven parking positions.",
+   "why": "Wikipedia alone, and possibly overtaken by the new terminal."
+  },
+  {
+   "claim": "Regional or North Terminal is the main passenger building",
+   "verdict": "cut",
+   "wasBefore": "The Regional or North Terminal is the main passenger building and takes everything to and from Trinidad and the rest of the Caribbean, with six positions.",
+   "why": "Wikipedia alone, and possibly overtaken by the new terminal."
+  },
+  {
+   "claim": "clients from a Caribbean hub use the regional building",
+   "verdict": "cut",
+   "wasBefore": "Most clients arriving from a Caribbean hub will use the regional building, not the international one.",
+   "why": "Follows from the cut terminal split; replaced by the advice to check which terminal a client will use."
+  },
+  {
+   "claim": "expansion programme since February 2004: ILS, domestic terminal and ATC modernisation complete; control tower and transit mall pending",
+   "verdict": "cut",
+   "wasBefore": "An expansion programme has been running since February 2004. The instrument landing system, the new domestic terminal and the air traffic control modernisation are complete, while a new control tower and a landside transit mall were still pending.",
+   "why": "As the drafting note asked: none of the COMPLETED or PENDING items could be dated, and all rest on an undated Wikipedia list. The current works are the new terminal, which the text now covers with the authority's and the government's own dated statements."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Check which terminal a client will use.",
+   "why": "Advice: no source from 2026 says whether the new terminal has opened or which flights use it."
+  },
+  {
+   "text": "so both names appear in supplier systems.",
+   "why": "Advice kept from the old text; the Crown Point name was used until 2011."
+  }
+ ],
+ "tracerOk": {}
+}

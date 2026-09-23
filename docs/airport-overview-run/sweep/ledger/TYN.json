@@ -1,0 +1,172 @@
+{
+ "iata": "TYN",
+ "id": "rec8J6HsEST5aMMZE",
+ "name": "Taiyuan Wusu International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Taiyuan_Wusu_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Shanxi's main airport and the largest in the province, about 15 km south east of downtown Taiyuan. For anything in this part of northern China it is the practical arrival point rather than routing through Beijing and driving.\n\nThe field is older than most Chinese airports still in use. It was surveyed in 1939 and built the same year on ground near Wusu village, which gave the airport its name, and opened that November as a joint military and civilian airfield. It has been rebuilt and extended repeatedly since.\n\nIt remains a joint use airport, so parts of the site are not public and photography restrictions apply in a way they would not at a purely commercial terminal.",
+ "after": "Shanxi's main airport and the largest in the province, about 15 km south east of downtown Taiyuan. It handled about 14.6 million passengers in 2025.\n\nAn expansion has added a second runway, and a new terminal is being built.",
+ "claims": [
+  {
+   "claim": "Shanxi's main airport and the largest in the province",
+   "verdict": "confirmed",
+   "inAfter": "Shanxi's main airport and the largest in the province",
+   "note": "CAAC 2025: Taiyuan 14,573,546 passengers; the next Shanxi airport, Yuncheng, 2,873,454; then Datong, Linfen, Changzhi, Lüliang and Xinzhou, all under a million.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is the largest airport in Shanxi"
+    },
+    {
+     "file": "caac-2025-shanxi",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "Row: 太原/武宿 | 32 | 14573546",
+      "Row: 运城/盐湖 | 70 | 2873454",
+      "In words: Taiyuan 14,573,546 passengers; Yuncheng 2,873,454; Datong 950,646"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 15 km south east of downtown Taiyuan",
+   "verdict": "confirmed",
+   "inAfter": "about 15 km south east of downtown Taiyuan",
+   "note": "Coordinates: 14.9 km in a straight line at 156 degrees, which is south east; ratio 1.01.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is located about 15 kilometers (9.3 miles) southeast of"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 14.9 km",
+      "Bearing from the city centre: 156 degrees, which is south east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 14.6 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled about 14.6 million passengers in 2025.",
+   "note": "The old text gave no figure. CAAC 14,573,546 (32nd in China, down 1.4 per cent on 2024's 14,775,147); Wikipedia's infobox gives the same figure. The rank has only the one source, so it is not in the text.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "passengers 2025: 14,573,546"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat1_data = 14,573,546",
+      "stat_year = 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "an expansion has added a second runway",
+   "verdict": "corrected",
+   "inAfter": "An expansion has added a second runway",
+   "note": "Replaces \"rebuilt and extended repeatedly since\". The Phase III expansion (under way since the end of 2021) includes a second 3,600 m runway, which Wikipedia says came into use on 25 December 2025, when the first was closed for renovation. The date and the closure are not in the text: Wikipedia's source for them, the Shanxi provincial government's page, answered 503 and then 502 through the browser, and the one other source (a Tencent News aviation columnist, 2 May 2026) says the second runway is built and in use but gives no date. OurAirports' runway table lists both runways.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "This phase of the project included a new 400,000‑square‑meter T3 terminal, a second runway 3,600 meters long",
+      "the new second runway of Taiyuan Wusu International Airport was officially put into operation"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "dated": "2026-09-23",
+     "quote": [
+      "Runway 13L/31R: 3,600 m",
+      "Runway 13R/31L: 3,600 m",
+      "Runways listed: 2"
+     ]
+    },
+    {
+     "file": "qq-shiguang-20260502",
+     "org": "Tencent News (时光飞行, aviation columnist)",
+     "dated": "2026-05-02",
+     "quote": [
+      "2026-05-02 19:50",
+      "现在它的第二跑道已经建成启用"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a new terminal is being built",
+   "verdict": "corrected",
+   "inAfter": "a new terminal is being built",
+   "note": "The expansion's new T3 terminal (400,000 square metres). Wikipedia describes it as part of the project and reports no opening; the Tencent News columnist (2 May 2026) says a new large terminal is still being built. Low-tier second source, used only to confirm what Wikipedia already says; no official page was reachable (Shanxi government 502, the airport group's old site 503, WeChat posts behind a verification wall, not attempted further).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The terminal area includes the T3 terminal building",
+      "This phase of the project included a new 400,000‑square‑meter T3 terminal, a second runway 3,600 meters long"
+     ]
+    },
+    {
+     "file": "qq-shiguang-20260502",
+     "org": "Tencent News (时光飞行, aviation columnist)",
+     "dated": "2026-05-02",
+     "quote": [
+      "2026-05-02 19:50",
+      "还正在建设新的大型航站楼"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the practical arrival point rather than routing through Beijing and driving",
+   "verdict": "cut",
+   "wasBefore": "For anything in this part of northern China it is the practical arrival point rather than routing through Beijing and driving.",
+   "why": "Advice with nothing behind it in any source. Dropped rather than replaced."
+  },
+  {
+   "claim": "older than most Chinese airports still in use",
+   "verdict": "cut",
+   "wasBefore": "The field is older than most Chinese airports still in use.",
+   "why": "No source makes the comparison."
+  },
+  {
+   "claim": "surveyed and built in 1939 near Wusu village, which gave it its name; opened November 1939 as a joint military and civilian airfield",
+   "verdict": "cut",
+   "wasBefore": "It was surveyed in 1939 and built the same year on ground near Wusu village, which gave the airport its name, and opened that November as a joint military and civilian airfield.",
+   "why": "Only Wikipedia. Its own history also says the field went to military use in 1948 and reopened as a civil airport on 1 July 1971, the opening date in its infobox, so the 1939 story needs a second source before it is told. None reachable: the airport group's old site (sxairport.org.cn) answers 503, Chinese government pages 502, and the WeChat posts Wikipedia cites sit behind a verification wall."
+  },
+  {
+   "claim": "rebuilt and extended repeatedly since",
+   "verdict": "cut",
+   "wasBefore": "It has been rebuilt and extended repeatedly since.",
+   "why": "Goes with the history above; replaced by the current expansion, which two sources support."
+  },
+  {
+   "claim": "remains a joint use airport; parts not public; photography restrictions",
+   "verdict": "cut",
+   "wasBefore": "It remains a joint use airport, so parts of the site are not public and photography restrictions apply in a way they would not at a purely commercial terminal.",
+   "why": "Not supported. Wikipedia now says the 1939 field was joint military and civilian, went to military use in 1948 and was handed to the civil aviation administration in 1969; nothing says it is joint use today, and no source mentions photography rules."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "14.6": "rounded from 14,573,546 (CAAC, Wikipedia infobox)"
+ }
+}
