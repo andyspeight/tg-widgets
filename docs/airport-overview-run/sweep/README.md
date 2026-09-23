@@ -160,5 +160,7 @@ two sources is `Done`, and Done is servable. That is Andy's call, asked on
 | 23 Sep 2026 | SYZ Shiraz (revised) | Added the same sanctions sentence as IKA and MHD, from reports dated 21 and 22 September. The ledger carries a `revised` note |
 | 23 Sep 2026 | EVN Yerevan Zvartnots | Verified and pushed. 7 kept, 8 cut. Caught against the operator's live pages: no Europcar desk now (Carwiz, Enterprise, GoMotion, Hertz, SIXT), no HSBC cash machines, and the lounge is the airport's own Business Lounge, not Converse Bank's. 15 km from the centre is about 12 by road |
 | 23 Sep 2026 | GYD Baku | Verified and pushed. 9 kept, 10 cut. Caught: "running at up to 3 million" (7.5 million in 2024); the former name Bina International is disputed by the operator; lounge counts disagree (five, four or seven), so "several" |
+| 23 Sep 2026 | ULH AlUla | Verified and pushed. 4 kept, 8 cut. The October 2023 "expansion" was designs for a second terminal (Arab News); the 2011 opening, "first visitor airport" and "closest to Hegra" rest on Wikipedia alone |
+| 23 Sep 2026 | LXR Luxor | Verified and pushed. 4 kept, 5 cut. The capacity figures and the long facilities list rest on an old Wikipedia fact sheet; kept what Travel Weekly and Air Journal (June 2026) confirm: holiday flights and Nile cruise packages |
 
 Integrity pull, evening of 23 Sep: all 23 pushed records match their ledgers word for word, carry Verified Date 2026-09-23 and kept their Status. The other 576 Overview records are unchanged since the morning snapshot.

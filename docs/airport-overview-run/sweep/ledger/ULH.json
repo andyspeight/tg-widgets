@@ -1,0 +1,158 @@
+{
+ "iata": "ULH",
+ "id": "recU9ih8cnhpfILe8",
+ "name": "Al-Ula International Airport",
+ "country": "Saudi Arabia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Al-Ula_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Al-Ula in north west Saudi Arabia, and the closest one to Hegra, the pre-Islamic archaeological site, and to the Al-Ula Heritage Village.\n\nIt is worth knowing what this airport is for. It was the first in Saudi Arabia designed specifically to serve people coming to the region to visit, rather than domestic or business traffic.\n\nIt has grown very fast. It opened in October 2011 as a domestic airport with a first flight from Riyadh, built for 100,000 passengers a year. International flights were approved in March 2021 and an expansion lifted capacity to 400,000, at which point it was renamed Al-Ula International. A further expansion announced in October 2023 is meant to take it to 6 million passengers a year and add a logistics role for the north west of the kingdom.\n\nIt was originally named after Prince Abdul Majeed bin Abdulaziz Al Saud, so older references use that name.",
+ "after": "The airport for AlUla in north west Saudi Arabia. Built for 100,000 passengers a year, it was expanded to 400,000 and approved for international flights in March 2021. In October 2023 the Royal Commission for AlUla unveiled designs for a second terminal that would take capacity to 6 million a year and make the airport a logistics hub for the north west.\n\nIt was originally named after Prince Abdul Majeed bin Abdulaziz, so older references use that name.",
+ "claims": [
+  {
+   "claim": "the airport for AlUla in north west Saudi Arabia",
+   "verdict": "confirmed",
+   "inAfter": "The airport for AlUla in north west Saudi Arabia.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is an international airport serving the Al-Ula governorate in the Medina Province of Saudi Arabia"
+    },
+    {
+     "file": "spa",
+     "org": "Saudi Press Agency",
+     "dated": "2021-03-05",
+     "quote": "to become an important logistical center in northwestern Saudi Arabia"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "OurAirports municipality: Al-Ula"
+    }
+   ]
+  },
+  {
+   "claim": "built for 100,000, expanded to 400,000, international flights approved March 2021",
+   "verdict": "confirmed",
+   "inAfter": "Built for 100,000 passengers a year, it was expanded to 400,000 and approved for international flights in March 2021.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The planned capacity of the airport was 100,000 passengers per year",
+      "In March 2021, the General Authority of Civil Aviation in Saudi Arabia has approved the landing of international flights at the airport."
+     ]
+    },
+    {
+     "file": "spa",
+     "org": "Saudi Press Agency",
+     "dated": "2021-03-05",
+     "quote": [
+      "AlUla, March 5, 2021, SPA -- The Royal Commission for AlUla (RCU) announced on Thursday the approval by the General Authority of Civil Aviation (GACA) to start receiving international flights at AlUla International Airport.",
+      "The capacity has increased from 100,000 passengers to 400,000 passengers per year."
+     ]
+    },
+    {
+     "file": "arabnews-2399401",
+     "org": "Arab News",
+     "dated": "2023-10-29",
+     "quote": "which became an international airport in March 2021"
+    }
+   ]
+  },
+  {
+   "claim": "October 2023: second terminal designs, capacity to 6 million, logistics hub for the north west",
+   "verdict": "corrected",
+   "inAfter": "In October 2023 the Royal Commission for AlUla unveiled designs for a second terminal that would take capacity to 6 million a year and make the airport a logistics hub for the north west.",
+   "note": "Was 'A further expansion announced in October 2023 is meant to take it to 6 million'. Made precise from Arab News: what was unveiled were designs for a second terminal. No later progress report was found, so it stays a plan.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "In October 2023, The Royal Commission for Al-Ula announced a new expansions of the airport",
+      "The new expansion will increase the capacity from 400,000 to 6 million passengers every year. The airport will also serve as a logistics hub in Saudi Arabia's northwest."
+     ]
+    },
+    {
+     "file": "arabnews-2399401",
+     "org": "Arab News",
+     "dated": "2023-10-29",
+     "quote": [
+      "Designs for the second terminal of AlUla International Airport were unveiled by officials from the Royal Commission for AlUla Governorate",
+      "from 400,000 per year to 6 million",
+      "AlUla also being positioned as global logistics hub in Kingdom's northwest"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "originally named after Prince Abdul Majeed bin Abdulaziz",
+   "verdict": "confirmed",
+   "inAfter": "It was originally named after Prince Abdul Majeed bin Abdulaziz, so older references use that name.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "it was named after Abdul Majeed bin Abdulaziz Al Saud"
+    },
+    {
+     "file": "arabnews-317336",
+     "org": "Arab News",
+     "quote": "the new airport in Al-Ula after the late Prince Abdul Majeed"
+    }
+   ]
+  },
+  {
+   "claim": "closest airport to Hegra and the Heritage Village",
+   "verdict": "cut",
+   "wasBefore": "and the closest one to Hegra, the pre-Islamic archaeological site, and to the Al-Ula Heritage Village.",
+   "why": "Only Wikipedia."
+  },
+  {
+   "claim": "worth knowing what it is for",
+   "verdict": "cut",
+   "wasBefore": "It is worth knowing what this airport is for.",
+   "why": "Framing sentence for the cut claim that follows."
+  },
+  {
+   "claim": "first Saudi airport designed for visitors",
+   "verdict": "cut",
+   "wasBefore": "It was the first in Saudi Arabia designed specifically to serve people coming to the region to visit, rather than domestic or business traffic.",
+   "why": "Only Wikipedia; the cited 2010 and 2011 pages are gone or blocked."
+  },
+  {
+   "claim": "grown very fast",
+   "verdict": "cut",
+   "wasBefore": "It has grown very fast.",
+   "why": "Opinion."
+  },
+  {
+   "claim": "opened October 2011, first flight from Riyadh",
+   "verdict": "cut",
+   "wasBefore": "It opened in October 2011 as a domestic airport with a first flight from Riyadh, built for 100,000 passengers a year.",
+   "why": "The opening date and first flight rest on Wikipedia alone (the 2011 Arab News page returns 404, the GACA page and the web archive are unreachable). The 100,000 design capacity is kept with the Saudi Press Agency."
+  },
+  {
+   "claim": "renamed AlUla International at that point",
+   "verdict": "cut",
+   "wasBefore": "International flights were approved in March 2021 and an expansion lifted capacity to 400,000, at which point it was renamed Al-Ula International.",
+   "why": "The approval and capacity are kept. The timing of the renaming has one source; the Saudi Press Agency already uses the new name in March 2021 but does not say when it changed."
+  },
+  {
+   "claim": "October 2023 expansion as first worded",
+   "verdict": "cut",
+   "wasBefore": "A further expansion announced in October 2023 is meant to take it to 6 million passengers a year and add a logistics role for the north west of the kingdom.",
+   "why": "Reworded from Arab News: designs for a second terminal."
+  },
+  {
+   "claim": "originally named sentence as first worded",
+   "verdict": "cut",
+   "wasBefore": "It was originally named after Prince Abdul Majeed bin Abdulaziz Al Saud, so older references use that name.",
+   "why": "Kept almost as it was; the family name is dropped because Arab News gives only Prince Abdul Majeed."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

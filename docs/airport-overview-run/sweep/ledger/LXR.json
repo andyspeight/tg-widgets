@@ -1,0 +1,147 @@
+{
+ "iata": "LXR",
+ "id": "recKIq48kQs5RLSAW",
+ "name": "Luxor International Airport",
+ "country": "Egypt",
+ "wikipedia": "https://en.wikipedia.org/wiki/Luxor_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Luxor, 6 km east of the city, and the practical arrival for the Valley of the Kings and for anyone joining a Nile cruise. A lot of the traffic is charter.\n\nIt is much bigger than the town suggests. An upgrade in 2005 lifted capacity to eight million passengers a year, with 48 check in desks, eight gates and five baggage belts.\n\nThe passenger facilities are unusually complete: a bank, a bureau de change and a cash machine, restaurants and cafeterias, a VIP lounge, duty free, a chemist, a newsagent, a gift shop, a travel agency, a tourist help desk, car hire, first aid, a baby and parent room, a business centre and step free access throughout.\n\nOn the freight side there is refrigerated storage, animal quarantine and livestock handling, with EgyptAir Cargo as the handling agent.",
+ "after": "The airport for Luxor, about 6 km east of the city, used by visitors to the Valley of the Kings and by passengers joining Nile cruises. Charter and holiday airlines fly in, and tour operators sell flights packaged with week-long Nile cruises.",
+ "claims": [
+  {
+   "claim": "the airport for Luxor, about 6 km east of the city",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Luxor, about 6 km east of the city",
+   "note": "Coordinates give 7.2 km in a straight line at 116 degrees from the GeoNames centre (south east on an 8-point rose, one point from east, inside the tolerance); ratio 0.84.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "is the main airport serving the city of Luxor, Egypt",
+      "It is located 6 km (4 miles) east of the city."
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Luxor",
+      "Straight-line distance from the city centre: 7.2 km (4.4 miles)",
+      "Bearing from the city centre: 116 degrees, which is south east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "used by visitors to the Valley of the Kings and passengers joining Nile cruises",
+   "verdict": "confirmed",
+   "inAfter": "used by visitors to the Valley of the Kings and by passengers joining Nile cruises",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "as it is a popular tourist destination for those visiting the River Nile and the Valley of the Kings"
+    },
+    {
+     "file": "tw-easyjet",
+     "org": "Travel Weekly (UK)",
+     "dated": "2024-07-17",
+     "quote": [
+      "Luxor is home to famous monuments such as the Luxor Temple, the Valley of the Kings and the tomb of Tutankhamun.",
+      "seven-night Nile cruises"
+     ]
+    },
+    {
+     "file": "tw-tui",
+     "org": "Travel Weekly (UK)",
+     "dated": "2024-11-07",
+     "quote": "The Boeing 737 services will feed Nile river cruises"
+    }
+   ]
+  },
+  {
+   "claim": "charter and holiday airlines fly in",
+   "verdict": "softened",
+   "inAfter": "Charter and holiday airlines fly in",
+   "note": "Was 'A lot of the traffic is charter': no source gives a share, so the text says who flies in rather than how much.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Many charter airlines use the airport"
+    },
+    {
+     "file": "tw-tui",
+     "org": "Travel Weekly (UK)",
+     "dated": "2024-11-07",
+     "quote": "Tui Airways has started winter season flights to Luxor from Gatwick and Manchester."
+    },
+    {
+     "file": "airjournal-2026",
+     "org": "Air Journal",
+     "dated": "2026-06-27",
+     "quote": "EasyJet annonce l'ouverture de deux liaisons inédites vers Louxor, au départ de Lyon-Saint-Exupéry et de Nantes-Atlantique."
+    }
+   ]
+  },
+  {
+   "claim": "tour operators package flights with week-long Nile cruises",
+   "verdict": "confirmed",
+   "inAfter": "and tour operators sell flights packaged with week-long Nile cruises",
+   "note": "TUI (its own ship, Tui Al Horeya) and easyJet holidays both do. The UK routes themselves are not named: the reports on them are from 2024, older than the twelve months the standard allows for routes.",
+   "sources": [
+    {
+     "file": "tw-easyjet",
+     "org": "Travel Weekly (UK)",
+     "dated": "2024-07-17",
+     "quote": "easyJet holidays will offer a river cruise package holiday from Luxor, with seven-night Nile cruises"
+    },
+    {
+     "file": "airjournal-2026",
+     "org": "Air Journal",
+     "dated": "2026-06-27",
+     "quote": "une croisière de 7 nuits sur le Nil en pension complète"
+    },
+    {
+     "file": "tw-tui",
+     "org": "Travel Weekly (UK)",
+     "dated": "2024-11-07",
+     "quote": "Nile river cruises operated by refurbished ship Tui Al Horeya"
+    }
+   ]
+  },
+  {
+   "claim": "practical arrival for the Valley of the Kings and Nile cruises; much charter",
+   "verdict": "cut",
+   "wasBefore": "The airport for Luxor, 6 km east of the city, and the practical arrival for the Valley of the Kings and for anyone joining a Nile cruise. A lot of the traffic is charter.",
+   "why": "Reworded to the two-source version above."
+  },
+  {
+   "claim": "much bigger than the town suggests",
+   "verdict": "cut",
+   "wasBefore": "It is much bigger than the town suggests.",
+   "why": "Opinion, resting on the capacity claim that follows."
+  },
+  {
+   "claim": "2005 upgrade, 8 million capacity, 48 desks, 8 gates, 5 belts",
+   "verdict": "cut",
+   "wasBefore": "An upgrade in 2005 lifted capacity to eight million passengers a year, with 48 check in desks, eight gates and five baggage belts.",
+   "why": "Only Wikipedia; the Egyptian airports holding company's site did not respond and Ahram refused the fetcher."
+  },
+  {
+   "claim": "facilities list",
+   "verdict": "cut",
+   "wasBefore": "The passenger facilities are unusually complete: a bank, a bureau de change and a cash machine, restaurants and cafeterias, a VIP lounge, duty free, a chemist, a newsagent, a gift shop, a travel agency, a tourist help desk, car hire, first aid, a baby and parent room, a business centre and step free access throughout.",
+   "why": "Only Wikipedia, undated, and it reads like an old airport fact sheet."
+  },
+  {
+   "claim": "cargo facilities, EgyptAir Cargo handling agent",
+   "verdict": "cut",
+   "wasBefore": "On the freight side there is refrigerated storage, animal quarantine and livestock handling, with EgyptAir Cargo as the handling agent.",
+   "why": "Only Wikipedia, and of little use to a travel agent."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
