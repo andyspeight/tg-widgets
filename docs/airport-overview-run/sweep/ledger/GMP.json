@@ -1,0 +1,235 @@
+{
+ "iata": "GMP",
+ "id": "recU2PUIwouLDtSD0",
+ "name": "Seoul Gimpo International Airport",
+ "country": "South Korea",
+ "wikipedia": "https://en.wikipedia.org/wiki/Gimpo_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Seoul's second airport, at the far western edge of the city about 15 km from the centre, and much closer in than Incheon. It was the country's main international airport until Incheon replaced it in 2001, and carried over 23 million passengers in 2015.\n\nWhat makes it valuable now is a small set of short international routes into other cities' close-in airports. Gimpo flies to Haneda in Tokyo, Hongqiao in Shanghai, Kansai in Osaka, Beijing Capital and Songshan in Taipei. For a client on business in any of those cities, that pairing saves a long transfer at both ends.\n\nOne booking note. Gimpo used to hold the code SEL, which now stands for all Seoul airports in reservation systems, so check which airport a fare actually uses.\n\nThe airfield was built in 1939 as a Japanese army base, with runways laid on rock hauled by hand by Korean labourers, and played a major part in the Korean War as Kimpo Air Base, the name the United States Air Force gave it.",
+ "after": "Seoul's city airport, at the western edge of town about 15 km from the centre, and much closer in than Incheon. It was Seoul's main international airport until Incheon opened in 2001.\n\nIts international flights include Songshan, Taipei's own city airport. For a client on business in Taipei, flying between the two saves a long transfer at both ends.\n\nThe airfield dates from 1939, when the Japanese army built it. A presidential decree made it Gimpo International Airport in 1958.",
+ "claims": [
+  {
+   "claim": "Seoul's city airport, at the western edge of town about 15 km from the centre",
+   "verdict": "corrected",
+   "inAfter": "Seoul's city airport, at the western edge of town about 15 km from the centre",
+   "note": "Was 'Seoul's second airport, at the far western edge of the city about 15 km from the centre'. 'Second' (Wikipedia's 'secondary airport') has no second source, so the text says what the operator's address and both coordinate sets show: it is inside Seoul, in Gangseo-gu, 16.5 km west of the GeoNames centre (17.6 km on Wikipedia's coordinates); 15 km gives ratios of 0.91 and 0.85, inside the check.",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "Korea Airports Corporation (the operator, airport.co.kr/gimpoeng)",
+     "dated": "read 2026-09-23 (the airport's overview and history page)",
+     "quote": "Gimpo Airport is located at 112 Haneul-gil (Gonghang-dong), Gangseo-gu, Seoul."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Seoul",
+      "Straight-line distance from the city centre: 16.5 km (10.3 miles)",
+      "Bearing from the city centre: 267 degrees, which is west"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "is located in the far western end of Seoul, the capital of South Korea, some 15 kilometres (9 mi) west of the central district of Seoul."
+    }
+   ]
+  },
+  {
+   "claim": "much closer in than Incheon",
+   "verdict": "confirmed",
+   "inAfter": "and much closer in than Incheon.",
+   "note": "Two coordinate sets: from the centre of Seoul, Gimpo is 16.5 km and Incheon 47.7 km (OurAirports and GeoNames), or 17.6 km and 49.7 km (Wikipedia's own coordinates).",
+   "sources": [
+    {
+     "file": "geo-incheon",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre of Seoul to Incheon International Airport: 47.7 km (29.6 miles)"
+    },
+    {
+     "file": "wikipedia-coords",
+     "org": "Wikimedia",
+     "dated": "coordinates, revisions of 2026-09-12 to 2026-09-22",
+     "quote": [
+      "Straight-line distance from Seoul to Gimpo International Airport, from the Wikipedia coordinates: 17.6 km",
+      "Straight-line distance from Seoul to Incheon International Airport, from the Wikipedia coordinates: 49.7 km"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Seoul's main international airport until Incheon opened in 2001",
+   "verdict": "corrected",
+   "inAfter": "It was Seoul's main international airport until Incheon opened in 2001.",
+   "note": "Was 'the country's main international airport until Incheon replaced it in 2001'. The operator dates Gimpo's designation as an international airport to 1958; Incheon's own history marks the 20th anniversary of its opening on 29 March 2021, so it opened on 29 March 2001; Wikipedia says Incheon replaced Gimpo as the main international airport in 2001.",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "Korea Airports Corporation (the operator, airport.co.kr/gimpoeng)",
+     "dated": "read 2026-09-23 (the airport's overview and history page)",
+     "quote": "it was only in 1958 when it was designated as Gimpo International Airport by a presidential decree"
+    },
+    {
+     "file": "iiac-history",
+     "org": "Incheon International Airport Corporation (airport.kr)",
+     "dated": "read 2026-09-23 (its history page)",
+     "quote": "2021. 03. 29 Celebrated the 20th anniversary of Incheon International Airport’s opening"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "was the main international airport for Seoul and South Korea before being replaced by Incheon International Airport in 2001"
+    }
+   ]
+  },
+  {
+   "claim": "international flights include Songshan, Taipei's own city airport",
+   "verdict": "corrected",
+   "inAfter": "Its international flights include Songshan, Taipei's own city airport.",
+   "note": "Replaces 'Gimpo flies to Haneda in Tokyo, Hongqiao in Shanghai, Kansai in Osaka, Beijing Capital and Songshan in Taipei'. Only Songshan has a second current source that could be read: Taiwan's official schedule data (MOTC's TDX, saved for Songshan on 23 September 2026 and copied here) lists flights from Songshan (TSA) to Gimpo (GMP) in late September 2026, and the Taipei Metro calls Songshan an airport right in the city core. The operator's own schedule and live flight pages build their tables by script, so the saved copies carry no routes; the other four routes rest on Wikipedia alone (cut below). 'Include' because Wikipedia lists others.",
+   "sources": [
+    {
+     "file": "tdx-intl-schedule",
+     "org": "Taiwan's Ministry of Transportation and Communications (TDX, tdx.transportdata.tw)",
+     "dated": "schedule read 2026-09-23 (flights from 25 September 2026)",
+     "quote": "\"AirlineID\":\"BR\",\"ScheduleStartDate\":\"2026-09-25\",\"ScheduleEndDate\":\"2026-09-26\",\"FlightNumber\":\"BR156\",\"DepartureAirportID\":\"TSA\",\"DepartureTime\":\"09:20\",\"CodeShare\":[],\"ArrivalAirportID\":\"GMP\""
+    },
+    {
+     "file": "metro-wenhu-stamps",
+     "org": "Taipei Rapid Transit Corporation (Taipei Metro, gov.taipei)",
+     "dated": "Wenhu line leaflet (read 2026-09-23)",
+     "quote": "Located right in the city core, Taipei Songshan Airport sends out jets"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": [
+      "Services to Taipei Songshan Airport started on 30 April 2012.",
+      "This \"city to city\" route was followed by new routes to Hongqiao Airport in Shanghai"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the airfield dates from 1939, when the Japanese army built it",
+   "verdict": "confirmed",
+   "inAfter": "The airfield dates from 1939, when the Japanese army built it.",
+   "note": "Kept from 'The airfield was built in 1939 as a Japanese army base'.",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "Korea Airports Corporation (the operator, airport.co.kr/gimpoeng)",
+     "dated": "read 2026-09-23 (the airport's overview and history page)",
+     "quote": "The history of the airport started in 1939 when the Japanese army constructed a runway"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "The airfield was built in 1939 during the Japanese Imperial period as an Imperial Army base."
+    }
+   ]
+  },
+  {
+   "claim": "a presidential decree made it Gimpo International Airport in 1958",
+   "verdict": "corrected",
+   "inAfter": "A presidential decree made it Gimpo International Airport in 1958.",
+   "note": "The operator's own milestone, in place of the Korean War line (cut below): a like-for-like replacement within the airport's history.",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "Korea Airports Corporation (the operator, airport.co.kr/gimpoeng)",
+     "dated": "read 2026-09-23 (the airport's overview and history page)",
+     "quote": "it was only in 1958 when it was designated as Gimpo International Airport by a presidential decree"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "In 1958, the airport was redesignated as the Gimpo international airport of Seoul by a presidential decree"
+    }
+   ]
+  },
+  {
+   "claim": "Seoul's second airport",
+   "verdict": "cut",
+   "wasBefore": "Seoul's second airport, at the far western edge of the city",
+   "why": "'Second' rests on Wikipedia alone. Reworded to what the operator's address and the coordinates show (see above)."
+  },
+  {
+   "claim": "the country's main international airport until Incheon replaced it",
+   "verdict": "cut",
+   "wasBefore": "It was the country's main international airport until Incheon replaced it in 2001",
+   "why": "Reworded with the operator and Incheon's own history (see above)."
+  },
+  {
+   "claim": "over 23 million passengers in 2015",
+   "verdict": "cut",
+   "wasBefore": "and carried over 23 million passengers in 2015.",
+   "why": "Eleven years old. No current total could be read: Wikipedia's infobox stops at 2019 (25,448,416, from the operator), and the operator's English site has no statistics page."
+  },
+  {
+   "claim": "what makes it valuable now: short international routes into close-in airports",
+   "verdict": "cut",
+   "wasBefore": "What makes it valuable now is a small set of short international routes into other cities' close-in airports.",
+   "why": "The framing rests on Wikipedia's 'city to city' routes, which only it lists; the one route with a second source is kept (see above)."
+  },
+  {
+   "claim": "routes to Haneda, Hongqiao, Kansai and Beijing Capital",
+   "verdict": "cut",
+   "wasBefore": "Gimpo flies to Haneda in Tokyo, Hongqiao in Shanghai, Kansai in Osaka, Beijing Capital and Songshan in Taipei.",
+   "why": "Only Songshan could be confirmed from a second source (Taiwan's schedule data). The others rest on Wikipedia alone in what could be read: the operator's schedule and live flight pages are built by script, and Haneda's city list page is a template with no cities in the saved copy. Worth restoring when an airline or airport page can be read; Haneda is the one most worth a check by hand."
+  },
+  {
+   "claim": "for a client on business in any of those cities, that pairing saves a long transfer",
+   "verdict": "cut",
+   "wasBefore": "For a client on business in any of those cities, that pairing saves a long transfer at both ends.",
+   "why": "The old text's judgement, kept for Taipei, where both airports are sourced as city airports (see the opinion)."
+  },
+  {
+   "claim": "Gimpo used to hold the code SEL, now used for all Seoul airports",
+   "verdict": "cut",
+   "wasBefore": "One booking note. Gimpo used to hold the code SEL, which now stands for all Seoul airports in reservation systems, so check which airport a fare actually uses.",
+   "why": "Wikipedia alone; no IATA or airline page that could be read gives it. Worth checking in a booking system (as at Viracopos's SAO code): it goes back if true."
+  },
+  {
+   "claim": "runways laid on rock hauled by hand by Korean labourers",
+   "verdict": "cut",
+   "wasBefore": "with runways laid on rock hauled by hand by Korean labourers",
+   "why": "Wikipedia alone; the operator says only that the Japanese army built the runway."
+  },
+  {
+   "claim": "the Korean War, as Kimpo Air Base, the name the US Air Force gave it",
+   "verdict": "cut",
+   "wasBefore": "and played a major part in the Korean War as Kimpo Air Base, the name the United States Air Force gave it.",
+   "why": "Wikipedia alone, which also says the USAF designation was K-14; 'Kimpo' is the older spelling of the name. The operator's history mentions only that the US Air Force used the runway and a 1949 agreement."
+  },
+  {
+   "claim": "Jeju to Gimpo is the world's busiest domestic route",
+   "verdict": "cut",
+   "why": "Held back: OAG (read 23 September 2026) names Jeju to Seoul Gimpo the world's busiest domestic route in September 2026, with 1.08 million seats. It replaces nothing in the old text, which is about the international flights.",
+   "sources": [
+    {
+     "file": "oag-busiest",
+     "org": "OAG (flight data company, oag.com)",
+     "dated": "September 2026 (read 2026-09-23 for CJU)",
+     "quote": "The World’s Busiest Domestic route in September 2026 is Jeju International (CJU) to Seoul Gimpo (GMP), offering 1.08 million seats"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "For a client on business in Taipei, flying between the two saves a long transfer at both ends.",
+   "why": "The old text's judgement, kept for the one pairing that is sourced: Gimpo is 16.5 km from the centre of Seoul against Incheon's 47.7 km, and the Taipei Metro puts Songshan in the city core."
+  }
+ ],
+ "tracerOk": {
+  "Seoul's city": "The tracer reads the opening possessive; Seoul is on the operator's page and in both coordinate sets.",
+  "Taipei's own": "A possessive; Taipei is in the metro leaflet and in Wikipedia."
+ }
+}
