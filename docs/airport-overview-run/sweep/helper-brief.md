@@ -56,6 +56,9 @@ finished, passing example). Follow both exactly.
    two chained retries on egress-blocked sites).
    A site's own search page counts as a search page, and a blocked site is
    not fetched again just to read the refusal (added 23 Sep late evening).
+   Give links.mjs, plainlinks.mjs and grabb.mjs https:// addresses only: the
+   proxy refuses a plain http:// address itself (405), which spends the try
+   (added 23 Sep night, after three helpers lost browser tries that way).
    Make sure an "official" site really is the airport's: compare the domain
    with OurAirports' home link (in scratchpad/sweep/airports.csv) or the
    Wikipedia infobox. billund-airport.com, for one, is a hijacked spam site.
@@ -63,8 +66,13 @@ finished, passing example). Follow both exactly.
    statistics office; the airline's own site for its own base; reputable news
    or aviation trade press (Reuters, AP, Aviation Week, CAPA, Simple Flying
    only to back up something plainer sources say). Travel blogs and content
-   farms only as a last-resort tie-breaker. Sites that copy Wikipedia do not
+   farms only as a last-resort tie-breaker, never as the second source
+   (a specialist history blog included). Sites that copy Wikipedia do not
    count.
+   A quote must be the source's own words as saved. Never quote a line you
+   wrote into an evidence file yourself (a summary, an 'In words' line or a
+   NOTE line); put your own reading in the claim's note instead (added 23 Sep
+   night, after a helper quoted its own summary of a CAAC extract).
    Time-sensitive claims (passengers, airlines, routes, terminals, works,
    renamings, closures, conflict) need a source dated within the last 12
    months. If Wikipedia is out of date, the corrected fact needs two sources
