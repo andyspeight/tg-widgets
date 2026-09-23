@@ -1,0 +1,268 @@
+{
+ "iata": "CRL",
+ "id": "recanEPB4f0E9YTsQ",
+ "name": "Brussels South Charleroi Airport",
+ "country": "Belgium",
+ "wikipedia": "https://en.wikipedia.org/wiki/Brussels_South_Charleroi_Airport",
+ "audited": "2026-09-23",
+ "before": "Sold as a Brussels airport and 46 km from it, which is the first thing to make clear. Charleroi is 7 km from its own city centre and is Belgium's second busiest airport, with 10,504,554 passengers in 2024.\n\nThe transfer is well organised but it is a transfer. A shuttle bus runs continuously between the airport and Brussels-Midi station, roughly every thirty minutes and timed to the flights, with fares starting at 14.99 euros through Flibco. There is also a coach to Brussels-Central.\n\nFor the Belgian rail network, the Airport Express bus A runs to Charleroi-South station every thirty minutes, taking about twenty minutes, and from there SNCB trains reach Brussels, Namur, Liège and Mons. A combined bus and train ticket to any Belgian station can be bought in the terminal.\n\nShuttles also run to Luxembourg and Lille.\n\nThe airport is a busy general aviation field as well, with three flight schools based here, and flying at Gosselies goes back to 1919.",
+ "after": "Ryanair sells it as Brussels Charleroi, but it is about 45 km south of Brussels, which is the first thing to make clear to a client. It is Belgium's second busiest airport, 7 km from the centre of Charleroi, its own city. Eurostat counted about 11.2 million passengers there in 2025.\n\nThe transfer into Brussels is well organised, but it is a transfer. Flibco runs shuttles to Brussels-Midi station every 20 minutes, taking about 55 minutes, with fares from 14.99 euros. Shuttles also run to Luxembourg and Lille.\n\nFor the Belgian rail network, TEC buses run to Charleroi Central station in about 20 minutes, and the airport gives four departures an hour. A combined train and bus ticket is sold on the SNCB website.",
+ "claims": [
+  {
+   "claim": "Ryanair sells it as Brussels Charleroi",
+   "verdict": "confirmed",
+   "inAfter": "Ryanair sells it as Brussels Charleroi",
+   "primary": true,
+   "attribution": "Ryanair",
+   "note": "Ryanair's own airport data names it 'Brussels Charleroi' under the Brussels city code; Wikipedia gives 'Brussels-Charleroi Airport' as a common name.",
+   "sources": [
+    {
+     "file": "ryanair-api",
+     "org": "Ryanair (ryanair.com airport data)",
+     "dated": "2026-09-23",
+     "quote": [
+      "\"name\":\"Brussels Charleroi\"",
+      "\"macCityCode\":\"BRUSSELS\""
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "informally called Brussels-Charleroi Airport"
+    }
+   ]
+  },
+  {
+   "claim": "about 45 km south of Brussels",
+   "verdict": "corrected",
+   "inAfter": "it is about 45 km south of Brussels",
+   "note": "Was '46 km'. The straight line from the centre of Brussels is 43.9 km at 170 degrees (south); Wikipedia's 46 km fits that. Flibco's 'around 60 kilometers' is by road. 'About 45 km' is what the straight-line sources support.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "46 km (29 miles) south of the city of Brussels"
+    },
+    {
+     "file": "geo-brussels",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from Brussels: 43.9 km (27.3 miles)",
+      "Bearing from Brussels to the airport: 170 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "7 km from the centre of Charleroi",
+   "verdict": "confirmed",
+   "inAfter": "7 km from the centre of Charleroi, its own city",
+   "note": "Coordinates: 5.7 km in a straight line (ratio 1.23, a road distance).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is 7 km (5 miles) north of downtown Charleroi"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 5.7 km (3.6 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "Belgium's second busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "Belgium's second busiest airport",
+   "note": "Eurostat 2025: Brussels 23,754,209, Charleroi 11,244,536, then Ostend-Bruges 393,731.",
+   "sources": [
+    {
+     "file": "eurostat-be",
+     "org": "Eurostat",
+     "dated": "2026-09-23",
+     "quote": [
+      "Eurostat BE_EBBR BRUSSELS airport: passengers carried in 2025: 23,754,209",
+      "Eurostat BE_EBCI CHARLEROI/BRUSSELS SOUTH airport: passengers carried in 2025: 11,244,536",
+      "Eurostat BE_EBOS OOSTENDE/BRUGGE airport: passengers carried in 2025: 393,731"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Brussels-Charleroi is the second busiest airport in Belgium in terms of passengers"
+    }
+   ]
+  },
+  {
+   "claim": "Eurostat: about 11.2 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "Eurostat counted about 11.2 million passengers there in 2025.",
+   "primary": true,
+   "attribution": "Eurostat",
+   "note": "Replaces '10,504,554 passengers in 2024' (Wikipedia; Eurostat's own 2024 figure is 10,490,155). Attributed: no second source for 2025 could be read; the operator's news page gives only its summer 2026 record (almost 2.4 million in July and August).",
+   "sources": [
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "dated": "2026-09-23",
+     "quote": "Eurostat BE_EBCI Brussels South Charleroi Airport: passengers carried in 2025: 11,244,536"
+    }
+   ]
+  },
+  {
+   "claim": "Flibco shuttles to Brussels-Midi every 20 minutes, about 55 minutes, from 14.99 euros",
+   "verdict": "corrected",
+   "inAfter": "Flibco runs shuttles to Brussels-Midi station every 20 minutes, taking about 55 minutes, with fares from 14.99 euros.",
+   "primary": true,
+   "attribution": "Flibco",
+   "note": "Was 'roughly every thirty minutes'. Flibco, which runs the shuttle, gives departures every 20 minutes and 55 minutes' travel; the fare is on both the airport's and Flibco's pages. Flibco's FAQ also mentions 'around 19,00 euros' depending on the package; 'from 14.99' is its headline price and the airport's.",
+   "sources": [
+    {
+     "file": "flibco-brussels",
+     "org": "Flibco (shuttle operator, flibco.com)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Departures every 20 minutes",
+      "Brussels Midi - Charleroi Airport",
+      "Travel time 55 min",
+      "From 14.99€"
+     ]
+    },
+    {
+     "file": "op-access",
+     "org": "Brussels South Charleroi Airport (operator, brussels-charleroi-airport.com)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Shuttle bus connections are operated from Brussels (Brussels-midi station)",
+      "Tickets are available from 14,99 euros on the flibco.com website"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "shuttles to Luxembourg and Lille",
+   "verdict": "confirmed",
+   "inAfter": "Shuttles also run to Luxembourg and Lille.",
+   "sources": [
+    {
+     "file": "op-access",
+     "org": "Brussels South Charleroi Airport (operator, brussels-charleroi-airport.com)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Lille",
+      "Luxembourg",
+      "other cities in the greater region"
+     ]
+    },
+    {
+     "file": "flibco-charleroi",
+     "org": "Flibco (shuttle operator, flibco.com)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Book your shuttle bus from or to Charleroi Airport"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "There are several shuttles to different cities in the neighbouring countries including Luxembourg, and French cities such as Lille"
+    }
+   ]
+  },
+  {
+   "claim": "TEC buses to Charleroi Central station in about 20 minutes",
+   "verdict": "corrected",
+   "inAfter": "TEC buses run to Charleroi Central station in about 20 minutes",
+   "note": "Was 'Airport Express bus A ... to Charleroi-South station'. The airport's page gives line A1 to Charleroi Gare Centrale (Charleroi Central) and 20 minutes; Wikipedia names the TEC service and the 20 minutes. The TEC site refused (403).",
+   "sources": [
+    {
+     "file": "op-access",
+     "org": "Brussels South Charleroi Airport (operator, brussels-charleroi-airport.com)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Your airport is only 20 minutes from Charleroi Central station",
+      "A1 : Charleroi Gare Centrale > Airport",
+      "Visit the TEC website"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "local TEC bus service (Line A) between the airport and the station, with departures every 30 minutes and a journey time of around 20 minutes",
+      "Charleroi-Central railway station"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the airport gives four departures an hour",
+   "verdict": "corrected",
+   "inAfter": "the airport gives four departures an hour",
+   "primary": true,
+   "attribution": "airport",
+   "note": "Was 'every thirty minutes' (Wikipedia). Attributed to the airport, whose page gives 4 an hour between 4.30am and 11.30pm; TEC's own site refused (403).",
+   "sources": [
+    {
+     "file": "op-access",
+     "org": "Brussels South Charleroi Airport (operator, brussels-charleroi-airport.com)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "between 4.30am and 11.30pm with a frequency of 4x/hour"
+    }
+   ]
+  },
+  {
+   "claim": "combined train and bus ticket on the SNCB website",
+   "verdict": "corrected",
+   "inAfter": "A combined train and bus ticket is sold on the SNCB website.",
+   "note": "Was 'can be bought in the terminal'. The airport says the combined ticket is on SNCB's website, as Wikipedia also says in its later paragraph.",
+   "sources": [
+    {
+     "file": "op-access",
+     "org": "Brussels South Charleroi Airport (operator, brussels-charleroi-airport.com)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "A \"combined\" train + bus ticket is available on the SNCB website."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Tickets for the combined train and bus journey can be purchased at Belgian Rail stations or online via the SNCB/NMBS website"
+    }
+   ]
+  },
+  {
+   "claim": "46 km; 10,504,554 passengers in 2024",
+   "verdict": "cut",
+   "wasBefore": "Sold as a Brussels airport and 46 km from it, which is the first thing to make clear. Charleroi is 7 km from its own city centre and is Belgium's second busiest airport, with 10,504,554 passengers in 2024.",
+   "why": "Reworded. The 2024 figure is replaced by Eurostat's 2025 count; 46 km becomes 'about 45 km' (straight line 43.9 km). The rest is kept."
+  },
+  {
+   "claim": "Midi shuttle roughly every thirty minutes, timed to flights, from 14.99 via Flibco",
+   "verdict": "cut",
+   "wasBefore": "A shuttle bus runs continuously between the airport and Brussels-Midi station, roughly every thirty minutes and timed to the flights, with fares starting at 14.99 euros through Flibco.",
+   "why": "Flibco now gives every 20 minutes; reworded with its journey time. The fare is kept."
+  },
+  {
+   "claim": "coach to Brussels-Central",
+   "verdict": "cut",
+   "wasBefore": "There is also a coach to Brussels-Central.",
+   "why": "Wikipedia alone; the airport's own list of shuttles has Brussels-Midi, Lille and Luxembourg only."
+  },
+  {
+   "claim": "Airport Express bus A to Charleroi-South every thirty minutes; SNCB to Brussels, Namur, Liège and Mons; combined ticket in the terminal",
+   "verdict": "cut",
+   "wasBefore": "For the Belgian rail network, the Airport Express bus A runs to Charleroi-South station every thirty minutes, taking about twenty minutes, and from there SNCB trains reach Brussels, Namur, Liège and Mons. A combined bus and train ticket to any Belgian station can be bought in the terminal.",
+   "why": "Out of date on the airport's own page: the bus is now A1, to Charleroi Central (Gare Centrale), four an hour, and the combined ticket is sold on SNCB's website. The list of cities by train rests on Wikipedia alone."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which is the first thing to make clear to a client",
+   "why": "The old text's advice, kept: it follows from the confirmed distance."
+  },
+  {
+   "text": "The transfer into Brussels is well organised, but it is a transfer.",
+   "why": "The old text's judgement, kept; the shuttle facts that follow are sourced."
+  }
+ ],
+ "tracerOk": {}
+}
