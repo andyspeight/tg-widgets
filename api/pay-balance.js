@@ -221,6 +221,57 @@ function buildContactInfo(raw) {
   return ci;
 }
 
+/**
+ * Ask Travelify for a basket that takes `decision.amount` against this order,
+ * and return its https URL, or null for any failure (logged here, generic to
+ * the caller).
+ *
+ * The ONE way a balance payment is raised. The My Booking widget calls it
+ * through the handler below, and Luna Travel's traveller app through
+ * /api/internal/pay-balance-by-client. The amount always comes from
+ * decideCharge over an order fetched on the server, never from a request.
+ *
+ *   Reference / Description use the human-readable orderRef.
+ *   OrderRef is the order id + key joined with a slash (NOT orderRef).
+ *   Anything that isn't success:true with a usable https URL is a failure
+ *   (per the guide: generic failure, no redirect).
+ */
+export async function createBasket(creds, { raw, orderId, orderKey, orderRef }, decision, tag = 'pay-balance') {
+  const payload = {
+    Reference: orderRef,
+    Title: 'Balance Payment',
+    Description: `Balance Payment for Order ${orderRef}`,
+    Price: decision.amount,
+    Currency: decision.currency,
+    OrderRef: `${orderId}/${orderKey}`,
+    ContactInfo: buildContactInfo(raw),
+  };
+
+  let apiRes;
+  try {
+    apiRes = await fetch(ADDGENERICITEM_API, {
+      method: 'POST',
+      headers: travelifyAuthHeaders(creds.appId, creds.apiKey),
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(15000),
+    });
+  } catch (err) {
+    console.error(`[${tag}] addgenericitem network error:`, err.message);
+    return null;
+  }
+
+  const text = await apiRes.text();
+  let json = null;
+  try { json = text ? JSON.parse(text) : null; } catch { json = null; }
+
+  const url = json && json.success === true ? json.data : null;
+  if (!isHttpsUrl(url)) {
+    console.error(`[${tag}] addgenericitem did not return a basket url for order ${orderId} (status ${apiRes.status})`);
+    return null;
+  }
+  return url.trim();
+}
+
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -301,48 +352,13 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: false, noBalance: true });
     }
 
-    // 4. Build the addgenericitem payload.
-    //    Reference / Description use the human-readable orderRef.
-    //    OrderRef is the order id + key joined with a slash (NOT orderRef).
-    const payload = {
-      Reference: orderRef,
-      Title: 'Balance Payment',
-      Description: `Balance Payment for Order ${orderRef}`,
-      Price: decision.amount,
-      Currency: decision.currency,
-      OrderRef: `${orderId}/${orderKey}`,
-      ContactInfo: buildContactInfo(raw),
-    };
-
-    // 5. Create the basket.
-    let apiRes;
-    try {
-      apiRes = await fetch(ADDGENERICITEM_API, {
-        method: 'POST',
-        headers: travelifyAuthHeaders(creds.appId, creds.apiKey),
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(15000),
-      });
-    } catch (err) {
-      console.error('[pay-balance] addgenericitem network error:', err.message);
-      return res.status(200).json({ success: false });
-    }
-
-    const text = await apiRes.text();
-    let json = null;
-    try { json = text ? JSON.parse(text) : null; } catch { json = null; }
-
-    // 6. Treat anything that isn't success:true with a usable https URL as a
-    //    failure (per the guide — generic failure, no redirect).
-    const url = json && json.success === true ? json.data : null;
-    if (!isHttpsUrl(url)) {
-      console.error(`[pay-balance] addgenericitem did not return a basket url for order ${orderId} (status ${apiRes.status})`);
-      return res.status(200).json({ success: false });
-    }
+    // 4 + 5 + 6. Raise the basket (shared with Luna Travel, see createBasket).
+    const url = await createBasket(creds, { raw, orderId, orderKey, orderRef }, decision, 'pay-balance');
+    if (!url) return res.status(200).json({ success: false });
 
     return res.status(200).json({
       success: true,
-      url: url.trim(),
+      url,
       payment: {
         amount: decision.amount,
         currency: decision.currency,
