@@ -1,0 +1,381 @@
+{
+ "iata": "SDJ",
+ "id": "recF8iNhjkeJMpzXP",
+ "name": "Sendai Airport",
+ "country": "Japan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Sendai_Airport",
+ "audited": "2026-09-23",
+ "before": "The largest airport in the Tōhoku region, at Natori about 13.6 km south south east of Sendai. It carries around 3.6 million passengers a year, which puts it roughly tenth in Japan.\n\nThe rail link makes it easy. The Sendai Airport Line opened in March 2007 and runs to Sendai Station in 17 to 25 minutes. By road it is reached on the Sendai Tōbu Road, with two car parks holding 970 and 250 spaces.\n\nThe terminal has four levels and eight jet bridges, with domestic flights at the west end and international at the east. Arrivals and baggage reclaim are on the ground floor, departures on the second, and the third has shops, a business lounge and an observation deck. It was designed by Gyo Obata of Hellmuth, Obata and Kassabaum.\n\nThe airport was badly damaged by the earthquake and tsunami of 2011, and the railway into the city did not reopen until that October. It began life in 1940 as an army flight training field.",
+ "after": "The largest airport in the Tōhoku region, at Natori about 14 km south south east of Sendai. It handled just over 4 million passengers in the year to March 2026.\n\nThe rail link makes it easy. Opened in 2007, the Sendai Airport Line runs to Sendai Station in 17 to 25 minutes.\n\nDomestic and international flights share one terminal, with arrivals on the ground floor and departures on the second. The airport is refitting its second and third floors until March 2029 and warns that some facilities will be closed or restricted while the work goes on.\n\nIt was badly damaged by the earthquake and tsunami of 2011.",
+ "claims": [
+  {
+   "claim": "the largest airport in the Tōhoku region",
+   "verdict": "confirmed",
+   "inAfter": "The largest airport in the Tōhoku region",
+   "note": "The Tokyo Civil Aviation Bureau's table covers every airport in its area, Tōhoku included. For January to July 2026 Sendai handled 2,276,899 of the 4,875,650 passengers at the region's nine airports (47 per cent), and no other Tōhoku row passes 750,000. The rows were matched to names with care, because the PDF prints the names apart from the figures: Sendai's row is the first after the zero-filled regional total, as in the page's name order (丘珠, 仙台, 秋田, 山形), and the nine Tōhoku rows for January (310,815 for Sendai, 85,294, 25,697, 81,424, 32,892, 13,687, 23,445, 20,429 and 29,407) add up exactly to the regional January total of 623,090. The operator calls Sendai Tōhoku's air gateway in its March 2026 notice.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is the largest in Tōhoku region."
+    },
+    {
+     "file": "tcab-riyou-2026",
+     "org": "MLIT Tokyo Civil Aviation Bureau (its airport usage table, cab.mlit.go.jp)",
+     "dated": "figures for January to July 2026 (table for 令和8年1月 to 令和9年3月, read 2026-09-23)",
+     "quote": [
+      "管内空港の利用概況集計表（令和8年１月～令和9年３月）",
+      "東京航空局　空港管理課",
+      "東北地区",
+      "合計 623,090 626,157 769,836 682,312 740,094 693,443 740,718 0 0 0 0 0 4,875,650",
+      "丘珠 仙台 秋田 山形",
+      "合計 310,815 313,785 369,856 314,144 326,134 313,807 328,358 0 0 0 0 0 2,276,899",
+      "合計 81,424 83,720 111,512 113,098 121,242 113,136 125,713 0 0 0 0 0 749,845"
+     ]
+    },
+    {
+     "file": "sia-renewal",
+     "org": "Sendai International Airport Co. (the airport operator, sendai-airport.co.jp)",
+     "dated": "2026-03-24",
+     "quote": "リニューアル後は東北の空の玄関口として"
+    }
+   ]
+  },
+  {
+   "claim": "at Natori",
+   "verdict": "confirmed",
+   "inAfter": "at Natori",
+   "sources": [
+    {
+     "file": "mlit-kuni-kanri",
+     "org": "MLIT Civil Aviation Bureau (national airports sheets, mlit.go.jp)",
+     "dated": "undated PDF read 2026-09-23",
+     "quote": [
+      "・位置 ： 宮城県名取市",
+      "仙台空港"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Natori"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "located in Natori of Miyagi Prefecture"
+    }
+   ]
+  },
+  {
+   "claim": "about 14 km south south east of Sendai",
+   "verdict": "softened",
+   "inAfter": "about 14 km south south east of Sendai",
+   "note": "Was 'about 13.6 km', a false precision next to 'about'. Wikipedia gives 13.6 km; the coordinates give 14.8 km in a straight line at 163 degrees, five and a half degrees from south south east (ratio 0.95 for 14 km, inside the tolerance). Rounded to about 14.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "13.6 km (8.5 mi) south-southeast of Sendai"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Sendai (GeoNames 2111149): 14.8 km (9.2 miles), bearing 163 degrees, which is south"
+    }
+   ]
+  },
+  {
+   "claim": "just over 4 million passengers in the year to March 2026",
+   "verdict": "corrected",
+   "inAfter": "It handled just over 4 million passengers in the year to March 2026.",
+   "note": "Was 'around 3.6 million passengers a year'. For the 2025 financial year (April 2025 to March 2026) the operator's preliminary count, its own tally from the airlines' figures, is 4,000,689 and MLIT's sheet has 4,031,331. Both give 661,378 international passengers, which ties MLIT's row to Sendai; the domestic counts differ by about 30,600. The operator's figure for the year before (3,778,423) is the one Wikipedia's infobox gives for 2024.",
+   "sources": [
+    {
+     "file": "sia-fy2025",
+     "org": "Sendai International Airport Co. (the airport operator, sendai-airport.co.jp)",
+     "dated": "2026-04-10 (preliminary figures for April 2025 to March 2026)",
+     "quote": [
+      "2026年4月10日",
+      "2025年度（2025年4月～2026年3月）の航空旅客数・貨物取扱量（速報値）をとりまとめま",
+      "国際線 661,378 519,179 +142,199 +27.3%",
+      "合　計 4,000,689 3,778,423 +222,266 +5.8%"
+     ]
+    },
+    {
+     "file": "mlit-kuni-kanri",
+     "org": "MLIT Civil Aviation Bureau (national airports sheets, mlit.go.jp)",
+     "dated": "figures for the years to March 2022 to March 2026 (undated PDF read 2026-09-23)",
+     "quote": [
+      "仙台空港",
+      "373,787 519,179 661,378",
+      "令和3年度 令和4年度 令和5年度 令和6年度 令和7年度",
+      "3,550,095 3,809,646 4,031,331"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the Sendai Airport Line opened in 2007",
+   "verdict": "softened",
+   "inAfter": "Opened in 2007, the Sendai Airport Line",
+   "note": "Was 'opened in March 2007'. MLIT's sheet gives the year; the month rests on Wikipedia alone, as the railway's company, features and 2026 safety report pages give no opening date.",
+   "sources": [
+    {
+     "file": "mlit-kuni-kanri",
+     "org": "MLIT Civil Aviation Bureau (national airports sheets, mlit.go.jp)",
+     "dated": "undated PDF read 2026-09-23",
+     "quote": [
+      "・位置 ： 宮城県名取市",
+      "平成１９年 アクセス鉄道開業"
+     ]
+    },
+    {
+     "file": "sia-history",
+     "org": "Sendai International Airport Co. (the airport operator, sendai-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "JR仙台駅まで最速17分で結ぶ「仙台空港線」の開業。"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The Sendai Airport Line rail link was completed on 18 March 2007"
+    }
+   ]
+  },
+  {
+   "claim": "runs to Sendai Station in 17 to 25 minutes",
+   "verdict": "confirmed",
+   "inAfter": "runs to Sendai Station in 17 to 25 minutes",
+   "note": "The airport gives the fastest time, 17 minutes; the railway gives 25 minutes for stopping trains and says trains run through to Sendai without a change.",
+   "sources": [
+    {
+     "file": "sia-history",
+     "org": "Sendai International Airport Co. (the airport operator, sendai-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "JR仙台駅まで最速17分で結ぶ「仙台空港線」の開業。"
+    },
+    {
+     "file": "senat-faq",
+     "org": "Sendai Airport Transit (the railway operator, senat.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "仙台空港駅－仙台駅間は、普通列車25分で運転しております。",
+      "仙台空港駅から仙台駅までは直通で運転を行っております。"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The journey to the downtown core of the city takes 17–25 minutes."
+    }
+   ]
+  },
+  {
+   "claim": "domestic and international flights share one terminal",
+   "verdict": "softened",
+   "inAfter": "Domestic and international flights share one terminal",
+   "note": "Was 'domestic flights at the west end and international at the east'. The operator's pages put the domestic and the international arrivals lobbies in the one terminal building joined to the station, and its refit notice has both boarding lounges in it; the west and east ends rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "sia-access",
+     "org": "Sendai International Airport Co. (the airport operator, sendai-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "仙台空港駅と仙台空港ターミナルビルは直結しており、段差なしで移動できます。",
+      "1F国内線到着ロビーに出たらコンビニエンスストア方向にお進みください。",
+      "1F国際線到着ロビーに出たら銀行方向にお進み下さい。"
+     ]
+    },
+    {
+     "file": "sia-renewal",
+     "org": "Sendai International Airport Co. (the airport operator, sendai-airport.co.jp)",
+     "dated": "2026-03-24",
+     "quote": "国内線・国際線の各搭乗待合室を3階に拡張します。"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The west end of the terminal services domestic routes and the east side international routes."
+    }
+   ]
+  },
+  {
+   "claim": "arrivals on the ground floor",
+   "verdict": "confirmed",
+   "inAfter": "with arrivals on the ground floor",
+   "sources": [
+    {
+     "file": "sia-access",
+     "org": "Sendai International Airport Co. (the airport operator, sendai-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "1F国内線到着ロビーに出たらコンビニエンスストア方向にお進みください。",
+      "1F国際線到着ロビーに出たら銀行方向にお進み下さい。"
+     ]
+    },
+    {
+     "file": "sia-en-access",
+     "org": "Sendai International Airport Co. (the airport operator, sendai-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page, machine-translated English)",
+     "quote": "Once you exit the domestic arrivals lobby on the 1st floor, proceed towards the convenience store."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "G1: arrivals area (domestic and international), baggage claim"
+    }
+   ]
+  },
+  {
+   "claim": "departures on the second floor",
+   "verdict": "confirmed",
+   "inAfter": "departures on the second",
+   "note": "The operator's refit notice calls the second floor the start of the journey and names the second-floor boarding lounges, which it is relieving by extending them to the third floor.",
+   "sources": [
+    {
+     "file": "sia-renewal",
+     "org": "Sendai International Airport Co. (the airport operator, sendai-airport.co.jp)",
+     "dated": "2026-03-24",
+     "quote": [
+      "旅の始まりとなる2階フロアに、東北が誇る逸品が並",
+      "ターやエスカレーターを新たに設置します。これにより、旅客収容力を増強し2階搭乗待合室の混雑緩"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "2 – departure area (domestic and international), airline offices, check-in counters"
+    }
+   ]
+  },
+  {
+   "claim": "the airport is refitting its second and third floors until March 2029 and warns some facilities will be closed or restricted",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport is refitting its second and third floors until March 2029 and warns that some facilities will be closed or restricted while the work goes on.",
+   "note": "Replaces the floor-by-floor account of the upper floors ('the third has shops, a business lounge and an observation deck'), which the operator's current floor map no longer matches and which this work is changing. The operator's notice of 24 March 2026: the refit of floors 2 and 3, paused in November 2020 by the pandemic, restarted in March 2026 and is planned to finish, with a grand opening, in March 2029; it enlarges the shops on the second floor, fills the third floor with restaurants, extends both boarding lounges to the third floor and moves the card lounge to the domestic third floor after security. Attributed to the airport, as the plan and the warning are its own.",
+   "sources": [
+    {
+     "file": "sia-renewal",
+     "org": "Sendai International Airport Co. (the airport operator, sendai-airport.co.jp)",
+     "dated": "2026-03-24",
+     "quote": [
+      "仙台空港ターミナルビル2・3階リニューアル工事再開のお知らせ",
+      "2026年3月24日",
+      "2026 年 3月 着工",
+      "2029 年 3月 全工事完了 グランドオープン",
+      "工事に伴い、一部施設の閉鎖並びにご利用の制限によりご迷惑をおかけしますが"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "badly damaged by the 2011 earthquake and tsunami",
+   "verdict": "confirmed",
+   "inAfter": "It was badly damaged by the earthquake and tsunami of 2011.",
+   "sources": [
+    {
+     "file": "sia-history",
+     "org": "Sendai International Airport Co. (the airport operator, sendai-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "2011年3月11日、東日本大震災が発生。",
+      "押し寄せた津波により、ターミナルビル1階には自動車や瓦礫が流れ込み、小型機・ヘリコプターなども損壊。仙台空港は大きな被害を受けました。"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport sustained serious damage in 2011 Tōhoku earthquake and tsunami."
+    }
+   ]
+  },
+  {
+   "claim": "about 13.6 km",
+   "verdict": "cut",
+   "wasBefore": "about 13.6 km south south east of Sendai",
+   "why": "Rounded to about 14 km (see above): 13.6 km on Wikipedia, 14.8 km in a straight line on the coordinates."
+  },
+  {
+   "claim": "around 3.6 million passengers a year",
+   "verdict": "cut",
+   "wasBefore": "It carries around 3.6 million passengers a year",
+   "why": "Out of date: the operator counted 3,778,423 for the year to March 2025 and 4,000,689 for the year to March 2026. Replaced by the latest year (see above)."
+  },
+  {
+   "claim": "roughly tenth in Japan",
+   "verdict": "cut",
+   "wasBefore": "which puts it roughly tenth in Japan",
+   "why": "A national ranking the operator does not state. MLIT's national ranking tables are Excel files the sweep's tools cannot save, and its readable sheets leave out the company-run airports (Narita, Kansai, Itami, Chubu), so no current rank could be confirmed."
+  },
+  {
+   "claim": "opened in March 2007",
+   "verdict": "cut",
+   "wasBefore": "The Sendai Airport Line opened in March 2007",
+   "why": "Softened to 2007 (see above): the month rests on Wikipedia alone."
+  },
+  {
+   "claim": "reached by road on the Sendai Tōbu Road",
+   "verdict": "cut",
+   "wasBefore": "By road it is reached on the Sendai Tōbu Road",
+   "why": "Wikipedia alone. The operator's car, parking and access FAQ pages (Japanese and English) name no road, and no other source was found in three tries."
+  },
+  {
+   "claim": "two car parks of 970 and 250 spaces",
+   "verdict": "cut",
+   "wasBefore": "with two car parks holding 970 and 250 spaces",
+   "why": "Wikipedia alone. The operator's parking and access FAQ pages give no capacities, and its car parks are now signed 1R (reserved), 1A, 1B and 2."
+  },
+  {
+   "claim": "four levels and eight jet bridges",
+   "verdict": "cut",
+   "wasBefore": "The terminal has four levels and eight jet bridges",
+   "why": "The floors are counted differently (Wikipedia: G1, M2, 2 and 3; the operator's floor map: 1F, 2F, 3F and the roof deck), and the eight jet bridges rest on Wikipedia alone. MLIT also records a new boarding pier opened in 2018 (平成30年 新旅客搭乗施設（ピア棟）供用開始), so the count may be out of date."
+  },
+  {
+   "claim": "domestic at the west end, international at the east",
+   "verdict": "cut",
+   "wasBefore": "with domestic flights at the west end and international at the east",
+   "why": "Softened to one shared terminal (see above): the ends rest on Wikipedia alone."
+  },
+  {
+   "claim": "baggage reclaim on the ground floor",
+   "verdict": "cut",
+   "wasBefore": "Arrivals and baggage reclaim are on the ground floor",
+   "why": "Arrivals on the ground floor are kept (see above); baggage reclaim there rests on Wikipedia alone."
+  },
+  {
+   "claim": "the third floor has shops, a business lounge and an observation deck",
+   "verdict": "cut",
+   "wasBefore": "and the third has shops, a business lounge and an observation deck",
+   "why": "Partly out of date: the operator's floor map lists the shops on the first and second floors and restaurants on the third, and its roof, not the third floor, carries the observation deck ('RF 展望デッキ'). The third-floor business lounge is on the operator's map and Wikipedia, but the refit that runs to March 2029 is moving the lounges and shops, so the refit replaces the floor-by-floor detail (see above)."
+  },
+  {
+   "claim": "designed by Gyo Obata of HOK",
+   "verdict": "cut",
+   "wasBefore": "It was designed by Gyo Obata of Hellmuth, Obata and Kassabaum.",
+   "why": "Wikipedia alone. HOK's own aviation project lists (hok.com, read 2026-09-23) do not include Sendai, and the operator's history describes the 1997 terminal without naming an architect."
+  },
+  {
+   "claim": "the railway did not reopen until October 2011",
+   "verdict": "cut",
+   "wasBefore": "and the railway into the city did not reopen until that October",
+   "why": "Wikipedia alone. The railway's company and 2026 safety report pages and the Tokyo Civil Aviation Bureau's Sendai page give no reopening date. The operator's history gives flights instead: temporary flights about a month after the disaster, domestic scheduled flights from July 2011 and international from September 2011."
+  },
+  {
+   "claim": "began life in 1940 as an army flight training field",
+   "verdict": "cut",
+   "wasBefore": "It began life in 1940 as an army flight training field.",
+   "why": "Wikipedia alone. The operator's history starts in 1956, when GHQ returned the Yanome airfield, which opened the next year as Sendai Airfield and took the name Sendai Airport in 1964; it says nothing of 1940 or army training."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The rail link makes it easy.",
+   "why": "Framing carried over from the old text. The operator says the station and terminal are directly connected with no steps (sia-access), and the railway runs through trains to Sendai Station without a change (senat-faq)."
+  }
+ ],
+ "tracerOk": {}
+}

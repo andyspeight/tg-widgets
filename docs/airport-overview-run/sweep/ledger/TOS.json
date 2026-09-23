@@ -1,0 +1,257 @@
+{
+ "iata": "TOS",
+ "id": "rec7AClttGUvesst7",
+ "name": "Tromsø Airport",
+ "country": "Norway",
+ "wikipedia": "https://en.wikipedia.org/wiki/Troms%C3%B8_Airport",
+ "audited": "2026-09-23",
+ "before": "The fifth busiest airport in Norway, on the western shore of Tromsoya island. It is the hub for Wideroe's regional network into Finnmark, so anything heading further north connects through here.\n\nThe runway is 2,447 metres and the airport is owned and run by Avinor, the state operator. It handled a little over 1.9 million passengers and more than 43,000 aircraft movements in 2014.\n\nThere are two terminals. Terminal B dates from 1977 and Terminal A opened in 1997, alongside a runway extension and a new control tower.\n\nThe airport opened in September 1964, replacing a water aerodrome at Skattora which had served Tromso until then. Lufttransport has its main operating base here, and Norwegian has flown from the airport since 1992.",
+ "after": "The fifth busiest airport in Norway, at Langnes a few kilometres from the centre of Tromsø. It is the main hub for flights between southern Norway and Finnmark, so a lot of journeys further north connect through here.\n\nThe runway is about 2,450 metres, and the airport is owned and run by Avinor, the state operator. It handled about 2.9 million passengers in 2025.\n\nThe airport opened in September 1964, replacing the seaplane base at Skattøra.",
+ "claims": [
+  {
+   "claim": "the fifth busiest airport in Norway",
+   "verdict": "confirmed",
+   "inAfter": "The fifth busiest airport in Norway",
+   "note": "Now on 2025 figures: Eurostat has Oslo, Bergen, Trondheim and Stavanger ahead and Bodø next (1.96 million). Avinor's own table lists the four larger airports separately and SNL, citing Avinor, gives Tromsø 2,881,478 in 2025, below all four.",
+   "sources": [
+    {
+     "file": "eurostat-no",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat NO_ENZV STAVANGER/SOLA airport: passengers carried in 2025: 3,764,864",
+      "Eurostat NO_ENTC TROMSO/LANGNES airport: passengers carried in 2025: 2,883,525",
+      "Eurostat NO_ENBO BODO airport: passengers carried in 2025: 1,958,604"
+     ]
+    },
+    {
+     "file": "avinor-ar2025",
+     "org": "Avinor (the airport operator, 2025 annual report)",
+     "dated": "annual and sustainability report 2025",
+     "quote": [
+      "Number of air passengers, January - December",
+      "Stavanger Airport  3 975  3 972 0,1 %"
+     ]
+    },
+    {
+     "file": "snl",
+     "org": "Store norske leksikon (the Norwegian encyclopaedia, snl.no)",
+     "dated": "article last updated 28 Apr 2026",
+     "quote": [
+      "2025",
+      "2881478",
+      "Kilde:  Avinor AS"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "This makes Tromsø the fifth-busiest airport in the country"
+    }
+   ]
+  },
+  {
+   "claim": "at Langnes, a few kilometres from the centre of Tromsø",
+   "verdict": "corrected",
+   "inAfter": "at Langnes a few kilometres from the centre of Tromsø.",
+   "note": "Was 'on the western shore of Tromsoya island', which rests on Wikipedia alone. SNL puts it about three kilometres outside the centre; the coordinates give 4.1 km from the GeoNames centre. The Norwegian letters are restored throughout (Tromsø, Skattøra).",
+   "sources": [
+    {
+     "file": "snl",
+     "org": "Store norske leksikon (the Norwegian encyclopaedia, snl.no)",
+     "dated": "article last updated 28 Apr 2026",
+     "quote": [
+      "Tromsø lufthavn, Langnes er en sivil stamflyplass i Tromsø kommune",
+      "ligger cirka tre kilometer utenfor Tromsø sentrum"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "is an international airport located at Langnes"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 4.1 km (2.5 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "the main hub for flights between southern Norway and Finnmark",
+   "verdict": "softened",
+   "inAfter": "It is the main hub for flights between southern Norway and Finnmark, so a lot of journeys further north connect through here.",
+   "note": "Was 'the hub for Wideroe's regional network into Finnmark, so anything heading further north connects through here'. SNL: the hub for most traffic between southern Norway and Finnmark; Wikipedia: still the main hub for Widerøe's regional flights to Finnmark. Widerøe's own pages were not read, so the airline is not named, and 'anything' became 'a lot of journeys'.",
+   "sources": [
+    {
+     "file": "snl",
+     "org": "Store norske leksikon (the Norwegian encyclopaedia, snl.no)",
+     "dated": "article last updated 28 Apr 2026",
+     "quote": "Tromsø lufthavn, Langnes, er knutepunkt for den største delen av trafikk mellom Sør-Norge og Finnmark."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "Tromsø became and still is the main hub for Widerøe's regional flights to Finnmark."
+    }
+   ]
+  },
+  {
+   "claim": "runway about 2,450 metres",
+   "verdict": "softened",
+   "inAfter": "The runway is about 2,450 metres",
+   "note": "Was 2,447 metres (Wikipedia); OurAirports gives 2,451 m, so the text rounds to the figure both support.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": "Runway 18/36: 2,451 m (8,041 ft), ASP"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "it features a 2,447-meter (8,028 ft) runway aligned 18/36"
+    }
+   ]
+  },
+  {
+   "claim": "owned and run by Avinor, the state operator",
+   "verdict": "confirmed",
+   "inAfter": "and the airport is owned and run by Avinor, the state operator.",
+   "sources": [
+    {
+     "file": "avinor-ar2025",
+     "org": "Avinor (the airport operator, 2025 annual report)",
+     "dated": "annual and sustainability report 2025",
+     "quote": [
+      "Avinor AS, the parent company of the Group, is a state-owned limited liability",
+      "In Tromsø, two new aircraft stands have just been"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "Owned and operated by the state-owned Avinor"
+    }
+   ]
+  },
+  {
+   "claim": "about 2.9 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled about 2.9 million passengers in 2025.",
+   "note": "Was 'a little over 1.9 million passengers and more than 43,000 aircraft movements in 2014'. A passenger total replaces a passenger total: SNL's table (from Avinor) 2,881,478 and Eurostat 2,883,525 for 2025. No current source gives Tromsø's movements, so they are cut.",
+   "sources": [
+    {
+     "file": "snl",
+     "org": "Store norske leksikon (the Norwegian encyclopaedia, snl.no)",
+     "dated": "article last updated 28 Apr 2026",
+     "quote": [
+      "Trafikkutvikling (lokalt reisende)",
+      "2881478"
+     ]
+    },
+    {
+     "file": "eurostat-no",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat NO_ENTC TROMSO/LANGNES airport: passengers carried in 2025: 2,883,525"
+    }
+   ]
+  },
+  {
+   "claim": "opened in September 1964, replacing the seaplane base at Skattøra",
+   "verdict": "confirmed",
+   "inAfter": "The airport opened in September 1964, replacing the seaplane base at Skattøra.",
+   "note": "Was 'replacing a water aerodrome at Skattora which had served Tromso until then': SNL shows Bardufoss also served Tromsø by bus from 1958, so 'until then' is dropped.",
+   "sources": [
+    {
+     "file": "snl",
+     "org": "Store norske leksikon (the Norwegian encyclopaedia, snl.no)",
+     "dated": "article last updated 28 Apr 2026",
+     "quote": [
+      "Daværende kronprins Harald foretok den offisielle åpningen av Tromsø lufthavn, Langnes 14. september 1964.",
+      "da sjøflyhavna i Skattøra ble innviet"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "The airport opened on 14 September 1964, replacing Tromsø Airport, Skattøra, a water aerodrome."
+    }
+   ]
+  },
+  {
+   "claim": "on the western shore of Tromsøya",
+   "verdict": "cut",
+   "wasBefore": "on the western shore of Tromsoya island",
+   "why": "Wikipedia alone. Corrected to Langnes and the distance (see above)."
+  },
+  {
+   "claim": "hub for Widerøe's network; anything further north connects here",
+   "verdict": "cut",
+   "wasBefore": "It is the hub for Wideroe's regional network into Finnmark, so anything heading further north connects through here.",
+   "why": "Softened (see above)."
+  },
+  {
+   "claim": "1.9 million passengers and 43,000 movements in 2014",
+   "verdict": "cut",
+   "wasBefore": "It handled a little over 1.9 million passengers and more than 43,000 aircraft movements in 2014.",
+   "why": "Superseded by the 2025 passenger total; no current source gives the movements."
+  },
+  {
+   "claim": "two terminals: B from 1977, A from 1997 with a runway extension and a new tower",
+   "verdict": "cut",
+   "wasBefore": "There are two terminals. Terminal B dates from 1977 and Terminal A opened in 1997, alongside a runway extension and a new control tower.",
+   "why": "Wikipedia alone, and SNL describes a later rebuild (an upgraded terminal finished in September 2024) that Wikipedia does not mention, so the old picture may no longer hold."
+  },
+  {
+   "claim": "Lufttransport main operating base",
+   "verdict": "cut",
+   "wasBefore": "Lufttransport has its main operating base here",
+   "why": "Wikipedia alone: Lufttransport's own site now shows only a Bodø to Værøy route and says nothing about Tromsø.",
+   "sources": [
+    {
+     "file": "lufttransport",
+     "org": "Lufttransport (lufttransport.no)",
+     "dated": "read 2026-09-23",
+     "quote": "Booking Bodø - Værøy"
+    }
+   ]
+  },
+  {
+   "claim": "Norwegian since 1992",
+   "verdict": "cut",
+   "wasBefore": "and Norwegian has flown from the airport since 1992.",
+   "why": "Wikipedia alone, and doubtful: Wikipedia's own history says Norwegian took over Busy Bee's routes after its 1992 bankruptcy."
+  },
+  {
+   "claim": "the terminal rebuild finished in September 2024; two new stands",
+   "verdict": "cut",
+   "why": "Held back: new facts that replace nothing. SNL says an upgraded terminal was finished in September 2024 (work began in 2019); Avinor's 2025 report says two new aircraft stands have just been completed and new security screening is being planned.",
+   "sources": [
+    {
+     "file": "snl",
+     "org": "Store norske leksikon (the Norwegian encyclopaedia, snl.no)",
+     "dated": "article last updated 28 Apr 2026",
+     "quote": "Den oppgraderte terminalbygningen sto ferdig i september 2024."
+    },
+    {
+     "file": "avinor-ar2025",
+     "org": "Avinor (the airport operator, 2025 annual report)",
+     "dated": "annual and sustainability report 2025",
+     "quote": "completed, and adaptations for the new security screening and passenger areas are"
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "2,450": "Rounded: Wikipedia gives 2,447 m and OurAirports 2,451 m."
+ }
+}

@@ -1,0 +1,444 @@
+{
+ "iata": "AEP",
+ "id": "rec9ClM2CBddVRnQz",
+ "name": "Aeroparque Jorge Newbery",
+ "country": "Argentina",
+ "wikipedia": "https://en.wikipedia.org/wiki/Aeroparque_Jorge_Newbery",
+ "audited": "2026-09-23",
+ "before": "Buenos Aires has two airports and this is the close one: 2 km north west of downtown, on the Rio de la Plata in Palermo. Domestic routes and regional South American services run from here, while most long haul international traffic uses Ezeiza well outside the city.\n\nThat split is the thing to get right. A client connecting from a long haul arrival onto an internal Argentine flight has to cross Buenos Aires between the two airports, and the traffic is not kind.\n\nThe site is compact at 138 hectares and is operated by Aeropuertos Argentina 2000.\n\nIt has been flying since 1947, on ground reclaimed from the river in 1916 after a proposal for an island airport reached by causeway was dropped. It opened as Aeroparque 17 de Octubre with a single 1,000 metre runway, and everyone still shortens the name to Aeroparque.",
+ "after": "Buenos Aires has two main airports and this is the close one, inside the city and north west of the centre. The city's tourism board puts it about 25 minutes from the main hotels. Domestic routes and regional international flights run from here, while most long-haul international traffic uses Ezeiza, well outside the city.\n\nThat split is the thing to get right. A client connecting from a long-haul arrival at Ezeiza onto a domestic flight from here has to cross Buenos Aires between the two airports. Ezeiza has some domestic flights too, so check which airport the onward flight uses.\n\nThe site is compact at 138 hectares and is run by Aeropuertos Argentina. Its name is usually shortened to Aeroparque.",
+ "claims": [
+  {
+   "claim": "Buenos Aires has two main airports and this is the close one",
+   "verdict": "softened",
+   "inAfter": "Buenos Aires has two main airports and this is the close one",
+   "note": "Was 'two airports'. The city's tourism board tells visitors they will land at Ezeiza or Aeroparque, and Aviacionline's 2025 figures put almost all of Buenos Aires's international passengers through the two. 'Main' is a precaution: only the tourism board's visitor advice names exactly two.",
+   "sources": [
+    {
+     "file": "caba-como-llegar",
+     "org": "Buenos Aires city tourism board (Ente de Turismo, turismo.buenosaires.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Si volás a Buenos Aires, aterrizarás en los aeropuertos de Ezeiza o de Aeroparque, según de dónde vengas.",
+      "La particularidad de este aeropuerto es que está ubicado dentro de la Ciudad"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "serves as the city's inner-city airport for domestic routes and regional South American destinations, while most long-haul international traffic is handled by the larger Ezeiza International Airport"
+    },
+    {
+     "file": "avl-ranking-2025",
+     "org": "Aviacionline (Argentine aviation trade press)",
+     "dated": "2026-01-28",
+     "quote": [
+      "miércoles 28 de enero de 2026",
+      "mientras el Aeropuerto Internacional de Ezeiza creció un 6% internacional hasta los 8.533.000 usuarios , el Aeroparque Jorge Newbery absorbió gran parte de la nueva demanda regional con 5.229.000 pasajeros"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "inside the city and north west of the centre",
+   "verdict": "corrected",
+   "inAfter": "inside the city and north west of the centre",
+   "note": "Replaces '2 km north west of downtown' (the distance is cut below). The direction holds: 330 degrees from the city centre, north west, and the operator puts it in the north west of the city.",
+   "sources": [
+    {
+     "file": "op-nuestros-aep",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "El Aeroparque Jorge Newbery se encuentra ubicado en la zona noroeste de la Ciudad de Buenos Aires"
+    },
+    {
+     "file": "caba-como-llegar",
+     "org": "Buenos Aires city tourism board (Ente de Turismo, turismo.buenosaires.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "está ubicado dentro de la Ciudad"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 330 degrees, which is north west"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "is an international airport located 2 km (1.2 mi) northwest of downtown Buenos Aires, Argentina"
+    }
+   ]
+  },
+  {
+   "claim": "about 25 minutes from the main hotels, says the city's tourism board",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "tourism board",
+   "inAfter": "The city's tourism board puts it about 25 minutes from the main hotels.",
+   "note": "Replaces the 2 km, which the coordinates rule out (cut below). The city's official tourism site, so it is attributed.",
+   "sources": [
+    {
+     "file": "caba-como-llegar",
+     "org": "Buenos Aires city tourism board (Ente de Turismo, turismo.buenosaires.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Sitio oficial de turismo de la Ciudad de Buenos Aires",
+      "La particularidad de este aeropuerto es que está ubicado dentro de la Ciudad y a unos 25 minutos de los principales hoteles."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "domestic routes and regional international flights run from here",
+   "verdict": "softened",
+   "inAfter": "Domestic routes and regional international flights run from here",
+   "note": "Was 'regional South American services'. The operator says regional flights to 'various countries of the Americas', so 'South American' is dropped. Current: Aviacionline (23 December 2025) lists the airlines (Aerolíneas Argentinas, American Jet, JetSMART, Flybondi, LATAM, GOL, LADE, Humming Airways, Sky, Avianca and Paranair) and 16 international destinations, and 5.2 million international passengers in 2025 (28 January 2026). FlightGlobal reported in June 2023 that Aerolíneas Argentinas would start flights to the USA from here; nothing read shows them running now, which is why the next phrase keeps 'most'.",
+   "sources": [
+    {
+     "file": "op-nuestros-aep",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Opera vuelos de cabotaje y vuelos regionales con destino a diversos países de América."
+    },
+    {
+     "file": "caba-como-llegar",
+     "org": "Buenos Aires city tourism board (Ente de Turismo, turismo.buenosaires.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "opera mayoritariamente con vuelos domésticos y algunos vuelos regionales"
+    },
+    {
+     "file": "avl-a330-records",
+     "org": "Aviacionline (Argentine aviation trade press)",
+     "dated": "2025-12-23",
+     "quote": [
+      "martes 23 de diciembre de 2025",
+      "conectando 39 destinos nacionales y 16 internacionales"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "serves as the city's inner-city airport for domestic routes and regional South American destinations"
+    }
+   ]
+  },
+  {
+   "claim": "most long-haul international traffic uses Ezeiza, well outside the city",
+   "verdict": "confirmed",
+   "inAfter": "while most long-haul international traffic uses Ezeiza, well outside the city",
+   "note": "The tourism board says most international flights arrive at Ezeiza, 32 km from the city; the operator puts Ezeiza 22 km from the city (the two disagree on the distance, so none is given); Aviacionline's report on the October 2026 runway works shows the US long-haul flights (American, Delta, United) at Ezeiza; FlightGlobal (2023) calls Ezeiza the much larger airport on the outskirts.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "while most long-haul international traffic is handled by the larger Ezeiza International Airport"
+    },
+    {
+     "file": "caba-como-llegar",
+     "org": "Buenos Aires city tourism board (Ente de Turismo, turismo.buenosaires.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Es el más importante del país, donde arriba la mayoría de los vuelos internacionales y algunos vuelos domésticos.",
+      "El aeropuerto se encuentra en la localidad de Ezeiza, a 32 km de la ciudad"
+     ]
+    },
+    {
+     "file": "op-nuestros-eze",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Se encuentra ubicado a 22 km de la ciudad de Buenos Aires"
+    },
+    {
+     "file": "avl-obras-delta-united",
+     "org": "Aviacionline (Argentine aviation trade press)",
+     "dated": "2026-04-16",
+     "quote": [
+      "jueves 16 de abril de 2026",
+      "American Airlines , Delta Air Lines y United Airlines suspenderán o modificarán sus servicios hacia Buenos Aires",
+      "Las restricciones en la infraestructura impactan la performance de las aeronaves de fuselaje ancho."
+     ]
+    },
+    {
+     "file": "fg-usa-aeroparque",
+     "org": "FlightGlobal (aviation trade press)",
+     "dated": "2023-06-01",
+     "quote": [
+      "1 June 2023",
+      "rather than the much larger Ezeiza Ministro Pistorini International airport on the outskirts of the city"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a client connecting from a long-haul arrival at Ezeiza onto a domestic flight from here has to cross Buenos Aires",
+   "verdict": "corrected",
+   "inAfter": "A client connecting from a long-haul arrival at Ezeiza onto a domestic flight from here has to cross Buenos Aires between the two airports",
+   "note": "Was 'onto an internal Argentine flight', which overstated it: Ezeiza has domestic flights too (next claim). The crossing itself follows from the two locations: Aeroparque inside the city, Ezeiza well outside it to the south west, and the tourism board lists Tienda León services from both airports to the centre.",
+   "sources": [
+    {
+     "file": "caba-como-llegar",
+     "org": "Buenos Aires city tourism board (Ente de Turismo, turismo.buenosaires.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "está ubicado dentro de la Ciudad",
+      "El aeropuerto se encuentra en la localidad de Ezeiza, a 32 km de la ciudad",
+      "La empresa Tienda León ofrece servicios desde ambos aeropuertos hasta la terminal de Puerto Madero, en el centro de la Ciudad."
+     ]
+    },
+    {
+     "file": "op-nuestros-aep",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "El Aeroparque Jorge Newbery se encuentra ubicado en la zona noroeste de la Ciudad de Buenos Aires"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "serves as the city's inner-city airport for domestic routes"
+    }
+   ]
+  },
+  {
+   "claim": "Ezeiza has some domestic flights too, so check which airport the onward flight uses",
+   "verdict": "corrected",
+   "inAfter": "Ezeiza has some domestic flights too",
+   "note": "Added to correct the old advice, which assumed every domestic connection needs the cross-city transfer. The tourism board says Ezeiza has some domestic flights, Aviacionline says Ezeiza strengthened its domestic services in 2025, and the operator opened a new domestic arrivals area there in July 2026 'to keep pace with the growth of domestic flying'. 'So check which airport the onward flight uses' is advice that follows.",
+   "sources": [
+    {
+     "file": "caba-como-llegar",
+     "org": "Buenos Aires city tourism board (Ente de Turismo, turismo.buenosaires.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "donde arriba la mayoría de los vuelos internacionales y algunos vuelos domésticos"
+    },
+    {
+     "file": "avl-ranking-2025",
+     "org": "Aviacionline (Argentine aviation trade press)",
+     "dated": "2026-01-28",
+     "quote": "el refuerzo de los servicios de cabotaje desde dicha terminal"
+    },
+    {
+     "file": "op-arribos-domesticos",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "2026-07-22",
+     "quote": [
+      "Fecha de publicación 22/07/2026",
+      "El Aeropuerto Internacional de Ezeiza puso en marcha una nueva área de arribos domésticos en la Terminal A",
+      "acompañando el crecimiento de la operación doméstica en el aeropuerto"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the site is compact at 138 hectares",
+   "verdict": "confirmed",
+   "inAfter": "The site is compact at 138 hectares",
+   "note": "'Compact' by comparison with Ezeiza's 3,475 hectares (the operator's own page for Ezeiza).",
+   "sources": [
+    {
+     "file": "op-nuestros-aep",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Superficie: 138 hectáreas"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "the airport covers an area of 138 hectares (341 acres)"
+    },
+    {
+     "file": "op-nuestros-eze",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Superficie: 3.475 hectáreas"
+    }
+   ]
+  },
+  {
+   "claim": "run by Aeropuertos Argentina",
+   "verdict": "corrected",
+   "inAfter": "is run by Aeropuertos Argentina",
+   "note": "Was 'Aeropuertos Argentina 2000', the name Wikipedia still uses; the operator now trades as Aeropuertos Argentina (Aeropuertos Argentina S.A.), as found for Iguazú and Ezeiza.",
+   "sources": [
+    {
+     "file": "op-nuestros-aep",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Av. Rafael Obligado s/n° - (C1425DAA)",
+      "©2017 - 2026 Aeropuertos Argentina S.A."
+     ]
+    },
+    {
+     "file": "op-como-llego",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Aeroparque, AEP",
+      "Av. Costanera Rafael Obligado s/n, C1425 Cdad. Autónoma de Buenos Aires",
+      "©2017 - 2026 Aeropuertos Argentina S.A."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "is operated by Aeropuertos Argentina 2000 S.A."
+    }
+   ]
+  },
+  {
+   "claim": "the name is usually shortened to Aeroparque",
+   "verdict": "softened",
+   "inAfter": "Its name is usually shortened to Aeroparque.",
+   "note": "Was 'everyone still shortens the name to Aeroparque'. The operator and the tourism board both call it plain Aeroparque in their lists; Wikipedia says it is commonly known as Aeroparque.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "commonly known as Aeroparque"
+    },
+    {
+     "file": "op-nuestros-aep",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Aeroparque, AEP"
+    },
+    {
+     "file": "caba-como-llegar",
+     "org": "Buenos Aires city tourism board (Ente de Turismo, turismo.buenosaires.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "aterrizarás en los aeropuertos de Ezeiza o de Aeroparque"
+    }
+   ]
+  },
+  {
+   "claim": "Buenos Aires has two airports",
+   "verdict": "cut",
+   "wasBefore": "Buenos Aires has two airports",
+   "why": "Softened to 'two main airports' (above) as a precaution: only the tourism board's visitor advice names exactly two airports."
+  },
+  {
+   "claim": "2 km from downtown",
+   "verdict": "cut",
+   "wasBefore": "2 km north west of downtown",
+   "why": "Fails the coordinates check: the airport is 6.9 km in a straight line from the city centre (ratio 0.29), so no road distance can be 2 km. Wikipedia and the operator's own page both say 2 km, so the figure is not made up, but it cannot be measured from the centre and would mislead. Replaced by the tourism board's 25 minutes from the main hotels (attributed) and the direction, which holds. Flag for Andy: the operator's page repeats the figure.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 6.9 km (4.3 miles)"
+    },
+    {
+     "file": "op-nuestros-aep",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "a una distancia de 2 km del centro"
+    }
+   ]
+  },
+  {
+   "claim": "on the Río de la Plata in Palermo",
+   "verdict": "cut",
+   "wasBefore": "on the Rio de la Plata in Palermo",
+   "why": "Wikipedia alone names the river and Palermo. The operator gives the address Av. Costanera Rafael Obligado, C1425 (a riverside avenue), which does not name either. Tried for a second source: a page of the city's Atlas de Buenos Aires that Wikipedia cites (the domain no longer resolves), a guessed address for the tourism board's Palermo page (404) and Aviacionline's Aeroparque pages (no mention)."
+  },
+  {
+   "claim": "regional South American services",
+   "verdict": "cut",
+   "wasBefore": "Domestic routes and regional South American services run from here",
+   "why": "Softened to regional international flights (above): the operator says regional flights to countries of the Americas."
+  },
+  {
+   "claim": "an internal Argentine flight means crossing Buenos Aires",
+   "verdict": "cut",
+   "wasBefore": "A client connecting from a long haul arrival onto an internal Argentine flight has to cross Buenos Aires between the two airports",
+   "why": "Overstated: Ezeiza has domestic flights too. Corrected above to a domestic flight from Aeroparque, with advice to check the airport."
+  },
+  {
+   "claim": "the traffic is not kind",
+   "verdict": "cut",
+   "wasBefore": "and the traffic is not kind",
+   "why": "A judgement with only one source behind it: Aviacionline (26 April 2026, on diverted flights) says the road trip between Aeroparque and Ezeiza on the Riccheri motorway can take more than an hour depending on traffic. Nothing else gives the transfer time.",
+   "sources": [
+    {
+     "file": "avl-vientos-2026",
+     "org": "Aviacionline (Argentine aviation trade press)",
+     "dated": "2026-04-26",
+     "quote": [
+      "domingo 26 de abril de 2026",
+      "un trayecto que puede demorar más de una hora dependiendo del tráfico"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "operated by Aeropuertos Argentina 2000",
+   "verdict": "cut",
+   "wasBefore": "is operated by Aeropuertos Argentina 2000",
+   "why": "The operator now calls itself Aeropuertos Argentina (Aeropuertos Argentina S.A.). Corrected above."
+  },
+  {
+   "claim": "flying since 1947, on land reclaimed in 1916, after the island-airport proposal was dropped",
+   "verdict": "cut",
+   "wasBefore": "It has been flying since 1947, on ground reclaimed from the river in 1916 after a proposal for an island airport reached by causeway was dropped.",
+   "why": "Wikipedia alone, and Wikipedia is not consistent with itself: it says the airport was inaugurated in 1947 but began operations in January 1948. The pages it cites for the history could not be read: the city's Atlas de Buenos Aires and aeromilitaria.com.ar no longer resolve, La Nación's 2003 article answers 404 (two addresses tried), and the Universidad de Palermo thesis is only in the blocked web archive. The operator's airport page offers only a Word download ('Descargar nota'), which the tools cannot save as text."
+  },
+  {
+   "claim": "opened as Aeroparque 17 de Octubre with a single 1,000 metre runway",
+   "verdict": "cut",
+   "wasBefore": "It opened as Aeroparque 17 de Octubre with a single 1,000 metre runway",
+   "why": "Wikipedia alone; see the history cut above."
+  },
+  {
+   "claim": "everyone still shortens the name to Aeroparque",
+   "verdict": "cut",
+   "wasBefore": "everyone still shortens the name to Aeroparque",
+   "why": "Softened to 'usually' (above)."
+  },
+  {
+   "claim": "Argentina's busiest airport, 17.7 million passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: the old text gives no traffic figure or rank, so this replaces nothing. Aeroparque was the busiest airport in Argentina in 2025 with 17,738,000 passengers, up 19 per cent and 35 per cent of the country's total (Aviacionline, 28 January 2026, from ANAC figures; Wikipedia's infobox gives the same 17,738,000 and ranks it first; Aviacionline on 23 December 2025 also calls it the country's main airport by passengers). Worth adding if Andy agrees.",
+   "sources": [
+    {
+     "file": "avl-ranking-2025",
+     "org": "Aviacionline (Argentine aviation trade press)",
+     "dated": "2026-01-28",
+     "quote": [
+      "El Aeroparque Jorge Newbery se ratificó como el principal aeropuerto del país al alcanzar los 17.738.000 pasajeros",
+      "Esta cifra representa el 35% de todos los movimientos del sistema nacional."
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 17,738,000",
+      "stat2_data = 1st"
+     ]
+    },
+    {
+     "file": "avl-a330-records",
+     "org": "Aviacionline (Argentine aviation trade press)",
+     "dated": "2025-12-23",
+     "quote": "el Aeroparque Jorge Newbery se consolida como la principal terminal del país por volumen de pasajeros"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "That split is the thing to get right.",
+   "why": "A signpost kept from the old text; the split it refers to is sourced in the sentences either side."
+  }
+ ],
+ "tracerOk": {}
+}

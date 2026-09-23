@@ -1,0 +1,552 @@
+{
+ "iata": "EZE",
+ "id": "recxOM1SLvs5azDCb",
+ "name": "Ezeiza International Airport - Ministro Pistarini",
+ "country": "Argentina",
+ "wikipedia": "https://en.wikipedia.org/wiki/Ezeiza_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Argentina's main international gateway, at Ezeiza 22 km south south west of Buenos Aires, handling 85 per cent of the country's international air traffic. The inner-city Aeroparque Jorge Newbery takes domestic and regional routes, so a client connecting between the two faces a cross-city transfer.\n\nPlan the ground journey. There are buses to central Buenos Aires and to Retiro bus station, and local services, but there are no trains at all.\n\nThe terminals were reorganised recently. A new Departures Terminal opened on 14 April 2023, 50,000 square metres over four floors and built for 30 million passengers a year. At that point the old Terminal A became International Arrivals and the old Terminal C became Domestic Arrivals, so older terminal guidance is misleading.\n\nThe airport covers 3,475 hectares and has been operated by Aeropuertos Argentina 2000 since 1998. It is a major hub for Aerolíneas Argentinas.",
+ "after": "Argentina's main international airport, at Ezeiza, south west of Buenos Aires. It is about 50 minutes from the city centre, according to the city's tourism board. The inner-city Aeroparque Jorge Newbery takes domestic and regional routes, so a client connecting between the two faces a cross-city transfer.\n\nPlan the ground journey. The tourism board lists Tienda León shuttles to Puerto Madero in the city centre, city buses, taxis and remises (private hire cars).\n\nTerminal arrangements keep changing. A new Departures Terminal opened on 14 April 2023: 50,000 square metres on four levels, built for 30 million passengers a year. Domestic and international arrivals have shared Terminal A since July 2026, and Terminal C now handles only domestic departures, Aeropuertos Argentina says, so older terminal guidance is misleading.\n\nThe airport covers 3,475 hectares and has been run by Aeropuertos Argentina since 1998. Aerolíneas Argentinas flies long-haul routes from here.",
+ "claims": [
+  {
+   "claim": "Argentina's main international gateway",
+   "verdict": "confirmed",
+   "inAfter": "Argentina's main international airport",
+   "note": "Four independent publishers agree it is the country's main international airport: the city's tourism board (most international flights arrive here), Aviacionline (16 August 2026: 'the main international airport of the country'; 28 January 2026: it led international traffic in 2025), the operator ('the most important in the country') and Wikipedia. The old '85 per cent' share is cut below: it is out of date. In review, 'gateway' became 'airport' (house style), as at Hangzhou and Kunming.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "It is the main international gateway for the Buenos Aires metropolitan area"
+    },
+    {
+     "file": "caba-como-llegar",
+     "org": "Buenos Aires city tourism board (Ente de Turismo, turismo.buenosaires.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Es el más importante del país, donde arriba la mayoría de los vuelos internacionales y algunos vuelos domésticos."
+    },
+    {
+     "file": "avl-fondos-pistas",
+     "org": "Aviacionline (Argentine aviation trade press)",
+     "dated": "2026-08-16",
+     "quote": [
+      "domingo 16 de agosto de 2026",
+      "las pistas del principal aeropuerto internacional del país"
+     ]
+    },
+    {
+     "file": "avl-ranking-2025",
+     "org": "Aviacionline (Argentine aviation trade press)",
+     "dated": "2026-01-28",
+     "quote": [
+      "miércoles 28 de enero de 2026",
+      "Ezeiza registró 11.911.000 pasajeros (+7%) y lideró el tráfico internacional con 8.533.000 usuarios"
+     ]
+    },
+    {
+     "file": "op-nuestros-eze",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "El aeropuerto Internacional Ministro Pistarini de Ezeiza, es el más importante de país."
+    }
+   ]
+  },
+  {
+   "claim": "at Ezeiza",
+   "verdict": "confirmed",
+   "inAfter": "at Ezeiza",
+   "note": "The operator gives the postal address in Ezeiza, Buenos Aires province (outside the city of Buenos Aires).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "is an international airport located in Ezeiza"
+    },
+    {
+     "file": "op-como-llego",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "AU Tte. Gral. Pablo Riccheri Km 33,5, B1802 Ezeiza, Provincia de Buenos Aires"
+    },
+    {
+     "file": "caba-como-llegar",
+     "org": "Buenos Aires city tourism board (Ente de Turismo, turismo.buenosaires.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "El aeropuerto se encuentra en la localidad de Ezeiza"
+    }
+   ]
+  },
+  {
+   "claim": "south west of Buenos Aires",
+   "verdict": "confirmed",
+   "inAfter": "south west of Buenos Aires",
+   "note": "Wikipedia says south-southwest; the coordinates give 212 degrees from the city centre, south west, 9 degrees from Wikipedia's point. Written as the computed point. The distance is dealt with below.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "22 kilometres (14 mi) south-southwest of Buenos Aires"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Bearing from the city centre: 212 degrees, which is south west",
+      "Straight-line distance from the city centre: 27.4 km (17.0 miles)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 50 minutes from the city centre, according to the city's tourism board",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "tourism board",
+   "inAfter": "It is about 50 minutes from the city centre, according to the city's tourism board.",
+   "note": "Replaces '22 km', on which good sources disagree (cut below): the operator and Wikipedia say 22 km from the city, the tourism board 32 km from the city and about 50 minutes from the centre, and the straight line from the centre is 27.4 km, so 22 km cannot be a distance from the centre. The board's travel time is attributed to it, as Swedavia's were for Östersund.",
+   "sources": [
+    {
+     "file": "caba-como-llegar",
+     "org": "Buenos Aires city tourism board (Ente de Turismo, turismo.buenosaires.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Sitio oficial de turismo de la Ciudad de Buenos Aires",
+      "El aeropuerto se encuentra en la localidad de Ezeiza, a 32 km de la ciudad, a unos 50 minutos del centro porteño."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the inner-city Aeroparque Jorge Newbery takes domestic and regional routes (so connecting between the two means a cross-city transfer)",
+   "verdict": "confirmed",
+   "inAfter": "The inner-city Aeroparque Jorge Newbery takes domestic and regional routes, so a client connecting between the two faces a cross-city transfer.",
+   "note": "Current: the operator's Aeroparque page and the tourism board both say domestic and regional flights, and Aviacionline (28 January 2026) shows Aeroparque took 5.2 million international passengers in 2025, up 39 per cent, which Aviacionline describes as much of the new regional demand. 'So a client connecting between the two faces a cross-city transfer' is advice that follows from the two locations: Aeroparque is inside the city (tourism board), in its north west (operator), and Ezeiza is out at Ezeiza (above). The operator's '2 km from the centre' for Aeroparque is not used: it fails the coordinates (see the AEP ledger).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "while the inner-city Aeroparque Jorge Newbery primarily serves domestic and regional routes"
+    },
+    {
+     "file": "op-nuestros-aep",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "El Aeroparque Jorge Newbery se encuentra ubicado en la zona noroeste de la Ciudad de Buenos Aires",
+      "Opera vuelos de cabotaje y vuelos regionales con destino a diversos países de América."
+     ]
+    },
+    {
+     "file": "caba-como-llegar",
+     "org": "Buenos Aires city tourism board (Ente de Turismo, turismo.buenosaires.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "La particularidad de este aeropuerto es que está ubicado dentro de la Ciudad",
+      "opera mayoritariamente con vuelos domésticos y algunos vuelos regionales"
+     ]
+    },
+    {
+     "file": "avl-ranking-2025",
+     "org": "Aviacionline (Argentine aviation trade press)",
+     "dated": "2026-01-28",
+     "quote": [
+      "miércoles 28 de enero de 2026",
+      "el Aeroparque Jorge Newbery absorbió gran parte de la nueva demanda regional con 5.229.000 pasajeros"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the tourism board lists Tienda León shuttles to Puerto Madero, city buses, taxis and remises",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "tourism board",
+   "inAfter": "The tourism board lists Tienda León shuttles to Puerto Madero in the city centre, city buses, taxis and remises (private hire cars).",
+   "note": "Replaces 'buses to central Buenos Aires and to Retiro bus station, and local services' (cut below). The city's official tourism site, so it is attributed; the facts behind it are borne out by Wikipedia (bus connections to central Buenos Aires and local colectivo buses) and the operator's own page, which lists taxis and remises and public transport (its details did not load). Tienda León's own site answered 429 (too many requests) to a plain request and was not tried again.",
+   "sources": [
+    {
+     "file": "caba-como-llegar",
+     "org": "Buenos Aires city tourism board (Ente de Turismo, turismo.buenosaires.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "La empresa Tienda León ofrece servicios desde ambos aeropuertos hasta la terminal de Puerto Madero, en el centro de la Ciudad.",
+      "hay distintas paradas disponibles dentro de los aeropuertos",
+      "Varias compañías ofrecen sus servicios desde el aeropuerto",
+      "a ambos aeropuertos llegan líneas de colectivos que los unen con el centro de la Ciudad"
+     ]
+    },
+    {
+     "file": "op-como-llego",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Taxi y remises",
+      "Transporte público"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "The airport has bus connections to central Buenos Aires and Retiro bus station in Puerto Madero, and local bus (Colectivo)."
+    }
+   ]
+  },
+  {
+   "claim": "a new Departures Terminal opened on 14 April 2023",
+   "verdict": "confirmed",
+   "inAfter": "A new Departures Terminal opened on 14 April 2023",
+   "sources": [
+    {
+     "file": "gob-terminal-partidas",
+     "org": "ORSNA (national airport regulator, argentina.gob.ar)",
+     "dated": "2023-04-14",
+     "quote": [
+      "Quedó inaugurada la Nueva Terminal de Partidas (NTP) en el Aeropuerto de Ezeiza",
+      "14 de abril de 2023"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "On April 14, 2023, the new Departures Terminal (Terminal de Partidas) was inaugurated."
+    }
+   ]
+  },
+  {
+   "claim": "50,000 square metres on four levels, built for 30 million passengers a year",
+   "verdict": "confirmed",
+   "inAfter": "50,000 square metres on four levels, built for 30 million passengers a year",
+   "note": "Was 'over four floors'. ORSNA says four levels, with two basement levels beneath for back offices and baggage; the operator's investor presentation (2Q26) says over 50,000 square metres.",
+   "sources": [
+    {
+     "file": "gob-terminal-partidas",
+     "org": "ORSNA (national airport regulator, argentina.gob.ar)",
+     "dated": "2023-04-14",
+     "quote": "de 50.000m2 de superficie cubierta, organizado en 4 niveles, con capacidad para procesar 30 millones de pasajeros al año"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "The new terminal features 50,000 square meters (538,195 sq ft) of open surface over 4 floors, with a projected capacity of 30 million passengers per year."
+    },
+    {
+     "file": "aa2000-pres-2q26",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "2026 (2Q26 investor presentation)",
+     "quote": [
+      "EZE – New Departure Terminal",
+      "Over 50,000 square meters equipped with state of the"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "since July 2026 domestic and international arrivals share Terminal A and Terminal C handles only domestic departures (Aeropuertos Argentina)",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Aeropuertos Argentina",
+   "inAfter": "Domestic and international arrivals have shared Terminal A since July 2026, and Terminal C now handles only domestic departures, Aeropuertos Argentina says",
+   "note": "Replaces 'the old Terminal A became International Arrivals and the old Terminal C became Domestic Arrivals', the April 2023 arrangement Wikipedia still describes (cut below). Only the operator reports the change (Aviacionline's Ezeiza tag pages list no story on it), so it is attributed, from its press release of 22 July 2026 and its passenger notice of 17 August 2026. 'So older terminal guidance is misleading' is kept as advice: it is truer now than when it was written, and the operator's own airport fact page still lists a 'Terminal de Arribos Domésticos'.",
+   "sources": [
+    {
+     "file": "op-arribos-domesticos",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "2026-07-22",
+     "quote": [
+      "Fecha de publicación 22/07/2026",
+      "El Aeropuerto Internacional de Ezeiza puso en marcha una nueva área de arribos domésticos en la Terminal A, en el marco de un proceso de reconfiguración que unifica en un mismo sector los flujos de pasajeros que arriban desde vuelos nacionales como internacionales",
+      "Así, la terminal C destinada a operar vuelos domésticos, será únicamente utilizada para partidas"
+     ]
+    },
+    {
+     "file": "op-arribos-unificados",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "2026-08-17",
+     "quote": [
+      "Fecha de publicación 17/08/2026",
+      "integrando los arribos domésticos e internacionales en una misma terminal"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "covers 3,475 hectares",
+   "verdict": "confirmed",
+   "inAfter": "The airport covers 3,475 hectares",
+   "sources": [
+    {
+     "file": "op-nuestros-eze",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Superficie: 3.475 hectáreas"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "Covering 3,475 hectares (13.42 sq mi; 8,590 acres)"
+    }
+   ]
+  },
+  {
+   "claim": "run by Aeropuertos Argentina since 1998",
+   "verdict": "corrected",
+   "inAfter": "has been run by Aeropuertos Argentina since 1998",
+   "note": "Was 'Aeropuertos Argentina 2000', the name Wikipedia still uses; the operator now trades as Aeropuertos Argentina (Aeropuertos Argentina S.A.), as found for Iguazú. Its concession began in 1998 and was extended in December 2020 to February 2038 (investor presentation, 2Q26).",
+   "sources": [
+    {
+     "file": "op-arribos-domesticos",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "2026-07-22",
+     "quote": [
+      "Aeropuertos Argentina nació en el año 1998 con el objetivo de desarrollar y operar terminales aéreas en el país",
+      "Desde el inicio de la concesión"
+     ]
+    },
+    {
+     "file": "aa2000-pres-2q26",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "2026 (2Q26 investor presentation)",
+     "quote": [
+      "Long term airport operator concession",
+      "since 1998, extended until 2038 after"
+     ]
+    },
+    {
+     "file": "op-nuestros-eze",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "El aeropuerto Internacional Ministro Pistarini de Ezeiza",
+      "©2017 - 2026 Aeropuertos Argentina S.A."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "the airport has been operated by Aeropuertos Argentina 2000 S.A. since 1998"
+    }
+   ]
+  },
+  {
+   "claim": "Aerolíneas Argentinas flies long-haul routes from here",
+   "verdict": "softened",
+   "inAfter": "Aerolíneas Argentinas flies long-haul routes from here.",
+   "note": "Was 'It is a major hub for Aerolíneas Argentinas' (cut below). Only Wikipedia uses the word hub. Aviacionline (16 August 2026) reports that Aerolíneas Argentinas will keep its long-haul flights at Ezeiza during the runway works, and the airline's own help pages have a topic on its 'Salón Cóndor (Ezeiza)'.",
+   "sources": [
+    {
+     "file": "avl-fondos-pistas",
+     "org": "Aviacionline (Argentine aviation trade press)",
+     "dated": "2026-08-16",
+     "quote": [
+      "domingo 16 de agosto de 2026",
+      "Aerolíneas Argentinas mantendrá vuelos de largo alcance pese a obras en Ezeiza"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "Ezeiza serves as a major hub for international and select domestic flights of Aerolíneas Argentinas."
+    },
+    {
+     "file": "ar-faq",
+     "org": "Aerolíneas Argentinas (airline, aerolineas.com.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Salón Cóndor (Ezeiza)"
+    }
+   ]
+  },
+  {
+   "claim": "22 km south south west of Buenos Aires",
+   "verdict": "cut",
+   "wasBefore": "22 km south south west of Buenos Aires",
+   "why": "Good sources disagree on the distance: the operator and Wikipedia say 22 km from the city, the city's tourism board 32 km from the city and about 50 minutes from the centre. The straight line from the centre is 27.4 km, so 22 km cannot be a distance from the centre and would mislead anyone reading it that way; 32 km fits a road distance from the centre. Neither figure is given. The direction is kept as south west (the computed point) and the board's travel time is given, attributed.",
+   "sources": [
+    {
+     "file": "op-nuestros-eze",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Se encuentra ubicado a 22 km de la ciudad de Buenos Aires"
+    },
+    {
+     "file": "caba-como-llegar",
+     "org": "Buenos Aires city tourism board (Ente de Turismo, turismo.buenosaires.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "a 32 km de la ciudad, a unos 50 minutos del centro porteño"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 27.4 km (17.0 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "handles 85 per cent of the country's international air traffic",
+   "verdict": "cut",
+   "wasBefore": "handling 85 per cent of the country's international air traffic",
+   "why": "Out of date. Aviacionline's 2025 ranking (28 January 2026, from ANAC figures) gives Ezeiza 8,533,000 international passengers and Aeroparque 5,229,000 (up 39 per cent), the Buenos Aires airports together 87 per cent; ANAC counts 15,911,424 international passengers for the whole country in 2025, so Ezeiza's own share was about 54 per cent. Only Aviacionline gives Ezeiza's figure (ANAC's statistics portal timed out, the city statistics page Wikipedia cites answered 503, and ORSNA's site is known to answer 503), so no share is given. 'Main international gateway' stays.",
+   "sources": [
+    {
+     "file": "avl-ranking-2025",
+     "org": "Aviacionline (Argentine aviation trade press)",
+     "dated": "2026-01-28",
+     "quote": [
+      "La concentración del tráfico en el Área Metropolitana de Buenos Aires ( AMBA ) se mantuvo predominante con 13.764.000 pasajeros internacionales , lo que equivale al 87% de la cuota de mercado del segmento.",
+      "mientras el Aeropuerto Internacional de Ezeiza creció un 6% internacional hasta los 8.533.000 usuarios"
+     ]
+    },
+    {
+     "file": "anac-2025-anual",
+     "org": "ANAC (national civil aviation authority, argentina.gob.ar)",
+     "dated": "2026-01-21",
+     "quote": [
+      "21 de enero de 2026",
+      "Récord histórico de pasajeros internacionales: 15.911.424"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "handling 85% of the country's international air traffic"
+    }
+   ]
+  },
+  {
+   "claim": "buses to central Buenos Aires and to Retiro bus station, and local services",
+   "verdict": "cut",
+   "wasBefore": "There are buses to central Buenos Aires and to Retiro bus station, and local services",
+   "why": "Replaced by the tourism board's list (attributed, above). Retiro bus station is not confirmed: the board names a terminal in Puerto Madero for Tienda León's services, and Wikipedia's own sentence puts 'Retiro bus station in Puerto Madero', two different places. Nothing else mentions Retiro."
+  },
+  {
+   "claim": "no trains at all",
+   "verdict": "cut",
+   "wasBefore": "but there are no trains at all",
+   "why": "Wikipedia alone says so outright. The operator's page and the city's tourism board list only road transport (cars, taxis, remises, shuttles and city buses), which is consistent with it but is not a second statement."
+  },
+  {
+   "claim": "the terminals were reorganised recently",
+   "verdict": "cut",
+   "wasBefore": "The terminals were reorganised recently.",
+   "why": "Replaced by the signpost 'Terminal arrangements keep changing' (listed as opinion), which points to the two sourced changes: April 2023 and July 2026."
+  },
+  {
+   "claim": "over four floors",
+   "verdict": "cut",
+   "wasBefore": "50,000 square metres over four floors and built for 30 million passengers a year",
+   "why": "Reworded to ORSNA's four levels; the size and capacity are kept (above)."
+  },
+  {
+   "claim": "old Terminal A became International Arrivals, old Terminal C Domestic Arrivals",
+   "verdict": "cut",
+   "wasBefore": "At that point the old Terminal A became International Arrivals and the old Terminal C became Domestic Arrivals",
+   "why": "Overtaken: since July 2026 Terminal A takes domestic arrivals as well as international ones, and Terminal C is used only for domestic departures (Aeropuertos Argentina, 22 July and 17 August 2026; attributed above)."
+  },
+  {
+   "claim": "operated by Aeropuertos Argentina 2000",
+   "verdict": "cut",
+   "wasBefore": "operated by Aeropuertos Argentina 2000",
+   "why": "The operator now calls itself Aeropuertos Argentina (Aeropuertos Argentina S.A.). Corrected above."
+  },
+  {
+   "claim": "a major hub for Aerolíneas Argentinas",
+   "verdict": "cut",
+   "wasBefore": "It is a major hub for Aerolíneas Argentinas.",
+   "why": "Only Wikipedia calls it a hub; Aerolíneas Argentinas' own pages (a single-page app) and SkyTeam's site (403) could not be read for it. Softened to what Aviacionline supports: the airline keeps long-haul flights here (above)."
+  },
+  {
+   "claim": "runway works: from 25 October to 11 November 2026 only a shortened runway 11/29 (1,850 m)",
+   "verdict": "cut",
+   "why": "Held back: a warning that replaces nothing in the old text, and the most useful thing found for agents booking late October and early November 2026. Runway 17/35 has been under rehabilitation since 1 August 2026; from 25 October to 11 November 2026, while the crossing of the two runways is rebuilt, Ezeiza will use only runway 11/29, cut from 3,300 to 1,850 metres. Delta suspends its Atlanta and New York flights from 24 October to 10 November and United its Houston flights over the same period, American Airlines keeps a daily Boeing 787 from Miami and stops some 777 flights in Montevideo, and other airlines have rescheduled or added stops. One organisation only (Aviacionline, 16 April and 16 August 2026): no second publisher was found (AeroRoutes, which Aviacionline cites, had nothing on its front page). For Andy to decide.",
+   "sources": [
+    {
+     "file": "avl-obras-delta-united",
+     "org": "Aviacionline (Argentine aviation trade press)",
+     "dated": "2026-04-16",
+     "quote": [
+      "jueves 16 de abril de 2026",
+      "El ajuste en la operación es consecuencia de las obras de mantenimiento en la pista 11-29 del Aeropuerto Internacional de Ezeiza , que limitarán su longitud operativa a 1.850 metros durante dicho periodo.",
+      "Delta cancelará sus rutas desde Atlanta y Nueva York (JFK) hacia Buenos Aires entre el 24 de octubre y el 10 de noviembre."
+     ]
+    },
+    {
+     "file": "avl-fondos-pistas",
+     "org": "Aviacionline (Argentine aviation trade press)",
+     "dated": "2026-08-16",
+     "quote": [
+      "domingo 16 de agosto de 2026",
+      "Las obras en la pista 17-35 comenzaron el 1 de agosto",
+      "Durante ese período, Ezeiza operará exclusivamente con la pista 11/29, cuya longitud operativa se reduce de 3.300 a 1.850 metros"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "11.9 million passengers in 2025, 8.5 million international",
+   "verdict": "cut",
+   "why": "Held back: the old text gives no passenger total, so this replaces nothing. Aviacionline (28 January 2026, from ANAC figures) gives 11,911,000 passengers in 2025, up 7 per cent, 8,533,000 of them international; Aeroparque was busier overall (17,738,000). One organisation only; Wikipedia's infobox has 11,077,000 for 2024.",
+   "sources": [
+    {
+     "file": "avl-ranking-2025",
+     "org": "Aviacionline (Argentine aviation trade press)",
+     "dated": "2026-01-28",
+     "quote": [
+      "Ezeiza registró 11.911.000 pasajeros (+7%) y lideró el tráfico internacional con 8.533.000 usuarios",
+      "Aeroparque Jorge Newbery fue el principal aeropuerto con 17.738.000 pasajeros"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2024",
+      "stat1_data = 11,077,000"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "British Airways from London Heathrow",
+   "verdict": "cut",
+   "why": "Held back: the old text names no UK flight. The operator's airline list for Ezeiza includes British Airways, and the UK CAA's 2025 table has 87,027 scheduled passengers between Heathrow and Buenos Aires, the only UK route to Argentina (the table names the city, not the airport). BA's own page answered a plain request with a 'high demand' holding page and was not tried again. For Andy to decide.",
+   "sources": [
+    {
+     "file": "op-lineas-aereas",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Ezeiza, EZE",
+      "British Airways"
+     ]
+    },
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "table run 25/02/2026, year 2025",
+     "quote": "2025,90,SOUTH AMERICA,ARGENTINA,1,HEATHROW,BUENOS AIRES,87027,87027,0"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Plan the ground journey.",
+   "why": "A signpost kept from the old text; the options that follow are the tourism board's, attributed."
+  },
+  {
+   "text": "Terminal arrangements keep changing.",
+   "why": "A signpost for the two sourced changes that follow: the April 2023 terminal (ORSNA, Wikipedia) and the July 2026 arrivals change (attributed to Aeropuertos Argentina)."
+  }
+ ],
+ "tracerOk": {}
+}

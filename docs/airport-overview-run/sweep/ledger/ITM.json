@@ -1,0 +1,437 @@
+{
+ "iata": "ITM",
+ "id": "recdENpzbx7CLt6xe",
+ "name": "Osaka Itami International Airport",
+ "country": "Japan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Itami_Airport",
+ "audited": "2026-09-23",
+ "before": "The closest airport to Osaka, 11 km north of Osaka Station, and closer to Kyoto than anything else at 36 km. It is the primary domestic airport for the whole Kansai region.\n\nThe name is the trap. Until January 2025 this was called Osaka International Airport, and that is still its official Japanese name, but it handles domestic flights only. Every international service moved to Kansai International, 43 km away, in 1994. A client booked to Osaka may be arriving at either, so check the code.\n\nThere is a single terminal with 21 gates, split into a North Terminal for JAL and Amakusa Airlines and a South Terminal for ANA and IBEX, joined by a Central Block of shops, restaurants and a hotel. A renovation begun in 2016 delivered a consolidated central area in 2018.\n\nIt carried 16.3 million passengers in 2018, seventh busiest in Japan, on a site of only 311 hectares.\n\nThe airport takes its name from Itami in Hyōgo Prefecture, where most of its land sits, though it also spreads into Toyonaka and Ikeda.",
+ "after": "Kansai's main domestic airport, 11 km north of central Osaka and about 55 minutes by bus from Kyoto Station.\n\nThe name is the trap. Its official Japanese name is still Osaka International Airport, though it now calls itself Osaka Itami Airport in English, and it handles domestic flights only. International flights moved to Kansai International when that airport opened in 1994. A client booked to Osaka may be arriving at either, so check the code.\n\nThe terminal is split into a North Terminal for JAL and Amakusa Airlines and a South Terminal for ANA and IBEX. A renovation opened a new central area in 2018 and was completed in August 2020.\n\nJapan's transport ministry counted just over 16 million passengers here in 2025, on a site of only 311 hectares.",
+ "claims": [
+  {
+   "claim": "Kansai's main domestic airport",
+   "verdict": "confirmed",
+   "inAfter": "Kansai's main domestic airport",
+   "note": "Was 'the primary domestic airport for the whole Kansai region', moved to the opening. The Osaka Civil Aviation Bureau's preliminary table for calendar 2025 has Itami at 16,175,135 domestic passengers against 6,571,221 at Kansai and 3,654,633 at Kobe. The table prints the airport names apart from the figures, so the rows were tied to names by the regional total: the Kinki rows (Itami 16,175,135, Kansai 34,034,435, Yao 0, Nanki-Shirahama 247,436, Kobe 4,059,871 and Tajima 39,946) add up exactly to the Kinki total of 54,556,823, and the 16.2 million row has no international passengers in any month, which of the region's large airports fits only Itami (Kansai and Kobe both carry international passengers).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the primary domestic airport for the Kansai region of Japan"
+    },
+    {
+     "file": "ocab-riyou-2025",
+     "org": "MLIT Osaka Civil Aviation Bureau (Japan's transport ministry, cab.mlit.go.jp)",
+     "dated": "figures for calendar 2025 and the year to March 2026 (preliminary table, read 2026-09-23)",
+     "quote": [
+      "令和7年管内空港の利用概況集計表（速報値）",
+      "近畿地区",
+      "合計 4,361,698 4,103,162 4,585,256 4,380,032 4,583,177 4,433,297 4,520,601 5,171,254 4,543,843 4,885,569 4,603,637 4,385,297 54,556,823",
+      "大阪国際",
+      "合計 1,237,797 1,184,946 1,384,421 1,215,539 1,332,045 1,298,975 1,370,521 1,581,079 1,408,349 1,465,760 1,374,453 1,321,250 16,175,135",
+      "関西国際 八尾 南紀白浜 神戸",
+      "国内 531,514 511,393 591,414 501,449 556,135 532,630 549,030 619,664 588,767 593,630 499,216 496,379 6,571,221",
+      "国内 278,705 279,971 319,864 269,555 302,869 301,024 303,456 352,073 326,913 334,480 300,537 285,186 3,654,633"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "11 km north of central Osaka",
+   "verdict": "softened",
+   "inAfter": "11 km north of central Osaka",
+   "note": "Was '11 km north of Osaka Station'. The coordinates measure from the centre of Osaka, not the station: 11.1 km at 330 degrees, which is north west and 30 degrees from north, inside the tolerance.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "11 km (6.8 mi) north of Osaka Station"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Osaka (GeoNames 1853909): 11.1 km (6.9 miles), bearing 330 degrees, which is north west"
+    }
+   ]
+  },
+  {
+   "claim": "about 55 minutes by bus from Kyoto Station",
+   "verdict": "corrected",
+   "inAfter": "about 55 minutes by bus from Kyoto Station",
+   "note": "Replaces 'closer to Kyoto than anything else at 36 km': the distance and the comparison rest on Wikipedia alone, and the coordinates check measures only from the city an airport serves. As at Östersund, a travel time from sources of its own stands in for the unconfirmed distance. IBEX's access table for Itami gives the airport bus to Kyoto Station as about 55 minutes (1,310 yen); Wikipedia gives central Kyoto in 55 minutes by car or bus.",
+   "sources": [
+    {
+     "file": "ibex-airports",
+     "org": "IBEX Airlines (its airport and access page, ibexair.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "大阪（伊丹空港）について",
+      "京都駅 約55分 1,310円"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "central Kyoto in 55 minutes"
+    }
+   ]
+  },
+  {
+   "claim": "its official Japanese name is still Osaka International Airport",
+   "verdict": "confirmed",
+   "inAfter": "Its official Japanese name is still Osaka International Airport",
+   "note": "The transport ministry's 2025 table, the operator's own page and JAL's page (updated 4 September 2026) all use 大阪国際空港 (Osaka International Airport), the name the airport has had since July 1959.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "which remains the airport's official Japanese name"
+    },
+    {
+     "file": "ka-itm-numbers",
+     "org": "Kansai Airports (the airport operator, kansai-airports.co.jp and osaka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "大阪国際空港について",
+      "空港整備法に基づく第一種空港に指定され、「大阪国際空港」と改称"
+     ]
+    },
+    {
+     "file": "ocab-riyou-2025",
+     "org": "MLIT Osaka Civil Aviation Bureau (Japan's transport ministry, cab.mlit.go.jp)",
+     "dated": "calendar 2025 (preliminary table, read 2026-09-23)",
+     "quote": [
+      "令和7年管内空港の利用概況集計表（速報値）",
+      "大阪国際"
+     ]
+    },
+    {
+     "file": "jal-itm",
+     "org": "Japan Airlines (JAL, its own airport page, jal.co.jp)",
+     "dated": "2026-09-04 (the page's update date)",
+     "quote": [
+      "更新日：2026年9月4日",
+      "大阪国際空港（伊丹）"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "it now calls itself Osaka Itami Airport in English",
+   "verdict": "softened",
+   "inAfter": "though it now calls itself Osaka Itami Airport in English",
+   "note": "Was 'Until January 2025 this was called Osaka International Airport'. The operator's English pages now use Osaka Itami Airport throughout. The January 2025 date rests on Wikipedia alone: the operator's release at the address Wikipedia cites returns a 404 page, and its news list shows only recent items.",
+   "sources": [
+    {
+     "file": "oap-en-home",
+     "org": "Kansai Airports (the airport operator, kansai-airports.co.jp and osaka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Osaka Itami Airport Domestic only Kansai International Airport International/Domestic Kobe Airport International/Domestic",
+      "© 2026 Kansai Airports All Rights Reserved"
+     ]
+    },
+    {
+     "file": "ka-news-en",
+     "org": "Kansai Airports (the airport operator, kansai-airports.co.jp and osaka-airport.co.jp)",
+     "dated": "2026-09-18 (the item's date on the news list)",
+     "quote": [
+      "2026-09-18",
+      "JAL Group to Add New Routes at Osaka Itami Airport"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On January 30, 2025, the airport's English name and signs were officially changed to \"Osaka Itami Airport\""
+    }
+   ]
+  },
+  {
+   "claim": "it handles domestic flights only",
+   "verdict": "confirmed",
+   "inAfter": "and it handles domestic flights only",
+   "sources": [
+    {
+     "file": "oap-en-home",
+     "org": "Kansai Airports (the airport operator, kansai-airports.co.jp and osaka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Osaka Itami Airport Domestic only"
+    },
+    {
+     "file": "ocab-riyou-2025",
+     "org": "MLIT Osaka Civil Aviation Bureau (Japan's transport ministry, cab.mlit.go.jp)",
+     "dated": "calendar 2025 (preliminary table, read 2026-09-23)",
+     "quote": [
+      "合計 1,237,797 1,184,946 1,384,421 1,215,539 1,332,045 1,298,975 1,370,521 1,581,079 1,408,349 1,465,760 1,374,453 1,321,250 16,175,135",
+      "国際 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the airport caters exclusively to domestic flights"
+    }
+   ]
+  },
+  {
+   "claim": "international flights moved to Kansai International when it opened in 1994",
+   "verdict": "confirmed",
+   "inAfter": "International flights moved to Kansai International when that airport opened in 1994.",
+   "note": "The operator's timeline has the move in September 1994, with the opening of Kansai International.",
+   "sources": [
+    {
+     "file": "ka-itm-numbers",
+     "org": "Kansai Airports (the airport operator, kansai-airports.co.jp and osaka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "1994 9月 関西国際空港の開港に伴い国際線が移管"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "took over the region's international traffic in 1994"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Upon the opening of Kansai, all international service at Itami was transferred to Kansai"
+    }
+   ]
+  },
+  {
+   "claim": "a North Terminal for JAL and Amakusa Airlines and a South Terminal for ANA and IBEX",
+   "verdict": "confirmed",
+   "inAfter": "The terminal is split into a North Terminal for JAL and Amakusa Airlines and a South Terminal for ANA and IBEX.",
+   "note": "Each airline's own page places it: JAL's self check-in and bag drop at the North Terminal entrance, Amakusa Airlines' counter in the North Terminal, and IBEX's check-in at the ANA counters in the South Terminal. The operator lists one passenger terminal (旅客ターミナル) and names its North and South Terminal buildings in its timeline.",
+   "sources": [
+    {
+     "file": "jal-itm",
+     "org": "Japan Airlines (JAL, its own airport page, jal.co.jp)",
+     "dated": "2026-09-04 (the page's update date)",
+     "quote": [
+      "更新日：2026年9月4日",
+      "自動チェックイン機、Self Baggage Drop（自動手荷物預け機）は、北ターミナル入口から向かって左側（1番）にございます。"
+     ]
+    },
+    {
+     "file": "amx-osaka",
+     "org": "Amakusa Airlines (its own route page, amx.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "チェックインカウンターのご案内(大阪国際空港 1F北ターミナル案内図)"
+    },
+    {
+     "file": "ibex-airports",
+     "org": "IBEX Airlines (its airport and access page, ibexair.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "大阪（伊丹空港）について",
+      "南ターミナル1F　チェックインロビー",
+      "※ご搭乗手続きはANAカウンターにて承ります。"
+     ]
+    },
+    {
+     "file": "ka-itm-numbers",
+     "org": "Kansai Airports (the airport operator, kansai-airports.co.jp and osaka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "旅客ターミナル",
+      "北ターミナルビル・リニューアル竣工",
+      "旧国際線ビルを南ターミナルビルとしてリニューアルオープン"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "divided into the \"North Terminal\" for JAL and Amakusa Airlines; and the \"South Terminal\" for ANA and IBEX"
+    }
+   ]
+  },
+  {
+   "claim": "a renovation opened a new central area in 2018",
+   "verdict": "confirmed",
+   "inAfter": "A renovation opened a new central area in 2018",
+   "note": "The operator's timeline lists, under 2018, the early opening in April of the renovated central area and observation deck.",
+   "sources": [
+    {
+     "file": "ka-itm-numbers",
+     "org": "Kansai Airports (the airport operator, kansai-airports.co.jp and osaka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "2018 12月 空港カーボン認証（ACA：Airport Carbon Accreditation）レベル3を取得 5月 ACI Green Airports Recognition で刈草リサイクルが Sliver Recogonitionを受賞 4月 大阪国際空港中央エリアおよび展望デッキ先行リニューアルオープン"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the renovated central area became operational in 2018"
+    }
+   ]
+  },
+  {
+   "claim": "the renovation was completed in August 2020",
+   "verdict": "corrected",
+   "inAfter": "and was completed in August 2020",
+   "note": "The old text gave only the start (2016) and the central area (2018). The operator's timeline has the grand opening of the terminal renovation project in August 2020; Wikipedia gives 5 August 2020.",
+   "sources": [
+    {
+     "file": "ka-itm-numbers",
+     "org": "Kansai Airports (the airport operator, kansai-airports.co.jp and osaka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "2020 8月 ターミナル改修プロジェクト　グランドオープン"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On August 5, 2020, the terminal's complete renovation was completed."
+    }
+   ]
+  },
+  {
+   "claim": "the transport ministry counted just over 16 million passengers in 2025",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "transport ministry",
+   "inAfter": "Japan's transport ministry counted just over 16 million passengers here in 2025",
+   "note": "Was '16.3 million passengers in 2018'. MLIT's Osaka Civil Aviation Bureau counts 16,175,135 passengers for calendar 2025 (preliminary) and 16,286,822 for the year to March 2026, all domestic. Attributed, because no second count could be read: the operator's monthly traffic reports sit on its corporate site, which answers plain requests with 403 and refuses both link listers, so no report address could be found (the one Wikipedia cites is for December 2024), and the owner NKIAC's results for the year to March 2026 give no traffic. The operator's own profile page says about 17 million a year, undated, which is not used. Wikipedia's infobox gives 15,157,501 for 2024.",
+   "sources": [
+    {
+     "file": "ocab-riyou-2025",
+     "org": "MLIT Osaka Civil Aviation Bureau (Japan's transport ministry, cab.mlit.go.jp)",
+     "dated": "calendar 2025 and the year to March 2026 (preliminary table, read 2026-09-23)",
+     "quote": [
+      "令和7年管内空港の利用概況集計表（速報値）",
+      "大阪国際",
+      "合計 1,237,797 1,184,946 1,384,421 1,215,539 1,332,045 1,298,975 1,370,521 1,581,079 1,408,349 1,465,760 1,374,453 1,321,250 16,175,135 1,249,123 1,224,351 1,445,377 16,286,822"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a site of only 311 hectares",
+   "verdict": "confirmed",
+   "inAfter": "on a site of only 311 hectares",
+   "sources": [
+    {
+     "file": "ka-itm-numbers",
+     "org": "Kansai Airports (the airport operator, kansai-airports.co.jp and osaka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "面積 311 ha"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "covering only 311 hectares (768 acres) of land"
+    }
+   ]
+  },
+  {
+   "claim": "the closest airport to Osaka",
+   "verdict": "cut",
+   "wasBefore": "The closest airport to Osaka",
+   "why": "Wikipedia alone: no saved source compares the distances of Itami, Kansai and Kobe from Osaka, and the coordinates check covers only this airport. The distance itself is kept."
+  },
+  {
+   "claim": "11 km north of Osaka Station",
+   "verdict": "cut",
+   "wasBefore": "11 km north of Osaka Station",
+   "why": "Softened to central Osaka (see above): the coordinates measure from the city centre, not the station."
+  },
+  {
+   "claim": "closer to Kyoto than anything else at 36 km",
+   "verdict": "cut",
+   "wasBefore": "and closer to Kyoto than anything else at 36 km",
+   "why": "Wikipedia alone, the distance and the comparison both. Replaced by the bus time to Kyoto Station, which IBEX and Wikipedia both give (see above)."
+  },
+  {
+   "claim": "the primary domestic airport for the whole Kansai region",
+   "verdict": "cut",
+   "wasBefore": "It is the primary domestic airport for the whole Kansai region.",
+   "why": "Reworded, not dropped: now the opening words (see above)."
+  },
+  {
+   "claim": "called Osaka International Airport until January 2025",
+   "verdict": "cut",
+   "wasBefore": "Until January 2025 this was called Osaka International Airport",
+   "why": "The January 2025 date rests on Wikipedia alone (the operator's release at the cited address returns 404). Softened to the English name the operator uses now (see above)."
+  },
+  {
+   "claim": "still its official Japanese name",
+   "verdict": "cut",
+   "wasBefore": "and that is still its official Japanese name",
+   "why": "Reworded, not dropped (see above)."
+  },
+  {
+   "claim": "Kansai International 43 km away",
+   "verdict": "cut",
+   "wasBefore": "Every international service moved to Kansai International, 43 km away, in 1994.",
+   "why": "The 1994 move is kept (see above). The 43 km rests on Wikipedia alone, and the coordinates check does not measure between two airports."
+  },
+  {
+   "claim": "a single terminal with 21 gates",
+   "verdict": "cut",
+   "wasBefore": "There is a single terminal with 21 gates",
+   "why": "The North and South Terminals are kept (see above). The 21 gates rest on Wikipedia alone: the operator's terminal map at the address Wikipedia cites returns 404, and its passenger site draws its maps and access details in script, so they could not be read."
+  },
+  {
+   "claim": "a Central Block of shops, restaurants and a hotel",
+   "verdict": "cut",
+   "wasBefore": "joined by a Central Block of shops, restaurants and a hotel",
+   "why": "The operator confirms a central area (opened 2018, kept above) and a hotel (its timeline: 大阪空港ホテル renovated in December 2017), but not where the hotel sits or what the central area holds; that rests on Wikipedia alone."
+  },
+  {
+   "claim": "a renovation begun in 2016 delivered a consolidated central area in 2018",
+   "verdict": "cut",
+   "wasBefore": "A renovation begun in 2016 delivered a consolidated central area in 2018.",
+   "why": "The start is disputed: the operator's timeline dates the start of works (着工) to April 2015 and a safety ceremony for them to February 2016, while Wikipedia says work began in February 2016. 'Consolidated' rests on Wikipedia alone. Replaced by the 2018 central area and the August 2020 completion (see above)."
+  },
+  {
+   "claim": "16.3 million passengers in 2018",
+   "verdict": "cut",
+   "wasBefore": "It carried 16.3 million passengers in 2018",
+   "why": "Eight years old. Replaced by the transport ministry's 2025 count (see above)."
+  },
+  {
+   "claim": "seventh busiest in Japan",
+   "verdict": "cut",
+   "wasBefore": "seventh busiest in Japan",
+   "why": "A 2018 ranking the operator does not state. MLIT's national ranking tables are Excel files the sweep's tools cannot save, so no current rank could be confirmed."
+  },
+  {
+   "claim": "named after Itami, where most of its land is, spreading into Toyonaka and Ikeda",
+   "verdict": "cut",
+   "wasBefore": "The airport takes its name from Itami in Hyōgo Prefecture, where most of its land sits, though it also spreads into Toyonaka and Ikeda.",
+   "why": "Wikipedia alone. Itami City's airport page that Wikipedia cites is gone (404) and its airport section could not be found; the Osaka Civil Aviation Bureau's pages give no location. The operator's head office address, 大阪府豊中市蛍池西町 (Toyonaka, Osaka), bears out Toyonaka only. Worth restoring if the city's page turns up."
+  },
+  {
+   "claim": "Kobe Airport now has international flights too",
+   "verdict": "cut",
+   "why": "Held back: verified but replaces nothing in the old text. The operator now lists Kobe Airport as international and domestic, and the transport ministry's 2025 table shows Kobe's first international passengers in April 2025 (405,238 in the year). So a client booked to the Osaka area could also land at Kobe.",
+   "sources": [
+    {
+     "file": "oap-en-home",
+     "org": "Kansai Airports (the airport operator, kansai-airports.co.jp and osaka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Kobe Airport International/Domestic"
+    },
+    {
+     "file": "ocab-riyou-2025",
+     "org": "MLIT Osaka Civil Aviation Bureau (Japan's transport ministry, cab.mlit.go.jp)",
+     "dated": "calendar 2025 (preliminary table, read 2026-09-23)",
+     "quote": [
+      "関西国際 八尾 南紀白浜 神戸",
+      "国際 0 0 0 23,562 52,008 48,439 43,760 48,946 45,846 51,509 48,043 43,125 405,238"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The name is the trap.",
+   "why": "Framing carried over from the old text. The official Japanese name (Osaka International Airport) and the English name the operator now uses (Osaka Itami Airport) differ, and the airport has no international flights, which is the confusion Wikipedia says the English renaming was meant to end."
+  },
+  {
+   "text": "A client booked to Osaka may be arriving at either, so check the code.",
+   "why": "Advice carried over from the old text. Kansai International has domestic flights as well as international ones (the operator lists it as international and domestic; the transport ministry counts 6,571,221 domestic passengers there in 2025)."
+  }
+ ],
+ "tracerOk": {}
+}
