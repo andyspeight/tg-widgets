@@ -1,0 +1,179 @@
+{
+ "iata": "BEG",
+ "id": "recfUSBRziECKTvKX",
+ "name": "Belgrade Nikola Tesla Airport",
+ "country": "Serbia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Belgrade_Nikola_Tesla_Airport",
+ "audited": "2026-09-23",
+ "before": "Serbia's main airport, 18 km west of downtown Belgrade near Surčin, run by Vinci Airports. It is the hub for Air Serbia and one of Wizz Air's many operating bases.\n\nThere are two terminals joined by a hallway, with 90 check in counters and 32 gates between them. Twenty four of those gates have jetways; the rest are bus gates. One gate, A11, is set aside for domestic flights to Niš.\n\nTerminal 1 is the original building and was renovated in 2016 and 2017. It has largely handled low cost and charter international flights. Terminal 2, built in 1979 and rated for 5 million passengers, has been renovated twice, most recently in 2012 and 2013.\n\nThe terminal allocation is not settled. It is believed, though not confirmed, that foreign carriers will use the overhauled Terminal 1 while Air Serbia takes Terminal 2, so check before advising a client which building to use.\n\nThe airport is named after Nikola Tesla and connects to the A3 motorway.",
+ "after": "Serbia's main airport, 18 km west of downtown Belgrade, run by Vinci Airports. Air Serbia flies from here, and it is one of Wizz Air's bases.\n\nThe airport is named after Nikola Tesla.",
+ "claims": [
+  {
+   "claim": "Serbia's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Serbia's main airport",
+   "note": "Eurostat 2025: Belgrade 8,913,522, Nis 393,036.",
+   "sources": [
+    {
+     "file": "eurostat-rs",
+     "org": "Eurostat",
+     "dated": "2026-09-23",
+     "quote": [
+      "Eurostat RS_LYBE BEOGRAD/NIKOLA TESLA airport: passengers carried in 2025: 8,913,522",
+      "Eurostat RS_LYNI NIS airport: passengers carried in 2025: 393,036"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The flag carrier and the largest airline of Serbia, Air Serbia, uses Belgrade Nikola Tesla as its hub"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the largest and the busiest airport in Serbia"
+    }
+   ]
+  },
+  {
+   "claim": "18 km west of downtown Belgrade",
+   "verdict": "confirmed",
+   "inAfter": "18 km west of downtown Belgrade",
+   "note": "Coordinates: 12.4 km in a straight line at 277 degrees, west (ratio 1.45, a road distance).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "situated 18 km (11 mi) west of downtown Belgrade"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 12.4 km (7.7 miles)",
+      "Bearing from the city centre: 277 degrees, which is west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "run by Vinci Airports",
+   "verdict": "confirmed",
+   "inAfter": "run by Vinci Airports",
+   "sources": [
+    {
+     "file": "vinci-traffic-2024-pdf",
+     "org": "VINCI Airports (vinci-airports.com)",
+     "dated": "2025-01 (traffic to 31 December 2024)",
+     "quote": [
+      "Four airports operated by VINCI Airports have",
+      "8 million at Belgrade in Serbia"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On 21 December 2018, Vinci formally took over the airport"
+    }
+   ]
+  },
+  {
+   "claim": "Air Serbia flies from here",
+   "verdict": "softened",
+   "inAfter": "Air Serbia flies from here",
+   "note": "Was 'the hub for Air Serbia'. Wikipedia calls it Air Serbia's hub; the sources that could be read show Air Serbia flying Belgrade routes (EX-YU, June 2026: Belgrade to Podgorica with Air Montenegro) but none uses the word hub, and both Air Serbia's and the airport's sites refused both tools. Put 'hub' back when either can be read.",
+   "sources": [
+    {
+     "file": "exyu-2026-06",
+     "org": "EX-YU Aviation News (exyuaviation.com)",
+     "dated": "2026-06",
+     "quote": "Belgrade - Podgorica remained the busiest intra-ex-YU route, with Air Serbia and Air Montenegro jointly carrying"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Air Serbia, uses Belgrade Nikola Tesla as its hub"
+    }
+   ]
+  },
+  {
+   "claim": "one of Wizz Air's bases",
+   "verdict": "confirmed",
+   "inAfter": "it is one of Wizz Air's bases",
+   "note": "EX-YU (16 September 2026): Wizz Air has renewed its call on the Serbian authorities to resolve a regulatory dispute it says threatens the future of its Belgrade base. The base exists today; its future is uncertain, so re-check in early 2027.",
+   "sources": [
+    {
+     "file": "exyu-wizz-2026-09",
+     "org": "EX-YU Aviation News (exyuaviation.com)",
+     "dated": "2026-09-16 (in the page URL, 2026/09)",
+     "quote": "Wizz Air has renewed its call on the Serbian authorities to urgently resolve a regulatory dispute which it says threatens the future of its Belgrade base."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is also one of the many operating bases for low-cost airline Wizz Air"
+    }
+   ]
+  },
+  {
+   "claim": "named after Nikola Tesla",
+   "verdict": "confirmed",
+   "inAfter": "The airport is named after Nikola Tesla.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": "Belgrade Nikola Tesla Airport (OurAirports LYBE, IATA BEG)"
+    },
+    {
+     "file": "eurostat-rs",
+     "org": "Eurostat",
+     "quote": "BEOGRAD/NIKOLA TESLA airport"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Belgrade Nikola Tesla Airport"
+    }
+   ]
+  },
+  {
+   "claim": "the hub for Air Serbia",
+   "verdict": "cut",
+   "wasBefore": "It is the hub for Air Serbia and one of Wizz Air's many operating bases.",
+   "why": "Reworded: 'hub' has no second source that could be read (see the Air Serbia claim); the Wizz Air base is kept."
+  },
+  {
+   "claim": "near Surcin",
+   "verdict": "cut",
+   "wasBefore": "18 km west of downtown Belgrade near Surčin, run by Vinci Airports",
+   "why": "'Near Surcin' rests on Wikipedia alone; the rest of the sentence is kept."
+  },
+  {
+   "claim": "two terminals joined by a hallway; 90 check-in counters; 32 gates, 24 with jetways; gate A11 for Nis",
+   "verdict": "cut",
+   "wasBefore": "There are two terminals joined by a hallway, with 90 check in counters and 32 gates between them. Twenty four of those gates have jetways; the rest are bus gates. One gate, A11, is set aside for domestic flights to Niš.",
+   "why": "Wikipedia alone: the airport's own site (beg.aero) refused both tools."
+  },
+  {
+   "claim": "Terminal 1 renovated 2016 and 2017, low cost and charter; Terminal 2 of 1979, 5 million, renovated 2012 and 2013",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 is the original building and was renovated in 2016 and 2017. It has largely handled low cost and charter international flights. Terminal 2, built in 1979 and rated for 5 million passengers, has been renovated twice, most recently in 2012 and 2013.",
+   "why": "EX-YU (May 2017) confirms the Terminal 1 overhaul, but the rest rests on Wikipedia alone, and none of it helps an agent today."
+  },
+  {
+   "claim": "terminal allocation believed but not confirmed",
+   "verdict": "cut",
+   "wasBefore": "The terminal allocation is not settled. It is believed, though not confirmed, that foreign carriers will use the overhauled Terminal 1 while Air Serbia takes Terminal 2, so check before advising a client which building to use.",
+   "why": "Speculation that Wikipedia itself marks as unconfirmed; no source could be read on how the terminals are used now."
+  },
+  {
+   "claim": "connects to the A3 motorway",
+   "verdict": "cut",
+   "wasBefore": "and connects to the A3 motorway",
+   "why": "Wikipedia alone."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
