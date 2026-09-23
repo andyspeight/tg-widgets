@@ -1,0 +1,286 @@
+{
+ "iata": "GND",
+ "id": "recmVixs2rM8cIf4C",
+ "name": "Maurice Bishop International Airport",
+ "country": "Grenada",
+ "wikipedia": "https://en.wikipedia.org/wiki/Maurice_Bishop_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Grenada's international airport, on Point Salines at the south western tip of the island, with the capital St George's about 8 km to the north.\n\nIt was built to solve a real problem. The old Pearls Airport on the north side of the island had a short and geographically difficult runway that long-range jets could not use, so tourists faced delays getting to Grenada. Point Salines was designed to replace it.\n\nThe airport has a heavy political history. Its construction, partly by Cuban workers, was cited by President Ronald Reagan as evidence that the Grenadian government meant to let it be used as a staging point for Soviet military aircraft bound for Cuba. Prime Minister Maurice Bishop's government maintained it was for European and North American tourists. The airport now carries Bishop's name.\n\nThe single runway is 2,744 metres at an elevation of 12 metres.\n\nIt was formerly called Point Salines Airport, so both names appear in supplier systems.",
+ "after": "Grenada's international airport, at Point Salines in the south west of the island, with the capital St George's about 8 km to the north.\n\nThe airport has a heavy political history. Cuban workers helped to build it, and in 1983 President Ronald Reagan said it looked suitable for Soviet military aircraft. Prime Minister Maurice Bishop's government said it was for tourists. The airport now carries Bishop's name.\n\nIts single runway is 2,744 metres, at an elevation of 12 metres.\n\nIt was formerly called Point Salines Airport, so both names appear in supplier systems.",
+ "claims": [
+  {
+   "claim": "Grenada's international airport",
+   "verdict": "confirmed",
+   "inAfter": "Grenada's international airport",
+   "note": "The Grenada Tourism Authority says international flights land here. Carriacou's Lauriston Airport also has scheduled flights (OurAirports), which is why the text says 'international' rather than 'only'.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport located in the parish of St. George"
+    },
+    {
+     "file": "puregrenada-plan",
+     "org": "Grenada Tourism Authority (puregrenada.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "International flights land at Maurice Bishop International Airport."
+    }
+   ]
+  },
+  {
+   "claim": "at Point Salines in the south west of the island",
+   "verdict": "softened",
+   "inAfter": "at Point Salines in the south west of the island",
+   "note": "Was 'on Point Salines at the south western tip of the island'. Wikipedia places it on Point Salines, the island's most south westerly point; OurAirports keeps 'Point Salines' as a name for this airport, and the coordinates put it 6.5 km south west of St George's. 'Tip' is Wikipedia's alone, so the text says 'in the south west'.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is located on Point Salines, the most southwestern point of the island."
+    },
+    {
+     "file": "ourairports-gd",
+     "org": "OurAirports",
+     "quote": "\"https://en.wikipedia.org/wiki/Point_Salines_International_Airport\",\"Point Salines\""
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 213 degrees, which is south west"
+    }
+   ]
+  },
+  {
+   "claim": "the capital St George's about 8 km to the north",
+   "verdict": "confirmed",
+   "inAfter": "with the capital St George's about 8 km to the north",
+   "note": "Coordinates: 6.5 km in a straight line (8 km by road is a ratio of 1.23, inside the check). The airport lies at 213 degrees from the city, so the city lies at 33 degrees from the airport, north east; 'north' is the adjacent point, inside the check (geo.mjs flagged it only because it read the bearing from the city).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The town of St. George's is about 8 kilometres (5 mi) north of the airport and is the capital of the island nation of Grenada."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "City centre: Saint George's (GeoNames 3579925) at 12.0529, -61.7523, population 7,500; GeoNames class PPLC, the national capital",
+      "Straight-line distance from the city centre: 6.5 km (4.0 miles)",
+      "Bearing from the city centre: 213 degrees, which is south west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Cuban workers helped to build it",
+   "verdict": "confirmed",
+   "inAfter": "Cuban workers helped to build it",
+   "note": "Reagan's own words from the Reagan Library: in March 1983 'the Cubans ... are in the process of building an airfield', and in October 1983 'several hundred Cubans working on the airport'. Wikipedia says it was built in part by Cuban workers, with Canadian design and European and American contractors, so 'helped to build' rather than 'built'.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "He buttressed this claim with the evidence that it was being built, in part, by Cuban workers."
+    },
+    {
+     "file": "reagan-1983-10-27",
+     "org": "Ronald Reagan Presidential Library (US National Archives)",
+     "dated": "1983-10-27",
+     "quote": [
+      "October 27, 1983",
+      "We had to assume that several hundred Cubans working on the airport could be military reserves."
+     ]
+    },
+    {
+     "file": "reagan-1983-03-23",
+     "org": "Ronald Reagan Presidential Library (US National Archives)",
+     "dated": "1983-03-23",
+     "quote": [
+      "March 23, 1983",
+      "On the small island of Grenada, at the southern end of the Caribbean chain, the Cubans, with Soviet financing and backing, are in the process of building an airfield with a 10,000-foot runway."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in 1983 Reagan said it looked suitable for Soviet military aircraft",
+   "verdict": "softened",
+   "inAfter": "in 1983 President Ronald Reagan said it looked suitable for Soviet military aircraft",
+   "note": "Was 'cited by President Ronald Reagan as evidence that the Grenadian government meant to let it be used as a staging point for Soviet military aircraft bound for Cuba'. Reagan's own words (27 October 1983) are that it 'looked suspiciously suitable for military aircraft, including Soviet-built long-range bombers'; in March 1983 he asked 'Who is it intended for?' and called it Soviet-Cuban 'power projection into the region'. Neither speech says 'bound for Cuba', which is Wikipedia's reading, so the text keeps to what both support. The year is the date of both speeches.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "was cited by U.S. President Ronald Reagan as evidence that the Grenadian government intended to allow it to be used as a way point for Soviet military aircraft en route to Cuba"
+    },
+    {
+     "file": "reagan-1983-10-27",
+     "org": "Ronald Reagan Presidential Library (US National Archives)",
+     "dated": "1983-10-27",
+     "quote": "which looked suspiciously suitable for military aircraft, including Soviet-built long-range bombers"
+    },
+    {
+     "file": "reagan-1983-03-23",
+     "org": "Ronald Reagan Presidential Library (US National Archives)",
+     "dated": "1983-03-23",
+     "quote": [
+      "Grenada doesn't even have an air force. Who is it intended for?",
+      "The Soviet-Cuban militarization of Grenada, in short, can only be seen as power projection into the region."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Bishop's government said it was for tourists",
+   "verdict": "softened",
+   "inAfter": "Prime Minister Maurice Bishop's government said it was for tourists.",
+   "note": "Was 'maintained it was for European and North American tourists'. Reagan's account is that Bishop claimed it was for the tourist trade; 'European and North American' is Wikipedia's alone.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Bishop and his government contended that the Point Salines airport was intended to make the island more accessible to European and North American tourists."
+    },
+    {
+     "file": "reagan-1983-10-27",
+     "org": "Ronald Reagan Presidential Library (US National Archives)",
+     "dated": "1983-10-27",
+     "quote": "He sought the help of Cuba in building an airport, which he claimed was for tourist trade"
+    }
+   ]
+  },
+  {
+   "claim": "now carries Bishop's name",
+   "verdict": "confirmed",
+   "inAfter": "The airport now carries Bishop's name.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is named after former Prime Minister Maurice Bishop (1944–1983)"
+    },
+    {
+     "file": "puregrenada-plan",
+     "org": "Grenada Tourism Authority (puregrenada.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Maurice Bishop International Airport"
+    },
+    {
+     "file": "ourairports-gd",
+     "org": "OurAirports",
+     "quote": "\"TGPY\",\"large_airport\",\"Maurice Bishop International Airport\""
+    }
+   ]
+  },
+  {
+   "claim": "single runway 2,744 metres at 12 metres elevation",
+   "verdict": "confirmed",
+   "inAfter": "Its single runway is 2,744 metres, at an elevation of 12 metres.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport is at an elevation of 12 m (41 ft) above mean sea level.",
+      "It has one runway designated 10/28 with an asphalt surface measuring 2,744 m"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": [
+      "The airport is at an elevation of 12 m (41 ft) above mean sea level.",
+      "It has one runway designated 10/28 with an asphalt surface measuring 2,744 m"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "elevation 41 ft (12 m)",
+      "Runway 10/28: 2,744 m (9,003 ft), ASP",
+      "Runways listed: 1"
+     ],
+     "dated": "OurAirports data read 2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "formerly Point Salines Airport",
+   "verdict": "confirmed",
+   "inAfter": "It was formerly called Point Salines Airport",
+   "note": "OurAirports keeps 'Point Salines' as another name for the airport and still links it to Wikipedia's old 'Point Salines International Airport' title.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "formerly known as Point Salines Airport"
+    },
+    {
+     "file": "ourairports-gd",
+     "org": "OurAirports",
+     "quote": "\"Maurice Bishop International Airport\",12.003996,-61.785302,41,\"NA\",\"GD\",\"GD-GE\",\"Saint George's\",\"yes\",\"TGPY\",\"GND\",\"TGPY\",,\"http://www.psiagrenada.com/\",\"https://en.wikipedia.org/wiki/Point_Salines_International_Airport\",\"Point Salines\""
+    }
+   ]
+  },
+  {
+   "claim": "at the south western tip",
+   "verdict": "cut",
+   "wasBefore": "on Point Salines at the south western tip of the island",
+   "why": "'Tip' is Wikipedia's alone; softened to 'in the south west of the island' (see above)."
+  },
+  {
+   "claim": "built to replace Pearls Airport, whose short, difficult runway long-range jets could not use",
+   "verdict": "cut",
+   "wasBefore": "It was built to solve a real problem. The old Pearls Airport on the north side of the island had a short and geographically difficult runway that long-range jets could not use, so tourists faced delays getting to Grenada. Point Salines was designed to replace it.",
+   "why": "Wikipedia alone. The Grenada Airports Authority's site (gaa.gd, from the infobox) answered 502, the Government of Grenada's home page has no airport history, and the US Army's history site refused the link lister (403). OurAirports confirms only that Pearls Airport is closed, and places it in St Andrew parish on the east coast, which sits awkwardly with 'the north side of the island'."
+  },
+  {
+   "claim": "staging point for Soviet aircraft bound for Cuba; European and North American tourists",
+   "verdict": "cut",
+   "wasBefore": "Its construction, partly by Cuban workers, was cited by President Ronald Reagan as evidence that the Grenadian government meant to let it be used as a staging point for Soviet military aircraft bound for Cuba. Prime Minister Maurice Bishop's government maintained it was for European and North American tourists.",
+   "why": "Reworded to what Reagan's own speeches and Wikipedia both say: Cuban workers helped build it, Reagan said it looked suitable for Soviet military aircraft, and Bishop's government said it was for tourists (see above). 'Bound for Cuba' and 'European and North American' rest on Wikipedia alone."
+  },
+  {
+   "claim": "flights from London",
+   "verdict": "cut",
+   "why": "Held back: replaces nothing (the old text names no airlines). The UK CAA's 2025 route table has 37,058 scheduled passengers between Gatwick and Grenada in 2025 (39,518 in 2024) and only 202 between Heathrow and Grenada (634 in 2024). The Grenada Tourism Authority's page still lists British Airways three times a week from Gatwick and Virgin Atlantic twice a week from Heathrow, in a list whose other entries are dated 2023; the CAA's tiny Heathrow figures suggest the Virgin line is out of date. An airline's own page would be needed before any of this goes in.",
+   "sources": [
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2025 table, run 25 February 2026",
+     "quote": [
+      "GRENADA,1,GATWICK,GRENADA,37058,37058,0,39518,39518,0,-6.22501",
+      "GRENADA,1,HEATHROW,GRENADA,202,202,0,634,634,0,-68.1388"
+     ]
+    },
+    {
+     "file": "puregrenada-plan",
+     "org": "Grenada Tourism Authority (puregrenada.com)",
+     "dated": "read 2026-09-23 (live page; other entries in the list dated 2023)",
+     "quote": [
+      "British Airways operates three weekly flights from London, Gatwick.",
+      "Virgin Atlantic Airways operates two weekly flights from London, Heathrow Airport.",
+      "A weekly (Saturday) direct flight from Boston starts November 4, 2023."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The airport has a heavy political history.",
+   "why": "Signpost for the sentences that follow, which are sourced to Reagan's own speeches and Wikipedia."
+  },
+  {
+   "text": "so both names appear in supplier systems.",
+   "why": "Advice kept from the old text; follows from the confirmed former name."
+  }
+ ],
+ "tracerOk": {
+  "Prime Minister Maurice Bishop's": "A possessive; 'Prime Minister Maurice Bishop' is in Wikipedia's text ('named after former Prime Minister Maurice Bishop')."
+ }
+}

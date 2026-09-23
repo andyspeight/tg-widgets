@@ -1,0 +1,336 @@
+{
+ "iata": "SKB",
+ "id": "rec4z72YPdDibgGtx",
+ "name": "Robert L. Bradshaw International Airport",
+ "country": "St Kitts and Nevis",
+ "wikipedia": "https://en.wikipedia.org/wiki/Robert_L._Bradshaw_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for St Kitts, just north east of Basseterre, and capable of a good deal more than its size suggests. Non-stop jet services run to Canada and the United States alongside the regional Caribbean commuter flights, and the apron takes six wide bodied aircraft at once. The largest aircraft to have landed here is a Boeing 747-400.\n\nThat capacity is recent. The airport was built in the 1940s and the runway, now 2,439 metres, was completely resurfaced as part of a seventeen million dollar programme finished in December 2006, which also widened the apron and added a taxiway.\n\nIt handles cargo and private jets as well as scheduled traffic. Passenger numbers were just under 400,000 in 2008.\n\nIt is named after Robert Llewellyn Bradshaw, the first Premier of what was then St Kitts-Nevis-Anguilla, and was called Golden Rock Airport before that, which is the name older guides use.",
+ "after": "The airport for St Kitts, just north east of Basseterre. Non-stop jet services run to the United States and, in winter, to Canada, alongside regional Caribbean flights.\n\nIt is named after Robert Llewellyn Bradshaw and was called Golden Rock Airport before that, which is the name older guides use.",
+ "claims": [
+  {
+   "claim": "the airport for St Kitts",
+   "verdict": "confirmed",
+   "inAfter": "The airport for St Kitts",
+   "note": "The government's own fact page lists one airport per island: Robert L. Bradshaw on St Kitts, Vance W. Amory on Nevis.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "on the island of Saint Kitts, serving the nation of Saint Kitts and Nevis"
+    },
+    {
+     "file": "govkn-about",
+     "org": "Government of St Kitts and Nevis (gov.kn)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Airports ST. KITTS Robert L. Bradshaw International Airport NEVIS Vance W. Amory International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "just north east of Basseterre",
+   "verdict": "confirmed",
+   "inAfter": "just north east of Basseterre",
+   "note": "Coordinates give 1.8 km in a straight line from the GeoNames centre of Basseterre at a bearing of 20 degrees (north); north east is the adjacent compass point, inside the check.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "is an international airport located just northeast of Basseterre"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 1.8 km (1.1 miles)",
+      "Bearing from the city centre: 20 degrees, which is north"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "non-stop jet services to the United States",
+   "verdict": "confirmed",
+   "inAfter": "Non-stop jet services run to the United States",
+   "note": "Current services from the government's 2026 Budget Address (delivered after 12 December 2025, a date it mentions): Delta from Atlanta and New York JFK, American from Miami, United from Newark. Caribbean Journal (4 July 2026) reports American going to two daily nonstop flights from Miami between 17 December 2026 and 5 April 2027. Airlines are not named in the text, as the old text did not name them.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "handles scheduled non-stop jet flights to Canada and the United States"
+    },
+    {
+     "file": "caribjournal-aa-2026",
+     "org": "Caribbean Journal",
+     "dated": "2026-07-04",
+     "quote": [
+      "July 4th, 2026",
+      "American Airlines is increasing its service between Miami and Robert L. Bradshaw International Airport",
+      "two daily nonstop flights"
+     ]
+    },
+    {
+     "file": "budget-2026",
+     "org": "Government of St Kitts and Nevis (2026 Budget Address, sknis.gov.kn)",
+     "dated": "2026 Budget Address, delivered after 12 December 2025",
+     "quote": [
+      "Delta Airlines commenced its inaugural direct service from JFK to the Federation, complementing the existing flight from Atlanta",
+      "negotiations with American Airlines have led to the commencement of double Saturday flights originating from Miami beginning in November 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in winter, to Canada",
+   "verdict": "corrected",
+   "inAfter": "and, in winter, to Canada",
+   "note": "Was plain 'Canada', which reads as year-round. The government says Air Canada's Toronto service is a winter one, resumed in November 2025; the Nevis Tourism Authority's live list of flights into St Kitts shows Toronto weekly.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "handles scheduled non-stop jet flights to Canada and the United States"
+    },
+    {
+     "file": "budget-2026",
+     "org": "Government of St Kitts and Nevis (2026 Budget Address, sknis.gov.kn)",
+     "dated": "2026 Budget Address, delivered after 12 December 2025",
+     "quote": "United Airlines and Air Canada also resumed winter services from Newark and Toronto starting in November 2025"
+    },
+    {
+     "file": "nevistourism-flying",
+     "org": "Nevis Tourism Authority (nevisisland.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "VIA RLB",
+      "Toronto (YYZ) Weekly"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "regional Caribbean flights",
+   "verdict": "confirmed",
+   "inAfter": "alongside regional Caribbean flights",
+   "note": "The government names Cape Air, interCaribbean, Sunrise Airways, Caribbean Airlines and LIAT as the regional carriers; interCaribbean's own release (19 December 2025) puts its Barbados to St Kitts service up to five a week. 'Commuter' dropped as a word no source from the last 12 months uses.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "as well as numerous regional commuter flights from within the Caribbean area"
+    },
+    {
+     "file": "budget-2026",
+     "org": "Government of St Kitts and Nevis (2026 Budget Address, sknis.gov.kn)",
+     "dated": "2026 Budget Address, delivered after 12 December 2025",
+     "quote": [
+      "the Government introduced Cape Air with a new regional air service",
+      "operating alongside other regional air carriers"
+     ]
+    },
+    {
+     "file": "intercaribbean-barbados",
+     "org": "interCaribbean Airways",
+     "dated": "2025-12-19",
+     "quote": [
+      "December 19, 2025",
+      "service to St. Kitts (SKB) will increase to five times per week"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after Robert Llewellyn Bradshaw",
+   "verdict": "softened",
+   "inAfter": "It is named after Robert Llewellyn Bradshaw",
+   "note": "Was 'named after Robert Llewellyn Bradshaw, the first Premier of what was then St Kitts-Nevis-Anguilla'. The government lists the airport under his name and Sir Robert L. Bradshaw as one of the National Heroes, but gives no titles, so 'first Premier' rests on Wikipedia alone (cut below). The government pages do not say in words that the airport is named after him; the name itself and Wikipedia's statement carry it.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "It was named after the first Premier of St. Kitts-Nevis-Anguilla (as it then was), Robert Llewellyn Bradshaw"
+    },
+    {
+     "file": "govkn-heroes",
+     "org": "Government of St Kitts and Nevis (gov.kn)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "The National Heroes of St. Christopher & Nevis",
+      "The Right Excellent Sir Robert L Bradshaw"
+     ]
+    },
+    {
+     "file": "govkn-about",
+     "org": "Government of St Kitts and Nevis (gov.kn)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Robert L. Bradshaw International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "formerly Golden Rock Airport",
+   "verdict": "confirmed",
+   "inAfter": "was called Golden Rock Airport before that",
+   "note": "The ports authority (which lists 'RLB International Airport' in its own portfolio) says the airport ran as Golden Rock Airport before the airport and seaport were merged in 1993.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "formerly known as Golden Rock Airport"
+    },
+    {
+     "file": "scaspa-airport",
+     "org": "St Christopher Air and Sea Ports Authority (operator, scaspa.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Before 1993, the airport and seaport operated as two separate entities, the seaport under the name of the St. Christopher & Nevis Ports Authority and the Airport under the name of the Golden Rock Airport.",
+      "RLB International Airport"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "capable of a good deal more than its size suggests",
+   "verdict": "cut",
+   "wasBefore": "and capable of a good deal more than its size suggests",
+   "why": "A judgement resting on the wide-body apron and 747-400 lines, which are cut below."
+  },
+  {
+   "claim": "non-stop to Canada and the United States, without a season",
+   "verdict": "cut",
+   "wasBefore": "Non-stop jet services run to Canada and the United States alongside the regional Caribbean commuter flights",
+   "why": "Corrected: the Canadian service is a winter one (the government's 2026 Budget Address). Kept as 'the United States and, in winter, to Canada'."
+  },
+  {
+   "claim": "the apron takes six wide bodied aircraft at once",
+   "verdict": "cut",
+   "wasBefore": "the apron takes six wide bodied aircraft at once",
+   "why": "Wikipedia alone, from the 2006 works. The ports authority's history page answered with Cloudflare's 'Just a moment...' check (429) and was not tried again. (A link listing of eccaa.org, wrongly taken for the Eastern Caribbean Civil Aviation Authority's site, answered 502; nothing was saved or used from it.)"
+  },
+  {
+   "claim": "largest aircraft to land here a Boeing 747-400",
+   "verdict": "cut",
+   "wasBefore": "The largest aircraft to have landed here is a Boeing 747-400.",
+   "why": "Wikipedia alone, with no citation and no date."
+  },
+  {
+   "claim": "that capacity is recent",
+   "verdict": "cut",
+   "wasBefore": "That capacity is recent.",
+   "why": "The works it refers to finished in December 2006, twenty years ago, and rest on Wikipedia alone."
+  },
+  {
+   "claim": "built in the 1940s",
+   "verdict": "cut",
+   "wasBefore": "The airport was built in the 1940s",
+   "why": "Wikipedia alone. The ports authority's history page is behind a Cloudflare check (not retried)."
+  },
+  {
+   "claim": "runway 2,439 metres",
+   "verdict": "cut",
+   "wasBefore": "the runway, now 2,439 metres,",
+   "why": "Sources disagree: Wikipedia gives 2,439 m (8,002 ft), OurAirports 2,317 m (7,602 ft). The UK AAIB's 2010 report on the G-VIIR incident, which Wikipedia cites, failed to connect, so nothing settled it."
+  },
+  {
+   "claim": "resurfaced in a seventeen million dollar programme finished December 2006; apron widened; taxiway added",
+   "verdict": "cut",
+   "wasBefore": "was completely resurfaced as part of a seventeen million dollar programme finished in December 2006, which also widened the apron and added a taxiway.",
+   "why": "Wikipedia alone; no government, operator or lender source for the 2006 works could be read."
+  },
+  {
+   "claim": "handles cargo and private jets",
+   "verdict": "cut",
+   "wasBefore": "It handles cargo and private jets as well as scheduled traffic.",
+   "why": "Wikipedia alone. The ports authority's cargo page is about the seaport, and its site was closed to further requests by a Cloudflare check."
+  },
+  {
+   "claim": "just under 400,000 passengers in 2008",
+   "verdict": "cut",
+   "wasBefore": "Passenger numbers were just under 400,000 in 2008.",
+   "why": "Eighteen years old, and no current airport passenger total was found. The 2026 Budget Address gives stay-over visitors (more than 102,000 over the 2024 to 2025 peak season), which is not the same measure."
+  },
+  {
+   "claim": "the first Premier of what was then St Kitts-Nevis-Anguilla",
+   "verdict": "cut",
+   "wasBefore": "the first Premier of what was then St Kitts-Nevis-Anguilla",
+   "why": "'First Premier' rests on Wikipedia alone: the government's National Heroes page names Sir Robert L. Bradshaw but gives no titles, and the government information service's archive pages had nothing on him (a day archive answered 404). The naming is kept (see above)."
+  },
+  {
+   "claim": "all visitors need an Electronic Travel Authorisation",
+   "verdict": "cut",
+   "why": "Held back: a verified fact that replaces nothing in the old text. The FCDO (updated 5 January 2026) says all visitors to St Kitts and Nevis must get an eTA before travel, and the government's 2026 Budget Address describes the launch of the eTA system. Worth adding if Andy agrees, as it will catch a traveller out.",
+   "sources": [
+    {
+     "file": "fcdo-kn-entry",
+     "org": "UK Foreign, Commonwealth and Development Office (GOV.UK)",
+     "dated": "updated 2026-01-05, still current 2026-09-23",
+     "quote": "All visitors to St Kitts and Nevis must obtain an Electronic Travel Authorisation (eTA) before travel."
+    },
+    {
+     "file": "budget-2026",
+     "org": "Government of St Kitts and Nevis (2026 Budget Address, sknis.gov.kn)",
+     "dated": "2026 Budget Address, delivered after 12 December 2025",
+     "quote": "Electronic Travel Authorisation (eTA) system"
+    }
+   ]
+  },
+  {
+   "claim": "departure tax paid at the Airport Finance Office on LIAT flights",
+   "verdict": "cut",
+   "why": "Held back: replaces nothing, and rests on the FCDO alone (it could go in only as an attributed statement). The FCDO says arrival and departure tax is usually in the ticket, but passengers leaving on a LIAT flight pay it at the Airport Finance Office.",
+   "sources": [
+    {
+     "file": "fcdo-kn-entry",
+     "org": "UK Foreign, Commonwealth and Development Office (GOV.UK)",
+     "dated": "updated 2026-01-05, still current 2026-09-23",
+     "quote": [
+      "Arrival and departure tax is usually included in the ticket price of most commercial flights.",
+      "If you’re leaving from Robert L Bradshaw International Airport on a flight operated by LIAT, you must pay the departure tax cash or card at the Airport Finance Office."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "scheduled flights from London Gatwick",
+   "verdict": "cut",
+   "why": "Held back: replaces nothing (the old text names no UK service). The UK CAA's 2025 route table has 22,239 scheduled passengers between Gatwick and St Kitts in 2025 (20,078 in 2024), and the Nevis Tourism Authority lists Gatwick to St Kitts on Tuesdays and Saturdays. Neither names the airline in the saved text, and the tourism authority's 'nonstop' is marketing copy that no airline source was read to confirm, so the airline and any stop would need the airline's own page before this goes in.",
+   "sources": [
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2025 table, run 25 February 2026",
+     "quote": "SAINT KITTS AND NEVIS,1,GATWICK,ST KITTS,22239,22239,0,20078,20078,0,10.76302"
+    },
+    {
+     "file": "nevistourism-flying",
+     "org": "Nevis Tourism Authority (nevisisland.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "London Gatwick (LGW) - St Kitts (SKB) TUES, SAT",
+      "St Kitts (SKB) - London Gatwick (LGW) TUES, SAT"
+     ]
+    },
+    {
+     "file": "nevistourism-howto",
+     "org": "Nevis Tourism Authority (nevisisland.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Nonstop flights from major cities across the U.S., Canada and the U.K. land daily at St. Kitts' Robert L. Bradshaw International Airport (SKB)."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which is the name older guides use.",
+   "why": "Advice kept from the old text; the ports authority says the airport ran as Golden Rock until 1993."
+  }
+ ],
+ "tracerOk": {}
+}

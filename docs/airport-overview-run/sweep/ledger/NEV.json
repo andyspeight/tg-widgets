@@ -1,0 +1,262 @@
+{
+ "iata": "NEV",
+ "id": "rec2tlCgLZd8o1Uyq",
+ "name": "Vance W. Amory International Airport",
+ "country": "St Kitts and Nevis",
+ "wikipedia": "https://en.wikipedia.org/wiki/Vance_W._Amory_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Nevis has its own airport, on the north of the island just west of the village of Newcastle, in Saint James Windward Parish. The single runway is about 1,220 metres, which is short by international standards even though the airport carries international status.\n\nThe terminal, the control tower and the current runway length all date from the works completed in 2002, when the airport was renamed after Vance Amory, then Premier of Nevis.\n\nBefore that it was Newcastle Airport, and before that Bambooshay, so older references use all three names and it is worth checking which one a supplier is quoting against.",
+ "after": "Nevis has its own airport, at Newcastle on the north of the island. The single runway is about 1,220 metres.\n\nIt is named after Vance Amory. Newcastle Airport and Bambooshay Airport are earlier names, so older references use all three and it is worth checking which one a supplier is quoting against.",
+ "claims": [
+  {
+   "claim": "Nevis has its own airport",
+   "verdict": "confirmed",
+   "inAfter": "Nevis has its own airport",
+   "note": "The operator calls it the island's only airport; the government's fact page lists it as Nevis's airport.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-29",
+     "quote": "serves the island of Nevis in the Federation of Saint Kitts and Nevis"
+    },
+    {
+     "file": "naspa-airport",
+     "org": "Nevis Air and Sea Ports Authority (operator, naspakn.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The Vance W. Amory International Airport serves as the only airport on the island of Nevis in the federation of Saint Kitts and Nevis."
+    },
+    {
+     "file": "govkn-about",
+     "org": "Government of St Kitts and Nevis (gov.kn)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "NEVIS Vance W. Amory International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "at Newcastle on the north of the island",
+   "verdict": "softened",
+   "inAfter": "at Newcastle on the north of the island",
+   "note": "Was 'on the north of the island just west of the village of Newcastle'. Wikipedia places the airport at Newcastle (text and infobox); the operator, which runs the small port at Newcastle too, says Newcastle is on the northern side of the island; OurAirports keeps 'Newcastle Airport' as one of the airport's names. The exact position west of the village rests on Wikipedia alone, so it is dropped. The operator's site (naspakn.com) is where the address Wikipedia cites (nevisportsauthority.com) now leads.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-29",
+     "quote": "The airport is located just west of the village Newcastle, Nevis"
+    },
+    {
+     "file": "naspa-about",
+     "org": "Nevis Air and Sea Ports Authority (operator, naspakn.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "NASPA oversees operations at the island's only airport, the Vance W. Amory International Airport",
+      "The Newcastle Port is located on the northern side of the island"
+     ]
+    },
+    {
+     "file": "ourairports-tkpn",
+     "org": "OurAirports",
+     "quote": "\"Nevis, Bambooshay Airport, Newcastle Airport\""
+    }
+   ]
+  },
+  {
+   "claim": "single runway about 1,220 metres",
+   "verdict": "confirmed",
+   "inAfter": "The single runway is about 1,220 metres.",
+   "note": "The operator gives 1,220 m (4,026 ft), Wikipedia about 1,220 m (4,000 ft), OurAirports 1,218 m.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-29",
+     "quote": "The airport has a single runway, which is approximately 1,220 meters (4,000 feet) long."
+    },
+    {
+     "file": "naspa-airport",
+     "org": "Nevis Air and Sea Ports Authority (operator, naspakn.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Vance Amory Airport has a 1,220 meters (4,026 feet) runway"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 10/28: 1,218 m (3,996 ft), ASP",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after Vance Amory",
+   "verdict": "softened",
+   "inAfter": "It is named after Vance Amory.",
+   "note": "Was 'renamed after Vance Amory, then Premier of Nevis' in 2002. The operator and the government use the name Vance W. Amory International Airport; the year and 'then Premier' rest on Wikipedia alone (cut below). As at St Kitts, no second source says in words that the airport is named after him; the name itself and Wikipedia's statement carry it.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-29",
+     "quote": "It was renamed in 2002 after the Premier of Nevis, Vance Amory"
+    },
+    {
+     "file": "naspa-airport",
+     "org": "Nevis Air and Sea Ports Authority (operator, naspakn.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Vance W. Amory International Airport"
+    },
+    {
+     "file": "govkn-about",
+     "org": "Government of St Kitts and Nevis (gov.kn)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Vance W. Amory International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "earlier names Newcastle Airport and Bambooshay Airport",
+   "verdict": "softened",
+   "inAfter": "Newcastle Airport and Bambooshay Airport are earlier names",
+   "note": "Was 'Before that it was Newcastle Airport, and before that Bambooshay'. OurAirports lists both as other names for the airport but gives no order, so the order (Wikipedia alone) is dropped.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-29",
+     "quote": "The airport was previously known as Bambooshay Airport, then Newcastle Airport."
+    },
+    {
+     "file": "ourairports-tkpn",
+     "org": "OurAirports",
+     "quote": [
+      "\"TKPN\",\"medium_airport\",\"Vance W. Amory International Airport\"",
+      "\"Nevis, Bambooshay Airport, Newcastle Airport\""
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "just west of the village of Newcastle",
+   "verdict": "cut",
+   "wasBefore": "on the north of the island just west of the village of Newcastle",
+   "why": "The position relative to the village rests on Wikipedia alone. Softened to 'at Newcastle on the north of the island' (see above)."
+  },
+  {
+   "claim": "in Saint James Windward Parish",
+   "verdict": "cut",
+   "wasBefore": "in Saint James Windward Parish",
+   "why": "Wikipedia, plus a Nevis Tourism Authority sentence ('located in Saint James Windward Parish, serves Nevis with a single 1,220-meter runway') that repeats Wikipedia's opening paragraph fact for fact, so it is not counted as independent. Of little use to an agent."
+  },
+  {
+   "claim": "short by international standards despite international status",
+   "verdict": "cut",
+   "wasBefore": "which is short by international standards even though the airport carries international status",
+   "why": "A judgement, not a checkable fact. The runway length itself is kept."
+  },
+  {
+   "claim": "terminal, control tower and runway length from works completed in 2002",
+   "verdict": "cut",
+   "wasBefore": "The terminal, the control tower and the current runway length all date from the works completed in 2002",
+   "why": "Wikipedia alone. The operator says only that there is 'a modern terminal building'; the Nevis Island Administration's pages had nothing on the works."
+  },
+  {
+   "claim": "renamed in 2002 after Vance Amory, then Premier of Nevis",
+   "verdict": "cut",
+   "wasBefore": "when the airport was renamed after Vance Amory, then Premier of Nevis",
+   "why": "The year and 'then Premier' rest on Wikipedia alone (three tries: the operator's airport and about pages, and the Nevis Island Administration's Premier's Ministry page and home page). The naming is kept (see above)."
+  },
+  {
+   "claim": "the order of the old names",
+   "verdict": "cut",
+   "wasBefore": "Before that it was Newcastle Airport, and before that Bambooshay",
+   "why": "The order rests on Wikipedia alone; both names are kept without it (see above)."
+  },
+  {
+   "claim": "most travellers arrive via St Kitts and a short ferry",
+   "verdict": "cut",
+   "why": "Held back: replaces nothing in the old text, but matters to an agent. The Nevis Tourism Authority says regional, private and international connections arrive daily at Vance W. Amory, while most travellers arrive via St Kitts's Robert L. Bradshaw Airport and then take a short ferry. It could go in as an attributed statement.",
+   "sources": [
+    {
+     "file": "nevistourism-flying",
+     "org": "Nevis Tourism Authority (nevisisland.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Regional flights, private jet services, and international connections arrive daily at Vance W. Amory International Airport (NEV), while most travellers choose to arrive via St. Kitts Robert L. Bradshaw Airport (SKB).",
+      "you're just a short ferry ride from Nevis' shores"
+     ]
+    },
+    {
+     "file": "nevistourism-howto",
+     "org": "Nevis Tourism Authority (nevisisland.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "short ferry rides across The Narrows from St. Kitts"
+    }
+   ]
+  },
+  {
+   "claim": "scheduled flights: Cape Air, Winair, Trans Anguilla",
+   "verdict": "cut",
+   "why": "Held back: the old text names no airlines. The operator's live schedule lists Cape Air daily to St Thomas and St Croix, Winair weekly to St Maarten and Trans Anguilla daily to Anguilla, Antigua and St Eustatius. The two official sources disagree on Winair: the operator says weekly, the Nevis Tourism Authority advertises new daily Winair flights from St Maarten. Neither page is dated.",
+   "sources": [
+    {
+     "file": "naspa-flightschedule",
+     "org": "Nevis Air and Sea Ports Authority (operator, naspakn.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "St. Thomas (STT) Daily St. Croix (STX) Daily",
+      "Winair Arrivals Flight Schedule Country Frequency St. Maarten Weekly",
+      "Anguilla (AXA) Daily Antigua (ANU) Daily St. Eustatius (EUX) Daily"
+     ]
+    },
+    {
+     "file": "nevistourism-howto",
+     "org": "Nevis Tourism Authority (nevisisland.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "With new daily WinAir flights from St. Maarten (SXM)"
+    }
+   ]
+  },
+  {
+   "claim": "all visitors need an Electronic Travel Authorisation",
+   "verdict": "cut",
+   "why": "Held back, as at St Kitts (the same federation): the FCDO (updated 5 January 2026) says all visitors to St Kitts and Nevis need an eTA before travel, and the government's 2026 Budget Address describes its launch.",
+   "sources": [
+    {
+     "file": "fcdo-kn-entry",
+     "org": "UK Foreign, Commonwealth and Development Office (GOV.UK)",
+     "dated": "updated 2026-01-05, still current 2026-09-23",
+     "quote": "All visitors to St Kitts and Nevis must obtain an Electronic Travel Authorisation (eTA) before travel."
+    },
+    {
+     "file": "budget-2026",
+     "org": "Government of St Kitts and Nevis (2026 Budget Address, sknis.gov.kn)",
+     "dated": "2026 Budget Address, delivered after 12 December 2025",
+     "quote": "Electronic Travel Authorisation (eTA) system"
+    }
+   ]
+  },
+  {
+   "claim": "airport upgrades on Nevis in 2025",
+   "verdict": "cut",
+   "why": "Held back: the government's 2026 Budget Address lists 'airport upgrades on Nevis' among 2025's public works but says nothing about what they are, so there is nothing an agent can use yet.",
+   "sources": [
+    {
+     "file": "budget-2026",
+     "org": "Government of St Kitts and Nevis (2026 Budget Address, sknis.gov.kn)",
+     "dated": "2026 Budget Address, delivered after 12 December 2025",
+     "quote": "infrastructure: airport upgrades on Nevis"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so older references use all three and it is worth checking which one a supplier is quoting against.",
+   "why": "Advice kept from the old text; follows from the confirmed earlier names."
+  }
+ ],
+ "tracerOk": {}
+}

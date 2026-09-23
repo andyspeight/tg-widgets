@@ -1,0 +1,251 @@
+{
+ "iata": "SLU",
+ "id": "recJBAQLTtGpEYtHU",
+ "name": "George F. L. Charles Airport",
+ "country": "St Lucia",
+ "wikipedia": "https://en.wikipedia.org/wiki/George_F._L._Charles_Airport",
+ "audited": "2026-09-23",
+ "before": "Saint Lucia's second airport, and the one that matters if a client is staying around Castries. It is 2 km north of the capital, against the much longer drive from Hewanorra in the south east.\n\nThe trade off is what flies there. This is a turboprop airport, mostly ATR 72s and Dash 8s, with no scheduled jet service at all. Every jet flight into Saint Lucia, transatlantic services included, uses Hewanorra. So a UK client will land at Hewanorra and may use this airport only for onward island hopping.\n\nIt handles around 32,000 flights and 394,000 passengers a year, which is a lot of small aircraft.\n\nThe setting is part of the appeal. The runway runs parallel to Vigie Beach, which is a destination in its own right. The airport was called Vigie Field until August 1997, when it was renamed after the Saint Lucia politician Sir George Frederick Lawrence Charles, and most people still say Vigie.",
+ "after": "Saint Lucia's second airport, and the one that matters if a client is staying around Castries. It is about 3 km north of the centre of the capital, against the much longer drive from Hewanorra in the south east.\n\nThe trade off is what flies there. Regional flights use it: interCaribbean lists non-stop flights to Barbados and Dominica. Flights from the UK land at Hewanorra, so a UK client may use this airport only for onward island hopping.\n\nIt is named after George Frederick Lawrence Charles, but most people still call it Vigie.",
+ "claims": [
+  {
+   "claim": "Saint Lucia's second airport",
+   "verdict": "confirmed",
+   "inAfter": "Saint Lucia's second airport",
+   "note": "OurAirports has exactly two rows for Saint Lucia, both with scheduled service: this one (a medium airport) and Hewanorra (a large one).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "is the smaller of the two airports in Saint Lucia, the other being Hewanorra International Airport"
+    },
+    {
+     "file": "ourairports-lc",
+     "org": "OurAirports",
+     "quote": [
+      "\"TLPC\",\"medium_airport\",\"George F. L. Charles Airport\"",
+      "\"TLPL\",\"large_airport\",\"Hewanorra International Airport\""
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 3 km north of the centre of the capital",
+   "verdict": "corrected",
+   "inAfter": "It is about 3 km north of the centre of the capital",
+   "note": "Was '2 km north of the capital', which fails the coordinates check (3.1 km in a straight line from the GeoNames centre of Castries, a ratio of 0.65). interCaribbean's own St Lucia page gives 3 km from downtown Castries. The bearing is 28 degrees (north east); Wikipedia's 'north' is the adjacent point, inside the check.",
+   "sources": [
+    {
+     "file": "intercaribbean-stlucia",
+     "org": "interCaribbean Airways",
+     "dated": "read 2026-09-23 (live page, © 2026)",
+     "quote": "George F. L. Charles Airport (SLU) is located just 3 km (2 miles) from downtown Castries."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 3.1 km (1.9 miles)",
+      "Bearing from the city centre: 28 degrees, which is north east"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "It is located 2 km (1.2 mi) north of Castries, the capital city."
+    }
+   ]
+  },
+  {
+   "claim": "the much longer drive from Hewanorra in the south east",
+   "verdict": "confirmed",
+   "inAfter": "against the much longer drive from Hewanorra in the south east",
+   "note": "Coordinates put Hewanorra 29.8 km in a straight line from the centre of Castries, against 3.1 km for this airport, at a bearing of 169 degrees (south); Wikipedia's 'southeast portion of the island' is the adjacent point. OurAirports places Hewanorra at Vieux Fort.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "Hewanorra International Airport, located on the southeast portion of the island"
+    },
+    {
+     "file": "geo-lc",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "to Hewanorra International Airport (TLPL, IATA UVF): 29.8 km, bearing from Castries 169 degrees, which is south",
+      "to George F. L. Charles Airport (TLPC, IATA SLU): 3.1 km"
+     ]
+    },
+    {
+     "file": "ourairports-lc",
+     "org": "OurAirports",
+     "quote": "\"Hewanorra International Airport\",13.7332,-60.952599,14,\"NA\",\"LC\",\"LC-11\",\"Vieux Fort\""
+    }
+   ]
+  },
+  {
+   "claim": "regional flights use it",
+   "verdict": "corrected",
+   "inAfter": "Regional flights use it",
+   "note": "Replaces 'This is a turboprop airport, mostly ATR 72s and Dash 8s, with no scheduled jet service at all', which rests on an undated Wikipedia paragraph with no current second source (cut below). What two sources support is that regional flights use it: Wikipedia describes regional turboprop flying, and interCaribbean (2026 page) flies here.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "Most of these flights operate with turboprop aircraft such as the ATR 72-500 or the de Havilland Canada DHC-8 Dash 8."
+    },
+    {
+     "file": "intercaribbean-stlucia",
+     "org": "interCaribbean Airways",
+     "dated": "read 2026-09-23 (live page, © 2026)",
+     "quote": "interCaribbean flies into George F. L. Charles Airport (SLU), conveniently located just minutes from the capital Castries."
+    }
+   ]
+  },
+  {
+   "claim": "interCaribbean lists non-stop flights to Barbados and Dominica",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "interCaribbean",
+   "inAfter": "interCaribbean lists non-stop flights to Barbados and Dominica",
+   "note": "Attributed statement: the airline's own page for its own flights, with one-stop connections via Barbados to Antigua, Grenada, St Kitts, Tortola and others. It is the concrete version of 'onward island hopping', which the old text already carried.",
+   "sources": [
+    {
+     "file": "intercaribbean-stlucia",
+     "org": "interCaribbean Airways",
+     "dated": "read 2026-09-23 (live page, © 2026)",
+     "quote": [
+      "Non-Stop Routes to St. Lucia (SLU): Barbados (BGI) Dominica (DOM)",
+      "interCaribbean offers direct flights to Saint Lucia (SLU) from Barbados and Dominica"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "flights from the UK land at Hewanorra",
+   "verdict": "softened",
+   "inAfter": "Flights from the UK land at Hewanorra",
+   "note": "Was 'Every jet flight into Saint Lucia, transatlantic services included, uses Hewanorra. So a UK client will land at Hewanorra'. The UK CAA's 2025 route table lists St Lucia traffic only at Hewanorra (Gatwick 131,243 and Heathrow 12,839 passengers in 2025), and no row for this airport. The claim about every jet flight rests on Wikipedia alone (cut below).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "All jet services into St. Lucia, including transatlantic flights, operate at the present time via Hewanorra International Airport"
+    },
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2025 table, run 25 February 2026",
+     "quote": [
+      "ST LUCIA,1,GATWICK,ST LUCIA (HEWANORRA),131243",
+      "ST LUCIA,1,HEATHROW,ST LUCIA (HEWANORRA),12839"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after George Frederick Lawrence Charles",
+   "verdict": "softened",
+   "inAfter": "It is named after George Frederick Lawrence Charles",
+   "note": "Was 'renamed after the Saint Lucia politician Sir George Frederick Lawrence Charles' in August 1997. The airline and OurAirports use the name George F. L. Charles Airport; the date, the former name Vigie Field, 'politician' and 'Sir' rest on Wikipedia alone (cut below). As at St Kitts and Nevis, no second source says in words that the airport is named after him; the name itself and Wikipedia's statement carry it.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "The airport was renamed on 4 August 1997 in honour of Saint Lucia politician Sir George Frederick Lawrence Charles (1916–2004)."
+    },
+    {
+     "file": "intercaribbean-stlucia",
+     "org": "interCaribbean Airways",
+     "dated": "read 2026-09-23 (live page, © 2026)",
+     "quote": "George F. L. Charles Airport (SLU)"
+    },
+    {
+     "file": "ourairports-lc",
+     "org": "OurAirports",
+     "quote": "\"TLPC\",\"medium_airport\",\"George F. L. Charles Airport\""
+    }
+   ]
+  },
+  {
+   "claim": "most people still call it Vigie",
+   "verdict": "confirmed",
+   "inAfter": "most people still call it Vigie",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "George F. L. Charles Airport (commonly known as Vigie Airport)"
+    },
+    {
+     "file": "ourairports-lc",
+     "org": "OurAirports",
+     "quote": "\"https://en.wikipedia.org/wiki/George_F._L._Charles_Airport\",\"Vigie Airport\""
+    }
+   ]
+  },
+  {
+   "claim": "2 km north of the capital",
+   "verdict": "cut",
+   "wasBefore": "It is 2 km north of the capital",
+   "why": "Fails the coordinates check (3.1 km, ratio 0.65). Corrected to about 3 km from interCaribbean's page and the coordinates."
+  },
+  {
+   "claim": "turboprop airport, mostly ATR 72s and Dash 8s, no scheduled jet service",
+   "verdict": "cut",
+   "wasBefore": "This is a turboprop airport, mostly ATR 72s and Dash 8s, with no scheduled jet service at all.",
+   "why": "An undated Wikipedia paragraph with no current second source for the aircraft mix or the absence of jets: the operator's (SLASPA's) site serves only a web server's default page and its old airport page is a 404, and interCaribbean, whose December 2025 release lists Embraer ERJ145 and Bombardier CRJ900 jets in its fleet as well as turboprops, does not say which aircraft it uses here. Replaced by what two sources support: regional flights use it."
+  },
+  {
+   "claim": "every jet flight into Saint Lucia uses Hewanorra",
+   "verdict": "cut",
+   "wasBefore": "Every jet flight into Saint Lucia, transatlantic services included, uses Hewanorra.",
+   "why": "Wikipedia alone for all jets. The Saint Lucia Tourism Authority's page names the North American airlines but not the airport they use. Softened to the UK flights, which the CAA's table places at Hewanorra."
+  },
+  {
+   "claim": "a UK client will land at Hewanorra",
+   "verdict": "cut",
+   "wasBefore": "So a UK client will land at Hewanorra and may use this airport only for onward island hopping.",
+   "why": "Merged into 'Flights from the UK land at Hewanorra, so a UK client may use this airport only for onward island hopping' (see above)."
+  },
+  {
+   "claim": "around 32,000 flights and 394,000 passengers a year",
+   "verdict": "cut",
+   "wasBefore": "It handles around 32,000 flights and 394,000 passengers a year, which is a lot of small aircraft.",
+   "why": "Undated, and Wikipedia contradicts itself: its infobox gives 195,859 passengers and 17,569 movements for 2016, citing the operator. No current figure from the operator could be read (its site serves only a default page)."
+  },
+  {
+   "claim": "the runway runs parallel to Vigie Beach, a destination in its own right",
+   "verdict": "cut",
+   "wasBefore": "The setting is part of the appeal. The runway runs parallel to Vigie Beach, which is a destination in its own right.",
+   "why": "Wikipedia alone. The Saint Lucia Tourism Authority's beaches page (read in a browser after a plain 403) does not mention Vigie."
+  },
+  {
+   "claim": "called Vigie Field until August 1997; renamed after the politician Sir George Charles",
+   "verdict": "cut",
+   "wasBefore": "The airport was called Vigie Field until August 1997, when it was renamed after the Saint Lucia politician Sir George Frederick Lawrence Charles, and most people still say Vigie.",
+   "why": "The date, the former name Vigie Field and the description rest on Wikipedia alone: the government's 1997 press release that Wikipedia cites failed to connect, and the government's current press room lists nothing on the airport. The naming and the everyday name Vigie are kept (see above)."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and the one that matters if a client is staying around Castries.",
+   "why": "The old text's judgement, kept: the coordinates put this airport 3.1 km from the centre of Castries and Hewanorra 29.8 km."
+  },
+  {
+   "text": "The trade off is what flies there.",
+   "why": "Signpost for the sentences that follow; carries no fact of its own."
+  },
+  {
+   "text": "so a UK client may use this airport only for onward island hopping.",
+   "why": "Advice following from the two sourced points: UK flights land at Hewanorra, and this airport has regional flights."
+  }
+ ],
+ "tracerOk": {}
+}
