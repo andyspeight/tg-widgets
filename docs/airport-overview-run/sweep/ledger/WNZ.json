@@ -1,0 +1,278 @@
+{
+ "iata": "WNZ",
+ "id": "recdA7FOaGJQjmzhO",
+ "name": "Wenzhou Longwan International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Wenzhou_Longwan_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Wenzhou's airport, 24 km south east of the city in Zhejiang, and thirty fifth busiest in mainland China with 13,058,523 passengers in 2025.\n\nThe terminal arrangement is being rearranged, so check before quoting. Terminal 2, four times the size of Terminal 1 and built for 13 million passengers, takes domestic flights, with Terminal 1 becoming a dedicated international terminal. Terminal 2 also anchors the Wenzhou Comprehensive Transportation Hub, which brings a long distance bus terminal and a subway station onto the same site.\n\nA third phase is under way and it is a big one. Roughly 10.97 billion yuan is being spent to lift capacity from about 13 million passengers to 30 million by 2030, with a second runway of 3,600 metres alongside the existing 3,200 metre one, 50 more aircraft stands and a cargo facility handling 320,000 tonnes a year. The airport is also to be linked directly to Wenzhou East railway station.\n\nThe airport can take aircraft up to a 767 or A330. It was called Wenzhou Yongqiang until April 2013.",
+ "after": "Wenzhou's airport, 24 km south east of the city in Zhejiang. It was the 35th busiest in mainland China in 2025, with 13,058,523 passengers. Its former name is Wenzhou Yongqiang Airport.\n\nInternational flights use Terminal 1 and domestic flights Terminal 2. Terminal 2 sits beside the airport's transport hub, which brings long-distance coaches onto the same site.\n\nA third phase of building is being prepared to take the airport to 30 million passengers a year by 2030, with a second runway of 3,600 m beside the existing 3,200 m one and cargo space for 320,000 tonnes a year. The plan also links the airport to Wenzhou East, a planned high-speed railway station.",
+ "claims": [
+  {
+   "claim": "Wenzhou's airport, 24 km south east of the city in Zhejiang",
+   "verdict": "confirmed",
+   "inAfter": "Wenzhou's airport, 24 km south east of the city in Zhejiang",
+   "note": "Coordinates: 20.8 km in a straight line at 118 degrees, which is south east; ratio 1.15. The operator puts it about 22 km from the city's administrative centre.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is located 24 km (15 mi) southeast of the city."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 20.8 km",
+      "Bearing from the city centre: 118 degrees, which is south east"
+     ]
+    },
+    {
+     "file": "wzair-jcgk",
+     "org": "Wenzhou Airport Group (operator)",
+     "dated": "2026-09-23",
+     "quote": "距市行政中心约22公里"
+    }
+   ]
+  },
+  {
+   "claim": "35th busiest in mainland China, 13,058,523 passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "It was the 35th busiest in mainland China in 2025, with 13,058,523 passengers.",
+   "note": "CAAC 13,058,523, up 4.2 per cent; the operator's 2025 record gives 13.0585 million and 35th.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "passenger rank 35 in China",
+      "passengers 2025: 13,058,523"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In 2025, Wenzhou Airport was the 35th-busiest airport in mainland China with 13,058,523 passengers."
+    },
+    {
+     "file": "wzair-dsj",
+     "org": "Wenzhou Airport Group (operator)",
+     "dated": "2026",
+     "quote": [
+      "旅客吞吐量 1305.85万人次",
+      "列全 国机场第 35位"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "formerly Wenzhou Yongqiang Airport",
+   "verdict": "softened",
+   "inAfter": "Its former name is Wenzhou Yongqiang Airport.",
+   "note": "Was 'called Wenzhou Yongqiang until April 2013'. The operator and OurAirports give the former name; the date of the change (25 April 2013) rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Formerly called Wenzhou Yongqiang Airport"
+    },
+    {
+     "file": "wzair-jcgk",
+     "org": "Wenzhou Airport Group (operator)",
+     "dated": "2026-09-23",
+     "quote": "温州龙湾国际机场前身是温州永强机场"
+    }
+   ]
+  },
+  {
+   "claim": "international flights use Terminal 1, domestic Terminal 2",
+   "verdict": "corrected",
+   "inAfter": "International flights use Terminal 1 and domestic flights Terminal 2.",
+   "note": "Replaces 'The terminal arrangement is being rearranged, so check before quoting', which described the split as still coming: the operator's passenger guide now has an international building and a domestic Terminal 2, and its 2025 record mentions the T1 international hall (a tax refund desk opened there on 10 July 2025).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "it will be used exclusively for domestic flights, while Terminal 1 will be converted to a dedicated international terminal"
+    },
+    {
+     "file": "wzair-jcgyd",
+     "org": "Wenzhou Airport Group (operator)",
+     "dated": "2026-09-23",
+     "quote": [
+      "国际楼设施分布",
+      "T2国内楼设施分布"
+     ]
+    },
+    {
+     "file": "wzair-dsj",
+     "org": "Wenzhou Airport Group (operator)",
+     "dated": "2026",
+     "quote": "T1国际厅离境退税代理点"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2 beside the airport's transport hub, with long-distance coaches",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 2 sits beside the airport's transport hub, which brings long-distance coaches onto the same site.",
+   "note": "The hub (综合交通中心) stands west of Terminal 2 and its transport functions were fully in use from 25 April 2025 (operator), including long-distance coaches. The metro station the old text mentioned (lines S1 and S2) is described in Wenzhou Daily's 2023 report as part of the hub's construction; no source says it is open, so it is not stated.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Terminal 2 is the centrepiece of the new Wenzhou Comprehensive Transportation Hub development, which also includes a long-distance bus terminal"
+    },
+    {
+     "file": "wzdaily-phase3-2023",
+     "org": "Wenzhou Daily (reprinted by the operator)",
+     "dated": "2023-12-04",
+     "quote": [
+      "机场交通枢纽综合体位于T2航站楼西侧",
+      "建设长途客运站"
+     ]
+    },
+    {
+     "file": "wzair-dsj",
+     "org": "Wenzhou Airport Group (operator)",
+     "dated": "2026",
+     "quote": [
+      "综合交通中心交通功能全面投用",
+      "长途客运等多元交通资源"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "third phase being prepared: 30 million passengers by 2030",
+   "verdict": "softened",
+   "inAfter": "A third phase of building is being prepared to take the airport to 30 million passengers a year by 2030",
+   "note": "Was 'A third phase is under way and it is a big one'. The operator's 2025 record shows the feasibility study reviewed in Beijing (26 to 28 February 2025) and the preliminary design pre-reviewed (30 July to 1 August 2025); no source says building has started, so 'being prepared'.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "to meet the needs of 30 million passengers in 2030"
+    },
+    {
+     "file": "wzdaily-phase3-2023",
+     "org": "Wenzhou Daily (reprinted by the operator)",
+     "dated": "2023-12-04",
+     "quote": "满足2030年旅客吞吐量3000万人次的目标需求"
+    },
+    {
+     "file": "wzair-dsj",
+     "org": "Wenzhou Airport Group (operator)",
+     "dated": "2026",
+     "quote": "温州机场三期扩建项目工程可行性研究报告评估会在北京召开"
+    }
+   ]
+  },
+  {
+   "claim": "second runway of 3,600 m beside the existing 3,200 m one",
+   "verdict": "confirmed",
+   "inAfter": "with a second runway of 3,600 m beside the existing 3,200 m one",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "A planned new second runway spanning 3,600 meters long will be built on the east side of the existing 3,200 meters runway"
+    },
+    {
+     "file": "wzdaily-phase3-2023",
+     "org": "Wenzhou Daily (reprinted by the operator)",
+     "dated": "2023-12-04",
+     "quote": "在现有跑道东侧新建一条长3600米的第二"
+    },
+    {
+     "file": "wzair-jcgk",
+     "org": "Wenzhou Airport Group (operator)",
+     "dated": "2026-09-23",
+     "quote": "拥有一条长3200米、宽45米跑道"
+    }
+   ]
+  },
+  {
+   "claim": "cargo space for 320,000 tonnes a year",
+   "verdict": "confirmed",
+   "inAfter": "cargo space for 320,000 tonnes a year",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "with an annual processing capacity of 320,000 tons"
+    },
+    {
+     "file": "wzdaily-phase3-2023",
+     "org": "Wenzhou Daily (reprinted by the operator)",
+     "dated": "2023-12-04",
+     "quote": "可满足年32万吨货运量"
+    }
+   ]
+  },
+  {
+   "claim": "linked to Wenzhou East, a planned high-speed railway station",
+   "verdict": "softened",
+   "inAfter": "The plan also links the airport to Wenzhou East, a planned high-speed railway station.",
+   "note": "Was 'The airport is also to be linked directly to Wenzhou East railway station'. Wenzhou Daily says the hub keeps connections ready for the planned Wenzhou East high-speed station.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "seamlessly integrated with the Wenzhou East Railway station in the future"
+    },
+    {
+     "file": "wzdaily-phase3-2023",
+     "org": "Wenzhou Daily (reprinted by the operator)",
+     "dated": "2023-12-04",
+     "quote": "预留与规划中的温州高铁东站的联络通道"
+    }
+   ]
+  },
+  {
+   "claim": "terminal arrangement being rearranged; check before quoting",
+   "verdict": "cut",
+   "wasBefore": "The terminal arrangement is being rearranged, so check before quoting.",
+   "why": "Settled: the operator's own guidance now shows the split in use (Terminal 1 international, Terminal 2 domestic)."
+  },
+  {
+   "claim": "Terminal 2 four times the size of Terminal 1, built for 13 million",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2, four times the size of Terminal 1 and built for 13 million passengers, takes domestic flights, with Terminal 1 becoming a dedicated international terminal.",
+   "why": "Reworded: the split is kept with the operator as the second source. 'Four times the size' and the 13 million design figure for Terminal 2 rest on Wikipedia alone (Wenzhou Daily gives 13 million as the whole airport's design capacity, not Terminal 2's)."
+  },
+  {
+   "claim": "hub brings a long distance bus terminal and a subway station onto the site",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 also anchors the Wenzhou Comprehensive Transportation Hub, which brings a long distance bus terminal and a subway station onto the same site.",
+   "why": "Reworded: the hub and its coaches are kept (operator, Wenzhou Daily). The subway station is part of the hub's plans in Wenzhou Daily's 2023 report; no source says it is open."
+  },
+  {
+   "claim": "third phase under way; 10.97 billion yuan; 13 to 30 million; 50 more stands",
+   "verdict": "cut",
+   "wasBefore": "A third phase is under way and it is a big one. Roughly 10.97 billion yuan is being spent to lift capacity from about 13 million passengers to 30 million by 2030, with a second runway of 3,600 metres alongside the existing 3,200 metre one, 50 more aircraft stands and a cargo facility handling 320,000 tonnes a year.",
+   "why": "Reworded: the 30 million target, the second runway and the cargo capacity are kept with Wenzhou Daily as the second source. The cost and the 50 stands rest on Wikipedia alone, and 'under way' overstates it: the operator's 2025 record shows the project still in approvals."
+  },
+  {
+   "claim": "linked directly to Wenzhou East railway station",
+   "verdict": "cut",
+   "wasBefore": "The airport is also to be linked directly to Wenzhou East railway station.",
+   "why": "Reworded: the station is itself still planned (Wenzhou Daily)."
+  },
+  {
+   "claim": "aircraft up to a 767 or A330",
+   "verdict": "cut",
+   "wasBefore": "The airport can take aircraft up to a 767 or A330.",
+   "why": "Wikipedia alone; the operator's page gives the airfield class (4E) but no aircraft limit."
+  },
+  {
+   "claim": "called Wenzhou Yongqiang until April 2013",
+   "verdict": "cut",
+   "wasBefore": "It was called Wenzhou Yongqiang until April 2013.",
+   "why": "Reworded: the former name is kept with the operator as the second source; the date of the change rests on Wikipedia alone."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
