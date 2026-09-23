@@ -2115,7 +2115,7 @@
     leaf:    'M11 20A7 7 0 0 1 4 13c0-2 1-4 3-6 1-1 2-3 4-5l1 4c2-1 4 1 5 3 1 3 0 5-1 6-2 2-4 5-5 5z',
     eye:     'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
     x:       'M18 6L6 18M6 6l12 12',
-    car:     'M4 16v-3l1.9-4.4A2 2 0 0 1 7.7 7.4h8.6a2 2 0 0 1 1.8 1.2L20 13v3M4 13h16M10 7.4V13M6 16a2 2 0 1 0 4 0 2 2 0 1 0-4 0M14 16a2 2 0 1 0 4 0 2 2 0 1 0-4 0',
+    car:     'M1.6 15.4v-3.2a1.6 1.6 0 0 1 1.1-1.5l2.5-.8 2.6-2.8a2 2 0 0 1 1.5-.6h5.4a2 2 0 0 1 1.5.6l2.6 2.8 2.5.8a1.6 1.6 0 0 1 1.1 1.5v3.2M1.6 15.4h20.8M5.2 10.1h13.6M12 6.5v3.6M4 16.6a2.8 2.8 0 1 0 5.6 0 2.8 2.8 0 1 0-5.6 0M14.4 16.6a2.8 2.8 0 1 0 5.6 0 2.8 2.8 0 1 0-5.6 0',
     van:     'M3 17h18M3 17V8a1 1 0 0 1 1-1h11l4 5h1a1 1 0 0 1 1 1v4M7 17v2M17 17v2M15 7v5h5',
     ticket:  'M3 7v3a2 2 0 0 1 0 4v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 0 1 0-4V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2zM13 5v14',
     seat:    'M6 5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v7H6zM4 12h16v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM7 19v2M17 19v2',
@@ -2968,6 +2968,11 @@
        inventing a second one that only nearly matches. Only the anchor's own
        defaults and the trailing margin need saying here. */
     .tgm-upsell .tgm-action-row { margin-bottom: 0; }
+    /* The tile icons carry more of their chip than the other action buttons do
+       (Andy, 23 Sep 2026: "make the car icon bigger"). The .tgm-root prefix is
+       only there to outrank the narrow-width rule further down, which would
+       otherwise shrink these back to 16px on a phone. */
+    .tgm-root .tgm-upsell .tgm-action-icon svg { width: 22px; height: 22px; }
     a.tgm-action { text-decoration: none; color: inherit; }
     a.tgm-action:focus-visible { outline: 2px solid var(--tgm-accent); outline-offset: 2px; }
     .tgm-help { background: linear-gradient(135deg, var(--tgm-primary) 0%, var(--tgm-primary-dark) 100%); color: #fff; padding: 20px; border-radius: var(--tgm-radius-lg); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 24px; }
@@ -4835,7 +4840,7 @@
         <div class="tgm-action-row">
           ${tiles.map((t) => `
             <a class="tgm-action tgm-upsell-card" href="${esc(safeUrl(t.url))}" target="_blank" rel="noopener noreferrer">
-              <div class="tgm-action-icon">${svg(UPSELL_IC[t.product] || IC.search)}</div>
+              <div class="tgm-action-icon">${svg(UPSELL_IC[t.product] || IC.search, 2, 22)}</div>
               <div class="tgm-action-text">
                 <div class="tgm-action-title">${esc(t.label)}</div>
                 <div class="tgm-action-sub">${esc(t.hint)}</div>
