@@ -1,0 +1,241 @@
+{
+ "iata": "NNG",
+ "id": "receXsoHnJAUQZpXd",
+ "name": "Nanning Wuxu International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Nanning_Wuxu_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Guangxi's largest airport, 32 km south west of Nanning, and a designated gateway hub to ASEAN. It handled 13.5 million passengers in 2025, thirty third in China, though traffic was down about 4 per cent on the year.\n\nTerminal 2 is the main building and a handsome one. Opened in September 2014, it covers 189,000 square metres across three floors with 32 air bridges and is built for 16 million passengers a year. Its design draws on the Han dynasty Phoenix Lantern found at Hepu in Guangxi.\n\nThere is a station on the Nanning to Pingxiang high speed railway at the airport itself, alongside two airport bus lines into the city, one to the Chaoyang Road ticket office near Nanning railway station and one to Wuxiang Square.\n\nThis is a joint civil and military field, so parts of the site are not public.\n\nGrowth here has been steep. The airport passed a million passengers in 2002, two million by 2006 and fifteen million by 2019.",
+ "after": "Guangxi's largest airport, 32 km south west of Nanning. It handled 13.5 million passengers in 2025, thirty third in China, though traffic was down about 4 per cent on the year.\n\nTerminal 2 is the main building and a handsome one. It opened in September 2014, covers 189,000 square metres and was built for 16 million passengers a year, with a shape inspired by the phoenix.\n\nThe airport has its own railway station, called Wuxu Airport. Airport buses also run into the city.",
+ "claims": [
+  {
+   "claim": "Guangxi's largest airport",
+   "verdict": "confirmed",
+   "inAfter": "Guangxi's largest airport",
+   "note": "CAAC 2025: Nanning 13,502,293, then Guilin 6,504,366 and Beihai 2,955,931; every other Guangxi airport is smaller.",
+   "sources": [
+    {
+     "file": "caac-2025-guangxi",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "Row 南宁/吴圩: passenger rank 33 in China; passengers 2025: 13502293",
+      "Row 桂林/两江: passenger rank 48 in China; passengers 2025: 6504366"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "it is the largest airport in Guangxi"
+    }
+   ]
+  },
+  {
+   "claim": "32 km south west of Nanning",
+   "verdict": "confirmed",
+   "inAfter": "32 km south west of Nanning",
+   "note": "Coordinates: 28.0 km at 210 degrees, south west (ratio 1.14).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is located 32 km (20 mi) southwest of the centre of the city"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 28.0 km (17.4 miles)",
+      "Bearing from the city centre: 210 degrees, which is south west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "13.5 million passengers in 2025, 33rd in China, down about 4 per cent",
+   "verdict": "confirmed",
+   "inAfter": "It handled 13.5 million passengers in 2025, thirty third in China, though traffic was down about 4 per cent on the year.",
+   "note": "CAAC: 13,502,293, rank 33, down 3.6 per cent on 14,005,332.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 南宁/吴圩: passenger rank 33 in China; passengers 2025: 13,502,293; passengers 2024: 14,005,332; change -3.6%"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In 2025, the airport handled 13.5 million passengers, a year‑on‑year decrease of 3.6 percent"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2 is the main building",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 2 is the main building",
+   "note": "When T2 opened, T1 was closed and all flights moved to T2 (People's Daily). A T3 was begun in January 2023 for about 2027 (Xinhua, Sina); not in the text, as no current source dates it.",
+   "sources": [
+    {
+     "file": "people-2014",
+     "org": "People's Daily (people.com.cn)",
+     "dated": "2014-09-20",
+     "quote": "T1航站楼暂停使用，所有航班停靠T2航站楼"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Terminal 2 entered official operation on September 25, 2014"
+    }
+   ]
+  },
+  {
+   "claim": "T2 opened in September 2014",
+   "verdict": "confirmed",
+   "inAfter": "It opened in September 2014",
+   "sources": [
+    {
+     "file": "people-2014",
+     "org": "People's Daily (people.com.cn)",
+     "dated": "2014-09-20",
+     "quote": "南宁吴圩国际机场T2航站楼于2014年9月25日6∶00正式启用"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Terminal 2 entered official operation on September 25, 2014"
+    }
+   ]
+  },
+  {
+   "claim": "189,000 square metres, built for 16 million passengers a year",
+   "verdict": "confirmed",
+   "inAfter": "covers 189,000 square metres and was built for 16 million passengers a year",
+   "sources": [
+    {
+     "file": "gxnews-2013",
+     "org": "Guangxi News (gxnews.com.cn)",
+     "dated": "2013-07-30",
+     "quote": [
+      "新建18.9万平方米的航站楼",
+      "新航站楼建成后，机场每年的旅客吞吐量将可达到1600万人次"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "The building covers 189,000 m2",
+      "It is designed to handle 16 million passengers annually"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "shape inspired by the phoenix",
+   "verdict": "softened",
+   "inAfter": "with a shape inspired by the phoenix",
+   "note": "Was 'Its design draws on the Han dynasty Phoenix Lantern found at Hepu in Guangxi'. Guangxi News describes the terminal's form as 'twin phoenixes returning to the nest'; the Han lantern from Hepu rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "gxnews-2013",
+     "org": "Guangxi News (gxnews.com.cn)",
+     "dated": "2013-07-30",
+     "quote": "新航站楼\"双凤还巢\"的造型已现雏形"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Its design was inspired by the Han‑dynasty \"Phoenix Lantern\" unearthed in Hepu, Guangxi"
+    }
+   ]
+  },
+  {
+   "claim": "railway station at the airport, Wuxu Airport",
+   "verdict": "softened",
+   "inAfter": "The airport has its own railway station, called Wuxu Airport.",
+   "note": "China Railway's station list has 吴圩机场 (Wuxu Airport) under Nanning. Which line it is on ('Nanning to Pingxiang high speed railway') rests on Wikipedia alone, so the line is not named.",
+   "sources": [
+    {
+     "file": "railway-12306-stations",
+     "org": "China Railway 12306",
+     "dated": "2026-09-23",
+     "quote": "@wxc|吴圩机场|WJZ|wuxujichang|wxjc|153|1607|南宁|||"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "has a dedicated station at the airport, Wuxu Airport Railway Station"
+    }
+   ]
+  },
+  {
+   "claim": "airport buses into the city",
+   "verdict": "softened",
+   "inAfter": "Airport buses also run into the city.",
+   "note": "Was the two lines to the Chaoyang Road ticket office and Wuxiang Square; those destinations rest on Wikipedia alone. Nanning Bendibao (August 2026) points readers to the airport bus timetable; People's Daily (2014) says the airport buses kept their routes when T2 opened.",
+   "sources": [
+    {
+     "file": "qq-20260802",
+     "org": "Nanning Bendibao (local information site, via Tencent News)",
+     "dated": "2026-08-02",
+     "quote": "即可查询南宁机场大巴时刻表"
+    },
+    {
+     "file": "people-2014",
+     "org": "People's Daily (people.com.cn)",
+     "dated": "2014-09-20",
+     "quote": "机场巴士仍按原时间和原线路开行"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "two airport bus lines connect the airport with the city center"
+    }
+   ]
+  },
+  {
+   "claim": "a designated gateway hub to ASEAN",
+   "verdict": "cut",
+   "wasBefore": ", and a designated gateway hub to ASEAN",
+   "why": "Wikipedia alone; the airport's site (502) and the Guangxi government's English page could not be read."
+  },
+  {
+   "claim": "three floors, 32 air bridges",
+   "verdict": "cut",
+   "wasBefore": "it covers 189,000 square metres across three floors with 32 air bridges and is built for 16 million passengers a year",
+   "why": "The floors and air bridges rest on Wikipedia alone; the area and capacity are kept (Guangxi News)."
+  },
+  {
+   "claim": "Phoenix Lantern found at Hepu",
+   "verdict": "cut",
+   "wasBefore": "Its design draws on the Han dynasty Phoenix Lantern found at Hepu in Guangxi.",
+   "why": "The Hepu lantern rests on Wikipedia alone; softened to the phoenix shape Guangxi News describes."
+  },
+  {
+   "claim": "Nanning to Pingxiang high speed railway; bus lines to Chaoyang Road and Wuxiang Square",
+   "verdict": "cut",
+   "wasBefore": "There is a station on the Nanning to Pingxiang high speed railway at the airport itself, alongside two airport bus lines into the city, one to the Chaoyang Road ticket office near Nanning railway station and one to Wuxiang Square.",
+   "why": "The line name and the bus destinations rest on Wikipedia alone (the airport's site answered 502). The station and the buses are kept."
+  },
+  {
+   "claim": "joint civil and military field",
+   "verdict": "cut",
+   "wasBefore": "This is a joint civil and military field, so parts of the site are not public.",
+   "why": "Wikipedia alone; no second source found."
+  },
+  {
+   "claim": "a million passengers in 2002, two million by 2006, fifteen million by 2019",
+   "verdict": "cut",
+   "wasBefore": "Growth here has been steep. The airport passed a million passengers in 2002, two million by 2006 and fifteen million by 2019.",
+   "why": "Wikipedia alone; the cited Sina (2006) and CAAC News (2019) pages answered 503 and the old Guangxi News pages are only on the Internet Archive, which the network policy blocks."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and a handsome one",
+   "why": "The old text's judgement, kept as colour."
+  }
+ ],
+ "tracerOk": {}
+}
