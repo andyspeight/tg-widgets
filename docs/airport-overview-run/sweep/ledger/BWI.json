@@ -1,0 +1,433 @@
+{
+ "iata": "BWI",
+ "id": "recFB5nDh4VDt376Z",
+ "name": "Baltimore/Washington International Thurgood Marshall Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Baltimore/Washington_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The third Washington airport, and often the cheapest way into either city. It is in Anne Arundel County 14 km south of downtown Baltimore and 50 km north east of Washington DC, and it is one of Southwest Airlines' thirteen United States operating bases, which is what keeps fares competitive.\n\nIt carried 27.06 million passengers in 2024, a shade behind Dulles, having been the busiest of the three the year before. Either way, this is the one to price against when a client is flying into the capital.\n\nThere are three runways across 3,160 acres. Runway 28 is the main departure runway and 33L the main arrival, with Runway 10 carrying the highest instrument rating for poor visibility.\n\nIt opened as Friendship International and was renamed in 2005 after Thurgood Marshall, a Baltimore native and the first African American to sit on the United States Supreme Court. There is a proper aircraft viewing area at Friendship Park overlooking the landing runway.",
+ "after": "One of the three main airports for the Washington and Baltimore area, alongside Dulles and Reagan National. It is in Anne Arundel County, 14 km south of downtown Baltimore and 50 km north east of Washington DC, and is one of Southwest Airlines' 13 crew bases.\n\nThe airport handled about 25.2 million passengers in 2025, down about 7 per cent on 2024. That made it the second busiest of the three, behind Dulles and just ahead of Reagan National.\n\nThere are three runways. Plane spotters have a dedicated viewing area, the Dixon Aircraft Observation Area, with parking and a playground.\n\nIt opened as Friendship International. Since 2005 its name has also honoured Thurgood Marshall, a Baltimore native and the first African American to sit on the United States Supreme Court.",
+ "claims": [
+  {
+   "claim": "one of the three main airports for the Washington and Baltimore area, with Dulles and Reagan National",
+   "verdict": "confirmed",
+   "inAfter": "One of the three main airports for the Washington and Baltimore area, alongside Dulles and Reagan National.",
+   "note": "Reworded from 'The third Washington airport', which could be read as a rank; in 2025 it was second of the three by traffic (see below). The operator's own timeline speaks of 'the three major commercial airports serving the National Capital Region', and the FAA's table lists all three among the large hubs.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "BWI is one of three major airports that serve the Washington–Baltimore metropolitan area.",
+      "Dulles International Airport (IAD), in Dulles, Virginia, and Ronald Reagan Washington National Airport (DCA), in Crystal City, Virginia, are the other two."
+     ]
+    },
+    {
+     "file": "op-timeline",
+     "org": "BWI Thurgood Marshall Airport (Maryland Aviation Administration, operator, bwiairport.com)",
+     "quote": "BWI's cargo operations accounted for more than 55% of the total air cargo flown through the three major commercial airports serving the National Capital Region."
+    }
+   ]
+  },
+  {
+   "claim": "in Anne Arundel County",
+   "verdict": "confirmed",
+   "inAfter": "It is in Anne Arundel County",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is an international airport in Anne Arundel County, Maryland"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "5 COUNTY: ANNE ARUNDEL MD",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "14 km south of downtown Baltimore",
+   "verdict": "confirmed",
+   "inAfter": "14 km south of downtown Baltimore",
+   "note": "Coordinates put it 13.7 km from the GeoNames centre at 201 degrees, which is south (ratio 1.02). The FAA record gives 9 nautical miles (about 17 km) south of the business district.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "located 9 mi (14 km) south of downtown Baltimore"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 13.7 km (8.5 miles)",
+      "Bearing from the city centre: 201 degrees, which is south"
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "3 CBD TO AIRPORT (NM): 09 S",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "50 km north east of Washington DC",
+   "verdict": "confirmed",
+   "inAfter": "50 km north east of Washington DC",
+   "note": "Coordinates give 44.5 km in a straight line at 45 degrees, north east (ratio 1.12, a road distance).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "30 miles (50 km) northeast of Washington, D.C."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Washington (GeoNames 4140963): 44.5 km (27.7 miles), bearing 45 degrees, which is north east"
+    }
+   ]
+  },
+  {
+   "claim": "one of Southwest Airlines' 13 crew bases",
+   "verdict": "softened",
+   "inAfter": "is one of Southwest Airlines' 13 crew bases",
+   "note": "Was 'one of Southwest Airlines' thirteen United States operating bases'. Southwest's own careers page (read 23 Sep 2026, no date of its own) lists 13 crew bases, Baltimore (BWI) among them; 'crew bases' is Southwest's word. All 13 are in the US, so 'United States' is dropped as redundant. Southwest carried 71.28 per cent of BWI's passengers in 2025 (operator) and 73.48 per cent in the 12 months to June 2026 (BTS); not added, as the old text gave no share.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport serves as one of 13 U.S.-based operating bases for Southwest Airlines."
+    },
+    {
+     "file": "swa-fa-careers",
+     "org": "Southwest Airlines",
+     "quote": [
+      "Southwest currently has 13 Crew Bases:",
+      "Atlanta (ATL), Austin (AUS), Baltimore (BWI), Chicago (MDW), Dallas (DAL), Denver (DEN), Houston (HOU), Las Vegas (LAS), Los Angeles (LAX), Nashville (BNA), Oakland (OAK), Orlando (MCO), and Phoenix (PHX)"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "the airport describes itself as the lowest-cost airport for passengers in the National Capital Region",
+   "verdict": "cut",
+   "note": "Replaces 'often the cheapest way into either city', for which no fare comparison could be read: the Bureau of Transportation Statistics' fare page lists airport fare tables for the first quarter of 2026, but the links to them could not be read (bts.gov refused the link lister and WebFetch with 403; the browser copy holds the table titles only). The airport's own words are given as its claim, not as a fact.",
+   "sources": [
+    {
+     "file": "op-value",
+     "org": "BWI Thurgood Marshall Airport (Maryland Aviation Administration, operator, bwiairport.com)",
+     "quote": "And as the lowest-cost airport for passengers in the National Capital Region, it consistently delivers value that travelers notice and airlines can build on.",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ],
+   "why": "Held back in review (23 Sep): the airport's own marketing line, loose in meaning (it does not say whether it means fares, fees or parking), so it is not a like-for-like replacement for the old 'often the cheapest way in', which no fare source could confirm. Andy can add it as the airport's claim; the source stays listed here. Was to read: \"The airport describes itself as the lowest-cost airport for passengers in the National Capital Region.\""
+  },
+  {
+   "claim": "about 25.2 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "The airport handled about 25.2 million passengers in 2025",
+   "note": "Was 27.06 million in 2024, which the operator's report confirms (27,059,733). TOTAL passengers, arriving and departing: the operator gives 25,215,520 for calendar 2025. The FAA's preliminary CY2025 table counts 12,274,134 revenue enplanements (boardings only, about half of total passengers), in line with it.",
+   "sources": [
+    {
+     "file": "op-stats-dec2025",
+     "org": "BWI Thurgood Marshall Airport (Maryland Aviation Administration, operator, bwiairport.com)",
+     "quote": [
+      "For calendar year 2025, BWI Marshall's total passenger count was 25,215,520,",
+      "TOTAL COMMERCIAL PASSENGERS 2,023,319 2,150,486 (5.9%) 25,215,520 27,059,733 (6.8%)"
+     ],
+     "dated": "December 2025 (report period on the page)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "26 EA MD BWI Glen Burnie Baltimore/Washington International Thurgood Marshall P L 12,274,134 13,221,461 -7.17%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "down about 7 per cent on 2024",
+   "verdict": "corrected",
+   "inAfter": "down about 7 per cent on 2024",
+   "note": "The operator gives a fall of 6.8 per cent in total passengers; the FAA a fall of 7.17 per cent in boardings. Both round to about 7.",
+   "sources": [
+    {
+     "file": "op-stats-dec2025",
+     "org": "BWI Thurgood Marshall Airport (Maryland Aviation Administration, operator, bwiairport.com)",
+     "quote": "a decrease of 6.8% from 2024.",
+     "dated": "December 2025 (report period on the page)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "International Thurgood Marshall P L 12,274,134 13,221,461 -7.17%",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "second busiest of the three in 2025, behind Dulles and just ahead of Reagan National",
+   "verdict": "corrected",
+   "inAfter": "That made it the second busiest of the three, behind Dulles and just ahead of Reagan National.",
+   "note": "Replaces 'a shade behind Dulles' (2024) and 'the busiest of the three the year before' (2023). For 2025 the order is the same on both measures: total passengers Dulles 29,008,839 and Reagan National 24,889,473 (their operator, MWAA) against BWI's 25,215,520 (its operator); FAA boardings Dulles 13,859,569 (22nd), BWI 12,274,134 (26th), Reagan National 12,003,594 (28th).",
+   "sources": [
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "22 EA VA IAD Dulles Washington Dulles International P L 13,859,569 13,003,234 6.59%",
+      "26 EA MD BWI Glen Burnie Baltimore/Washington International Thurgood Marshall P L 12,274,134 13,221,461 -7.17%",
+      "28 EA VA DCA Arlington Ronald Reagan Washington Ntl P L 12,003,594 12,750,892 -5.86%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "mwaa-dec25",
+     "org": "Metropolitan Washington Airports Authority (operator of Dulles and Reagan National)",
+     "quote": [
+      "Washington Dulles International Airport Monthly Air Traffic Summary Report January 2025 - December 2025",
+      "Grand Total - Passengers 14,491,017 14,517,822 29,008,839 27,257,974 6.4",
+      "Ronald Reagan Washington National Airport Monthly Air Traffic Summary Report January 2025 - December 2025",
+      "Grand Total - Passengers 12,478,076 12,411,397 24,889,473 26,290,722 -5.3"
+     ],
+     "dated": "2026-02-12 (date in the report's file name)"
+    },
+    {
+     "file": "op-stats-dec2025",
+     "org": "BWI Thurgood Marshall Airport (Maryland Aviation Administration, operator, bwiairport.com)",
+     "quote": "For calendar year 2025, BWI Marshall's total passenger count was 25,215,520,",
+     "dated": "December 2025 (report period on the page)"
+    }
+   ]
+  },
+  {
+   "claim": "three runways",
+   "verdict": "confirmed",
+   "inAfter": "There are three runways.",
+   "note": "The longest, 10-28, is fully closed for resurfacing from 22 July to 8 October 2026, and the operator says the airport stays open on the other two. Not added, as it ends in two weeks.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "has three active runways"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "10/28 15L/33R 15R/33L",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runways listed: 3"
+    }
+   ]
+  },
+  {
+   "claim": "a dedicated aircraft viewing area, the Dixon Aircraft Observation Area, with parking and a playground",
+   "verdict": "softened",
+   "inAfter": "Plane spotters have a dedicated viewing area, the Dixon Aircraft Observation Area, with parking and a playground.",
+   "note": "Was 'a proper aircraft viewing area at Friendship Park overlooking the landing runway'. The area is open now on the operator's and the county's live pages (the county: trails open dawn to dusk). Friendship Park and the landing runway rest on Wikipedia alone, so they are left out. The short name is the operator's; the county's full name is the Thomas A. Dixon, Jr. Aircraft Observation Area, at 1911 Dorsey Road.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The Thomas A. Dixon Aircraft Observation Area at Friendship Park overlooks Runway 33L.",
+      "The observation plaza features a playground"
+     ]
+    },
+    {
+     "file": "op-trail",
+     "org": "BWI Thurgood Marshall Airport (Maryland Aviation Administration, operator, bwiairport.com)",
+     "quote": [
+      "including Dixon Aircraft Observation Area",
+      "where you can enjoy some of the best aircraft watching in the area and a wonderful children's playground."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "aacounty-trail",
+     "org": "Anne Arundel County Government",
+     "quote": [
+      "A parking lot and playground are located at the Thomas A. Dixon, Jr. Aircraft Observation Area at 1911 Dorsey Road in Glen Burnie.",
+      "Trails are open from dawn to dusk."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "opened as Friendship International",
+   "verdict": "confirmed",
+   "inAfter": "It opened as Friendship International.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Originally opened as Friendship International Airport"
+    },
+    {
+     "file": "op-timeline",
+     "org": "BWI Thurgood Marshall Airport (Maryland Aviation Administration, operator, bwiairport.com)",
+     "quote": "Since its dedication as Friendship International Airport on June 24, 1950",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Thurgood Marshall's name added in 2005",
+   "verdict": "corrected",
+   "inAfter": "Since 2005 its name has also honoured Thurgood Marshall",
+   "note": "Was 'opened as Friendship International and was renamed in 2005 after Thurgood Marshall', which reads as if the Friendship name lasted until 2005. Wikipedia has it renamed Baltimore/Washington International in 1973; the 2005 change added Marshall's name to that (operator: 'Baltimore/Washington International Airport is renamed Baltimore/Washington International Thurgood Marshall Airport'). The 2005 bill is also saved (mgaleg-hb0189).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "On November 16, 1973, in an effort to attract passengers from the Washington metropolitan area",
+      "the airport was renamed Baltimore/Washington International Airport",
+      "On October 1 of that year, the airport was renamed Baltimore/Washington International Thurgood Marshall Airport"
+     ]
+    },
+    {
+     "file": "op-marshall",
+     "org": "BWI Thurgood Marshall Airport (Maryland Aviation Administration, operator, bwiairport.com)",
+     "quote": "On October 1, 2005, Baltimore/Washington International Airport is renamed Baltimore/Washington International Thurgood Marshall Airport in his honor."
+    },
+    {
+     "file": "mgaleg-hb0189",
+     "org": "Maryland General Assembly",
+     "quote": [
+      "Renaming the Baltimore-Washington International Airport as the",
+      "Baltimore-Washington International Thurgood Marshall Airport"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Thurgood Marshall, a Baltimore native",
+   "verdict": "confirmed",
+   "inAfter": "Thurgood Marshall, a Baltimore native",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Thurgood Marshall, a Baltimore native"
+    },
+    {
+     "file": "fjc-marshall",
+     "org": "Federal Judicial Center",
+     "quote": "Born July 2, 1908, in Baltimore, MD"
+    }
+   ]
+  },
+  {
+   "claim": "first African American to sit on the United States Supreme Court",
+   "verdict": "confirmed",
+   "inAfter": "the first African American to sit on the United States Supreme Court",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the first African American to serve as a U.S. Supreme Court justice"
+    },
+    {
+     "file": "op-marshall",
+     "org": "BWI Thurgood Marshall Airport (Maryland Aviation Administration, operator, bwiairport.com)",
+     "quote": "Becomes first African American elevated to U.S. Supreme Court (1967-1991)"
+    }
+   ]
+  },
+  {
+   "claim": "the third Washington airport",
+   "verdict": "cut",
+   "wasBefore": "The third Washington airport",
+   "why": "Reworded as one of the three main airports for the area, since 'third' reads as a rank and BWI was second of the three in 2025."
+  },
+  {
+   "claim": "often the cheapest way into either city",
+   "verdict": "cut",
+   "wasBefore": "and often the cheapest way into either city",
+   "why": "No fare comparison could be read (the BTS airport fare tables' links were refused: link lister and WebFetch 403). The helper replaced it with the airport's own 'lowest-cost' claim, attributed; that was held back in review (see above)."
+  },
+  {
+   "claim": "thirteen United States operating bases",
+   "verdict": "cut",
+   "wasBefore": "it is one of Southwest Airlines' thirteen United States operating bases",
+   "why": "Reworded to Southwest's own term, crew bases; the count of 13 is confirmed on Southwest's careers page."
+  },
+  {
+   "claim": "Southwest is what keeps fares competitive",
+   "verdict": "cut",
+   "wasBefore": "which is what keeps fares competitive",
+   "why": "A causal claim with no source, not even Wikipedia."
+  },
+  {
+   "claim": "27.06 million passengers in 2024",
+   "verdict": "cut",
+   "wasBefore": "It carried 27.06 million passengers in 2024",
+   "why": "Out of date: replaced by the operator's 2025 figure (25,215,520). The 2024 figure itself matches the operator (27,059,733)."
+  },
+  {
+   "claim": "a shade behind Dulles in 2024",
+   "verdict": "cut",
+   "wasBefore": "a shade behind Dulles",
+   "why": "True for 2024 (Dulles 27,257,974 on MWAA's report against 27,059,733) but not for 2025, when Dulles handled 29.0 million to BWI's 25.2 million. Replaced by the 2025 order."
+  },
+  {
+   "claim": "the busiest of the three in 2023",
+   "verdict": "cut",
+   "wasBefore": "having been the busiest of the three the year before",
+   "why": "A 2023 position, now two years old and overtaken; the 2025 order is given instead."
+  },
+  {
+   "claim": "the one to price against when flying into the capital",
+   "verdict": "cut",
+   "wasBefore": "Either way, this is the one to price against when a client is flying into the capital.",
+   "why": "Advice resting on the claim that BWI is the cheapest, which could not be confirmed (see above)."
+  },
+  {
+   "claim": "3,160 acres",
+   "verdict": "cut",
+   "wasBefore": "across 3,160 acres",
+   "why": "Sources disagree: the FAA record and Wikipedia give 3,160 acres, the operator's own facts page 3,596.3 acres."
+  },
+  {
+   "claim": "Runway 28 the main departure runway and 33L the main arrival",
+   "verdict": "cut",
+   "wasBefore": "Runway 28 is the main departure runway and 33L the main arrival",
+   "why": "Wikipedia alone; neither the FAA record nor the operator's pages say which runways are used most. It is also not true at present: Runway 10-28 is closed for resurfacing from 22 July to 8 October 2026 (operator)."
+  },
+  {
+   "claim": "Runway 10 carries the highest instrument rating",
+   "verdict": "cut",
+   "wasBefore": "with Runway 10 carrying the highest instrument rating for poor visibility",
+   "why": "Wikipedia alone (the FAA record saved does not list approach categories), of little use to a UK agent, and the runway is closed until 8 October 2026."
+  },
+  {
+   "claim": "renamed in 2005 after Thurgood Marshall",
+   "verdict": "cut",
+   "wasBefore": "and was renamed in 2005 after Thurgood Marshall",
+   "why": "Misleading as worded: Friendship became Baltimore/Washington International in 1973, and 2005 added Marshall's name. Reworded (see above)."
+  },
+  {
+   "claim": "a proper viewing area at Friendship Park overlooking the landing runway",
+   "verdict": "cut",
+   "wasBefore": "There is a proper aircraft viewing area at Friendship Park overlooking the landing runway.",
+   "why": "Friendship Park and 'overlooking the landing runway' rest on Wikipedia alone (the operator and the county name only the observation area, its parking and playground). The area itself is kept."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

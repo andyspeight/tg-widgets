@@ -1,0 +1,321 @@
+{
+ "iata": "MYR",
+ "id": "recIxg63L8Tpj8AFL",
+ "name": "Myrtle Beach International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Myrtle_Beach_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Myrtle Beach's airport, three miles south west of the town centre, and second busiest in South Carolina after Charleston with over 2.4 million passengers in 2018.\n\nIt stands on the site of the former Myrtle Beach Air Force Base, which is also where The Market Common shopping complex now sits. That shared past shaped the airport for decades: until 1993 the civil airport and the air force base used the same main runway, and civil operations were capped at thirty landings a day.\n\nToday there is a single runway of 9,503 feet across a 3,795 acre site, and a helipad at the end of runway 36 used mostly by sightseeing charter companies.\n\nThe terminal is named after Dr Wilford Leroy Harrelson, Myrtle Beach's first mayor, who was in office when the city bought the land. The airport was called Myrtle Beach Jetport until 1989.",
+ "after": "Myrtle Beach's airport, three miles south west of the town centre, and the second busiest in South Carolina after Charleston. It handled about 3.5 million passengers in 2025, down about 8 per cent on 2024.\n\nThe airport stands on part of the former Myrtle Beach Air Force Base, where The Market Common shopping complex now sits too. Civil flights shared the base with the air force until it closed in the 1990s.\n\nToday there is a single runway of 9,503 feet on a 3,795 acre site, and a helicopter pad near the end of runway 36 used by sightseeing flights.",
+ "claims": [
+  {
+   "claim": "Myrtle Beach's airport",
+   "verdict": "confirmed",
+   "inAfter": "Myrtle Beach's airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is located 3 miles (5 km) southwest of the central business district of Myrtle Beach"
+    },
+    {
+     "file": "op-terminal-expansion",
+     "org": "Myrtle Beach International Airport (Horry County Department of Airports, operator, flymyrtlebeach.com)",
+     "quote": "The Myrtle Beach International Airport is the gateway to Myrtle Beach, SC, the Grand Strand and the Hammock Coast.",
+     "dated": "read 2026-09-23 (live page; it reports the ribbon-cutting of 1 December 2025)"
+    }
+   ]
+  },
+  {
+   "claim": "three miles south west of the town centre",
+   "verdict": "confirmed",
+   "inAfter": "three miles south west of the town centre",
+   "note": "Coordinates put it 2.5 miles (4.0 km) from the GeoNames centre at 255 degrees, which is west and one point from south west (ratio 1.2). The FAA gives 3 nautical miles south west of the business district.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is located 3 miles (5 km) southwest of the central business district of Myrtle Beach"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "3 CBD TO AIRPORT (NM): 03 SW",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 4.0 km (2.5 miles)",
+      "Bearing from the city centre: 255 degrees, which is west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "second busiest in South Carolina after Charleston",
+   "verdict": "confirmed",
+   "inAfter": "the second busiest in South Carolina after Charleston",
+   "note": "Wikipedia's statement is for 2018; the FAA's 2025 table, in rank order, still puts Myrtle Beach second in the state (81st in the US) behind Charleston (57th) and ahead of Greenville-Spartanburg (89th) and Columbia (126th).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Myrtle Beach has the second-busiest airport in South Carolina, behind Charleston"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "57 SO SC CHS Charleston Charleston AFB/International P M 3,142,402 3,115,194 0.87%",
+      "81 SO SC MYR Myrtle Beach Myrtle Beach International P S 1,743,132 1,894,929 -8.01%",
+      "89 SO SC GSP Greer",
+      "126 SO SC CAE Columbia Columbia Metro P S 662,756 654,460 1.27%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "about 3.5 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled about 3.5 million passengers in 2025",
+   "note": "Was 'over 2.4 million passengers in 2018'. TOTAL passengers, arriving and departing: Wikipedia's infobox gives 3,530,754 for 2025. The operator publishes no 2025 year-end figure (its newsroom's last traffic release is for 2024 and its statistics files stop in 2019) and the South Carolina Aeronautics Commission's site answered 502. The FAA's preliminary CY2025 table counts 1,743,132 revenue enplanements (boardings only, about half of total passengers), which is in line with about 3.5 million in total, and its fall of 8.01 per cent matches the fall from the operator's 2024 total (3,837,052) to Wikipedia's 2025 total (8.0 per cent).",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_header = Total passengers",
+      "stat1_data = 3,530,754"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "81 SO SC MYR Myrtle Beach Myrtle Beach International P S 1,743,132 1,894,929 -8.01%",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "down about 8 per cent on 2024",
+   "verdict": "corrected",
+   "inAfter": "down about 8 per cent on 2024",
+   "note": "The FAA gives a fall of 8.01 per cent in boardings; the operator's 2024 total (3,837,052, a record) against Wikipedia's 2025 total (3,530,754) is a fall of 8.0 per cent.",
+   "sources": [
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "Myrtle Beach International P S 1,743,132 1,894,929 -8.01%",
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "op-record-2024",
+     "org": "Myrtle Beach International Airport (Horry County Department of Airports, operator, flymyrtlebeach.com)",
+     "quote": [
+      "Myrtle Beach, SC, January 17, 2025",
+      "In 2024, MYR welcomed 3,837,052 arriving and departing passengers, a nearly 14% increase compared to the previous year."
+     ],
+     "dated": "2025-01-17"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "stat1_data = 3,530,754"
+    }
+   ]
+  },
+  {
+   "claim": "on part of the former Myrtle Beach Air Force Base",
+   "verdict": "confirmed",
+   "inAfter": "The airport stands on part of the former Myrtle Beach Air Force Base",
+   "note": "'Part of' follows the operator, which describes civilian control of a portion of the base.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "it is located on the site of the former Myrtle Beach Air Force Base, which also includes The Market Common shopping complex."
+    },
+    {
+     "file": "op-masterplan-exec",
+     "org": "Myrtle Beach International Airport (Horry County Department of Airports, operator, flymyrtlebeach.com)",
+     "quote": [
+      "Commercial Operations at MYR began in 1975 when the Myrtle Beach Air Force Base entered into an agreement with Horry County to allow civilian control of a portion of the base.",
+      "redevelopment of the previously base-controlled areas began."
+     ],
+     "dated": "2023 (master plan summary; FAA approval July 2023 on the page)"
+    }
+   ]
+  },
+  {
+   "claim": "The Market Common also on the former base",
+   "verdict": "confirmed",
+   "inAfter": "where The Market Common shopping complex now sits too",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "which also includes The Market Common shopping complex"
+    },
+    {
+     "file": "marketcommon-history",
+     "org": "The Market Common",
+     "quote": "Located in the former Myrtle Beach Air Force Base, closed in 1993",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "civil flights shared the base with the air force until it closed in the 1990s",
+   "verdict": "softened",
+   "inAfter": "Civil flights shared the base with the air force until it closed in the 1990s.",
+   "note": "Replaces 'until 1993 the civil airport and the air force base used the same main runway'. The closing year differs by source: Wikipedia and The Market Common give 1993, the operator's master plan says the base 'closed completely' in 1995. Both years are in the 1990s, so no year is given. The shared main runway itself rests on Wikipedia alone; the operator speaks of civilian control of a portion of the base from 1975.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "after an agreement for joint civilian and military use of the base",
+      "Until 1993, both MYR and Myrtle Beach AFB jointly used the main runway",
+      "In 1993, the Air Force closed the base as a result of BRAC 1991."
+     ]
+    },
+    {
+     "file": "op-masterplan-exec",
+     "org": "Myrtle Beach International Airport (Horry County Department of Airports, operator, flymyrtlebeach.com)",
+     "quote": [
+      "agreement with Horry County to allow civilian control of a portion of the base.",
+      "Twenty years later, in 1995, the Air Force base closed completely"
+     ],
+     "dated": "2023 (master plan summary; FAA approval July 2023 on the page)"
+    },
+    {
+     "file": "marketcommon-history",
+     "org": "The Market Common",
+     "quote": "Located in the former Myrtle Beach Air Force Base, closed in 1993",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "a single runway of 9,503 feet",
+   "verdict": "confirmed",
+   "inAfter": "Today there is a single runway of 9,503 feet",
+   "note": "The operator says the runway is due to be reconstructed (master plan, and its release on the December 2025 ribbon-cutting lists 'a runway reconstruction project' among future work); not added, as no date is given.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Its single runway, 18/36, is 9,503 ft (2,897 m) long and 150 ft (46 m) wide."
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "18/36 9,503 150",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 18/36: 2,897 m (9,503 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "op-masterplan-exec",
+     "org": "Myrtle Beach International Airport (Horry County Department of Airports, operator, flymyrtlebeach.com)",
+     "quote": "The airport is equipped with a single asphalt runway that is 9,503 feet in length, which is designated as Runway 18-36."
+    }
+   ]
+  },
+  {
+   "claim": "a 3,795 acre site",
+   "verdict": "confirmed",
+   "inAfter": "on a 3,795 acre site",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport covers 3,795 acres (1,536 ha)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "22 ACREAGE: 3,795",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "a helicopter pad near the end of runway 36 used by sightseeing flights",
+   "verdict": "softened",
+   "inAfter": "a helicopter pad near the end of runway 36 used by sightseeing flights",
+   "note": "Was 'a helipad at the end of runway 36 used mostly by sightseeing charter companies'. The FAA record places the pad 700 ft south south east of the approach end of runway 36 and warns of sightseeing helicopters; 'mostly' and 'charter companies' are dropped.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "MYR has a helipad primarily used by charter tour companies at the base of runway 36."
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "SIGHTSEEING HELS OPRG IN CLOSE PROXIMITY OF ARPT AND RWY AT OR BLW 1200 FT.",
+      "HELS DEPG/ARRG PAD LCTD 700 FT SSE APCH END RWY 36."
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "over 2.4 million passengers in 2018",
+   "verdict": "cut",
+   "wasBefore": "with over 2.4 million passengers in 2018",
+   "why": "Out of date: replaced by 2025 (about 3.5 million, Wikipedia's total, in line with the FAA's boardings)."
+  },
+  {
+   "claim": "that shared past shaped the airport for decades",
+   "verdict": "cut",
+   "wasBefore": "That shared past shaped the airport for decades:",
+   "why": "A judgement; the shared use itself is kept, with sources."
+  },
+  {
+   "claim": "until 1993 the civil airport and the air force base used the same main runway",
+   "verdict": "cut",
+   "wasBefore": "until 1993 the civil airport and the air force base used the same main runway",
+   "why": "The year is disputed (1993 in Wikipedia and The Market Common, 1995 in the operator's master plan) and the shared main runway rests on Wikipedia alone. Softened to the shared base, closed in the 1990s."
+  },
+  {
+   "claim": "civil operations capped at thirty landings a day",
+   "verdict": "cut",
+   "wasBefore": "and civil operations were capped at thirty landings a day",
+   "why": "Wikipedia alone. The Air Force Civil Engineer Center's base history (a PDF) gave no text to either tool, the City of Myrtle Beach's base history answered with a Cloudflare bot check (blocked) and the Sun News is blocked by the session's egress policy."
+  },
+  {
+   "claim": "helipad used mostly by sightseeing charter companies",
+   "verdict": "cut",
+   "wasBefore": "and a helipad at the end of runway 36 used mostly by sightseeing charter companies",
+   "why": "Reworded to what the FAA record says: a pad near the end of runway 36, with sightseeing helicopters operating."
+  },
+  {
+   "claim": "terminal named after Dr Wilford Leroy Harrelson, first mayor, in office when the city bought the land",
+   "verdict": "cut",
+   "wasBefore": "The terminal is named after Dr Wilford Leroy Harrelson, Myrtle Beach's first mayor, who was in office when the city bought the land.",
+   "why": "Wikipedia alone. None of the operator's pages read names the terminal after him, and the City of Myrtle Beach's site answered with a Cloudflare bot check (blocked)."
+  },
+  {
+   "claim": "called Myrtle Beach Jetport until 1989",
+   "verdict": "cut",
+   "wasBefore": "The airport was called Myrtle Beach Jetport until 1989.",
+   "why": "Wikipedia alone (the airport's address is still 1100 Jetport Road, but no saved source gives the old name or the year it changed)."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

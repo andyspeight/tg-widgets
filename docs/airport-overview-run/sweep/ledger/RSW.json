@@ -1,0 +1,259 @@
+{
+ "iata": "RSW",
+ "id": "recGXi67qSeB2jgQo",
+ "name": "Southwest Florida International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Southwest_Florida_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for the whole south west Florida coast, taking in Fort Myers, Cape Coral, Naples, Marco Island and Punta Gorda. It is ten miles south east of Fort Myers and a United States customs port of entry.\n\nIt does all that on one runway. At 12,000 feet it is a long one, and the airport is now the second busiest single runway airport in the country after San Diego, handling 11,154,458 passengers in 2025, its highest ever. Studies for a second runway are under way.\n\nThe terminal covers 798,000 square feet with 28 gates across three concourses and is designed for ten million passengers a year, so it is already running beyond that. It can be built out to 65 gates across five concourses. Parking is generous at 11,250 spaces, with a separate three storey structure for short stays.\n\nOf the 13,555 acre site, around 6,000 acres are conserved swamp land set aside for environmental mitigation.",
+ "after": "The main commercial airport for the Fort Myers area of south west Florida, and for Naples and Marco Island too. It is ten miles south east of Fort Myers and has US customs for international flights.\n\nIn 2025 it handled 11,154,458 passengers, the most in its history. All of that traffic runs on one runway, 12,000 feet long, on a site of 13,555 acres.",
+ "claims": [
+  {
+   "claim": "the main commercial airport for the Fort Myers area of south west Florida",
+   "verdict": "softened",
+   "inAfter": "The main commercial airport for the Fort Myers area of south west Florida",
+   "note": "Was 'The airport for the whole south west Florida coast'. Lee County's visitor bureau (a county department) uses the words 'main commercial airport for the Fort Myers area'. The FAA's 2025 table shows other airports with scheduled flights on the same coast (Punta Gorda 1,140,842 boardings, Sarasota/Bradenton 2,242,138), so 'the whole coast' is dropped.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport serves the Southwest Florida region, including the Cape Coral-Fort Myers, Naples-Marco Island, and Punta Gorda metropolitan areas"
+    },
+    {
+     "file": "leevcb-airport",
+     "org": "Lee County Visitor and Convention Bureau (visitfortmyers.com)",
+     "quote": "Southwest Florida International Airport (RSW) is the main commercial airport for the Fort Myers area.",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "also the airport for Naples and Marco Island",
+   "verdict": "confirmed",
+   "inAfter": "and for Naples and Marco Island too",
+   "note": "Collier County's tourism office points visitors to Naples and Marco Island to RSW.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Naples-Marco Island"
+    },
+    {
+     "file": "naples-cvb-transport",
+     "org": "Naples, Marco Island and Everglades Convention and Visitors Bureau (paradisecoast.com)",
+     "quote": [
+      "Find your ideal transportation in Naples, Marco Island and the Everglades.",
+      "Fly into the award-winning RSW airport which offers many nonstop flights"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "ten miles south east of Fort Myers",
+   "verdict": "confirmed",
+   "inAfter": "It is ten miles south east of Fort Myers",
+   "note": "Coordinates give 8.1 miles (13.0 km) in a straight line at 138 degrees, south east (ratio 1.23). The FAA gives 10 nautical miles south east of the business district.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "10 mi (16 km) southeast of Fort Myers"
+    },
+    {
+     "file": "cfaspp",
+     "org": "Florida Department of Transportation (CFASPP facility sheet)",
+     "quote": "approximately 10 miles southeast of downtown Fort Myers"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "3 CBD TO AIRPORT (NM): 10 SE",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 13.0 km (8.1 miles)",
+      "Bearing from the city centre: 138 degrees, which is south east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "US customs for international flights",
+   "verdict": "softened",
+   "inAfter": "has US customs for international flights",
+   "note": "Was 'a United States customs port of entry'. The FAA data (as printed by AirNav, effective 3 September 2026) class it as a customs landing rights airport and a customs user fee airport, where CBP clears international arrivals at the airport's cost; a user fee airport is not the same thing as a designated port of entry, so the text now says only that it has customs for international flights. Wikipedia puts the customs hall on the lower level of Concourse B. CBP's own port pages could not be found (its Florida list answered 404).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "is a U.S. Customs and Border Protection port of entry",
+      "Customs and Immigration services for international flights are located on the lower level of Concourse B."
+     ]
+    },
+    {
+     "file": "airnav",
+     "org": "AirNav (FAA data)",
+     "quote": [
+      "FAA INFORMATION EFFECTIVE 03 SEPTEMBER 2026",
+      "International operations: customs landing rights airport",
+      "US CUSTOMS USER FEE ARPT."
+     ],
+     "dated": "2026-09-03 (FAA information effective date on the page)"
+    }
+   ]
+  },
+  {
+   "claim": "11,154,458 passengers in 2025, the most in its history",
+   "verdict": "confirmed",
+   "inAfter": "In 2025 it handled 11,154,458 passengers, the most in its history.",
+   "note": "TOTAL passengers, arriving and departing, up 1.1 per cent on the previous record in 2024 (operator). The FAA's preliminary CY2025 table counts 5,504,420 revenue enplanements (boardings only, about half of total passengers), up 1.46 per cent, in line with it.",
+   "sources": [
+    {
+     "file": "op-stats-dec2025",
+     "org": "Lee County Port Authority (operator, flylcpa.com)",
+     "quote": [
+      "REPORTS RECORD-BREAKING YEAR-END TRAFFIC",
+      "FORT MYERS, Fla. (Jan. 15, 2026)",
+      "The airport finished 2025 with a record-breaking 11,154,458 passengers,",
+      "2025 was the busiest year in the history of the airport"
+     ],
+     "dated": "2026-01-15"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2025, the airport served 11,154,458 passengers, the most in its history."
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "42 SO FL RSW Fort Myers Southwest Florida International P M 5,504,420 5,425,293 1.46%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "one runway, 12,000 feet long",
+   "verdict": "confirmed",
+   "inAfter": "All of that traffic runs on one runway, 12,000 feet long",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport has one runway, designated as runway 06/24.",
+      "It measures 12,000 x 150 ft (3,658 x 46 m)"
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "06/24 12,000 150",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 06/24: 3,658 m (12,000 ft), ASP",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a site of 13,555 acres",
+   "verdict": "confirmed",
+   "inAfter": "on a site of 13,555 acres",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport covers 13,555 acres"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "22 ACREAGE: 13,555",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "the airport for the whole south west Florida coast",
+   "verdict": "cut",
+   "wasBefore": "The airport for the whole south west Florida coast",
+   "why": "Overstated: Punta Gorda (1,140,842 boardings in 2025) and Sarasota/Bradenton (2,242,138) have their own airports with scheduled flights on the same coast (FAA). Reworded to the Fort Myers area, plus Naples and Marco Island, each with two sources."
+  },
+  {
+   "claim": "taking in Cape Coral and Punta Gorda",
+   "verdict": "cut",
+   "wasBefore": "taking in Fort Myers, Cape Coral, Naples, Marco Island and Punta Gorda",
+   "why": "Cape Coral and Punta Gorda rest on Wikipedia's metro-area list alone (the operator's sites could not be read), and Punta Gorda has its own airport. Fort Myers, Naples and Marco Island are kept."
+  },
+  {
+   "claim": "a United States customs port of entry",
+   "verdict": "cut",
+   "wasBefore": "a United States customs port of entry",
+   "why": "The FAA data class it as a customs landing rights and user fee airport, not a port of entry; CBP's port pages could not be found. Softened to customs for international flights (see above)."
+  },
+  {
+   "claim": "at 12,000 feet it is a long one",
+   "verdict": "cut",
+   "wasBefore": "At 12,000 feet it is a long one",
+   "why": "The length is kept with three sources; 'a long one' is dropped as a judgement."
+  },
+  {
+   "claim": "second busiest single runway airport in the US after San Diego",
+   "verdict": "cut",
+   "wasBefore": "the airport is now the second busiest single runway airport in the country after San Diego",
+   "why": "Wikipedia alone, and its cited source is a 2015 San Diego article. The operator's sites (flylcpa.com and flyrsw.com) answer with a Cloudflare bot check and are treated as blocked, so the airport's own wording could not be read."
+  },
+  {
+   "claim": "studies for a second runway are under way",
+   "verdict": "cut",
+   "wasBefore": "Studies for a second runway are under way.",
+   "why": "Wikipedia contradicts itself (a parallel runway 'under development', 'delayed indefinitely' and 'studies ... underway'), and the only other source, the Florida DOT's undated facility sheet with 2023 figures, says only 'a future parallel runway'. Nothing dated within 12 months could be read; the operator's projects page answers with a Cloudflare bot check (blocked)."
+  },
+  {
+   "claim": "terminal of 798,000 square feet with 28 gates across three concourses",
+   "verdict": "cut",
+   "wasBefore": "The terminal covers 798,000 square feet with 28 gates across three concourses",
+   "why": "Wikipedia alone, and it contradicts itself (28 gates in one section, 27 in another). The terminal is also changing: Construction Dive (24 March 2025) reported the start of a 14-gate Concourse E due in 2027, but nothing dated within 12 months confirms its progress."
+  },
+  {
+   "claim": "designed for ten million passengers a year, already beyond it",
+   "verdict": "cut",
+   "wasBefore": "and is designed for ten million passengers a year, so it is already running beyond that",
+   "why": "The design capacity rests on Wikipedia's facilities list alone."
+  },
+  {
+   "claim": "can be built out to 65 gates across five concourses",
+   "verdict": "cut",
+   "wasBefore": "It can be built out to 65 gates across five concourses.",
+   "why": "Wikipedia alone; an old planning figure, overtaken by the Concourse E project."
+  },
+  {
+   "claim": "11,250 parking spaces and a three storey short-stay structure",
+   "verdict": "cut",
+   "wasBefore": "Parking is generous at 11,250 spaces, with a separate three storey structure for short stays.",
+   "why": "Wikipedia alone; the operator's sites answer with a Cloudflare bot check (blocked)."
+  },
+  {
+   "claim": "around 6,000 acres of conserved swamp for environmental mitigation",
+   "verdict": "cut",
+   "wasBefore": "around 6,000 acres are conserved swamp land set aside for environmental mitigation",
+   "why": "Wikipedia alone. The site's 13,555 acres are kept (FAA record)."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

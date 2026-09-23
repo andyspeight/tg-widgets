@@ -1,0 +1,357 @@
+{
+ "iata": "MSY",
+ "id": "recGrtIansTOsYP4w",
+ "name": "Louis Armstrong New Orleans International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Louis_Armstrong_New_Orleans_International_Airport",
+ "audited": "2026-09-23",
+ "before": "New Orleans' airport, 11 miles west of downtown in Kenner, with nonstop flights to around sixty destinations including Europe, Canada, Latin America and the Caribbean.\n\nThe single most quotable fact about it: at an average of 4.5 feet above sea level, this is the third lowest lying international airport in the world, behind only Schiphol and Atyrau in Kazakhstan, both of which are actually below sea level.\n\nThe terminal is simple to explain to a client. Everything works on three levels: check in and departures on Level 3, security on Level 2, arrivals and baggage on Level 1. There are 35 gates across concourses A, B and C, and international arrivals clear customs in Concourse A.\n\nBuses into the city are run by the New Orleans Regional Transit Authority on Airport Express route 202 and by Jefferson Parish Transit on the E-1, and the Airport Shuttle serves most hotels in the Central Business District.\n\nThe code MSY comes from the Moisant Stock Yards that once stood here.",
+ "after": "New Orleans' airport, 11 miles west of downtown in Kenner. The airport lists more than 50 nonstop destinations, among them London's Heathrow with British Airways, Toronto with Air Canada and, in season, Cancún.\n\nIt sits only a few feet above sea level.\n\nThe terminal is simple to explain to a client. Everything works on three levels: check-in on Level 3, security on Level 2 and baggage claim on Level 1. There are 35 gates across concourses A, B and C.\n\nBuses into the city are run by the New Orleans Regional Transit Authority on Airport Express route 202 and by Jefferson Transit on the E1.\n\nThe code MSY comes from the Moisant Stock Yards, which once stood near the site.",
+ "claims": [
+  {
+   "claim": "New Orleans' airport",
+   "verdict": "confirmed",
+   "inAfter": "New Orleans' airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Armstrong International is the primary commercial airport for the New Orleans metropolitan area and southeast Louisiana."
+    },
+    {
+     "file": "op-about",
+     "org": "Louis Armstrong New Orleans International Airport (New Orleans Aviation Board, operator, flymsy.com)",
+     "quote": "Louis Armstrong New Orleans International Airport (MSY) is proud to serve as the gateway to one of the most iconic and culturally rich cities in the world — New Orleans",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "1 ASSOC CITY: NEW ORLEANS",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "11 miles west of downtown",
+   "verdict": "confirmed",
+   "inAfter": "11 miles west of downtown",
+   "note": "Coordinates give 11.7 miles (18.8 km) in a straight line at 283 degrees, west (ratio 0.94). The FAA gives 10 nautical miles (about 11.5 miles) west of the business district.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is 11 miles (18 km) west of downtown New Orleans"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 18.8 km (11.7 miles)",
+      "Bearing from the city centre: 283 degrees, which is west"
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "3 CBD TO AIRPORT (NM): 10 W",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "in Kenner",
+   "verdict": "confirmed",
+   "inAfter": "in Kenner",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "in the City of Kenner, Jefferson Parish, Louisiana"
+    },
+    {
+     "file": "op-history",
+     "org": "Louis Armstrong New Orleans International Airport (New Orleans Aviation Board, operator, flymsy.com)",
+     "quote": "1 Terminal Drive Kenner, LA 70062",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "the airport lists more than 50 nonstop destinations, among them London's Heathrow with British Airways, Toronto with Air Canada and, in season, Cancún",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport lists more than 50 nonstop destinations, among them London's Heathrow with British Airways, Toronto with Air Canada and, in season, Cancún.",
+   "note": "Was 'nonstop flights to around sixty destinations including Europe, Canada, Latin America and the Caribbean'. The airport's own list (read 23 Sep 2026) gives 'over 50 nonstop destinations', and its only international routes are London Heathrow (British Airways, five a week), Toronto (Air Canada, three a week) and Cancún (Breeze and Southwest, both marked seasonal); there is no Caribbean island or other Latin American destination. Given as the airport's own list. British Airways' own page (next claim) confirms its London flights.",
+   "sources": [
+    {
+     "file": "op-nonstop",
+     "org": "Louis Armstrong New Orleans International Airport (New Orleans Aviation Board, operator, flymsy.com)",
+     "quote": [
+      "Louis Armstrong New Orleans International Airport currently hosts 13 airlines, serving over 50 nonstop destinations.",
+      "London, England (LHR) Airline Frequency British Airways 5 per week",
+      "Toronto, ON, Canada (YYZ) Airline Frequency Air Canada 3 per week",
+      "Cancun, Mexico (CUN) Airline Frequency Breeze Airways 1-2 per week Seasonal Southwest Airlines 3-4 per week Seasonal"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "British Airways flies London to New Orleans",
+   "verdict": "confirmed",
+   "inAfter": "London's Heathrow with British Airways",
+   "note": "British Airways' page sells London to New Orleans with a 10 hr 10 min flight time and fares to February 2027. It does not name the London airport; the airport's list and Wikipedia both say Heathrow.",
+   "sources": [
+    {
+     "file": "op-nonstop",
+     "org": "Louis Armstrong New Orleans International Airport (New Orleans Aviation Board, operator, flymsy.com)",
+     "quote": "London, England (LHR) Airline Frequency British Airways 5 per week",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "ba-new-orleans",
+     "org": "British Airways",
+     "quote": [
+      "Our cheapest flights to New Orleans from London",
+      "Flight time 10 hrs 10 mins",
+      "Feb 2027"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In March 2017, British Airways resumed flying to MSY, commencing nonstop service to London's Heathrow Airport"
+    }
+   ]
+  },
+  {
+   "claim": "only a few feet above sea level",
+   "verdict": "softened",
+   "inAfter": "It sits only a few feet above sea level.",
+   "note": "Was 'at an average of 4.5 feet above sea level'. Sources give different figures: the FAA surveys the airport elevation at 3.0 ft (the value after the coordinates on the master record), OurAirports gives 4 ft and Wikipedia 'an average of 4.5 feet'. All are a few feet.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "At an average of 4.5 feet (1.4 m) above sea level"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "21 ARPT ELEV:",
+      "29-59-35.7800N ESTIMATED 090-15-32.4990W 3.0 SURVEYED"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "elevation 4 ft (1 m)"
+    }
+   ]
+  },
+  {
+   "claim": "three levels: check-in on Level 3, security on Level 2, baggage claim on Level 1",
+   "verdict": "confirmed",
+   "inAfter": "Everything works on three levels: check-in on Level 3, security on Level 2 and baggage claim on Level 1.",
+   "note": "Narrowed from 'check in and departures on Level 3 ... arrivals and baggage on Level 1': the operator says arriving passengers can be met at the concourse exits on Level 2 or in baggage claim on Level 1.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Departures and Ticketing are on Level 3, TSA Security Screening is on Level 2, and Arrivals and Baggage Claim are on Level 1."
+    },
+    {
+     "file": "op-amenities",
+     "org": "Louis Armstrong New Orleans International Airport (New Orleans Aviation Board, operator, flymsy.com)",
+     "quote": "The Military Lounge is located pre-security on Level 3 Ticketing across from the Alaska Airlines Ticket Counter.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-security",
+     "org": "Louis Armstrong New Orleans International Airport (New Orleans Aviation Board, operator, flymsy.com)",
+     "quote": "The security checkpoint is located on Level 2 of the Terminal.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-faqs",
+     "org": "Louis Armstrong New Orleans International Airport (New Orleans Aviation Board, operator, flymsy.com)",
+     "quote": "In the airport, you may meet your passengers at the exit of the concourses on Level 2 or in Baggage Claim on Level 1 .",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wwno-new-msy",
+     "org": "WWNO (New Orleans Public Radio)",
+     "quote": "Check-in and ticketing are located on Level 3. Security and concourses are located on Level 2.",
+     "dated": "2019-10-29"
+    }
+   ]
+  },
+  {
+   "claim": "35 gates across concourses A, B and C",
+   "verdict": "confirmed",
+   "inAfter": "There are 35 gates across concourses A, B and C.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "MSY has a single operational terminal with three concourses labeled A, B, and C. There are 35 gates."
+    },
+    {
+     "file": "op-about",
+     "org": "Louis Armstrong New Orleans International Airport (New Orleans Aviation Board, operator, flymsy.com)",
+     "quote": "MSY features a modern, $1.01 billion terminal, opened in 2019, with 35 gates",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-shopdine",
+     "org": "Louis Armstrong New Orleans International Airport (New Orleans Aviation Board, operator, flymsy.com)",
+     "quote": [
+      "Near Gate A1",
+      "Near Outside Concourse B",
+      "Near Concourse A"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-amenities",
+     "org": "Louis Armstrong New Orleans International Airport (New Orleans Aviation Board, operator, flymsy.com)",
+     "quote": "The United Lounge is located on Concourse C at Gate C5.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wwno-new-msy",
+     "org": "WWNO (New Orleans Public Radio)",
+     "quote": "Once you get through security, take a right to Concourse A or B or a left to Concourse C.",
+     "dated": "2019-10-29"
+    }
+   ]
+  },
+  {
+   "claim": "RTA Airport Express route 202 and Jefferson Transit's E1",
+   "verdict": "confirmed",
+   "inAfter": "Buses into the city are run by the New Orleans Regional Transit Authority on Airport Express route 202 and by Jefferson Transit on the E1.",
+   "note": "The agency's name is given as the airport writes it (Jefferson Transit, 'JET'), not 'Jefferson Parish Transit'; the route is the Veterans-Airport (E1), to City Park Avenue in New Orleans. Jefferson Transit's own site could not be read (503 to a plain request, 502 in the browser), so the E1 rests on the airport's live page and Wikipedia. RTA's 202 timetable is effective 20 September 2026. The airport says both buses leave from Level 1 baggage claim, outside Door 2.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Bus service between the airport and downtown New Orleans is provided by New Orleans Regional Transit Authority Airport Express Route 202 and Jefferson Parish Transit route E-1."
+    },
+    {
+     "file": "op-public-transport",
+     "org": "Louis Armstrong New Orleans International Airport (New Orleans Aviation Board, operator, flymsy.com)",
+     "quote": [
+      "Service to New Orleans from the airport is available via the Jefferson Transit Authority (JET) and the Regional Transportation Authority (RTA).",
+      "The Veterans-Airport (E1) bus provides service from the Louis Armstrong New Orleans International Airport to City Park Avenue in New Orleans .",
+      "The Regional Transit Authority (RTA) provides the Airport Express (202) Bus with service to and from the Louis Armstrong New Orleans International Airport into New Orleans."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "rta-202",
+     "org": "New Orleans Regional Transit Authority",
+     "quote": [
+      "202 Airport Express",
+      "Louis Armstrong Airport",
+      "Fall 2026 Effective 9/20/26"
+     ],
+     "dated": "2026-09-20 (timetable effective date)"
+    }
+   ]
+  },
+  {
+   "claim": "the code MSY comes from the Moisant Stock Yards, which stood near the site",
+   "verdict": "softened",
+   "inAfter": "The code MSY comes from the Moisant Stock Yards, which once stood near the site.",
+   "note": "Was 'that once stood here'. The airport's own FAQ says it 'was later built near the stock yards location'; Wikipedia says the area itself became the stockyard. 'Near the site' fits both.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The area was shortly after converted to a stockyard and was named Moisant Stock Yards after him.",
+      "The airport's IATA code, MSY, is derived from this name."
+     ]
+    },
+    {
+     "file": "op-history",
+     "org": "Louis Armstrong New Orleans International Airport (New Orleans Aviation Board, operator, flymsy.com)",
+     "quote": "The three letter identifier for Louis Armstrong New Orleans International Airport is MSY. It stands for Moisant Stock Yards.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-faqs",
+     "org": "Louis Armstrong New Orleans International Airport (New Orleans Aviation Board, operator, flymsy.com)",
+     "quote": "The airport was later built near the stock yards location.",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "around sixty destinations including Europe, Canada, Latin America and the Caribbean",
+   "verdict": "cut",
+   "wasBefore": "with nonstop flights to around sixty destinations including Europe, Canada, Latin America and the Caribbean",
+   "why": "Out of date: the airport's own list (read 23 Sep 2026) gives over 50 destinations, and its only international routes are London Heathrow, Toronto and seasonal Cancún, with no Caribbean island or other Latin American destination. Replaced by the airport's list, attributed."
+  },
+  {
+   "claim": "the single most quotable fact",
+   "verdict": "cut",
+   "wasBefore": "The single most quotable fact about it:",
+   "why": "A lead-in to the ranking cut below."
+  },
+  {
+   "claim": "an average of 4.5 feet above sea level",
+   "verdict": "cut",
+   "wasBefore": "at an average of 4.5 feet above sea level",
+   "why": "Sources disagree on the figure (FAA 3.0 ft surveyed, OurAirports 4 ft, Wikipedia an average of 4.5 ft), so the text says 'a few feet'."
+  },
+  {
+   "claim": "third lowest-lying international airport in the world, behind Schiphol and Atyrau",
+   "verdict": "cut",
+   "wasBefore": "this is the third lowest lying international airport in the world, behind only Schiphol and Atyrau in Kazakhstan, both of which are actually below sea level",
+   "why": "Wikipedia alone, and contradicted by OurAirports' elevations: Rotterdam The Hague (minus 15 ft) and Astrakhan (minus 65 ft), both international airports with scheduled flights, also lie below sea level, besides Schiphol and Atyrau; several more scheduled airports sit at or below 4 ft."
+  },
+  {
+   "claim": "check in and departures on Level 3, arrivals and baggage on Level 1",
+   "verdict": "cut",
+   "wasBefore": "check in and departures on Level 3, security on Level 2, arrivals and baggage on Level 1",
+   "why": "Reworded to what the airport's own pages say (check-in on Level 3, security on Level 2, baggage claim on Level 1); arriving passengers leave the concourses on Level 2."
+  },
+  {
+   "claim": "international arrivals clear customs in Concourse A",
+   "verdict": "cut",
+   "wasBefore": "and international arrivals clear customs in Concourse A",
+   "why": "Wikipedia alone: none of the airport's pages read (FAQ, amenities, maps, security, dining) says where customs is, and its FAQ answer on customs is blank."
+  },
+  {
+   "claim": "Jefferson Parish Transit on the E-1",
+   "verdict": "cut",
+   "wasBefore": "by Jefferson Parish Transit on the E-1",
+   "why": "Reworded to the airport's own naming (Jefferson Transit, route E1); the bus itself is kept."
+  },
+  {
+   "claim": "the Airport Shuttle serves most hotels in the Central Business District",
+   "verdict": "cut",
+   "wasBefore": "and the Airport Shuttle serves most hotels in the Central Business District",
+   "why": "Rests on Wikipedia and the shuttle company's own undated page, which still calls the airport New Orleans International (its name before 2001). The airport's own ground transport and shuttle pages (read 23 Sep 2026) do not list it."
+  },
+  {
+   "claim": "the stock yards once stood here",
+   "verdict": "cut",
+   "wasBefore": "The code MSY comes from the Moisant Stock Yards that once stood here.",
+   "why": "The airport says it was built near the stock yards, not on them; reworded to 'near the site'."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The terminal is simple to explain to a client.",
+   "why": "The old text's framing of the sentence that follows, which carries the facts: one terminal, three levels and a single security checkpoint on Level 2 (airport)."
+  }
+ ],
+ "tracerOk": {}
+}
