@@ -1,0 +1,194 @@
+{
+ "iata": "MST",
+ "id": "recSEvUUmtvTvg2WC",
+ "name": "Maastricht Aachen Airport",
+ "country": "Netherlands",
+ "wikipedia": "https://en.wikipedia.org/wiki/Maastricht_Aachen_Airport",
+ "audited": "2026-09-23",
+ "before": "A cargo airport with a passenger service attached, at Beek in Limburg, 9 km north east of Maastricht and 28 km north west of Aachen just over the German border. It is second in the Netherlands for freight, handling 29,448 tonnes in 2024 against 230,932 passengers.\n\nGround transport is straightforward. Arriva bus line 30 runs every thirty minutes to Maastricht and Sittard, connecting with the national rail network at both stations. The airport sits on the A2 at exit 50, there are two car parks and several hire firms, and a GR8 hotel opened 50 metres from the terminal in 2021.\n\nOne useful option for a client whose flight does not work: KLM runs a bus to Schiphol by way of Maastricht station and Eindhoven Airport, sold as an add-on to a KLM ticket.\n\nThere is a good deal of aviation industry here too, including an aircraft painting facility running since the late 1980s, a maintenance operation, and the EUROCONTROL upper area control centre.",
+ "after": "A cargo airport with a passenger service attached, 9 km north east of Maastricht and 28 km north west of Aachen, just over the German border. On Eurostat's figures it was second in the Netherlands for freight in 2025, handling about 41,600 tonnes against about 156,000 passengers.\n\nGround transport is straightforward. Arriva bus line 30 between Maastricht and Sittard stops in front of the terminal and calls at the railway stations of Maastricht, Sittard and Beek-Elsloo. Hertz, Sixt and Europcar hire cars here. There is also a Gr8 hotel at the airport.",
+ "claims": [
+  {
+   "claim": "9 km north east of Maastricht and 28 km north west of Aachen",
+   "verdict": "confirmed",
+   "inAfter": "9 km north east of Maastricht and 28 km north west of Aachen, just over the German border.",
+   "note": "Coordinates: 9.0 km from Maastricht at 39 degrees (north east) and 26.6 km from Aachen at 304 degrees (north west); Aachen is in Germany (GeoNames).",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from Maastricht (GeoNames 2751283): 9.0 km (5.6 miles), bearing 39 degrees, which is north east",
+      "Straight-line distance from Aachen (GeoNames 3247449): 26.6 km (16.6 miles), bearing 304 degrees, which is north west"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "located 5 NM (9.3 km; 5.8 mi) northeast of Maastricht and 15 NM (28 km; 17 mi) northwest of Aachen, Germany"
+    }
+   ]
+  },
+  {
+   "claim": "second in the Netherlands for freight in 2025; about 41,600 tonnes against about 156,000 passengers (Eurostat)",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Eurostat",
+   "inAfter": "On Eurostat's figures it was second in the Netherlands for freight in 2025, handling about 41,600 tonnes against about 156,000 passengers.",
+   "note": "Was 'second in the Netherlands for freight, handling 29,448 tonnes in 2024 against 230,932 passengers' (Wikipedia's estimated figures; Eurostat has 29,448.4 tonnes and 227,387 passengers for 2024). Like for like, the 2025 figures: Eurostat's freight table has Schiphol first (1,436,858 tonnes) and Maastricht second (41,636.6 tonnes), the other Dutch airports reporting none; its passenger table has 155,647. Eurostat alone gives both years, so the sentence is attributed.",
+   "sources": [
+    {
+     "file": "eurostat-freight-nl",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat NL_EHAM AMSTERDAM/SCHIPHOL airport: freight and mail loaded and unloaded in 2025: 1,436,858.4 tonnes",
+      "Eurostat NL_EHBK MAASTRICHT/AACHEN airport: freight and mail loaded and unloaded in 2025: 41,636.6 tonnes",
+      "Eurostat NL_EHEH EINDHOVEN airport: freight and mail loaded and unloaded in 2025: 0 tonnes"
+     ]
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "dated": "annual data to 2025",
+     "quote": [
+      "Eurostat NL_EHBK Maastricht Aachen Airport: passengers carried in 2024: 227,387",
+      "Eurostat NL_EHBK Maastricht Aachen Airport: passengers carried in 2025: 155,647"
+     ]
+    },
+    {
+     "file": "eurostat-freight-nl-2024",
+     "org": "Eurostat",
+     "dated": "2024 (annual data)",
+     "quote": "Eurostat NL_EHBK MAASTRICHT/AACHEN airport: freight and mail loaded and unloaded in 2024: 29,448.4 tonnes"
+    }
+   ]
+  },
+  {
+   "claim": "Arriva bus 30 between Maastricht and Sittard stops at the terminal and calls at Maastricht, Sittard and Beek-Elsloo stations",
+   "verdict": "softened",
+   "inAfter": "Arriva bus line 30 between Maastricht and Sittard stops in front of the terminal and calls at the railway stations of Maastricht, Sittard and Beek-Elsloo.",
+   "note": "Was 'Arriva bus line 30 runs every thirty minutes to Maastricht and Sittard, connecting with the national rail network at both stations'. The airport says the bus calls 'regularly', so the frequency goes (Wikipedia alone), and names the stations it serves.",
+   "sources": [
+    {
+     "file": "op-transport",
+     "org": "Maastricht Aachen Airport BV (the airport operator, maa.nl)",
+     "dated": "read 2026-09-23 (the airport's 'To and from the airport' page)",
+     "quote": [
+      "Arriva bus line 30 (Maastricht-Sittard) regularly calls in at our airport. The bus stop is located in front of the terminal.",
+      "The bus calls in at the NS railway stations of Maastricht, Sittard and Beek-Elsloo"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "There is bus service (line 30), operated by Arriva, running every 30 mins to Maastricht and Sittard. This line also covers the transport connections from the ai"
+    }
+   ]
+  },
+  {
+   "claim": "Hertz, Sixt and Europcar hire cars here",
+   "verdict": "confirmed",
+   "inAfter": "Hertz, Sixt and Europcar hire cars here.",
+   "note": "Was 'several hire firms'. The airport names the three.",
+   "sources": [
+    {
+     "file": "op-transport",
+     "org": "Maastricht Aachen Airport BV (the airport operator, maa.nl)",
+     "dated": "read 2026-09-23 (the airport's 'To and from the airport' page)",
+     "quote": [
+      "The following car rental companies offer rental cars at Maastricht Aachen Airport.",
+      "Hertz autoverhuur Sixt rent a car Europe car - moving your way"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "There are several car rental companies at the airport with desks in the terminal."
+    }
+   ]
+  },
+  {
+   "claim": "a Gr8 hotel at the airport",
+   "verdict": "softened",
+   "inAfter": "There is also a Gr8 hotel at the airport.",
+   "note": "Was 'a GR8 hotel opened 50 metres from the terminal in 2021'. The airport's own page features the Gr8 Hotel Maastricht Aachen Airport; the 50 metres and 2021 rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "op-hotel",
+     "org": "Maastricht Aachen Airport BV (the airport operator, maa.nl)",
+     "dated": "read 2026-09-23 (the airport's hotel, restaurants and shops page; post of 13 February 2023)",
+     "quote": [
+      "Gr8 Hotel Maastricht Aachen Airport",
+      "13 februari 2023 Gr8 Hotel Maastricht Aachen Airport"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "A modern hotel operated by GR8 is located 50 metres from the terminal building"
+    }
+   ]
+  },
+  {
+   "claim": "at Beek in Limburg",
+   "verdict": "cut",
+   "wasBefore": "at Beek in Limburg,",
+   "why": "Beek rests on Wikipedia alone: OurAirports puts the airport under Maastricht, the operator's address is 6199 AD Maastricht-Airport, and EUROCONTROL's page read does not say where its centre stands."
+  },
+  {
+   "claim": "29,448 tonnes and 230,932 passengers in 2024",
+   "verdict": "cut",
+   "wasBefore": "handling 29,448 tonnes in 2024 against 230,932 passengers.",
+   "why": "Superseded by the 2025 figures. Corrected (see above)."
+  },
+  {
+   "claim": "every thirty minutes; connecting with the national rail network at both stations",
+   "verdict": "cut",
+   "wasBefore": "Arriva bus line 30 runs every thirty minutes to Maastricht and Sittard, connecting with the national rail network at both stations.",
+   "why": "The frequency rests on Wikipedia alone; the airport says 'regularly'. Softened (see above)."
+  },
+  {
+   "claim": "the A2 at exit 50; two car parks; several hire firms; the GR8 hotel of 2021 50 metres away",
+   "verdict": "cut",
+   "wasBefore": "The airport sits on the A2 at exit 50, there are two car parks and several hire firms, and a GR8 hotel opened 50 metres from the terminal in 2021.",
+   "why": "The motorway exit and the two car parks rest on Wikipedia alone (the airport's page names only P1); the hire firms and the hotel are kept (see above)."
+  },
+  {
+   "claim": "the KLM bus to Schiphol via Maastricht station and Eindhoven Airport",
+   "verdict": "cut",
+   "wasBefore": "One useful option for a client whose flight does not work: KLM runs a bus to Schiphol by way of Maastricht station and Eindhoven Airport, sold as an add-on to a KLM ticket.",
+   "why": "Wikipedia alone; neither the airport's transport page nor its destinations page mentions it, and KLM's own page was not found. Worth checking by hand: it goes back if still sold."
+  },
+  {
+   "claim": "the painting facility since the late 1980s, a maintenance operation and the EUROCONTROL upper area control centre",
+   "verdict": "cut",
+   "wasBefore": "There is a good deal of aviation industry here too, including an aircraft painting facility running since the late 1980s, a maintenance operation, and the EUROCONTROL upper area control centre.",
+   "why": "Wikipedia alone: EUROCONTROL's own page on its Maastricht centre, read on 23 Sep, does not say it is at the airport, and the painting and maintenance firms were not checked."
+  },
+  {
+   "claim": "TUI fly and Transavia moving Eindhoven flights here while Eindhoven closes in 2027",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing, on Wikipedia alone (TUI fly Netherlands and Transavia announced in March 2026 that they will move a significant number of flights from Eindhoven while its runway closes for five months from February 2027). Worth a check with the airlines before use."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "A cargo airport with a passenger service attached,",
+   "why": "The old text's framing, kept: second in the Netherlands for freight with about 41,600 tonnes in 2025 against about 156,000 passengers (Eurostat), and Wikipedia calls it a major cargo hub and regional passenger airport."
+  },
+  {
+   "text": "Ground transport is straightforward.",
+   "why": "The old text's framing, kept; the bus, the car hire and the hotel that follow are sourced."
+  }
+ ],
+ "tracerOk": {
+  "On Eurostat's": "The tracer reads the opening word with the name; Eurostat is the source's org.",
+  "41,600": "Rounded from 41,636.6 tonnes (Eurostat).",
+  "156,000": "Rounded from 155,647 (Eurostat)."
+ }
+}

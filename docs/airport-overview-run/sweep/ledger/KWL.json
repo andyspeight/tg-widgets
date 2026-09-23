@@ -1,0 +1,251 @@
+{
+ "iata": "KWL",
+ "id": "recwKNBJyv3vlNrBk",
+ "name": "Guilin Liangjiang International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Guilin_Liangjiang_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Guilin, about 28 km south west of the city, and the arrival point for one of China's most visited landscapes. It handled 6,504,366 passengers in 2025, 48th busiest in China, across 48 domestic and international destinations.\n\nTerminal guidance needs checking. All flights moved from Terminal 1 to Terminal 2 on 30 September 2018, and Terminal 1 closed for renovation, so anything pointing a client at Terminal 1 is out of date.\n\nTerminal 2 covers 100,000 square metres with 25 boarding gates and 22 security lanes, 17 domestic and 5 international, and was built for 12 million passengers a year. It cost 3.258 billion yuan.\n\nThe airport opened on 1 October 1996, replacing Guilin Qifengling Airport, and has a 3,200 metre runway.",
+ "after": "The airport for Guilin, about 28 km south west of the city. It handled 6,504,366 passengers in 2025, 48th busiest in China.\n\nTerminal guidance needs checking. All flights moved from Terminal 1 to Terminal 2 in September 2018, so anything pointing a client at Terminal 1 is out of date.\n\nThe airport opened on 1 October 1996 and has a 3,200 metre runway.",
+ "claims": [
+  {
+   "claim": "The airport for Guilin",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Guilin",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "is an international airport serving the city of Guilin"
+    },
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 桂林/两江: passenger rank 48 in China"
+    },
+    {
+     "file": "airchina-guide",
+     "org": "Air China (airchina.jp, the airline's own airport page)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": "Guilin Liangjiang International Airport is located near Liangjiang Town, Lingui County, 28 kilometers southwest of Guilin City."
+    }
+   ]
+  },
+  {
+   "claim": "about 28 km south west of the city",
+   "verdict": "confirmed",
+   "inAfter": "about 28 km south west of the city",
+   "note": "Coordinates: 26.7 km in a straight line at 255 degrees (west, next to south west; ratio 1.05). CAOP gives 26 km south west of the city.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "about 28 km (17 mi) southwest of the city center"
+    },
+    {
+     "file": "airchina-guide",
+     "org": "Air China (airchina.jp, the airline's own airport page)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": "28 kilometers southwest of Guilin City"
+    },
+    {
+     "file": "caop-port",
+     "org": "China Association of Port-of-Entry (CAOP, caop.org.cn)",
+     "dated": "read 2026-09-23 (live page, undated; its address carries 2019-02-19)",
+     "quote": "桂林空运口岸位于桂林市西南方向临桂县境内,距市中心26公里"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 26.7 km (16.6 miles)",
+      "Bearing from the city centre: 255 degrees, which is west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "6,504,366 passengers in 2025, 48th busiest in China",
+   "verdict": "confirmed",
+   "inAfter": "It handled 6,504,366 passengers in 2025, 48th busiest in China.",
+   "note": "CAAC: 6,504,366, up 9.6 per cent on 5,932,075; 48th.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 桂林/两江: passenger rank 48 in China; passengers 2025: 6,504,366"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "In 2025, the airport became the 48th busiest airport in China (up one place), with a passenger throughput of 6,504,366."
+    }
+   ]
+  },
+  {
+   "claim": "all flights moved from Terminal 1 to Terminal 2 in September 2018",
+   "verdict": "softened",
+   "inAfter": "All flights moved from Terminal 1 to Terminal 2 in September 2018",
+   "note": "Was 'on 30 September 2018'. Air China gives the day Terminal 2 opened as 28 September 2018 and Wikipedia the day flights moved as 30 September, so only the month is given. Air China's live guide sends its domestic and international passengers only to T2, and Travel China Guide (August 2025) has T2 handling domestic and international flights.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "Starting from 30 September 2018, all flights from Terminal 1 have been moved to Terminal 2."
+    },
+    {
+     "file": "airchina-guide",
+     "org": "Air China (airchina.jp, the airline's own airport page)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": [
+      "The airport’s T2 terminal building opened on September 28, 2018.",
+      "Guilin Liangjiang International Airport T2 international departures",
+      "Guilin Liangjiang International Airport T2 domestic departures"
+     ]
+    },
+    {
+     "file": "travelchinaguide",
+     "org": "Travel China Guide (travel guide; low tier)",
+     "dated": "2025-08-07 (page says 'Last updated on Aug. 07, 2025')",
+     "quote": "T2 (operating domestic and international flights)"
+    }
+   ]
+  },
+  {
+   "claim": "opened on 1 October 1996",
+   "verdict": "confirmed",
+   "inAfter": "The airport opened on 1 October 1996",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "Liangjiang Airport was opened on 1 October 1996"
+    },
+    {
+     "file": "airchina-guide",
+     "org": "Air China (airchina.jp, the airline's own airport page)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": "it began operating on October 1, 1996"
+    }
+   ]
+  },
+  {
+   "claim": "a 3,200 metre runway",
+   "verdict": "confirmed",
+   "inAfter": "has a 3,200 metre runway",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "Liangjiang Airport now features a 3,200 meter-long runway"
+    },
+    {
+     "file": "airchina-guide",
+     "org": "Air China (airchina.jp, the airline's own airport page)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": "is equipped with a 3,200×45m runway"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 01/19: 3,200 m (10,499 ft), CON",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the arrival point for one of China's most visited landscapes",
+   "verdict": "cut",
+   "wasBefore": ", and the arrival point for one of China's most visited landscapes",
+   "why": "No source: the Wikipedia article says nothing about the landscape or visitor numbers, and 'most visited' is a ranking nothing saved gives. See the held-back Yangshuo buses below for what can be said."
+  },
+  {
+   "claim": "48 domestic and international destinations",
+   "verdict": "cut",
+   "wasBefore": ", across 48 domestic and international destinations",
+   "why": "A destination count, which only the airport's own current count may replace; the operator's site (airport-gl.com.cn) timed out and then answered 502. Wikipedia's 48 is undated and Travel China Guide (2025) says 76 cities, so the sources disagree too."
+  },
+  {
+   "claim": "Terminal 1 closed for renovation",
+   "verdict": "cut",
+   "wasBefore": "and Terminal 1 closed for renovation",
+   "why": "'For renovation' rests on Wikipedia alone; kept as closed since 2018 (see above)."
+  },
+  {
+   "claim": "Terminal 2 details: 100,000 square metres, 25 gates, 22 security lanes, 12 million a year, 3.258 billion yuan",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 covers 100,000 square metres with 25 boarding gates and 22 security lanes, 17 domestic and 5 international, and was built for 12 million passengers a year. It cost 3.258 billion yuan.",
+   "why": "Wikipedia alone. The 2018 CARNOC report it cites came back as an empty script page (left alone, as in earlier batches), the operator's site did not answer, and Air China and Travel China Guide give none of these figures."
+  },
+  {
+   "claim": "replacing Guilin Qifengling Airport",
+   "verdict": "cut",
+   "wasBefore": ", replacing Guilin Qifengling Airport,",
+   "why": "Wikipedia alone; Air China gives the 1996 opening but not what it replaced, and the operator's history page did not answer."
+  },
+  {
+   "claim": "airport buses to Yangshuo",
+   "verdict": "cut",
+   "note": "Air China's guide: bus routes from the airport cover downtown Guilin, Liuzhou, Hezhou and 'the famous tourist destinations of Yangshuo'; Travel China Guide (August 2025) lists an Airport to Yangshuo shuttle.",
+   "sources": [
+    {
+     "file": "airchina-guide",
+     "org": "Air China (airchina.jp, the airline's own airport page)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": "bus routes also cover Liuzhou, Hezhou, and the famous tourist destinations of Yangshuo"
+    },
+    {
+     "file": "travelchinaguide",
+     "org": "Travel China Guide (travel guide; low tier)",
+     "dated": "2025-08-07 (page says 'Last updated on Aug. 07, 2025')",
+     "quote": "Route Airport - Yangshuo Yangshuo - Airport"
+    }
+   ],
+   "why": "Held back: a verified transport fact that replaces nothing now that the 'most visited landscapes' line is cut. Andy may want it in place of that line: 'Airport buses run on to Yangshuo as well as into Guilin.' One source is a low-tier travel guide."
+  },
+  {
+   "claim": "Terminal 1 has been closed since (taken out in review)",
+   "verdict": "cut",
+   "wasBefore": "and Terminal 1 closed for renovation",
+   "why": "Taken out in review (23 Sep): beyond Wikipedia, the only source for Terminal 1 being closed is Travel China Guide, and the brief never takes a travel guide as the second source. The move of all flights to Terminal 2 in September 2018 stands on Air China's own guide and Wikipedia, and the advice follows from it.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "Following the opening of the new Terminal 2, Terminal 1 was closed temporarily for renovation."
+    },
+    {
+     "file": "travelchinaguide",
+     "org": "Travel China Guide (travel guide; low tier)",
+     "dated": "2025-08-07 (page says 'Last updated on Aug. 07, 2025')",
+     "quote": [
+      "Two Terminals: T1 (temporarily suspended)",
+      "- Last updated on Aug. 07, 2025 by Demi Li -"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Terminal guidance needs checking.",
+   "why": "The old text's advice, kept on the confirmed move to Terminal 2."
+  },
+  {
+   "text": "so anything pointing a client at Terminal 1 is out of date",
+   "why": "The old text's advice, which follows from the confirmed move of all flights to Terminal 2 (Air China, Wikipedia)."
+  }
+ ],
+ "tracerOk": {}
+}

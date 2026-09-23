@@ -1,0 +1,197 @@
+{
+ "iata": "JJN",
+ "id": "recVO0RwUlLN9gbUz",
+ "name": "Quanzhou Jinjiang International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Quanzhou_Jinjiang_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Quanzhou's airport, 12 km south of the city centre in Jinjiang, and a joint military and commercial field, so parts of the site are not public.\n\nIt handled 8,852,384 passengers in 2025, almost exactly level with the year before.\n\nThe airport opened in December 1996 and was upgraded to international status in November 2012.",
+ "after": "Quanzhou's airport, 12 km south of the city centre in Jinjiang, first built as a military airfield in 1955.\n\nIt handled 8,852,384 passengers in 2025, almost exactly level with the year before.\n\nThe airport was upgraded to international status in November 2012.",
+ "claims": [
+  {
+   "claim": "Quanzhou's airport",
+   "verdict": "confirmed",
+   "inAfter": "Quanzhou's airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-01",
+     "quote": "serving the city of Quanzhou in East China's Fujian province"
+    },
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 泉州/晋江: passenger rank 43 in China"
+    },
+    {
+     "file": "caop-port",
+     "org": "China Association of Port-of-Entry (CAOP, caop.org.cn)",
+     "dated": "read 2026-09-23 (live page, undated; its address carries 2019-02-18)",
+     "quote": "泉州空运口岸"
+    }
+   ]
+  },
+  {
+   "claim": "12 km south of the city centre",
+   "verdict": "confirmed",
+   "inAfter": "12 km south of the city centre",
+   "note": "Coordinates: 13.1 km in a straight line at 179 degrees, south (ratio 0.91).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-01",
+     "quote": "It is located 12 km (7.5 mi) south of the city center"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 13.1 km (8.2 miles)",
+      "Bearing from the city centre: 179 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in Jinjiang",
+   "verdict": "confirmed",
+   "inAfter": "in Jinjiang",
+   "note": "Wikipedia places it in the county-level city of Jinjiang, under Quanzhou. The coordinates put it 3.0 km from the centre of Jinjiang (GeoNames' seat of the county-level city) against 13.1 km from Quanzhou's, and it carries Jinjiang's name (CAOP calls it Jinjiang International Airport before its 2014 renaming). A computed second source, flagged for the reviewer.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-01",
+     "quote": "in the county-level city of Jinjiang, which is under the administration of the prefecture-level city of Quanzhou"
+    },
+    {
+     "file": "geo-jinjiang",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the centre of Jinjiang: 3.0 km",
+      "Straight-line distance from the centre of Quanzhou: 13.1 km"
+     ]
+    },
+    {
+     "file": "caop-port",
+     "org": "China Association of Port-of-Entry (CAOP, caop.org.cn)",
+     "dated": "read 2026-09-23 (live page, undated; its address carries 2019-02-18)",
+     "quote": "晋江国际机场始建于1955年8月"
+    }
+   ]
+  },
+  {
+   "claim": "first built as a military airfield in 1955",
+   "verdict": "softened",
+   "inAfter": "first built as a military airfield in 1955",
+   "note": "Was 'a joint military and commercial field, so parts of the site are not public' (see the cut below). CAOP: first built in August 1955 as a military airport; Wikipedia's infobox gives August 1955 as the opening and its text calls it a dual-use military and commercial airport. OurAirports also lists 'Jinjiang Air Base' among its names.",
+   "sources": [
+    {
+     "file": "caop-port",
+     "org": "China Association of Port-of-Entry (CAOP, caop.org.cn)",
+     "dated": "read 2026-09-23 (live page, undated; its address carries 2019-02-18)",
+     "quote": "晋江国际机场始建于1955年8月，为军用机场"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-01",
+     "quote": "opened = {{start date and age|1955|08||df=yes}}"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-01",
+     "quote": "is a dual-use military and commercial airport"
+    },
+    {
+     "file": "geo-jinjiang",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "keywords: Jinjiang Air Base"
+    }
+   ]
+  },
+  {
+   "claim": "8,852,384 passengers in 2025, almost exactly level with the year before",
+   "verdict": "confirmed",
+   "inAfter": "It handled 8,852,384 passengers in 2025, almost exactly level with the year before.",
+   "note": "CAAC: 8,852,384 against 8,842,486 in 2024, up 0.1 per cent; 43rd in China.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 泉州/晋江: passenger rank 43 in China; passengers 2025: 8,852,384; passengers 2024: 8,842,486; change 0.1%"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-01",
+     "quote": "In 2025, the number of passenger movements of Quanzhou Jinjiang International Airport was 8,852,384, representing a year-on-year increase of 0.1%."
+    }
+   ]
+  },
+  {
+   "claim": "upgraded to international status in November 2012",
+   "verdict": "confirmed",
+   "inAfter": "The airport was upgraded to international status in November 2012.",
+   "note": "CAOP: the air port of entry formally opened to the outside world in November 2012 (and the airport took its present name, Quanzhou Jinjiang International, in October 2014, not added).",
+   "sources": [
+    {
+     "file": "caop-port",
+     "org": "China Association of Port-of-Entry (CAOP, caop.org.cn)",
+     "dated": "read 2026-09-23 (live page, undated; its address carries 2019-02-18)",
+     "quote": "2012年11月航空口岸正式对外开放"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-01",
+     "quote": "being upgraded to an international airport in November 2012"
+    }
+   ]
+  },
+  {
+   "claim": "joint military and commercial field; parts of the site not public",
+   "verdict": "cut",
+   "wasBefore": "and a joint military and commercial field, so parts of the site are not public",
+   "why": "Today's joint use rests on Wikipedia, with only a name in OurAirports ('Jinjiang Air Base') beside it; CAOP gives the military origin (1955) but says nothing of today's use, and nothing says which parts are closed. Softened to the 1955 military origin, which two sources give."
+  },
+  {
+   "claim": "opened in December 1996",
+   "verdict": "cut",
+   "wasBefore": "The airport opened in December 1996 and",
+   "why": "Wikipedia alone (civil operations from 12 December 1996). The operator's site (qzair.com), which Wikipedia cites, timed out to a plain fetch and answered 502 in the browser; CAOP gives 1955 and 2012 but not 1996. With the 1955 military start now stated, 'opened in 1996' would also mislead without 'to civil flights'."
+  },
+  {
+   "claim": "flights abroad, including a new Cebu route for summer 2026",
+   "verdict": "cut",
+   "note": "Fujian News Broadcast (29 March 2026), crediting the airport among its sources: the summer 2026 season plans 1,719 movements a week and adds Cebu, Nanchang, Linyi and Weihai. CAOP (undated) says it has international, regional and domestic routes. The Manila Bulletin's report of Fujian to Cebu flights (February 2026) sits behind a Cloudflare check and was left alone.",
+   "sources": [
+    {
+     "file": "qq-20260329",
+     "org": "Fujian News Broadcast (Fujian provincial TV news, official account on Tencent News)",
+     "dated": "2026-03-29",
+     "quote": [
+      "2026-03-29 17:01 发布于 福建 福建新闻联播官方账号",
+      "每周计划起降1719架次",
+      "新开宿务、南昌、临沂、威海航点",
+      "泉州—宿务"
+     ]
+    },
+    {
+     "file": "caop-port",
+     "org": "China Association of Port-of-Entry (CAOP, caop.org.cn)",
+     "dated": "read 2026-09-23 (live page, undated; its address carries 2019-02-18)",
+     "quote": "开通国际（地区）、国内客货运航线40条"
+    }
+   ],
+   "why": "Held back: new facts that replace nothing (the old text names no routes), and only one dated source. Would read: 'It has some flights abroad, with Cebu added in 2026.'"
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

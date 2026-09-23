@@ -1,0 +1,219 @@
+{
+ "iata": "SJW",
+ "id": "recx0r3gdDBK6JvcB",
+ "name": "Shijiazhuang Zhengding International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Shijiazhuang_Zhengding_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Shijiazhuang, capital of Hebei province, and a hub for Hebei Airlines with bases for China United and Spring Airlines. It handled 12.014 million passengers in 2025.\n\nThe high speed rail link is what sets it apart. The Beijing to Guangzhou line passes about 3 km south of the terminal, and a free shuttle bus runs every 30 minutes between the terminals and Zhengding Airport railway station. A D or G series train reaches Shijiazhuang station in under 15 minutes.\n\nThe airport goes further than that to pull passengers in. It offers free train tickets to stations including Beijing West and Zhengzhou for people flying into Shijiazhuang, and reimburses the train fare for passengers who arrive by rail and leave by air. For a client whose real destination is Beijing, that is worth pricing against a Beijing arrival.\n\nFive bus routes also serve the city, costing up to 20 yuan.\n\nIt is one of the few airports in China that could handle the Antonov An-225.",
+ "after": "The airport for Shijiazhuang, the capital of Hebei province. It is a base for Spring Airlines and handled 12.014 million passengers in 2025.\n\nWhat sets it apart is the high speed rail link. Some trains on the Beijing to Guangzhou high speed line stop at the airport's own station, Zhengding Airport, a short ride from the terminals.\n\nThe Antonov An-225 cargo aircraft has flown in several times.",
+ "claims": [
+  {
+   "claim": "The airport for Shijiazhuang",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Shijiazhuang",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-02",
+     "quote": "is an international airport serving Shijiazhuang"
+    },
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 石家庄/正定: passenger rank 38 in China"
+    }
+   ]
+  },
+  {
+   "claim": "capital of Hebei province",
+   "verdict": "confirmed",
+   "inAfter": "capital of Hebei province",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-02",
+     "quote": "the capital of North China's Hebei province"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "GeoNames class PPLA, the capital of a first-order division (state, province or region)"
+    }
+   ]
+  },
+  {
+   "claim": "a base for Spring Airlines",
+   "verdict": "softened",
+   "inAfter": "a base for Spring Airlines",
+   "note": "Was 'a hub for Hebei Airlines with bases for China United and Spring Airlines' (see the cuts below). Spring Airlines' own live page lists Shijiazhuang among its bases.",
+   "sources": [
+    {
+     "file": "spring-about",
+     "org": "Spring Airlines (ch.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "春秋航空总部设在上海，在沈阳、石家庄、深圳"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-02",
+     "quote": "the operating base for both China United Airlines and Spring Airlines"
+    },
+    {
+     "file": "caop-port",
+     "org": "China Association of Port-of-Entry (CAOP, caop.org.cn)",
+     "dated": "read 2026-09-23 (live page, undated; its address carries 2019-02-19 and its figures run to 2013)",
+     "quote": "是中国联合航空河北分公司、河北航空有限公司、春秋航空公司、中国货运邮政航空公司基地"
+    }
+   ]
+  },
+  {
+   "claim": "12.014 million passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "handled 12.014 million passengers in 2025",
+   "note": "CAAC: 12,014,301, up 6.2 per cent; 38th in China.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 石家庄/正定: passenger rank 38 in China; passengers 2025: 12,014,301; passengers 2024: 11,314,852; change 6.2%"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-02",
+     "quote": "12.014 million passenger movements, representing a year-on-year increase of 2.8% and 6.2% respectively"
+    }
+   ]
+  },
+  {
+   "claim": "some Beijing to Guangzhou high speed trains stop at the airport's own station, Zhengding Airport",
+   "verdict": "softened",
+   "inAfter": "Some trains on the Beijing to Guangzhou high speed line stop at the airport's own station, Zhengding Airport",
+   "note": "CAOP: the day the Beijing to Guangzhou high speed line opened throughout (26 December 2012) the airport launched its air-rail service. China Railway's current station list has 正定机场 (Zhengding Airport) under Shijiazhuang. 'Some' follows Wikipedia's 'a few trains a day'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-02",
+     "quote": [
+      "The Beijing–Guangzhou–Shenzhen–Hong Kong High-Speed Railway passes within about 3 km south of the airport's terminal.",
+      "A few trains a day stop at Zhengding Airport railway station"
+     ]
+    },
+    {
+     "file": "caop-port",
+     "org": "China Association of Port-of-Entry (CAOP, caop.org.cn)",
+     "dated": "read 2026-09-23 (live page, undated; its address carries 2019-02-19 and its figures run to 2013)",
+     "quote": "2012年12月26日，纵贯南北的京广高铁全线贯通，同日石家庄机场推出国内第一家由机场主导的空铁联运产品"
+    },
+    {
+     "file": "railway-12306-stations",
+     "org": "China Railway 12306",
+     "dated": "2026-09-23",
+     "quote": "@zdc|正定机场|ZHP|zhengdingjichang|zdjc|1586|0365|石家庄|||"
+    }
+   ]
+  },
+  {
+   "claim": "a short ride from the terminals",
+   "verdict": "softened",
+   "inAfter": "a short ride from the terminals",
+   "note": "Was 'passes about 3 km south of the terminal'. Wikipedia gives about 3 km; CAOP gives three minutes on the airport's shuttle. The coordinates check flagged '3 km south' only because it read it as a distance from the city; it is from the terminal, and no saved source gives the bearing, so the direction is dropped.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-02",
+     "quote": "passes within about 3 km south of the airport's terminal"
+    },
+    {
+     "file": "caop-port",
+     "org": "China Association of Port-of-Entry (CAOP, caop.org.cn)",
+     "dated": "read 2026-09-23 (live page, undated; its address carries 2019-02-19 and its figures run to 2013)",
+     "quote": "搭乘机场免费摆渡车3分钟就可到达候机楼"
+    }
+   ]
+  },
+  {
+   "claim": "the Antonov An-225 has flown in several times",
+   "verdict": "softened",
+   "inAfter": "The Antonov An-225 cargo aircraft has flown in several times.",
+   "note": "Was 'one of the few airports in China that could handle the Antonov An-225'. CAOP: the world's largest cargo aircraft, the An-225, and the A380 have flown in to Shijiazhuang several times. 'One of the few in China' rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "caop-port",
+     "org": "China Association of Port-of-Entry (CAOP, caop.org.cn)",
+     "dated": "read 2026-09-23 (live page, undated; its address carries 2019-02-19 and its figures run to 2013)",
+     "quote": "世界最大货运飞机安225、最大客机A380曾多次飞抵石家庄机场"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-02",
+     "quote": "It is also one of the few airports in China where the Antonov An-225 was able to operate."
+    }
+   ]
+  },
+  {
+   "claim": "a hub for Hebei Airlines",
+   "verdict": "cut",
+   "wasBefore": "a hub for Hebei Airlines",
+   "why": "Time-sensitive, and nothing dated within the year says so: Wikipedia, plus CAOP's undated page (figures to 2013) calling it a base. Hebei Airlines' own site builds its pages by script and shows no company page; XiamenAir's pages do not mention it. The operator's site (hebeiairport.cn) answered 503."
+  },
+  {
+   "claim": "a base for China United",
+   "verdict": "cut",
+   "wasBefore": "with bases for China United and",
+   "why": "Time-sensitive: Wikipedia, plus CAOP's undated page naming China United's Hebei branch. China United's site showed no links to a plain fetch or the browser, so nothing current confirms it."
+  },
+  {
+   "claim": "passes about 3 km south of the terminal",
+   "verdict": "cut",
+   "wasBefore": "The Beijing to Guangzhou line passes about 3 km south of the terminal",
+   "why": "Softened to 'a short ride from the terminals' (Wikipedia 3 km, CAOP three minutes by shuttle); the direction and exact distance rest on Wikipedia alone."
+  },
+  {
+   "claim": "free shuttle every 30 minutes between the terminals and the station",
+   "verdict": "cut",
+   "wasBefore": "a free shuttle bus runs every 30 minutes between the terminals and Zhengding Airport railway station",
+   "why": "A service that needs a current source: the 30 minute frequency rests on Wikipedia alone, and CAOP's free shuttle dates from the 2012 launch. The operator's site answered 503."
+  },
+  {
+   "claim": "D or G train to Shijiazhuang station in under 15 minutes",
+   "verdict": "cut",
+   "wasBefore": "A D or G series train reaches Shijiazhuang station in under 15 minutes.",
+   "why": "Wikipedia alone; the timetable page it cites (qq.ip138.com) now serves unrelated content, and no current timetable was reached."
+  },
+  {
+   "claim": "free train tickets for fly-in passengers, rail fares refunded for rail-and-fly, worth pricing against Beijing",
+   "verdict": "cut",
+   "wasBefore": "The airport goes further than that to pull passengers in. It offers free train tickets to stations including Beijing West and Zhengzhou for people flying into Shijiazhuang, and reimburses the train fare for passengers who arrive by rail and leave by air. For a client whose real destination is Beijing, that is worth pricing against a Beijing arrival.",
+   "why": "A promotion Wikipedia describes as 'announced', from the 2012 air-rail launch; nothing current shows it still runs (CAOP describes the 2012 air-rail product and calls Shijiazhuang a second way in and out of Beijing, but mentions no free tickets). The advice to price it against Beijing rests on it and goes too."
+  },
+  {
+   "claim": "five bus routes, up to 20 yuan",
+   "verdict": "cut",
+   "wasBefore": "Five bus routes also serve the city, costing up to 20 yuan.",
+   "why": "Wikipedia alone, and time-sensitive; the operator's site answered 503."
+  },
+  {
+   "claim": "one of the few airports in China that could handle the An-225",
+   "verdict": "cut",
+   "wasBefore": "It is one of the few airports in China that could handle the Antonov An-225.",
+   "why": "'One of the few in China' rests on Wikipedia alone; softened to CAOP's account that the An-225 has flown in several times."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "What sets it apart is the high speed rail link.",
+   "why": "The old text's judgement, kept on the confirmed air-rail station."
+  }
+ ],
+ "tracerOk": {}
+}

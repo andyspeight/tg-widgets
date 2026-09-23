@@ -1,0 +1,363 @@
+{
+ "iata": "CSX",
+ "id": "recSZGRadfJc1wcvT",
+ "name": "Changsha Huanghua International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Changsha_Huanghua_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The busiest airport in central China, about 25 km from downtown Changsha at Huanghua, and the arrival point for the wider metropolitan region taking in Zhuzhou and Xiangtan.\n\nTerminal 2 is the main building and a genuinely impressive one: 212,000 square metres, the fifth largest airport terminal in mainland China, with 22 air bridge gates and the longest walk from entrance to gate kept within 300 metres, which is unusually considerate for a terminal this size. Its main hall is the largest single steel truss structure in Hunan.\n\nTerminal 1 reopened in May 2018 after a long renovation and now handles Air China, Shandong, Shenzhen, Tibet, Kunming, Chengdu, Joy Air and Okay Airways, with 38 check in counters and ten air bridges.\n\nBetween them the two terminals are rated for 15.6 million passengers a year.\n\nThe airport opened in August 1989, replacing Changsha Datuopu, which is now a military air base. It is run by the Hunan Airport Authority, which manages all five airports in the province.",
+ "after": "Hunan's busiest airport lies about 25 km from downtown Changsha at Huanghua and is the arrival point for the wider metropolitan region taking in Zhuzhou and Xiangtan.\n\nTerminal 2 is the main building and a genuinely impressive one: 212,000 square metres, designed so that the longest walk to a gate is within 300 metres, which is unusually considerate for a terminal this size.\n\nAir China flies from Terminal 1, which reopened in May 2018 after a long renovation.\n\nThe airport handled 30.3 million passengers in 2025, fifteenth in China.",
+ "claims": [
+  {
+   "claim": "Hunan's busiest airport",
+   "verdict": "corrected",
+   "inAfter": "Hunan's busiest airport",
+   "note": "Was 'The busiest airport in central China' (see the cut below). CAAC 2025: Changsha 30,253,675, then Zhangjiajie 2,062,663; the other eight Hunan airports are smaller still.",
+   "sources": [
+    {
+     "file": "caac-2025-hunan",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "Row: 长沙/黄花 | 15 | 30253675",
+      "Row: 张家界/荷花 | 77 | 2062663"
+     ]
+    },
+    {
+     "file": "airchina-guide",
+     "org": "Air China (airchina.jp, the airline's own airport page)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": "Changsha Huanghua International Airport is the largest and busiest civil airport in Hunan province"
+    },
+    {
+     "file": "caop-port",
+     "org": "China Association of Port-of-Entry (CAOP, caop.org.cn)",
+     "dated": "read 2026-09-23 (live page, undated; its address carries 2019-02-19 and its figures run to 2017)",
+     "quote": "是湖南省规模最大的民用机场"
+    }
+   ]
+  },
+  {
+   "claim": "about 25 km from downtown Changsha",
+   "verdict": "confirmed",
+   "inAfter": "about 25 km from downtown Changsha",
+   "note": "Coordinates: 24.4 km in a straight line (ratio 1.02). CAOP gives 24.2 km from the city centre; Air China's guide says about 22 km, which the rounding covers.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "Located about 25 kilometres (16 mi) from downtown Changsha"
+    },
+    {
+     "file": "caop-port",
+     "org": "China Association of Port-of-Entry (CAOP, caop.org.cn)",
+     "dated": "read 2026-09-23 (live page, undated; its address carries 2019-02-19 and its figures run to 2017)",
+     "quote": "距长沙市中心24.2公里"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 24.4 km (15.2 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "at Huanghua",
+   "verdict": "confirmed",
+   "inAfter": "at Huanghua",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "in the town of Huanghua in Changsha County"
+    },
+    {
+     "file": "caop-port",
+     "org": "China Association of Port-of-Entry (CAOP, caop.org.cn)",
+     "dated": "read 2026-09-23 (live page, undated; its address carries 2019-02-19 and its figures run to 2017)",
+     "quote": "长沙航空口岸设于长沙黄花国际机场,位于长沙县黄花镇"
+    }
+   ]
+  },
+  {
+   "claim": "the arrival point for the wider metropolitan region taking in Zhuzhou and Xiangtan",
+   "verdict": "confirmed",
+   "inAfter": "the arrival point for the wider metropolitan region taking in Zhuzhou and Xiangtan",
+   "note": "Wikipedia says it serves the Greater Changsha region of Zhuzhou and Xiangtan. CAAC's 2025 table has no airport at Zhuzhou or Xiangtan (the whole table read for 株洲 and 湘潭: no rows), so Changsha is where that region flies in. China National Radio (2011) has the airport leading the Changsha, Zhuzhou and Xiangtan city cluster (长株潭城市群).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "and the Greater Changsha Metropolitan Region comprising the nearby cities of Zhuzhou and Xiangtan"
+    },
+    {
+     "file": "caac-2025-hunan",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "No airport is listed for Zhuzhou or Xiangtan."
+    },
+    {
+     "file": "sohu-2011",
+     "org": "China National Radio (cnr.cn, via Sohu News)",
+     "dated": "2011-07-19",
+     "quote": "引领长株潭城市群"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2 is the main building",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 2 is the main building",
+   "note": "CNR (2011): Terminal 2 is six times the size of the old terminal. Air China's live guide and Hunan Daily (January 2026) both describe the airport as T1 and T2 today; Terminal 3 is still being built (held back, below). Wikipedia gives T1 39,000 square metres after its renovation.",
+   "sources": [
+    {
+     "file": "sohu-2011",
+     "org": "China National Radio (cnr.cn, via Sohu News)",
+     "dated": "2011-07-19",
+     "quote": "新航站楼现正式命名为T2航站楼，它的总建筑面积达21.2万平方米，相当于老航站楼的6倍"
+    },
+    {
+     "file": "airchina-guide",
+     "org": "Air China (airchina.jp, the airline's own airport page)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": "Changsha Huanghua International Airport has two terminals, T1 and T2."
+    },
+    {
+     "file": "voc-202601",
+     "org": "Hunan Daily (voc.com.cn, New Hunan)",
+     "dated": "2026-01-28",
+     "quote": [
+      "2026-01-28 10:25:20",
+      "more than double the combined area of T1 and T2 terminals"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": [
+      "the airport has two terminal buildings",
+      "After renovation, Terminal 1 has 39,000 square metres (420,000 sq ft) of space"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "212,000 square metres",
+   "verdict": "confirmed",
+   "inAfter": "212,000 square metres",
+   "sources": [
+    {
+     "file": "sohu-2011",
+     "org": "China National Radio (cnr.cn, via Sohu News)",
+     "dated": "2011-07-19",
+     "quote": [
+      "2011年07月19日15:47",
+      "它的总建筑面积达21.2万平方米"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "With 212,000 m2 (2,280,000 sq ft) of space"
+    }
+   ]
+  },
+  {
+   "claim": "designed so that the longest walk to a gate is within 300 metres",
+   "verdict": "softened",
+   "inAfter": "designed so that the longest walk to a gate is within 300 metres",
+   "note": "Was 'the longest walk from entrance to gate kept within 300 metres'. Both sources give the longest walk to a gate or stand as 300 metres at most; neither measures it from the entrance. CNR gives it as the design once the old terminal reopened (47 stands, 75 per cent at the terminal).",
+   "sources": [
+    {
+     "file": "sohu-2011",
+     "org": "China National Radio (cnr.cn, via Sohu News)",
+     "dated": "2011-07-19",
+     "quote": "步行距离最远不超过300米"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "to which the longest passenger walking distance is within 300 metres"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 1 reopened in May 2018 after a long renovation",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 1, which reopened in May 2018 after a long renovation",
+   "note": "Air China: refurbishment completed on 16 May 2018; Wikipedia: closed from July 2011, reopened 18 May 2018. The month is given, not the day. CNR (2011) confirms the old terminal was to close for rebuilding once T2 opened, so the renovation ran from 2011 to 2018.",
+   "sources": [
+    {
+     "file": "airchina-guide",
+     "org": "Air China (airchina.jp, the airline's own airport page)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": "T1, home to Air China, has completed refurbishment on May 16, 2018."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": [
+      "Terminal 1 was closed for renovation from July 2011 to 17 May 2018 after Terminal 2 became fully operational.",
+      "Terminal 1 reopened on 18 May 2018."
+     ]
+    },
+    {
+     "file": "sohu-2011",
+     "org": "China National Radio (cnr.cn, via Sohu News)",
+     "dated": "2011-07-19",
+     "quote": "T2航站楼运行后，老航站楼将关闭改造"
+    }
+   ]
+  },
+  {
+   "claim": "Air China flies from Terminal 1",
+   "verdict": "confirmed",
+   "inAfter": "Air China flies from Terminal 1",
+   "note": "Air China's own live guide: T1, check-in counters 1 to 7, domestic departures and arrivals through T1.",
+   "sources": [
+    {
+     "file": "airchina-guide",
+     "org": "Air China (airchina.jp, the airline's own airport page)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": [
+      "T1, home to Air China",
+      "Air China’s check-in counters are at 1-7 on the departure floor at T1."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "Terminal 1 serves Air China"
+    }
+   ]
+  },
+  {
+   "claim": "30.3 million passengers in 2025, fifteenth in China",
+   "verdict": "corrected",
+   "inAfter": "The airport handled 30.3 million passengers in 2025, fifteenth in China.",
+   "note": "Replaces the old passenger figure, 'rated for 15.6 million passengers a year' (see the cut below): a capacity misread from Wikipedia and half the traffic the airport now carries. CAAC: 30,253,675, 15th, down 3.1 per cent on 31,218,109 in 2024.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 长沙/黄花: passenger rank 15 in China; passengers 2025: 30,253,675"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "As for 2025, Changsha Huanghua International Airport was the 15th busiest airport in the People's Republic of China with 30,253,675 passengers."
+    }
+   ]
+  },
+  {
+   "claim": "the busiest airport in central China",
+   "verdict": "cut",
+   "wasBefore": "The busiest airport in central China",
+   "why": "Wrong for 2024 and 2025: CAAC's table puts Wuhan ahead (31,339,277 against 30,253,675 in 2025; 31,406,186 against 31,218,109 in 2024). Wikipedia's 'busiest in Central China' is dated 2022. Replaced by Hunan's busiest (CAAC, Air China); Changsha's second place in central China rests on CAAC alone, so it is not stated."
+  },
+  {
+   "claim": "fifth largest airport terminal in mainland China",
+   "verdict": "cut",
+   "wasBefore": "the fifth largest airport terminal in mainland China",
+   "why": "A 2011 ranking, long overtaken by newer terminals, and the two sources disagree on which four were larger (CNR: Beijing, Shanghai Hongqiao, Shanghai Pudong, Guangzhou; Wikipedia: Beijing Capital, Pudong, Guangzhou, Shenzhen)."
+  },
+  {
+   "claim": "22 air bridge gates",
+   "verdict": "cut",
+   "wasBefore": "with 22 air bridge gates",
+   "why": "Wikipedia alone; CNR gives 47 stands across the airport, 75 per cent at the terminal, not a count of air bridges."
+  },
+  {
+   "claim": "largest single steel truss structure in Hunan",
+   "verdict": "cut",
+   "wasBefore": "Its main hall is the largest single steel truss structure in Hunan.",
+   "why": "Wikipedia alone. CNR (2011) calls T2 Hunan's most structurally complex and most modern public building, which is a different claim."
+  },
+  {
+   "claim": "Terminal 1 airlines other than Air China",
+   "verdict": "cut",
+   "wasBefore": "now handles Air China, Shandong, Shenzhen, Tibet, Kunming, Chengdu, Joy Air and Okay Airways",
+   "why": "Time-sensitive and resting on Wikipedia alone for the seven airlines other than Air China; the operator's site did not connect and the Hunan Airport Group's refused (403). Air China is kept on its own current guide. CAOP's undated page (figures to 2017) says China Southern and XiamenAir have operating bases here; not added, as nothing dated within the year says so."
+  },
+  {
+   "claim": "38 check-in counters and ten air bridges",
+   "verdict": "cut",
+   "wasBefore": "with 38 check in counters and ten air bridges",
+   "why": "Wikipedia alone; the 2018 Hunan Daily report it cites refused a plain fetch and the browser (403)."
+  },
+  {
+   "claim": "two terminals rated for 15.6 million passengers a year",
+   "verdict": "cut",
+   "wasBefore": "Between them the two terminals are rated for 15.6 million passengers a year.",
+   "why": "A misreading: Wikipedia gives 15.6 million as the capacity Terminal 2 ADDED in 2011, and six million for Terminal 1 alone after 2018; CNR (2011) says T2 lifted the airport from 4.6 million to more than 20 million a year. The airport carried 30.3 million in 2025 (CAAC), so the figure misleads. Replaced by the 2025 total."
+  },
+  {
+   "claim": "opened August 1989, replacing Datuopu, now a military air base",
+   "verdict": "cut",
+   "wasBefore": "The airport opened in August 1989, replacing Changsha Datuopu, which is now a military air base.",
+   "why": "Wikipedia alone. The pages it cites could not be read: huaxia.com (no DNS answer), CAAC News (503), the Changsha government's English site (no connection), China Aviation Daily (503). CAOP dates only the opening of the air port of entry (1990)."
+  },
+  {
+   "claim": "run by the Hunan Airport Authority, which manages all five airports in the province",
+   "verdict": "cut",
+   "wasBefore": "It is run by the Hunan Airport Authority, which manages all five airports in the province.",
+   "why": "Out of date: CAAC's 2025 table lists ten Hunan airports with traffic, not five, and Wikipedia's own infobox names the operator as Hunan Airport Management Group Co., Ltd. The group's sites did not answer (csa.hnjcjt.com no connection, hnjcjt.com 403), so neither the name nor a count is confirmed today."
+  },
+  {
+   "claim": "Terminal 3 due to open in 2026",
+   "verdict": "cut",
+   "note": "Hunan Daily (28 January 2026, from the Changsha government portal): T3 is 533,600 square metres, more than twice T1 and T2 together, due in 2026, linked to maglev, high-speed rail and metro, for 40 million passengers a year. Wikipedia (19 September 2026) has only the east terminal area 'in which both Terminals 3 and 4 lie'; People's Daily (2019) has the 2019 master plan for four terminals. Nothing saved says it has opened.",
+   "sources": [
+    {
+     "file": "voc-202601",
+     "org": "Hunan Daily (voc.com.cn, New Hunan)",
+     "dated": "2026-01-28",
+     "quote": [
+      "2026-01-28 10:25:20",
+      "the T3 terminal is scheduled for operation in 2026",
+      "designed to handle an annual passenger throughput of 40 million"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "The east terminal area, in which both Terminals 3 and 4 lie"
+    },
+    {
+     "file": "yueyang-gov",
+     "org": "People's Daily (people.com.cn, via the Yueyang Nanhu district government)",
+     "dated": "2019-12-23",
+     "quote": [
+      "编稿时间：2019-12-23 来源： 人民网",
+      "长沙机场将拥有4条跑道、431个机位和4个航站楼"
+     ]
+    }
+   ],
+   "why": "Held back: a new terminal that replaces nothing in the old text while it is still being built, so the sweep's rule keeps it out. Andy may want it in, as it will change which terminal clients use: 'A third terminal, more than twice the size of the other two together, is due to open in 2026, so check which terminal a client will use.' Only one source dates the opening (Hunan Daily)."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and a genuinely impressive one",
+   "why": "The old text's judgement, kept as colour on the confirmed size (212,000 square metres, six times the old terminal)."
+  },
+  {
+   "text": "which is unusually considerate for a terminal this size",
+   "why": "The old text's judgement on the confirmed 300 metre design."
+  }
+ ],
+ "tracerOk": {
+  "30.3": "30,253,675 rounded (CAAC, Wikipedia)"
+ }
+}

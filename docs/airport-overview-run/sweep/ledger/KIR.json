@@ -1,0 +1,285 @@
+{
+ "iata": "KIR",
+ "id": "recJe6bkEXb9CH2VY",
+ "name": "Kerry Airport",
+ "country": "Ireland",
+ "wikipedia": "https://en.wikipedia.org/wiki/Kerry_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for County Kerry, at Farranfore between Killarney and Tralee, and the shortest way into the Ring of Kerry. It handled 417,409 passengers in 2024, with services from Ryanair and, more recently, the French airline Chalair.\n\nGround transport needs a little planning. There is a railway station at Farranfore only 1.6 km away with direct trains to Tralee and Killarney, but no shuttle connects it to the terminal, so it is a walk along the main road or a taxi. Bus Éireann route 271 runs Tralee to Killarney through the airport, route 14 links Limerick and Killarney, and Local Link route 283 stops here too. Car hire is in the long term car park and taxis wait outside the terminal.\n\nBy road the airport is on the N23, about 94 km from Limerick and 106 km from Cork.\n\nIt has grown steadily since the company was formed in July 1968. The first runway of 1,090 metres opened in 1969, a longer one in 1989, and the current 2,000 metre runway in May 1994.",
+ "after": "Kerry's airport, at Farranfore between Tralee and Killarney, is the shortest way into the Ring of Kerry. On Eurostat's figures it handled about 440,000 passengers in 2025, and Ryanair flies here.\n\nGround transport needs a little planning. Farranfore's railway station has direct trains to Tralee and Killarney, and three bus routes call at the airport: Bus Éireann's 271 from Tralee to Killarney and 14 from Limerick, and Local Link's 283 from Currow to Tralee.\n\nBy road it is about 94 km from Limerick and 106 km from Cork. Its single runway is 2,000 metres long.",
+ "claims": [
+  {
+   "claim": "Kerry's airport, at Farranfore",
+   "verdict": "confirmed",
+   "inAfter": "Kerry's airport, at Farranfore",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Airport: Kerry Airport (OurAirports EIKY, IATA KIR)",
+      "OurAirports municipality: Farranfore"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "is an international airport in Farranfore, County Kerry, Ireland"
+    }
+   ]
+  },
+  {
+   "claim": "between Tralee and Killarney",
+   "verdict": "confirmed",
+   "inAfter": "between Tralee and Killarney",
+   "note": "Bus Éireann's route 271 runs Tralee to Killarney via the airport, and Irish Rail's trains call at Farranfore between Tralee and Killarney. Coordinates: 15.7 km south east of Tralee (Killarney is not in the GeoNames file used).",
+   "sources": [
+    {
+     "file": "buseireann-271",
+     "org": "Bus Éireann (buseireann.ie)",
+     "dated": "read 2026-09-23 (live route page)",
+     "quote": "Bus Éireann | Route 271 | Tralee to Killarney via Kerry Airport"
+    },
+    {
+     "file": "irishrail-tralee",
+     "org": "Iarnród Éireann (Irish Rail, irishrail.ie)",
+     "dated": "timetable valid from 14 December 2025",
+     "quote": [
+      "TRALEE Dep 15:05",
+      "Farranfore Dep 15:18",
+      "Killarney Dep 15:41"
+     ]
+    },
+    {
+     "file": "geo-cities",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Tralee (GeoNames 2961123, 52.2704, -9.7026, population 26,079): 15.7 km, bearing from Tralee 129 degrees, which is south east"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "8 nautical miles (15 km; 9.2 mi) southeast of the county town, Tralee"
+    }
+   ]
+  },
+  {
+   "claim": "about 440,000 passengers in 2025 (Eurostat)",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Eurostat",
+   "inAfter": "On Eurostat's figures it handled about 440,000 passengers in 2025",
+   "note": "Was '417,409 passengers in 2024' (the airport's figure, via Wikipedia; Eurostat has 412,034 for 2024). A passenger total replaces a passenger total. Eurostat has 440,180 for 2025; Wikipedia's infobox gives the same number, most likely taken from Eurostat, so it is attributed rather than counted as a second source. The airport's own site answered with an empty 202 challenge and could not be read.",
+   "sources": [
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "dated": "annual data to 2025",
+     "quote": [
+      "Eurostat IE_EIKY Kerry Airport: passengers carried in 2024: 412,034",
+      "Eurostat IE_EIKY Kerry Airport: passengers carried in 2025: 440,180"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Ryanair flies here",
+   "verdict": "corrected",
+   "inAfter": "and Ryanair flies here.",
+   "note": "Was 'with services from Ryanair and, more recently, the French airline Chalair'. Ryanair's own airport data lists its routes from Kerry (Stansted, Luton, Manchester, Dublin, Frankfurt Hahn and others); Chalair is cut (below).",
+   "sources": [
+    {
+     "file": "ryanair-kir",
+     "org": "Ryanair (its own airport data, ryanair.com)",
+     "dated": "read 2026-09-23 (live data)",
+     "quote": [
+      "\"iataCode\":\"KIR\",\"name\":\"Kerry\"",
+      "\"routes\":[\"airport:STN\",\"airport:HHN\",\"country:gb\""
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "Passenger services are operated by Ryanair"
+    }
+   ]
+  },
+  {
+   "claim": "Farranfore's railway station has direct trains to Tralee and Killarney",
+   "verdict": "softened",
+   "inAfter": "Farranfore's railway station has direct trains to Tralee and Killarney",
+   "note": "Was 'There is a railway station at Farranfore only 1.6 km away with direct trains to Tralee and Killarney, but no shuttle connects it to the terminal'. Irish Rail's timetable has trains calling at Farranfore on the line between Tralee and Killarney; the 1.6 km and the missing shuttle rest on Wikipedia alone (cut below).",
+   "sources": [
+    {
+     "file": "irishrail-tralee",
+     "org": "Iarnród Éireann (Irish Rail, irishrail.ie)",
+     "dated": "timetable valid from 14 December 2025",
+     "quote": [
+      "Tralee - Cork & Dublin - Monday to Saturday (excluding public holidays) - Valid from 14.12.2025 until further notice",
+      "Farranfore Dep 15:18",
+      "Killarney Dep 15:41"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "Iarnród Éireann's Farranfore railway station is located 1.6 kilometres (0.99 mi) to the south-west, offering direct services to Tralee and Killarney"
+    }
+   ]
+  },
+  {
+   "claim": "three bus routes call at the airport: Bus Éireann 271 and 14, Local Link 283",
+   "verdict": "confirmed",
+   "inAfter": "and three bus routes call at the airport: Bus Éireann's 271 from Tralee to Killarney and 14 from Limerick, and Local Link's 283 from Currow to Tralee.",
+   "note": "Each operator's own page or timetable names the airport stop: Bus Éireann's 271 (Tralee to Killarney via Kerry Airport) and 14 (Limerick to Killarney, continuing to Kerry Airport), and TFI Local Link's 283 (Currow to Tralee via Kerry Airport, timetable printed November 2025).",
+   "sources": [
+    {
+     "file": "buseireann-271",
+     "org": "Bus Éireann (buseireann.ie)",
+     "dated": "read 2026-09-23 (live route page)",
+     "quote": "Bus Éireann | Route 271 | Tralee to Killarney via Kerry Airport"
+    },
+    {
+     "file": "buseireann-14",
+     "org": "Bus Éireann (buseireann.ie)",
+     "dated": "read 2026-09-23 (live route page)",
+     "quote": [
+      "Expressway | Route: 14 | Limerick to Killarney",
+      "After the divergence from Route 13 at Abbeyfeale, Route 14 continues to Kerry Airport en route to Killarney."
+     ]
+    },
+    {
+     "file": "tfi-283",
+     "org": "TFI Local Link Kerry (Transport for Ireland, transportforireland.ie)",
+     "dated": "timetable printed November 2025",
+     "quote": [
+      "283 Currow to Tralee via Kerry Airport",
+      "Information correct at the time of print: November 2025"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": [
+      "Route 14: Limerick - Killarney",
+      "Route 271: Tralee - Castleisland - Kerry Airport - Killarney",
+      "As at 2026 the Local Link bus route 283, which goes to and from Tralee, stops at the airport."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 94 km from Limerick and 106 km from Cork by road",
+   "verdict": "confirmed",
+   "inAfter": "By road it is about 94 km from Limerick and 106 km from Cork.",
+   "note": "Straight lines: Limerick 81.4 km (ratio 1.15) and Cork 78.6 km (ratio 1.35), both inside the check for a road distance.",
+   "sources": [
+    {
+     "file": "geo-cities",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from Limerick (GeoNames 2962943, 52.6647, -8.6231, population 102,287): 81.4 km",
+      "Straight-line distance from Cork (GeoNames 2965140, 51.8980, -8.4706, population 224,004): 78.6 km"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "approximately 94 kilometres (58 mi) from Limerick and approximately 106 kilometres (66 mi) from Cork"
+    }
+   ]
+  },
+  {
+   "claim": "a single runway, 2,000 metres",
+   "verdict": "confirmed",
+   "inAfter": "Its single runway is 2,000 metres long.",
+   "note": "Kept from the history paragraph's 'the current 2,000 metre runway'; the dates are cut (below).",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 08/26: 2,000 m (6,562 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "The contract for the new runway of 2,000m x 45m and the new terminal was signed in May 1993"
+    }
+   ]
+  },
+  {
+   "claim": "417,409 passengers in 2024",
+   "verdict": "cut",
+   "wasBefore": "It handled 417,409 passengers in 2024",
+   "why": "Superseded by the 2025 figure. Corrected (see above)."
+  },
+  {
+   "claim": "the French airline Chalair",
+   "verdict": "cut",
+   "wasBefore": "and, more recently, the French airline Chalair.",
+   "why": "Chalair's own destination list (read 23 Sep 2026: Ajaccio, Aurillac, Brive, Castres, Limoges, Lyon, Paris) does not include Kerry.",
+   "sources": [
+    {
+     "file": "chalair-destinations",
+     "org": "Chalair (chalair.fr)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Nos destinations",
+      "Ajaccio",
+      "Brive La Gaillarde",
+      "Limoges"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "1.6 km to the station; no shuttle; a walk along the main road or a taxi",
+   "verdict": "cut",
+   "wasBefore": "only 1.6 km away with direct trains to Tralee and Killarney, but no shuttle connects it to the terminal, so it is a walk along the main road or a taxi.",
+   "why": "Wikipedia alone (as of May 2023); the airport's own site answered with an empty 202 challenge. The station and its trains are kept (see above)."
+  },
+  {
+   "claim": "car hire in the long term car park; taxis outside the terminal",
+   "verdict": "cut",
+   "wasBefore": "Car hire is in the long term car park and taxis wait outside the terminal.",
+   "why": "Wikipedia alone; the airport's own site could not be read."
+  },
+  {
+   "claim": "on the N23",
+   "verdict": "cut",
+   "wasBefore": "By road the airport is on the N23, about 94 km from Limerick and 106 km from Cork.",
+   "why": "The road number rests on Wikipedia alone. The distances are kept (see above)."
+  },
+  {
+   "claim": "the company formed in July 1968; runways of 1969, 1989 and May 1994",
+   "verdict": "cut",
+   "wasBefore": "It has grown steadily since the company was formed in July 1968. The first runway of 1,090 metres opened in 1969, a longer one in 1989, and the current 2,000 metre runway in May 1994.",
+   "why": "Wikipedia alone; the airport's own site could not be read. The runway's length is kept (see above)."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "is the shortest way into the Ring of Kerry.",
+   "why": "The old text's judgement, kept: Wikipedia puts the airport 13 km north of the Ring of Kerry, and Cork, the next airport with scheduled flights on this side, is 78.6 km away (coordinates)."
+  },
+  {
+   "text": "Ground transport needs a little planning.",
+   "why": "The old text's framing, kept; the station is in the village, not at the terminal, and the buses run to timetables (sourced)."
+  }
+ ],
+ "tracerOk": {
+  "On Eurostat's": "The tracer reads the opening word with the name; Eurostat is the source's org.",
+  "Bus Éireann's": "A possessive; 'Bus Éireann' is on its own route pages.",
+  "Local Link's": "A possessive; 'Local Link' is on TFI's timetable and in Wikipedia.",
+  "440,000": "Rounded from 440,180 (Eurostat)."
+ }
+}
