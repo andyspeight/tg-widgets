@@ -1,0 +1,140 @@
+{
+ "iata": "CKG",
+ "id": "recdtlvJqUEgZViyJ",
+ "name": "Chongqing Jiangbei International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Chongqing_Jiangbei_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Chongqing's airport, about 19 km north of the city centre, and ninth busiest in mainland China. It is a major hub for western Chinese carriers including Sichuan Airlines, Hainan Airlines, West Air, China Express and Chongqing Airlines.\n\nTerminal 3A is where an international client will be. Opened in August 2017 with 66 gates and rated for 45 million passengers a year, it handles all international flights plus a share of domestic. Terminal 2, with its two concourses and 30 gates, is domestic only. Terminal 1, the original 1990 building, closed in August 2017.\n\nThe two live terminals sit some distance apart, Terminal 2 on the western perimeter and Terminal 3A to the south east, linked by metro line 10 and a free shuttle bus. Allow real time for a transfer between them.\n\nA new satellite terminal, 3B, and a fourth runway both finished construction in 2025.\n\nAirports Council International named it the best airport in its size category in both 2017 and 2018.",
+ "after": "Chongqing's main international airport, about 19 km north of the city centre. In 2025 it was the ninth busiest in mainland China.\n\nIt now has four runways.",
+ "claims": [
+  {
+   "claim": "Chongqing's main international airport",
+   "verdict": "confirmed",
+   "inAfter": "Chongqing's main international airport",
+   "note": "CAAC 2025: Jiangbei 50,094,770 passengers; Wanzhou, the next in Chongqing, 891,860.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the main international airport serving the city of Chongqing"
+    },
+    {
+     "file": "caac-2025-chongqing",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "Row: 重庆/江北 | 9 | 50094770",
+      "Row: 万州/五桥 | 117 | 891860"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 19 km north of the city centre",
+   "verdict": "confirmed",
+   "inAfter": "about 19 km north of the city centre",
+   "note": "Coordinates: 19.2 km in a straight line at 28 degrees, which is north east on the 8-point rose, one point from north and inside the tolerance; ratio 0.99.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "about 19 kilometres (12 mi) north of Chongqing city center"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 19.2 km",
+      "Bearing from the city centre: 28 degrees"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "ninth busiest in mainland China in 2025",
+   "verdict": "confirmed",
+   "inAfter": "In 2025 it was the ninth busiest in mainland China.",
+   "note": "CAAC: 9th, 50,094,770 passengers, up 2.9 per cent. The figure itself is not in Wikipedia's archived text, so only the rank is stated.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "passenger rank 9 in China"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It was the 9th busiest airport in mainland China by passenger traffic in 2025."
+    }
+   ]
+  },
+  {
+   "claim": "four runways",
+   "verdict": "corrected",
+   "inAfter": "It now has four runways.",
+   "note": "Replaces 'A new satellite terminal, 3B, and a fourth runway both finished construction in 2025'. OurAirports lists four runways (the newest, 03R/21L, 3,400 m); Wikipedia says the fourth runway was finished in 2025. Terminal 3B rests on Wikipedia alone and is cut.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "dated": "2026-09-23",
+     "quote": [
+      "Runway 03R/21L: 3,400 m",
+      "Runways listed: 4"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The latest expansion involves a new satellite terminal (Terminal 3B) and a fourth runway, both of which have finished construction as of 2025."
+    }
+   ]
+  },
+  {
+   "claim": "ninth busiest (first sentence form)",
+   "verdict": "cut",
+   "wasBefore": "Chongqing's airport, about 19 km north of the city centre, and ninth busiest in mainland China.",
+   "why": "Reworded into two sentences; both facts are kept above."
+  },
+  {
+   "claim": "hub for Sichuan Airlines, Hainan Airlines, West Air, China Express and Chongqing Airlines",
+   "verdict": "cut",
+   "wasBefore": "It is a major hub for western Chinese carriers including Sichuan Airlines, Hainan Airlines, West Air, China Express and Chongqing Airlines.",
+   "why": "Wikipedia alone. The airlines' own sites did not answer (China Express 405; West Air and Chongqing Airlines did not connect)."
+  },
+  {
+   "claim": "Terminal 3A: opened August 2017, 66 gates, 45 million, all international flights",
+   "verdict": "cut",
+   "wasBefore": "Terminal 3A is where an international client will be. Opened in August 2017 with 66 gates and rated for 45 million passengers a year, it handles all international flights plus a share of domestic.",
+   "why": "Wikipedia alone. The airport group's site answers 405 and the Chongqing metro's site did not connect, so which terminal takes international flights could not be confirmed. An agent should check the terminal on the ticket."
+  },
+  {
+   "claim": "Terminal 2 domestic only; Terminal 1 closed August 2017",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2, with its two concourses and 30 gates, is domestic only. Terminal 1, the original 1990 building, closed in August 2017.",
+   "why": "Wikipedia alone (see above)."
+  },
+  {
+   "claim": "terminals apart, linked by metro line 10 and a free shuttle",
+   "verdict": "cut",
+   "wasBefore": "The two live terminals sit some distance apart, Terminal 2 on the western perimeter and Terminal 3A to the south east, linked by metro line 10 and a free shuttle bus. Allow real time for a transfer between them.",
+   "why": "Wikipedia alone; the metro operator's site did not connect."
+  },
+  {
+   "claim": "Terminal 3B and fourth runway finished 2025",
+   "verdict": "cut",
+   "wasBefore": "A new satellite terminal, 3B, and a fourth runway both finished construction in 2025.",
+   "why": "Reworded: the fourth runway is kept with OurAirports as the second source; Terminal 3B rests on Wikipedia alone."
+  },
+  {
+   "claim": "ACI best airport in its size category, 2017 and 2018",
+   "verdict": "cut",
+   "wasBefore": "Airports Council International named it the best airport in its size category in both 2017 and 2018.",
+   "why": "Wikipedia alone; not pursued, as a 2017 and 2018 award is of little use in a booking."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
