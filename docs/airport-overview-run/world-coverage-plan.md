@@ -1,4 +1,4 @@
-# Phase 2: world coverage of airports (BUILT, 22 Sep 2026)
+# Phase 2: world coverage of airports (BUILT 22 Sep 2026, extended 23 Sep)
 
 Andy, 21 Sep 2026: "Once we have these 600 done we are going to list all other
 airports in the world that have international flights, and get those live even
@@ -84,30 +84,25 @@ Live read of the whole table, 1,018 records:
 - All 929 rule-passers present; 0 missing
 - 195 of the 234 countries with scheduled service now have at least one airport
 
-## The coverage gap worth knowing about
+## The 30 countries with no traffic data (resolved 23 Sep 2026)
 
-39 countries with scheduled service still have no airport in the table. Only
-9 of those are genuinely small. **The other 30 are missing because Wikidata
-holds no passenger figure for them at all**, not because their airports are
-minor:
+The 22 Sep import left 39 countries with scheduled service and no airport. Nine
+were genuinely small. The other 30 had no Wikidata passenger figure at all, so the
+rule could not judge them. Andy: "do the 30 countries."
 
-Afghanistan, Anguilla, Bhutan, Brunei, Cook Islands, Eritrea, Eswatini,
-Falkland Islands, Gambia, Greenland, Kiribati, Laos, Lesotho, Liberia, Libya,
-Malawi, Marshall Islands, Micronesia, Monaco, Mongolia, Nauru, Niue, North
-Korea, Sao Tome & Principe, Sierra Leone, Solomon Islands, Somalia, South
-Sudan, Tonga, Tuvalu.
+Each was sourced by hand against the same rule. **18 airports were added** (table
+now 1,036 records, 213 of 234 countries covered) and **12 countries were left out**,
+most because they are genuinely small. Full evidence, source by source, with the
+flagged calls and the Greenland decision, is in `thirty-countries.md`.
 
-Several of those are countries whose capital-city international airport a
-travel agent would sell without hesitation. They are absent purely because the
-free traffic data is thin, which is a different problem from "too small to
-bother with".
+Added: UBN Mongolia, VTE Laos, MJI Libya, BWN Brunei, BJL Gambia, LLW Malawi,
+FNA Sierra Leone, ROB Liberia, RAR Cook Islands, TBU Tonga, AXA Anguilla,
+GOH Greenland, MGQ Somalia, KBL Afghanistan, HIR Solomon Islands, JUB South Sudan,
+PBH Bhutan, TMS Sao Tome & Principe.
 
-Do NOT infer which airport each one needs from the OurAirports ordering. With
-no passenger figures the list falls back to alphabetical, so it surfaces
-Chileka for Malawi, Spriggs Payne for Liberia, Kufra for Libya and Arvaikheer
-for Mongolia - none of which is that country's principal airport. Each of the
-30 has to be sourced and verified by hand. That is a separate, evidence-first
-job, not a bulk import.
+Still without an airport (21 countries): the nine small ones listed below, plus
+Tuvalu, Niue, Micronesia, Kiribati, Lesotho, Eswatini, the Falklands, Monaco,
+the Marshall Islands, Nauru, Eritrea and North Korea.
 
 The genuinely small nine, for the record: Guinea-Bissau (83,616), Norfolk
 Island (67,959), Wallis & Futuna (45,093), St Pierre & Miquelon (38,808),

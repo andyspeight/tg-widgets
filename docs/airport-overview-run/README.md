@@ -9,11 +9,13 @@ session scratchpad, which does not survive.
 The one blank is MPC, a small airport in Bengkulu that Andy has said to ignore.
 Do not reopen it and do not count it as a gap.
 
-**The table now holds 1,018 records.** 418 were imported on 22 Sep under the
+**The table now holds 1,036 records.** 418 were imported on 22 Sep under the
 traffic rule Andy set (peak passengers >= 1m, or busiest in its country with at
-least 100k). Those 418 are thin by design: name, IATA, country, lat/lng,
+least 100k), and 18 more were hand-sourced on 23 Sep for countries with no
+Wikidata traffic figure. All 436 are thin by design: name, IATA, country, lat/lng,
 Wikipedia URL, Source 1, Status "Todo". They carry no Overview, and they are
-NOT part of the 599 figure above. See `world-coverage-plan.md`.
+NOT part of the 599 figure above. See `world-coverage-plan.md` and
+`thirty-countries.md`.
 
 **Verified Date is blank on all 599, deliberately.** Andy chose finish-first,
 verify-after on 21 Sep. The records meet one traced source plus the three-layer
@@ -27,6 +29,8 @@ that is the next job.
   were logged rather than silently resolved, and the per-batch notes.
 - `world-coverage-plan.md` — phase 2, the 418-record import: the rule, the
   sources, what was verified afterwards, and the 39 countries still missing.
+- `thirty-countries.md` — the 23 Sep hand-sourcing of the 30 countries Wikidata
+  could not judge: what was added, what was left out and why, source by source.
 - `build-import.mjs` — regenerates that import from OurAirports and Wikidata.
   Re-run it when OurAirports updates. Verified 22 Sep to reproduce the run
   exactly: 929 qualifying, 892 over the threshold, 37 on the country floor,
