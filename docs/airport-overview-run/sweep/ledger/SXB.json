@@ -1,0 +1,415 @@
+{
+ "iata": "SXB",
+ "id": "recGvKgK6A4OgWhsh",
+ "name": "Strasbourg Airport",
+ "country": "France",
+ "wikipedia": "https://en.wikipedia.org/wiki/Strasbourg_Airport",
+ "audited": "2026-09-23",
+ "before": "Strasbourg's airport, at Entzheim 10 km west south west of the city. It handled 1,308,984 passengers in 2025 from a single two storey terminal, with check in and arrivals downstairs and the departure lounges and four air bridge gates above.\n\nThe train is the thing to use. Entzheim-Aéroport station sits at the airport on the Strasbourg to Molsheim line, and TER Grand Est trains reach Strasbourg-Ville in seven to twelve minutes. There is no direct bus or tram into the city, so the train really is the answer.\n\nHigh speed rail also explains the airport's shape. The LGV Est cut the journey from Paris so sharply, to one hour forty eight minutes after the second phase opened in July 2016, that Air France gave up flying the route in 2013 and puts passengers on the train instead. Traffic has nonetheless grown since 2011.\n\nThe nearest larger airports are Basel Mulhouse, 154 km south, and Stuttgart, 168 km north east.",
+ "after": "Strasbourg's airport, at Entzheim 10 km west south west of the city. It handled about 1.3 million passengers in 2025 from a single terminal.\n\nThe train is the thing to use. Entzheim-Aéroport station sits at the airport, and its TER Grand Est trains reach Strasbourg station in eight minutes, the airport says.\n\nHigh speed rail also explains the airport's shape. Flights to Paris Charles de Gaulle stopped in 2013, and Eurostat's figures show the last to Orly in 2016. Traffic has nonetheless grown since 2011.\n\nThe nearest bigger airport is Karlsruhe/Baden-Baden in Germany, about 42 km north east in a straight line. Basel Mulhouse is about 105 km south and Stuttgart about 118 km east, and both are larger again.",
+ "claims": [
+  {
+   "claim": "at Entzheim, 10 km west south west of Strasbourg",
+   "verdict": "confirmed",
+   "inAfter": "Strasbourg's airport, at Entzheim 10 km west south west of the city.",
+   "note": "Coordinates: 10.0 km from the GeoNames centre of Strasbourg at 240 degrees, inside the check for west south west. The airport's own address is in Entzheim.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 10.0 km (6.2 miles)",
+      "Bearing from the city centre: 240 degrees"
+     ]
+    },
+    {
+     "file": "op-navette-train",
+     "org": "Aéroport de Strasbourg (the airport operator, strasbourg.aeroport.fr)",
+     "dated": "read 2026-09-23 (page footer)",
+     "quote": "67960 Entzheim"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-06",
+     "quote": "is a minor international airport located in Entzheim, 10 km (6.2 miles) west-southwest of Strasbourg"
+    }
+   ]
+  },
+  {
+   "claim": "about 1.3 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled about 1.3 million passengers in 2025",
+   "note": "Was 1,308,984, Wikipedia's figure. The French airports' association has 1,305,867 and Eurostat 1,302,008 for 2025, so the text gives the figure all three support.",
+   "sources": [
+    {
+     "file": "uaf-2025",
+     "org": "Union des Aéroports Français (the French airports' association, aeroport.fr)",
+     "dated": "2025 results (published April 2026)",
+     "quote": [
+      "Classement par passagers des aéroports de France",
+      "15 Strasbourg 1 305 867"
+     ]
+    },
+    {
+     "file": "eurostat-fr",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat FR_LFST STRASBOURG-ENTZHEIM airport: passengers carried in 2025: 1,302,008"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-06",
+     "quote": "In 2025, the airport served 1,308,984 passengers."
+    }
+   ]
+  },
+  {
+   "claim": "a single terminal",
+   "verdict": "confirmed",
+   "inAfter": "from a single terminal.",
+   "note": "The airport's pages speak of one terminal building throughout ('l'aérogare'), with one plan that lists check-in, arrivals and the departure lounge shop. The two storeys, the floor layout and the four air bridges rest on Wikipedia alone (cut below).",
+   "sources": [
+    {
+     "file": "op-plan",
+     "org": "Aéroport de Strasbourg (the airport operator, strasbourg.aeroport.fr)",
+     "dated": "read 2026-09-23 (the airport's terminal plan)",
+     "quote": [
+      "Plan de l'aérogare",
+      "Enregistrement 1",
+      "Relay - Salle d",
+      "Arrivée"
+     ]
+    },
+    {
+     "file": "op-parking-gare",
+     "org": "Aéroport de Strasbourg (the airport operator, strasbourg.aeroport.fr)",
+     "dated": "read 2026-09-23 (the airport's page for station car park users)",
+     "quote": "présentez-vous au comptoir accueil de l’aérogare"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-06",
+     "quote": "The airport consists of a single two-storey passenger terminal building."
+    }
+   ]
+  },
+  {
+   "claim": "Entzheim-Aéroport station sits at the airport",
+   "verdict": "confirmed",
+   "inAfter": "Entzheim-Aéroport station sits at the airport",
+   "note": "The airport names the station 'la gare d'Entzheim Aéroport' and says a covered footpath leads from the terminal to the platform.",
+   "sources": [
+    {
+     "file": "op-parking-gare",
+     "org": "Aéroport de Strasbourg (the airport operator, strasbourg.aeroport.fr)",
+     "dated": "read 2026-09-23 (the airport's page for station car park users)",
+     "quote": "la gare d’Entzheim Aéroport"
+    },
+    {
+     "file": "op-navette-train",
+     "org": "Aéroport de Strasbourg (the airport operator, strasbourg.aeroport.fr)",
+     "dated": "read 2026-09-23 (the airport's train shuttle page)",
+     "quote": "Une liaison piétonne couverte vous permet de rejoindre directement l’aéroport ou le quai de la gare."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-06",
+     "quote": "The airport and community of Entzheim is served by the Entzheim-Aéroport station"
+    }
+   ]
+  },
+  {
+   "claim": "TER Grand Est trains reach Strasbourg station in eight minutes, the airport says",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "and its TER Grand Est trains reach Strasbourg station in eight minutes, the airport says.",
+   "note": "Replaces 'TER Grand Est trains reach Strasbourg-Ville in seven to twelve minutes' (Wikipedia). The airport's own figure for its train shuttle, attributed; Wikipedia's range of 7 to 12 minutes takes it in, and both name TER Grand Est.",
+   "sources": [
+    {
+     "file": "op-navette-train",
+     "org": "Aéroport de Strasbourg (the airport operator, strasbourg.aeroport.fr)",
+     "dated": "read 2026-09-23 (the airport's train shuttle page)",
+     "quote": [
+      "relié à la gare de Strasbourg en 8 minutes",
+      "TER Grand-est"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-06",
+     "quote": [
+      "It is serviced by TER Grand Est trains towards Strasbourg",
+      "The trip to Strasbourg-Ville station takes 7 to 12 minutes."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "flights to Paris Charles de Gaulle stopped in 2013",
+   "verdict": "corrected",
+   "inAfter": "Flights to Paris Charles de Gaulle stopped in 2013",
+   "note": "Replaces 'Air France gave up flying the route in 2013'. Wikipedia dates the end of Air France's Charles de Gaulle flights to 2 April 2013, and Eurostat's route figures fall from 154,247 passengers in 2012 to 33,578 in 2013 and stop. The route was not the whole of Paris: Orly carried on (below).",
+   "sources": [
+    {
+     "file": "eurostat-paris-routes",
+     "org": "Eurostat",
+     "dated": "annual route data, 2001 to 2024",
+     "quote": [
+      "Eurostat FR_LFST_FR_LFPG STRASBOURG-ENTZHEIM airport - PARIS-CHARLES DE GAULLE airport: 154,247 passengers in 2012",
+      "Eurostat FR_LFST_FR_LFPG STRASBOURG-ENTZHEIM airport - PARIS-CHARLES DE GAULLE airport: 33,578 passengers in 2013"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-06",
+     "quote": "However, Air France ceased to operate the route between Strasbourg and Paris-Charles de Gaulle on 2 April 2013"
+    }
+   ]
+  },
+  {
+   "claim": "Eurostat's figures show the last Orly flights in 2016",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Eurostat",
+   "inAfter": "and Eurostat's figures show the last to Orly in 2016.",
+   "note": "The old text had all Paris flying end in 2013. Eurostat's Orly route runs on to 135,985 passengers in 2015 and 29,725 in 2016, with nothing after, and its 19 Strasbourg routes for 2024 include no Paris airport. Attributed to Eurostat, the EU's statistics office, as no second source names the year.",
+   "sources": [
+    {
+     "file": "eurostat-paris-routes",
+     "org": "Eurostat",
+     "dated": "annual route data, 2001 to 2024",
+     "quote": [
+      "Eurostat FR_LFST_FR_LFPO STRASBOURG-ENTZHEIM airport - PARIS-ORLY airport: 135,985 passengers in 2015",
+      "Eurostat FR_LFST_FR_LFPO STRASBOURG-ENTZHEIM airport - PARIS-ORLY airport: 29,725 passengers in 2016"
+     ]
+    },
+    {
+     "file": "eurostat-routes",
+     "org": "Eurostat",
+     "dated": "2024 (annual route data, the latest year)",
+     "quote": "Eurostat routes reported for LFST in 2024: 19, carrying 996,112 passengers in all"
+    }
+   ]
+  },
+  {
+   "claim": "traffic has grown since 2011",
+   "verdict": "confirmed",
+   "inAfter": "Traffic has nonetheless grown since 2011.",
+   "note": "Eurostat: 1,065,242 passengers in 2011 and 1,302,008 in 2025 (with the 2020 to 2022 dip in between); the French airports association has 2025 just above 2019.",
+   "sources": [
+    {
+     "file": "eurostat-series",
+     "org": "Eurostat",
+     "dated": "annual data to 2025",
+     "quote": [
+      "Eurostat FR_LFST STRASBOURG-ENTZHEIM airport: passengers carried in 2011: 1,065,242",
+      "Eurostat FR_LFST STRASBOURG-ENTZHEIM airport: passengers carried in 2025: 1,302,008"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-06",
+     "quote": "but since 2011, traffic at the airport has grown"
+    },
+    {
+     "file": "uaf-2025",
+     "org": "Union des Aéroports Français (the French airports' association, aeroport.fr)",
+     "dated": "2025 results (published April 2026)",
+     "quote": "Strasbourg 1 302 373 930 428 1 017 990 1 231 906 1 305 867 6.0% 0.3%"
+    }
+   ]
+  },
+  {
+   "claim": "the nearest bigger airport is Karlsruhe/Baden-Baden in Germany, about 42 km north east",
+   "verdict": "corrected",
+   "inAfter": "The nearest bigger airport is Karlsruhe/Baden-Baden in Germany, about 42 km north east in a straight line.",
+   "note": "Replaces 'The nearest larger airports are Basel Mulhouse ... and Stuttgart'. Karlsruhe/Baden-Baden is nearer than either and handled 2,257,542 passengers in 2025 (ADV; Eurostat 2,256,875) against Strasbourg's 1.3 million. It is the nearest airport with scheduled flights: Lahr (23.9 km), Phalsbourg (40.4 km) and Colmar (51.6 km) have none. Straight line 42.7 km on OurAirports' coordinates and 42.1 km on Wikipedia's, both at 51 degrees.",
+   "sources": [
+    {
+     "file": "geo-airports",
+     "org": "OurAirports (computed)",
+     "quote": "Straight-line distance from Strasbourg Airport to Karlsruhe Baden-Baden Airport (OurAirports EDSB): 42.7 km, bearing 51 degrees, which is north east"
+    },
+    {
+     "file": "wikipedia-coords",
+     "org": "Wikimedia (computed from the article coordinates)",
+     "quote": "Straight-line distance from Strasbourg Airport to Karlsruhe/Baden-Baden Airport, from the Wikipedia coordinates: 42.1 km, bearing 51 degrees, which is north east"
+    },
+    {
+     "file": "ourairports-nearby",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Lahr Airport (OurAirports EDTL, IATA LHA, DE, medium airport): 23.9 km from Strasbourg Airport; scheduled service: no",
+      "Karlsruhe Baden-Baden Airport (OurAirports EDSB, IATA FKB, DE, large airport): 42.7 km from Strasbourg Airport; scheduled service: yes"
+     ]
+    },
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": [
+      "Kumuliertes Gesamtaufkommen in Deutschland: Passagiere (an+ab) | Januar bis Dezember 2025",
+      "Karlsruhe/Baden-Baden 2.257.542"
+     ]
+    },
+    {
+     "file": "eurostat-de",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat DE_EDSB KARLSRUHE/BADEN-BADEN airport: passengers carried in 2025: 2,256,875"
+    }
+   ]
+  },
+  {
+   "claim": "Basel Mulhouse about 105 km south and Stuttgart about 118 km east, both larger again",
+   "verdict": "corrected",
+   "inAfter": "Basel Mulhouse is about 105 km south and Stuttgart about 118 km east, and both are larger again.",
+   "note": "Was '154 km south' and '168 km north east' (Wikipedia, which does not say how it measured; the straight lines are about 105 and 118 km, and Stuttgart lies east, at 81 degrees). Straight lines: Basel Mulhouse 104.6 km (OurAirports) and 106.1 km (Wikipedia), Stuttgart 118.4 and 117.9 km. Both handled about 9.6 million passengers in 2025, more than four times Karlsruhe/Baden-Baden.",
+   "sources": [
+    {
+     "file": "geo-airports",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Straight-line distance from Strasbourg Airport to EuroAirport Basel–Mulhouse–Freiburg (OurAirports LFSB): 104.6 km, bearing 184 degrees, which is south",
+      "Straight-line distance from Strasbourg Airport to Stuttgart Airport (OurAirports EDDS): 118.4 km, bearing 81 degrees, which is east"
+     ]
+    },
+    {
+     "file": "wikipedia-coords",
+     "org": "Wikimedia (computed from the article coordinates)",
+     "quote": [
+      "Straight-line distance from Strasbourg Airport to EuroAirport Basel–Mulhouse–Freiburg, from the Wikipedia coordinates: 106.1 km, bearing 184 degrees, which is south",
+      "Straight-line distance from Strasbourg Airport to Stuttgart Airport, from the Wikipedia coordinates: 117.9 km, bearing 81 degrees, which is east"
+     ]
+    },
+    {
+     "file": "uaf-2025",
+     "org": "Union des Aéroports Français (the French airports' association, aeroport.fr)",
+     "dated": "2025 results (published April 2026)",
+     "quote": "6 Bâle - Mulhouse 9 629 416"
+    },
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": "Stuttgart 9.585.033"
+    },
+    {
+     "file": "eurostat-de",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat DE_EDDS STUTTGART airport: passengers carried in 2025: 9,571,997"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-06",
+     "quote": "The nearest larger international airports are EuroAirport Basel Mulhouse Freiburg"
+    }
+   ]
+  },
+  {
+   "claim": "1,308,984 passengers",
+   "verdict": "cut",
+   "wasBefore": "It handled 1,308,984 passengers in 2025",
+   "why": "Wikipedia's figure alone; the French airports' association and Eurostat give 1,305,867 and 1,302,008. Corrected to about 1.3 million (see above)."
+  },
+  {
+   "claim": "a two storey terminal, check-in and arrivals below, lounges and four air bridge gates above",
+   "verdict": "cut",
+   "wasBefore": "from a single two storey terminal, with check in and arrivals downstairs and the departure lounges and four air bridge gates above",
+   "why": "Wikipedia alone: the airport's terminal plan lists the check-in desks, arrivals and the departure lounge shop but gives no floors and no gate count. The single terminal is kept (see above)."
+  },
+  {
+   "claim": "on the Strasbourg to Molsheim line",
+   "verdict": "cut",
+   "wasBefore": "on the Strasbourg to Molsheim line",
+   "why": "Wikipedia alone; the airport names only its shuttle to Strasbourg."
+  },
+  {
+   "claim": "seven to twelve minutes to Strasbourg-Ville",
+   "verdict": "cut",
+   "wasBefore": "TER Grand Est trains reach Strasbourg-Ville in seven to twelve minutes",
+   "why": "Wikipedia's range; the airport gives eight minutes. Corrected (see above)."
+  },
+  {
+   "claim": "no direct bus or tram into the city",
+   "verdict": "cut",
+   "wasBefore": "There is no direct bus or tram into the city, so the train really is the answer.",
+   "why": "Wikipedia alone. The airport's own pages sell a ticket covering the train and then a tram or bus in the city, but do not say whether any bus runs direct."
+  },
+  {
+   "claim": "the LGV Est cut the Paris journey to 1 hour 48 after its second phase opened in July 2016",
+   "verdict": "cut",
+   "wasBefore": "The LGV Est cut the journey from Paris so sharply, to one hour forty eight minutes after the second phase opened in July 2016,",
+   "why": "Wikipedia alone, and the old sentence ran backwards: it had the 2016 journey time drive Air France's withdrawal in 2013."
+  },
+  {
+   "claim": "Air France gave up the route in 2013 and puts passengers on the train",
+   "verdict": "cut",
+   "wasBefore": "that Air France gave up flying the route in 2013 and puts passengers on the train instead.",
+   "why": "Only the Charles de Gaulle flights stopped in 2013 (Wikipedia, Eurostat); Orly flights ran on to 2016 (Eurostat). Moving passengers onto tgvair trains rests on Wikipedia alone. Corrected (see above)."
+  },
+  {
+   "claim": "the nearest larger airports are Basel Mulhouse, 154 km south, and Stuttgart, 168 km north east",
+   "verdict": "cut",
+   "wasBefore": "The nearest larger airports are Basel Mulhouse, 154 km south, and Stuttgart, 168 km north east.",
+   "why": "Karlsruhe/Baden-Baden is nearer and bigger than Strasbourg, and the distances are not straight lines. Corrected (see above)."
+  },
+  {
+   "claim": "fifteenth in France; the 1999 peak of 2.2 million",
+   "verdict": "cut",
+   "why": "Held back: new facts that replace nothing. The French airports' association ranks Strasbourg fifteenth in France for 2025, and Eurostat's highest year is 1999, with 2,213,875 passengers.",
+   "sources": [
+    {
+     "file": "uaf-2025",
+     "org": "Union des Aéroports Français (the French airports' association, aeroport.fr)",
+     "dated": "2025 results (published April 2026)",
+     "quote": "15 Strasbourg 1 305 867"
+    },
+    {
+     "file": "eurostat-series",
+     "org": "Eurostat",
+     "dated": "annual data to 2025",
+     "quote": "Highest year in the series: 1999"
+    }
+   ]
+  },
+  {
+   "claim": "trains up to five times an hour; a covered footpath to the platform; fares",
+   "verdict": "cut",
+   "why": "Held back: new facts that replace nothing, from the airport's train page: up to five shuttle trains an hour, a covered footpath from the terminal to the platform, a single TER ticket to Strasbourg at 3.20 euros, and a 24-hour ticket at 4.60 euros that also covers the city's trams and buses.",
+   "sources": [
+    {
+     "file": "op-navette-train",
+     "org": "Aéroport de Strasbourg (the airport operator, strasbourg.aeroport.fr)",
+     "dated": "read 2026-09-23 (the airport's train shuttle page)",
+     "quote": [
+      "jusqu’à 5 fois par heure par une navette train",
+      "Prix du billet TER seul de l'Aéroport à la Gare de Strasbourg : 3,20 €",
+      "Billet train vers Strasbourg + tram ou bus ALSA + 24H EMS 4,60€"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The train is the thing to use.",
+   "why": "The old text's advice, kept: the station is at the terminal and the airport runs up to five shuttle trains an hour (sourced, held back)."
+  },
+  {
+   "text": "High speed rail also explains the airport's shape.",
+   "why": "The old text's framing, kept. Wikipedia ties the fall in flying to the first phase of the LGV Est, and Eurostat's Paris routes fall from 1,006,961 passengers in 2006 to 438,181 in 2008 before stopping."
+  }
+ ],
+ "tracerOk": {}
+}

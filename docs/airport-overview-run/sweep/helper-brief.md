@@ -166,6 +166,15 @@ budget before finishing an airport.
   <IATA>` saves an airport's routes from Eurostat (2024, the latest by
   route); `node eurostat-series.cjs <ISO2_ICAO> <IATA>` saves its passenger
   totals for every year, for 'record year' claims (see ledger/NUE.json).
+- A route that has ended: `node eurostat-pair-series.cjs <ISO2> <IATA>
+  <label> <PAIR> ...` (pairs like FR_LFST_FR_LFPG) saves every year Eurostat
+  has for those routes; the last year with passengers dates the end (see
+  ledger/SXB.json, Strasbourg's Paris flights).
+- Airport-to-airport distances ('the nearest larger airport is ...'):
+  `node wiki-coords.mjs <IATA> "<this airport's article>" "<other article>" ...`
+  saves a second coordinate set from Wikipedia beside OurAirports', and a
+  'nearest' claim also needs a check that no nearer airport has scheduled
+  flights (ledger/SXB.json again).
 - Blocked, do not retry: web.archive.org (network policy), onda.ma
   (Cloudflare), airbus.com (Imperva). Many Chinese government and airport
   sites answer 502 or 503; one try is enough.
