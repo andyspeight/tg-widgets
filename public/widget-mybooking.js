@@ -2950,6 +2950,18 @@
     .tgm-extra-meta-item { display: inline-flex; align-items: center; gap: 6px; }
     .tgm-extra-meta-item strong { color: var(--tgm-text); font-weight: 600; }
 
+    .tgm-upsell { margin-top: 24px; padding: 20px; background: var(--tgm-surface, #fff); border: 1px solid var(--tgm-border, #E2E8F0); border-radius: var(--tgm-radius-lg); }
+    .tgm-upsell-head h3 { font-size: 16px; font-weight: 600; margin: 0 0 4px; letter-spacing: -.01em; color: var(--tgm-text, #0F172A); }
+    .tgm-upsell-head p { font-size: 13px; color: var(--tgm-muted, #64748B); margin: 0 0 14px; }
+    .tgm-upsell-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+    .tgm-upsell-card { display: flex; flex-direction: column; gap: 3px; padding: 14px 16px; text-decoration: none;
+      background: var(--tgm-surface-2, #F8FAFC); border: 1px solid var(--tgm-border, #E2E8F0);
+      border-radius: var(--tgm-radius-md); transition: border-color .15s, transform .15s; }
+    .tgm-upsell-card:hover { border-color: var(--tgm-primary, #0891B2); transform: translateY(-1px); }
+    .tgm-upsell-card:focus-visible { outline: 2px solid var(--tgm-primary, #0891B2); outline-offset: 2px; }
+    .tgm-upsell-label { font-size: 14px; font-weight: 600; color: var(--tgm-text, #0F172A); }
+    .tgm-upsell-hint { font-size: 12.5px; color: var(--tgm-muted, #64748B); line-height: 1.45; }
+    @media (prefers-reduced-motion: reduce) { .tgm-upsell-card { transition: none; } .tgm-upsell-card:hover { transform: none; } }
     .tgm-help { background: linear-gradient(135deg, var(--tgm-primary) 0%, var(--tgm-primary-dark) 100%); color: #fff; padding: 20px; border-radius: var(--tgm-radius-lg); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 24px; }
     .tgm-help h3 { font-size: 16px; font-weight: 600; margin: 0 0 4px; letter-spacing: -.01em; color: #fff; }
     .tgm-help p { font-size: 13px; color: rgba(248,250,252,.78); margin: 0; }
@@ -4778,7 +4790,39 @@
     `;
   }
 
-  function renderFound(order, c, lookup) {
+  /**
+   * What else they could book.
+   *
+   * The tiles arrive ready-made from /api/retrieve-order, which knows which
+   * products are already on the booking and has built each deep link to
+   * Travelify's spec. Nothing is decided here: this draws what it is handed, or
+   * nothing at all.
+   *
+   * Every link opens in a new tab, so a customer poking at car hire does not
+   * lose the booking they came to look at.
+   */
+  function renderUpsell(tiles, c) {
+    if (!Array.isArray(tiles) || !tiles.length) return '';
+    if (c.display && c.display.showUpsell === false) return '';
+    const title = esc((c.labels && c.labels.upsellTitle) || 'Add to your trip');
+    const body = esc((c.labels && c.labels.upsellBody) || 'A few things that go well with this booking.');
+    return `
+      <div class="tgm-upsell">
+        <div class="tgm-upsell-head">
+          <h3>${title}</h3>
+          <p>${body}</p>
+        </div>
+        <div class="tgm-upsell-grid">
+          ${tiles.map((t) => `
+            <a class="tgm-upsell-card" href="${esc(safeUrl(t.url))}" target="_blank" rel="noopener noreferrer">
+              <span class="tgm-upsell-label">${esc(t.label)}</span>
+              <span class="tgm-upsell-hint">${esc(t.hint)}</span>
+            </a>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  function renderFound(order, c, lookup, upsell) {
     const items = order.items || [];
     const summary = order.summary || {};
 
@@ -5376,6 +5420,8 @@
 
         ${renderAmendSection(order, c)}
 
+        ${renderUpsell(upsell, c)}
+
         ${(c.support?.email || c.support?.phone) ? `
         <div class="tgm-help">
           <div>
@@ -5587,7 +5633,7 @@
       const overrides = this._buildOverrides();
       let inner;
       if (this.state.stage === 'loading') inner = renderLoading(this.c);
-      else if (this.state.stage === 'found') inner = renderFound(this.state.order, this.c, this.lookup);
+      else if (this.state.stage === 'found') inner = renderFound(this.state.order, this.c, this.lookup, this.state.upsell);
       else if (this.state.stage === 'notfound') inner = renderNotFound(this.c);
       else inner = renderForm(this.c, this.state, this._lastAttempt);
 
@@ -5863,7 +5909,10 @@
         // New booking → previously cached PDF is now stale. Discard.
         this._discardPdfCache();
 
-        this.state = { stage: 'found', order: data.order, error: null };
+        // What else they could book, worked out by the API from the order it
+        // just trimmed. The widget only draws it: deciding here would mean a
+        // second copy of "which products are already on this booking".
+        this.state = { stage: 'found', order: data.order, upsell: Array.isArray(data.upsell) ? data.upsell : [], error: null };
         this._render();
         // The booking is up, so the details have done their job and come out of
         // the address bar. Only after success: a failed link is left in place so

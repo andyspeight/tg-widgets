@@ -33,6 +33,8 @@ import { travelifyAuthHeaders } from './_lib/travelify.js';
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
 import { moneyOf, moneyOptsFromEnv } from './_lib/order-money.js';
 import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape, trimFlightSeating } from './_lib/travelify-items.js';
+import { upsellTiles, upsellUrl } from '../public/_order-upsell.js';
+import { readWidgetSettings } from './_lib/booking-email-brand.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
 const WIDGETS_TABLE = 'tblVAThVqAjqtria2';
@@ -1304,6 +1306,10 @@ export default async function handler(req, res) {
     // ReferenceError into the outer catch, so the alert never fired.
     let ownerRecordId = '';
     let clientEmail = '';
+    // Same reason as the two above: the upsell section is built after the
+    // Travelify call, outside the `else` where `widget` is declared. Reaching
+    // for widget.fields down there would throw the same ReferenceError.
+    let widgetConfig = {};
 
     if (widgetId === DEMO_WIDGET_SENTINEL) {
       // ----- Demo path -----
@@ -1338,6 +1344,7 @@ export default async function handler(req, res) {
 
       ownerRecordId = (widget.fields?.ClientRecordId || '').trim();
       clientEmail = (widget.fields?.ClientEmail || '').toLowerCase().trim();
+      widgetConfig = readWidgetSettings(widget.fields || {});
       if (!ownerRecordId && !clientEmail) return notFound(res);
 
       // Resolve the OWNING CLIENT's Travelify credentials.
@@ -1459,7 +1466,29 @@ export default async function handler(req, res) {
     const order = trimOrder(raw);
     if (!order || !order.id) return notFound(res);
 
-    return res.status(200).json({ order });
+    // 6. What else they could book.
+    //
+    // Computed here rather than in the widget because the widget is one
+    // self-contained script with no way to import the module, and a second
+    // implementation of "which products are already on this order" is exactly
+    // the kind of thing that drifts. The widget just draws what it is given.
+    //
+    // Never fatal: a booking must still load if this throws. The section is an
+    // addition to someone's booking, not part of it.
+    let upsell = [];
+    try {
+      const up = widgetConfig && widgetConfig.upsell;
+      if (!up || up.enabled !== false) {
+        upsell = upsellTiles(order, { enabled: (up && up.products) || {} })
+          .map((t) => ({ product: t.product, label: t.label, hint: t.hint, url: upsellUrl(t, appId) }))
+          .filter((t) => t.url);
+      }
+    } catch (err) {
+      console.error('[retrieve-order] upsell failed, booking returned without it:', err && err.message);
+      upsell = [];
+    }
+
+    return res.status(200).json({ order, upsell });
   } catch (err) {
     console.error('retrieve-order error:', err.message);
     return notFound(res);

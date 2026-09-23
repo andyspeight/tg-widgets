@@ -548,6 +548,9 @@
             </div>
             <div class="toggle-row"><span>Balance payment<small>Let customers pay their outstanding balance or next instalment from the widget.</small></span><button class="switch on" data-display="showPayBalance" type="button"></button></div>
             <div class="toggle-row"><span>Local fees</span><button class="switch on" data-display="showLocalFees" type="button"></button></div>
+            <div class="toggle-row"><span>Add to your trip<small>Offer things the customer has not already booked, as a search on your own Travelify account. Only shows what their booking can anchor a search to.</small></span><button class="switch on" data-display="showUpsell" type="button"></button></div>
+            <div class="toggle-row"><span>&nbsp;&nbsp;&nbsp;Things to do<small>Tours, attractions and days out where they are staying.</small></span><button class="switch on" data-upsell="TicketsAttractions" type="button"></button></div>
+            <div class="toggle-row"><span>&nbsp;&nbsp;&nbsp;Car hire<small>Picked up at the airport they land at, dropped off when they fly home.</small></span><button class="switch on" data-upsell="CarRental" type="button"></button></div>
           </div></div>
         </div>
 
@@ -697,7 +700,8 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
       reminderEmails: { interim: { subject: '', body: '' }, final: { subject: '', body: '' } },
       confirmationEmail: { enabled: false, layout: [] },
       cancelEmailMessage: '',
-      display: { showActions: true, showFullImage: false, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showCancel: true, cancelEmail: true, showAmend: true, showPayBalance: true, showLocalFees: true },
+      upsell: { enabled: true, products: { TicketsAttractions: true, CarRental: true } },
+      display: { showActions: true, showFullImage: false, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showCancel: true, cancelEmail: true, showAmend: true, showPayBalance: true, showLocalFees: true, showUpsell: true },
       lunaIntegration: { connected: false, clientName: '' },
     },
     previewTheme: 'light',
@@ -894,6 +898,20 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
     sw.addEventListener('click', () => {
       sw.classList.toggle('on');
       state.config.display[sw.dataset.display] = sw.classList.contains('on');
+      schedulePreview();
+    });
+  });
+
+  // ===== Add to your trip =====
+  // One switch per product, under the section's own switch. The widget asks the
+  // API which of these a booking can actually anchor a search to, so switching
+  // one on is permission rather than a promise it will appear.
+  document.querySelectorAll('[data-upsell]').forEach(sw => {
+    sw.addEventListener('click', () => {
+      sw.classList.toggle('on');
+      if (!state.config.upsell) state.config.upsell = { enabled: true, products: {} };
+      if (!state.config.upsell.products) state.config.upsell.products = {};
+      state.config.upsell.products[sw.dataset.upsell] = sw.classList.contains('on');
       schedulePreview();
     });
   });
@@ -1558,6 +1576,12 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
         const k = sw.dataset.display;
         const v = state.config.display?.[k];
         sw.classList.toggle('on', displayDefaultOff.has(k) ? (v === true) : (v !== false));
+      });
+      // Add to your trip. Absent key means on, so a client who saved before
+      // this existed gets the section rather than a silently empty one.
+      document.querySelectorAll('[data-upsell]').forEach(sw => {
+        const v = state.config.upsell?.products?.[sw.dataset.upsell];
+        sw.classList.toggle('on', v !== false);
       });
       // Luna integration
       if (!state.config.lunaIntegration) state.config.lunaIntegration = { connected: false, clientName: '' };
