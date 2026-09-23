@@ -1,0 +1,476 @@
+{
+ "iata": "BUR",
+ "id": "recklF5Y9kF534vki",
+ "name": "Hollywood Burbank/Bob Hope Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Hollywood_Burbank_Airport",
+ "audited": "2026-09-23",
+ "before": "The Los Angeles airport most people forget about, three miles north west of downtown Burbank. For anything in Hollywood, Glendale, Pasadena or the San Fernando Valley it is a good deal closer than LAX, and closer to Griffith Park, Universal Studios and downtown Los Angeles too.\n\nIt is also the only airport in the area with a direct rail link to downtown Los Angeles, served by two stations, Burbank Airport-North and Burbank Airport-South.\n\nTwo things to prepare a client for. There are no jet bridges at all, so every boarding is down air stairs onto the apron. And the route map is mostly western United States, with regular flights to Atlanta, Honolulu and Indianapolis and a seasonal New York service, so this is not a substitute for LAX on a long haul itinerary.\n\nTwo runways serve the 555 acre site. Aircraft generally take off on Runway 15 into the southerly wind and land across on Runway 8, which is the only one with an instrument landing system and clear ground on the approach.",
+ "after": "A Los Angeles area airport, three miles north west of downtown Burbank and about 12 miles from downtown Los Angeles. It is closer than LAX to many of the region's popular attractions and serves Hollywood, Glendale, Pasadena and the San Fernando Valley.\n\nMetrolink trains link it directly to downtown Los Angeles, running to Union Station from two stations, Burbank Airport-North and Burbank Airport-South.\n\nTwo things to prepare a client for. There are no jet bridges, so boarding is at ground level. Most routes are to the western United States. Those further afield include Atlanta, Honolulu, Indianapolis and, in season, New York, so this is not a substitute for LAX on a long haul itinerary.\n\nTwo runways serve the 555 acre site. Aircraft generally take off on Runway 15 and land on Runway 8.",
+ "claims": [
+  {
+   "claim": "a Los Angeles area airport",
+   "verdict": "confirmed",
+   "inAfter": "A Los Angeles area airport",
+   "note": "Replaces the old opening, 'The Los Angeles airport most people forget about', which is an opinion with no source (see the cut below).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is a public airport three miles (5 km) northwest of downtown Burbank, in Los Angeles County, California, United States"
+    },
+    {
+     "file": "op-faq",
+     "org": "Burbank-Glendale-Pasadena Airport Authority (operator, hollywoodburbankairport.com)",
+     "quote": "BUR is the closest L.A.-area airport to the majority of L.A.'s most popular tourist destinations",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "alaska-hnl-bur",
+     "org": "Alaska Airlines",
+     "quote": "adding a fourth Los Angeles gateway",
+     "dated": "2026-05-13"
+    }
+   ]
+  },
+  {
+   "claim": "three miles north west of downtown Burbank",
+   "verdict": "confirmed",
+   "inAfter": "three miles north west of downtown Burbank",
+   "note": "Coordinates put it 5.1 km (3.2 miles) from the GeoNames centre at 298 degrees, north west; a ratio of 0.94, inside the tolerance. The FAA's master record gives 3 nautical miles north west (about 3.5 statute miles).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "three miles (5 km) northwest of downtown Burbank"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 5.1 km (3.2 miles)",
+      "Bearing from the city centre: 298 degrees, which is north west"
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "3 CBD TO AIRPORT (NM): 03 NW",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "about 12 miles from downtown Los Angeles",
+   "verdict": "softened",
+   "inAfter": "about 12 miles from downtown Los Angeles",
+   "note": "Replaces 'closer to ... downtown Los Angeles [than LAX]', a comparison only Wikipedia makes. The operator and the FAA both give 12 miles; they differ on the direction (north, north west), so no direction is given.",
+   "sources": [
+    {
+     "file": "op-faq",
+     "org": "Burbank-Glendale-Pasadena Airport Authority (operator, hollywoodburbankairport.com)",
+     "quote": "Hollywood Burbank Airport (BUR) is located in Burbank, California, approximately 12 miles north of Downtown Los Angeles.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "faa-feis-ch1",
+     "org": "Federal Aviation Administration (Final EIS for the replacement terminal)",
+     "quote": "The 555-acre Airport is located about 12 miles northwest of downtown Los Angeles"
+    }
+   ]
+  },
+  {
+   "claim": "serves Hollywood, Glendale, Pasadena and the San Fernando Valley",
+   "verdict": "softened",
+   "inAfter": "serves Hollywood, Glendale, Pasadena and the San Fernando Valley",
+   "note": "Was 'For anything in Hollywood, Glendale, Pasadena or the San Fernando Valley it is a good deal closer than LAX'. Wikipedia says the airport serves these places; the operator calls itself the most convenient airport for Hollywood and the San Fernando Valley and the closest to attractions in Glendale and Pasadena. Neither measures 'a good deal closer' place by place.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport serves Burbank, Hollywood, and the northern Greater Los Angeles area, which includes Glendale, Pasadena, the San Fernando Valley, and the Santa Clarita Valley."
+    },
+    {
+     "file": "op-about",
+     "org": "Burbank-Glendale-Pasadena Airport Authority (operator, hollywoodburbankairport.com)",
+     "quote": "the friendliest, most convenient airport for flying to or from Los Angeles, Hollywood, and the San Fernando Valley",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-faq",
+     "org": "Burbank-Glendale-Pasadena Airport Authority (operator, hollywoodburbankairport.com)",
+     "quote": "as well as attractions in nearby Glendale and Pasadena",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "closer than LAX to many of the region's popular attractions",
+   "verdict": "softened",
+   "inAfter": "It is closer than LAX to many of the region's popular attractions",
+   "note": "Wikipedia names Griffith Park, Universal Studios Hollywood and downtown Los Angeles; the operator says it is the closest L.A.-area airport to most of the region's popular tourist destinations without naming them. The general statement is what both support; the names are cut.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is closer to many popular attractions, including Griffith Park, Universal Studios Hollywood, and Downtown Los Angeles, than Los Angeles International Airport (LAX)"
+    },
+    {
+     "file": "op-about",
+     "org": "Burbank-Glendale-Pasadena Airport Authority (operator, hollywoodburbankairport.com)",
+     "quote": "it's the closest L.A.-area airport to most of the region's popular tourist destinations",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Metrolink trains run directly to downtown Los Angeles, to Union Station",
+   "verdict": "confirmed",
+   "inAfter": "Metrolink trains link it directly to downtown Los Angeles, running to Union Station",
+   "note": "Metrolink's own timetables show the Ventura County Line (Burbank Airport - South) and the Antelope Valley Line (Burbank Airport - North) both running inbound to L.A. Union Station. The operator adds free on-demand shuttles from both stations; Amtrak's Pacific Surfliner also stops at the south station.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "a direct rail connection to Downtown Los Angeles, with service from two stations: Burbank Airport–North and Burbank Airport–South"
+    },
+    {
+     "file": "metrolink-vc-line",
+     "org": "Metrolink (Southern California Regional Rail Authority)",
+     "quote": [
+      "Ventura County Line",
+      "INBOUND L.A. Union Station",
+      "Burbank Airport - South (VC Line)"
+     ],
+     "dated": "read 2026-09-23 (live timetable)"
+    },
+    {
+     "file": "metrolink-av-line",
+     "org": "Metrolink (Southern California Regional Rail Authority)",
+     "quote": [
+      "Antelope Valley Line",
+      "INBOUND L.A. Union Station",
+      "Burbank Airport - North (AV Line)"
+     ],
+     "dated": "read 2026-09-23 (live timetable)"
+    },
+    {
+     "file": "op-trains",
+     "org": "Burbank-Glendale-Pasadena Airport Authority (operator, hollywoodburbankairport.com)",
+     "quote": "Metrolink trains currently serve the: Burbank Airport-South Train Station Empire Avenue, on Ventura County Line Burbank Airport-North Train Station",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "two stations, Burbank Airport-North and Burbank Airport-South",
+   "verdict": "confirmed",
+   "inAfter": "from two stations, Burbank Airport-North and Burbank Airport-South",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "with service from two stations: Burbank Airport–North and Burbank Airport–South"
+    },
+    {
+     "file": "op-trains",
+     "org": "Burbank-Glendale-Pasadena Airport Authority (operator, hollywoodburbankairport.com)",
+     "quote": [
+      "Burbank Airport-South Train Station",
+      "Burbank Airport-North Train Station"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "metrolink-bur-north",
+     "org": "Metrolink (Southern California Regional Rail Authority)",
+     "quote": "Complimentary on-demand shuttle service between Burbank Airport North Metrolink station and Hollywood Burbank Airport."
+    },
+    {
+     "file": "metrolink-bur-south",
+     "org": "Metrolink (Southern California Regional Rail Authority)",
+     "quote": "The Hollywood Burbank Airport is 1/4 mile walking distance from the station"
+    }
+   ]
+  },
+  {
+   "claim": "no jet bridges; boarding at ground level, in the new terminal too",
+   "verdict": "softened",
+   "inAfter": "There are no jet bridges, so boarding is at ground level.",
+   "note": "Was 'every boarding is down air stairs onto the apron'; only Wikipedia says air stairs, while the FAA and the Airport Authority both describe ground boarding, which by definition is not through a jet bridge. This matters because the replacement terminal is due to open in October 2026 (operator, February and September 2026): the Airport Authority's October 2025 commission paper on its design keeps 'ground level boarding', so the sentence still holds after the move. The new terminal itself is not in the text (a new fact; flagged for Andy).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Boarding uses air stairs instead of jet bridges."
+    },
+    {
+     "file": "faa-feis-ch1",
+     "org": "Federal Aviation Administration (Final EIS for the replacement terminal)",
+     "quote": "valet parking, and aircraft ground boarding, all of which are highly valued"
+    },
+    {
+     "file": "elevatebur-charrette-2025",
+     "org": "Burbank-Glendale-Pasadena Airport Authority (operator, commission paper on the replacement terminal)",
+     "quote": [
+      "10-20-25 Commission Meeting",
+      "Ground level boarding with close connection to the aircraft and operations"
+     ],
+     "dated": "2025-10-20"
+    }
+   ]
+  },
+  {
+   "claim": "most routes are to the western United States",
+   "verdict": "confirmed",
+   "inAfter": "Most routes are to the western United States.",
+   "note": "BTS's ten biggest destinations for the year to June 2026 are all western except Dallas/Fort Worth. The operator's airline pages (read 23 Sep 2026) list about 30 destinations, some two thirds of them in the western states.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Nonstop flights mostly serve cities in the western United States"
+    },
+    {
+     "file": "bts-carrier-shares",
+     "org": "US Bureau of Transportation Statistics",
+     "quote": [
+      "Top 10 Destination Airports (U.S. Only, Passengers (000))",
+      "Time Period: July 2025 - June 2026; Airport: Las Vegas, NV:LAS; Data: 397.69",
+      "Time Period: July 2025 - June 2026; Airport: Oakland, CA:OAK; Data: 271.99",
+      "Time Period: July 2025 - June 2026; Airport: Phoenix, AZ:PHX; Data: 270.02",
+      "Time Period: July 2025 - June 2026; Airport: Denver, CO:DEN; Data: 251.59",
+      "Time Period: July 2025 - June 2026; Airport: Seattle, WA:SEA; Data: 212.67"
+     ],
+     "dated": "2026-06 (12 months to June 2026; BTS data as of 9/23/2026)"
+    },
+    {
+     "file": "op-alaska-airlines",
+     "org": "Burbank-Glendale-Pasadena Airport Authority (operator, hollywoodburbankairport.com)",
+     "quote": [
+      "Eugene, OR",
+      "Portland, OR",
+      "Seattle, WA"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "further afield: Atlanta, Honolulu and Indianapolis",
+   "verdict": "confirmed",
+   "inAfter": "Those further afield include Atlanta, Honolulu, Indianapolis",
+   "note": "Atlanta is Delta's; Indianapolis is Allegiant's, twice weekly since 22 May 2026. Honolulu: Alaska flew it daily as a summer route (13 May to 18 August 2026, its own release) and the operator lists Southwest from August 2026, which Southwest's own pages could not confirm (its route list needs a search form). So the text says Honolulu without 'regular'. 'Include' because the list is not complete: Southwest also flies to Austin, Chicago Midway, Dallas Love Field, Houston Hobby and Nashville.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "though the airport also features regular flights to Atlanta, Honolulu, and Indianapolis"
+    },
+    {
+     "file": "op-delta",
+     "org": "Burbank-Glendale-Pasadena Airport Authority (operator, hollywoodburbankairport.com)",
+     "quote": "Atlanta, GA",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-southwest-carrier",
+     "org": "Burbank-Glendale-Pasadena Airport Authority (operator, hollywoodburbankairport.com)",
+     "quote": "Honolulu, HI (Starting August 2026)",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-alaska-airlines",
+     "org": "Burbank-Glendale-Pasadena Airport Authority (operator, hollywoodburbankairport.com)",
+     "quote": "Honolulu, HI (Seasonal May-August)",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "alaska-hnl-bur",
+     "org": "Alaska Airlines",
+     "quote": [
+      "May 13, 2026",
+      "Alaska Airlines today launched new, daily seasonal nonstop service between Hollywood Burbank and Honolulu"
+     ],
+     "dated": "2026-05-13"
+    },
+    {
+     "file": "op-allegiant-2026",
+     "org": "Burbank-Glendale-Pasadena Airport Authority (operator, release with Allegiant)",
+     "quote": [
+      "May 22, 2026",
+      "Indianapolis, Indiana via Indianapolis International Airport (IND) beginning May 22, 2026",
+      "The new flights will operate twice weekly."
+     ],
+     "dated": "2026-05-22"
+    },
+    {
+     "file": "op-paxstats-jul2026",
+     "org": "Burbank-Glendale-Pasadena Airport Authority (operator, hollywoodburbankairport.com)",
+     "quote": [
+      "July 2026 493,519 3,273,470",
+      "Delta Airlines 22,834 22,016 3.72% 153,673 141,274 8.78%",
+      "Allegiant Air 11,470"
+     ],
+     "dated": "2026-07 (report period)"
+    }
+   ]
+  },
+  {
+   "claim": "New York in season",
+   "verdict": "confirmed",
+   "inAfter": "in season, New York",
+   "note": "JetBlue's route. The operator's page still reads 'resuming April 2026'; its July 2026 statistics show JetBlue carrying 6,415 passengers that month and 20,779 from January to July, much as in 2025. JetBlue's own pages could not be read (newsroom 403; no Burbank destination page).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "as well as seasonal flights to New York (JFK)"
+    },
+    {
+     "file": "op-jetblue",
+     "org": "Burbank-Glendale-Pasadena Airport Authority (operator, hollywoodburbankairport.com)",
+     "quote": [
+      "Service resuming in April 2026.",
+      "New York, NY (Resuming April 2026)"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-paxstats-jul2026",
+     "org": "Burbank-Glendale-Pasadena Airport Authority (operator, hollywoodburbankairport.com)",
+     "quote": [
+      "July 2026 493,519 3,273,470",
+      "JetBlue Airways 6,415 6,688 -4.08% 20,779 21,263 -2.28%"
+     ],
+     "dated": "2026-07 (report period)"
+    }
+   ]
+  },
+  {
+   "claim": "two runways on a 555 acre site",
+   "verdict": "confirmed",
+   "inAfter": "Two runways serve the 555 acre site.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Hollywood Burbank Airport covers 555 acres (224 ha)",
+      "It has two asphalt runways"
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "22 ACREAGE: 555",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 08/26: 1,768 m (5,802 ft), ASP",
+      "Runway 15/33: 2,099 m (6,886 ft), ASP",
+      "Runways listed: 2"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "airliners generally take off on Runway 15 and land on Runway 8",
+   "verdict": "confirmed",
+   "inAfter": "Aircraft generally take off on Runway 15 and land on Runway 8.",
+   "note": "The FAA's Final EIS gives about 96 per cent of commercial departures on Runway 15 and about 86 per cent of arrivals on Runway 8. The pattern is set by terrain and wind, and the Airport Authority says the new terminal will not change how aircraft operate.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Airliners generally take off on Runway 15 due to wind from the south, and land crosswind on Runway 8"
+    },
+    {
+     "file": "faa-feis-ch1",
+     "org": "Federal Aviation Administration (Final EIS for the replacement terminal)",
+     "quote": [
+      "The Federal Aviation Administration (FAA) published a Notice of Intent",
+      "Runway 15 is the Airport's primary departure runway, while Runway 8 is the Airport's primary arrival runway",
+      "Retrieved April 2021"
+     ],
+     "dated": "2021 (Final EIS; cites material retrieved in April 2021)"
+    },
+    {
+     "file": "faa-feis-ch2",
+     "org": "Federal Aviation Administration (Final EIS for the replacement terminal)",
+     "quote": [
+      "The predominant arrival runway for commercial aircraft is Runway 8, which has about 86 percent of all arrivals.",
+      "The predominant departure runway for commercial aircraft is Runway 15, which has about 96 percent of all departures."
+     ]
+    },
+    {
+     "file": "elevatebur-faq2",
+     "org": "Burbank-Glendale-Pasadena Airport Authority (operator, Elevate BUR site)",
+     "quote": "The new terminal will not change how aircraft currently operate."
+    }
+   ]
+  },
+  {
+   "claim": "the Los Angeles airport most people forget about",
+   "verdict": "cut",
+   "wasBefore": "The Los Angeles airport most people forget about",
+   "why": "An opinion about people's habits with no source; replaced by a plain description the sources support."
+  },
+  {
+   "claim": "a good deal closer than LAX for Hollywood, Glendale, Pasadena and the San Fernando Valley",
+   "verdict": "cut",
+   "wasBefore": "it is a good deal closer than LAX",
+   "why": "No source measures this place by place; softened to 'serves' these areas (Wikipedia, operator)."
+  },
+  {
+   "claim": "closer than LAX to Griffith Park, Universal Studios and downtown Los Angeles",
+   "verdict": "cut",
+   "wasBefore": "and closer to Griffith Park, Universal Studios and downtown Los Angeles too",
+   "why": "The named places rest on Wikipedia alone: the operator claims to be the closest airport to most popular attractions without naming them, and the Discover Los Angeles and Universal Studios pages tried could not be read (404, script only). Kept as the general statement both support; downtown Los Angeles is now given as a distance (12 miles, operator and FAA)."
+  },
+  {
+   "claim": "the only airport in the area with a direct rail link to downtown Los Angeles",
+   "verdict": "cut",
+   "wasBefore": "It is also the only airport in the area with a direct rail link to downtown Los Angeles",
+   "why": "'Only' rests on Wikipedia alone. The rail link itself is kept, with Metrolink's timetables and the operator."
+  },
+  {
+   "claim": "every boarding is down air stairs onto the apron",
+   "verdict": "cut",
+   "wasBefore": "There are no jet bridges at all, so every boarding is down air stairs onto the apron.",
+   "why": "Air stairs rest on Wikipedia alone; the FAA and the Airport Authority say ground boarding. Softened to boarding at ground level (kept above)."
+  },
+  {
+   "claim": "regular flights to Atlanta, Honolulu and Indianapolis and a seasonal New York service",
+   "verdict": "cut",
+   "wasBefore": "with regular flights to Atlanta, Honolulu and Indianapolis and a seasonal New York service",
+   "why": "Reworded and kept (see above). 'Regular' dropped because Alaska's Honolulu flights are a summer route and Southwest's (from August 2026) rests on the operator alone; the list now says 'include' because Southwest also flies to Texas, Chicago and Nashville."
+  },
+  {
+   "claim": "take off into the southerly wind",
+   "verdict": "cut",
+   "wasBefore": "into the southerly wind",
+   "why": "Wikipedia alone; the FAA's Final EIS and master record give the runway use but not the wind."
+  },
+  {
+   "claim": "Runway 8 the only one with an instrument landing system and clear ground on the approach",
+   "verdict": "cut",
+   "wasBefore": "land across on Runway 8, which is the only one with an instrument landing system and clear ground on the approach",
+   "why": "The ILS and terrain clause rests on Wikipedia alone: neither the FAA master record nor the Final EIS mentions an ILS. The landing runway itself is kept, with the FAA."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Two things to prepare a client for.",
+   "why": "The old text's signpost for the two practical points that follow, both sourced."
+  },
+  {
+   "text": "so this is not a substitute for LAX on a long haul itinerary",
+   "why": "The old text's advice, drawn from the routes in the same sentence: every destination on the operator's airline pages (read 23 Sep 2026) is in the United States."
+  }
+ ],
+ "tracerOk": {}
+}

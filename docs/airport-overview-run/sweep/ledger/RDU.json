@@ -1,0 +1,448 @@
+{
+ "iata": "RDU",
+ "id": "reclZ4sc8Q0uYkeUX",
+ "name": "Raleigh-Durham International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Raleigh%E2%80%93Durham_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for the Research Triangle, serving Raleigh, Durham and the surrounding region, and second largest in North Carolina after Charlotte. It set a record in 2025 with 15.6 million passengers.\n\nThe connection between terminals is the thing to warn a client about. There is no airside link at all. Moving between Terminal 1 and Terminal 2 means leaving security and taking a shuttle bus or the moving walkway through the covered car parks, then clearing again. All international flights without pre-clearance arrive into Terminal 2.\n\nTerminal 1 has nine gates and Terminal 2 the rest, 45 in total.\n\nThe airline picture is competitive, which helps fares. Delta has the largest market share and treats it as a focus city, while Breeze Airways flies to more destinations than anyone with 41 and bases aircraft here. Atlanta is the busiest domestic route and New York carries the most passengers a day.\n\nThe airport reaches over 90 destinations including 15 international ones across 11 countries, on nearly 600 daily movements. A replacement runway is under construction.",
+ "after": "The airport for the Research Triangle, serving Raleigh, Durham and the surrounding region. It is the second largest in North Carolina after Charlotte and set a record in 2025 with 15.6 million passengers.\n\nThere are two terminals, each with its own security checkpoint, so check which one a client's airline uses. International flights without US preclearance arrive into Terminal 2.\n\nTerminal 1 has nine gates and Terminal 2 the rest, 45 in total.\n\nDelta has the largest market share, while Breeze Airways, which bases crews here, flies to more destinations than any other airline. Atlanta is the busiest domestic route, though the New York area's airports together carry more passengers.\n\nCounting routes due to start by December 2026, nonstop flights reach more than 90 destinations, 15 of them international in 11 countries. There are nearly 600 aircraft movements a day, and a replacement runway is under construction.",
+ "claims": [
+  {
+   "claim": "the airport for the Research Triangle, serving Raleigh, Durham and the surrounding region",
+   "verdict": "confirmed",
+   "inAfter": "The airport for the Research Triangle, serving Raleigh, Durham and the surrounding region",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport that serves Raleigh, Durham, and the surrounding Research Triangle region of North Carolina as its main airport"
+    },
+    {
+     "file": "op-acfr-fy26",
+     "org": "Raleigh-Durham Airport Authority (operator, annual financial report)",
+     "quote": [
+      "for the fiscal year ended March 31, 2026",
+      "The core of RDU's service area is the Research Triangle region, a 13-county zone that features prestigious universities in Raleigh, Durham, and Chapel Hill."
+     ],
+     "dated": "2026-03-31 (fiscal year ended)"
+    }
+   ]
+  },
+  {
+   "claim": "second largest in North Carolina after Charlotte",
+   "verdict": "confirmed",
+   "inAfter": "second largest in North Carolina after Charlotte",
+   "note": "FAA CY2025 boardings: Charlotte 25.9 million (11th), Raleigh-Durham 7.7 million (34th), then Asheville 1.1 million.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "RDU is the second-largest airport in the state of North Carolina, behind Charlotte Douglas International Airport."
+    },
+    {
+     "file": "op-acfr-fy26",
+     "org": "Raleigh-Durham Airport Authority (operator, annual financial report)",
+     "quote": "Raleigh-Durham International Airport (RDU) is the second-largest airport in North Carolina",
+     "dated": "2026-03-31 (fiscal year ended)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "11 SO NC CLT Charlotte Charlotte/Douglas International P L 25,873,555 28,523,822 -9.29%",
+      "34 SO NC RDU Raleigh Raleigh-Durham International P M 7,670,956 7,584,394 1.14%",
+      "103 SO NC AVL Asheville Asheville Regional P S 1,114,820 1,096,465 1.67%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "a record 15.6 million passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "set a record in 2025 with 15.6 million passengers.",
+   "note": "Total passengers, arrivals plus departures. The operator's December 2025 report gives 7,834,919 enplaned and 7,814,217 deplaned for the calendar year, 15,649,136 in all (Wikipedia's infobox: 15,644,658); 2024 was 7,746,384 plus 7,726,473, about 15.5 million. The FAA counts 7,670,956 revenue boardings for 2025 (boardings only, about half the total). CONFLICT: the operator's annual report says 'a record 15.7 million people' for calendar 2025, but that is the figure it gives for its fiscal year (April 2025 to March 2026); the operator's own calendar-year statistics round to 15.6 million, so 15.6 is kept.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In 2025, RDU served a record 15.6 million passengers, which broke the airport's 2024 record of 15.5 million passengers."
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 15,644,658"
+     ]
+    },
+    {
+     "file": "op-stats-2025",
+     "org": "Raleigh-Durham Airport Authority (operator, monthly statistics)",
+     "quote": [
+      "December FISCAL YEAR TO DATE CALENDAR YEAR TO DATE Market Share",
+      "Total Enplaned Passengers 695,186 688,874 0.92% 6,211,534 6,158,504 0.86% 7,834,919 7,746,384 1.14% 100.00%",
+      "Total Deplaned Passengers 657,965 650,800 1.10% 6,184,756 6,130,623 0.88% 7,814,217 7,726,473 1.14% 100.00%"
+     ],
+     "dated": "2025-12 (calendar year to date)"
+    },
+    {
+     "file": "op-acfr-fy26",
+     "org": "Raleigh-Durham Airport Authority (operator, annual financial report)",
+     "quote": [
+      "In calendar year 2025, a record 15.7 million people traveled through RDU.",
+      "Total passengers for the fiscal year ending March 31, 2026 were approximately 15.7 million up 1.2% from last fiscal year."
+     ],
+     "dated": "2026-03-31 (fiscal year ended)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "34 SO NC RDU Raleigh Raleigh-Durham International P M 7,670,956 7,584,394 1.14%",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "two terminals, each with its own security checkpoint; check the airline's terminal",
+   "verdict": "softened",
+   "inAfter": "There are two terminals, each with its own security checkpoint, so check which one a client's airline uses.",
+   "note": "Replaces 'There is no airside link at all' and the shuttle, walkway and re-screening detail, which rest on Wikipedia alone (see the cuts). The operator lists security checkpoints in both terminals, post-security pet areas in each (near Gate A7 and Gate C9) and tells travellers to confirm their airline's terminal before leaving home. Its FAQ asks 'How do I travel between Terminal 1 and Terminal 2?' but the answer does not load into the page text, so it could not be quoted.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport contains two terminals with a total of 45 gates.",
+      "The terminals do not have an airside connection"
+     ]
+    },
+    {
+     "file": "op-services",
+     "org": "Raleigh-Durham Airport Authority (operator, rdu.com)",
+     "quote": "PreCheck lanes are available at the security checkpoints in Terminal 1 and Terminal 2.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-travel-tips",
+     "org": "Raleigh-Durham Airport Authority (operator, rdu.com)",
+     "quote": "RDU has two terminals. Confirm which terminal your airline uses before you leave home.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-special",
+     "org": "Raleigh-Durham Airport Authority (operator, rdu.com)",
+     "quote": "Post-security areas are located near Gate A7 in Terminal 1 and Gate C9 in Terminal 2."
+    }
+   ]
+  },
+  {
+   "claim": "international flights without US preclearance arrive into Terminal 2",
+   "verdict": "confirmed",
+   "inAfter": "International flights without US preclearance arrive into Terminal 2.",
+   "note": "'All' dropped: the operator places the international arrivals area in Terminal 2 (it is being enlarged) but does not say every such flight uses it. Wikipedia names gates C21, C23, C24 and C25.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "All non precleared international flights are processed in Terminal 2"
+    },
+    {
+     "file": "op-t2-expansion",
+     "org": "Raleigh-Durham Airport Authority (operator, rdu.com)",
+     "quote": [
+      "July 17, 2026",
+      "The larger Terminal 2 will provide more space for ticketing, security screening, baggage claim and international arrivals."
+     ],
+     "dated": "2026-07-17"
+    },
+    {
+     "file": "op-terminal-expansion",
+     "org": "Raleigh-Durham Airport Authority (operator, rdu.com)",
+     "quote": "The project will expand the ticketing and international arrival areas",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 1 nine gates, 45 in total",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 1 has nine gates and Terminal 2 the rest, 45 in total.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Terminal 1 contains 9 gates, A1–A9.",
+      "two terminals with a total of 45 gates"
+     ]
+    },
+    {
+     "file": "op-acfr-fy26",
+     "org": "Raleigh-Durham Airport Authority (operator, annual financial report)",
+     "quote": "The airport has two active terminals: Terminal 1, operates 9 passenger gates, and Terminal 2 operates 36 passenger gates.",
+     "dated": "2026-03-31 (fiscal year ended)"
+    }
+   ]
+  },
+  {
+   "claim": "Delta has the largest market share",
+   "verdict": "confirmed",
+   "inAfter": "Delta has the largest market share",
+   "note": "A narrow lead: the operator's calendar 2025 figures give Delta and its regional partners 25.90 per cent and American 25.09 per cent; BTS, counting the operating airline, gives Delta 20.65 and American 17.05 for the year to June 2026.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "As of 2025, Delta Air Lines has the largest market share"
+    },
+    {
+     "file": "bts-carrier-shares",
+     "org": "US Bureau of Transportation Statistics",
+     "quote": [
+      "Carrier Shares for July 2025 - June 2026",
+      "Delta 3,037 20.65%",
+      "American 2,509 17.05%"
+     ],
+     "dated": "2026-06 (12 months to June 2026; BTS data as of 9/23/2026)"
+    },
+    {
+     "file": "op-stats-2025",
+     "org": "Raleigh-Durham Airport Authority (operator, monthly statistics)",
+     "quote": [
+      "Delta + Regionals 169,182 173,712 -2.61% 1,583,130 1,565,280 1.14% 2,029,274 2,006,462 1.14% 25.90%",
+      "American + Regionals 164,356 172,412 -4.67% 1,528,217 1,587,184 -3.72% 1,966,171 2,064,114 -4.75% 25.09%"
+     ],
+     "dated": "2025-12 (calendar year to date)"
+    }
+   ]
+  },
+  {
+   "claim": "Breeze bases crews here",
+   "verdict": "softened",
+   "inAfter": "Breeze Airways, which bases crews here",
+   "note": "Was 'bases aircraft here'; both sources speak of crews (pilots and flight attendants), not aircraft. Wikipedia says the base opened in March 2026; the operator's report for the year to March 2026 records the announcement. The reports Wikipedia cites (Triangle Business Journal, 2 March 2026; CBS17) and Breeze's own newsroom refused both a plain request and the browser (403).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Breeze opened an operating base in March 2026, with planned 200 pilots & flight attendants."
+    },
+    {
+     "file": "op-acfr-fy26",
+     "org": "Raleigh-Durham Airport Authority (operator, annual financial report)",
+     "quote": "Breeze Airways began international service at RDU with nonstop flights to Punta Cana, Dominican Republic, and announced plans to open a crew base at the airport that would create more than 200 local jobs.",
+     "dated": "2026-03-31 (fiscal year ended)"
+    }
+   ]
+  },
+  {
+   "claim": "Breeze flies to more destinations than any other airline",
+   "verdict": "confirmed",
+   "inAfter": "flies to more destinations than any other airline",
+   "note": "The number is dropped. The operator's list (read 23 Sep 2026) has Breeze on 41 of its 91 routes, but two of those (Dayton, Provo) start in October and November 2026, so 39 are flying now; next are Delta on 24 and American, Southwest and Frontier on 15 each.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Breeze Airways flies to the most destinations with 41"
+    },
+    {
+     "file": "op-destinations-full",
+     "org": "Raleigh-Durham Airport Authority (operator, rdu.com)",
+     "quote": [
+      "Browse all nonstop destinations served from RDU and see which airlines fly each route.",
+      "Akron CAK Breeze",
+      "White Plains HPN Breeze",
+      "Dayton DAY Breeze (Starts November 2026)",
+      "Provo PVU Breeze (Starts October 2026)"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Atlanta the busiest domestic route; the New York area's airports together carry more",
+   "verdict": "confirmed",
+   "inAfter": "Atlanta is the busiest domestic route, though the New York area's airports together carry more passengers.",
+   "note": "Was 'New York carries the most passengers a day'; BTS gives yearly figures, so 'a day' is dropped. BTS, year to June 2026: Atlanta 675,490 passengers; LaGuardia 294,530, Newark 279,970 and JFK 274,170, together 848,670.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "with Atlanta being the busiest domestic route, and New York metropolitan area having the most passengers per day"
+    },
+    {
+     "file": "bts-carrier-shares",
+     "org": "US Bureau of Transportation Statistics",
+     "quote": [
+      "Top 10 Destination Airports (U.S. Only, Passengers (000))",
+      "Time Period: July 2025 - June 2026; Airport: Atlanta, GA:ATL; Data: 675.49",
+      "Time Period: July 2025 - June 2026; Airport: New York, NY:LGA; Data: 294.53",
+      "Time Period: July 2025 - June 2026; Airport: Newark, NJ:EWR; Data: 279.97",
+      "Time Period: July 2025 - June 2026; Airport: New York, NY:JFK; Data: 274.17"
+     ],
+     "dated": "2026-06 (12 months to June 2026; BTS data as of 9/23/2026)"
+    }
+   ]
+  },
+  {
+   "claim": "more than 90 destinations, 15 international in 11 countries, counting routes due by December 2026",
+   "verdict": "corrected",
+   "inAfter": "Counting routes due to start by December 2026, nonstop flights reach more than 90 destinations, 15 of them international in 11 countries.",
+   "note": "Was 'reaches over 90 destinations including 15 international ones across 11 countries', stated as if all were flying. The operator's list of 'current and scheduled' routes (read 23 Sep 2026) has 91 destinations, five of them starting between October and December 2026. Its 15 international destinations in 11 countries include three of those (Guadalajara on Volaris, Belize and Turks and Caicos on BermudAir); flying today are 86 destinations, 12 of them international in 9 countries. The operator's annual report (year to March 2026) says 'a record 87'.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "offering passenger service to over 90 destinations, including 15 international destinations in 11 countries"
+    },
+    {
+     "file": "op-destinations-full",
+     "org": "Raleigh-Durham Airport Authority (operator, rdu.com)",
+     "quote": [
+      "View the map below to explore current and scheduled nonstop destinations from RDU.",
+      "Guadalajara GDL Volaris (Starts October 2026)",
+      "Belize BZE Bermudair (Starts December 2026)",
+      "Turks and Caicos PLS BermudAir (Starts December 2026)",
+      "Cancun, Mexico CUN Aeromexico American Delta Frontier",
+      "Dublin DUB Aer Lingus",
+      "Frankfurt FRA Lufthansa",
+      "London LHR American",
+      "Mexico City MEX Aeromexico",
+      "Montreal YUL Air Canada",
+      "Panama City PTY Copa Airlines",
+      "Paris CDG Air France",
+      "Punta Cana, Dominican Republic PUJ American Breeze",
+      "Reykjavik KEF Icelandair",
+      "Toronto YYZ Air Canada",
+      "Vancouver YVR Air Canada"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-press-list",
+     "org": "Raleigh-Durham Airport Authority (operator, rdu.com)",
+     "quote": [
+      "RDU will add two new international destinations to its route map in December when BermudAir launches nonstop flights to Belize and Turks and Caicos.",
+      "RDU will welcome a new airline and a new international destination when Volaris launches nonstop flights to Guadalajara, Mexico, in October."
+     ],
+     "dated": "2026-06-03 and 2026-09-09"
+    }
+   ]
+  },
+  {
+   "claim": "nearly 600 aircraft movements a day",
+   "verdict": "confirmed",
+   "inAfter": "There are nearly 600 aircraft movements a day",
+   "note": "The operator counts 215,667 aircraft operations in calendar 2025, which is 591 a day; the count includes general aviation and military movements.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "There are nearly 600 daily aircraft operations."
+    },
+    {
+     "file": "op-stats-2025",
+     "org": "Raleigh-Durham Airport Authority (operator, monthly statistics)",
+     "quote": [
+      "December FISCAL YEAR TO DATE CALENDAR YEAR TO DATE",
+      "Total Aircraft Operations 18,164 17,505 3.76% 168,810 165,091 2.25% 215,667 210,883 2.27%"
+     ],
+     "dated": "2025-12 (calendar year to date)"
+    }
+   ]
+  },
+  {
+   "claim": "a replacement runway is under construction",
+   "verdict": "confirmed",
+   "inAfter": "a replacement runway is under construction",
+   "note": "The operator expects the new 10,639 ft Runway 5L-23R to be finished in 2029, and so does the current Wikipedia article (paving from 2027). Not added to the text, as the old text gave no date; for Andy.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "New runway 05L/23R is currently under construction northwest of the current runway 05L/23R."
+    },
+    {
+     "file": "op-runway",
+     "org": "Raleigh-Durham Airport Authority (operator, rdu.com)",
+     "quote": [
+      "Construction is underway on one of RDU's most important projects, the replacement of the airport's primary commercial runway, 5L-23R.",
+      "The runway is expected to be completed in 2029."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-runway-news",
+     "org": "Raleigh-Durham Airport Authority (operator, rdu.com)",
+     "quote": "setting the stage for the new runway's opening in 2029",
+     "dated": "2026-07-09"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is anticipated to start paving in 2027, to be finished in 2029"
+    }
+   ]
+  },
+  {
+   "claim": "the terminal connection is the thing to warn a client about",
+   "verdict": "cut",
+   "wasBefore": "The connection between terminals is the thing to warn a client about.",
+   "why": "A lead-in to the airside-link detail cut below; the warning is now the operator's own advice to check the airline's terminal."
+  },
+  {
+   "claim": "no airside link between the terminals",
+   "verdict": "cut",
+   "wasBefore": "There is no airside link at all.",
+   "why": "Wikipedia alone. The operator's FAQ has the question but its answer does not load into the page text; its services, parking, travel-tips, special-assistance and terminal-map pages, its annual report and WRAL's Terminal 1 report say nothing either way. Softened to two terminals with their own checkpoints (operator, Wikipedia)."
+  },
+  {
+   "claim": "moving between terminals means leaving security, a shuttle bus or walkway through the car parks, and re-screening",
+   "verdict": "cut",
+   "wasBefore": "Moving between Terminal 1 and Terminal 2 means leaving security and taking a shuttle bus or the moving walkway through the covered car parks, then clearing again.",
+   "why": "Wikipedia alone; no second source found (see above)."
+  },
+  {
+   "claim": "all non-precleared international flights arrive into Terminal 2",
+   "verdict": "cut",
+   "wasBefore": "All international flights without pre-clearance arrive into Terminal 2.",
+   "why": "Reworded and kept without 'all' (see above)."
+  },
+  {
+   "claim": "the airline picture is competitive, which helps fares",
+   "verdict": "cut",
+   "wasBefore": "The airline picture is competitive, which helps fares.",
+   "why": "An opinion with a claim about fares that no source makes."
+  },
+  {
+   "claim": "Delta treats it as a focus city",
+   "verdict": "cut",
+   "wasBefore": "and treats it as a focus city",
+   "why": "Wikipedia alone, and its cited sources are from 2018 and 2021 (Spectrum News, Airline Weekly); nothing from the last 12 months found. Delta's regional airline Endeavor confirms its own crew and maintenance bases at RDU, not focus-city status."
+  },
+  {
+   "claim": "Breeze flies to 41 destinations and bases aircraft here",
+   "verdict": "cut",
+   "wasBefore": "flies to more destinations than anyone with 41 and bases aircraft here",
+   "why": "41 counts two routes that start in October and November 2026 (39 flying now), so the number is dropped; 'aircraft' softened to crews, which is what both sources say. Both points kept in reworded form."
+  },
+  {
+   "claim": "New York carries the most passengers a day",
+   "verdict": "cut",
+   "wasBefore": "Atlanta is the busiest domestic route and New York carries the most passengers a day.",
+   "why": "Reworded and kept: BTS gives yearly figures, not daily, and New York is three airports."
+  },
+  {
+   "claim": "over 90 destinations, 15 international in 11 countries, on nearly 600 daily movements",
+   "verdict": "cut",
+   "wasBefore": "The airport reaches over 90 destinations including 15 international ones across 11 countries, on nearly 600 daily movements.",
+   "why": "Reworded and kept: the counts are true only when routes starting in October to December 2026 are included, so the text now says so."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

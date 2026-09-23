@@ -1,0 +1,402 @@
+{
+ "iata": "SAT",
+ "id": "recqkwpjz7QpV8zy2",
+ "name": "San Antonio International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/San_Antonio_International_Airport",
+ "audited": "2026-09-23",
+ "before": "San Antonio's airport, about 8 miles north of downtown, and 43rd busiest in the United States. It averages 260 departures and arrivals a day across 27 gates, with 14 airlines flying non-stop to 45 destinations in the United States and Mexico.\n\nThe terminal split is simple but worth getting right. All international carriers operate from Terminal A, which is also the larger of the two with 17 gates and holds the customs facility. Terminal B, opened in November 2010, has eight gates.\n\nSouthwest is the biggest airline here by both passengers and routes, and flies from Terminal A.\n\nThe route map is domestic and Mexican only, so this is not a long haul gateway. Three runways serve the 2,305 acre site at an elevation of 809 feet.",
+ "after": "San Antonio's airport, about 8 miles north of downtown. It is the 44th busiest in the United States by passengers, with nonstop flights to more than 40 destinations.\n\nAll the international airlines use Terminal A, which handles most other airlines too. Its extension, opened in March 2026, added ground-level gates and a new customs hall for international arrivals. American and some United flights use Terminal B.\n\nSouthwest is the biggest airline here by both passengers and routes, and flies from Terminal A.\n\nApart from Air Canada flights to Toronto, which the airport lists as seasonal, every route is domestic or to Mexico, so this is not a long haul gateway. Three runways serve the 2,305 acre site at an elevation of 809 feet.",
+ "claims": [
+  {
+   "claim": "San Antonio's airport, about 8 miles north of downtown",
+   "verdict": "confirmed",
+   "inAfter": "San Antonio's airport, about 8 miles north of downtown",
+   "note": "Coordinates put it 12.4 km (7.7 miles) from the GeoNames centre at 11 degrees, north; a ratio of 1.04. The FAA gives 7 nautical miles north (about 8 statute miles).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is in Uptown Central San Antonio, about 8 miles (13 km) north of Downtown."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 12.4 km (7.7 miles)",
+      "Bearing from the city centre: 11 degrees, which is north"
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "3 CBD TO AIRPORT (NM): 07 N",
+      "AFD EFF 9/23/2026 AIRPORT MASTER RECORD 09/03/2026"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "the 44th busiest in the United States by passengers",
+   "verdict": "corrected",
+   "inAfter": "the 44th busiest in the United States by passengers",
+   "note": "Was '43rd busiest'. The FAA's preliminary CY2025 table ranks San Antonio 44th by boardings (5,237,816, down 4.19 per cent), and BTS ranks it 44th of 765 US airports by passengers for the year to June 2026. Both are US Department of Transportation agencies, but they are separate data sets (calendar-year boardings and a mid-year twelve months). The operator gives 10,740,694 passengers for 2025, down 3.2 per cent.",
+   "sources": [
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "44 SW TX SAT San Antonio San Antonio International P M 5,237,816 5,466,684 -4.19%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "bts-carrier-shares",
+     "org": "US Bureau of Transportation Statistics",
+     "quote": [
+      "Arrival 4,955k 4,733k -4.48% 44",
+      "Among 765 U.S. airports, 12 months ending June 2026"
+     ],
+     "dated": "2026-06 (12 months to June 2026; BTS data as of 9/23/2026)"
+    },
+    {
+     "file": "op-traffic-dec2025",
+     "org": "San Antonio Aviation Department (operator, flysanantonio.com)",
+     "quote": "In 2025, 10,740,694 total passengers traveled through San Antonio International Airport representing a decrease of 3.2% compared to the year prior.",
+     "dated": "2025 (December & Year End 2025 Statistics)"
+    }
+   ]
+  },
+  {
+   "claim": "nonstop flights to more than 40 destinations",
+   "verdict": "softened",
+   "inAfter": "with nonstop flights to more than 40 destinations",
+   "note": "Was '14 airlines flying non-stop to 45 destinations in the United States and Mexico'. The operator's list (read 23 Sep 2026) has 47 destinations, five of them marked seasonal, flown by 12 airlines; Wikipedia gives 45 and 14. The counts differ, so the text says what both support and names no airline count.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "which serve 14 airlines flying non-stop to 45 destinations in the US and Mexico"
+    },
+    {
+     "file": "op-nonstop",
+     "org": "San Antonio Aviation Department (operator, flysanantonio.com)",
+     "quote": [
+      "We have a number of nonstop destinations for your convenience",
+      "S Albuquerque, NM ABQ Southwest",
+      "A Tampa, FL TPA Southwest",
+      "A Washington-Dulles, VA IAD United"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "all the international airlines use Terminal A, which handles most other airlines too",
+   "verdict": "confirmed",
+   "inAfter": "All the international airlines use Terminal A, which handles most other airlines too.",
+   "note": "The operator's airline list puts AeroMexico, Air Canada, Viva and Volaris in Terminal A, and every other airline there too except American (Terminal B) and United (A and B). Replaces 'the larger of the two with 17 gates', whose gate count is out of date (see the cuts).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "All international carriers operate out of Terminal A.",
+      "12 of the current 14 airlines serving the airport operate from Terminal A, including the Airport's largest airline by passengers and routes served, Southwest Airlines."
+     ]
+    },
+    {
+     "file": "op-airlines",
+     "org": "San Antonio Aviation Department (operator, flysanantonio.com)",
+     "quote": [
+      "AeroMexico AM 1.800.237.6639 A",
+      "Air Canada AC 1.888.247.2262 A",
+      "Viva VB 1.866.359.8482 A",
+      "Volaris Y4 1.866.988.2527 A",
+      "Delta Air Lines DL 1.800.221.1212 A",
+      "Southwest Airlines WN 1.800.435.9792 A"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal A extension opened March 2026 with ground-level gates and a new customs hall",
+   "verdict": "corrected",
+   "inAfter": "Its extension, opened in March 2026, added ground-level gates and a new customs hall for international arrivals.",
+   "note": "Replaces the stale '17 gates' and restates 'holds the customs facility' as it now stands. The operator describes the Ground Load Facility as three ground gates south of Terminal A with an integrated Federal Inspection Station; KSAT reports it opened on 27 March 2026. A new Terminal C with up to 18 gates and its own customs hall is due in 2028 (operator, KSAT); not added, as a new fact, for Andy.",
+   "sources": [
+    {
+     "file": "ksat-ta-expansion",
+     "org": "KSAT 12 (San Antonio television news)",
+     "quote": [
+      "Published: March 27, 2026 at 10:37 AM",
+      "San Antonio International Airport (SAT) officially opened its Terminal A expansion on Friday.",
+      "adding new ground-load gates, passenger areas and a Federal Inspection Station for international arrivals"
+     ],
+     "dated": "2026-03-27"
+    },
+    {
+     "file": "op-tdp",
+     "org": "San Antonio Aviation Department (operator, flysanantonio.com)",
+     "quote": [
+      "New Ground Load Facility Amenities",
+      "Three new ground gates located south of Terminal A",
+      "Integrated Federal Inspection Station for international arrivals"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The U.S. Customs and Border Protection facility is located in Terminal A."
+    }
+   ]
+  },
+  {
+   "claim": "American and some United flights use Terminal B",
+   "verdict": "confirmed",
+   "inAfter": "American and some United flights use Terminal B.",
+   "note": "The operator lists American in Terminal B and United in A and B. Under a May 2026 settlement Southwest is also to have three gates in a renovated Terminal B and three in the new Terminal C (KSAT); a future change, not in the text.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "American and Continental were the two original airlines at Terminal B.",
+      "United, at the time located in Terminal A, moved into Terminal B on August 1, 2012"
+     ]
+    },
+    {
+     "file": "op-airlines",
+     "org": "San Antonio Aviation Department (operator, flysanantonio.com)",
+     "quote": [
+      "American Airlines AA 1.800.433.7300 B",
+      "United Airlines UA 1.800.241.6522 A/B"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "ksat-southwest-settlement",
+     "org": "KSAT 12 (San Antonio television news)",
+     "quote": "three gates in the soon-to-be renovated Terminal B and three new gates at the brand new Terminal C"
+    }
+   ]
+  },
+  {
+   "claim": "Southwest the biggest airline by passengers and routes, flying from Terminal A",
+   "verdict": "confirmed",
+   "inAfter": "Southwest is the biggest airline here by both passengers and routes, and flies from Terminal A.",
+   "note": "BTS gives Southwest 36.95 per cent of passengers (American next on 19.94). On the operator's list Southwest flies 20 of the 47 routes; American is next with 8.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "including the Airport's largest airline by passengers and routes served, Southwest Airlines"
+    },
+    {
+     "file": "bts-carrier-shares",
+     "org": "US Bureau of Transportation Statistics",
+     "quote": [
+      "Southwest 3,496 36.95%",
+      "American 1,887 19.94%"
+     ],
+     "dated": "2026-06 (12 months to June 2026; BTS data as of 9/23/2026)"
+    },
+    {
+     "file": "op-airlines",
+     "org": "San Antonio Aviation Department (operator, flysanantonio.com)",
+     "quote": "Southwest Airlines WN 1.800.435.9792 A",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-nonstop",
+     "org": "San Antonio Aviation Department (operator, flysanantonio.com)",
+     "quote": [
+      "A Dallas-Love, TX DAL Southwest",
+      "A Tampa, FL TPA Southwest",
+      "S Cancun, MX CUN Southwest"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Air Canada flies to Toronto",
+   "verdict": "corrected",
+   "inAfter": "Apart from Air Canada flights to Toronto",
+   "note": "The old text said the route map was domestic and Mexican only. Air Canada began flying to Toronto Pearson on 2 May 2026, three times a week at the start (KSAT, operator).",
+   "sources": [
+    {
+     "file": "ksat-aircanada",
+     "org": "KSAT 12 (San Antonio television news)",
+     "quote": [
+      "Air Canada announced a nonstop flight service that travels from San Antonio International Airport (SAT) to the Toronto Pearson International Airport (YYZ) in Ontario.",
+      "Departures from SAT begin May 2, 2026, every Tuesday, Thursday and Saturday."
+     ],
+     "dated": "2025-09-22"
+    },
+    {
+     "file": "op-traffic-dec2025",
+     "org": "San Antonio Aviation Department (operator, flysanantonio.com)",
+     "quote": "Air Canada (AC) will launch new, nonstop service to Toronto (YYZ) starting on May 2nd.",
+     "dated": "2025 (December & Year End 2025 Statistics)"
+    },
+    {
+     "file": "op-nonstop",
+     "org": "San Antonio Aviation Department (operator, flysanantonio.com)",
+     "quote": "S Toronto, CA YYZ Air Canada",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "the airport lists Toronto as seasonal",
+   "verdict": "confirmed",
+   "primary": true,
+   "attribution": "the airport",
+   "inAfter": "which the airport lists as seasonal",
+   "note": "An attributed statement: the operator's destinations page marks Toronto 'S', which its legend defines as a Seasonal Destination. KSAT gives the start date but not whether the route is year-round.",
+   "sources": [
+    {
+     "file": "op-nonstop",
+     "org": "San Antonio Aviation Department (the airport, flysanantonio.com)",
+     "quote": [
+      "S Toronto, CA YYZ Air Canada",
+      "Active Destination",
+      "Seasonal Destination"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "every other route is domestic or to Mexico",
+   "verdict": "corrected",
+   "inAfter": "every route is domestic or to Mexico",
+   "note": "Every destination on the operator's list is in the United States or Mexico except Toronto; KSAT called Toronto the airport's 10th international destination and the only one in Canada. Condor's Frankfurt flights, the only European route, ended in 2025 (KSAT, December 2024).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "non-stop to 45 destinations in the US and Mexico"
+    },
+    {
+     "file": "op-nonstop",
+     "org": "San Antonio Aviation Department (operator, flysanantonio.com)",
+     "quote": [
+      "A Guadalajara, MX GDL Volaris",
+      "A Leon-Guanajuato, MX BJX Viva",
+      "A Mexico City, MX MEX Volaris",
+      "A Monterrey, MX MTY Viva",
+      "A Queretaro, MX QRO Viva",
+      "A San Luis Potosi, MX SLP Volaris",
+      "A Torreon, MX TRC Viva",
+      "S Cancun, MX CUN Southwest"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "ksat-aircanada",
+     "org": "KSAT 12 (San Antonio television news)",
+     "quote": "The addition is SAT's 10th international destination and the only one in Canada."
+    },
+    {
+     "file": "ksat-condor-2024",
+     "org": "KSAT 12 (San Antonio television news)",
+     "quote": "Condor Airlines announced it will discontinue its service to Frankfurt from San Antonio International Airport (SAT) and several other North American airports in 2025"
+    }
+   ]
+  },
+  {
+   "claim": "three runways, 2,305 acres, elevation 809 feet",
+   "verdict": "confirmed",
+   "inAfter": "Three runways serve the 2,305 acre site at an elevation of 809 feet.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "It has three runways and covers 2,305 acres (933 ha).",
+      "Its elevation is 809 feet (247 m) above sea level."
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "22 ACREAGE: 2,305",
+      "809.1 SURVEYED"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "elevation 809 ft (247 m)",
+      "Runways listed: 3"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "43rd busiest in the United States",
+   "verdict": "cut",
+   "wasBefore": "and 43rd busiest in the United States",
+   "why": "Out of date: the FAA (calendar 2025) and BTS (year to June 2026) both rank it 44th. Corrected above."
+  },
+  {
+   "claim": "260 departures and arrivals a day",
+   "verdict": "cut",
+   "wasBefore": "It averages 260 departures and arrivals a day",
+   "why": "Wikipedia alone, and it looks stale: BTS counts 43,716 scheduled departures in the year to June 2026, about 240 flights a day with arrivals. No current daily figure from a second source."
+  },
+  {
+   "claim": "27 gates",
+   "verdict": "cut",
+   "wasBefore": "across 27 gates",
+   "why": "No current total is sourced: Wikipedia's own figures conflict (17 plus 8 in one place, Terminal B with ten since January 2023 in another), and the March 2026 Terminal A extension added ground-level gates (three, per the operator)."
+  },
+  {
+   "claim": "14 airlines to 45 destinations in the United States and Mexico",
+   "verdict": "cut",
+   "wasBefore": "with 14 airlines flying non-stop to 45 destinations in the United States and Mexico",
+   "why": "Out of date: the operator lists 12 airlines and 47 destinations, one of them Toronto. Softened to 'more than 40 destinations', with Toronto now named."
+  },
+  {
+   "claim": "the terminal split is simple but worth getting right",
+   "verdict": "cut",
+   "wasBefore": "The terminal split is simple but worth getting right.",
+   "why": "A signpost with a judgement ('simple') no source makes; the split itself is stated and sourced."
+  },
+  {
+   "claim": "Terminal A the larger, with 17 gates, and holds the customs facility",
+   "verdict": "cut",
+   "wasBefore": "which is also the larger of the two with 17 gates and holds the customs facility",
+   "why": "The 17-gate count is out of date since the March 2026 extension; reworded to Terminal A handling most airlines and its new customs hall (KSAT, operator)."
+  },
+  {
+   "claim": "Terminal B opened in November 2010 with eight gates",
+   "verdict": "cut",
+   "wasBefore": "Terminal B, opened in November 2010, has eight gates.",
+   "why": "Eight is out of date: Wikipedia's current text says two gates were added in January 2023, making ten, but its source (San Antonio Report) refused the request (403), so no gate count is given. The 2010 opening rests on Wikipedia alone."
+  },
+  {
+   "claim": "the route map is domestic and Mexican only",
+   "verdict": "cut",
+   "wasBefore": "The route map is domestic and Mexican only",
+   "why": "Wrong since May 2026: Air Canada flies to Toronto. Corrected above."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so this is not a long haul gateway",
+   "why": "The old text's advice, drawn from the route list in the same sentence: nothing on the operator's list goes beyond North America, and Condor's Frankfurt flights ended in 2025 (KSAT)."
+  }
+ ],
+ "tracerOk": {}
+}

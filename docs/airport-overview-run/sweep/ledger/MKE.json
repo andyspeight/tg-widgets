@@ -1,0 +1,362 @@
+{
+ "iata": "MKE",
+ "id": "recoeWyle5oTfy7YM",
+ "name": "General Mitchell International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Milwaukee_Mitchell_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Milwaukee's airport, 9 km south of downtown, and a genuinely easy one to use. It serves southern and eastern Wisconsin and northern Illinois, which makes it a real alternative to Chicago for clients heading to that corner of the Midwest.\n\nOne terminal, two concourses, 38 gates. Southwest and United are in Concourse C and everyone else in Concourse D. International arrivals without border pre-clearance go through the separate International Arrivals Building.\n\nIt has more character than most American airports. There is an aviation museum and a USO room on the concession level, children's play areas throughout, and a branch of Renaissance Books which is believed to be the world's first second hand bookshop in an airport. An observation area on the north edge is open to the public, with tower radio traffic rebroadcast on low power FM so visitors can listen in the car.\n\nThe airport is named after General Billy Mitchell, who grew up in Milwaukee and is often called the father of the United States Air Force.",
+ "after": "Milwaukee's airport, 9 km south of downtown, serving south-eastern Wisconsin.\n\nOne terminal with two concourses, C and D. Southwest and United use Concourse C, while American, Delta and Alaska use Concourse D. International arrivals, apart from flights from Toronto, go through the separate International Arrivals Terminal north of the parking structure.\n\nThe main terminal has the Mitchell Gallery of Flight, a free aviation museum before security, next to a USO lounge for military personnel. There are children's play areas throughout and a branch of Renaissance Books, which sells second-hand and rare books.\n\nThe airport is named after General Billy Mitchell, who grew up in Milwaukee and is often called the father of the United States Air Force.",
+ "claims": [
+  {
+   "claim": "Milwaukee's airport",
+   "verdict": "confirmed",
+   "inAfter": "Milwaukee's airport",
+   "note": "The operator has called itself Milwaukee Mitchell International Airport since 2019; the record's name, General Mitchell International Airport, is the older name, which the FAA still uses (flagged for Andy).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Along with being the primary airport for Milwaukee"
+    },
+    {
+     "file": "op-history",
+     "org": "Milwaukee County (operator, mitchellairport.com)",
+     "quote": [
+      "for whom Milwaukee County's largest airport is named",
+      "In 2019, the airport was renamed \"Milwaukee Mitchell International Airport\" to incorporate the airport's location and anchor city in the airport name."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "9 km south of downtown",
+   "verdict": "confirmed",
+   "inAfter": "9 km south of downtown",
+   "note": "Wikipedia and the FAA give 5 nautical miles (9.3 km) south; the coordinates give 10.2 km in a straight line at 175 degrees, south, a ratio of 0.88.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is a civil–military airport 5 nautical miles (9.3 km; 5.8 mi) south of downtown Milwaukee, Wisconsin, United States"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "3 CBD TO AIRPORT (NM): 05 S",
+      "AFD EFF 9/23/2026 AIRPORT MASTER RECORD 09/03/2026"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 10.2 km (6.4 miles)",
+      "Bearing from the city centre: 175 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "serving south-eastern Wisconsin",
+   "verdict": "softened",
+   "inAfter": "serving south-eastern Wisconsin",
+   "note": "Was 'southern and eastern Wisconsin and northern Illinois'. The operator's master plan speaks of south-eastern Wisconsin and the Great Lakes area; northern Illinois rests on Wikipedia alone (see the cut).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Mitchell International is also used by travelers throughout Southern and Eastern Wisconsin and Northern Illinois."
+    },
+    {
+     "file": "op-mp-exec",
+     "org": "Milwaukee County (operator, master plan update)",
+     "quote": [
+      "MILWAUKEE MITCHELL INTERNATIONAL AIRPORT SEPTEMBER 2022",
+      "reflect MKE's important role in meeting the demand in southeastern Wisconsin, the Great Lakes area, and the national aviation system"
+     ],
+     "dated": "2022-09"
+    }
+   ]
+  },
+  {
+   "claim": "one terminal with two concourses, C and D",
+   "verdict": "confirmed",
+   "inAfter": "One terminal with two concourses, C and D.",
+   "note": "The gate count (38) is cut: only Wikipedia gives it. Concourse E closed in 2017 and is being rebuilt (see the international arrivals claim).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Milwaukee Mitchell International Airport has one terminal with two concourses and 38 gates."
+    },
+    {
+     "file": "op-shopping-b",
+     "org": "Milwaukee County (operator, mitchellairport.com)",
+     "quote": [
+      "Shopping in Concourse C",
+      "Shopping in Concourse D"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-concourse-e",
+     "org": "Milwaukee County (operator, mitchellairport.com)",
+     "quote": "Concourse E officially closed in 2017.",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Southwest and United in Concourse C; American, Delta and Alaska in Concourse D",
+   "verdict": "softened",
+   "inAfter": "Southwest and United use Concourse C, while American, Delta and Alaska use Concourse D.",
+   "note": "Was 'everyone else in Concourse D'. The operator's departures board for 23 September 2026 puts every Southwest and United flight at a C gate (C9 to C25) and every American, Delta and Alaska flight at a D gate (D44 to D55). Frontier, JetBlue and Sun Country, also on the operator's airline list, were not on that day's boards, so their concourse is not stated.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Concourse C houses Southwest Airlines and United Airlines; and Concourse D houses the remaining airlines at the airport."
+    },
+    {
+     "file": "op-departures",
+     "org": "Milwaukee County (operator, live departures board)",
+     "quote": [
+      "Today, September 23",
+      "Southwest 2878 Boarding C23",
+      "United 5640 On Time C12",
+      "American 2581 Departed D53",
+      "Delta 1151 On Time D46",
+      "Alaska 507 Updated D51",
+      "Flight data last updated 2026-09-23 12:45:06."
+     ],
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "international arrivals, apart from Toronto flights, use the separate International Arrivals Terminal",
+   "verdict": "confirmed",
+   "inAfter": "International arrivals, apart from flights from Toronto, go through the separate International Arrivals Terminal north of the parking structure.",
+   "note": "The operator's own wording and name. Its Concourse E page calls the 1975 building standalone and not connected to the main terminal; a connected replacement concourse was started on 16 September 2025 and is expected to open in late 2027 (not added, a new fact; for Andy).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "All international arrivals lacking border pre-clearance must pass through the International Arrivals Building."
+    },
+    {
+     "file": "op-iat",
+     "org": "Milwaukee County (operator, mitchellairport.com)",
+     "quote": "All international flight arrivals (except Toronto flights) arrive at the International Arrivals Terminal located north of the parking structure.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-concourse-e",
+     "org": "Milwaukee County (operator, mitchellairport.com)",
+     "quote": [
+      "The current International Arrivals Terminal was designed in 1975 as a standalone building with one gate.",
+      "it is not connected to the main terminal or parking garage",
+      "The new concourse is expected to open in late 2027."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "the Mitchell Gallery of Flight, a free aviation museum before security",
+   "verdict": "confirmed",
+   "inAfter": "The main terminal has the Mitchell Gallery of Flight, a free aviation museum before security",
+   "note": "Still open: the operator's history page and the museum's own site both describe it as open in the main terminal before security.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The terminal houses the Mitchell Gallery of Flight (a non-profit museum)"
+    },
+    {
+     "file": "op-history",
+     "org": "Milwaukee County (operator, mitchellairport.com)",
+     "quote": "a free non-profit aviation museum located pre-security in the main terminal",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "gallery-location",
+     "org": "Mitchell Gallery of Flight (the museum)",
+     "quote": [
+      "The museum is located on the south side of the main terminal, next to the USO, and before TSA security.",
+      "Admission to the museum is free."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "a USO lounge next to the museum",
+   "verdict": "confirmed",
+   "inAfter": "next to a USO lounge for military personnel",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "a USO room on the concession level"
+    },
+    {
+     "file": "op-uso",
+     "org": "Milwaukee County (operator, mitchellairport.com)",
+     "quote": [
+      "MKE offers a USO Lounge in the Main Terminal.",
+      "A retreat for active duty military members"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "gallery-location",
+     "org": "Mitchell Gallery of Flight (the museum)",
+     "quote": "next to the USO"
+    }
+   ]
+  },
+  {
+   "claim": "children's play areas throughout",
+   "verdict": "confirmed",
+   "inAfter": "There are children's play areas throughout",
+   "note": "Rebranded as Make-A-Wish Kids Zones in June 2026 (operator); the family page places them in Concourses C and D.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "There are play areas for children throughout the facility."
+    },
+    {
+     "file": "op-family-b",
+     "org": "Milwaukee County (operator, mitchellairport.com)",
+     "quote": "head to our Children's Play Areas located throughout the airport",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-news",
+     "org": "Milwaukee County (operator, mitchellairport.com)",
+     "quote": "MILWAUKEE (June 30, 2026) – Milwaukee Mitchell International Airport (MKE) unveiled newly branded Make-A-Wish Kids Zones",
+     "dated": "2026-06-30"
+    }
+   ]
+  },
+  {
+   "claim": "a branch of Renaissance Books, second-hand and rare books",
+   "verdict": "confirmed",
+   "inAfter": "a branch of Renaissance Books, which sells second-hand and rare books",
+   "note": "Still trading: the operator's shopping page and terminal guide list it in the main terminal. The 'world's first' claim is cut.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "a branch of Renaissance Books which is believed to be the world's first used book store in an airport"
+    },
+    {
+     "file": "op-shopping-b",
+     "org": "Milwaukee County (operator, mitchellairport.com)",
+     "quote": "Renaissance Books offers a large selection of used and rare books with a constantly changing inventory.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-terminal-guide-b",
+     "org": "Milwaukee County (operator, mitchellairport.com)",
+     "quote": "- Renaissance Books (Main Terminal)",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "named after General Billy Mitchell, who grew up in Milwaukee, often called the father of the US Air Force",
+   "verdict": "confirmed",
+   "inAfter": "The airport is named after General Billy Mitchell, who grew up in Milwaukee and is often called the father of the United States Air Force.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is named in honor of United States Army General Billy Mitchell, who was raised in Milwaukee and is often regarded as the father of the United States Air Force."
+    },
+    {
+     "file": "gallery-mitchell",
+     "org": "Mitchell Gallery of Flight (the museum)",
+     "quote": [
+      "namesake of our airport, was a great military leader",
+      "He is widely regarded as the Father of the U.S. Air Force",
+      "Billy grew up in Milwaukee."
+     ]
+    },
+    {
+     "file": "op-history",
+     "org": "Milwaukee County (operator, mitchellairport.com)",
+     "quote": "for whom Milwaukee County's largest airport is named"
+    }
+   ]
+  },
+  {
+   "claim": "a genuinely easy one to use",
+   "verdict": "cut",
+   "wasBefore": "and a genuinely easy one to use",
+   "why": "An opinion with no source."
+  },
+  {
+   "claim": "serves northern Illinois",
+   "verdict": "cut",
+   "wasBefore": "It serves southern and eastern Wisconsin and northern Illinois",
+   "why": "Northern Illinois rests on Wikipedia alone: the Milwaukee Journal Sentinel report it cites refused a plain request (403) and the browser (405), and the operator's master plan names south-eastern Wisconsin and the Great Lakes area. Softened to south-eastern Wisconsin."
+  },
+  {
+   "claim": "a real alternative to Chicago",
+   "verdict": "cut",
+   "wasBefore": "which makes it a real alternative to Chicago for clients heading to that corner of the Midwest",
+   "why": "An opinion that rests on the northern Illinois catchment, which could not be confirmed."
+  },
+  {
+   "claim": "38 gates",
+   "verdict": "cut",
+   "wasBefore": "One terminal, two concourses, 38 gates.",
+   "why": "The gate count rests on Wikipedia alone: the operator's facts, projects and Concourse E pages and its master plan summary give none. The terminal and its two concourses are kept."
+  },
+  {
+   "claim": "everyone else in Concourse D",
+   "verdict": "cut",
+   "wasBefore": "Southwest and United are in Concourse C and everyone else in Concourse D.",
+   "why": "Narrowed to the airlines the operator's departures board shows at D gates (American, Delta, Alaska); Frontier, JetBlue and Sun Country were not on the day's boards."
+  },
+  {
+   "claim": "International Arrivals Building wording",
+   "verdict": "cut",
+   "wasBefore": "International arrivals without border pre-clearance go through the separate International Arrivals Building.",
+   "why": "Reworded and kept in the operator's own terms (International Arrivals Terminal; all international arrivals except Toronto flights)."
+  },
+  {
+   "claim": "more character than most American airports",
+   "verdict": "cut",
+   "wasBefore": "It has more character than most American airports.",
+   "why": "An opinion with no source."
+  },
+  {
+   "claim": "museum and USO room on the concession level",
+   "verdict": "cut",
+   "wasBefore": "There is an aviation museum and a USO room on the concession level",
+   "why": "'On the concession level' is Wikipedia alone; the operator and the museum place both in the main terminal before security, which the text now says."
+  },
+  {
+   "claim": "believed to be the world's first second-hand bookshop in an airport",
+   "verdict": "cut",
+   "wasBefore": "which is believed to be the world's first second hand bookshop in an airport",
+   "why": "Wikipedia alone; the operator calls it one of a kind but makes no 'first' claim."
+  },
+  {
+   "claim": "public observation area with tower radio on low-power FM",
+   "verdict": "cut",
+   "wasBefore": "An observation area on the north edge is open to the public, with tower radio traffic rebroadcast on low power FM so visitors can listen in the car.",
+   "why": "Wikipedia alone and uncited there: the operator's site has no page on it (checked its guide, Milwaukee information and project pages), so whether it is still open could not be confirmed."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
