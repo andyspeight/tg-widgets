@@ -1,0 +1,431 @@
+{
+ "iata": "ANC",
+ "id": "recQwrAD4TdB6FJd3",
+ "name": "Ted Stevens Anchorage International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Ted_Stevens_Anchorage_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Alaska's main airport, five miles south west of downtown Anchorage, and one of the busiest cargo airports in the world thanks to its position on the trans-Pacific routes.\n\nFor a client it is also the gateway to everything else in the state. Every regional intrastate carrier uses the South Terminal, alongside Alaska Airlines, Delta, American, United, Air Canada, Sun Country and the German carriers Condor and Discover. The South Terminal has 24 gates across three concourses and the North Terminal another eight.\n\nThe detail worth telling a client: right next door is the Lake Hood Seaplane Base, the busiest seaplane base in the world, from which floatplanes leave for the bush.\n\nThe airport covers 4,608 acres with three runways, the longest at 12,400 feet, and handles around 718 movements a day. Roughly a third of that is scheduled airline flying and the rest is general aviation and air taxi work.\n\nIt is named after Ted Stevens, who served as a senator for Alaska from 1968 to 2009.",
+ "after": "Alaska's main airport, five miles south west of downtown Anchorage, and in 2025 the third busiest cargo airport in the world, thanks to its position on the trans-Pacific routes.\n\nFor a client it is also the main starting point for flights around Alaska. The South Terminal has three concourses, A, B and C, while US customs is in the North Terminal. Among its airlines, the airport lists Alaska Airlines, American, Delta, Hawaiian, Sun Country and United, with Air Canada, Condor and WestJet from abroad.\n\nThe detail worth telling a client: right next door is the Lake Hood Seaplane Base, the busiest seaplane base in the world.\n\nOf the airport's three runways, the longest is 12,400 feet. The airport is named after Ted Stevens, who served as a senator for Alaska from 1968 to 2009.",
+ "claims": [
+  {
+   "claim": "Alaska's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Alaska's main airport",
+   "note": "FAA preliminary CY2025 boardings: Anchorage 2,729,285; the next Alaska airports are Fairbanks (563,672) and Juneau (369,999).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the primary airport serving the US state of Alaska"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "2026-07-08",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "July 8, 2026",
+      "59 AL AK ANC Anchorage Ted Stevens Anchorage International P M 2,729,285 2,767,856 -1.39%",
+      "137 AL AK FAI Fairbanks Fairbanks International P S 563,672 574,012 -1.80%",
+      "163 AL AK JNU Juneau Juneau International P N 369,999 436,457 -15.23%"
+     ]
+    },
+    {
+     "file": "op-about",
+     "org": "Alaska DOT&PF (operator, Ted Stevens Anchorage International Airport, dot.alaska.gov/anc)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "stands as a cornerstone of Alaska's transportation network"
+    }
+   ]
+  },
+  {
+   "claim": "five miles south west of downtown Anchorage",
+   "verdict": "confirmed",
+   "inAfter": "five miles south west of downtown Anchorage",
+   "note": "Coordinates: 6.6 km (4.1 miles) in a straight line from the GeoNames centre, ratio 1.22, bearing 229 degrees (south west).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "located 5 miles (8 km) southwest of downtown Anchorage"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 6.6 km (4.1 miles)",
+      "Bearing from the city centre: 229 degrees, which is south west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in 2025 the third busiest cargo airport in the world",
+   "verdict": "corrected",
+   "inAfter": "in 2025 the third busiest cargo airport in the world",
+   "note": "Was 'one of the busiest cargo airports in the world', now given as ACI's 2025 ranking, which the operator's FY2026 facts page repeats (behind Hong Kong and Shanghai). The operator's older pages give fourth (airline page, January 2026 handbook) and fifth (About page), earlier years' ranks. The FAA's preliminary CY2025 table puts Anchorage first in the US for all-cargo landed weight; that US rank is not added, because on ACI's measure excluding transit Louisville says it led North America in 2025 (see the Louisville ledger).",
+   "sources": [
+    {
+     "file": "aci-2026-04",
+     "org": "Airports Council International (ACI World)",
+     "dated": "2026-04-14",
+     "quote": [
+      "Montreal, 14 April 2026",
+      "Hong Kong and Shanghai Pudong remain in 1 st and 2 nd rank respectively , and Anchorage gains 3 rd rank."
+     ]
+    },
+    {
+     "file": "op-facts",
+     "org": "Alaska DOT&PF (operator, Ted Stevens Anchorage International Airport, dot.alaska.gov/anc)",
+     "dated": "read 2026-09-23 (live page, FY2026 figures)",
+     "quote": "3rd largest airport in the world in terms of cargo throughput (#1 Hong Kong, #2 Shanghai)."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the world's third-busiest cargo airport in 2025"
+    },
+    {
+     "file": "faa-cy2025-cargo",
+     "org": "Federal Aviation Administration",
+     "dated": "2026-07-09",
+     "quote": [
+      "Preliminary Calendar Year 2025 All-Cargo Landed Weight",
+      "1 AL AAL AK ANC Ted Stevens Anchorage International Anchorage P M 26,279,915,354 25,468,126,865 3.19%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "thanks to its position on the trans-Pacific routes",
+   "verdict": "confirmed",
+   "inAfter": "thanks to its position on the trans-Pacific routes",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "It is a major cargo hub for trans-Pacific traffic",
+      "Cargo airlines travelling between Asia and the contiguous US prefer to refuel in Anchorage to carry less fuel and more cargo."
+     ]
+    },
+    {
+     "file": "op-facts",
+     "org": "Alaska DOT&PF (operator, Ted Stevens Anchorage International Airport, dot.alaska.gov/anc)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Equidistant from Tokyo and New York, within 9.5 hours of 90% of the industrialized world."
+    },
+    {
+     "file": "op-airlines",
+     "org": "Alaska DOT&PF (operator, Ted Stevens Anchorage International Airport, dot.alaska.gov/anc)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Ideally located between Asia and Canada/continental United States"
+    }
+   ]
+  },
+  {
+   "claim": "the main starting point for flights around Alaska",
+   "verdict": "softened",
+   "inAfter": "For a client it is also the main starting point for flights around Alaska.",
+   "note": "Replaces 'the gateway to everything else in the state' ('gateway to' is a banned phrase) and 'Every regional intrastate carrier uses the South Terminal' (Wikipedia alone). BTS's ten busiest routes from Anchorage for July 2025 to June 2026 include Fairbanks, Bethel, Kodiak and Juneau; the operator says the airport gives access to hundreds of remote communities that cannot be reached by road.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Alaska DOT&PF (operator, Ted Stevens Anchorage International Airport, dot.alaska.gov/anc)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "connecting the state to the Lower 48 and facilitating access to hundreds of remote communities inaccessible by road"
+    },
+    {
+     "file": "bts-carriers",
+     "org": "US Bureau of Transportation Statistics",
+     "dated": "2026-09-23 (data as of that day, 12 months to June 2026)",
+     "quote": [
+      "Top 10 Destination Airports (U.S. Only, Passengers (000))",
+      "Time Period: July 2025 - June 2026; Airport: Fairbanks, AK:FAI; Data: 175.74",
+      "Time Period: July 2025 - June 2026; Airport: Bethel, AK:BET; Data: 81.14",
+      "Time Period: July 2025 - June 2026; Airport: Kodiak, AK:ADQ; Data: 77.38",
+      "Time Period: July 2025 - June 2026; Airport: Juneau, AK:JNU; Data: 76.68"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "All regional intrastate carriers also use the South Terminal."
+    }
+   ]
+  },
+  {
+   "claim": "the airport lists its airlines",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "Among its airlines, the airport lists Alaska Airlines, American, Delta, Hawaiian, Sun Country and United, with Air Canada, Condor and WestJet from abroad.",
+   "note": "Replaces 'alongside Alaska Airlines, Delta, American, United, Air Canada, Sun Country and the German carriers Condor and Discover' (Wikipedia). The operator's live list, which it says it updates periodically, has no Discover (Wikipedia still lists it), adds Hawaiian and WestJet, and names three smaller Alaskan carriers (Aleutian Airways, Grant Aviation, Ravn Alaska) not repeated here. It does not list Southwest, which Wikipedia says began seasonal flights from Denver and Las Vegas on 15 May 2026; that is not confirmed, so Southwest is not named. BTS's carrier shares for July 2025 to June 2026 bear out the four big US airlines (Alaska 63.05 per cent, Delta 13.46, United 7.25, American 3.71).",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Alaska DOT&PF (operator, Ted Stevens Anchorage International Airport, dot.alaska.gov/anc)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "These airlines currently offer passenger and/or charter service to or from ANC.",
+      "Domestic Airlines",
+      "Alaska Airlines",
+      "American Airlines",
+      "Delta Airlines",
+      "Hawaiian Airlines",
+      "Sun Country",
+      "United Airlines",
+      "International Airlines",
+      "Air Canada",
+      "Condor",
+      "WestJet"
+     ]
+    },
+    {
+     "file": "bts-carriers",
+     "org": "US Bureau of Transportation Statistics",
+     "dated": "2026-09-23 (12 months to June 2026)",
+     "quote": [
+      "Alaska 3,331 63.05%",
+      "Delta 711 13.46%",
+      "United 383 7.25%",
+      "American 196 3.71%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the South Terminal has three concourses, A, B and C",
+   "verdict": "softened",
+   "inAfter": "The South Terminal has three concourses, A, B and C",
+   "note": "Was 'The South Terminal has 24 gates across three concourses'. The gate counts rest on Wikipedia alone (the operator's terminal pages, maps and airline handbook give none), so only the concourses are kept, from the operator's South Terminal map.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The South terminal contains three concourses: Concourse A, Concourse B, and Concourse C."
+    },
+    {
+     "file": "op-south-map",
+     "org": "Alaska DOT&PF (operator, Ted Stevens Anchorage International Airport, dot.alaska.gov/anc)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "A Concourse",
+      "B Concourse",
+      "C Concourse",
+      "Level 2 Check-in & Gates"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "US customs is in the North Terminal",
+   "verdict": "corrected",
+   "inAfter": "while US customs is in the North Terminal",
+   "note": "Replaces 'the North Terminal another eight [gates]' (Wikipedia alone). What matters about the North Terminal to a traveller is that arrivals needing US customs, such as Condor's from Frankfurt, come in there (Wikipedia); flights from Canadian airports with US preclearance need not.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The North Terminal (international) serves Condor (Arrivals), all international seasonal charter flights, and military flights."
+    },
+    {
+     "file": "op-terminal",
+     "org": "Alaska DOT&PF (operator, Ted Stevens Anchorage International Airport, dot.alaska.gov/anc)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "in the secure bag claim area prior customs and border protection in the North Terminal"
+    },
+    {
+     "file": "op-handbook",
+     "org": "Alaska DOT&PF (operator, Ted Stevens Anchorage International Airport, dot.alaska.gov/anc)",
+     "dated": "2026-01 (handbook dated January 2026)",
+     "quote": [
+      "JANUARY 2026",
+      "US Customs and Border Protection North Terminal, Room NA207"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Lake Hood Seaplane Base right next door, the busiest seaplane base in the world",
+   "verdict": "confirmed",
+   "inAfter": "right next door is the Lake Hood Seaplane Base, the busiest seaplane base in the world",
+   "note": "The operator runs Lake Hood from the same website and calls it the world's busiest floatplane base; Wikipedia says the same. No independent third source could be read (Visit Anchorage refused the link lister).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The Lake Hood Seaplane Base, adjacent to Anchorage Airport, is the busiest seaplane base in the world."
+    },
+    {
+     "file": "op-facts",
+     "org": "Alaska DOT&PF (operator, Ted Stevens Anchorage International Airport, dot.alaska.gov/anc)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Lake Hood Seaplane Base is the world's busiest floatplane base"
+    },
+    {
+     "file": "op-about",
+     "org": "Alaska DOT&PF (operator, Ted Stevens Anchorage International Airport, dot.alaska.gov/anc)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "its connection to the historic Lake Hood Seaplane Base, the world's largest and busiest"
+    }
+   ]
+  },
+  {
+   "claim": "three runways, the longest 12,400 feet",
+   "verdict": "confirmed",
+   "inAfter": "Of the airport's three runways, the longest is 12,400 feet.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It has three runways: 7L/25R is 10,600 by 150 feet (3,231 x 46 m) with an asphalt surface; 7R/25L is 12,400 by 200 feet"
+    },
+    {
+     "file": "op-facts",
+     "org": "Alaska DOT&PF (operator, Ted Stevens Anchorage International Airport, dot.alaska.gov/anc)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Three runways over 10,600 ft. - Longest runway - 12,400 ft."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 07R/25L: 3,780 m (12,400 ft), ASP",
+      "Runways listed: 3"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after Ted Stevens, senator for Alaska from 1968 to 2009",
+   "verdict": "confirmed",
+   "inAfter": "The airport is named after Ted Stevens, who served as a senator for Alaska from 1968 to 2009.",
+   "note": "The Senate's own list gives 24 December 1968 to 3 January 2009 (appointed, then elected).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is named for Ted Stevens (1923-2010), who served as a senator of Alaska from 1968 to 2009."
+    },
+    {
+     "file": "senate-ak",
+     "org": "United States Senate",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "States in the Senate | Alaska Senators",
+      "90th-110th Ted Stevens (R) Dec. 24, 1968 Jan. 3, 2009 Appointed, then elected"
+     ]
+    },
+    {
+     "file": "op-about",
+     "org": "Alaska DOT&PF (operator, Ted Stevens Anchorage International Airport, dot.alaska.gov/anc)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Established in 1951, the Ted Stevens Anchorage International Airport (ANC)"
+    }
+   ]
+  },
+  {
+   "claim": "one of the busiest cargo airports in the world",
+   "verdict": "cut",
+   "wasBefore": "one of the busiest cargo airports in the world",
+   "why": "Made precise: third busiest in the world in 2025 (ACI, operator)."
+  },
+  {
+   "claim": "the gateway to everything else in the state",
+   "verdict": "cut",
+   "wasBefore": "For a client it is also the gateway to everything else in the state.",
+   "why": "'Gateway to' is a banned phrase; reworded as the main starting point for flights around Alaska, with sources."
+  },
+  {
+   "claim": "every regional intrastate carrier uses the South Terminal",
+   "verdict": "cut",
+   "wasBefore": "Every regional intrastate carrier uses the South Terminal",
+   "why": "Wikipedia alone; the operator's pages do not say which terminal each carrier uses. The in-state role is kept in the sentence before."
+  },
+  {
+   "claim": "airline list including Discover",
+   "verdict": "cut",
+   "wasBefore": "alongside Alaska Airlines, Delta, American, United, Air Canada, Sun Country and the German carriers Condor and Discover",
+   "why": "Replaced by the airport's own current list, attributed. Discover is not on it, while Wikipedia still lists it, so good sources disagree and Discover is not named."
+  },
+  {
+   "claim": "24 gates in the South Terminal and eight in the North",
+   "verdict": "cut",
+   "wasBefore": "The South Terminal has 24 gates across three concourses and the North Terminal another eight.",
+   "why": "Gate counts on Wikipedia alone. The concourses are kept (operator's map) and the North Terminal is described by the customs hall (operator, Wikipedia)."
+  },
+  {
+   "claim": "floatplanes leave for the bush",
+   "verdict": "cut",
+   "wasBefore": "from which floatplanes leave for the bush",
+   "why": "No source describes where Lake Hood's floatplanes go; the busiest-base claim is kept."
+  },
+  {
+   "claim": "4,608 acres",
+   "verdict": "cut",
+   "wasBefore": "The airport covers 4,608 acres",
+   "why": "Sources disagree: Wikipedia 4,608 acres, the operator's facts page 4,612 and its About page 4,837."
+  },
+  {
+   "claim": "around 718 movements a day",
+   "verdict": "cut",
+   "wasBefore": "and handles around 718 movements a day",
+   "why": "Wikipedia's figure for the 12 months to 30 April 2019, seven years old. No current daily total was found: the operator's FY2026 facts count only passenger and cargo landings (see held back)."
+  },
+  {
+   "claim": "a third scheduled airline flying, the rest general aviation and air taxi",
+   "verdict": "cut",
+   "wasBefore": "Roughly a third of that is scheduled airline flying and the rest is general aviation and air taxi work.",
+   "why": "The same 2019 figures; no current breakdown found."
+  },
+  {
+   "claim": "5.8 million passengers in FY2026",
+   "verdict": "cut",
+   "why": "Held back: replaces nothing (the old text had no passenger figure). The operator says 5.8 million passengers in its 2026 financial year; the FAA's preliminary CY2025 table counts 2,729,285 boardings (enplanements, about half of total passengers), consistent with it; Wikipedia's infobox gives 5,368,921 for FY2025. For Andy to add if wanted.",
+   "sources": [
+    {
+     "file": "op-facts",
+     "org": "Alaska DOT&PF (operator, Ted Stevens Anchorage International Airport, dot.alaska.gov/anc)",
+     "dated": "read 2026-09-23 (live page, FY2026 figures)",
+     "quote": "5.8 million passengers served in FY2026."
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "2026-07-08",
+     "quote": "59 AL AK ANC Anchorage Ted Stevens Anchorage International P M 2,729,285 2,767,856 -1.39%"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025 (FY 2025)",
+      "stat1_data = 5,368,921"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "more cargo landings than passenger landings in FY2026",
+   "verdict": "cut",
+   "why": "Held back for length: the airport's own current count could replace the 2019 movements line, attributed ('the airport counted more than 55,000 cargo landings and more than 46,000 passenger landings in its 2026 financial year'), but the text would then run past 150 words.",
+   "sources": [
+    {
+     "file": "op-facts",
+     "org": "Alaska DOT&PF (operator, Ted Stevens Anchorage International Airport, dot.alaska.gov/anc)",
+     "dated": "read 2026-09-23 (live page, FY2026 figures)",
+     "quote": "Over 46,000 passenger aircraft landings and over 55,000 wide-body and narrow-body cargo aircraft landings in FY2026."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The detail worth telling a client:",
+   "why": "The old text's framing, kept; the Lake Hood facts that follow are sourced."
+  }
+ ],
+ "tracerOk": {}
+}

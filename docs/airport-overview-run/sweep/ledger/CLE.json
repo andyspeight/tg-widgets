@@ -1,0 +1,572 @@
+{
+ "iata": "CLE",
+ "id": "recNk5QMZbjCHChBt",
+ "name": "Cleveland Hopkins International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Cleveland_Hopkins_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Ohio's largest and busiest airport, nine miles south west of downtown Cleveland, with non-stop service to 43 destinations and a catchment of 4.9 million people. It sits next to NASA's Glenn Research Center.\n\nIt has a longer list of firsts than almost any airport in America. It was the first anywhere with an air traffic control tower, the first with a two level design separating arrivals from departures, and the first in North America connected directly to a rail transit line. It was founded on 1 July 1925 and turned a hundred in July 2025.\n\nThe market shape is the useful part for pricing. United ran a hub here and closed it in 2014, which opened the door to low cost carriers in what had been one of the most expensive markets in the country. Traffic recovered within a few years, and United is still the largest carrier by passengers even without the hub.\n\nThe terminal dates from 1978 and was renovated in 2016. Three of its four concourses are in use.",
+ "after": "Ohio's busiest airport, a 12-mile drive south west of downtown Cleveland. The airport says it has nonstop flights to more than 40 destinations. It sits next to NASA's Glenn Research Center.\n\nCleveland Hopkins opened on 1 July 1925 and has a long list of firsts. It was the first anywhere with an air traffic control tower and the first with a two level design separating arrivals from departures. In 1968 it became the first airport in North America connected directly to a rail transit line.\n\nUnited ran a hub here and closed it in 2014, which opened the door to low cost carriers. Traffic recovered within a few years, and United is still the largest carrier by passengers even without the hub.\n\nAirlines use three concourses, A, B and C.",
+ "claims": [
+  {
+   "claim": "Ohio's busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "Ohio's busiest airport",
+   "note": "Was 'Ohio's largest and busiest airport'. 'Largest' is cut (see below). The FAA's preliminary CY2025 table has 4,855,943 boardings at Cleveland against 4,396,625 at Columbus, the next Ohio airport; Cincinnati's airport (CVG) is in Hebron, Kentucky.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is the largest and busiest airport in the state"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "2026-07-08",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "July 8, 2026",
+      "46 GL OH CLE Cleveland Cleveland-Hopkins International P M 4,855,943 4,950,345 -1.91%",
+      "49 GL OH CMH Columbus John Glenn Columbus International P M 4,396,625 4,387,395 0.21%",
+      "50 SO KY CVG Hebron"
+     ]
+    },
+    {
+     "file": "op-lease-jul2026",
+     "org": "Cleveland Hopkins International Airport (operator, clevelandairport.com)",
+     "dated": "2026-07-20",
+     "quote": "Ohio's busiest airport, serving more than 10 million passengers annually"
+    },
+    {
+     "file": "op-facts",
+     "org": "Cleveland Hopkins International Airport (operator, clevelandairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "As Ohio's busiest airport"
+    }
+   ]
+  },
+  {
+   "claim": "a 12-mile drive from downtown Cleveland",
+   "verdict": "corrected",
+   "inAfter": "a 12-mile drive",
+   "note": "Was 'nine miles'. The figures differ by measure: Wikipedia 9 miles, the Encyclopedia of Cleveland History 8 miles from Public Square, 10.0 miles in a straight line from the GeoNames centre, and the operator a 12-mile drive. The operator's drive distance is used, as the airport's own figure and the one a traveller meets; it passes the coordinates check (12 / 10.0 = 1.2). Nine miles also passes (0.9), so this is a choice of measure, not a correction of an error.",
+   "sources": [
+    {
+     "file": "op-facts",
+     "org": "Cleveland Hopkins International Airport (operator, clevelandairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "it's just a short 12-mile drive from downtown Cleveland"
+    },
+    {
+     "file": "op-history",
+     "org": "Cleveland Hopkins International Airport (operator, clevelandairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "just 12 miles away from downtown Cleveland"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 16.2 km (10.0 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "south west of downtown Cleveland",
+   "verdict": "confirmed",
+   "inAfter": "south west of downtown Cleveland",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "9 miles (14 km) southwest of Downtown Cleveland"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 233 degrees, which is south west"
+    },
+    {
+     "file": "ech-hopkins",
+     "org": "Encyclopedia of Cleveland History (Case Western Reserve University)",
+     "quote": "8 miles southwest of PUBLIC SQUARE"
+    }
+   ]
+  },
+  {
+   "claim": "the airport says it has nonstop flights to more than 40 destinations",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport says it has nonstop flights to more than 40 destinations.",
+   "note": "Replaces 'non-stop service to 43 destinations' (Wikipedia, undated). The airport's own current count, attributed: its 20 July 2026 release says more than 40, its live facts page 'approx. 40', and its live nonstop list, read 23 September 2026, has 42 airports (five outside the US: Cancun, Dublin, Montreal, Punta Cana and Toronto).",
+   "sources": [
+    {
+     "file": "op-lease-jul2026",
+     "org": "Cleveland Hopkins International Airport (operator, clevelandairport.com)",
+     "dated": "2026-07-20",
+     "quote": [
+      "Cleveland, Ohio - July 20, 2026",
+      "more than 130 daily departures and nonstop service to more than 40 destinations"
+     ]
+    },
+    {
+     "file": "op-facts",
+     "org": "Cleveland Hopkins International Airport (operator, clevelandairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "daily nonstop departures to approx. 40 destinations"
+    },
+    {
+     "file": "op-nonstop",
+     "org": "Cleveland Hopkins International Airport (operator, clevelandairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Below is the most up-to-date list of nonstop destinations by airline.",
+      "Dublin, Ireland",
+      "Toronto, Canada"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "next to NASA's Glenn Research Center",
+   "verdict": "confirmed",
+   "inAfter": "It sits next to NASA's Glenn Research Center.",
+   "note": "NASA itself says its main campus is 'located near' the airport; the Encyclopedia of Cleveland History (and Cleveland Historical, which shares its wording here) puts the laboratory that became the Glenn Research Center on the airport's western end. ECH's own 'adjacent ... one of NASA's ten major field centers' line is worded like Wikipedia's and is not relied on.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "it is adjacent to the Glenn Research Center, one of NASA's ten major field centers"
+    },
+    {
+     "file": "nasa-glenn-about",
+     "org": "NASA",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Located near Cleveland Hopkins International Airport, Glenn's main campus, Lewis Field"
+    },
+    {
+     "file": "ech-hopkins",
+     "org": "Encyclopedia of Cleveland History (Case Western Reserve University)",
+     "quote": [
+      "In 1941, the National Advisory Committee for Aeronautics (NACA) laboratory opened on its western end.",
+      "renamed the NASA John H. Glenn Research Center at Lewis Field in 1999"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "opened on 1 July 1925",
+   "verdict": "confirmed",
+   "inAfter": "Cleveland Hopkins opened on 1 July 1925",
+   "note": "Was 'It was founded on 1 July 1925'. 'Has a long list of firsts' replaces 'a longer list of firsts than almost any airport in America' (see the cut and the opinion list).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Cleveland Hopkins International Airport was founded on July 1, 1925"
+    },
+    {
+     "file": "ech-hopkins",
+     "org": "Encyclopedia of Cleveland History (Case Western Reserve University)",
+     "quote": "On 1 July 1925, an estimated 100,000 people clogged the roadways for the opening of Cleveland Airport."
+    },
+    {
+     "file": "clevelandhistorical",
+     "org": "Cleveland Historical (Cleveland State University)",
+     "quote": "When Cleveland Municipal Airport opened on July 1, 1925"
+    },
+    {
+     "file": "op-history",
+     "org": "Cleveland Hopkins International Airport (operator, clevelandairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "When it opened in 1925, CLE was the first municipal airport in the country."
+    }
+   ]
+  },
+  {
+   "claim": "the first airport anywhere with an air traffic control tower",
+   "verdict": "confirmed",
+   "inAfter": "It was the first anywhere with an air traffic control tower",
+   "note": "The operator's own wording is narrower ('the world's first radio-equipped air traffic control tower'); Cleveland Historical and the Encyclopedia of Cleveland History both say the 1929 terminal contained the world's first air traffic control tower (the two share that sentence, so they count as one voice here).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It was the first airport with an air traffic control tower"
+    },
+    {
+     "file": "clevelandhistorical",
+     "org": "Cleveland Historical (Cleveland State University)",
+     "quote": "A new terminal building constructed that year contained the world&#039;s first air traffic control tower"
+    },
+    {
+     "file": "op-history",
+     "org": "Cleveland Hopkins International Airport (operator, clevelandairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "This includes the world's first radio-equipped air traffic control tower"
+    }
+   ]
+  },
+  {
+   "claim": "the first with a two level design separating arrivals from departures",
+   "verdict": "confirmed",
+   "inAfter": "the first with a two level design separating arrivals from departures",
+   "note": "The Oxford comma in the old list is gone: the rail link is now its own sentence. The Encyclopedia of Cleveland History dates the two-floor design to 1969 in its own list of milestones, worded differently from Wikipedia.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It was also the first airport to employ a two-level terminal design separating arrivals from departures."
+    },
+    {
+     "file": "ech-hopkins",
+     "org": "Encyclopedia of Cleveland History (Case Western Reserve University)",
+     "quote": "First airport with a two-floor terminal design (separating arrivals from departures) (1969)"
+    }
+   ]
+  },
+  {
+   "claim": "in 1968 the first in North America connected directly to a rail transit line",
+   "verdict": "confirmed",
+   "inAfter": "In 1968 it became the first airport in North America connected directly to a rail transit line.",
+   "note": "The year is added from the same sources (ECH gives 15 November 1968). The operator and Cleveland Historical say first in the country; ECH and Wikipedia say first in North America.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It was also the first airport in North America to be directly connected with a rail transit line."
+    },
+    {
+     "file": "ech-hopkins",
+     "org": "Encyclopedia of Cleveland History (Case Western Reserve University)",
+     "quote": "The first direct rapid transit link from an airport to downtown of any North American city was launched on 15 November 1968."
+    },
+    {
+     "file": "op-facts",
+     "org": "Cleveland Hopkins International Airport (operator, clevelandairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "a pioneering addition in 1968 that made CLE the first airport in the country with such a link"
+    },
+    {
+     "file": "clevelandhistorical",
+     "org": "Cleveland Historical (Cleveland State University)",
+     "quote": "In 1968, Cleveland-Hopkins became the first airport in the U.S. to have a direct rapid transit connection to downtown."
+    }
+   ]
+  },
+  {
+   "claim": "United ran a hub here and closed it in 2014",
+   "verdict": "confirmed",
+   "inAfter": "United ran a hub here and closed it in 2014",
+   "note": "The Encyclopedia of Cleveland History's account of the closure is worded almost exactly like Wikipedia's, so it is not used for this claim.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "However, in 2014, United discontinued its hub"
+    },
+    {
+     "file": "flightglobal-hub-2014",
+     "org": "FlightGlobal",
+     "dated": "2014-02-02",
+     "quote": [
+      "By Edward Russell | 2 February 2014",
+      "United Airlines will cut its hub at Cleveland Hopkins International airport from April, ending nonstop service to 39 cities by the end of June."
+     ]
+    },
+    {
+     "file": "clevelandhistorical",
+     "org": "Cleveland Historical (Cleveland State University)",
+     "quote": "Since the airport lost its hub status in 2014 following a merger of Continental and United Airlines"
+    }
+   ]
+  },
+  {
+   "claim": "which opened the door to low cost carriers",
+   "verdict": "confirmed",
+   "inAfter": "which opened the door to low cost carriers",
+   "note": "CAPA's June 2014 analysis describes Frontier, which it calls an ultra low-cost carrier, expanding at Cleveland in the wake of United's cut. The rest of the old sentence (one of the most expensive markets) is cut.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "United's hub closure created an opening for low-cost carriers to enter the market"
+    },
+    {
+     "file": "capa-frontier",
+     "org": "CAPA - Centre for Aviation",
+     "dated": "2014-06-23",
+     "quote": [
+      "23-Jun-2014",
+      "Frontier Airlines continues to give Cleveland Hopkins International Airport a shot in the arm through expansion in the wake of United 's pull-down of its small hub in Ohio.",
+      "the newly minted ultra low-cost carrier (ULCC)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "traffic recovered within a few years",
+   "verdict": "confirmed",
+   "inAfter": "Traffic recovered within a few years",
+   "note": "The operator's own series: 9,072,126 passengers in 2013, the last full hub year, 7,609,404 in 2014 and 9,140,445 in 2017.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "by 2017, the airport's passenger count exceeded levels achieved during the last full year that United maintained a hub in Cleveland"
+    },
+    {
+     "file": "op-facts",
+     "org": "Cleveland Hopkins International Airport (operator, clevelandairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Historic Passenger Volume At A Glance",
+      "2017 9,140,445",
+      "2014 7,609,404",
+      "2013 9,072,126"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "United is still the largest carrier by passengers",
+   "verdict": "confirmed",
+   "inAfter": "United is still the largest carrier by passengers even without the hub",
+   "note": "Still true but narrowly: BTS gives United 23.45 per cent and Frontier 21.48 per cent of passengers on US flights for July 2025 to June 2026 (Wikipedia notes Frontier passed United in single months from June 2024). Frontier's closeness is not added (a new fact).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is its largest carrier by passenger count"
+    },
+    {
+     "file": "bts-carriers",
+     "org": "US Bureau of Transportation Statistics",
+     "dated": "2026-09-23 (data as of that day, 12 months to June 2026)",
+     "quote": [
+      "BTS Data as of 9/23/2026",
+      "Carrier Shares for July 2025 - June 2026",
+      "United 2,212 23.45%",
+      "Frontier 2,026 21.48%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "airlines use three concourses, A, B and C",
+   "verdict": "softened",
+   "inAfter": "Airlines use three concourses, A, B and C.",
+   "note": "Was 'Three of its four concourses are in use.' The operator's live airline list puts all ten scheduled airlines in Concourses A, B and C, exactly as Wikipedia does (Avelo and Frontier in A; Delta and Southwest in B; the rest in C). The unused fourth concourse (D) rests on Wikipedia alone, as the only other account of it is ECH's sentence worded like Wikipedia's.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "There are four concourses, three of which are currently in use.",
+      "Concourse B houses Delta and Southwest."
+     ]
+    },
+    {
+     "file": "op-airlines",
+     "org": "Cleveland Hopkins International Airport (operator, clevelandairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "CLE is proud to offer service from ten different air service providers.",
+      "Concourse A",
+      "Concourse B",
+      "Concourse C"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "largest airport in Ohio",
+   "verdict": "cut",
+   "wasBefore": "Ohio's largest and busiest airport",
+   "why": "Softened to 'Ohio's busiest airport'. 'Largest' is undefined (by area? by traffic?) and only Wikipedia says it; the operator and the FAA support 'busiest'."
+  },
+  {
+   "claim": "nine miles",
+   "verdict": "cut",
+   "wasBefore": "nine miles south west of downtown Cleveland",
+   "why": "Replaced by the operator's 12-mile drive (see above); the direction is kept."
+  },
+  {
+   "claim": "non-stop service to 43 destinations",
+   "verdict": "cut",
+   "wasBefore": "with non-stop service to 43 destinations",
+   "why": "Undated Wikipedia count. Replaced by the airport's own current count, attributed (more than 40, July 2026)."
+  },
+  {
+   "claim": "catchment of 4.9 million people",
+   "verdict": "cut",
+   "wasBefore": "a catchment of 4.9 million people",
+   "why": "Wikipedia alone; its source is a 2013 page of the operator's old site, reachable only through the web archive, which is blocked. The operator's current pages give no catchment figure (they say within 500 miles of nearly half the US population)."
+  },
+  {
+   "claim": "a longer list of firsts than almost any airport in America",
+   "verdict": "cut",
+   "wasBefore": "It has a longer list of firsts than almost any airport in America.",
+   "why": "A superlative no source makes. Softened to 'has a long list of firsts', which the three sourced firsts that follow carry."
+  },
+  {
+   "claim": "turned a hundred in July 2025",
+   "verdict": "cut",
+   "wasBefore": "turned a hundred in July 2025",
+   "why": "Follows from the opening date, and only Wikipedia records the centenary; not needed."
+  },
+  {
+   "claim": "the market shape is the useful part for pricing",
+   "verdict": "cut",
+   "wasBefore": "The market shape is the useful part for pricing.",
+   "why": "A lead-in to the fares claim, which is cut; without it the pricing framing has nothing behind it."
+  },
+  {
+   "claim": "one of the most expensive markets in the country",
+   "verdict": "cut",
+   "wasBefore": "in what had been one of the most expensive markets in the country",
+   "why": "Wikipedia alone. CAPA's 2014 analysis and FlightGlobal's report confirm the hub cut and the low-cost growth but say nothing on fares; the Plain Dealer (cleveland.com) and USA Today are blocked by the session's egress policy, and the Washington Times shows a Cloudflare bot check, so none of them was read."
+  },
+  {
+   "claim": "the terminal dates from 1978",
+   "verdict": "cut",
+   "wasBefore": "The terminal dates from 1978",
+   "why": "Sources disagree: Wikipedia says the terminal was completed in 1978, the Encyclopedia of Cleveland History that the terminal was begun in 1953 and its $60 million rebuild ran from 1974 to 1982."
+  },
+  {
+   "claim": "renovated in 2016",
+   "verdict": "cut",
+   "wasBefore": "and was renovated in 2016",
+   "why": "Wikipedia alone; no second source found."
+  },
+  {
+   "claim": "four concourses",
+   "verdict": "cut",
+   "wasBefore": "Three of its four concourses are in use.",
+   "why": "Reworded to the three concourses the operator lists. The unused Concourse D rests on Wikipedia alone (ECH's sentence on it is worded like Wikipedia's)."
+  },
+  {
+   "claim": "about 10 million passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: a verified 2025 total that replaces nothing (the old text had no passenger figure). TOTAL passengers 10,003,833 in 2025 (operator's series; Wikipedia's infobox, 'Source: FAA and Cleveland Airport'); the FAA's preliminary CY2025 table counts 4,855,943 boardings (46th in the US). For Andy to add if wanted.",
+   "sources": [
+    {
+     "file": "op-facts",
+     "org": "Cleveland Hopkins International Airport (operator, clevelandairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "10M",
+      "passengers passed through CLE in 2025",
+      "2025 10,003,833"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 10,003,833"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "2026-07-08",
+     "quote": "46 GL OH CLE Cleveland Cleveland-Hopkins International P M 4,855,943 4,950,345 -1.91%"
+    }
+   ]
+  },
+  {
+   "claim": "CLEvolution works under way from July 2026",
+   "verdict": "cut",
+   "why": "Held back: new, replaces nothing. The operator broke ground on 1 July 2026 on the Gold Lot (about 1,600 spaces), the first project of CLEvolution, its multi-year terminal modernisation; it says the airport stays fully operational through construction. Wikipedia gives the programme as $1.6 billion, with a new terminal building targeted for 2032. Worth adding if Andy wants the works mentioned: parking and roads will change over several years.",
+   "sources": [
+    {
+     "file": "clevolution-goldlot",
+     "org": "Cleveland Hopkins International Airport (operator, clevelandairport.com) (CLEvolution site)",
+     "dated": "2026-07-01",
+     "quote": [
+      "Cleveland, Ohio - July 1, 2026 - Cleveland Hopkins International Airport (CLE) today officially launched CLEvolution with a groundbreaking ceremony for the new Gold Lot",
+      "the Gold Lot will add approximately 1,600 parking spaces"
+     ]
+    },
+    {
+     "file": "clevolution-mar2026",
+     "org": "Cleveland Hopkins International Airport (operator, clevelandairport.com) (CLEvolution newsletter)",
+     "dated": "2026-03",
+     "quote": "CLE will remain fully operational throughout construction."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "a seven-year, $1.6 billion project to rebuild Cleveland Hopkins",
+      "targeting completion in 2032"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "airline changes in 2026: Spirit gone, Avelo arrived",
+   "verdict": "cut",
+   "why": "Held back: the old text names neither airline. Spirit stopped flying from Cleveland on 15 April 2026 (News 5 Cleveland; Wikipedia) and Avelo began twice-weekly flights to Concord and New Haven on 19 June 2026, the airport's 11th airline (operator, 18 March 2026; Wikipedia).",
+   "sources": [
+    {
+     "file": "news5-spirit",
+     "org": "News 5 Cleveland (WEWS)",
+     "dated": "2026 (page copyright)",
+     "quote": [
+      "Spirit Airlines announced Thursday that it will cease operations at Cleveland Hopkins International Airport on April 15.",
+      "2026 Scripps Media, Inc"
+     ]
+    },
+    {
+     "file": "op-avelo",
+     "org": "Cleveland Hopkins International Airport (operator, clevelandairport.com)",
+     "dated": "2026-03-18",
+     "quote": [
+      "Cleveland, Ohio - March 18, 2026",
+      "Avelo will offer twice weekly nonstop service to Concord, North Carolina, and New Haven, Connecticut, beginning June 19, 2026."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Spirit Airlines announced it would cease operations at the airport, effective April 15, 2026",
+      "beginning June 19, 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Aer Lingus to Dublin, the only transatlantic flight",
+   "verdict": "cut",
+   "why": "Held back: new, replaces nothing, but the one flight that matters most to a UK agent. The operator's live list has Dublin, Ireland among its nonstop destinations and Aer Lingus in Concourse C; Wikipedia says it is the only nonstop transatlantic flight (since May 2023). 'Only' rests on Wikipedia, though the operator's list has no other European city.",
+   "sources": [
+    {
+     "file": "op-nonstop",
+     "org": "Cleveland Hopkins International Airport (operator, clevelandairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Dublin, Ireland",
+      "DUB",
+      "Aer Lingus"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is currently the only nonstop transatlantic flight between Europe and Cleveland."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "has a long list of firsts",
+   "why": "Softened from the old 'a longer list of firsts than almost any airport in America'; carried by the three sourced firsts in the next two sentences (ECH lists more)."
+  }
+ ],
+ "tracerOk": {}
+}

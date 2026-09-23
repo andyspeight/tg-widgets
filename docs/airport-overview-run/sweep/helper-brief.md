@@ -48,6 +48,12 @@ finished, passing example). Follow both exactly.
    page), the site is behind a bot check: stop there, do NOT try grabb.mjs,
    and record the block (tightened 23 Sep evening). Only a quote that
    appears in a page saved by grab.mjs or grabb.mjs counts.
+   Read grab.mjs's answer before you do anything else: never chain
+   grabb.mjs, or any other fetch, into the same command as grab.mjs. An
+   answer of 'Blocked by egress policy' means the session's network
+   policy forbids that site: record it and move on, and let no other tool
+   try it. Do not use curl or wget at all (added 23 Sep evening, after
+   two chained retries on egress-blocked sites).
    Make sure an "official" site really is the airport's: compare the domain
    with OurAirports' home link (in scratchpad/sweep/airports.csv) or the
    Wikipedia infobox. billund-airport.com, for one, is a hijacked spam site.
@@ -151,6 +157,13 @@ budget before finishing an airport.
   from (wikipedia-archived.txt), which is source 1. refs.mjs will not work
   while the block lasts: find publishers through the operator's own site,
   the regulator and links.mjs instead.
+- German airports: ADV's December 2025 report (full-year 2025 passengers,
+  cargo and domestic share for every German airport) is saved as
+  evidence/BRE/adv-dec2025.txt; copy it with a NOTE line as LEJ and NUE do.
+- EU airports, the kind of flying: `node eurostat-routes.cjs <ISO2> <ICAO>
+  <IATA>` saves an airport's routes from Eurostat (2024, the latest by
+  route); `node eurostat-series.cjs <ISO2_ICAO> <IATA>` saves its passenger
+  totals for every year, for 'record year' claims (see ledger/NUE.json).
 - Blocked, do not retry: web.archive.org (network policy), onda.ma
   (Cloudflare), airbus.com (Imperva). Many Chinese government and airport
   sites answer 502 or 503; one try is enough.

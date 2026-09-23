@@ -1,0 +1,416 @@
+{
+ "iata": "IND",
+ "id": "recP8yieovf4KJ5Ot",
+ "name": "Indianapolis International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Indianapolis_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Indiana's busiest airport, seven miles south west of downtown Indianapolis, with more than 50 non-stop destinations across North America, the Caribbean and Europe. It carried 5,180,917 passengers in 2024.\n\nFreight is where it really counts. This is the second largest FedEx Express hub in the world, behind only Memphis, and that keeps the airport consistently among the ten busiest in the United States for air cargo.\n\nThe terminal opened in 2008 and was one of the first in the country designed and built after the September 11 attacks. There is a single terminal with two concourses and 39 gates, and international arrivals are handled in Concourse A.\n\nA hotel is on the way. A 253 room Westin, connected directly to the terminal parking garage, broke ground in June 2025 and is due in December 2027, with a seventh floor lounge overlooking the airfield that will be open to the public.\n\nRepublic Airways is headquartered here and Allegiant Air keeps an operating base.",
+ "after": "Indiana's busiest airport, seven miles south west of downtown Indianapolis, with more than 50 non-stop destinations across North America, the Caribbean and Europe. It handled more than 10.6 million passengers in 2025.\n\nFreight is where it really counts. This is the second largest FedEx Express hub in the world, and that keeps the airport consistently among the ten busiest in the United States for air cargo.\n\nThe terminal opened in 2008 and was one of the first in the country designed and built after the September 11 attacks. There is a single terminal with two concourses and 39 gates, and international arrivals are handled in Concourse A.\n\nA hotel is on the way. The 253-room Westin, connected directly to the terminal parking garage, broke ground in June 2025 and is due to open by the end of 2027, with a seventh floor bar and lounge.",
+ "claims": [
+  {
+   "claim": "Indiana's busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "Indiana's busiest airport",
+   "note": "FAA preliminary CY2025 boardings: Indianapolis 5,221,447; the next Indiana airports are South Bend (551,719), Fort Wayne (486,022) and Evansville (227,895).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the busiest in Indiana"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "2026-07-08",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "July 8, 2026",
+      "45 GL IN IND Indianapolis Indianapolis International P M 5,221,447 5,181,947 0.76%",
+      "139 GL IN SBN South Bend South Bend International P S 551,719 454,920 21.28%",
+      "145 GL IN FWA Fort Wayne Fort Wayne International P N 486,022 424,491 14.50%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "seven miles south west of downtown Indianapolis",
+   "verdict": "confirmed",
+   "inAfter": "seven miles south west of downtown Indianapolis",
+   "note": "Coordinates: 13.0 km (8.1 miles) in a straight line from the GeoNames centre, ratio 0.86, bearing 244 degrees (south west). The operator's annual report says 'sixteen miles southwest of downtown', which reads as a road distance to the midfield terminal; it fails the straight-line tolerance (16 / 8.1 = 1.98) and no second written source gives it, so the checked seven miles stays.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "located seven miles (11 km) southwest of Downtown Indianapolis"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 13.0 km (8.1 miles)",
+      "Bearing from the city centre: 244 degrees, which is south west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "more than 50 non-stop destinations across North America, the Caribbean and Europe",
+   "verdict": "confirmed",
+   "inAfter": "with more than 50 non-stop destinations across North America, the Caribbean and Europe",
+   "note": "Still true on the operator's 2026 figures: 52 nonstop destinations at the end of 2025 rising to 55 in the first half of 2026 (10 February 2026 release), 55 served during 2025 (annual report) and 57 in its June 2026 public value report. Europe is Aer Lingus to Dublin (from May 2025, five days a week from April 2026); the Caribbean includes Punta Cana and San Juan.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the airport serves over 50 non-stop destinations throughout North America, the Caribbean and Europe"
+    },
+    {
+     "file": "op-record-2025",
+     "org": "Indianapolis Airport Authority (operator, ind.com)",
+     "dated": "2026-02-10",
+     "quote": [
+      "INDIANAPOLIS (Feb. 10, 2026)",
+      "In all, passengers had access to 52 nonstop destinations out of Indy by the end of 2025.",
+      "the transatlantic flight to Dublin (DUB) on Aer Lingus and the addition of an international Caribbean flight to Punta Cana (PUJ) on American Airlines",
+      "increasing its total nonstops to a new record of 55"
+     ]
+    },
+    {
+     "file": "op-publicvalue-2026",
+     "org": "Indianapolis Airport Authority (operator, ind.com)",
+     "dated": "2026-06 (date in the report's URL)",
+     "quote": [
+      "57 NONSTOP",
+      "(40 out of the 57)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "more than 10.6 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled more than 10.6 million passengers in 2025.",
+   "note": "Was 'It carried 5,180,917 passengers in 2024'. That was a count of boardings (enplanements), about half of all passengers: the FAA's own CY2024 boardings figure is 5,181,947. Now the operator's 2025 TOTAL, arrivals plus departures: more than 10.6 million (Wikipedia's infobox, citing the airport: 10,616,093). The FAA's preliminary CY2025 table counts 5,221,447 boardings, in line with it.",
+   "sources": [
+    {
+     "file": "op-record-2025",
+     "org": "Indianapolis Airport Authority (operator, ind.com)",
+     "dated": "2026-02-10",
+     "quote": "welcoming more than 10.6 million passengers in all through the IND terminal, nearly 100,000 passengers more than in 2024"
+    },
+    {
+     "file": "op-acfr-2025",
+     "org": "Indianapolis Airport Authority (operator, ind.com)",
+     "dated": "year ended 31 December 2025 (report period)",
+     "quote": "In 2025, IND served about 10.6 million passengers on 11 major airlines"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_header = Total passengers",
+      "stat1_data = 10,616,093"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "2026-07-08",
+     "quote": "45 GL IN IND Indianapolis Indianapolis International P M 5,221,447 5,181,947 0.76%"
+    }
+   ]
+  },
+  {
+   "claim": "the second largest FedEx Express hub in the world",
+   "verdict": "confirmed",
+   "inAfter": "This is the second largest FedEx Express hub in the world",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "IND is home to the second largest FedEx Express hub in the world"
+    },
+    {
+     "file": "op-acfr-2025",
+     "org": "Indianapolis Airport Authority (operator, ind.com)",
+     "dated": "year ended 31 December 2025 (report period)",
+     "quote": "IND remains FedEx's second-largest hub worldwide."
+    },
+    {
+     "file": "op-cargo",
+     "org": "Indianapolis Airport Authority (operator, ind.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "IND is home to the second-largest FedEx Express operation."
+    }
+   ]
+  },
+  {
+   "claim": "consistently among the ten busiest US airports for air cargo, because of FedEx",
+   "verdict": "confirmed",
+   "inAfter": "and that keeps the airport consistently among the ten busiest in the United States for air cargo",
+   "note": "FAA preliminary CY2025 all-cargo landed weight: tenth (4.33 billion lb); its 2024 weight (4.49 billion lb) also sits tenth in the same table. The operator's annual report, citing ACI-NA, says ninth, and that FedEx accounts for most of the cargo landed weight.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Largely because of FedEx's activity, IND consistently ranks among the top 10 busiest U.S. airports in terms of air cargo throughput."
+    },
+    {
+     "file": "faa-cy2025-cargo",
+     "org": "Federal Aviation Administration",
+     "dated": "2026-07-09",
+     "quote": [
+      "Preliminary Calendar Year 2025 All-Cargo Landed Weight",
+      "July 9, 2026",
+      "10 GL CHI IN IND Indianapolis International Indianapolis P M 4,327,641,825 4,489,767,935 -3.61%"
+     ]
+    },
+    {
+     "file": "op-acfr-2025",
+     "org": "Indianapolis Airport Authority (operator, ind.com)",
+     "dated": "year ended 31 December 2025 (report period)",
+     "quote": [
+      "IND is ranked the 9th largest cargo facility in the",
+      "FedEx continued to account for most of the cargo landed weight in 2025."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the terminal opened in 2008",
+   "verdict": "confirmed",
+   "inAfter": "The terminal opened in 2008",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The current terminal opened in 2008"
+    },
+    {
+     "file": "encyc-indy",
+     "org": "Encyclopedia of Indianapolis (Polis Center, Indiana University)",
+     "dated": "2021-07 (article revised July 2021)",
+     "quote": [
+      "The new airport passenger terminal opened two years later, on November 12, 2008.",
+      "Revised July 2021"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "one of the first designed and built after 9/11",
+   "verdict": "confirmed",
+   "inAfter": "was one of the first in the country designed and built after the September 11 attacks",
+   "note": "The Encyclopedia of Indianapolis goes further ('first post-9/11, greenfield airport' built in the country); the text keeps Wikipedia's more cautious 'one of the first'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It was one of the first designed and built in the U.S. following the September 11 attacks."
+    },
+    {
+     "file": "encyc-indy",
+     "org": "Encyclopedia of Indianapolis (Polis Center, Indiana University)",
+     "dated": "2021-07 (article revised July 2021)",
+     "quote": [
+      "Designed following the 9/11 terrorist attacks",
+      "Revised July 2021"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a single terminal with two concourses and 39 gates",
+   "verdict": "confirmed",
+   "inAfter": "There is a single terminal with two concourses and 39 gates",
+   "note": "The operator's annual report gives 20 gates in Concourse A and 19 in Concourse B.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Indianapolis International Airport has a single terminal with two concourses and a total of 39 gates."
+    },
+    {
+     "file": "op-acfr-2025",
+     "org": "Indianapolis Airport Authority (operator, ind.com)",
+     "dated": "year ended 31 December 2025 (report period)",
+     "quote": "The Col. H. Weir Cook Terminal has approximately 1.2 million square feet with 20 gates in Concourse A and 19 gates in Concourse B."
+    }
+   ]
+  },
+  {
+   "claim": "international arrivals are handled in Concourse A",
+   "verdict": "confirmed",
+   "inAfter": "international arrivals are handled in Concourse A",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "International arrivals are processed in Concourse A (Gates A4-A5)."
+    },
+    {
+     "file": "op-acfr-2025",
+     "org": "Indianapolis Airport Authority (operator, ind.com)",
+     "dated": "year ended 31 December 2025 (report period)",
+     "quote": "For international arrivals, two gates on Concourse A have been configured to lead directly to a dedicated federal inspection area and baggage claim."
+    }
+   ]
+  },
+  {
+   "claim": "a 253-room Westin connected directly to the terminal parking garage",
+   "verdict": "confirmed",
+   "inAfter": "The 253-room Westin, connected directly to the terminal parking garage",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The 253-room Marriott Westin-branded hotel will connect to the west side of the terminal parking garage, allowing direct access to the airport terminal."
+    },
+    {
+     "file": "op-hotel-topsout",
+     "org": "Indianapolis Airport Authority (operator, ind.com)",
+     "dated": "2026-05-14",
+     "quote": [
+      "INDIANAPOLIS (May 14, 2026)",
+      "When it opens, the hotel will offer 253 guest rooms",
+      "A pedestrian passage will connect the hotel directly to the airport's parking garage"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "broke ground in June 2025",
+   "verdict": "confirmed",
+   "inAfter": "broke ground in June 2025",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Groundbreaking for the Westin Indianapolis Airport hotel began in June 2025"
+    },
+    {
+     "file": "op-hotel-ground-2025",
+     "org": "Indianapolis Airport Authority (operator, ind.com)",
+     "dated": "2025-06-12",
+     "quote": "INDIANAPOLIS (June 12, 2025) -- The Indianapolis Airport Authority officially broke ground today on the new hotel"
+    }
+   ]
+  },
+  {
+   "claim": "due to open by the end of 2027",
+   "verdict": "softened",
+   "inAfter": "is due to open by the end of 2027",
+   "note": "Was 'is due in December 2027'. The operator's June 2025 release said completion in December 2027; at the topping-out on 14 May 2026 it said the hotel is on track to open by the end of 2027. The text uses the later wording.",
+   "sources": [
+    {
+     "file": "op-hotel-topsout",
+     "org": "Indianapolis Airport Authority (operator, ind.com)",
+     "dated": "2026-05-14",
+     "quote": "Next milestone begins, as new hotel is on track to open by end of 2027"
+    },
+    {
+     "file": "op-hotel-ground-2025",
+     "org": "Indianapolis Airport Authority (operator, ind.com)",
+     "dated": "2025-06-12",
+     "quote": "The IAA anticipates the new Westin Indianapolis Airport hotel will be completed in December 2027."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "with anticipated completion of the almost $206 million project in December 2027"
+    }
+   ]
+  },
+  {
+   "claim": "a seventh floor bar and lounge",
+   "verdict": "softened",
+   "inAfter": "with a seventh floor bar and lounge",
+   "note": "Was 'a seventh floor lounge overlooking the airfield that will be open to the public'. The operator's releases describe a seventh-floor bar and lounge but say nothing of the view or of public access (see the cut).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "a seventh-floor lounge area"
+    },
+    {
+     "file": "op-hotel-topsout",
+     "org": "Indianapolis Airport Authority (operator, ind.com)",
+     "dated": "2026-05-14",
+     "quote": "a seventh-floor bar and lounge"
+    },
+    {
+     "file": "op-hotel-ground-2025",
+     "org": "Indianapolis Airport Authority (operator, ind.com)",
+     "dated": "2025-06-12",
+     "quote": "a 7th-floor bar and lounge area"
+    }
+   ]
+  },
+  {
+   "claim": "5,180,917 passengers in 2024",
+   "verdict": "cut",
+   "wasBefore": "It carried 5,180,917 passengers in 2024.",
+   "why": "A boardings count presented as passengers, and a year old. Replaced by the operator's 2025 total (more than 10.6 million)."
+  },
+  {
+   "claim": "behind only Memphis",
+   "verdict": "cut",
+   "wasBefore": "behind only Memphis",
+   "why": "Only Wikipedia names Memphis as the one larger hub; the operator says second-largest without naming the first, FedEx's own newsroom did not list its hubs, and the Encyclopedia of Indianapolis's hub ranking is from 1998."
+  },
+  {
+   "claim": "due in December 2027",
+   "verdict": "cut",
+   "wasBefore": "is due in December 2027",
+   "why": "Reworded to the operator's May 2026 wording, 'by the end of 2027'."
+  },
+  {
+   "claim": "lounge overlooking the airfield, open to the public",
+   "verdict": "cut",
+   "wasBefore": "overlooking the airfield that will be open to the public",
+   "why": "Wikipedia alone: neither of the operator's hotel releases (June 2025, May 2026) mentions the view or public access."
+  },
+  {
+   "claim": "Republic Airways is headquartered here",
+   "verdict": "cut",
+   "wasBefore": "Republic Airways is headquartered here",
+   "why": "Out of date: Republic's own site gives its address as 2 Brickyard Lane, Carmel, Indiana, the new Republic Airways Aviation Campus that holds its corporate headquarters, training centre and hotel. Carmel is north of Indianapolis, not at the airport. Not replaced: a UK agent does not need Republic's head office.",
+   "sources": [
+    {
+     "file": "republic-home",
+     "org": "Republic Airways",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "2 Brickyard Lane",
+      "Carmel, Indiana 46032"
+     ]
+    },
+    {
+     "file": "republic-newhq",
+     "org": "Republic Airways",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Our Corporate Headquarters, state-of-the-art Training Center and even the Brickyard Hotel for visiting Associates are all conveniently located on one campus"
+    }
+   ]
+  },
+  {
+   "claim": "Allegiant Air keeps an operating base",
+   "verdict": "cut",
+   "wasBefore": "Allegiant Air keeps an operating base",
+   "why": "Nothing from the last 12 months confirms the base: the operator's release on it is from 2018 and its 2025 annual report lists Allegiant's routes, not a base. Allegiant's own site shows a Cloudflare bot check ('Just a moment...') and was not read further."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Freight is where it really counts.",
+   "why": "The old text's framing, kept: the airport is tenth in the US for cargo (FAA 2025) but 45th for passengers, and the next sentence gives the sourced facts."
+  },
+  {
+   "text": "A hotel is on the way.",
+   "why": "A signpost for the sourced hotel sentence that follows."
+  }
+ ],
+ "tracerOk": {}
+}

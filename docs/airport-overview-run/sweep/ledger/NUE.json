@@ -1,0 +1,402 @@
+{
+ "iata": "NUE",
+ "id": "recEccdpcFJiNJZuw",
+ "name": "Nuremberg Airport",
+ "country": "Germany",
+ "wikipedia": "https://en.wikipedia.org/wiki/Nuremberg_Airport",
+ "audited": "2026-09-23",
+ "before": "Bavaria's second airport after Munich, only 5 km north of Nuremberg city centre, which makes it one of the shortest airport transfers in Germany. It broke its own record in 2025 with 4,508,700 passengers, ninth busiest in the country.\n\nThe route map is domestic German flying plus European city and leisure destinations, weighted heavily towards the Mediterranean, the Canary Islands, Turkey and North Africa.\n\nThe terminal is compact and pleasant: two departure halls and one arrival hall, all connected both landside and airside, with 40 check in desks and four finger docks. Departure hall 2 was built in 1992 in steel and glass by the Nuremberg architects Grabow and Hoffmann and is full of daylight. Security moved to the ground floor between the two halls in December 2015.\n\nOne practical limit. The runway is 2,700 metres and takes everything currently flying, including the 747, but the airport is not licensed for the A380.\n\nIt is owned jointly by the state of Bavaria and the city of Nuremberg, and marketed after the painter Albrecht Dürer.",
+ "after": "Bavaria's second airport after Munich, only 5 km north of Nuremberg city centre. The U2 underground runs from outside the terminal to the main station in under a quarter of an hour.\n\nIn 2025 the airport broke its own record with 4,508,700 passengers, ninth busiest in the country. Domestic flying is now little more than the link to Frankfurt. Otherwise the map is European city and leisure flying, weighted heavily towards the Mediterranean, the Canary Islands, Turkey and North Africa.\n\nSecurity sits in the middle, on the ground floor between the two departure halls, and the airport makes a point of its clear layout and short walks.\n\nIt has a single runway of 2,700 metres. The state of Bavaria and the city of Nuremberg each own half of it, and it is marketed as Albrecht Dürer Airport, after the painter.",
+ "claims": [
+  {
+   "claim": "Bavaria's second airport after Munich",
+   "verdict": "confirmed",
+   "inAfter": "Bavaria's second airport after Munich",
+   "note": "OurAirports lists three Bavarian airports with scheduled service: Munich, Nuremberg and Memmingen. ADV's 2025 table has Munich 43,357,559 (scheduled and charter), Nuremberg 4,508,700 and Memmingen 3,698,440 in all.",
+   "sources": [
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": [
+      "Kumuliertes Gesamtaufkommen in Deutschland: Passagiere (an+ab) | Januar bis Dezember 2025",
+      "Nürnberg 4.508.700 +11,9 %"
+     ]
+    },
+    {
+     "file": "eurostat-de",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat DE_EDDM MUENCHEN airport: passengers carried in 2025: 43,366,310",
+      "Eurostat DE_EDDN NUERNBERG airport: passengers carried in 2025: 4,487,554",
+      "Eurostat DE_EDJA MEMMINGEN airport: passengers carried in 2025: 3,668,836"
+     ]
+    },
+    {
+     "file": "ourairports-by",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "EDDM MUC Munich Airport (Munich)",
+      "EDDN NUE Nuremberg Airport (Nuremberg)",
+      "EDJA FMM Memmingen Allgau Airport (Memmingen)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "the second-busiest airport in Bavaria after Munich Airport"
+    }
+   ]
+  },
+  {
+   "claim": "5 km north of Nuremberg city centre",
+   "verdict": "confirmed",
+   "inAfter": "only 5 km north of Nuremberg city centre.",
+   "note": "Coordinates: 4.9 km in a straight line, due north (ratio 1.01). The operator gives 5 km to the city centre.",
+   "sources": [
+    {
+     "file": "op-pilots-corner",
+     "org": "Flughafen Nürnberg GmbH (the airport operator, airport-nuernberg.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Entfernung zur Innenstadt",
+      "5 km (2.7nm)"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 4.9 km (3.1 miles)",
+      "Bearing from the city centre: 0 degrees, which is north"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "north of Nuremberg's city centre"
+    }
+   ]
+  },
+  {
+   "claim": "the U2 underground from outside the terminal to the main station in under a quarter of an hour",
+   "verdict": "corrected",
+   "inAfter": "The U2 underground runs from outside the terminal to the main station in under a quarter of an hour.",
+   "note": "Replaces 'which makes it one of the shortest airport transfers in Germany', a comparison no source makes, with the journey behind it. The airport's travel page gives 12 minutes from the main station and its facts sheet 13; Wikipedia gives 13. Both of the airport's pages put the station directly outside the terminal.",
+   "sources": [
+    {
+     "file": "op-anreise",
+     "org": "Flughafen Nürnberg GmbH (the airport operator, airport-nuernberg.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Die U-Bahn-Linie U2 verbindet den Hauptbahnhof Nürnberg direkt mit dem Flughafen. Die Fahrtzeit vom Hauptbahnhof zum Airport beträgt zwölf Minuten. Die U-Bahnhaltestelle befindet sich direkt am Terminal Vorplatz."
+    },
+    {
+     "file": "op-9-fakten",
+     "org": "Flughafen Nürnberg GmbH (the airport operator, airport-nuernberg.de)",
+     "dated": "undated facts sheet, linked from the operator's company page read 2026-09-23",
+     "quote": [
+      "With an underground station right outside the",
+      "terminal, the main railway station in the centre of Nuremberg is just 13 minutes away."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": [
+      "The U-Bahn (Metro) line U2 serves the airport at the Flughafen station.",
+      "The ride to the Hauptbahnhof (Central Railway Station) and the nearby Altstadt (historic old town) only takes 13 minutes."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a record 4,508,700 passengers in 2025, ninth busiest in Germany",
+   "verdict": "confirmed",
+   "inAfter": "In 2025 the airport broke its own record with 4,508,700 passengers, ninth busiest in the country.",
+   "note": "ADV's full-year table has 4,508,700 (up 11.9%); Eurostat's own series for the airport, back to 1998, peaks in 2025 (4,487,554; the old high was 4,435,627 in 2018). Both rank it ninth, behind Frankfurt, Munich, Berlin, Dusseldorf, Hamburg, Cologne Bonn, Stuttgart and Hanover. The operator says 4.5 million.",
+   "sources": [
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": [
+      "Nürnberg 4.508.700 +11,9 %",
+      "Hannover 5.344.722 +2,3 %",
+      "Memmingen 3.692.077"
+     ]
+    },
+    {
+     "file": "eurostat-series",
+     "org": "Eurostat",
+     "dated": "1998 to 2025 (annual data)",
+     "quote": [
+      "Eurostat DE_EDDN NUERNBERG airport: passengers carried in 2018: 4,435,627",
+      "Eurostat DE_EDDN NUERNBERG airport: passengers carried in 2025: 4,487,554",
+      "Highest year in the series: 2025 (4,487,554)"
+     ]
+    },
+    {
+     "file": "eurostat-de",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat DE_EDDV HANNOVER airport: passengers carried in 2025: 5,332,850",
+      "Eurostat DE_EDDN NUERNBERG airport: passengers carried in 2025: 4,487,554"
+     ]
+    },
+    {
+     "file": "op-ueber-uns",
+     "org": "Flughafen Nürnberg GmbH (the airport operator, airport-nuernberg.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "4,5 Mio Passagiere in 2025"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": [
+      "In 2025, the airport handled 4,508,700 passengers, the highest volume in its history, surpassing the previous record of 4,466,864 set in 2018.",
+      "It was Germany's 9th busiest airport in 2025."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "domestic flying now little more than the link to Frankfurt",
+   "verdict": "corrected",
+   "inAfter": "Domestic flying is now little more than the link to Frankfurt.",
+   "note": "Was 'domestic German flying plus European city and leisure destinations'. Eurostat's 2024 route figures (the latest by route) have Frankfurt as the only German route among the 41 the airport reports (240,577 passengers), and Wikipedia says every other domestic route has gone. ADV's 2025 table has domestic scheduled and charter traffic at 280,452 of 4,473,406, about 6 per cent, which fits.",
+   "sources": [
+    {
+     "file": "eurostat-routes",
+     "org": "Eurostat",
+     "dated": "2024 (annual data, the latest by route)",
+     "quote": [
+      "Eurostat routes reported for EDDN in 2024: 41, carrying 3,806,018 passengers in all",
+      "Eurostat DE_EDDN_DE_EDDF NUERNBERG airport - FRANKFURT/MAIN airport: 240,577 passengers in 2024"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "This leads to the circumstance that every domestic route from Nuremberg has been cancelled, with the sole exception of Lufthansas hub-feeder to Frankfurt Airport"
+    },
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": [
+      "Kumulierter Linien- und Charterverkehr in Deutschland: Passagiere (an+ab) | Januar bis Dezember 2025",
+      "Nürnberg 4.473.406 +11,9 % 280.452 +12,9 %"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "otherwise European city and leisure flying, weighted towards the Mediterranean, the Canaries, Turkey and North Africa",
+   "verdict": "confirmed",
+   "inAfter": "Otherwise the map is European city and leisure flying, weighted heavily towards the Mediterranean, the Canary Islands, Turkey and North Africa.",
+   "note": "The airport's winter 2026/27 announcement (14 Sep 2026): 19 airlines with direct flights to Europe, North Africa and Turkey, city destinations such as Seville and Porto, and sun routes to Hurghada, the Canaries, Palma, Malaga, Valencia and Antalya. Eurostat's busiest routes in 2024 were Antalya (552,971) and Palma (437,134).",
+   "sources": [
+    {
+     "file": "op-winter-2026",
+     "org": "Flughafen Nürnberg GmbH (the airport operator, airport-nuernberg.de)",
+     "dated": "14 Sep 2026",
+     "quote": [
+      "bietet mit 19 Airlines zahlreiche Direktverbindungen zu Zielen in Europa, Nordafrika und der Türkei",
+      "Zudem kehrt Sevilla zurück und ergänzt das Angebot an beliebten Städtereisezielen.",
+      "Dazu zählen unter anderem Hurghada , die Kanarischen Inseln, Palma de Mallorca , Málaga , Valencia und Antalya ."
+     ]
+    },
+    {
+     "file": "eurostat-routes",
+     "org": "Eurostat",
+     "dated": "2024 (annual data, the latest by route)",
+     "quote": [
+      "Eurostat DE_EDDN_TR_LTAI NUERNBERG airport - ANTALYA airport: 552,971 passengers in 2024",
+      "Eurostat DE_EDDN_ES_LEPA NUERNBERG airport - PALMA DE MALLORCA airport: 437,134 passengers in 2024"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "offers flights within Germany as well as to European metropolitan and leisure destinations, especially along the Mediterranean Sea, to the Canary Islands, Turkey and to North Africa"
+    }
+   ]
+  },
+  {
+   "claim": "security in the middle, on the ground floor between the two departure halls",
+   "verdict": "confirmed",
+   "inAfter": "Security sits in the middle, on the ground floor between the two departure halls",
+   "note": "Wikipedia dates the move to the ground floor between halls 1 and 2 to December 2015; the airport's facts sheet names a centrally located security check and a departure hall 2.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": [
+      "The passenger terminal consists of two departure halls and one arrival hall which are all linked landside and airside.",
+      "In December 2015 the new security control between departure halls 1 and 2 on the ground floor opened"
+     ]
+    },
+    {
+     "file": "op-9-fakten",
+     "org": "Flughafen Nürnberg GmbH (the airport operator, airport-nuernberg.de)",
+     "dated": "undated facts sheet, linked from the operator's company page read 2026-09-23",
+     "quote": [
+      "clear terminal layout, centrally located security check",
+      "situated on the first floor in departure hall 2"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the airport makes a point of its clear layout and short walks",
+   "verdict": "confirmed",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "and the airport makes a point of its clear layout and short walks.",
+   "note": "The airport's own claim, on its orientation page and in its facts sheet, so it is attributed.",
+   "sources": [
+    {
+     "file": "op-lageplan",
+     "org": "Flughafen Nürnberg GmbH (the airport operator, airport-nuernberg.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Ein übersichtliches Terminal und kurze Wege zeichnen den Airport Nürnberg aus."
+    },
+    {
+     "file": "op-9-fakten",
+     "org": "Flughafen Nürnberg GmbH (the airport operator, airport-nuernberg.de)",
+     "dated": "undated facts sheet, linked from the operator's company page read 2026-09-23",
+     "quote": "Der Airport punktet mit seinen kurzen Wegen und dem persönlichen Service."
+    }
+   ]
+  },
+  {
+   "claim": "a single runway of 2,700 metres",
+   "verdict": "confirmed",
+   "inAfter": "It has a single runway of 2,700 metres.",
+   "sources": [
+    {
+     "file": "op-pilots-corner",
+     "org": "Flughafen Nürnberg GmbH (the airport operator, airport-nuernberg.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Piste",
+      "10/28 (2700m x 45m)"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 10/28: 2,700 m (8,858 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "The runway 10/28 is 2,700 by 45 m (8,858 by 148 ft)."
+    }
+   ]
+  },
+  {
+   "claim": "owned half each by the state of Bavaria and the city of Nuremberg",
+   "verdict": "confirmed",
+   "inAfter": "The state of Bavaria and the city of Nuremberg each own half of it",
+   "sources": [
+    {
+     "file": "op-ueber-uns",
+     "org": "Flughafen Nürnberg GmbH (the airport operator, airport-nuernberg.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Gesellschafter",
+      "50 Prozent Freistaat Bayern",
+      "50 Prozent Stadt Nürnberg"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "in turn owned 50% by the state of Bavaria and 50% by the city of Nuremberg"
+    }
+   ]
+  },
+  {
+   "claim": "marketed as Albrecht Dürer Airport, after the painter",
+   "verdict": "confirmed",
+   "inAfter": "and it is marketed as Albrecht Dürer Airport, after the painter.",
+   "note": "Renamed for the international market in 2014, per the operator's facts sheet; its travel page still uses the name, though the website itself says 'Airport Nürnberg'.",
+   "sources": [
+    {
+     "file": "op-9-fakten",
+     "org": "Flughafen Nürnberg GmbH (the airport operator, airport-nuernberg.de)",
+     "dated": "undated facts sheet, linked from the operator's company page read 2026-09-23",
+     "quote": [
+      "Nuremberg Airport was renamed ‘Albrecht Dürer Airport Nürnberg’ in 2014",
+      "The painter Albrecht Dürer created the world’s first genuine brand with his initials, AD."
+     ]
+    },
+    {
+     "file": "op-anreise",
+     "org": "Flughafen Nürnberg GmbH (the airport operator, airport-nuernberg.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Die Buslinie 30, 33 und der Nightliner N12 verbinden Erlangen, Fürth und Nürnberg mit dem Albrecht Dürer Airport."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "marketed as Albrecht Dürer Airport Nürnberg after the painter Albrecht Dürer"
+    }
+   ]
+  },
+  {
+   "claim": "one of the shortest airport transfers in Germany",
+   "verdict": "cut",
+   "wasBefore": "which makes it one of the shortest airport transfers in Germany",
+   "why": "No source makes the comparison. Replaced by the underground journey time (see above)."
+  },
+  {
+   "claim": "domestic German flying",
+   "verdict": "cut",
+   "wasBefore": "The route map is domestic German flying plus European city and leisure destinations",
+   "why": "Only the Frankfurt route is left. Corrected (see above)."
+  },
+  {
+   "claim": "the terminal: compact and pleasant, halls linked landside and airside, 40 check-in desks, four finger docks",
+   "verdict": "cut",
+   "wasBefore": "The terminal is compact and pleasant: two departure halls and one arrival hall, all connected both landside and airside, with 40 check in desks and four finger docks.",
+   "why": "The counts and the links between halls rest on Wikipedia alone; the airport's pages read give none of them. The two departure halls stay (see above), and 'compact' gives way to the airport's own 'clear layout and short walks'."
+  },
+  {
+   "claim": "departure hall 2 of 1992, steel and glass, by Grabow and Hoffmann",
+   "verdict": "cut",
+   "wasBefore": "Departure hall 2 was built in 1992 in steel and glass by the Nuremberg architects Grabow and Hoffmann and is full of daylight.",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "security moved to the ground floor in December 2015",
+   "verdict": "cut",
+   "wasBefore": "Security moved to the ground floor between the two halls in December 2015.",
+   "why": "The December 2015 date rests on Wikipedia alone; the central position is confirmed by the airport's facts sheet and kept (see above)."
+  },
+  {
+   "claim": "the runway takes everything flying, the 747 included, but not the A380",
+   "verdict": "cut",
+   "wasBefore": "One practical limit. The runway is 2,700 metres and takes everything currently flying, including the 747, but the airport is not licensed for the A380.",
+   "why": "The aircraft limits rest on Wikipedia alone; the operator's pilot page gives only the runway (2,700 by 45 metres), which is kept (see above)."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

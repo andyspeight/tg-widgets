@@ -1,0 +1,435 @@
+{
+ "iata": "SLC",
+ "id": "recOU6WwnTtE0intO",
+ "name": "Salt Lake City International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Salt_Lake_City_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Four miles west of downtown Salt Lake City, this is Utah's main way in and out, and by a long margin the busiest airport in the state. It handled just over 28.3 million passengers in 2024, an all-time record, and runs around 343 scheduled nonstop departures a day to 93 cities across North America, South America, Asia and Europe.\n\nMuch of that traffic exists because Delta Air Lines uses it as a hub, so plenty of travellers pass through on connections rather than stopping in the city. The rest are heading for the Intermountain West and the ski country, national parks and canyon roads that surround it, or for business in a metro area where nearly 1.3 million jobs sit within a 30-minute drive.\n\nIt has a good reputation for reliability. The airport has consistently ranked high among major US airports for on-time departures and arrivals and for its low cancellation rate, which matters if you are connecting onward. It is a joint civil-military site, owned by the City of Salt Lake City and run by the municipal Department of Airports, with the smaller Provo and Ogden-Hinckley airports serving the same region.",
+ "after": "Five miles north west of downtown Salt Lake City, this is by far the busiest airport in Utah. It handled just over 28.1 million passengers in 2025, slightly down on the 2024 record. The airport says it has nonstop flights to about 100 destinations, including Delta's to Amsterdam, London and Paris.\n\nDelta Air Lines uses it as a hub and carries more than half of the airport's passengers. For skiers, ten resorts are less than an hour's drive away.\n\nIt has a good reputation for reliability. In the year to July 2026 it ranked first among major US airports for on-time departures and arrivals and second for fewest cancellations, which matters if you are connecting onward. It is a joint civil-military site, owned by the City of Salt Lake City and run by the municipal Department of Airports, with the smaller Provo and Ogden-Hinckley airports serving the same region.",
+ "claims": [
+  {
+   "claim": "five miles north west of downtown Salt Lake City",
+   "verdict": "corrected",
+   "inAfter": "Five miles north west of downtown Salt Lake City",
+   "note": "Was 'Four miles west'. Four miles fails the coordinates check: the straight line from the GeoNames centre is 8.1 km (5.03 miles), a ratio of 0.795, just under the 0.8 floor, and Wikipedia's own conversion (3.5 nmi) suggests a nautical figure. The operator's own page says five miles north west, which the coordinates match (293 degrees, north west).",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "Salt Lake City International Airport (operator, slcairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "SLC is located five miles northwest of downtown Salt Lake City."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 8.1 km (5.0 miles)",
+      "Bearing from the city centre: 293 degrees, which is north west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "by far the busiest airport in Utah",
+   "verdict": "confirmed",
+   "inAfter": "this is by far the busiest airport in Utah",
+   "note": "FAA preliminary CY2025 boardings: Salt Lake City 13,429,128; the next Utah airports are Provo (531,126) and St George (219,286). 'By a long margin' shortened to Wikipedia's 'by far' in review, to keep the text within 150 words.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is by far the busiest airport in Utah."
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "2026-07-08",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "July 8, 2026",
+      "23 NM UT SLC Salt Lake City Salt Lake City International P L 13,429,128 13,543,570 -0.84%",
+      "141 NM UT PVU Provo Provo Municipal P S 531,126 455,219 16.67%",
+      "191 NM UT SGU St. George St George Regional P N 219,286 161,201 36.03%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "just over 28.1 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled just over 28.1 million passengers in 2025",
+   "note": "Was 'just over 28.3 million passengers in 2024, an all-time record'. TOTAL passengers, arriving and departing: 28,158,007 in 2025 on the operator's calendar-year summary and live fact sheet (and Wikipedia's infobox, which cites the airport). The FAA's preliminary CY2025 table counts 13,429,128 boardings (enplanements only, about half of total passengers), down 0.84 per cent on 2024, in line with it.",
+   "sources": [
+    {
+     "file": "op-stats-2025",
+     "org": "Salt Lake City International Airport (operator, slcairport.com)",
+     "dated": "calendar year 2025 (report period)",
+     "quote": [
+      "Summary Statistics for 2025",
+      "Total Passengers * 2,183,127 2,120,944 2,503,033 2,222,457 2,424,843 2,524,426 2,588,668 2,484,435 2,305,852 2,417,669 2,052,283 2,330,270 28,158,007"
+     ]
+    },
+    {
+     "file": "op-fastfacts",
+     "org": "Salt Lake City International Airport (operator, slcairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The airport served 28,158,007 passengers in 2025."
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat1_data = 28,158,007",
+      "stat_year = 2025"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "2026-07-08",
+     "quote": "23 NM UT SLC Salt Lake City Salt Lake City International P L 13,429,128 13,543,570 -0.84%"
+    }
+   ]
+  },
+  {
+   "claim": "slightly down on the 2024 record",
+   "verdict": "corrected",
+   "inAfter": "slightly down on the 2024 record",
+   "note": "The 2024 record (28,364,610) is kept as context for the 2025 figure, which is 0.7 per cent lower.",
+   "sources": [
+    {
+     "file": "op-record-2024",
+     "org": "Salt Lake City International Airport (operator, slcairport.com)",
+     "dated": "2025-01-22",
+     "quote": [
+      "SLC International Airport Reports Record Passengers for 2024",
+      "Salt Lake City, UT (January 22, 2025)",
+      "From January 1 through December 31, 2024, the airport recorded 28,364,610 passengers."
+     ]
+    },
+    {
+     "file": "op-stats-2024",
+     "org": "Salt Lake City International Airport (operator, slcairport.com)",
+     "dated": "calendar year 2024 (report period)",
+     "quote": "Summary Statistics for 2024"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2024, the airport set an all-time record with 28,364,610 passengers served"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "2026-07-08",
+     "quote": "13,429,128 13,543,570 -0.84%"
+    }
+   ]
+  },
+  {
+   "claim": "the airport says nonstop flights to about 100 destinations, including Delta's to Amsterdam, London and Paris",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport says it has nonstop flights to about 100 destinations, including Delta's to Amsterdam, London and Paris.",
+   "note": "Replaces 'around 343 scheduled nonstop departures a day to 93 cities across North America, South America, Asia and Europe' (Wikipedia, undated). The airport's own current count, attributed: its overview says 100 nonstop destinations and its fact sheet 'close to 100 cities'. Its two pages disagree on daily departures (more than 330, about 300), so no departure count is given. The fact sheet names Delta's European nonstops; London is the one that matters most to a UK agent.",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "Salt Lake City International Airport (operator, slcairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "More than 330 flights depart daily to 100 nonstop destinations."
+    },
+    {
+     "file": "op-fastfacts",
+     "org": "Salt Lake City International Airport (operator, slcairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "serving close to 100 cities with non-stop flights",
+      "Delta Air Lines currently offers non-stop service between Salt Lake City International Airport (SLC) and Amsterdam, London and Paris."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Delta Air Lines uses it as a hub",
+   "verdict": "confirmed",
+   "inAfter": "Delta Air Lines uses it as a hub",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport serves as a hub for Delta Air Lines"
+    },
+    {
+     "file": "op-fastfacts",
+     "org": "Salt Lake City International Airport (operator, slcairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "SLC is a major hub for Delta Air Lines with about 70 percent of total traffic."
+    },
+    {
+     "file": "op-record-2024",
+     "org": "Salt Lake City International Airport (operator, slcairport.com)",
+     "dated": "2025-01-22",
+     "quote": "hub carrier Delta Air Lines"
+    }
+   ]
+  },
+  {
+   "claim": "Delta carries more than half of its passengers",
+   "verdict": "corrected",
+   "inAfter": "carries more than half of the airport's passengers",
+   "note": "Replaces 'Much of that traffic exists because Delta Air Lines uses it as a hub'. Delta alone: 56.37 per cent of passengers on US flights for July 2025 to June 2026 (BTS), and 8,035,488 of the airport's 13,940,164 boardings in 2025 (57.6 per cent, operator). With SkyWest's Delta Connection flights the operator puts Delta at about 70 per cent of traffic; that larger figure rests on the operator alone, so the text gives the smaller one.",
+   "sources": [
+    {
+     "file": "bts-carriers",
+     "org": "US Bureau of Transportation Statistics",
+     "dated": "2026-09-23 (data as of that day, 12 months to June 2026)",
+     "quote": [
+      "BTS Data as of 9/23/2026",
+      "Carrier Shares for July 2025 - June 2026",
+      "Delta 14,385 56.37%"
+     ]
+    },
+    {
+     "file": "op-stats-2025",
+     "org": "Salt Lake City International Airport (operator, slcairport.com)",
+     "dated": "calendar year 2025 (report period)",
+     "quote": [
+      "Delta 618,176 589,851 725,736 639,057 707,668 708,930 732,926 717,267 653,738 682,421 598,389 661,329 8,035,488",
+      "Total Enplanements 1,082,519 1,048,242 1,269,573 1,085,561 1,207,832 1,234,136 1,279,619 1,239,360 1,139,655 1,202,255 1,017,710 1,133,702 13,940,164"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "ten ski resorts less than an hour's drive away",
+   "verdict": "softened",
+   "inAfter": "ten resorts are less than an hour's drive away",
+   "note": "Replaces 'the ski country, national parks and canyon roads that surround it'. The ski resorts are the part two organisations support; Utah's national parks are several hours' drive away and only the operator's promotional line links them to the airport.",
+   "sources": [
+    {
+     "file": "skiutah",
+     "org": "Ski Utah",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "10 resorts less than an hour from Salt Lake City International Airport."
+    },
+    {
+     "file": "op-fastfacts",
+     "org": "Salt Lake City International Airport (operator, slcairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Ten major ski resorts are within an hour's drive of SLC."
+    }
+   ]
+  },
+  {
+   "claim": "first among major US airports for on-time departures and arrivals, second for fewest cancellations, in the year to July 2026",
+   "verdict": "confirmed",
+   "inAfter": "In the year to July 2026 it ranked first among major US airports for on-time departures and arrivals and second for fewest cancellations",
+   "note": "Wikipedia's ranking is dated April 2017, so a current source was needed. BTS, for August 2025 to July 2026, ranks it first among major US airports for on-time departures and for on-time arrivals and second for the lowest share of cancelled flights, with on-time rates of 83 to 86 per cent every year since 2021. Revised in review (23 Sep evening): the helper wrote 'has consistently ranked high', but only the latest ranking (BTS, August 2025 to July 2026) is sourced, so the text now gives that ranking and its period.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Salt Lake City International Airport continues to rank high for on-time departures/arrivals and the fewest flight cancellations among major US airports."
+    },
+    {
+     "file": "bts-carriers",
+     "org": "US Bureau of Transportation Statistics",
+     "dated": "2026-09-23 (August 2025 to July 2026)",
+     "quote": [
+      "% On Time 2021 2022 2023 2024 2025 2026* Rank**",
+      "Departure 85% 83% 83% 83% 84% 84% 1",
+      "Arrival 86% 84% 84% 84% 84% 84% 1",
+      "Total 0.78% 1.09% 0.75% 0.62% 0.51% 0.78% 2",
+      "** Ranked only for major U.S. airports, August 2025 - July 2026."
+     ]
+    },
+    {
+     "file": "op-fastfacts",
+     "org": "Salt Lake City International Airport (operator, slcairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The airport has a strong on-time performance record."
+    }
+   ]
+  },
+  {
+   "claim": "joint civil-military site",
+   "verdict": "confirmed",
+   "inAfter": "It is a joint civil-military site",
+   "note": "The operator counts 2,945 military movements in 2025 and says its traffic includes military activity; the Utah Air National Guard's 151st Wing flies KC-135 tankers from the Roland R. Wright Air National Guard Base, which Wikipedia places on the east side of the airport.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "is a joint civil-military international airport",
+      "The Utah Air National Guard operates what was previously named the Salt Lake City Air National Guard Base on the east side of the airport."
+     ]
+    },
+    {
+     "file": "op-fastfacts",
+     "org": "Salt Lake City International Airport (operator, slcairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "including commercial air traffic, cargo, general aviation and military activity"
+    },
+    {
+     "file": "op-stats-2025",
+     "org": "Salt Lake City International Airport (operator, slcairport.com)",
+     "dated": "calendar year 2025 (report period)",
+     "quote": "Military 236 212 255 261 306 286 246 247 204 278 234 180 2,945"
+    },
+    {
+     "file": "ang-151arw",
+     "org": "Utah Air National Guard (151st Wing)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "the Roland R. Wright Air National Guard Base stands as the proud home of the Utah Air National Guard's distinguished 151st Wing"
+    }
+   ]
+  },
+  {
+   "claim": "owned by the city and run by the municipal Department of Airports",
+   "verdict": "confirmed",
+   "inAfter": "owned by the City of Salt Lake City and run by the municipal Department of Airports",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is owned by the City of Salt Lake City and is administered by the municipal Department of Airports."
+    },
+    {
+     "file": "op-overview",
+     "org": "Salt Lake City International Airport (operator, slcairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "is operated and managed by the Salt Lake City Department of Airports, a department of Salt Lake City Corporation",
+      "a system of airports, owned by Salt Lake City"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the smaller Provo and Ogden-Hinckley airports serve the same region",
+   "verdict": "confirmed",
+   "inAfter": "with the smaller Provo and Ogden-Hinckley airports serving the same region",
+   "note": "FAA CY2025 boardings: Provo 531,126 and Ogden-Hinckley 12,597 against Salt Lake City's 13,429,128.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "along with the much smaller Provo Airport (PVU) and Ogden-Hinckley Airport (OGD) are the closest commercial airports for more than 3 million people"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "2026-07-08",
+     "quote": [
+      "141 NM UT PVU Provo Provo Municipal P S 531,126 455,219 16.67%",
+      "394 NM UT OGD Ogden Ogden-Hinckley P N 12,597 15,582 -19.16%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Utah's main way in and out",
+   "verdict": "cut",
+   "wasBefore": "this is Utah's main way in and out",
+   "why": "Folded into 'the busiest airport in Utah', which says the same thing with two sources, to bring the text within 150 words."
+  },
+  {
+   "claim": "four miles west",
+   "verdict": "cut",
+   "wasBefore": "Four miles west of downtown Salt Lake City",
+   "why": "Fails the coordinates check (4 / 5.03 = 0.795). Replaced by the operator's five miles north west, which the coordinates confirm."
+  },
+  {
+   "claim": "28.3 million in 2024, an all-time record",
+   "verdict": "cut",
+   "wasBefore": "It handled just over 28.3 million passengers in 2024, an all-time record",
+   "why": "A year out of date: replaced by the operator's 2025 total, with 2024 kept as the record year."
+  },
+  {
+   "claim": "343 daily departures to 93 cities in four continents",
+   "verdict": "cut",
+   "wasBefore": "runs around 343 scheduled nonstop departures a day to 93 cities across North America, South America, Asia and Europe",
+   "why": "Undated Wikipedia figures. Replaced by the airport's own current count, attributed. Its two pages give different daily departure counts (about 300, more than 330), so none is given."
+  },
+  {
+   "claim": "much of that traffic exists because of the Delta hub",
+   "verdict": "cut",
+   "wasBefore": "Much of that traffic exists because Delta Air Lines uses it as a hub",
+   "why": "Reworded and kept with a figure: Delta carries more than half of passengers (BTS, operator)."
+  },
+  {
+   "claim": "plenty of travellers pass through on connections",
+   "verdict": "cut",
+   "wasBefore": "so plenty of travellers pass through on connections rather than stopping in the city",
+   "why": "No source gives a connecting share: Wikipedia does not, and the operator's fact sheet, overview, rebuild pages and 2024 economic impact report say only that it is a hub with many flights arriving and leaving together. The hub point stays."
+  },
+  {
+   "claim": "the rest are heading for the Intermountain West",
+   "verdict": "cut",
+   "wasBefore": "The rest are heading for the Intermountain West and the ski country",
+   "why": "'The rest' splits passengers in a way no source does, and 'Intermountain West' rests on Wikipedia alone. The ski resorts are kept with two sources."
+  },
+  {
+   "claim": "national parks and canyon roads that surround it",
+   "verdict": "cut",
+   "wasBefore": "national parks and canyon roads that surround it",
+   "why": "Canyon roads have no source; the national parks link rests on the operator's promotional fact sheet alone and the parks are hours away."
+  },
+  {
+   "claim": "nearly 1.3 million jobs within a 30-minute drive",
+   "verdict": "cut",
+   "wasBefore": "or for business in a metro area where nearly 1.3 million jobs sit within a 30-minute drive",
+   "why": "Wikipedia alone; its cited source is an archived page (the web archive is blocked) and the operator's pages and 2024 economic impact report do not give the figure."
+  },
+  {
+   "claim": "The New SLC completes on 27 October 2026 with 94 gates",
+   "verdict": "cut",
+   "why": "Held back: new, replaces nothing (the old text says nothing of the terminal). The operator said on 23 July 2026 that the final phase of The New SLC, seven more gates (for United plus two common-use gates), opens on 27 October 2026, for a total of 94 gates, at a total cost of $5.1 billion; its overview describes one terminal and two concourses, A and B. Wikipedia agrees (11 more gates in fall 2026, 94 in all). Worth adding if Andy wants the terminal described: the long concourses and the tunnels between them matter to connecting passengers.",
+   "sources": [
+    {
+     "file": "op-newslc-complete",
+     "org": "Salt Lake City International Airport (operator, slcairport.com)",
+     "dated": "2026-07-23",
+     "quote": [
+      "Jul 23, 2026",
+      "Phase 4, the final phase of construction, will open to the public on Oct. 27 and includes seven additional gates and six new concessions.",
+      "for a total of 101 concessions, 94 aircraft gates and four hardstand positions. The total cost of The New SLC is $5.1 billion."
+     ]
+    },
+    {
+     "file": "op-overview",
+     "org": "Salt Lake City International Airport (operator, slcairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "There is one terminal and two concourses (A & B)."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Concourse B has 36 gates, with 11 more opening in Fall 2026.",
+      "phase 2 through phase 4 are planned to add 48 new gates to the airport for a total of 94 gates"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "It has a good reputation for reliability.",
+   "why": "The old text's framing, carried by the next sentence (BTS ranks it first among major US airports for on-time departures and arrivals, August 2025 to July 2026)."
+  },
+  {
+   "text": "which matters if you are connecting onward",
+   "why": "Advice to the agent that follows from the reliability claim at a hub airport."
+  },
+  {
+   "text": "For skiers,",
+   "why": "A signpost for the sourced resort figure that follows."
+  }
+ ],
+ "tracerOk": {}
+}

@@ -31,7 +31,7 @@ const url = `https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data
   const n = Math.min(rows.length, +top);
   const out = `URL: ${url}\nFETCHED: ${new Date().toISOString()}\nHTTP: 200\nKIND: Eurostat avia_par_${ES.toLowerCase()}, passengers carried on each route ${icao} reports in ${yr} (both directions; a domestic route counted once, as this airport reports it), high to low, top ${n} of ${rows.length}\n----\n` +
     `Eurostat routes reported for ${icao} in ${yr}: ${rows.length}, carrying ${total.toLocaleString('en-GB')} passengers in all\n` +
-    rows.slice(0, n).map((o, i) => `${i + 1}. Eurostat ${o.code} ${o.label.replace(/^[A-Z_]+\s+/, '').trim()}: ${o.v.toLocaleString('en-GB')} passengers in ${yr} (${(100 * o.v / total).toFixed(1)}% of the routes listed)`).join('\n') + '\n';
+    rows.slice(0, n).map((o, i) => `${i + 1}. Eurostat ${o.code} ${o.label.trim()}: ${o.v.toLocaleString('en-GB')} passengers in ${yr} (${(100 * o.v / total).toFixed(1)}% of the routes listed)`).join('\n') + '\n';
   const dir = path.join(EVIDENCE, folder); fs.mkdirSync(dir, { recursive: true });
   const f = path.join(dir, 'eurostat-routes.txt'); fs.writeFileSync(f, out);
   console.log(out); console.log('saved ' + f);
