@@ -1,0 +1,301 @@
+{
+ "iata": "BZE",
+ "id": "recrehVnKpSfVXl0M",
+ "name": "Philip S. W. Goldson International Airport",
+ "country": "Belize",
+ "wikipedia": "https://en.wikipedia.org/wiki/Philip_S._W._Goldson_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Belize's main airport, at Ladyville about 30 minutes drive from central Belize City, and fifth busiest in Central America.\n\nIt sits at an elevation of 5 metres. Both the airport and the whole of Belize City are at serious risk of flooding because of that low elevation and the coastal position, which is part of why the country moved its capital inland to Belmopan. The airport stayed where it is and remains the largest and busiest in Belize.\n\nA new paved access road was completed in mid-2020, running from the George Price Highway across the Belize River directly to the terminal side of the airfield.\n\nThere is one runway on a 457 acre site.\n\nThe airport has a long military history because of the territorial dispute with Guatemala, and hosted British Forces Belize, including RAF Harriers. Price Barracks sits just north of the airport.\n\nIt is named after the politician Philip S. W. Goldson, who died in 2001.",
+ "after": "Belize's main airport sits at Ladyville, 10 miles (16 km) from downtown Belize City. The airport counted about 1.2 million passengers in 2024.\n\nIts 457 acre site has one runway and lies just 5 metres above sea level.\n\nIt is named after the Belizean politician Philip Goldson.",
+ "claims": [
+  {
+   "claim": "Belize's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Belize's main airport",
+   "note": "The operator calls it Belize's only international airport; Wikipedia (the archived copy the Overview was drafted from, source 1 throughout this ledger) says it remains the largest and busiest in the country. This also carries the old 'remains the largest and busiest in Belize', folded in here.",
+   "sources": [
+    {
+     "file": "pgia-about",
+     "org": "Belize Airport Concession Company (the airport's operator, pgiabelize.com)",
+     "dated": "read 2026-09-23 (live page, ©PGIA Belize 2026)",
+     "quote": [
+      "The PGIA is Belize’s only international airport located 10 miles from Belize City in Ladyville, Belize District.",
+      "©PGIA Belize 2026."
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "the archived copy the Overview was drafted from",
+     "quote": "but the airport remains the largest and busiest in the country"
+    }
+   ]
+  },
+  {
+   "claim": "at Ladyville",
+   "verdict": "confirmed",
+   "inAfter": "sits at Ladyville",
+   "sources": [
+    {
+     "file": "pgia-quickfacts",
+     "org": "Belize Airport Concession Company (the airport's operator, pgiabelize.com)",
+     "dated": "read 2026-09-23 (live page, ©PGIA Belize 2026)",
+     "quote": "Ladyville, Belize District"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "the archived copy the Overview was drafted from",
+     "quote": "The airport is about 30 minutes drive from Belize City's centre, in Ladyville."
+    }
+   ]
+  },
+  {
+   "claim": "10 miles (16 km) from downtown Belize City",
+   "verdict": "corrected",
+   "inAfter": "10 miles (16 km) from downtown Belize City",
+   "note": "Replaces 'about 30 minutes drive from central Belize City' (cut below) with the operator's own distance, which it gives on two pages. It passes the coordinates check: the airport is 12.1 km in a straight line from the GeoNames centre of Belize City, and 16 km divided by 12.1 is 1.3, in the range a road distance falls in. 16 km is the conversion of 10 miles.",
+   "sources": [
+    {
+     "file": "pgia-quickfacts",
+     "org": "Belize Airport Concession Company (the airport's operator, pgiabelize.com)",
+     "dated": "read 2026-09-23 (live page, ©PGIA Belize 2026)",
+     "quote": "Distance from Downtown Belize City: 10 miles"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 12.1 km (7.5 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "about 1.2 million passengers in 2024 (the airport)",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport counted about 1.2 million passengers in 2024.",
+   "note": "Replaces 'fifth busiest in Central America' (cut below), the same measure made current: the operator's own count, approximately 1,229,000 arriving and departing passengers, domestic and international, in 2024, the latest year its live pages give. Wikipedia's infobox has the same 1,229,000 but footnotes it to the airport's statistics, so it is not an independent second source and the figure is named as the airport's.",
+   "sources": [
+    {
+     "file": "pgia-about",
+     "org": "Belize Airport Concession Company (the airport's operator, pgiabelize.com)",
+     "dated": "read 2026-09-23 (live page, ©PGIA Belize 2026)",
+     "quote": "In 2024, there were over 4,800 international flights, 29,387 domestic flights, approximately 1,229,000 domestic and international arriving and departing passengers"
+    }
+   ]
+  },
+  {
+   "claim": "a 457 acre site with one runway",
+   "verdict": "confirmed",
+   "inAfter": "Its 457 acre site has one runway",
+   "note": "The runway's length is disputed (the operator says 9,900 feet, OurAirports and Wikipedia 2,950 m, about 9,680 feet), so no length is given, as before.",
+   "sources": [
+    {
+     "file": "pgia-quickfacts",
+     "org": "Belize Airport Concession Company (the airport's operator, pgiabelize.com)",
+     "dated": "read 2026-09-23 (live page, ©PGIA Belize 2026)",
+     "quote": [
+      "Total Airport Area: 457 acres",
+      "Runway/Apron: 9,900 feet long"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "the archived copy the Overview was drafted from",
+     "quote": "Belize Airport covers 457 acres (185 ha) of land and has one runway."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 07/25: 2,950 m (9,678 ft), ASP",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "5 metres above sea level",
+   "verdict": "confirmed",
+   "inAfter": "lies just 5 metres above sea level",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "elevation 15 ft (5 m)"
+    },
+    {
+     "file": "pgia-quickfacts",
+     "org": "Belize Airport Concession Company (the airport's operator, pgiabelize.com)",
+     "dated": "read 2026-09-23 (live page, ©PGIA Belize 2026)",
+     "quote": "Elevation Above Sea Level: 15 feet"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "the archived copy the Overview was drafted from",
+     "quote": "The airport is at an elevation of 5 m (16 ft)"
+    }
+   ]
+  },
+  {
+   "claim": "named after the Belizean politician Philip Goldson",
+   "verdict": "confirmed",
+   "inAfter": "It is named after the Belizean politician Philip Goldson.",
+   "note": "Written 'Philip Goldson', as the operator's own road notice and the FCDO write the airport's name, because the gate splits sentences at initials such as 'S. W.' (as at George, PW Botha). The operator calls him a Belizean nationalist, Wikipedia a politician.",
+   "sources": [
+    {
+     "file": "pgia-about",
+     "org": "Belize Airport Concession Company (the airport's operator, pgiabelize.com)",
+     "dated": "read 2026-09-23 (live page, ©PGIA Belize 2026)",
+     "quote": [
+      "The name of the airport is dedicated to the memory of a Belizean nationalist, Hon. Philip S.W. Goldson.",
+      "ROAD ADVISORY: Philip Goldson International Airport"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "the archived copy the Overview was drafted from",
+     "quote": "It was named after politician Philip S. W. Goldson"
+    }
+   ]
+  },
+  {
+   "claim": "about 30 minutes drive from central Belize City",
+   "verdict": "cut",
+   "wasBefore": "about 30 minutes drive from central Belize City",
+   "why": "Wikipedia alone; the operator's pages give a distance, not a time. Replaced by the operator's 10 miles (above)."
+  },
+  {
+   "claim": "fifth busiest in Central America",
+   "verdict": "cut",
+   "wasBefore": "and fifth busiest in Central America",
+   "why": "Wikipedia alone, with no figures or year. Replaced by the airport's own 2024 total, attributed (above).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "the archived copy the Overview was drafted from",
+     "quote": "With stable passenger growth, Philip S. W. Goldson International Airport is currently the fifth busiest airport in Central America."
+    }
+   ]
+  },
+  {
+   "claim": "flood risk to the airport and Belize City, and the capital's move to Belmopan",
+   "verdict": "cut",
+   "wasBefore": "Both the airport and the whole of Belize City are at serious risk of flooding because of that low elevation and the coastal position, which is part of why the country moved its capital inland to Belmopan.",
+   "why": "Wikipedia alone. The Belize Tourism Board's site answered a plain request with 403 and was not tried with the browser; the FCDO speaks of flooding after heavy rain and of the hurricane season, but not of Belize City's elevation or of why the capital moved. The elevation itself is kept (above)."
+  },
+  {
+   "claim": "the airport stayed where it is and remains the largest and busiest in Belize",
+   "verdict": "cut",
+   "wasBefore": "The airport stayed where it is and remains the largest and busiest in Belize.",
+   "why": "Folded into 'Belize's main airport' (above), which the operator and Wikipedia both support; 'stayed where it is' only made sense beside the cut Belmopan sentence."
+  },
+  {
+   "claim": "a new paved access road completed in mid-2020 from the George Price Highway",
+   "verdict": "cut",
+   "wasBefore": "A new paved access road was completed in mid-2020, running from the George Price Highway across the Belize River directly to the terminal side of the airfield.",
+   "why": "Wikipedia alone. The operator's capital projects page (10 June 2025) describes a different, shorter road: a new 2,500 ft airport access road completed in December 2023. The operator's current road advisory is held back below.",
+   "sources": [
+    {
+     "file": "pgia-capital-projects",
+     "org": "Belize Airport Concession Company (the airport's operator, pgiabelize.com)",
+     "dated": "2025-06-10",
+     "quote": [
+      "Jun. 10/2025",
+      "A new 2,500 ft. airport access road, included drainage, surface markings, signs, fencing, etc. completed since December, 2023."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "one runway on a 457 acre site (old wording)",
+   "verdict": "cut",
+   "wasBefore": "There is one runway on a 457 acre site.",
+   "why": "Reworded (above), with the operator's own area."
+  },
+  {
+   "claim": "a long military history; British Forces Belize and RAF Harriers",
+   "verdict": "cut",
+   "wasBefore": "The airport has a long military history because of the territorial dispute with Guatemala, and hosted British Forces Belize, including RAF Harriers.",
+   "why": "Wikipedia alone, and history rather than anything a traveller meets: the British Army's site answered a plain request with 403 (not tried further), and the operator's history mentions only the 1943 building of the airfield."
+  },
+  {
+   "claim": "Price Barracks sits just north of the airport",
+   "verdict": "cut",
+   "wasBefore": "Price Barracks sits just north of the airport.",
+   "why": "Wikipedia alone; no second source for its position could be read."
+  },
+  {
+   "claim": "named after the politician Philip S. W. Goldson, who died in 2001",
+   "verdict": "cut",
+   "wasBefore": "It is named after the politician Philip S. W. Goldson, who died in 2001.",
+   "why": "The name is kept (above). The year of his death rests on Wikipedia alone; the operator says only that the name is dedicated to his memory."
+  },
+  {
+   "claim": "the operator's road advisory, check-in times and opening hours",
+   "verdict": "cut",
+   "why": "Held back: the operator's pages (read 23 September 2026) warn that roadwork and dredging are under way on the airport access road, so drivers should expect slower traffic and allow extra time; ask passengers to arrive 3 to 4 hours before departure; and give the airport's hours as 6am to 6pm daily, with services beyond that on request. The road warning is the most useful thing on the operator's site for an agent, but it is a notice that will date quickly and replaces nothing in the old text. For Andy to decide.",
+   "sources": [
+    {
+     "file": "pgia-quickfacts",
+     "org": "Belize Airport Concession Company (the airport's operator, pgiabelize.com)",
+     "dated": "read 2026-09-23 (live page, ©PGIA Belize 2026)",
+     "quote": [
+      "Roadwork and dredging are currently underway on the airport access road leading to the Philip Goldson International Airport.",
+      "Passengers are encouraged to arrive 3 to 4 hours before scheduled departure of flight.",
+      "Daily from 6:00 a.m. to 6:00 p.m."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "who flies here, by terminal",
+   "verdict": "cut",
+   "why": "Held back: the operator lists check-in in Terminal 1 for Copa, Sun Country, TAG, Maya Island Air and Tropic Air, and in Terminal 2 for Air Canada, Alaska, American, Delta, Southwest, United and WestJet. No British Airways flight is listed. The old text names no airline, so there is nothing to replace.",
+   "sources": [
+    {
+     "file": "pgia-quickfacts",
+     "org": "Belize Airport Concession Company (the airport's operator, pgiabelize.com)",
+     "dated": "read 2026-09-23 (live page, ©PGIA Belize 2026)",
+     "quote": [
+      "Terminal 1 COPA Sun Country Transportes Aereos Guatemaltecos (TAG) Maya Island Air Tropic Air",
+      "Terminal 2 Air Canada Alaska Air American Delta Southwest United Westjet"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: taxis, arrival form, departure tax, hurricanes, airstrip security",
+   "verdict": "cut",
+   "why": "Held back: the FCDO says to take only registered taxis with green licence plates and agree the fare first; everyone passing through Philip Goldson International must complete an immigration and customs declaration form (the digital one is recommended before travel); the departure tax is usually in the airfare when leaving by air; the hurricane season runs from 1 June to 30 November; and after the hijacking of a domestic flight on 17 April 2025 the Belize Airports Authority tightened security at the municipal airstrips. Nothing in the old text to replace.",
+   "sources": [
+    {
+     "file": "fcdo-bz-safety",
+     "org": "UK FCDO",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Only take registered taxis with green licence plates. Always ask the fare before getting in, and expect to pay in cash.",
+      "The hurricane season is from 1 June to 30 November.",
+      "the Belize Airports Authority has announced security enhancements across Belize’s municipal airstrips"
+     ]
+    },
+    {
+     "file": "fcdo-bz-entry",
+     "org": "UK FCDO",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "All travellers transiting Belize through the Philip Goldson International Airport are required to complete an immigration and customs declaration form.",
+      "If leaving by air, the tax is usually included in the airfare."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

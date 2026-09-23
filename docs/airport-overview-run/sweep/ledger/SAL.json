@@ -1,0 +1,371 @@
+{
+ "iata": "SAL",
+ "id": "rec6q3laKzHqZG1eT",
+ "name": "El Salvador International Airport Saint Óscar Arnulfo Romero y Galdámez",
+ "country": "El Salvador",
+ "wikipedia": "https://en.wikipedia.org/wiki/El_Salvador_International_Airport",
+ "audited": "2026-09-23",
+ "before": "El Salvador's international gateway, and third in Central America for passenger movements at around 3.4 million a year. It is a joint civilian and military field in San Luis Talpa, in the south of the country.\n\nThe transfer is better than the distance suggests. A four lane motorway runs the 42 km into San Salvador and the drive averages about thirty minutes, which is quick for a capital this far from its airport.\n\nThe setting is unusual: a triangle of ground with the Pacific on its southern boundary and the Jiboa River to the east. Being close to sea level, aircraft can operate at full capacity rather than being weight limited, which matters for long haul routes out of Central America.\n\nIt carries FAA category 1 status. The airport is now named after Saint Oscar Arnulfo Romero y Galdamez, having previously been Comalapa International, so both names still appear on schedules and in supplier systems.",
+ "after": "El Salvador's main international airport sits in San Luis Talpa, just over 30 km south east of San Salvador in a straight line. It handled more than 5.2 million passengers in 2025, according to its operator, CEPA.\n\nIts full name honours Saint Óscar Arnulfo Romero y Galdámez, but it is usually called El Salvador International Airport, and it was previously known as Comalapa International.\n\nThe US FAA gives El Salvador its Category 1 safety rating, which covers the country's oversight of aviation rather than the airport itself.",
+ "claims": [
+  {
+   "claim": "El Salvador's main international airport",
+   "verdict": "confirmed",
+   "inAfter": "El Salvador's main international airport",
+   "note": "Was 'El Salvador's international gateway'. start.mjs found no archived copy of the article the Overview was drafted from, so wikipedia-now (revision of 2026-09-15) is source 1 throughout this ledger. CEPA calls it the country's main air terminal; Wikipedia says it replaced Ilopango, which now handles regional, air taxi, military and charter flying. Not 'the only' one: OurAirports marks Ilopango (ILS) as having scheduled service too.",
+   "sources": [
+    {
+     "file": "cepa-cierre-2025",
+     "org": "CEPA (Comisión Ejecutiva Portuaria Autónoma, the airport's operator, cepa.gob.sv)",
+     "dated": "2026-01-05",
+     "quote": [
+      "Publicado el 05-01-2026.",
+      "lo que confirma el crecimiento sostenido de la principal terminal aérea del país"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "The airport was built in the late 1970s to replace its predecessor, Ilopango International Airport, which is now used for regional, air taxi, military, and charter aviation."
+    }
+   ]
+  },
+  {
+   "claim": "in San Luis Talpa",
+   "verdict": "confirmed",
+   "inAfter": "sits in San Luis Talpa",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "in the city of San Luis Talpa, Department of La Paz"
+    },
+    {
+     "file": "ourairports-mslp",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": "\"SV\",\"SV-PA\",\"San Salvador (San Luis Talpa)\",\"yes\",\"MSLP\",\"SAL\""
+    }
+   ]
+  },
+  {
+   "claim": "just over 30 km south east of San Salvador in a straight line",
+   "verdict": "corrected",
+   "inAfter": "just over 30 km south east of San Salvador in a straight line",
+   "note": "Replaces 'in the south of the country' and the '42 km' of the transfer paragraph (cut below) with what two independent position sets agree on: OurAirports' airport with GeoNames' city centre gives 30.7 km at 152 degrees, and Wikipedia's own coordinates for the airport and for San Salvador give 32.2 km at 153 degrees, both south east. Wikipedia gives two different road distances (42 km in its lead, about 50 km in its infrastructure section), and both pass the coordinates check against its own coordinates, so no road figure is given.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 30.7 km (19.1 miles)",
+      "Bearing from the city centre: 152 degrees, which is south east"
+     ]
+    },
+    {
+     "file": "wikipedia-coords",
+     "org": "Wikimedia",
+     "dated": "revisions of 2026-09-21 (San Salvador) and 2026-09-15 (the airport)",
+     "quote": "Straight-line distance from San Salvador to El Salvador International Airport, from the Wikipedia coordinates: 32.2 km, bearing 153 degrees, which is south east"
+    }
+   ]
+  },
+  {
+   "claim": "run by CEPA",
+   "verdict": "confirmed",
+   "inAfter": "its operator, CEPA",
+   "note": "CEPA, the Comisión Ejecutiva Portuaria Autónoma, has run the airport since it opened in January 1980 (CEPA's own history); it also runs Ilopango airport and the ports of Acajutla and La Unión.",
+   "sources": [
+    {
+     "file": "cepa-historia",
+     "org": "CEPA (Comisión Ejecutiva Portuaria Autónoma, the airport's operator, cepa.gob.sv)",
+     "dated": "read 2026-09-23 (CEPA's history page)",
+     "quote": [
+      "el Gobierno le confía a CEPA la construcción, administración y operación del Aeropuerto Internacional El Salvador, el cual inició operaciones en enero de 1980",
+      "quedando desde entonces su operación bajo la responsabilidad de la CEPA"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "operator = Autonomous Port Executive Commission (CEPA)"
+    }
+   ]
+  },
+  {
+   "claim": "more than 5.2 million passengers in 2025 (CEPA)",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "CEPA",
+   "inAfter": "It handled more than 5.2 million passengers in 2025, according to its operator, CEPA.",
+   "note": "Replaces 'at around 3.4 million a year' (Wikipedia's undated 3,411,015), the same measure made current. CEPA's release of 5 January 2026 counts arrivals, departures and connections. Only the operator gives the 2025 figure among the pages read (La Prensa Gráfica answered with an empty 202 challenge page and was not tried again; CEPA's and the civil aviation authority's statistics pages stop at 2021 or return 404), so it is named as CEPA's. For the record: Wikipedia's infobox gives 5,298,491 for 2024, which sits oddly beside 'more than 5.2 million' and 'sustained growth' for 2025; the text uses only CEPA's own 2025 wording.",
+   "sources": [
+    {
+     "file": "cepa-cierre-2025",
+     "org": "CEPA (Comisión Ejecutiva Portuaria Autónoma, the airport's operator, cepa.gob.sv)",
+     "dated": "2026-01-05",
+     "quote": [
+      "Publicado el 05-01-2026.",
+      "A nivel anual, entre el 1 de enero y el 31 de diciembre de 2025, el Aeropuerto Internacional de El Salvador atendió a más de 5.2 millones de pasajeros, considerando llegadas, salidas y conexiones"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after Saint Óscar Arnulfo Romero y Galdámez",
+   "verdict": "confirmed",
+   "inAfter": "Its full name honours Saint Óscar Arnulfo Romero y Galdámez",
+   "note": "Was 'now named after Saint Oscar Arnulfo Romero y Galdamez'; the accents are restored as CEPA writes the name. Wikipedia dates the present name to 29 October 2018, after Romero's canonisation; CEPA uses it in 2026.",
+   "sources": [
+    {
+     "file": "cepa-aies",
+     "org": "CEPA (Comisión Ejecutiva Portuaria Autónoma, the airport's operator, cepa.gob.sv)",
+     "dated": "read 2026-09-23 (the airport's page on CEPA's site)",
+     "quote": "El Aeropuerto Internacional de El Salvador San Óscar Arnulfo Romero y Galdámez opera las 24 horas del día"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "The airport was renamed to Saint Óscar Arnulfo Romero y Galdámez International Airport on 29 October 2018"
+    }
+   ]
+  },
+  {
+   "claim": "usually called El Salvador International Airport",
+   "verdict": "corrected",
+   "inAfter": "but it is usually called El Salvador International Airport",
+   "note": "Replaces 'so both names still appear on schedules and in supplier systems' (cut below) with what two sources show: Wikipedia says it is still commonly known as El Salvador International Airport, and CEPA's own releases of 2026 mostly use that short name.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "but it is still commonly known as El Salvador International Airport"
+    },
+    {
+     "file": "cepa-3m-2026",
+     "org": "CEPA (Comisión Ejecutiva Portuaria Autónoma, the airport's operator, cepa.gob.sv)",
+     "dated": "2026-07-28",
+     "quote": [
+      "Aeropuerto Internacional de El Salvador supera los 3 millones de pasajeros",
+      "Publicado el 28-07-2026."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "previously known as Comalapa International",
+   "verdict": "softened",
+   "inAfter": "and it was previously known as Comalapa International",
+   "note": "Was 'having previously been Comalapa International'. Wikipedia says 'previously known as'; OurAirports lists Comalapa International Airport among the airport's other names, as it does the old names of Sofia and George. CEPA's history says the airport opened in 1980 as Aeropuerto Internacional El Salvador, so Comalapa is given as a name it was known by, not an official title.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "previously known as Comalapa International Airport (Aeropuerto Internacional de Comalapa)"
+    },
+    {
+     "file": "ourairports-mslp",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": "\"https://en.wikipedia.org/wiki/El_Salvador_International_Airport\",\"Monseñor Óscar Arnulfo Romero International Airport, Comalapa International Airport\""
+    }
+   ]
+  },
+  {
+   "claim": "the FAA's Category 1 rating is El Salvador's, for its safety oversight",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FAA",
+   "inAfter": "The US FAA gives El Salvador its Category 1 safety rating, which covers the country's oversight of aviation rather than the airport itself.",
+   "note": "Was 'It carries FAA category 1 status', as if the airport were rated. The FAA's IASA programme rates a country's civil aviation safety oversight against ICAO standards, not an airport or an airline; its current results table (dated 18 April 2025, read 23 September 2026) lists El Salvador as Category 1. Wikipedia repeats the airport wording.",
+   "sources": [
+    {
+     "file": "faa-iasa-pdf",
+     "org": "US Federal Aviation Administration (FAA)",
+     "dated": "2025-04-18 (the current IASA results table, read 2026-09-23)",
+     "quote": [
+      "4/18/2025 FAA Flight Standards Service",
+      "COUNTRY CATEGORY COUNTRY CATEGORY",
+      "El Salvador 1 South Africa 1"
+     ]
+    },
+    {
+     "file": "faa-iasa",
+     "org": "US Federal Aviation Administration (FAA)",
+     "dated": "read 2026-09-23 (page last updated 16 April 2026)",
+     "quote": [
+      "Through the IASA program, the FAA focuses on a country's ability, not the ability of individual air carriers, to adhere to those international safety standards and recommended practices.",
+      "Last updated: Thursday, April 16, 2026"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "It is classified as category 1 by the Federal Aviation Administration of the United States (FAA)"
+    }
+   ]
+  },
+  {
+   "claim": "the international gateway",
+   "verdict": "cut",
+   "wasBefore": "El Salvador's international gateway",
+   "why": "Reworded to 'El Salvador's main international airport' (above), which CEPA and Wikipedia both support."
+  },
+  {
+   "claim": "third in Central America for passenger movements",
+   "verdict": "cut",
+   "wasBefore": "and third in Central America for passenger movements",
+   "why": "Wikipedia alone, and it rests on an undated figure (3,411,015) that its own infobox has overtaken; no regional ranking with current figures could be read.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "It is third in Central America in movement of passengers with 3,411,015 annually"
+    }
+   ]
+  },
+  {
+   "claim": "around 3.4 million a year",
+   "verdict": "cut",
+   "wasBefore": "at around 3.4 million a year",
+   "why": "Out of date. Replaced by CEPA's own 2025 total, attributed (above).",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2024",
+      "stat1_data = 5,298,491"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a joint civilian and military field",
+   "verdict": "cut",
+   "wasBefore": "It is a joint civilian and military field",
+   "why": "Wikipedia alone. The Salvadoran defence ministry's domain (defensa.gob.sv) did not resolve (one try), CEPA's pages read do not mention military use, and the 2023 elsalvador.com report on an Air Force jet's emergency landing here says it had been due to land at the base at Ilopango."
+  },
+  {
+   "claim": "in the south of the country",
+   "verdict": "cut",
+   "wasBefore": "in the south of the country",
+   "why": "Replaced by the straight-line distance and bearing from San Salvador (above), which two position sets support; Wikipedia's own wording is 'the south central area of the country'."
+  },
+  {
+   "claim": "the transfer is better than the distance suggests; four lane motorway; 42 km; about thirty minutes",
+   "verdict": "cut",
+   "wasBefore": "The transfer is better than the distance suggests. A four lane motorway runs the 42 km into San Salvador and the drive averages about thirty minutes, which is quick for a capital this far from its airport.",
+   "why": "Wikipedia alone, and it disagrees with itself: its lead gives a four-lane motorway, 42 km and 30 minutes, its infrastructure section 'about 50 km (31 mi) by road'. Both distances pass the coordinates check, so neither can be chosen. Its source for the lead appears to be the old airport site (aeropuertoelsalvador.gob.sv), which survives only in the web archive (blocked by the network policy); CEPA's airport page, FAQ and history give no distance or time, and El Salvador's tourism site had no page on getting from the airport. The straight-line distance is kept (above); 'better than the distance suggests' and 'quick for a capital' are judgements that fall with the facts.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": [
+      "It is connected to the capital of San Salvador, El Salvador, by a four-lane motorway, with 42 kilometres (26 mi) travel in an average time of 30 minutes.",
+      "The airport is located about 50 km (31 mi) by road from the city of San Salvador."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a triangle of ground bounded by the Pacific and the Jiboa River",
+   "verdict": "cut",
+   "wasBefore": "The setting is unusual: a triangle of ground with the Pacific on its southern boundary and the Jiboa River to the east.",
+   "why": "Wikipedia alone; CEPA's pages read do not describe the site, and the old airport site Wikipedia seems to draw on is only in the blocked web archive."
+  },
+  {
+   "claim": "close to sea level, so aircraft operate at full capacity, which matters for long haul",
+   "verdict": "cut",
+   "wasBefore": "Being close to sea level, aircraft can operate at full capacity rather than being weight limited, which matters for long haul routes out of Central America.",
+   "why": "The elevation is confirmed (31 m: OurAirports and Wikipedia), but the performance point rests on Wikipedia alone and 'which matters for long haul routes out of Central America' on no source. The elevation on its own tells an agent nothing, so the sentence goes."
+  },
+  {
+   "claim": "FAA category 1 status for the airport",
+   "verdict": "cut",
+   "wasBefore": "It carries FAA category 1 status.",
+   "why": "Made precise (above): the FAA rates the country's safety oversight, not the airport."
+  },
+  {
+   "claim": "named after Saint Oscar Arnulfo Romero y Galdamez (unaccented); previously Comalapa International; both names on schedules and in supplier systems",
+   "verdict": "cut",
+   "wasBefore": "The airport is now named after Saint Oscar Arnulfo Romero y Galdamez, having previously been Comalapa International, so both names still appear on schedules and in supplier systems.",
+   "why": "The name and the former name are kept, reworded (above). 'Both names still appear on schedules and in supplier systems' has no source at all: no schedule or supplier system was read, so it is replaced by the short name two sources say is in everyday use."
+  },
+  {
+   "claim": "direct flights to Madrid",
+   "verdict": "cut",
+   "why": "Held back: the civil aviation authority (AAC) marked Avianca's relaunch of the direct San Salvador to Madrid route on 13 June 2026, and CEPA announced on 1 August 2026 that Air Europa will start direct San Salvador to Madrid flights in December 2026. The AAC also says Iberojet has announced Madrid and Barcelona routes (a headline only; that page was not saved). Useful to a UK agent, but the old text names no airline or route, so there is nothing to replace. For Andy to decide.",
+   "sources": [
+    {
+     "file": "aac-madrid-jun2026",
+     "org": "AAC (El Salvador's civil aviation authority, aac.gob.sv)",
+     "dated": "2026-06-13",
+     "quote": [
+      "La Autoridad de Aviación Civil (AAC) acompañó el relanzamiento de la ruta directa San Salvador – Madrid",
+      "agradeció a Avianca por continuar apostando por el país",
+      "Publicado el 13-06-2026."
+     ]
+    },
+    {
+     "file": "cepa-aireuropa",
+     "org": "CEPA (Comisión Ejecutiva Portuaria Autónoma, the airport's operator, cepa.gob.sv)",
+     "dated": "2026-08-01",
+     "quote": [
+      "El Salvador continúa ampliando su conectividad aérea con la llegada de Air Europa, que iniciará operaciones con vuelos directos entre San Salvador y Madrid a partir de diciembre de este año.",
+      "Publicado el 01-08-2026."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "more than 3 million passengers by the end of July 2026",
+   "verdict": "cut",
+   "why": "Held back: CEPA's figure for January to July 2026 (28 July 2026). The full-year 2025 total is used instead, as the like-for-like replacement.",
+   "sources": [
+    {
+     "file": "cepa-3m-2026",
+     "org": "CEPA (Comisión Ejecutiva Portuaria Autónoma, the airport's operator, cepa.gob.sv)",
+     "dated": "2026-07-28",
+     "quote": "superar los 3 millones de pasajeros atendidos a finales de julio de 2026"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: entry, transit fee and taxis",
+   "verdict": "cut",
+   "why": "Held back, for the record: the FCDO says British visitors can stay up to 180 days without a visa; Indian nationals and nationals of any African country travelling through El Salvador must pay a 1,130 US dollar fee (British dual nationals travelling on a British passport do not); and for short trips it advises radio-dispatched, pre-booked or hotel taxis, never unofficial ones. The state of exception declared in 2022 is still in place. Nothing in the old text to replace.",
+   "sources": [
+    {
+     "file": "fcdo-sv-entry",
+     "org": "UK FCDO",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "You can travel to El Salvador for tourism or business for up to 180 days without a visa.",
+      "Indian nationals or nationals from any African country travelling through El Salvador must pay a 1,130 US dollar fee."
+     ]
+    },
+    {
+     "file": "fcdo-sv-safety",
+     "org": "UK FCDO",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "For shorter trips within towns and cities, take radio-dispatched, pre-booked or hotel taxis operated by reputable companies. Do not use unofficial taxis, as there remains a small risk of kidnapping.",
+      "The state of exception started in 2022 and has remained in place since."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

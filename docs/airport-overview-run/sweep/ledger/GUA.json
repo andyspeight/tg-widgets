@@ -1,0 +1,285 @@
+{
+ "iata": "GUA",
+ "id": "recJkon4PUGeQOfzw",
+ "name": "La Aurora International Airport",
+ "country": "Guatemala",
+ "wikipedia": "https://en.wikipedia.org/wiki/La_Aurora_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Guatemala City's airport, and fourth busiest in Central America behind Panama, Costa Rica and El Salvador. It is only 6.4 km south of the centre and 25 km from Antigua Guatemala, which is where most leisure clients are actually heading, so the transfer is genuinely short.\n\nThe one long haul link worth knowing is Madrid. Iberia has flown non-stop with A340s since October 2004, a route opened when the airline closed its Miami hub and stopped routing passengers through it.\n\nThere is a single runway of 2,987 metres, and two VIP lounges: Los Añejos Business Lounge and the Copa Club, the latter for Copa Airlines and United passengers.\n\nThe airport is run directly by Guatemala's General Directorate of Civil Aeronautics, whose head office is on the site in Zone 13.",
+ "after": "Guatemala City's airport sits 6.4 km south of the city centre and about 22 km in a straight line from Antigua Guatemala. It handled more than five million passengers in 2025.\n\nFlights between Madrid and Guatemala City carried 95,563 passengers in 2024, the latest year Eurostat has published for the route.\n\nThere is a single runway of 2,987 metres, and the airport is run by Guatemala's civil aviation directorate, the DGAC.",
+ "claims": [
+  {
+   "claim": "Guatemala City's airport",
+   "verdict": "confirmed",
+   "inAfter": "Guatemala City's airport",
+   "note": "start.mjs found no archived copy of the article the Overview was drafted from, so wikipedia-now (revision of 2026-08-26) is source 1 throughout this ledger.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "La Aurora International Airport (IATA: GUA, ICAO: MGGT) serves Guatemala City, the capital of Guatemala."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Airport: La Aurora International Airport (OurAirports MGGT, IATA GUA)",
+      "OurAirports municipality: Guatemala City"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "6.4 km south of the city centre",
+   "verdict": "confirmed",
+   "inAfter": "6.4 km south of the city centre",
+   "note": "The coordinates check puts the airport 6.6 km from the GeoNames centre of Guatemala City at 193 degrees, south, so the stated 6.4 km and the bearing pass. start.mjs printed a CHECK line pairing '6.4 km south' with Antigua; that is the tool matching the wrong place, as the 6.4 km is from the city centre.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "It is located 6.4 kilometres (4.0 mi; 3.5 nmi) south of Guatemala City's center"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 6.6 km (4.1 miles)",
+      "Bearing from the city centre: 193 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 22 km in a straight line from Antigua Guatemala",
+   "verdict": "corrected",
+   "inAfter": "about 22 km in a straight line from Antigua Guatemala",
+   "note": "Was '25 km from Antigua Guatemala'. Two independent position sets agree on about 22 km in a straight line (22.3 km from OurAirports and GeoNames, 22.4 km from Wikipedia's own coordinates). The 25 km passes the coordinates check, but no source says whether it is a road distance, and none gives the road distance or journey time, so the straight line is given and named as such.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Antigua Guatemala (GeoNames 3599699): 22.3 km (13.9 miles), bearing 82 degrees, which is east"
+    },
+    {
+     "file": "wikipedia-coords",
+     "org": "Wikimedia",
+     "dated": "revisions of 2026-09-13 (Antigua Guatemala) and 2026-08-26 (the airport)",
+     "quote": "Straight-line distance from Antigua Guatemala to La Aurora International Airport, from the Wikipedia coordinates: 22.4 km, bearing 83 degrees, which is east"
+    }
+   ]
+  },
+  {
+   "claim": "more than five million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled more than five million passengers in 2025.",
+   "note": "Replaces 'fourth busiest in Central America behind Panama, Costa Rica and El Salvador' (cut below), the same measure made current. Prensa Libre (26 January 2026), from DGAC data: more than 5.1 million in 2025 (2,573,651 arrivals and 2,555,884 departures), up from 2024. La Hora (23 July 2026) quotes the vice-minister of transport, Fernando Suriano: 'we have more than five million passengers', the current yearly level, which bears the 2025 figure out. His 'growing at more than 10 per cent' is not used: the DGAC figures Prensa Libre gives show about 4 per cent for 2025. Wikipedia's infobox gives 4,919,850 for 2024.",
+   "sources": [
+    {
+     "file": "prensalibre-5m",
+     "org": "Prensa Libre (Guatemalan national newspaper)",
+     "dated": "2026-01-26",
+     "quote": [
+      "26 de enero de 2026",
+      "El Aeropuerto La Aurora cerró el 2025 con más de 5.1 millones de pasajeros movilizados, superando las cifras del año anterior",
+      "según datos de la Dirección General de Aeronáutica Civil (DGAC)"
+     ]
+    },
+    {
+     "file": "lahora-limite-terminal",
+     "org": "La Hora (Guatemalan newspaper)",
+     "dated": "2026-07-23",
+     "quote": [
+      "23 julio, 2026",
+      "Tenemos más de cinco millones de pasajeros y creciendo a tasas superiores al 10%."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Madrid route: 95,563 passengers in 2024 (Eurostat)",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Eurostat",
+   "inAfter": "Flights between Madrid and Guatemala City carried 95,563 passengers in 2024, the latest year Eurostat has published for the route.",
+   "note": "Replaces 'The one long haul link worth knowing is Madrid. Iberia has flown non-stop with A340s since October 2004...' (cut below) with the one dated fact about the route that could be read: Eurostat's count of passengers carried between Madrid-Barajas and La Aurora, which has figures for 2010, 2012 to 2019 and 2023 to 2024, and none for 2011 or 2020 to 2022. No source from the last 12 months names the airline now flying it (Iberia's site refused the link lister with a 403; Prensa Libre's and La Hora's Iberia pages stop in 2022 and 2023), so no airline is named and the sentence is dated rather than put in the present tense. Wikipedia confirms the route itself.",
+   "sources": [
+    {
+     "file": "eurostat-madrid-route",
+     "org": "Eurostat",
+     "dated": "2024 (annual data by route; the latest year published)",
+     "quote": [
+      "Eurostat ES_LEMD_GT_MGGT ADOLFO SUAREZ MADRID-BARAJAS airport - LA AURORA airport: 95,563 passengers in 2024",
+      "Eurostat ES_LEMD_GT_MGGT ADOLFO SUAREZ MADRID-BARAJAS airport - LA AURORA airport: 90,526 passengers in 2023"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "In October 2004, Iberia introduced nonstop service to Madrid aboard Airbus A340s."
+    }
+   ]
+  },
+  {
+   "claim": "a single runway of 2,987 metres",
+   "verdict": "confirmed",
+   "inAfter": "There is a single runway of 2,987 metres",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 02/20: 2,987 m (9,800 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "The airport's runway currently measures 2,987 m"
+    }
+   ]
+  },
+  {
+   "claim": "run by Guatemala's civil aviation directorate, the DGAC",
+   "verdict": "softened",
+   "inAfter": "the airport is run by Guatemala's civil aviation directorate, the DGAC",
+   "note": "Was 'run directly by'. La Hora (26 August 2026): the culture ministry changed the heritage rules for La Aurora so that the DGAC can carry out maintenance, repair and modernisation work there itself. Wikipedia: administered by the DGAC. 'Directly' is dropped as neither source frames it that way.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "It is administered by the General Directorate of Civil Aeronautics."
+    },
+    {
+     "file": "lahora-mcd-remodel",
+     "org": "La Hora (Guatemalan newspaper)",
+     "dated": "2026-08-26",
+     "quote": [
+      "26 agosto, 2026",
+      "El Ministerio de Cultura y Deportes modificó las reglas de protección patrimonial aplicables al Aeropuerto Internacional La Aurora para permitir que la Dirección General de Aeronáutica Civil (DGAC) realice con mayor margen trabajos de mantenimiento, reparación, modernización y adecuación del recinto."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "fourth busiest in Central America behind Panama, Costa Rica and El Salvador",
+   "verdict": "cut",
+   "wasBefore": "and fourth busiest in Central America behind Panama, Costa Rica and El Salvador",
+   "why": "Wikipedia alone, with no figures or year. The 2025 figures read are consistent with El Salvador still being ahead (La Aurora more than 5.1 million, DGAC via Prensa Libre; El Salvador more than 5.2 million, CEPA's own release, see ledger/SAL.json), but Panama's and Costa Rica's current figures were not read, so the rank is not confirmed. Replaced by the passenger total (above).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "The airport is the fourth-busiest in Central America in terms of passenger traffic behind Tocumen International Airport in Panamá, Juan Santamaría International Airport in Costa Rica, and the El Salvador International Airport."
+    }
+   ]
+  },
+  {
+   "claim": "25 km from Antigua Guatemala",
+   "verdict": "cut",
+   "wasBefore": "and 25 km from Antigua Guatemala",
+   "why": "Made precise as the straight-line distance two position sets agree on (above)."
+  },
+  {
+   "claim": "most leisure clients are heading to Antigua, so the transfer is genuinely short",
+   "verdict": "cut",
+   "wasBefore": "which is where most leisure clients are actually heading, so the transfer is genuinely short.",
+   "why": "No source says where most leisure clients go, and none gives the road distance or time to Antigua (the 25 km is close to the 22 km straight line). The FCDO's warnings about the tourist routes out of Guatemala City are held back below."
+  },
+  {
+   "claim": "the one long haul link worth knowing is Madrid",
+   "verdict": "cut",
+   "wasBefore": "The one long haul link worth knowing is Madrid.",
+   "why": "A judgement, and 'the one' could not be checked. The Madrid route is kept, dated (above). For the record, La Hora (31 July 2026) reports Air Canada keeping its Montreal to Guatemala City route open all year, and the DGAC noted a Boeing 787 on one of its flights in May 2026; whether that counts as long haul is a matter of definition (held back below)."
+  },
+  {
+   "claim": "Iberia non-stop with A340s since October 2004, after closing its Miami hub",
+   "verdict": "cut",
+   "wasBefore": "Iberia has flown non-stop with A340s since October 2004, a route opened when the airline closed its Miami hub and stopped routing passengers through it.",
+   "why": "The 2004 start and the Miami hub rest on Wikipedia alone: its source, Travel Weekly, answered with Cloudflare's 'Just a moment...' check (recorded, not retried). The A340s also rest on Wikipedia alone, and its wording ('introduced ... aboard Airbus A340s') describes the 2004 launch, not the aircraft flown now. 'Since 2004' is also broken by Eurostat's gap from 2020 to 2022. Prensa Libre (28 February 2022) shows Iberia flying Madrid to Guatemala City, going on to San Salvador, in 2022, but nothing from the last 12 months names the airline, and Iberia's own site refused the link lister (403), so it was not tried again.",
+   "sources": [
+    {
+     "file": "prensalibre-madrid-flight",
+     "org": "Prensa Libre (Guatemalan national newspaper)",
+     "dated": "2022-02-28",
+     "quote": [
+      "28 de febrero de 2022",
+      "En el vuelo 6341 de @Iberia Madrid/El Salvador con escala en Guatemala"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "two VIP lounges: Los Añejos Business Lounge and the Copa Club",
+   "verdict": "cut",
+   "wasBefore": "and two VIP lounges: Los Añejos Business Lounge and the Copa Club, the latter for Copa Airlines and United passengers.",
+   "why": "Wikipedia alone, and facilities change. Copa's site answered the link lister with a 401 (not retried), Wikipedia's Copa source is a 2011 page in the web archive (blocked), and the DGAC's portal builds its pages by script with no links to follow."
+  },
+  {
+   "claim": "run directly; the DGAC's head office on the site in Zone 13",
+   "verdict": "cut",
+   "wasBefore": "The airport is run directly by Guatemala's General Directorate of Civil Aeronautics, whose head office is on the site in Zone 13.",
+   "why": "The DGAC's role is kept (above). The head office and Zone 13 rest on Wikipedia alone: the DGAC's portal (dgac.gob.gt) is a script-built app whose old statistics addresses now open its home page, and it offers no links to its contact pages."
+  },
+  {
+   "claim": "FCDO: taxis, protests, robberies on tourist routes, volcanoes",
+   "verdict": "cut",
+   "why": "Held back: the FCDO says visitors can buy pre-paid taxi vouchers from the INGUAT tourist office in the arrivals terminal, that protesters may block roads and public facilities, including the international airport, without notice, that there have been armed attacks or robberies on most tourist routes between Guatemala City, Antigua, Tikal, Petén and Lake Atitlán, and that there is a risk of volcanic eruptions. Useful to a UK agent, but nothing in the old text to replace. For Andy to decide.",
+   "sources": [
+    {
+     "file": "fcdo-gt-safety",
+     "org": "UK FCDO",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "You can buy pre-paid taxi vouchers from the office of INGUAT , Guatemala’s tourist agency",
+      "in the airport’s arrivals terminal",
+      "Protestors may block roads and public facilities, including the international airport, without notice.",
+      "There have been armed attacks or robberies on most tourist routes between Guatemala City, Antigua, Tikal, Petén and Lake Atitlán.",
+      "There is a risk of volcanic eruptions in Guatemala."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a new airport to replace much of La Aurora (phase zero)",
+   "verdict": "cut",
+   "why": "Held back: La Hora (23 July 2026) reports the vice-minister of transport saying the government has begun 'phase zero' of a new international airport that would, in the medium to long term, largely replace La Aurora because it is nearing capacity, with Masagua in Escuintla mentioned as a possible site. One source, and a plan rather than a change a traveller will meet now.",
+   "sources": [
+    {
+     "file": "lahora-limite-terminal",
+     "org": "La Hora (Guatemalan newspaper)",
+     "dated": "2026-07-23",
+     "quote": [
+      "23 julio, 2026",
+      "para definir el desarrollo de un nuevo aeropuerto internacional que, en el mediano y largo plazo, sustituya en gran medida al Aeropuerto Internacional La Aurora (AILA)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Air Canada flies Montreal to Guatemala City all year",
+   "verdict": "cut",
+   "why": "Held back: La Hora (31 July 2026) reports that Air Canada, which first landed here from Montreal on 3 October 2025, will keep the route open all year. One source, and the old text names no airline route other than Madrid.",
+   "sources": [
+    {
+     "file": "lahora-aircanada",
+     "org": "La Hora (Guatemalan newspaper)",
+     "dated": "2026-07-31",
+     "quote": [
+      "31 julio, 2026",
+      "la aerolínea confirmó que mantendrá activa la ruta entre Guatemala y Canadá durante todo el año"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
