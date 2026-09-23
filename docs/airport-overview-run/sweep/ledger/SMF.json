@@ -1,0 +1,415 @@
+{
+ "iata": "SMF",
+ "id": "rec9UMoyvuaDDkyoF",
+ "name": "Sacramento International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Sacramento_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Sacramento's main airport, ten and a half miles north west of downtown, and the largest public airport in California by land area at 6,000 acres. It is run by the Sacramento County Airport System, one of four airfields serving the city.\n\nWhat makes it useful for an itinerary is what lies within reach. It is a practical gateway for Lake Tahoe and Heavenly, for Yosemite, for the Napa and Sonoma wine country and for the gold rush sites at Sutter's Mill and Marshall Gold Discovery State Historic Park, as well as the state capitol and Old Sacramento.\n\nThe airport has two parallel runways.",
+ "after": "Sacramento's main airport, about 10 miles north west of downtown on a site of roughly 6,000 acres. It is one of four airports run by the Sacramento County Department of Airports.\n\nWhat makes it useful for an itinerary is what lies within reach: Lake Tahoe, Yosemite and the Napa and Sonoma wine country, as well as the State Capitol and Old Sacramento.\n\nThe airport has two parallel runways.",
+ "claims": [
+  {
+   "claim": "Sacramento's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Sacramento's main airport",
+   "note": "Of the four county airports, the operator gives Sacramento International the passenger role (Mather cargo, Executive and Franklin Field general aviation). The FAA's CY2025 table lists no other Sacramento airport among commercial service airports.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is the primary airport serving the Sacramento Metropolitan Area"
+    },
+    {
+     "file": "scda-general",
+     "org": "Sacramento County Department of Airports (operator, sacramento.aero and flysmf.gov)",
+     "quote": [
+      "Four airports comprise the Sacramento County Department of Airports:",
+      "Sacramento International Airport – focus on passenger aviation",
+      "Mather Airport – focus on cargo aviation",
+      "Executive Airport – focus on general aviation"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "July 8, 2026",
+      "36 WP CA SMF Sacramento Sacramento International P M 6,805,910 6,679,426 1.89%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "about 10 miles from downtown",
+   "verdict": "softened",
+   "inAfter": "about 10 miles north west of downtown",
+   "note": "Was 'ten and a half miles'. The written figures differ a little: Wikipedia 10.5 miles, the operator's 2020 Master Plan 'approximately 10 miles', the FAA master record 10 nautical miles (about 11.5 statute miles) and the operator's live history page '12 miles from downtown Sacramento'. The straight line from the GeoNames centre is 9.4 miles, and every one of these passes the coordinates check. The text uses the Master Plan's wording, which Wikipedia's 10.5 also supports; the 12 miles on the history page is not explained there.",
+   "sources": [
+    {
+     "file": "mp-inventory-summary",
+     "org": "Sacramento County Department of Airports (operator, sacramento.aero and flysmf.gov)",
+     "quote": [
+      "INVENTORY SUMMARY July, 2020",
+      "The Airport is located in Sacramento County, approximately 10 miles northwest of downtown Sacramento"
+     ],
+     "dated": "2020-07"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "10.5 mi (16.9 km) northwest of Downtown Sacramento"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "3 CBD TO AIRPORT (NM):",
+      "10 NW"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 15.2 km (9.4 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "north west of downtown",
+   "verdict": "confirmed",
+   "inAfter": "north west of downtown",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "northwest of Downtown Sacramento"
+    },
+    {
+     "file": "mp-inventory-summary",
+     "org": "Sacramento County Department of Airports (operator, sacramento.aero and flysmf.gov)",
+     "quote": "approximately 10 miles northwest of downtown Sacramento"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 326 degrees, which is north west"
+    }
+   ]
+  },
+  {
+   "claim": "a site of roughly 6,000 acres",
+   "verdict": "confirmed",
+   "inAfter": "on a site of roughly 6,000 acres",
+   "note": "The FAA master record and Wikipedia give 6,000 acres; the operator's 2020 Master Plan says approximately 5,900 and its history page says nearly 6,000 acres were bought in 1957, hence 'roughly'. The ranking that went with the figure is cut (see below).",
+   "sources": [
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "22 ACREAGE:",
+      "6,000"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "covers 6,000 acres (2,400 ha)"
+    },
+    {
+     "file": "mp-inventory-summary",
+     "org": "Sacramento County Department of Airports (operator, sacramento.aero and flysmf.gov)",
+     "quote": "The Airport occupies an approximately 5,900-acre site"
+    },
+    {
+     "file": "op-history",
+     "org": "Sacramento County Department of Airports (operator, sacramento.aero and flysmf.gov)",
+     "quote": "purchase of nearly 6,000 acres north of downtown Sacramento"
+    }
+   ]
+  },
+  {
+   "claim": "one of four airports run by the Sacramento County Department of Airports",
+   "verdict": "corrected",
+   "inAfter": "It is one of four airports run by the Sacramento County Department of Airports.",
+   "note": "Was 'run by the Sacramento County Airport System, one of four airfields serving the city'. The operator calls itself the Sacramento County Department of Airports on every current page (the 'County Airport System' is the four airports together), and the four it runs are the same four Wikipedia lists: Sacramento International, Mather, Executive and Franklin Field. The FAA record gives the County of Sacramento as owner.",
+   "sources": [
+    {
+     "file": "scda-general",
+     "org": "Sacramento County Department of Airports (operator, sacramento.aero and flysmf.gov)",
+     "quote": [
+      "The Sacramento County Department of Airports is owned and operated by the County of Sacramento.",
+      "Four airports comprise the Sacramento County Department of Airports:",
+      "Franklin Field – focus on general aviation training activities"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "mp-inventory-summary",
+     "org": "Sacramento County Department of Airports (operator, sacramento.aero and flysmf.gov)",
+     "quote": "The Sacramento County Department of Airports (SCDA or the Department) owns and/or operates Sacramento International Airport (SMF or the Airport), Sacramento Mather Airport (MHR), Sacramento Executive Airport (SAC) and Franklin Field (F72)."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport is one of 4 airports serving Sacramento, the others being Sacramento Mather Airport, Sacramento Executive Airport, and Franklin Field.",
+      "the Sacramento County Department of Airports announced funding had been secured"
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "> 11 OWNER:",
+      "COUNTY OF SACRAMENTO"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "Lake Tahoe within reach",
+   "verdict": "softened",
+   "inAfter": "Lake Tahoe",
+   "note": "Was 'a practical gateway for Lake Tahoe'. Lake Tahoe's own visitor authority calls Reno-Tahoe the closest airport (about an hour) and lists Sacramento as another option, about two hours' drive, so the text now says only that Tahoe is within reach.",
+   "sources": [
+    {
+     "file": "op-visit",
+     "org": "Sacramento County Department of Airports (operator, sacramento.aero and flysmf.gov)",
+     "quote": [
+      "Located in the heart of Northern California, Sacramento International is the perfect portal to countless world-class destinations.",
+      "The scenic days and vibrant nights of Lake Tahoe."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "visitlaketahoe-fly",
+     "org": "Lake Tahoe Visitors Authority (visitlaketahoe.com)",
+     "quote": [
+      "Other Airports Near Lake Tahoe",
+      "Approximately a 2-hour drive from Lake Tahoe, SMF serves over 40 nonstop destinations, making it a viable option for travelers.",
+      "The closest airport to Lake Tahoe is the Reno-Tahoe International Airport (RNO)"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "such as Heavenly Mountain Resort, Lake Tahoe, Yosemite National Park"
+    }
+   ]
+  },
+  {
+   "claim": "Yosemite within reach",
+   "verdict": "confirmed",
+   "inAfter": "Yosemite",
+   "note": "The park service lists Sacramento among the commercial airports near Yosemite, three and a half hours' drive from Yosemite Valley (Merced and Fresno are closer).",
+   "sources": [
+    {
+     "file": "nps-yose-airports",
+     "org": "National Park Service (Yosemite National Park)",
+     "quote": [
+      "Commercial Airports Near Yosemite",
+      "Sacramento International (SMF) Driving time: 3.5 hours to Yosemite Valley"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-visit",
+     "org": "Sacramento County Department of Airports (operator, sacramento.aero and flysmf.gov)",
+     "quote": "The majesty of Yosemite."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Yosemite National Park"
+    }
+   ]
+  },
+  {
+   "claim": "the Napa and Sonoma wine country within reach",
+   "verdict": "confirmed",
+   "inAfter": "the Napa and Sonoma wine country",
+   "note": "The operator names Napa Valley and the Wine Country among the places it serves; Sonoma County's tourism body lists Sacramento International among its nearby airports (119 miles, about two hours). Wikipedia names the Wine Country. Visit Napa Valley's site refused the link lister (403) and was not used.",
+   "sources": [
+    {
+     "file": "op-visit",
+     "org": "Sacramento County Department of Airports (operator, sacramento.aero and flysmf.gov)",
+     "quote": [
+      "The Vino Valhalla of the Wine Country.",
+      "Napa Valley",
+      "visitnapavalley.com"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "sonoma-how-to-get",
+     "org": "Sonoma County Tourism",
+     "quote": [
+      "Other nearby airports:",
+      "119 miles, 2:06 hours west of Sacramento International (SMF)"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "California State Capitol, Wine Country"
+    }
+   ]
+  },
+  {
+   "claim": "the State Capitol and Old Sacramento",
+   "verdict": "confirmed",
+   "inAfter": "the State Capitol and Old Sacramento",
+   "note": "Both are in downtown Sacramento, within walking distance of each other and reached from Interstate 5, the road the airport sits on. The operator lists Sacramento itself among its destination ideas.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Old Sacramento State Historic Park, California State Capitol",
+      "The airport is accessed via Airport Boulevard directly from Interstate 5 at exit 528."
+     ]
+    },
+    {
+     "file": "oldsac-getting-here",
+     "org": "Old Sacramento Waterfront (oldsacramento.com)",
+     "quote": [
+      "The Old Sacramento Waterfront is located along the east bank of the Sacramento River between the Tower Bridge and I Street Bridge, and easily accessible from Interstate 5.",
+      "It is walking distance from the California State Capitol"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "capitol-directions",
+     "org": "California State Capitol Museum",
+     "quote": "The Capitol is located at 1315 10th Street Sacramento, CA 95814.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-visit",
+     "org": "Sacramento County Department of Airports (operator, sacramento.aero and flysmf.gov)",
+     "quote": [
+      "Destination Ideas",
+      "visitsacramento.com"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "two parallel runways",
+   "verdict": "confirmed",
+   "inAfter": "The airport has two parallel runways.",
+   "note": "The 2020 Master Plan uses the runways' old numbers (16L-34R and 16R-34L); Wikipedia says they became 17/35 on 20 May 2020, which is how OurAirports and the current FAA record list them.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "has two parallel runways",
+      "The runways were redesignated 17/35 from 16/34 on May 20, 2020."
+     ]
+    },
+    {
+     "file": "mp-inventory-summary",
+     "org": "Sacramento County Department of Airports (operator, sacramento.aero and flysmf.gov)",
+     "quote": "The Airport has two parallel runways, Runway 16L-34R and Runway 16R-34L"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 17L/35R: 2,623 m (8,605 ft), CON",
+      "Runway 17R/35L: 2,621 m (8,598 ft), CON",
+      "Runways listed: 2"
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "RWY 17L/35R PCR VALUE: 900/R/B/W/T",
+      "RWY 17R/35L PCR VALUE: 840/R/A/W/T",
+      "09/03/2026"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "ten and a half miles",
+   "verdict": "cut",
+   "wasBefore": "ten and a half miles north west of downtown",
+   "why": "Softened to the operator's own 'about 10 miles'; the written figures run from 10 to 12 miles (see the kept claim)."
+  },
+  {
+   "claim": "the largest public airport in California by land area",
+   "verdict": "cut",
+   "wasBefore": "and the largest public airport in California by land area at 6,000 acres",
+   "why": "Only Wikipedia ranks it, and Wikipedia's own sentence limits the ranking to commercial airports (military, cargo-only and general aviation fields excluded), so 'largest public airport' overstated it. The operator's pages, its Master Plan and the FAA record give the acreage but no ranking. The acreage is kept."
+  },
+  {
+   "claim": "run by the Sacramento County Airport System, one of four airfields serving the city",
+   "verdict": "cut",
+   "wasBefore": "It is run by the Sacramento County Airport System, one of four airfields serving the city.",
+   "why": "Reworded with the operator's own name, the Sacramento County Department of Airports, which runs four airports (see the kept claim)."
+  },
+  {
+   "claim": "a practical gateway for Lake Tahoe and Heavenly",
+   "verdict": "cut",
+   "wasBefore": "It is a practical gateway for Lake Tahoe and Heavenly",
+   "why": "Heavenly rests on Wikipedia alone: the resort's own site (skiheavenly.com) answered a plain request with a bot-management block page ('The system cannot process your request', saved as zz-heavenly-plain) and was not read further, and Lake Tahoe's visitor authority does not mention the resort. 'Practical gateway' is softened to 'within reach' because the visitor authority calls Reno-Tahoe the closest airport and Sacramento about two hours' drive. Lake Tahoe itself is kept."
+  },
+  {
+   "claim": "the gold rush sites at Sutter's Mill and Marshall Gold Discovery State Historic Park",
+   "verdict": "cut",
+   "wasBefore": "for the gold rush sites at Sutter's Mill and Marshall Gold Discovery State Historic Park",
+   "why": "Only Wikipedia ties the gold rush sites to the airport. California State Parks' page confirms the park at Coloma, on Highway 49 between Placerville and Auburn, but names no airport; El Dorado County's visitor site (visit-eldorado.com) answered both grab.mjs and grabb.mjs with a 'Checking the site connection security' page and was not tried again."
+  },
+  {
+   "claim": "13.9 million passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: verified with two sources, but a new fact that replaces nothing in the old text, which gives no traffic figure. For Andy to add if he wants: 13,912,718 passengers in 2025, arriving plus departing (operator's December 2025 report; Wikipedia's infobox gives the same, citing the FAA), and 6,805,910 boardings in the FAA's preliminary CY2025 table (36th in the US). Southwest carried 3,770,548 of the 6,951,103 passengers the operator counts as enplaned, a little over half.",
+   "sources": [
+    {
+     "file": "op-dec2025-report",
+     "org": "Sacramento County Department of Airports (operator, sacramento.aero and flysmf.gov)",
+     "quote": [
+      "December 2025",
+      "2025 939,365 922,357 1,128,857 1,157,886 1,238,628 1,297,721 1,328,712 1,242,472 1,169,982 1,246,844 1,100,961 1,138,933 13,912,718",
+      "Total Enplaned 573,499 578,235 -0.8% 3,608,931 3,562,838 1.3% 6,951,103 6,810,327 2.1%",
+      "Southwest 319,969 311,129 2.8% 1,973,770 1,855,789 6.4% 3,770,548 3,643,193 3.5%"
+     ],
+     "dated": "2025 calendar year (report for December 2025)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "36 WP CA SMF Sacramento Sacramento International P M 6,805,910 6,679,426 1.89%",
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 13,912,718"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "What makes it useful for an itinerary is what lies within reach",
+   "why": "The old text's framing, kept. The places named after it are each sourced: the operator's own destination page, Lake Tahoe's visitor authority, the park service, Sonoma County Tourism and the Capitol and Old Sacramento pages."
+  }
+ ],
+ "tracerOk": {}
+}

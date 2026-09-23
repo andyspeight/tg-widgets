@@ -1,0 +1,461 @@
+{
+ "iata": "CVG",
+ "id": "rec9tasgl0R6PAJ0I",
+ "name": "Cincinnati Northern Kentucky International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Cincinnati/Northern_Kentucky_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Cincinnati, though it is not in Ohio. It sits in Boone County, Kentucky, near Hebron, and serves the whole tri-state area. The code comes from Covington, the nearest city when the airport opened.\n\nPassengers get one terminal with two concourses and 51 gates between them. Both concourses are islands, reached only by an underground moving walkway and a people mover, so allow a little longer than the terminal map suggests. International arrivals without pre-clearance are handled in Concourse B.\n\nThere are nonstop flights to more than fifty destinations across North America and Europe, but the real volume here is freight. This is a global cargo hub for Amazon Air, DHL Aviation, Atlas Air, ABX Air and Kalitta Air, fifth busiest in the United States for cargo and twelfth in the world.\n\nWorth a look while waiting: five of the Art Deco mosaic murals made in 1932 for Cincinnati Union Terminal, by Winold Reiss, were saved from demolition and are on show here.",
+ "after": "The airport for Cincinnati, though it is not in Ohio. It sits near Hebron in Boone County, Kentucky, serving the whole tri-state area.\n\nPassengers get one terminal with two concourses, A and B. Both are reached only through an underground tunnel, by train, moving walkway or on foot, so allow a little longer than the terminal map suggests. International arrivals without pre-clearance are handled in Concourse B.\n\nThe airport says it offers more than 55 nonstop destinations across North America and Europe, but the real volume here is freight. It is Amazon's main US air hub and a DHL hub, and in 2025 it was the fifth busiest cargo airport in the United States.\n\nWorth a look while waiting: five of the mosaic murals Winold Reiss made for Cincinnati Union Terminal in the early 1930s came here in the 1970s and are on show in the main terminal.",
+ "claims": [
+  {
+   "claim": "the airport for Cincinnati, though not in Ohio",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Cincinnati, though it is not in Ohio.",
+   "note": "The FAA's CY2025 table lists no other Cincinnati airport among commercial service airports.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "is a public international airport located in Boone County, Kentucky, United States, near the community of Hebron",
+      "It is the primary commercial airport for Cincinnati, Ohio and the tri-state area."
+     ]
+    },
+    {
+     "file": "op-about",
+     "org": "CVG Airport (Kenton County Airport Board, operator, cvgairport.com)",
+     "quote": "The airport, based in Kentucky and serving the Cincinnati region, throughout Ohio, Kentucky, Indiana and beyond",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "July 8, 2026",
+      "50 SO KY CVG Hebron",
+      "International P M 4,366,865 4,500,414 -2.97%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "in Boone County, Kentucky, near Hebron",
+   "verdict": "confirmed",
+   "inAfter": "It sits near Hebron in Boone County, Kentucky",
+   "note": "The FAA's master record gives Boone County and its traffic tables give the city as Hebron.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "located in Boone County, Kentucky, United States, near the community of Hebron"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "5 COUNTY:",
+      "BOONE KY",
+      "09/03/2026"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "faa-cy2025-cargo",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "5 SO MEM KY CVG Cincinnati/Northern Kentucky",
+      "Hebron P M 8,551,208,388 9,797,422,964 -12.72%"
+     ],
+     "dated": "2026-07-09"
+    }
+   ]
+  },
+  {
+   "claim": "serves the whole tri-state area",
+   "verdict": "confirmed",
+   "inAfter": "serving the whole tri-state area",
+   "note": "The operator names the three states: Ohio, Kentucky and Indiana.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is the primary commercial airport for Cincinnati, Ohio and the tri-state area."
+    },
+    {
+     "file": "op-about",
+     "org": "CVG Airport (Kenton County Airport Board, operator, cvgairport.com)",
+     "quote": "serving the Cincinnati region, throughout Ohio, Kentucky, Indiana and beyond",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "one terminal with two concourses, A and B",
+   "verdict": "confirmed",
+   "inAfter": "Passengers get one terminal with two concourses, A and B.",
+   "note": "The gate total is cut (see below).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport has one terminal and two concourses with a total of 51 gates."
+    },
+    {
+     "file": "op-directions-raw",
+     "org": "CVG Airport (Kenton County Airport Board, operator, cvgairport.com)",
+     "quote": [
+      "After clearing security and proceeding down two escalators, you will be in the Transportation Tunnel, which connects to the gates in Concourse A or B.",
+      "Upon reaching the Terminal Transportation Tunnel, continue straight ahead for the single airport exit."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "both concourses reached only through an underground tunnel, by train, moving walkway or on foot",
+   "verdict": "confirmed",
+   "inAfter": "Both are reached only through an underground tunnel, by train, moving walkway or on foot",
+   "note": "Reworded from 'islands, reached only by an underground moving walkway and a people mover' into the operator's own terms. The operator puts Concourse B at 4 minutes by train or 6 on foot from the terminal (under 1,500 feet), and Concourse A at half that, which is what the old advice to allow a little longer rests on.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Both concourses are islands and are only accessible by an underground moving walkway and people mover."
+    },
+    {
+     "file": "op-directions-raw",
+     "org": "CVG Airport (Kenton County Airport Board, operator, cvgairport.com)",
+     "quote": [
+      "Your options to connect to the concourses are the trains on either side, moving walkways, or walking.",
+      "The furthest distance between the Terminal and Concourse B is less than 1,500 feet. Typical travel time between the Terminal and Concourse B is 4 minutes by train or 6 minutes by walking. Travel to Concourse A is half that amount of time from either the Terminal or Concourse B."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "international arrivals without pre-clearance handled in Concourse B",
+   "verdict": "confirmed",
+   "inAfter": "International arrivals without pre-clearance are handled in Concourse B.",
+   "note": "The operator's step-by-step directions for international arrivals send passengers through TSA screening into the concourse they share with domestic departures, then straight on to gates B-1 to B-28 for Delta connections, with the escalators to all Concourse B departure gates beside them; the train to the terminal from there takes 4 minutes, the Concourse B time. The operator does not use the word pre-clearance.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "All international arrivals without pre-clearance are handled in Concourse B."
+    },
+    {
+     "file": "op-directions-raw",
+     "org": "CVG Airport (Kenton County Airport Board, operator, cvgairport.com)",
+     "quote": [
+      "International Arrivals",
+      "All arriving international customers are required to complete TSA screening prior to entry into the same Concourse as departing domestic flights.",
+      "If connecting to another Delta flight, continue straight to gates B-1 through B-28.",
+      "Escalators are to the left and right for all Concourse B departure gates."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "the airport says it offers more than 55 nonstop destinations",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport says it offers more than 55 nonstop destinations",
+   "note": "Was 'nonstop flights to more than fifty destinations' (Wikipedia). Replaced, as the brief asks for counts of destinations, by the airport's own current count, attributed. The operator's live route map lists 59 destinations, seasonal ones included, which fits '55+'.",
+   "sources": [
+    {
+     "file": "op-airservice",
+     "org": "CVG Airport (Kenton County Airport Board, operator, cvgairport.com)",
+     "quote": "CVG offers the lowest airfares in the region and 55+ nonstop destinations with 14 airlines/tour operators.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-wherewefly",
+     "org": "CVG Airport (Kenton County Airport Board, operator, cvgairport.com)",
+     "quote": [
+      "Explore our destinations",
+      "From",
+      "Cincinnati/Northern Kentucky"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "offers nonstop passenger service to over 50 destinations in North America and Europe"
+    }
+   ]
+  },
+  {
+   "claim": "across North America and Europe",
+   "verdict": "confirmed",
+   "inAfter": "across North America and Europe",
+   "note": "The operator's live route map lists London Heathrow and Paris Charles de Gaulle besides cities in the US, Canada, Mexico and the Dominican Republic; Fox19 (17 November 2025) reports British Airways' nonstop London Heathrow flights.",
+   "sources": [
+    {
+     "file": "op-wherewefly",
+     "org": "CVG Airport (Kenton County Airport Board, operator, cvgairport.com)",
+     "quote": [
+      "London/Heathrow",
+      "Paris/Charles de Gaulle",
+      "Toronto/Pearson",
+      "Montreal",
+      "Cancún",
+      "Punta Cana"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "fox19-europe-2025",
+     "org": "Fox19 (WXIX, Gray Local Media)",
+     "quote": [
+      "Published : Nov. 17, 2025 at 2:44 PM EST",
+      "British Airways is expanding at Cincinnati/Northern Kentucky International Airport, bringing additional nonstop flights to and from London."
+     ],
+     "dated": "2025-11-17"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "over 50 destinations in North America and Europe"
+    }
+   ]
+  },
+  {
+   "claim": "Amazon's main US air hub and a DHL hub",
+   "verdict": "corrected",
+   "inAfter": "It is Amazon's main US air hub and a DHL hub",
+   "note": "Was 'a global cargo hub for Amazon Air, DHL Aviation, Atlas Air, ABX Air and Kalitta Air'. The operator names Amazon and DHL (and a presence by FedEx); the three contract carriers are cut (see below). The operator's newsroom quotes Air Transport World (13 July 2026) on DHL's new Bangkok freighter service to its CVG hub.",
+   "sources": [
+    {
+     "file": "op-aircargo",
+     "org": "CVG Airport (Kenton County Airport Board, operator, cvgairport.com)",
+     "quote": "Home to Amazon's primary U.S. Air Hub and DHL's Global Super Hub for the Americas",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-news-dhl-2026",
+     "org": "CVG Airport (Kenton County Airport Board, operator, cvgairport.com)",
+     "quote": [
+      "Aaron Karp / Air Transport World / July 13, 2026",
+      "DHL opened freighter service between Bangkok and its Cincinnati/Northern Kentucky International Airport (CVG) hub"
+     ],
+     "dated": "2026-07-13"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport is a cargo global hub for Amazon Air, Atlas Air, ABX Air, Kalitta Air, and DHL Aviation.",
+      "The hub is Amazon's principal shipping hub"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "fifth busiest cargo airport in the United States in 2025",
+   "verdict": "confirmed",
+   "inAfter": "in 2025 it was the fifth busiest cargo airport in the United States",
+   "note": "The FAA ranks cargo airports by the landed weight of all-cargo aircraft: CVG fifth in 2025 (8.55 billion lb, down 12.7 per cent), just ahead of Chicago O'Hare, as it was in 2024. Spectrum News (3 February 2026) reports cargo down from 1,869,694 to 1,703,828 tons in 2025.",
+   "sources": [
+    {
+     "file": "faa-cy2025-cargo",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary Calendar Year 2025 All-Cargo Landed Weight",
+      "July 9, 2026",
+      "5 SO MEM KY CVG Cincinnati/Northern Kentucky",
+      "Hebron P M 8,551,208,388 9,797,422,964 -12.72%",
+      "6 GL CHI IL ORD Chicago O'Hare International Chicago P L 8,482,484,822 8,158,909,140 3.97%"
+     ],
+     "dated": "2026-07-09"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is currently the 5th busiest airport in the United States by cargo traffic"
+    }
+   ]
+  },
+  {
+   "claim": "five Winold Reiss mosaic murals made for Cincinnati Union Terminal in the early 1930s",
+   "verdict": "confirmed",
+   "inAfter": "five of the mosaic murals Winold Reiss made for Cincinnati Union Terminal in the early 1930s",
+   "note": "The operator dates them 1931 to 1932 and Wikipedia 1932, so 'early 1930s'. Cincinnati Museum Center, which runs Union Terminal, confirms Reiss's glass mosaic murals for the building.",
+   "sources": [
+    {
+     "file": "op-reiss",
+     "org": "CVG Airport (Kenton County Airport Board, operator, cvgairport.com)",
+     "quote": [
+      "CVG is the proud home of 5 Winold Reiss industrial murals.",
+      "Originally a set of 16 tile mosaic murals, the works were created by Winold Reiss for Cincinnati Union Terminal from 1931 to 1932 and later moved to CVG in August 1973."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The current airport is home to 5 of 16 large Art Deco murals created for the train concourse building at Cincinnati Union Terminal during the station's construction in 1932."
+    },
+    {
+     "file": "cmc-art",
+     "org": "Cincinnati Museum Center",
+     "quote": [
+      "The artist selected for the large mural project was Winold Reiss.",
+      "The murals themselves were executed in glass mosaic tile."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "came here in the 1970s and are on show in the main terminal",
+   "verdict": "corrected",
+   "inAfter": "came here in the 1970s and are on show in the main terminal",
+   "note": "Was 'were saved from demolition and are on show here'. The operator gives the move as August 1973 and says all five are on display in the Main Terminal; Wikipedia has the station's train concourse designated for demolition in 1972 and the murals moved to the airport, five still there. Only Wikipedia mentions the demolition, so it is left out.",
+   "sources": [
+    {
+     "file": "op-reiss",
+     "org": "CVG Airport (Kenton County Airport Board, operator, cvgairport.com)",
+     "quote": [
+      "later moved to CVG in August 1973",
+      "All 5 Winold Reiss industrial murals are on display at CVG's Main Terminal."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "When the train concourse building was designated for demolition in 1972",
+      "raised funds to remove and transport 14 of the murals in the concourse to new locations in the Airport",
+      "five murals remain in Terminal 3 to this day"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the code comes from Covington, the nearest city when the airport opened",
+   "verdict": "cut",
+   "wasBefore": "The code comes from Covington, the nearest city when the airport opened.",
+   "why": "Only Wikipedia states where the code comes from. The FAA's master record still names Covington as the airport's associated city, which fits but does not say it; the operator's pages, Cincinnati Magazine's piece on the airport and the Kenton County Airport Board page do not explain the code, and the operator's 2022 anniversary release is gone (404)."
+  },
+  {
+   "claim": "51 gates",
+   "verdict": "cut",
+   "wasBefore": "Passengers get one terminal with two concourses and 51 gates between them.",
+   "why": "Sources disagree. Wikipedia gives 51 (23 in A, 28 in B); the operator's own directions name gates A-4 to A-23 and B-1 to B-28, which make 48. The terminal and the two concourses are kept."
+  },
+  {
+   "claim": "concourses are islands, reached by an underground moving walkway and a people mover",
+   "verdict": "cut",
+   "wasBefore": "Both concourses are islands, reached only by an underground moving walkway and a people mover",
+   "why": "Reworded in the operator's terms (tunnel, trains, moving walkways, walking); see the kept claim."
+  },
+  {
+   "claim": "nonstop flights to more than fifty destinations",
+   "verdict": "cut",
+   "wasBefore": "There are nonstop flights to more than fifty destinations",
+   "why": "Replaced by the airport's own current count, attributed ('more than 55'), as the brief asks for destination counts."
+  },
+  {
+   "claim": "global cargo hub for Atlas Air, ABX Air and Kalitta Air",
+   "verdict": "cut",
+   "wasBefore": "This is a global cargo hub for Amazon Air, DHL Aviation, Atlas Air, ABX Air and Kalitta Air",
+   "why": "Atlas Air, ABX Air and Kalitta Air rest on Wikipedia alone; the operator names only Amazon and DHL as hubs, with a presence by FedEx. Amazon and DHL are kept."
+  },
+  {
+   "claim": "twelfth in the world for cargo",
+   "verdict": "cut",
+   "wasBefore": "and twelfth in the world",
+   "why": "The operator's own '12th largest globally' is marked 2023, more than 12 months old, and its cargo has fallen since (1,869,694 tons in 2024, 1,703,828 in 2025, Spectrum News; FAA landed weight down 12.7 per cent in 2025). No current world ranking was found, so only the FAA's 2025 US rank is given."
+  },
+  {
+   "claim": "Art Deco, made in 1932, saved from demolition",
+   "verdict": "cut",
+   "wasBefore": "five of the Art Deco mosaic murals made in 1932 for Cincinnati Union Terminal, by Winold Reiss, were saved from demolition and are on show here",
+   "why": "'Art Deco' and 'saved from demolition' rest on Wikipedia alone (the operator and Cincinnati Museum Center do not use either; the Cincinnati Enquirer's 2015 article refused both grab.mjs (403) and grabb.mjs (405)). The date is widened to the early 1930s because the operator gives 1931 to 1932. The murals themselves are kept."
+  },
+  {
+   "claim": "British Airways flies nonstop to London Heathrow",
+   "verdict": "cut",
+   "why": "Held back: verified, but a new fact that replaces nothing (the old text says only 'Europe'). For Andy: British Airways flies CVG to London Heathrow nonstop, six a week from 29 March 2026 through October 2026 on BA's own figures (Fox19, 17 November 2025); the operator's route map lists London/Heathrow and BA sells London to Cincinnati with a flight time of 8 hours 40 minutes for every month to February 2027. It matters to a UK agent, so it may be worth adding.",
+   "sources": [
+    {
+     "file": "fox19-europe-2025",
+     "org": "Fox19 (WXIX, Gray Local Media)",
+     "quote": [
+      "Starting in Spring 2026, the airline will offer six weekly nonstop flights between CVG and London Heathrow Airport.",
+      "British Airways will make the change to six days a week of operation on March 29, 2026, which will continue through October 2026."
+     ],
+     "dated": "2025-11-17"
+    },
+    {
+     "file": "ba-cincinnati",
+     "org": "British Airways",
+     "quote": [
+      "Our cheapest flights to Cincinnati from London",
+      "8 hours 40 mins"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-wherewefly",
+     "org": "CVG Airport (Kenton County Airport Board, operator, cvgairport.com)",
+     "quote": "London/Heathrow",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "8,971,128 passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: verified, but a new fact that replaces nothing (the old text gives no passenger figure). For Andy: 8,971,128 passengers in 2025, down 2.62 per cent on 2024's 9.2 million (Spectrum News, 3 February 2026; the same in Wikipedia's infobox, citing the airport); the FAA counts 4,366,865 boardings (about half of total passengers).",
+   "sources": [
+    {
+     "file": "spectrum-2025-traffic",
+     "org": "Spectrum News 1",
+     "quote": [
+      "PUBLISHED 1:41 PM ET Feb. 03, 2026",
+      "This past year, CVG served 8,971,128 passengers, a 2.62% drop from its 9.2 million served in 2024"
+     ],
+     "dated": "2026-02-03"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "International P M 4,366,865 4,500,414 -2.97%",
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 8,971,128 2.62%"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so allow a little longer than the terminal map suggests",
+   "why": "The old text's advice, kept. It follows from the operator's own figures: Concourse B is 4 minutes by train or 6 on foot from the terminal, through the tunnel."
+  },
+  {
+   "text": "but the real volume here is freight",
+   "why": "The old text's framing, kept: the airport is Amazon's main US air hub and a DHL hub, and fifth in the US for cargo on the FAA's 2025 figures."
+  },
+  {
+   "text": "Worth a look while waiting",
+   "why": "The old text's lead-in to the murals, whose details are sourced."
+  }
+ ],
+ "tracerOk": {}
+}

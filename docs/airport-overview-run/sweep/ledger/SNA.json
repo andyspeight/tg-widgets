@@ -1,0 +1,424 @@
+{
+ "iata": "SNA",
+ "id": "recEtcjHQmwNxqctF",
+ "name": "John Wayne Orange County International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/John_Wayne_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Orange County, and the second busiest in the Greater Los Angeles area with more than 10 million passengers in 2024. For a client heading to Newport Beach, Irvine or Costa Mesa it is far more convenient than the alternatives.\n\nThe runway is the thing to understand. At 5,700 feet the main runway is the shortest in the United States handling regularly scheduled international flights, and no scheduled passenger aircraft larger than a 757 has ever operated here. No widebody has ever flown a scheduled service in. That shapes which carriers and which routes are possible.\n\nThere are 22 gates in total. Southwest, American, United, Delta and Alaska are the main airlines. General aviation movements actually outnumber commercial ones.\n\nThe code SNA comes from Santa Ana, which sits just across Interstate 405. The airport was renamed in 1979 after John Wayne, who lived nearby in Newport Beach and died that year, and a statue of him was put up in the terminal in 1982.",
+ "after": "The airport for Orange County, and the second busiest in the Greater Los Angeles area, with more than 11.3 million passengers in 2025. For a client heading to Newport Beach or elsewhere in Orange County it is far more convenient than the alternatives.\n\nThe runway is the thing to understand. At 5,700 feet the main runway is short, and that shapes which carriers and routes are possible. Scheduled flights go across the US and to Mexico and Canada.\n\nThe airport counts 20 commercial passenger gates plus two small commuter terminals. Southwest, American, United, Alaska and Delta are the main airlines. General aviation movements outnumber commercial ones.\n\nIts code, SNA, comes from Santa Ana. The airport was renamed in 1979 after the late John Wayne, who lived nearby in Newport Beach. A bronze statue of him, dedicated in 1982, stands on the arrivals level between the A and B baggage claims.",
+ "claims": [
+  {
+   "claim": "the airport for Orange County",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Orange County",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "John Wayne Airport is the sole commercial airport in Orange County."
+    },
+    {
+     "file": "newportbeach-jwa",
+     "org": "City of Newport Beach",
+     "quote": "John Wayne Airport (JWA) is owned and operated by the County of Orange and it is the only commercial-service airport in the county.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-overview",
+     "org": "John Wayne Airport (County of Orange, operator, ocair.com)",
+     "quote": "John Wayne Airport is owned and operated by the County of Orange.",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "second busiest in the Greater Los Angeles area",
+   "verdict": "confirmed",
+   "inAfter": "the second busiest in the Greater Los Angeles area",
+   "note": "Wikipedia says so for 2024. The FAA's CY2025 boardings keep it second behind LAX: LAX 36.5 million, John Wayne 5.52 million, Ontario 3.47 million, Burbank 3.22 million, Long Beach 1.87 million.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2024, John Wayne Airport was the second busiest airport in the Greater Los Angeles area by passenger count with over 10 million total passengers."
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "July 8, 2026",
+      "5 WP CA LAX Los Angeles Los Angeles International P L 36,497,303 37,760,834 -3.35%",
+      "41 WP CA SNA Santa Ana John Wayne/Orange County P M 5,521,729 5,370,273 2.82%",
+      "53 WP CA ONT Ontario Ontario International P M 3,473,874 3,494,554 -0.59%",
+      "56 WP CA BUR Burbank Bob Hope P M 3,218,222 3,383,237 -4.88%",
+      "78 WP CA LGB Long Beach Long Beach (Daugherty Field) P S 1,867,498 2,031,810 -8.09%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "more than 11.3 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "with more than 11.3 million passengers in 2025",
+   "note": "Was 'more than 10 million passengers in 2024' (the operator gives 11,089,405 for 2024). TOTAL passengers, arriving plus departing: 11,369,865 in 2025, up 2.5 per cent (operator's December 2025 release). The FAA's preliminary table counts 5,521,729 boardings (about half of total passengers), consistent with it, and the City of Newport Beach gives about 11.3 million a year. The operator's own overview page says 'approximately 11.7 million annual passengers', which is not tied to a year and is not used.",
+   "sources": [
+    {
+     "file": "op-stats-dec2025",
+     "org": "John Wayne Airport (County of Orange, operator, ocair.com)",
+     "quote": [
+      "January 22, 2026",
+      "Monthly Airport Statistics - December 2025",
+      "Total passengers 961,634 941,651 2.1% 11,369,865 11,089,405 2.5%"
+     ],
+     "dated": "2026-01-22"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "41 WP CA SNA Santa Ana John Wayne/Orange County P M 5,521,729 5,370,273 2.82%",
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "newportbeach-jwa",
+     "org": "City of Newport Beach",
+     "quote": "JWA currently handles about 11.3 million passengers annually and about 130 commercial flights per day.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 11,369,865"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "next to Newport Beach",
+   "verdict": "softened",
+   "inAfter": "For a client heading to Newport Beach or elsewhere in Orange County",
+   "note": "Was 'Newport Beach, Irvine or Costa Mesa'. The City of Newport Beach puts the airport along its northern boundary; Irvine and Costa Mesa rest on Wikipedia alone (see the cut). 'Far more convenient than the alternatives' is the old text's judgement, kept (see opinion).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "John Wayne Airport is surrounded by the cities of Irvine, Newport Beach, and Costa Mesa"
+    },
+    {
+     "file": "newportbeach-jwa",
+     "org": "City of Newport Beach",
+     "quote": "The airport is located along the northern boundary of Newport Beach",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "main runway 5,700 feet",
+   "verdict": "confirmed",
+   "inAfter": "At 5,700 feet the main runway",
+   "note": "'Short' and the effect on carriers and routes are the old text's framing (see opinion); the superlative and the aircraft history that backed them rest on Wikipedia alone and are cut.",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "John Wayne Airport (County of Orange, operator, ocair.com)",
+     "quote": "The 2,887-foot runway serves general aviation and the 5,700-foot main runway serves both commercial and general aviation aircraft.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The main runway, 2L/20R, at 5,700 feet (1,700 m) in length"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runway 02L/20R: 1,737 m (5,700 ft), ASP"
+    }
+   ]
+  },
+  {
+   "claim": "scheduled flights across the US and to Mexico and Canada",
+   "verdict": "softened",
+   "inAfter": "Scheduled flights go across the US and to Mexico and Canada.",
+   "note": "What survives of 'regularly scheduled international flights' in the cut superlative. The operator counts all Canada and Mexico flights as its international traffic (297,354 passengers in 2025).",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "John Wayne Airport (County of Orange, operator, ocair.com)",
+     "quote": "With flights to more than 40 non-stop destinations in the U.S., Mexico, and Canada",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-stats-dec2025",
+     "org": "John Wayne Airport (County of Orange, operator, ocair.com)",
+     "quote": "Includes all Canada and Mexico Commercial passengers and operations.",
+     "dated": "2026-01-22"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "John Wayne Airport offers international flights to Mexico and Canada."
+    }
+   ]
+  },
+  {
+   "claim": "the airport counts 20 commercial passenger gates plus two commuter terminals",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport counts 20 commercial passenger gates plus two small commuter terminals.",
+   "note": "Was 'There are 22 gates in total' (Wikipedia numbers the gates 1 to 22). The operator's own count is 20 commercial passenger gates and two smaller commuter terminals, so it is given in the airport's words, attributed. Wikipedia also places the commuter gate areas at the north end of Terminal A and the south end of Terminal C.",
+   "sources": [
+    {
+     "file": "op-terminal",
+     "org": "John Wayne Airport (County of Orange, operator, ocair.com)",
+     "quote": "The current Riley Terminal is 730,505 square feet, and provides 20 commercial passenger gates and two smaller commuter passenger terminals at the north and south ends.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "with dedicated commuter gate areas at the north end of Terminal A and south end of Terminal C"
+    }
+   ]
+  },
+  {
+   "claim": "Southwest, American, United, Alaska and Delta are the main airlines",
+   "verdict": "confirmed",
+   "inAfter": "Southwest, American, United, Alaska and Delta are the main airlines.",
+   "note": "Same five as Wikipedia's 2023 list; BTS for July 2025 to June 2026 now puts Alaska (10.77 per cent) ahead of Delta (9.71 per cent), so the order follows BTS. The operator's December 2025 release names Southwest, American and United as its top three that month.",
+   "sources": [
+    {
+     "file": "bts-carrier-shares",
+     "org": "Bureau of Transportation Statistics (US Department of Transportation)",
+     "quote": [
+      "Santa Ana, CA: John Wayne Airport-Orange County (SNA) Scheduled Services except Freight/Mail BTS Data as of 9/23/2026",
+      "Carrier Shares for July 2025 - June 2026",
+      "Southwest 3,120 29.05%",
+      "American 1,886 17.57%",
+      "United 1,597 14.87%",
+      "Alaska 1,156 10.77%",
+      "Delta 1,043 9.71%"
+     ],
+     "dated": "July 2025 to June 2026 (the period printed on the page)"
+    },
+    {
+     "file": "op-stats-dec2025",
+     "org": "John Wayne Airport (County of Orange, operator, ocair.com)",
+     "quote": "The top three airlines in December 2025 based on passenger count were Southwest Airlines (291,662), American Airlines (159,608), and United Airlines (149,854).",
+     "dated": "2026-01-22"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "As of 2023, the largest airlines at John Wayne Airport were Southwest Airlines, American Airlines, United Airlines, Delta Air Lines, and Alaska Airlines."
+    }
+   ]
+  },
+  {
+   "claim": "general aviation movements outnumber commercial ones",
+   "verdict": "confirmed",
+   "inAfter": "General aviation movements outnumber commercial ones.",
+   "note": "Operator, calendar 2025: 216,093 general aviation operations against 94,388 commercial and 8,375 commuter; its overview puts general aviation at 60 per cent of all operations.",
+   "sources": [
+    {
+     "file": "op-stats-dec2025",
+     "org": "John Wayne Airport (County of Orange, operator, ocair.com)",
+     "quote": [
+      "General Aviation 16,868 20,677 -18.4% 216,093 236,229 -8.5%",
+      "Commercial 7,991 7,802 2.4% 94,388 92,760 1.8%"
+     ],
+     "dated": "2026-01-22"
+    },
+    {
+     "file": "op-overview",
+     "org": "John Wayne Airport (County of Orange, operator, ocair.com)",
+     "quote": "It is home to nearly 500 general aviation (private, non-commercial) aircraft, representing 60% of total operations",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "General aviation operations outnumber commercial operations."
+    }
+   ]
+  },
+  {
+   "claim": "the code SNA comes from Santa Ana",
+   "verdict": "confirmed",
+   "inAfter": "Its code, SNA, comes from Santa Ana.",
+   "note": "Wikipedia states the derivation; the operator's FAQ answers whether the airport is called the 'Santa Ana' airport by saying websites reference it as SNA and that it uses the IATA code SNA, with a Santa Ana address. 'Just across Interstate 405' is cut (see below).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is separated from the city limits of Santa Ana (from which the IATA airport code SNA is derived) by Interstate 405 and State Route 55"
+    },
+    {
+     "file": "op-faqs",
+     "org": "John Wayne Airport (County of Orange, operator, ocair.com)",
+     "quote": [
+      "Is John Wayne Airport sometimes called the \"Santa Ana\" or \"Orange County\" airport?",
+      "Many online travel and airline websites reference either SNA or Orange County for John Wayne Airport.",
+      "is located in the city of Santa Ana, and uses the International Air Transport Association (IATA) code"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "renamed in 1979 after the late John Wayne, who lived nearby in Newport Beach",
+   "verdict": "confirmed",
+   "inAfter": "The airport was renamed in 1979 after the late John Wayne, who lived nearby in Newport Beach.",
+   "note": "The operator gives the date as 20 June 1979, by the county Board of Supervisors, 'to honor the late John Wayne'. 'Died that year' is cut: only Wikipedia gives the year of his death.",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "John Wayne Airport (County of Orange, operator, ocair.com)",
+     "quote": "In 1979, the Board of Supervisors for the County of Orange renamed Orange County Airport to John Wayne Airport, Orange County, in memory of the late movie star and Newport Beach resident.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-statue",
+     "org": "John Wayne Airport (County of Orange, operator, ocair.com)",
+     "quote": "Orange County Airport was renamed by the Orange County Board of Supervisors on June 20, 1979, to honor the late John Wayne."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "renamed the airport in 1979 in honor of actor John Wayne, who lived in neighboring Newport Beach and died that year"
+    }
+   ]
+  },
+  {
+   "claim": "bronze statue dedicated in 1982, on the arrivals level between the A and B baggage claims",
+   "verdict": "corrected",
+   "inAfter": "A bronze statue of him, dedicated in 1982, stands on the arrivals level between the A and B baggage claims.",
+   "note": "Was 'a statue of him was put up in the terminal in 1982'. The operator says the statue was dedicated on 4 November 1982 and first stood on a pedestal outside the old Eddie Martin Terminal; it was restored in 1990 for the lobby of the new Thomas F. Riley Terminal and now stands on the arrivals level between the A and B baggage claims.",
+   "sources": [
+    {
+     "file": "op-statue",
+     "org": "John Wayne Airport (County of Orange, operator, ocair.com)",
+     "quote": [
+      "the John Wayne Associates commissioned sculptor Robert Summers to create a bronze statue",
+      "was dedicated to the County on November 4, 1982, and installed on a pedestal outside the Eddie Martin Terminal.",
+      "The statue was returned to the Hoka Hey Foundry on March 23, 1990, for refinishing and restoration in preparation for its placement in the lobby of the Thomas F. Riley Terminal.",
+      "Located on the Arrival (lower) Level between Riley Terminals A and B baggage claim areas"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "was dedicated to the County on November 4, 1982.",
+      "Today, the bronze statue is in the Thomas F. Riley Terminal on the Arrival Level."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "more than 10 million passengers in 2024",
+   "verdict": "cut",
+   "wasBefore": "with more than 10 million passengers in 2024",
+   "why": "Replaced by the 2025 total (11,369,865, operator; FAA boardings to match)."
+  },
+  {
+   "claim": "Irvine or Costa Mesa",
+   "verdict": "cut",
+   "wasBefore": "Newport Beach, Irvine or Costa Mesa",
+   "why": "Irvine and Costa Mesa rest on Wikipedia alone: the operator's pages do not name them, the City of Irvine's home page has no airport link, and Visit Newport Beach answered with a Cloudflare block page (not retried). Newport Beach is kept, from the City of Newport Beach."
+  },
+  {
+   "claim": "shortest US runway handling regularly scheduled international flights",
+   "verdict": "cut",
+   "wasBefore": "the shortest in the United States handling regularly scheduled international flights",
+   "why": "Only Wikipedia makes the ranking. The operator gives the 5,700-foot length but no ranking. The length and the international flights are kept."
+  },
+  {
+   "claim": "no scheduled passenger aircraft larger than a 757",
+   "verdict": "cut",
+   "wasBefore": "and no scheduled passenger aircraft larger than a 757 has ever operated here",
+   "why": "Only Wikipedia says so; no operator, regulator or press source found."
+  },
+  {
+   "claim": "no widebody scheduled service",
+   "verdict": "cut",
+   "wasBefore": "No widebody has ever flown a scheduled service in.",
+   "why": "Only Wikipedia says so."
+  },
+  {
+   "claim": "22 gates",
+   "verdict": "cut",
+   "wasBefore": "There are 22 gates in total.",
+   "why": "Replaced by the airport's own count, attributed (20 commercial passenger gates plus two commuter terminals); Wikipedia's 22 counts the gates numbered 1 to 22."
+  },
+  {
+   "claim": "old order of the main airlines",
+   "verdict": "cut",
+   "wasBefore": "Southwest, American, United, Delta and Alaska are the main airlines.",
+   "why": "Reordered: BTS now puts Alaska ahead of Delta. The same five airlines are kept."
+  },
+  {
+   "claim": "Santa Ana sits just across Interstate 405",
+   "verdict": "cut",
+   "wasBefore": "The code SNA comes from Santa Ana, which sits just across Interstate 405.",
+   "why": "Sources disagree: Wikipedia puts the airport in unincorporated Orange County, separated from Santa Ana's city limits by Interstate 405 and State Route 55, while the operator's FAQ says it is located in the city of Santa Ana. The code's origin is kept."
+  },
+  {
+   "claim": "John Wayne died that year",
+   "verdict": "cut",
+   "wasBefore": "who lived nearby in Newport Beach and died that year",
+   "why": "Only Wikipedia gives the year of his death; the operator says only 'the late John Wayne' at the June 1979 renaming, so the text says 'the late John Wayne'."
+  },
+  {
+   "claim": "statue put up in the terminal in 1982",
+   "verdict": "cut",
+   "wasBefore": "and a statue of him was put up in the terminal in 1982",
+   "why": "Not quite right: in 1982 it was installed outside the old Eddie Martin Terminal and it moved into the Riley Terminal in 1990 (operator). Corrected above."
+  },
+  {
+   "claim": "curfew and access limits",
+   "verdict": "cut",
+   "why": "Held back: a warning that replaces nothing in the old text. For Andy: the operator says airline operations are regulated by an Access Plan that 'places restrictions on operational capacity, hours of operations, and noise levels' under the 1985 Settlement Agreement, which the City of Newport Beach also describes; Wikipedia gives the curfew as no commercial departures from 10 pm to 7 am (8 am on Sundays) and no commercial arrivals from 11 pm to 7 am. The curfew hours themselves would need the operator's own curfew page before being added.",
+   "sources": [
+    {
+     "file": "op-access-noise",
+     "org": "John Wayne Airport (County of Orange, operator, ocair.com)",
+     "quote": "Commercial Air Carrier operations at JWA are regulated by the Access Plan, which places restrictions on operational capacity, hours of operations, and noise levels",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "newportbeach-jwa",
+     "org": "City of Newport Beach",
+     "quote": "In 1985, the City, the County of Orange, the Airport Working Group (AWG), and Stop Polluting Our Newport (SPON) entered into a Settlement Agreement to resolve litigation related to John Wayne Airport (JWA).",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The county prohibits commercial departures between 10:00 PM and 7:00 AM (8:00 AM on Sundays) and commercial arrivals between 11:00 PM and 7:00 AM (8:00 AM on Sundays)."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "it is far more convenient than the alternatives",
+   "why": "The old text's judgement, kept: it is Orange County's only commercial airport (City of Newport Beach, Wikipedia) and the operator puts it about 35 miles south of Los Angeles."
+  },
+  {
+   "text": "The runway is the thing to understand.",
+   "why": "The old text's lead-in, kept; the runway's length is sourced."
+  },
+  {
+   "text": "is short, and that shapes which carriers and routes are possible",
+   "why": "The old text's framing, kept in softer form. Wikipedia calls it the shortest US runway with regularly scheduled international flights and says passenger jets here have never been larger than a 757; those details rest on Wikipedia alone, so the text says only that the runway is short. The City of Newport Beach records local opposition to any runway extension."
+  }
+ ],
+ "tracerOk": {}
+}
