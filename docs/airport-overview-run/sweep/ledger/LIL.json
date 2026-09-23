@@ -1,0 +1,211 @@
+{
+ "iata": "LIL",
+ "id": "recAuXGXbTYg5kLTd",
+ "name": "Lille Airport",
+ "country": "France",
+ "wikipedia": "https://en.wikipedia.org/wiki/Lille_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Lille, in the commune of Lesquin about 7 km south south east of the city, which is why it also goes by Lille-Lesquin. The run into the centre takes about fifteen minutes, and a shuttle bus connects the terminal with Lille Flandres railway station.\n\nIt is twelfth busiest in France by passengers, handling 1,397,637 in 2012 against around 970,000 in 2001. The passenger terminal dates from 1996.\n\nFreight is where it punches above its weight. The airport is fourth in France for cargo, with almost 38,000 tonnes passing through each year.\n\nLille itself is the principal city of the Lille Métropole, the capital of the Hauts-de-France region and the prefecture of the Nord department, so this is a working airport for the whole of the north.",
+ "after": "The airport for Lille, in the commune of Lesquin about 7 km south south east of the city, which is why it also goes by Lille-Lesquin. A shuttle bus connects the terminal with Lille Flandres railway station, and the airport puts the average trip at 20 minutes.\n\nThe French airports' association ranks it eleventh in France, with about 1.7 million passengers in 2025. Its passenger terminal dates from 1996.\n\nLille itself is the capital of the Hauts-de-France region, so this is a working airport for the whole of the north.",
+ "claims": [
+  {
+   "claim": "in the commune of Lesquin, about 7 km south south east of the city",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Lille, in the commune of Lesquin about 7 km south south east of the city",
+   "note": "Coordinates: 8.2 km in a straight line at 156 degrees (ratio 0.85; the bearing is inside the check for south south east).",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Lesquin",
+      "Straight-line distance from the city centre: 8.2 km (5.1 miles)",
+      "Bearing from the city centre: 156 degrees, which is south east"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-14",
+     "quote": "is an airport located in Lesquin, 7 km (4 mi) south-southeast of Lille"
+    }
+   ]
+  },
+  {
+   "claim": "also goes by Lille-Lesquin",
+   "verdict": "confirmed",
+   "inAfter": "which is why it also goes by Lille-Lesquin.",
+   "sources": [
+    {
+     "file": "uaf-2025",
+     "org": "Union des Aéroports Français (the French airports' association, aeroport.fr)",
+     "dated": "2025 results (published April 2026)",
+     "quote": "11 Lille - Lesquin 1 705 709"
+    },
+    {
+     "file": "eurostat-fr",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat FR_LFQQ LILLE-LESQUIN airport: passengers carried in 2025: 1,700,437"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-14",
+     "quote": "It is also known as Lille-Lesquin Airport or Lesquin Airport."
+    }
+   ]
+  },
+  {
+   "claim": "a shuttle bus to Lille Flandres station",
+   "verdict": "confirmed",
+   "inAfter": "A shuttle bus connects the terminal with Lille Flandres railway station",
+   "sources": [
+    {
+     "file": "op-navette",
+     "org": "Aéroport de Lille (the airport operator, lille.aeroport.fr)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "La Navette Aéroport de Lille stationne devant l'immeuble CIC, face à la place des Buisses, à proximité immédiate de la gare et de station de métro/tram \"Lille Flandres\"."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-14",
+     "quote": "There is a shuttle bus between the airport and Lille Flandres railway station."
+    }
+   ]
+  },
+  {
+   "claim": "the airport puts the average shuttle trip at 20 minutes",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "and the airport puts the average trip at 20 minutes.",
+   "note": "Replaces 'The run into the centre takes about fifteen minutes' (Wikipedia alone). The airport's own average for the shuttle, attributed.",
+   "sources": [
+    {
+     "file": "op-navette",
+     "org": "Aéroport de Lille (the airport operator, lille.aeroport.fr)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "La durée moyenne de trajet est de 20 minutes."
+    }
+   ]
+  },
+  {
+   "claim": "eleventh in France, about 1.7 million passengers in 2025",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "association",
+   "inAfter": "The French airports' association ranks it eleventh in France, with about 1.7 million passengers in 2025.",
+   "note": "Was 'twelfth busiest in France by passengers, handling 1,397,637 in 2012 against around 970,000 in 2001'. A passenger total replaces a passenger total: UAF 1,705,709 and Eurostat 1,700,437 for 2025. The rank is attributed to UAF because Eurostat books most of Basel-Mulhouse's traffic to Switzerland, which moves Lille up one place in its list.",
+   "sources": [
+    {
+     "file": "uaf-2025",
+     "org": "Union des Aéroports Français (the French airports' association, aeroport.fr)",
+     "dated": "2025 results (published April 2026)",
+     "quote": [
+      "Classement par passagers des aéroports de France",
+      "11 Lille - Lesquin 1 705 709",
+      "6 Bâle - Mulhouse 9 629 416"
+     ]
+    },
+    {
+     "file": "eurostat-fr",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat FR_LFQQ LILLE-LESQUIN airport: passengers carried in 2025: 1,700,437"
+    }
+   ]
+  },
+  {
+   "claim": "the passenger terminal dates from 1996",
+   "verdict": "confirmed",
+   "inAfter": "Its passenger terminal dates from 1996.",
+   "sources": [
+    {
+     "file": "op-histoire",
+     "org": "Aéroport de Lille (the airport operator, lille.aeroport.fr)",
+     "dated": "read 2026-09-23 (the operator's history page)",
+     "quote": [
+      "1996",
+      "Ouverture d’un nouvel aérogare moderne pour les passagers"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-14",
+     "quote": "The current passenger terminal was built in 1996."
+    }
+   ]
+  },
+  {
+   "claim": "Lille the capital of Hauts-de-France",
+   "verdict": "confirmed",
+   "inAfter": "Lille itself is the capital of the Hauts-de-France region",
+   "sources": [
+    {
+     "file": "geo-region",
+     "org": "GeoNames (computed)",
+     "quote": [
+      "feature code PPLA (the seat of a first-order administrative division)",
+      "FR.32 Hauts-de-France"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-14",
+     "quote": "the capital of the Hauts-de-France region"
+    }
+   ]
+  },
+  {
+   "claim": "the run into the centre about fifteen minutes",
+   "verdict": "cut",
+   "wasBefore": "The run into the centre takes about fifteen minutes, and a shuttle bus connects the terminal with Lille Flandres railway station.",
+   "why": "The fifteen minutes rests on Wikipedia alone; the airport gives 20 minutes for its shuttle. Corrected (see above)."
+  },
+  {
+   "claim": "twelfth; 1,397,637 in 2012 and about 970,000 in 2001",
+   "verdict": "cut",
+   "wasBefore": "It is twelfth busiest in France by passengers, handling 1,397,637 in 2012 against around 970,000 in 2001.",
+   "why": "Superseded by the 2025 figures. Corrected (see above)."
+  },
+  {
+   "claim": "fourth in France for cargo, almost 38,000 tonnes a year",
+   "verdict": "cut",
+   "wasBefore": "Freight is where it punches above its weight. The airport is fourth in France for cargo, with almost 38,000 tonnes passing through each year.",
+   "why": "Contradicted: UAF's 2025 table has no air freight at Lille since 2022 (317 tonnes in 2019), and Eurostat has 20.1 tonnes of freight and mail in 2025. Whatever the old figure measured, it is not true now.",
+   "sources": [
+    {
+     "file": "uaf-2025",
+     "org": "Union des Aéroports Français (the French airports' association, aeroport.fr)",
+     "dated": "2025 results (published April 2026)",
+     "quote": "Lille - Lesquin 317 0 0 0 0 /// ///"
+    },
+    {
+     "file": "eurostat-freight-series",
+     "org": "Eurostat",
+     "dated": "annual data to 2025",
+     "quote": "Eurostat FR_LFQQ LILLE-LESQUIN airport: freight and mail loaded and unloaded in 2025: 20.1 tonnes"
+    }
+   ]
+  },
+  {
+   "claim": "the principal city of the Lille Metropole and the prefecture of the Nord",
+   "verdict": "cut",
+   "wasBefore": "Lille itself is the principal city of the Lille Métropole, the capital of the Hauts-de-France region and the prefecture of the Nord department",
+   "why": "Trimmed to the regional capital, which GeoNames confirms; the other two titles rest on Wikipedia alone here."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so this is a working airport for the whole of the north",
+   "why": "The old text's judgement, kept; it follows from Lille being the regional capital (sourced)."
+  }
+ ],
+ "tracerOk": {
+  "The French": "The tracer reads the opening word with 'French'; the association is named in the source's org, and its report is France's own."
+ }
+}
