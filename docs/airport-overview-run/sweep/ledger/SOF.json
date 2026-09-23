@@ -1,0 +1,192 @@
+{
+ "iata": "SOF",
+ "id": "recNbLbmhmnrsk1n4",
+ "name": "Sofia Airport",
+ "country": "Bulgaria",
+ "wikipedia": "https://en.wikipedia.org/wiki/Sofia_Airport",
+ "audited": "2026-09-23",
+ "before": "Bulgaria's main international airport, 10 km east of central Sofia. It passed 8 million passengers for the first time in 2025.\n\nIt is the home base for Bulgaria Air, BH Air, European Air Charter and GullivAir, and a base for both Ryanair and Wizz Air, which is what keeps fares to Sofia low.\n\nThe infrastructure is more modern than the airport's reputation suggests. A completely new runway system opened on 31 August 2006, replacing facilities described as old and out of date. The 3,600 metre runway sits 210 metres north of the old one, with its eastern end carried over the bed of the Iskar river on a purpose-built structure. A new 50 metre control tower followed in December 2012.\n\nThe airport also houses a Bulgarian Air Force base.",
+ "after": "Bulgaria's main international airport, 10 km east of central Sofia. It passed 8 million passengers for the first time in 2025.\n\nBulgaria Air, the national airline, flies its regular routes from here. Ryanair also has a base.\n\nIts runway is 3,600 metres long. The airport also houses a Bulgarian Air Force base, Vrazhdebna.",
+ "claims": [
+  {
+   "claim": "Bulgaria's main international airport",
+   "verdict": "confirmed",
+   "inAfter": "Bulgaria's main international airport",
+   "note": "Eurostat 2025: Sofia 8,382,684 passengers, Burgas 1,824,539 (Varna does not report to Eurostat).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the main international airport of Bulgaria"
+    },
+    {
+     "file": "eurostat-bg",
+     "org": "Eurostat",
+     "quote": [
+      "Eurostat BG_LBSF Sofia Airport: passengers carried in 2025: 8,382,684",
+      "Eurostat BG_LBBG Burgas Airport: passengers carried in 2025: 1,824,539"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "10 km east of central Sofia",
+   "verdict": "confirmed",
+   "inAfter": "10 km east of central Sofia",
+   "note": "Coordinates: 7.6 km in a straight line at 91 degrees, which is east; ratio 1.31.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "located 10 km (6.2 mi) east of the centre of the capital Sofia"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 7.6 km",
+      "Bearing from the city centre: 91 degrees, which is east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "passed 8 million passengers for the first time in 2025",
+   "verdict": "confirmed",
+   "inAfter": "It passed 8 million passengers for the first time in 2025.",
+   "note": "Eurostat's full series for Sofia (2007 to 2025) peaks at 7,884,976 in 2024 before 8,382,684 in 2025.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In 2025 the airport surpassed 8 million passengers for the first time."
+    },
+    {
+     "file": "eurostat-series-lines",
+     "org": "Eurostat",
+     "dated": "2026-09-23",
+     "quote": [
+      "Eurostat BG_LBSF Sofia Airport: passengers carried in 2019: 7,078,183",
+      "Eurostat BG_LBSF Sofia Airport: passengers carried in 2024: 7,884,976",
+      "Eurostat BG_LBSF Sofia Airport: passengers carried in 2025: 8,382,684"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Bulgaria Air, the national airline, flies its regular routes from here",
+   "verdict": "softened",
+   "inAfter": "Bulgaria Air, the national airline, flies its regular routes from here.",
+   "note": "Was 'the home base for Bulgaria Air, BH Air, European Air Charter and GullivAir'. Bulgaria Air's own page calls it the national carrier and says it operates its regular flights from Sofia. The other three airlines rest on Wikipedia alone (GullivAir's site returned an empty page; the others were not reached).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport serves as the home base for BH Air, Bulgaria Air, European Air Charter and GullivAir"
+    },
+    {
+     "file": "bulgariaair-about",
+     "org": "Bulgaria Air",
+     "dated": "2026-09-23",
+     "quote": [
+      "Bulgaria Air is the national air carrier of the Republic of Bulgaria",
+      "The airline operates regular flights from Sofia to:"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Ryanair has a base",
+   "verdict": "confirmed",
+   "inAfter": "Ryanair also has a base.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "and as a base for both Ryanair and Wizz Air"
+    },
+    {
+     "file": "ryanair-api-sof",
+     "org": "Ryanair",
+     "dated": "2026-09-23",
+     "quote": [
+      "\"iataCode\":\"SOF\"",
+      "\"base\":true"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "runway 3,600 metres",
+   "verdict": "confirmed",
+   "inAfter": "Its runway is 3,600 metres long.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "3,600 m (11,811 ft) long strip"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "dated": "2026-09-23",
+     "quote": [
+      "Runway 09/27: 3,600 m",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "houses a Bulgarian Air Force base, Vrazhdebna",
+   "verdict": "confirmed",
+   "inAfter": "The airport also houses a Bulgarian Air Force base, Vrazhdebna.",
+   "note": "OurAirports lists 'Vrazhdebna Air Base' as another name for the Sofia airfield.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport also houses the Bulgarian Air Force's Vrazhdebna Air Base."
+    },
+    {
+     "file": "ourairports-lbsf",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": "\"Sofia International Airport, Vrazhdebna Air Base\""
+    }
+   ]
+  },
+  {
+   "claim": "home base for Bulgaria Air, BH Air, European Air Charter, GullivAir; base for Ryanair and Wizz Air; keeps fares low",
+   "verdict": "cut",
+   "wasBefore": "It is the home base for Bulgaria Air, BH Air, European Air Charter and GullivAir, and a base for both Ryanair and Wizz Air, which is what keeps fares to Sofia low.",
+   "why": "Reworded: Bulgaria Air and the Ryanair base are kept with the airlines' own pages. BH Air, European Air Charter, GullivAir and the Wizz Air base rest on Wikipedia alone, and 'keeps fares low' has no source."
+  },
+  {
+   "claim": "infrastructure more modern than its reputation",
+   "verdict": "cut",
+   "wasBefore": "The infrastructure is more modern than the airport's reputation suggests.",
+   "why": "A judgement about a reputation no source describes."
+  },
+  {
+   "claim": "new runway system opened 31 August 2006, replacing old facilities",
+   "verdict": "cut",
+   "wasBefore": "A completely new runway system opened on 31 August 2006, replacing facilities described as old and out of date.",
+   "why": "Wikipedia alone; the operator's site (sofia-airport.eu) refused both a plain request and the browser (403)."
+  },
+  {
+   "claim": "runway 210 m north of the old one, eastern end over the Iskar river",
+   "verdict": "cut",
+   "wasBefore": "The 3,600 metre runway sits 210 metres north of the old one, with its eastern end carried over the bed of the Iskar river on a purpose-built structure.",
+   "why": "The length is kept (OurAirports). The offset and the Iskar bridge rest on Wikipedia alone."
+  },
+  {
+   "claim": "new 50 m control tower, December 2012",
+   "verdict": "cut",
+   "wasBefore": "A new 50 metre control tower followed in December 2012.",
+   "why": "Wikipedia alone."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
