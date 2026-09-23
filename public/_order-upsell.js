@@ -214,28 +214,32 @@ const MAX_ADULTS = 9;
 const MAX_CHILDREN = 9;
 
 /**
- * The age to search a child at when the booking does not say.
+ * The age to search a child at when the booking genuinely does not say.
  *
- * Travelify's order carries a traveller's TYPE (Adult / Child / Infant) and,
- * often, no age at all: `trimAccommodation` and the flight trimmers keep title,
- * name and type because that is all the supplier reliably sends. The deep
- * linking spec meanwhile is firm that children need "an age for each child
- * searched", so a party of two adults and two children cannot be searched
- * honestly and completely at the same time.
+ * It usually does. Travelify states an AGE on some products and a DATE OF BIRTH
+ * on others, and /api/retrieve-order now reads whichever arrived and turns it
+ * into whole years at the date they travel (`ageTravellers`), so what lands
+ * here is the child's real age. This is the floor under that, for a supplier
+ * record that carries neither.
  *
- * Searching the right NUMBER of people at an assumed age beats searching the
- * wrong number of people, which is what the first version did: it dropped every
- * child it had no age for, so a family of four opened a search for two. The
- * customer lands on a live results page where the party is on screen and can be
- * changed, so an age that is a year or two out costs them a click; a missing
- * child costs them a price that was never for their family.
+ * Even then, searching the right NUMBER of people at an assumed age beats
+ * searching the wrong number of people, which is what the first version did: it
+ * dropped every child it had no age for, so a family of four opened a search
+ * for two. The customer lands on a live results page with the party on screen
+ * and can change an age; they cannot add a child who was never in the search.
  *
- * 8 is the same default the Travel Offers widget's own party picker starts a
- * child at, so the two agree. A real age always wins over this.
+ * 8 is the same figure the Travel Offers widget's own party picker starts a
+ * child at, so the two agree. A real age always wins over it.
  */
 export const CHILD_AGE_WHEN_UNKNOWN = 8;
 
-/** A traveller's age, when the supplier gave one we can believe. */
+/**
+ * A traveller's age, when we have one.
+ *
+ * `age` is what the API sends: it has already read the supplier's age or date
+ * of birth and counted the years to the travel date. The other two spellings
+ * are for an order handed straight to this function in a test or a tool.
+ */
 function ageOf(person) {
   if (!person) return null;
   const raw = person.age != null ? person.age
