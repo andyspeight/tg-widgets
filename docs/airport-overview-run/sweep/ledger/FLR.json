@@ -1,0 +1,106 @@
+{
+ "iata": "FLR",
+ "id": "rec4acbfUO3wyTVFG",
+ "name": "Florence Airport, Peretola",
+ "country": "Italy",
+ "wikipedia": "https://en.wikipedia.org/wiki/Florence_Airport",
+ "audited": "2026-09-23",
+ "before": "Tuscany's second airport after Pisa, and a small one. The terminals are modest: a larger building holding check in, security, duty free, arrivals and gate one, and an older building reached by an airbridge with gates two to eleven and a food court. There are no jetbridges anywhere on the site, so every flight boards by bus. Clients who expect to walk straight onto the aircraft should be told otherwise.\n\nThe single runway shapes the whole operation. Monte Morello sits close enough that departures normally use runway 23, which means aircraft taxi back down the runway before taking off, and arrivals turn at the far end and taxi back to the stands. It is slower than it looks on paper.\n\nA replacement is planned. A new terminal with seven jetbridges is expected within the decade, and a new runway is to be built perpendicular to the existing one, running parallel to the A11, with the current strip reduced to a taxiway.",
+ "after": "Tuscany's second airport after Pisa, and a small one, with a single runway.",
+ "claims": [
+  {
+   "claim": "Tuscany's second airport after Pisa",
+   "verdict": "confirmed",
+   "inAfter": "Tuscany's second airport after Pisa",
+   "note": "Tuscany has three airports with scheduled service (OurAirports): Pisa, Florence and Elba (Marina di Campo). In 2025 Pisa handled 5,977,227 passengers and Florence 3,847,658 (Assaeroporti; Eurostat 5,991,608 and 3,843,423). Elba appears in neither table, which lists airports down to a few thousand passengers.",
+   "sources": [
+    {
+     "file": "assaeroporti-2025",
+     "org": "Assaeroporti (Italian airports association)",
+     "dated": "2025 (year totals to December 2025)",
+     "quote": [
+      "14 | Firenze | 43793 | 8.4 | 3847658",
+      "29 | Pisa | 44892 | 7.3 | 5977227"
+     ]
+    },
+    {
+     "file": "eurostat-it",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat IT_LIRP PISA/S. GIUSTO airport: passengers carried in 2025: 5,991,608",
+      "Eurostat IT_LIRQ FIRENZE/PERETOLA airport: passengers carried in 2025: 3,843,423"
+     ]
+    },
+    {
+     "file": "ourairports-tuscany",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "LIRJ EBA Marina di Campo Airport",
+      "LIRP PSA Pisa International Airport",
+      "LIRQ FLR Florence Airport, Peretola"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "It is the second-busiest Tuscan airport in terms of passengers after Pisa International Airport."
+    }
+   ]
+  },
+  {
+   "claim": "a single runway",
+   "verdict": "confirmed",
+   "inAfter": "with a single runway",
+   "note": "Kept from the old text's 'The single runway shapes the whole operation', whose explanation is cut below.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 05/23: 1,560 m (5,118 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "Florence Airport has a single runway"
+    }
+   ]
+  },
+  {
+   "claim": "the terminal layout: a larger building with check-in, security, duty free, arrivals and gate 1; an older building by airbridge with gates 2 to 11 and a food court",
+   "verdict": "cut",
+   "wasBefore": "The terminals are modest: a larger building holding check in, security, duty free, arrivals and gate one, and an older building reached by an airbridge with gates two to eleven and a food court.",
+   "why": "Wikipedia alone. The operator's two sites could not be read: toscana-aeroporti.com answered grab.mjs with an empty page and grabb.mjs with 'The request is blocked', and aeroporto.firenze.it timed out upstream (503 to grab.mjs, 502 to grabb.mjs). ENAV's public AIP index answered 502."
+  },
+  {
+   "claim": "no jetbridges, so every flight boards by bus",
+   "verdict": "cut",
+   "wasBefore": "There are no jetbridges anywhere on the site, so every flight boards by bus. Clients who expect to walk straight onto the aircraft should be told otherwise.",
+   "why": "Wikipedia alone, and the advice after it depends on it. The operator's two sites could not be read: toscana-aeroporti.com answered grab.mjs with an empty page and grabb.mjs with 'The request is blocked', and aeroporto.firenze.it timed out upstream (503 to grab.mjs, 502 to grabb.mjs). ENAV's public AIP index answered 502."
+  },
+  {
+   "claim": "Monte Morello means departures normally use runway 23, with back-tracking on departure and arrival",
+   "verdict": "cut",
+   "wasBefore": "The single runway shapes the whole operation. Monte Morello sits close enough that departures normally use runway 23, which means aircraft taxi back down the runway before taking off, and arrivals turn at the far end and taxi back to the stands. It is slower than it looks on paper.",
+   "why": "Wikipedia alone; the runway procedures would need the AIP. The operator's two sites could not be read: toscana-aeroporti.com answered grab.mjs with an empty page and grabb.mjs with 'The request is blocked', and aeroporto.firenze.it timed out upstream (503 to grab.mjs, 502 to grabb.mjs). ENAV's public AIP index answered 502. The runway itself stays in the first sentence."
+  },
+  {
+   "claim": "a new terminal with seven jetbridges within the decade, and a new runway perpendicular to the existing one, parallel to the A11, with the current strip reduced to a taxiway",
+   "verdict": "cut",
+   "wasBefore": "A replacement is planned. A new terminal with seven jetbridges is expected within the decade, and a new runway is to be built perpendicular to the existing one, running parallel to the A11, with the current strip reduced to a taxiway.",
+   "why": "Wikipedia alone, uncited there, and time-sensitive: plans for Florence's new runway have been through the courts before, so a current source is needed and none could be read. The operator's two sites could not be read: toscana-aeroporti.com answered grab.mjs with an empty page and grabb.mjs with 'The request is blocked', and aeroporto.firenze.it timed out upstream (503 to grab.mjs, 502 to grabb.mjs). ENAV's public AIP index answered 502. Worth checking by hand; it goes back in if the operator or the ministry confirms the plan and its dates."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and a small one",
+   "why": "The old text's judgement, kept: one short runway (1,560 m, OurAirports) and about two thirds of Pisa's traffic."
+  }
+ ],
+ "tracerOk": {}
+}
