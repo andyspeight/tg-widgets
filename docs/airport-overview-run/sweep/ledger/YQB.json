@@ -1,0 +1,364 @@
+{
+ "iata": "YQB",
+ "id": "rec9bHkqPDc5BoLZx",
+ "name": "Quebec Jean Lesage International Airport",
+ "country": "Canada",
+ "wikipedia": "https://en.wikipedia.org/wiki/Qu%C3%A9bec_City_Jean_Lesage_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Quebec City's airport, 17 km west of the centre in the Sainte-Foy borough, and the eleventh busiest in Canada with just over 1.8 million passengers in 2025.\n\nThe route map is wider than the size suggests. More than ten airlines run hundreds of weekly flights to destinations across Canada and the United States and out to Mexico, Central America, the Caribbean and Europe, so a client does not automatically have to connect through Montreal.\n\nThe main terminal has seventeen gates, numbered from 20 to 37, and twelve of them have an air bridge, which is a better ratio than many airports this size.\n\nTwo runways serve it, the main one at 9,000 feet and a shorter second at 5,700 feet, with seven taxiways between them. A third apron handles general aviation, charter operators, flight schools and maintenance work.\n\nIt is named after Jean Lesage, and is designated an international airport by Transport Canada.",
+ "after": "Quebec City's airport, 17 km west of the centre in the Sainte-Foy–Sillery–Cap-Rouge borough, with about 1.8 million passengers in 2025.\n\nThe route map is wider than the size suggests. More than ten airlines fly from here, and the airport lists direct flights to more than 30 destinations. They reach across Canada and the United States and out to Mexico, Central America, the Caribbean and Europe, so a client does not automatically have to connect through Montreal.\n\nTwo runways serve it, the main one at 9,000 feet and a shorter second at 5,700 feet.\n\nIt is named after Jean Lesage.",
+ "claims": [
+  {
+   "claim": "Quebec City's airport",
+   "verdict": "confirmed",
+   "inAfter": "Quebec City's airport",
+   "note": "No archived Wikipedia copy exists for YQB, so source 1 is the article as it reads today (revision of 6 August 2026).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the primary airport serving Quebec City, Canada"
+    },
+    {
+     "file": "adq-home",
+     "org": "Québec City Jean Lesage International Airport (operator, aeroportdequebec.com)",
+     "quote": "Quebec City Airport (YQB) | Flights, Parking & Services | Québec City Jean Lesage International Airport (YQB)",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "17 km west of the centre",
+   "verdict": "confirmed",
+   "inAfter": "17 km west of the centre",
+   "note": "The coordinates give 13.8 km in a straight line at 260 degrees (west); 17 km is a road distance, ratio 1.23, inside the tolerance.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "it is located 17 km (10.5 mi) west of the city"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 13.8 km",
+      "Bearing from the city centre: 260 degrees, which is west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in the Sainte-Foy–Sillery–Cap-Rouge borough",
+   "verdict": "corrected",
+   "inAfter": "in the Sainte-Foy–Sillery–Cap-Rouge borough",
+   "note": "Was 'the Sainte-Foy borough': the borough's full name is Sainte-Foy–Sillery–Cap-Rouge, and the City of Québec's own page for it lists the Aéroport district council (conseil de quartier de l'Aéroport) among its districts.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "in the Sainte-Foy–Sillery–Cap-Rouge borough"
+    },
+    {
+     "file": "quebec-ville-sfsc",
+     "org": "Ville de Québec",
+     "quote": [
+      "L'arrondissement de Sainte-Foy–Sillery–Cap-Rouge est l'un des six arrondissements de la ville de Québec.",
+      "Conseil de quartier de l'Aéroport"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "about 1.8 million passengers in 2025",
+   "verdict": "softened",
+   "inAfter": "with about 1.8 million passengers in 2025",
+   "note": "Was 'just over 1.8 million'. The operator's 1,819,553 (Wikipedia's figure) includes general aviation; its main-terminal count is 1,741,273, and Statistics Canada counts 1,764,289. All three round to about 1.8 million; only the widest count is 'just over'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2025, it was the 11th-busiest airport in Canada by number of passengers with 1,819,553 passengers."
+    },
+    {
+     "file": "adq-statistics",
+     "org": "Québec City Jean Lesage International Airport (operator, aeroportdequebec.com)",
+     "quote": [
+      "Passenger traffic Main terminal Main terminal and general aviation 2025 1 741 273 1,819,553"
+     ],
+     "dated": "2025 (full year)"
+    },
+    {
+     "file": "statcan-2025-all",
+     "org": "Statistics Canada",
+     "quote": "\"2025\",\"Québec/Jean Lesage International, Quebec\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779470\",\"141.1\",\"1764289\"",
+     "dated": "2025 (reference year)"
+    }
+   ]
+  },
+  {
+   "claim": "more than ten airlines",
+   "verdict": "confirmed",
+   "inAfter": "More than ten airlines fly from here",
+   "note": "The operator's live airline page names eleven: Air Canada, Air France, Air Inuit, Air Transat, American Airlines, Central Mountain Air, PAL Airlines, Pascan, Porter, United Airlines and WestJet.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "More than ten airlines offer hundreds of weekly flights"
+    },
+    {
+     "file": "adq-airlines",
+     "org": "Québec City Jean Lesage International Airport (operator, aeroportdequebec.com)",
+     "quote": [
+      "YQB is served by several major airlines",
+      "Air Canada",
+      "Air France",
+      "Air Inuit",
+      "Air Transat",
+      "American Airlines",
+      "Central Mountain Air (CMA)",
+      "PAL Airlines",
+      "Pascan",
+      "Porter",
+      "United Airlines",
+      "WestJet"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "the airport lists direct flights to more than 30 destinations",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "the airport lists direct flights to more than 30 destinations",
+   "note": "Replaces 'hundreds of weekly flights', which no second source gives. The airport's own current count, attributed, as the sweep's rule asks for counts of routes and destinations.",
+   "sources": [
+    {
+     "file": "adq-home",
+     "org": "Québec City Jean Lesage International Airport (operator, aeroportdequebec.com)",
+     "quote": "Direct flights to over 30 destinations",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "destinations across Canada and the US and out to Mexico, Central America, the Caribbean and Europe",
+   "verdict": "confirmed",
+   "inAfter": "They reach across Canada and the United States and out to Mexico, Central America, the Caribbean and Europe, so a client does not automatically have to connect through Montreal.",
+   "note": "Each region is on the operator's own destination pages with current schedules: Calgary (WestJet from 14 September 2026), Cancún (Air Canada, Air Transat, WestJet), Roatán in Honduras (WestJet from 14 December 2026 to 11 April 2027), Martinique (Air Canada, Air Transat) and Paris (Air France, Air Transat). American's release of 5 August 2026 gives New York JFK (seasonal) plus Philadelphia, Chicago, Charlotte and Dallas Fort Worth. PAX adds Air Canada to Pointe-à-Pitre for winter 2026 to 2027. 'Does not have to connect through Montreal' follows from these being direct flights.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "More than ten airlines offer hundreds of weekly flights to destinations across Canada, the United States, Central America, Mexico, the Caribbean and Europe."
+    },
+    {
+     "file": "adq-dest-calgary",
+     "org": "Québec City Jean Lesage International Airport (operator, aeroportdequebec.com)",
+     "quote": [
+      "Flights to Calgary",
+      "WestJet",
+      "Flights from September 14, 2026"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "adq-aa-newyork",
+     "org": "Québec City Jean Lesage International Airport (operator, aeroportdequebec.com)",
+     "quote": [
+      "Quebec, on August 5, 2026",
+      "The new route complements the airline’s existing service between Quebec City and several of American’s hubs, including Philadelphia (PHL), Chicago (ORD), Charlotte (CLT), and Dallas Fort Worth (DFW)"
+     ],
+     "dated": "2026-08-05"
+    },
+    {
+     "file": "adq-dest-cancun",
+     "org": "Québec City Jean Lesage International Airport (operator, aeroportdequebec.com)",
+     "quote": [
+      "Flights to Cancún",
+      "Air Canada",
+      "Air Transat",
+      "WestJet",
+      "Flights from December 21, 2026",
+      "Mexican nature and culture"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "adq-dest-roatan",
+     "org": "Québec City Jean Lesage International Airport (operator, aeroportdequebec.com)",
+     "quote": [
+      "Off the northern coast of Honduras is the island of Roatán",
+      "Flights from December 14, 2026",
+      "until April 11, 2027"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "adq-dest-martinique",
+     "org": "Québec City Jean Lesage International Airport (operator, aeroportdequebec.com)",
+     "quote": [
+      "Welcome to Martinique, a beautiful island where Caribbean warmth meets French sophistication.",
+      "Flights to Martinique"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "adq-dest-paris",
+     "org": "Québec City Jean Lesage International Airport (operator, aeroportdequebec.com)",
+     "quote": [
+      "Flights to Paris",
+      "Air France",
+      "Flights from September 7, 2026"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "paxnews-ac-winter2627",
+     "org": "PAX News (Air Canada schedule)",
+     "quote": [
+      "04-07-2026",
+      "Quebec City (YQB) Pointe-a-Pitre (PTP), Guadaloupe Thu Dec. 17, 2026-Apr. 08, 2027"
+     ],
+     "dated": "2026-04-07"
+    }
+   ]
+  },
+  {
+   "claim": "two runways, 9,000 ft and 5,700 ft",
+   "verdict": "confirmed",
+   "inAfter": "Two runways serve it, the main one at 9,000 feet and a shorter second at 5,700 feet.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Runway 06/24 is the main and longest runway measuring 9000' by 150'.",
+      "The secondary runway 11/29 is 5700' by 150'."
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 06/24: 2,743 m (9,000 ft), ASP",
+      "Runway 11/29: 1,737 m (5,700 ft), ASP",
+      "Runways listed: 2"
+     ],
+     "dated": "OurAirports data fetched 2026-09-23 (stated on the saved file)"
+    }
+   ]
+  },
+  {
+   "claim": "named after Jean Lesage",
+   "verdict": "confirmed",
+   "inAfter": "It is named after Jean Lesage.",
+   "note": "Wikipedia gives the 1993 renaming in honour of the former Premier of Quebec; the operator uses the name throughout its site.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "it was renamed to Aéroport international Jean-Lesage in 1993, in honour of Jean Lesage, the former Premier of Quebec"
+    },
+    {
+     "file": "adq-home",
+     "org": "Québec City Jean Lesage International Airport (operator, aeroportdequebec.com)",
+     "quote": "Québec City Jean Lesage International Airport (YQB)",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "eleventh busiest in Canada",
+   "verdict": "cut",
+   "wasBefore": "and the eleventh busiest in Canada",
+   "why": "Cannot be confirmed. Statistics Canada's 2025 table puts Québec eleventh among airports with a published figure (1,764,289, behind Kelowna and Victoria), but Toronto Billy Bishop's figure is suppressed for 2024 and 2025, and in 2023, the last year both were published, Billy Bishop had 2,000,714 against Québec's 1,656,028. So Québec may be twelfth.",
+   "sources": [
+    {
+     "file": "statcan-yqb-ytz",
+     "org": "Statistics Canada",
+     "quote": [
+      "\"2023\",\"Québec/Jean Lesage International, Quebec\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779470\",\"141.1\",\"1656028\"",
+      "\"2023\",\"Toronto/Billy Bishop Toronto City, Ontario\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779622\",\"162.1\",\"2000714\"",
+      "\"2025\",\"Toronto/Billy Bishop Toronto City, Ontario\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779622\",\"162.1\",\"\",\"x\""
+     ],
+     "dated": "2023 to 2025 (reference years)"
+    }
+   ]
+  },
+  {
+   "claim": "just over 1.8 million passengers",
+   "verdict": "cut",
+   "wasBefore": "with just over 1.8 million passengers in 2025",
+   "why": "Softened to 'about 1.8 million': 'just over' holds only for the operator's count including general aviation."
+  },
+  {
+   "claim": "in the Sainte-Foy borough",
+   "verdict": "cut",
+   "wasBefore": "in the Sainte-Foy borough",
+   "why": "Corrected to the borough's full name, Sainte-Foy–Sillery–Cap-Rouge."
+  },
+  {
+   "claim": "hundreds of weekly flights",
+   "verdict": "cut",
+   "wasBefore": "run hundreds of weekly flights",
+   "why": "No second source gives a weekly flight count; replaced by the airport's own count of destinations, attributed."
+  },
+  {
+   "claim": "seventeen gates, 20 to 37, twelve with air bridges",
+   "verdict": "cut",
+   "wasBefore": "The main terminal has seventeen gates, numbered from 20 to 37, and twelve of them have an air bridge, which is a better ratio than many airports this size.",
+   "why": "Wikipedia alone, and 'better ratio than many airports this size' is an unsourced comparison. The operator's interactive map returned no text either as a plain page or in a browser, and none of its other pages gives the gates."
+  },
+  {
+   "claim": "seven taxiways",
+   "verdict": "cut",
+   "wasBefore": "with seven taxiways between them",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "third apron for general aviation, charters, flight schools and maintenance",
+   "verdict": "cut",
+   "wasBefore": "A third apron handles general aviation, charter operators, flight schools and maintenance work.",
+   "why": "Wikipedia alone. The operator's statistics confirm general aviation traffic, but not the apron or its tenants."
+  },
+  {
+   "claim": "designated an international airport by Transport Canada",
+   "verdict": "cut",
+   "wasBefore": "and is designated an international airport by Transport Canada",
+   "why": "Wikipedia alone; no Transport Canada page found that says so."
+  },
+  {
+   "claim": "no US preclearance at Québec City",
+   "verdict": "cut",
+   "why": "Held back: a fact the old text never mentioned. Preclearance was announced for Québec City in 2016 and again in 2019, but Wikipedia says it was not yet available as of March 2024, and CBP's list (modified 24 June 2026) still has no Québec City site among its ten Canadian locations. So clients to the US clear US border checks on arrival, unlike at Montreal or Ottawa. Worth adding if Andy wants it.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "However, as of March 2024, preclearance is not yet available."
+    },
+    {
+     "file": "cbp-preclearance",
+     "org": "US Customs and Border Protection",
+     "quote": [
+      "and Calgary, Toronto, Billy Bishop Toronto, Edmonton, Halifax, Montreal, Ottawa, Vancouver, Victoria, and Winnipeg in Canada.",
+      "Last Modified: Jun 24, 2026"
+     ],
+     "dated": "2026-06-24"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The route map is wider than the size suggests.",
+   "why": "Framing kept from the old text; the airline and destination facts that follow carry it."
+  }
+ ],
+ "tracerOk": {}
+}

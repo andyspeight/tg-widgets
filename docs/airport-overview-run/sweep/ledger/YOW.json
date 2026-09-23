@@ -1,0 +1,372 @@
+{
+ "iata": "YOW",
+ "id": "recMQGJbVrUsXKByI",
+ "name": "Ottawa Macdonald-Cartier International Airport",
+ "country": "Canada",
+ "wikipedia": "https://en.wikipedia.org/wiki/Ottawa_Macdonald%E2%80%93Cartier_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Canada's sixth busiest airport, 15 km south of downtown Ottawa, serving both Ottawa and Gatineau. It handled 4,866,236 passengers in 2025 and is a major hub for Porter Airlines, a focus city for Air Canada and Air Transat and the home base for Canadian North.\n\nThe detail worth knowing for a client flying onward to the United States: this is one of only nine Canadian airports with US border preclearance, so passengers clear American immigration here.\n\nThe terminal opened in October 2003, designed by Richard Brisbin and finished ahead of schedule. It was paid for in an unusual way, by putting up the airport parking rates from January 1997 and setting the money aside.\n\nThe site was a military base, CFB Uplands, and the Royal Canadian Air Force still keeps 412 Transport Squadron here, which flies Canadian and visiting government officials.\n\nThe airport is named after Sir John A. Macdonald and Sir George-Étienne Cartier.",
+ "after": "Canada's sixth busiest airport, 15 km south of downtown Ottawa. It handled more than 4.7 million passengers in 2025 and is a major hub for Porter Airlines and the home base for Canadian North. Air Canada and Air Transat also fly from here.\n\nFor a client flying on to the United States, one detail matters: the airport has US border preclearance, so passengers clear American border checks here.\n\nThe terminal opened in October 2003 and was finished ahead of schedule.\n\nOnce known as Uplands, the site was a military base. The airport's name honours two of Canada's Fathers of Confederation, Sir John A. Macdonald and Sir George-Étienne Cartier.",
+ "claims": [
+  {
+   "claim": "Canada's sixth busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "Canada's sixth busiest airport",
+   "note": "No archived Wikipedia copy exists for YOW; source 1 is the article as it read today (revision of 23 September 2026, 18:43 UTC). Statistics Canada's 2025 table (released 21 July 2026) puts Ottawa sixth: Toronto Pearson, Vancouver, Montreal-Trudeau, Calgary, Edmonton, then Ottawa at 4,732,563, ahead of Winnipeg at 4,274,502. The one suppressed airport of any size, Toronto Billy Bishop, had 2.0 million in 2023, far below.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "it is Canada's sixth-busiest airport"
+    },
+    {
+     "file": "statcan-2025-all",
+     "org": "Statistics Canada",
+     "quote": [
+      "\"2025\",\"Toronto/Lester B Pearson International, Ontario\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779614\",\"161.1\",\"45998881\"",
+      "\"2025\",\"Vancouver International, British Columbia\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779670\",\"169.1\",\"26013167\"",
+      "\"2025\",\"Montréal/Pierre Elliott Trudeau International, Quebec\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779126\",\"87.1\",\"21531258\"",
+      "\"2025\",\"Calgary International, Alberta\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65778574\",\"13.1\",\"18803183\"",
+      "\"2025\",\"Edmonton International, Alberta\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65778870\",\"52.1\",\"7658691\"",
+      "\"2025\",\"Ottawa/Macdonald-Cartier International, Ontario\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779038\",\"76.1\",\"4732563\"",
+      "\"2025\",\"Winnipeg/James Armstrong Richardson International, Manitoba\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779630\",\"163.1\",\"4274502\""
+     ],
+     "dated": "2025 (reference year)"
+    }
+   ]
+  },
+  {
+   "claim": "15 km south of downtown Ottawa",
+   "verdict": "confirmed",
+   "inAfter": "15 km south of downtown Ottawa",
+   "note": "Coordinates: 10.1 km in a straight line at 167 degrees (south); 15 km is by road, ratio 1.48, inside the tolerance.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Located 8 nautical miles (15 km; 9.2 mi) south of downtown Ottawa"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 10.1 km",
+      "Bearing from the city centre: 167 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "more than 4.7 million passengers in 2025",
+   "verdict": "softened",
+   "inAfter": "It handled more than 4.7 million passengers in 2025",
+   "note": "Was '4,866,236 passengers in 2025', the operator's own count (enplaned and deplaned), which Wikipedia repeats. Statistics Canada counts 4,732,563 for 2025. 'More than 4.7 million' is true on both independent counts.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "with 4,866,236 passengers in 2025"
+    },
+    {
+     "file": "yow-passenger-volume",
+     "org": "Ottawa International Airport Authority (operator, yow.ca)",
+     "quote": [
+      "Passenger volume at YOW includes the number of enplaned and deplaned passengers.",
+      "2021 2022 2023 2024 2025 2026 (to date)",
+      "Total 1,170,789 2,992,334 4,095,914 4,606,824 4,866,236 3,478,226"
+     ],
+     "dated": "2025 (full year)"
+    },
+    {
+     "file": "statcan-2025-all",
+     "org": "Statistics Canada",
+     "quote": "\"2025\",\"Ottawa/Macdonald-Cartier International, Ontario\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779038\",\"76.1\",\"4732563\"",
+     "dated": "2025 (reference year)"
+    }
+   ]
+  },
+  {
+   "claim": "a major hub for Porter Airlines",
+   "verdict": "confirmed",
+   "inAfter": "is a major hub for Porter Airlines",
+   "note": "PAX (8 October 2025, written 10-08-2025 in its month-first style) reports Porter 'consolidating Ottawa as a major hub in eastern Canada'; the operator lists being 'named a hub in Porter Airlines' network' and a Porter maintenance and crew base; Airways (29 January 2026) calls it Porter's 'growing capital hub'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is a major hub for Porter Airlines"
+    },
+    {
+     "file": "pax-transat-gatwick",
+     "org": "PAX News",
+     "quote": [
+      "10-08-2025",
+      "The development is driven by the growing network of Air Transat's partner, Porter Airlines, which is consolidating Ottawa as a major hub in eastern Canada."
+     ],
+     "dated": "2025-10-08"
+    },
+    {
+     "file": "yow-our-story",
+     "org": "Ottawa International Airport Authority (operator, yow.ca)",
+     "quote": [
+      "Named a hub in Porter Airlines’ network and a vital partner in the airline’s growth plans",
+      "YOW became a maintenance and crew base for Porter Airlines with the construction of two maintenance hangars"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "home base for Canadian North",
+   "verdict": "confirmed",
+   "inAfter": "the home base for Canadian North",
+   "note": "Canadian North gives its headquarters as 145 Thad Johnson Private, Ottawa, and Cargojet's entry for Ottawa (YOW) places 'the Canadian North facility' at that same address. The operator also lists a new cargo facility announced for Canadian North.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "a home base for Canadian North (formerly First Air)"
+    },
+    {
+     "file": "canadiannorth-contact",
+     "org": "Canadian North",
+     "quote": [
+      "Headquarters",
+      "145 Thad Johnson Private",
+      "Ottawa, ON K1V 1A2"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "cargojet-locations",
+     "org": "Cargojet",
+     "quote": [
+      "OTTAWA – YOW",
+      "All shipment tendering and retrieval take place at the Canadian North facility located at: 145 Thad Johnson Pvt, Ottawa"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Air Canada and Air Transat fly from here",
+   "verdict": "softened",
+   "inAfter": "Air Canada and Air Transat also fly from here.",
+   "note": "Was 'a focus city for Air Canada and Air Transat'; no source other than Wikipedia uses the label. Both are on the operator's live list of nine airlines (Air Canada, Air France, Air North, Air Transat, Canadian North, PAL Airlines, Porter Airlines, United Airlines, WestJet).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "a focus city for Air Canada and Air Transat"
+    },
+    {
+     "file": "yow-airlines",
+     "org": "Ottawa International Airport Authority (operator, yow.ca)",
+     "quote": [
+      "9 results found",
+      "Air Canada Airline code AC / ACA",
+      "Air Transat Airline code TS / TSC"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "pax-transat-gatwick",
+     "org": "PAX News",
+     "quote": "launching our first transatlantic route from Ottawa",
+     "dated": "2025-10-08"
+    }
+   ]
+  },
+  {
+   "claim": "US border preclearance at Ottawa",
+   "verdict": "confirmed",
+   "inAfter": "the airport has US border preclearance, so passengers clear American border checks here",
+   "note": "Kept without the old count of 'only nine' airports (see the cut). 'Border checks' rather than 'immigration': CBP describes an inspection that covers customs too, and the operator says passengers 'clear customs in Ottawa rather than at destination'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "it is one of nine Canadian airports that contain U.S border preclearance facilities"
+    },
+    {
+     "file": "cbp-preclearance",
+     "org": "US Customs and Border Protection",
+     "quote": [
+      "Ottawa Preclearance",
+      "inspect travelers prior to boarding U.S.-bound flights",
+      "Last Modified: Jun 24, 2026"
+     ],
+     "dated": "2026-06-24"
+    },
+    {
+     "file": "yow-our-story",
+     "org": "Ottawa International Airport Authority (operator, yow.ca)",
+     "quote": "preclearance facility, which allows passengers to clear customs in Ottawa rather than at destination",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "terminal opened in October 2003, ahead of schedule",
+   "verdict": "confirmed",
+   "inAfter": "The terminal opened in October 2003 and was finished ahead of schedule.",
+   "note": "The operator gives 13 October 2003 for the opening; Transport Canada's release of 3 October 2003 marks the opening celebration. Both are October 2003.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "was completed ahead of schedule and opened in October 2003"
+    },
+    {
+     "file": "yow-our-story",
+     "org": "Ottawa International Airport Authority (operator, yow.ca)",
+     "quote": "On October 13, 2003, the Airport Authority opened the beautiful, new 61,000 m2 terminal",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "canada-2003-terminal",
+     "org": "Transport Canada (Government of Canada news release)",
+     "quote": [
+      "For release October 3, 2003",
+      "This state-of-the-art terminal was completed under budget and ahead of schedule"
+     ],
+     "dated": "2003-10-03"
+    }
+   ]
+  },
+  {
+   "claim": "the site was a military base, Uplands",
+   "verdict": "softened",
+   "inAfter": "Once known as Uplands, the site was a military base.",
+   "note": "Was 'CFB Uplands': the operator's history calls the airfield Uplands and describes the Department of National Defence taking it over in the Second World War; only Wikipedia uses 'CFB Uplands' (the RCAF refers to Canadian Forces Base Ottawa, closed in October 1994).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport was formerly a military base known as CFB Ottawa South/CFB Uplands"
+    },
+    {
+     "file": "yow-our-story",
+     "org": "Ottawa International Airport Authority (operator, yow.ca)",
+     "quote": [
+      "On August 20, 1938, Transport Minister Howe inaugurated the newly renamed Uplands Airport.",
+      "With the onset of World War II, the Department of National Defence acquired the airport and established its own facilities."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "named in honour of two of Canada's Fathers of Confederation",
+   "verdict": "confirmed",
+   "inAfter": "The airport's name honours two of Canada's Fathers of Confederation",
+   "note": "The operator gives the 1993 renaming to Ottawa Macdonald-Cartier International 'in honor of two of Canada's Fathers of Confederation'; Wikipedia calls them two of the 'founding fathers of Canada'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "founding fathers of Canada"
+    },
+    {
+     "file": "yow-our-story",
+     "org": "Ottawa International Airport Authority (operator, yow.ca)",
+     "quote": "In June 1993, the federal government renamed the airport Ottawa Macdonald-Cartier International in honor of two of Canada’s Fathers of Confederation.",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "the two are Sir John A. Macdonald and Sir George-Étienne Cartier",
+   "verdict": "confirmed",
+   "inAfter": "Sir George-Étienne Cartier",
+   "note": "Split from the claim above only because the gate's sentence splitter breaks at 'John A.'; the whole sentence is 'The airport's name honours two of Canada's Fathers of Confederation, Sir John A. Macdonald and Sir George-Étienne Cartier.' Wikipedia gives both full names; the operator's own name for the airport, Macdonald-Cartier, carries both surnames.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Sir John A. Macdonald and Sir George-Étienne Cartier"
+    },
+    {
+     "file": "yow-our-story",
+     "org": "Ottawa International Airport Authority (operator, yow.ca)",
+     "quote": "renamed the airport Ottawa Macdonald-Cartier International",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "serving both Ottawa and Gatineau",
+   "verdict": "cut",
+   "wasBefore": "serving both Ottawa and Gatineau",
+   "why": "Wikipedia alone: none of the operator's pages read (home, about, air service, our story, passenger volume) names Gatineau."
+  },
+  {
+   "claim": "exact 2025 passenger figure",
+   "verdict": "cut",
+   "wasBefore": "It handled 4,866,236 passengers in 2025",
+   "why": "Softened to 'more than 4.7 million': 4,866,236 is the operator's own count, and Statistics Canada's count for 2025 is 4,732,563."
+  },
+  {
+   "claim": "focus city for Air Canada and Air Transat",
+   "verdict": "cut",
+   "wasBefore": "a focus city for Air Canada and Air Transat",
+   "why": "Wikipedia alone; softened to both airlines flying from here."
+  },
+  {
+   "claim": "one of only nine Canadian airports with US preclearance; American immigration",
+   "verdict": "cut",
+   "wasBefore": "this is one of only nine Canadian airports with US border preclearance, so passengers clear American immigration here",
+   "why": "The count no longer matches the authority: CBP (page modified 24 June 2026) lists ten preclearance locations in Canada, now including Billy Bishop Toronto, and gives Victoria's as a street address rather than an airport. The preclearance itself is kept."
+  },
+  {
+   "claim": "designed by Richard Brisbin",
+   "verdict": "cut",
+   "wasBefore": "designed by Richard Brisbin",
+   "why": "Wikipedia alone; neither the operator's history nor Transport Canada's 2003 release names the architect."
+  },
+  {
+   "claim": "paid for by raising parking rates from January 1997",
+   "verdict": "cut",
+   "wasBefore": "It was paid for in an unusual way, by putting up the airport parking rates from January 1997 and setting the money aside.",
+   "why": "Wikipedia alone; the operator's own history of the terminal does not mention it."
+  },
+  {
+   "claim": "CFB Uplands; RCAF 412 Transport Squadron still here, flying government officials",
+   "verdict": "cut",
+   "wasBefore": "The site was a military base, CFB Uplands, and the Royal Canadian Air Force still keeps 412 Transport Squadron here, which flies Canadian and visiting government officials.",
+   "why": "The military base is kept (as Uplands). The RCAF's own page (modified 11 October 2022) says 412 Transport Squadron is based in the National Capital Region and is known for VIP transport, but does not say it is at the airport, and the operator mentions the squadron only in the 1950s. So 'still keeps it here' rests on Wikipedia alone."
+  },
+  {
+   "claim": "non-stop flights to London (Air Canada to Heathrow, Air Transat to Gatwick)",
+   "verdict": "cut",
+   "why": "Held back: the old text never mentioned London, and it matters to UK agents. Air Canada flies Ottawa to London Heathrow (CTV, 23 September 2025: through the winter; Wikipedia: year round) and Air Transat began Ottawa to London Gatwick on 15 May 2026 for the summer (PAX, 8 October 2025; Wikipedia). The operator's destination map gives no text, so no source from the last 12 months confirms the Heathrow flights are still running; worth Andy adding once checked.",
+   "sources": [
+    {
+     "file": "pax-transat-gatwick",
+     "org": "PAX News",
+     "quote": [
+      "10-08-2025",
+      "For the first time, Air Transat will offer non-stop transatlantic flights from Ottawa to London-Gatwick, starting on May 15, 2026."
+     ],
+     "dated": "2025-10-08"
+    },
+    {
+     "file": "ctv-ac-heathrow",
+     "org": "CTV News Ottawa",
+     "quote": [
+      "London calling! Air Canada to operate Ottawa-London Heathrow service through the winter",
+      "Published: September 23, 2025"
+     ],
+     "dated": "2025-09-23"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "This is the second non-stop service to London, alongside Air Canada's route to London Heathrow which operates year round."
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

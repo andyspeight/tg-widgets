@@ -1,0 +1,353 @@
+{
+ "iata": "YHZ",
+ "id": "recmYvea5xuJ2wUAI",
+ "name": "Halifax / Stanfield International Airport",
+ "country": "Canada",
+ "wikipedia": "https://en.wikipedia.org/wiki/Halifax_Stanfield_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Nova Scotia's main airport, at Goffs in the Halifax Regional Municipality, and eighth busiest in Canada with 4,140,484 passengers in 2025. It serves mainland Nova Scotia and reaches into the neighbouring Maritime provinces.\n\nIt is a focus city for Air Canada and Porter Airlines, and the operating base for Cougar Helicopters, Maritime Air Charter and PAL Airlines.\n\nThe terminal has been substantially rebuilt. More than 200 million dollars has gone in since the Halifax International Airport Authority took over management in 2000, including an international arrivals area three times larger than its predecessor that opened in August 2001, with space set aside on its upper level for United States border preclearance, and a new domestic arrivals hall in December 2002.\n\nThe original 1960 building had two observation decks projecting over the apron and contained Nova Scotia's first escalators.\n\nThe airport is named after Robert Stanfield, the seventeenth premier of Nova Scotia.",
+ "after": "Nova Scotia's main airport and the largest in Atlantic Canada, at Goffs in the Halifax Regional Municipality. It was eighth busiest in Canada in 2025, with more than 4 million passengers.\n\nAir Canada, Porter Airlines and PAL Airlines fly from here, and Cougar Helicopters and Maritime Air Charter are based at the airport.\n\nThe Halifax International Airport Authority has run the airport since 2000. It is the only airport in Atlantic Canada with United States border preclearance, so a client flying to the States clears US border checks here.\n\nNova Scotia's first escalator was installed in the original 1960 terminal.\n\nThe airport is named after Robert Stanfield, a former premier of Nova Scotia.",
+ "claims": [
+  {
+   "claim": "Nova Scotia's main airport and the largest in Atlantic Canada",
+   "verdict": "corrected",
+   "inAfter": "Nova Scotia's main airport and the largest in Atlantic Canada",
+   "note": "'The largest in Atlantic Canada' is the operator's own description and replaces the cut catchment sentence (mainland Nova Scotia and the neighbouring Maritime provinces), which only Wikipedia gives. Statistics Canada's 2025 table bears it out: Halifax 4,020,914, then St John's 1,398,117, Moncton 628,525 and Fredericton 386,059; Sydney, Nova Scotia's other airport in the table, 103,970. Charlottetown is suppressed for 2023 to 2025; its last published year (2022) was 339,450.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It serves the Halifax region, mainland Nova Scotia, and adjacent areas in the neighbouring Maritime provinces."
+    },
+    {
+     "file": "yhz-history",
+     "org": "Halifax International Airport Authority (operator, halifaxstanfield.ca)",
+     "quote": "Today, Halifax Stanfield is Atlantic Canada’s largest airport",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "statcan-2025-all",
+     "org": "Statistics Canada",
+     "quote": [
+      "\"2025\",\"Halifax/Robert L Stanfield International, Nova Scotia\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65778638\",\"21.1\",\"4020914\"",
+      "\"2025\",\"St John's International, Newfoundland and Labrador\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779286\",\"117.1\",\"1398117\"",
+      "\"2025\",\"Moncton/Greater Moncton International, New Brunswick\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779150\",\"91.1\",\"628525\"",
+      "\"2025\",\"Fredericton International, New Brunswick\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65778758\",\"37.1\",\"386059\"",
+      "\"2025\",\"Sydney, Nova Scotia\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779766\",\"181.1\",\"103970\""
+     ],
+     "dated": "2025 (reference year)"
+    },
+    {
+     "file": "statcan-yyg-series",
+     "org": "Statistics Canada",
+     "quote": "\"2022\",\"Charlottetown, Prince Edward Island\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65778942\",\"63.1\",\"339450\"",
+     "dated": "2022 (reference year)"
+    }
+   ]
+  },
+  {
+   "claim": "at Goffs in the Halifax Regional Municipality",
+   "verdict": "confirmed",
+   "inAfter": "at Goffs in the Halifax Regional Municipality",
+   "note": "The coordinates put it 27.0 km north of the GeoNames centre of Halifax. CBP's preclearance entry gives a mailing address in Enfield, the neighbouring community; the operator's own footer says Goffs.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is a Canadian airport in Goffs, Nova Scotia, a rural community of the Halifax Regional Municipality"
+    },
+    {
+     "file": "yhz-history",
+     "org": "Halifax International Airport Authority (operator, halifaxstanfield.ca)",
+     "quote": [
+      "Located within the boundaries of Halifax Regional Municipality",
+      "Goffs, Nova Scotia, Canada, B2T 1K2"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "eighth busiest in Canada in 2025",
+   "verdict": "confirmed",
+   "inAfter": "It was eighth busiest in Canada in 2025",
+   "note": "Statistics Canada's 2025 table (released 21 July 2026): Winnipeg seventh at 4,274,502, Halifax eighth at 4,020,914, Kelowna ninth at 2,244,830. Toronto Billy Bishop, suppressed, had 2.0 million in 2023, well below.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Halifax Stanfield is the 8th busiest airport in Canada by passenger traffic"
+    },
+    {
+     "file": "statcan-2025-all",
+     "org": "Statistics Canada",
+     "quote": [
+      "\"2025\",\"Winnipeg/James Armstrong Richardson International, Manitoba\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779630\",\"163.1\",\"4274502\"",
+      "\"2025\",\"Halifax/Robert L Stanfield International, Nova Scotia\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65778638\",\"21.1\",\"4020914\"",
+      "\"2025\",\"Kelowna, British Columbia\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779198\",\"100.1\",\"2244830\""
+     ],
+     "dated": "2025 (reference year)"
+    }
+   ]
+  },
+  {
+   "claim": "more than 4 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "with more than 4 million passengers",
+   "note": "Was '4,140,484 passengers in 2025' (Wikipedia). The operator's own 2025 figure is 4,140,668 (release of 7 May 2026) and Statistics Canada's is 4,020,914, so the exact figure is replaced by what all three support.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It handled a total of 4,140,484 passengers in 2025"
+    },
+    {
+     "file": "yhz-news-milestone",
+     "org": "Halifax International Airport Authority (operator, halifaxstanfield.ca)",
+     "quote": [
+      "May 7, 2026",
+      "HIAA’s 2025 Highlights",
+      "4,140,668 passengers – a 4 per cent increase year-over-year"
+     ],
+     "dated": "2026-05-07"
+    },
+    {
+     "file": "statcan-2025-all",
+     "org": "Statistics Canada",
+     "quote": "\"2025\",\"Halifax/Robert L Stanfield International, Nova Scotia\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65778638\",\"21.1\",\"4020914\"",
+     "dated": "2025 (reference year)"
+    }
+   ]
+  },
+  {
+   "claim": "Air Canada, Porter Airlines and PAL Airlines fly from here",
+   "verdict": "softened",
+   "inAfter": "Air Canada, Porter Airlines and PAL Airlines fly from here",
+   "note": "Was 'a focus city for Air Canada and Porter Airlines' and 'the operating base for ... PAL Airlines'. The operator's live list has all three among its year-round airlines; no source other than Wikipedia uses the focus-city label, and PAL's own pages do not mention a Halifax base. Airways (29 January 2026) has Porter doubling Hamilton to Halifax to 14 a week.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is an operating base for Cougar Helicopters, Maritime Air Charter, and PAL Airlines, as well as a focus city for Air Canada and Porter Airlines."
+    },
+    {
+     "file": "yhz-airlines",
+     "org": "Halifax International Airport Authority (operator, halifaxstanfield.ca)",
+     "quote": [
+      "Year-Round Airlines",
+      "Air Canada Website Air Saint-Pierre",
+      "PAL Airlines Website Pascan Aviation",
+      "Porter Website United Airlines",
+      "WestJet Website Summer Seasonal"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Cougar Helicopters and Maritime Air Charter based at the airport",
+   "verdict": "confirmed",
+   "inAfter": "Cougar Helicopters and Maritime Air Charter are based at the airport",
+   "note": "Cougar's own contact page gives its Nova Scotia base as 95 Baldwin Drive, Goffs, the airport's community (the operator's own address is Goffs, and Cougar's 902-873 number shares the airport's exchange). Maritime Air Charter is run by Gateway Aviation, which says it is located at Halifax Stanfield, and the operator lists it among its small aircraft charters.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is an operating base for Cougar Helicopters, Maritime Air Charter, and PAL Airlines"
+    },
+    {
+     "file": "cougar-contact",
+     "org": "Cougar Helicopters",
+     "quote": [
+      "Nova Scotia 95 Baldwin Drive Goffs Nova Scotia Canada 902.873.8346"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "maritimeair",
+     "org": "Maritime Air Charter (Gateway Aviation)",
+     "quote": [
+      "Air Charter Halifax Airport YHZ - Maritime Air Charter - Gateway Aviation",
+      "Located at Halifax’s Stanfield International Airport, Gateway has repeatedly been voted Canada’s top FBO."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "yhz-airlines",
+     "org": "Halifax International Airport Authority (operator, halifaxstanfield.ca)",
+     "quote": "Small Aircraft Charters Maritime Air Charter Limited",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "run by the Halifax International Airport Authority since 2000",
+   "verdict": "confirmed",
+   "inAfter": "The Halifax International Airport Authority has run the airport since 2000.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "has been operated since 2000 by the Halifax International Airport Authority (HIAA)"
+    },
+    {
+     "file": "yhz-history",
+     "org": "Halifax International Airport Authority (operator, halifaxstanfield.ca)",
+     "quote": "On February 1, 2000, Halifax International Airport Authority (HIAA) assumed control of the airport",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "the only airport in Atlantic Canada with US border preclearance",
+   "verdict": "corrected",
+   "inAfter": "It is the only airport in Atlantic Canada with United States border preclearance, so a client flying to the States clears US border checks here.",
+   "note": "Replaces the old text's detail that the 2001 arrivals area set space aside for preclearance (Wikipedia alone). The operator says the preclearance facility opened in 2006 and that Halifax is the only Atlantic Canadian airport with it; CBP's list of ten Canadian locations (modified 24 June 2026) includes Halifax and no other airport in Atlantic Canada.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The upper level of this expansion included a space reserved for United States border preclearance facilities"
+    },
+    {
+     "file": "yhz-history",
+     "org": "Halifax International Airport Authority (operator, halifaxstanfield.ca)",
+     "quote": [
+      "In 2006, the U.S. preclearance facility opened",
+      "is the only airport in Atlantic Canada with U.S. preclearance"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "cbp-preclearance",
+     "org": "US Customs and Border Protection",
+     "quote": [
+      "and Calgary, Toronto, Billy Bishop Toronto, Edmonton, Halifax, Montreal, Ottawa, Vancouver, Victoria, and Winnipeg in Canada.",
+      "Halifax Preclearance",
+      "inspect travelers prior to boarding U.S.-bound flights",
+      "Last Modified: Jun 24, 2026"
+     ],
+     "dated": "2026-06-24"
+    }
+   ]
+  },
+  {
+   "claim": "Nova Scotia's first escalator in the 1960 terminal",
+   "verdict": "confirmed",
+   "inAfter": "Nova Scotia's first escalator was installed in the original 1960 terminal.",
+   "note": "The operator dates the terminal's public opening to 10 September 1960 (Wikipedia says August 1960); both are 1960.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The modern complex contained Nova Scotia's first set of escalators."
+    },
+    {
+     "file": "yhz-history",
+     "org": "Halifax International Airport Authority (operator, halifaxstanfield.ca)",
+     "quote": [
+      "In 1960, Halifax Airport installed the first escalator in Nova Scotia",
+      "On September 10th, 1960, the Air Terminal Building was officially opened to the public."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "named after Robert Stanfield, a former premier of Nova Scotia",
+   "verdict": "softened",
+   "inAfter": "The airport is named after Robert Stanfield, a former premier of Nova Scotia.",
+   "note": "'The seventeenth premier' is Wikipedia's alone; the operator says 'the former Premier of Nova Scotia'. The terminal took his name in 2005 and the whole airport in 2007.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is named in honour of Robert Stanfield, the 17th Premier of Nova Scotia"
+    },
+    {
+     "file": "yhz-history",
+     "org": "Halifax International Airport Authority (operator, halifaxstanfield.ca)",
+     "quote": [
+      "In 2005, the terminal was named after the Honourable Robert L. Stanfield, the former Premier of Nova Scotia and Leader of the Federal Opposition.",
+      "In 2007, the entire facility was renamed Robert L. Stanfield International Airport."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "exact 2025 passenger figure",
+   "verdict": "cut",
+   "wasBefore": "and eighth busiest in Canada with 4,140,484 passengers in 2025",
+   "why": "The figure does not match the operator's own (4,140,668); replaced by 'more than 4 million', which the operator, Statistics Canada and Wikipedia all support. The rank is kept."
+  },
+  {
+   "claim": "serves mainland Nova Scotia and the neighbouring Maritime provinces",
+   "verdict": "cut",
+   "wasBefore": "It serves mainland Nova Scotia and reaches into the neighbouring Maritime provinces.",
+   "why": "Wikipedia alone: none of the operator's pages read (history, stats, economic impact) describes the catchment. Replaced by the operator's 'Atlantic Canada's largest airport', which Statistics Canada bears out."
+  },
+  {
+   "claim": "focus city for Air Canada and Porter; operating base for Cougar, Maritime Air Charter and PAL",
+   "verdict": "cut",
+   "wasBefore": "It is a focus city for Air Canada and Porter Airlines, and the operating base for Cougar Helicopters, Maritime Air Charter and PAL Airlines.",
+   "why": "Reworded: the focus-city label and PAL's base rest on Wikipedia alone, so the three airlines are now said to fly from here; Cougar's and Maritime Air Charter's bases are confirmed by their own pages."
+  },
+  {
+   "claim": "terminal substantially rebuilt; over $200 million since 2000; 2001 international arrivals area three times larger; December 2002 domestic hall",
+   "verdict": "cut",
+   "wasBefore": "The terminal has been substantially rebuilt. More than 200 million dollars has gone in since the Halifax International Airport Authority took over management in 2000, including an international arrivals area three times larger than its predecessor that opened in August 2001, with space set aside on its upper level for United States border preclearance, and a new domestic arrivals hall in December 2002.",
+   "why": "Wikipedia alone: the operator's history covers 2000 (kept), preclearance (opened 2006, kept) and later works, but not the $200 million, the 2001 arrivals area or the 2002 hall."
+  },
+  {
+   "claim": "two observation decks projecting over the apron",
+   "verdict": "cut",
+   "wasBefore": "The original 1960 building had two observation decks projecting over the apron and contained Nova Scotia's first escalators.",
+   "why": "The decks rest on Wikipedia alone; the first escalator is kept, confirmed by the operator."
+  },
+  {
+   "claim": "the seventeenth premier",
+   "verdict": "cut",
+   "wasBefore": "the seventeenth premier of Nova Scotia",
+   "why": "Wikipedia alone; softened to the operator's 'former Premier of Nova Scotia'."
+  },
+  {
+   "claim": "non-stop flights to the UK and Ireland",
+   "verdict": "cut",
+   "why": "Held back: the old text named no routes, but this matters to UK agents. The operator's live non-stop list has Air Canada to London Heathrow daily, year round, and WestJet in summer 2026 to London Gatwick (three a week, 27 April to 7 October), Edinburgh (three a week, 27 April to 3 October) and Dublin. One organisation only (the operator), so not added; worth Andy adding if he wants it, with a second source.",
+   "sources": [
+    {
+     "file": "yhz-nonstop",
+     "org": "Halifax International Airport Authority (operator, halifaxstanfield.ca)",
+     "quote": [
+      "London (LHR) Carrier: Air Canada Peak Frequency: 1x Daily Days: All Details: Year-round",
+      "London (LGW) Carrier: WestJet Peak Frequency: 3 x Weekly",
+      "Edinburgh Carrier: WestJet Peak Frequency: 3 x Weekly"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "International Connections Facility (2025)",
+   "verdict": "cut",
+   "why": "Held back: new since the old text. The operator says the International Connections Facility opened in 2025, letting international passengers connect to domestic flights without clearing customs or collecting bags (history page; annual meeting release of 7 May 2026). Useful for UK clients connecting on to Canadian cities. One organisation only.",
+   "sources": [
+    {
+     "file": "yhz-history",
+     "org": "Halifax International Airport Authority (operator, halifaxstanfield.ca)",
+     "quote": "In 2025, Halifax Stanfield celebrated the opening of the International Connections Facility, allowing travellers to connect from international to domestic flights without clearing customs or collecting baggage",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "yhz-news-milestone",
+     "org": "Halifax International Airport Authority (operator, halifaxstanfield.ca)",
+     "quote": "A key project was the completion of the International Connections Facility",
+     "dated": "2026-05-07"
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

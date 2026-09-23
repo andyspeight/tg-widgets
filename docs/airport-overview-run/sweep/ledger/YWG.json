@@ -1,0 +1,393 @@
+{
+ "iata": "YWG",
+ "id": "rec7IJ20s5t5YlqWe",
+ "name": "Winnipeg / James Armstrong Richardson International Airport",
+ "country": "Canada",
+ "wikipedia": "https://en.wikipedia.org/wiki/Winnipeg_Richardson_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Canada's seventh busiest airport by passengers, in Winnipeg, and the primary airport for a very large area that reaches into north western Ontario and Nunavut. It also serves numerous small remote communities across northern Manitoba on scheduled flights.\n\nOne detail makes a real difference to itineraries. Winnipeg is one of only nine Canadian airports with United States border pre-clearance, so a client flying on to the States clears US immigration before boarding rather than on arrival.\n\nDaily non-stop flights reach destinations across Canada and the United States, with seasonal services to Mexico and the Caribbean. It is a hub for Calm Air, Perimeter Airlines and the cargo carrier Cargojet, a focus city for WestJet and a base for Flair Airlines.\n\nThe terminal was designed by the Argentine architect Cesar Pelli with Stantec, drawing on Manitoba's prairie and sky.\n\nThe airport shares its 1,370 hectare site with Canadian Forces Base Winnipeg.",
+ "after": "Canada's seventh busiest airport by passengers, in Winnipeg. Calm Air and Perimeter Aviation fly from here to communities across northern Manitoba and into north western Ontario and Nunavut.\n\nOne detail makes a real difference to itineraries. Winnipeg has United States border preclearance, so a client flying on to the States clears US border checks before boarding rather than on arrival.\n\nNon-stop flights reach destinations in Canada and the United States, with seasonal services to the Caribbean. WestJet and Flair Airlines are among the carriers flying from here.\n\nThe terminal was designed by the Argentine-born architect Cesar Pelli with Stantec, drawing on Manitoba's prairie.",
+ "claims": [
+  {
+   "claim": "Canada's seventh busiest airport by passengers",
+   "verdict": "confirmed",
+   "inAfter": "Canada's seventh busiest airport by passengers",
+   "note": "Statistics Canada's 2025 table, released 21 July 2026, ranks Winnipeg seventh among all airports with a published figure: Toronto Pearson 45,998,881, Vancouver 26,013,167, Montreal-Trudeau 21,531,258, Calgary 18,803,183, Edmonton 7,658,691, Ottawa 4,732,563, Winnipeg 4,274,502, then Halifax 4,020,914 and Kelowna 2,244,830. Toronto Billy Bishop is suppressed for 2024 and 2025; its last published year (2023) was 2,000,714, less than half Winnipeg's, so it cannot be above. The table view and the full 2025 download are both Statistics Canada's table 23-10-0253-01 (one organisation).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the seventh busiest airport in Canada by passenger traffic"
+    },
+    {
+     "file": "statcan-2310025301-b",
+     "org": "Statistics Canada",
+     "quote": [
+      "Air passenger traffic at Canadian airports, annual",
+      "Release date: 2026-07-21",
+      "Geography Air passenger traffic 2021 2022 2023 2024 2025",
+      "Ottawa/Macdonald-Cartier International, Ontario Total, passengers enplaned and deplaned 1,123,336 2,931,659 3,989,622 4,493,884 4,732,563",
+      "Winnipeg/James Armstrong Richardson International, Manitoba Total, passengers enplaned and deplaned 1,163,453 2,956,990 3,951,568 4,182,014 4,274,502",
+      "Halifax/Robert L Stanfield International, Nova Scotia Total, passengers enplaned and deplaned 1,049,286 3,066,979 3,493,778 3,851,498 4,020,914"
+     ],
+     "dated": "2026-07-21"
+    },
+    {
+     "file": "statcan-2025-all",
+     "org": "Statistics Canada",
+     "quote": [
+      "\"2025\",\"Edmonton International, Alberta\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65778870\",\"52.1\",\"7658691\"",
+      "\"2025\",\"Ottawa/Macdonald-Cartier International, Ontario\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779038\",\"76.1\",\"4732563\"",
+      "\"2025\",\"Winnipeg/James Armstrong Richardson International, Manitoba\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779630\",\"163.1\",\"4274502\"",
+      "\"2025\",\"Halifax/Robert L Stanfield International, Nova Scotia\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65778638\",\"21.1\",\"4020914\"",
+      "\"2025\",\"Kelowna, British Columbia\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779198\",\"100.1\",\"2244830\"",
+      "\"2025\",\"Toronto/Billy Bishop Toronto City, Ontario\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779622\",\"162.1\",\"\",\"x\""
+     ],
+     "dated": "2025 (reference year)"
+    },
+    {
+     "file": "statcan-ytz-series",
+     "org": "Statistics Canada",
+     "quote": "\"2023\",\"Toronto/Billy Bishop Toronto City, Ontario\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779622\",\"162.1\",\"2000714\"",
+     "dated": "2023 (reference year)"
+    }
+   ]
+  },
+  {
+   "claim": "in Winnipeg",
+   "verdict": "confirmed",
+   "inAfter": "in Winnipeg",
+   "note": "The coordinates put it 7.2 km north west of the GeoNames city centre, inside the city.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport located in Winnipeg, Manitoba, Canada"
+    },
+    {
+     "file": "cbp-preclearance",
+     "org": "US Customs and Border Protection",
+     "quote": [
+      "Winnipeg International Airport 2311-1970 Wellington Avenue",
+      "Winnipeg, MB, R3H 0E3"
+     ],
+     "dated": "2026-06-24"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 7.2 km",
+      "which is north west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Calm Air and Perimeter Aviation fly from here to communities in northern Manitoba, north western Ontario and Nunavut",
+   "verdict": "corrected",
+   "inAfter": "Calm Air and Perimeter Aviation fly from here to communities across northern Manitoba and into north western Ontario and Nunavut.",
+   "note": "Replaces 'the primary airport for a very large area that reaches into north western Ontario and Nunavut' and 'serves numerous small remote communities across northern Manitoba on scheduled flights', and names the two airlines the old text called hubs. Calm Air's September 2026 timetable has Winnipeg flights to Thompson, Churchill and Rankin Inlet, and its own history places Rankin Inlet in Nunavut and describes Northern Manitoba service. Perimeter's timetable (effective 1 March 2026) has Winnipeg to Sandy Lake and Pikangikum, which its destination list puts in Ontario; 'north western Ontario' is Wikipedia's name for the region those communities are in. Perimeter's own name is Perimeter Aviation (the old text said Perimeter Airlines).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport also serves numerous small remote communities in Northern Manitoba, Northwestern Ontario, and Nunavut through regularly scheduled flights.",
+      "Winnipeg International Airport is a hub for Calm Air, Perimeter Airlines, and cargo airline Cargojet"
+     ]
+    },
+    {
+     "file": "calmair-sep2026",
+     "org": "Calm Air",
+     "quote": [
+      "September 1-30, 2026",
+      "Winnipeg 730 Thompson 925 MO112",
+      "Winnipeg 1000 Churchill 1230 MO144",
+      "Winnipeg 815 Rankin Inlet 1045 MO300"
+     ],
+     "dated": "2026-09 (timetable period)"
+    },
+    {
+     "file": "calmair-story",
+     "org": "Calm Air",
+     "quote": [
+      "type of operation out of Rankin Inlet, Nunavut, connecting arctic communities to many services in Winnipeg with twice-a-day frequency",
+      "connections between the Keewatin, Northern Manitoba and the south"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "perimeter-pikangikum",
+     "org": "Perimeter Aviation",
+     "quote": [
+      "Effective March 1, 2026",
+      "663 Winnipeg Sandy Lake 08:00 09:30",
+      "663 Sandy Lake Pikangikum 09:50 10:30"
+     ],
+     "dated": "2026-03-01 (timetable effective date)"
+    },
+    {
+     "file": "perimeter-destinations",
+     "org": "Perimeter Aviation",
+     "quote": [
+      "Pikangikum Ontario",
+      "Sandy Lake Ontario",
+      "Island Lake Manitoba",
+      "Discover Manitoba and Ontario with our extensive network."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "US border preclearance at Winnipeg: US checks before boarding, not on arrival",
+   "verdict": "confirmed",
+   "inAfter": "Winnipeg has United States border preclearance, so a client flying on to the States clears US border checks before boarding rather than on arrival.",
+   "note": "Kept without the old count of 'only nine' airports (see the cut). 'Border checks' rather than 'immigration': CBP describes the preclearance inspection as a whole, customs included.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is one of nine Canadian airports that has U.S. border pre-clearance facilities"
+    },
+    {
+     "file": "cbp-preclearance",
+     "org": "US Customs and Border Protection",
+     "quote": [
+      "Winnipeg Preclearance",
+      "inspect travelers prior to boarding U.S.-bound flights",
+      "With Preclearance, travelers then bypass CBP and Transportation Security Administration (TSA) inspections upon U.S. arrival",
+      "Last Modified: Jun 24, 2026"
+     ],
+     "dated": "2026-06-24"
+    }
+   ]
+  },
+  {
+   "claim": "non-stop flights to destinations in Canada and the United States",
+   "verdict": "softened",
+   "inAfter": "Non-stop flights reach destinations in Canada and the United States",
+   "note": "Was 'Daily non-stop flights reach destinations across Canada and the United States'. 'Daily' is dropped: no current source gives a daily frequency to the US (Statistics Canada counts about 421,000 transborder passengers in 2025, down from 460,000 in 2024). Canadian routes in 2026 include Porter's new Hamilton flights and its Ottawa flights (Airways, 29 January 2026) and Calm Air's Nunavut flights.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Daily non-stop flights operate from Winnipeg International Airport to destinations across Canada as well as to the United States"
+    },
+    {
+     "file": "statcan-2310025301-b",
+     "org": "Statistics Canada",
+     "quote": [
+      "Winnipeg/James Armstrong Richardson International, Manitoba Total, passengers enplaned and deplaned 1,163,453 2,956,990 3,951,568 4,182,014 4,274,502 Domestic sector 1,134,941 2,728,889 3,468,057 3,519,269 3,637,440 Transborder sector 21,386 162,585 319,075 459,725 420,768",
+      "Release date: 2026-07-21"
+     ],
+     "dated": "2026-07-21"
+    },
+    {
+     "file": "airways-porter-2026",
+     "org": "Airways Magazine",
+     "quote": [
+      "January 29, 2026",
+      "YHM–YWG May 15, 2026 4x weekly New",
+      "YOW–YWG 7x weekly 12x weekly"
+     ],
+     "dated": "2026-01-29"
+    }
+   ]
+  },
+  {
+   "claim": "seasonal services to the Caribbean",
+   "verdict": "softened",
+   "inAfter": "with seasonal services to the Caribbean",
+   "note": "Was 'seasonal services to Mexico and the Caribbean'. The Caribbean is confirmed for winter 2026 to 2027 by two publishers (Air Canada to Montego Bay and Punta Cana; WestJet to Punta Cana). No source from the last 12 months names a Winnipeg to Mexico flight: WestJet's winter release is from July 2025 and does not list one, and Flair's own site is behind a Cloudflare security page. PAX dates the story 04-07-2026, which is 7 April 2026 in its month-first style (other items on the page are dated 09-23-2026).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "along with seasonal flights to Mexico, and the Caribbean"
+    },
+    {
+     "file": "paxnews-ac-winter2627",
+     "org": "PAX News (Air Canada schedule)",
+     "quote": [
+      "Winter 2026-27: Air Canada adds Tenerife, Roatan, Santo Domingo, Merida, Mazatlan",
+      "04-07-2026",
+      "Winnipeg (YWG) Montego Bay (MBJ), Jamaica Sun-Mon Dec. 07, 2026-Apr. 05, 2027",
+      "Winnipeg (YWG) Punta Cana (PUJ), Dominican Republic Thu Dec. 03, 2026-Apr. 08, 2027"
+     ],
+     "dated": "2026-04-07"
+    },
+    {
+     "file": "ctv-westjet-ywg-b",
+     "org": "CTV News Winnipeg",
+     "quote": [
+      "Published: July 20, 2026",
+      "WestJet is making it easier for Winnipeggers to chase the sun this winter.",
+      "Both routes will fly weekly, with the Punta Cana flights beginning on Nov. 28, 2026"
+     ],
+     "dated": "2026-07-20"
+    }
+   ]
+  },
+  {
+   "claim": "WestJet and Flair Airlines fly from here",
+   "verdict": "softened",
+   "inAfter": "WestJet and Flair Airlines are among the carriers flying from here.",
+   "note": "Was 'a focus city for WestJet and a base for Flair Airlines'. Neither label could be confirmed (WestJet's pages do not use it; flyflair.com answers with a Cloudflare security page), so the sentence now says only that both fly here, which both airlines' current material shows. 'Among the carriers' because Air Canada and Porter fly here too (PAX, Airways), not named because the old text did not name them.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "also serving as a focus city for WestJet and an operating base for Flair Airlines"
+    },
+    {
+     "file": "ctv-westjet-ywg-b",
+     "org": "CTV News Winnipeg",
+     "quote": [
+      "Published: July 20, 2026",
+      "On Monday, the airline announced it’s introducing two non-stop routes between Winnipeg and a pair of sunny destinations"
+     ],
+     "dated": "2026-07-20"
+    },
+    {
+     "file": "flair-where",
+     "org": "Flair Airlines",
+     "quote": [
+      "Where We Fly | Flair Airlines",
+      "Thunder Bay Toronto Vancouver Victoria Winnipeg"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "terminal designed by the Argentine-born Cesar Pelli with Stantec, drawing on the prairie",
+   "verdict": "softened",
+   "inAfter": "The terminal was designed by the Argentine-born architect Cesar Pelli with Stantec, drawing on Manitoba's prairie.",
+   "note": "'Argentine architect' made 'Argentine-born' (his firm gives his birth and training in Argentina; he practised in the US). 'And sky' dropped: the firm's own account speaks of the prairie horizon and Manitoba's wheat fields, not the sky. Stantec was architect of record, Pelli's firm the design architect.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Winnipeg's main airport terminal was designed by Argentine architect Cesar Pelli and Stantec.",
+      "The terminal's design was inspired by the City of Winnipeg's distinctive landscape and Manitoba's vast prairies and sky."
+     ]
+    },
+    {
+     "file": "pcpa-ywg",
+     "org": "Pelli Clarke & Partners",
+     "quote": [
+      "Cesar Pelli, FAIA, RIBA, JIA",
+      "Architect of Record: Stantec",
+      "Firm Role: Design Architect",
+      "The boundless prairie horizon is central to the terminal’s design",
+      "Inspired by Manitoba’s wheat fields"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "pcpa-cesar-pelli",
+     "org": "Pelli Clarke & Partners",
+     "quote": "Cesar was born October 12, 1926, in San Miguel de Tucumán, Argentina.",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "primary airport for a very large area",
+   "verdict": "cut",
+   "wasBefore": "and the primary airport for a very large area that reaches into north western Ontario and Nunavut",
+   "why": "'Primary airport for a very large area' is Wikipedia's characterisation alone; the operator's site (ywg.ca) answers plain requests with a Cloudflare security page, so it was not read. The reach into north western Ontario and Nunavut is kept, carried by the airlines' own timetables."
+  },
+  {
+   "claim": "numerous small remote communities across northern Manitoba on scheduled flights",
+   "verdict": "cut",
+   "wasBefore": "It also serves numerous small remote communities across northern Manitoba on scheduled flights.",
+   "why": "Merged into the Calm Air and Perimeter sentence, which the airlines' timetables carry. 'Numerous small remote' is Wikipedia's wording alone."
+  },
+  {
+   "claim": "one of only nine Canadian airports with US preclearance",
+   "verdict": "cut",
+   "wasBefore": "Winnipeg is one of only nine Canadian airports with United States border pre-clearance",
+   "why": "The count no longer matches the authority: CBP (page modified 24 June 2026) lists ten preclearance locations in Canada, now including Billy Bishop Toronto, and gives Victoria's as a street address rather than an airport, so the number depends on what is counted. The preclearance itself is kept."
+  },
+  {
+   "claim": "daily non-stop flights; seasonal services to Mexico",
+   "verdict": "cut",
+   "wasBefore": "Daily non-stop flights reach destinations across Canada and the United States, with seasonal services to Mexico and the Caribbean.",
+   "why": "'Daily' and 'Mexico' have no current second source (see the softened claims); the rest of the sentence is kept."
+  },
+  {
+   "claim": "hub for Calm Air, Perimeter and Cargojet",
+   "verdict": "cut",
+   "wasBefore": "It is a hub for Calm Air, Perimeter Airlines and the cargo carrier Cargojet",
+   "why": "Contradicted or unsupported by the airlines themselves: Cargojet's locations page labels Hamilton 'HUB OPERATIONS' and lists Winnipeg only as a station; Calm Air describes its hub-and-spoke network as run out of Rankin Inlet; Perimeter's pages do not use the word. Calm Air and Perimeter are still named, as airlines flying from here."
+  },
+  {
+   "claim": "focus city for WestJet; base for Flair",
+   "verdict": "cut",
+   "wasBefore": "a focus city for WestJet and a base for Flair Airlines",
+   "why": "Wikipedia alone. flyflair.com answered with a Cloudflare security page (not retried in a browser); WestJet's own pages do not call Winnipeg a focus city. Softened to both airlines flying here."
+  },
+  {
+   "claim": "Argentine architect; prairie and sky",
+   "verdict": "cut",
+   "wasBefore": "the Argentine architect Cesar Pelli with Stantec, drawing on Manitoba's prairie and sky",
+   "why": "Softened to 'Argentine-born' and to the prairie alone, which the architects' own page supports."
+  },
+  {
+   "claim": "shares its 1,370 hectare site with CFB Winnipeg",
+   "verdict": "cut",
+   "wasBefore": "The airport shares its 1,370 hectare site with Canadian Forces Base Winnipeg.",
+   "why": "Wikipedia alone. The RCAF's 17 Wing page describes CFB Winnipeg without mentioning the airport, OurAirports only lists 'CFB Winnipeg' as a search keyword, and the operator's site (the likely source for the 1,370 hectares) answers with a Cloudflare security page."
+  },
+  {
+   "claim": "about 4.3 to 4.4 million passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: verified, but the old text had no passenger figure for it to replace. Total passengers (enplaned and deplaned) in 2025: the operator's preliminary quarterly statistics give 4,412,013; Statistics Canada's table gives 4,274,502 (about 3 per cent lower, as Statistics Canada counts only its surveyed air carrier traffic). Either supports 'more than 4.2 million passengers in 2025' if Andy wants it added. The operator's PDF was saved by grab.mjs directly (HTTP 200) before ywg.ca's HTML pages were found to be behind a Cloudflare security page.",
+   "sources": [
+    {
+     "file": "ywg-stats-q4-2025",
+     "org": "Winnipeg Airports Authority (operator)",
+     "quote": [
+      "Passengers (Enplaned + Deplaned)",
+      "Total Passengers 345,943 341,099 357,849 342,633 363,467 372,810 414,513 444,268 381,433 379,906 325,948 342,144 4,412,013",
+      "The information provided is preliminary and subject to change."
+     ],
+     "dated": "2025 (full year, Q4 2025 report)"
+    },
+    {
+     "file": "statcan-2310025301-b",
+     "org": "Statistics Canada",
+     "quote": "Winnipeg/James Armstrong Richardson International, Manitoba Total, passengers enplaned and deplaned 1,163,453 2,956,990 3,951,568 4,182,014 4,274,502",
+     "dated": "2026-07-21"
+    }
+   ]
+  },
+  {
+   "claim": "WestJet to Belize City from 14 December 2026",
+   "verdict": "cut",
+   "why": "Held back: a new route, one source only (CTV News Winnipeg, 20 July 2026: weekly from 14 December 2026). The old text had nothing it could replace, and 'the Caribbean' does not cover Belize.",
+   "sources": [
+    {
+     "file": "ctv-westjet-ywg-b",
+     "org": "CTV News Winnipeg",
+     "quote": [
+      "Published: July 20, 2026",
+      "the Belize City flights beginning on Dec. 14, 2026"
+     ],
+     "dated": "2026-07-20"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "One detail makes a real difference to itineraries.",
+   "why": "Framing for the preclearance sentence that follows; kept from the old text."
+  }
+ ],
+ "tracerOk": {}
+}

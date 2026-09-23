@@ -1,0 +1,373 @@
+{
+ "iata": "YEG",
+ "id": "recR2qZW516a5B68M",
+ "name": "Edmonton International Airport",
+ "country": "Canada",
+ "wikipedia": "https://en.wikipedia.org/wiki/Edmonton_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Alberta's northern gateway, 30 km south of downtown Edmonton, and the largest airport in Canada by land area at just under 7,000 acres. It is fifth busiest in the country by passengers and serves over 50 destinations across Canada, the United States, Mexico, the Caribbean, Central America and Europe.\n\nTwo things matter for a client heading to the States. This is one of only nine Canadian airports with US border preclearance, and its Quick Connect system lets a passenger arriving on a domestic flight clear US customs without collecting and rechecking bags or going through security again.\n\nFor the Rockies there is a useful link most people miss: Sundog Tours runs a coach from Jasper National Park through Hinton and Edson to the airport.\n\nInto the city, Edmonton Transit route 747 runs to Century Park LRT station every thirty minutes from ten past four in the morning until midnight.\n\nThe airport is the headquarters and hub for Flair Airlines and a main hub for WestJet. There is a 213 room Renaissance hotel inside the terminal complex.",
+ "after": "Edmonton's airport lies 30 km south of downtown Edmonton and is the largest major Canadian airport by land area. It is fifth busiest in the country by passengers, and the airport lists more than 50 non-stop destinations across Canada, the United States, Mexico, the Caribbean and Europe.\n\nTwo things matter for a client heading to the States. The airport has US border preclearance, and a passenger arriving on a domestic flight can clear US customs through its US Connections station without rechecking bags.\n\nFor the Rockies, SunDog Tours runs a coach from Jasper through Hinton and Edson to the airport.\n\nInto the city, Edmonton Transit route 747 runs to Century Park Transit Centre. Edmonton Transit gives its hours as 4.10am to 12.30am, every 30 to 60 minutes.\n\nFlair Airlines and WestJet both fly from here. There is a 213 room Renaissance hotel attached to the terminal.",
+ "claims": [
+  {
+   "claim": "Edmonton's airport, 30 km south of downtown Edmonton",
+   "verdict": "confirmed",
+   "inAfter": "Edmonton's airport lies 30 km south of downtown Edmonton",
+   "note": "No archived Wikipedia copy exists for YEG; source 1 is the article as it read today (revision of 23 September 2026, 14:18 UTC). Coordinates: 27.7 km in a straight line at 195 degrees (south), ratio 1.08. OurAirports' home link (edmontonairports.com) lands on the same FlyYEG site as the infobox's flyyeg.com.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "serves as the primary air passenger and air cargo facility in the Edmonton Metropolitan Region",
+      "It is located 30 km (19 mi) south of Downtown Edmonton"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 27.7 km",
+      "Bearing from the city centre: 195 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "largest major Canadian airport by land area",
+   "verdict": "softened",
+   "inAfter": "is the largest major Canadian airport by land area",
+   "note": "Was 'the largest airport in Canada by land area'. The operator's own words limit it to major airports, so the text follows them.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "making it the largest airport in Canada by land area"
+    },
+    {
+     "file": "yeg-about",
+     "org": "Edmonton Airports (operator, flyyeg.com)",
+     "quote": "It is Canada’s fifth-busiest airport by passenger traffic and the largest major Canadian airport by land area.",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "fifth busiest in Canada by passengers",
+   "verdict": "confirmed",
+   "inAfter": "It is fifth busiest in the country by passengers",
+   "note": "Statistics Canada's 2025 table (released 21 July 2026) puts Edmonton fifth, at 7,658,691, after Toronto Pearson, Vancouver, Montreal-Trudeau and Calgary and ahead of Ottawa.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the 5th busiest airport in the country by passenger traffic"
+    },
+    {
+     "file": "yeg-about",
+     "org": "Edmonton Airports (operator, flyyeg.com)",
+     "quote": "It is Canada’s fifth-busiest airport by passenger traffic",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "statcan-2025-all",
+     "org": "Statistics Canada",
+     "quote": [
+      "\"2025\",\"Calgary International, Alberta\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65778574\",\"13.1\",\"18803183\"",
+      "\"2025\",\"Edmonton International, Alberta\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65778870\",\"52.1\",\"7658691\"",
+      "\"2025\",\"Ottawa/Macdonald-Cartier International, Ontario\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65779038\",\"76.1\",\"4732563\""
+     ],
+     "dated": "2025 (reference year)"
+    }
+   ]
+  },
+  {
+   "claim": "the airport lists more than 50 non-stop destinations in Canada, the US, Mexico, the Caribbean and Europe",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "the airport lists more than 50 non-stop destinations across Canada, the United States, Mexico, the Caribbean and Europe",
+   "note": "The operator's live non-stop list has 53 destinations: Canadian cities, US cities, Mexico (Cancún, Huatulco, Los Cabos, Mazatlán, Puerto Vallarta), the Caribbean (Montego Bay, Punta Cana) and Europe (Amsterdam, Reykjavik). Central America is dropped: none is on the list. Wikipedia also gives 'over 50 destinations'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Edmonton International Airport provides scheduled non-stop flights to over 50 destinations.",
+      "The airport offers scheduled non-stop flights to major cities in Canada, the United States, Mexico, the Caribbean, Central America and Europe."
+     ]
+    },
+    {
+     "file": "yeg-nonstop",
+     "org": "Edmonton Airports (operator, flyyeg.com)",
+     "quote": [
+      "Discover all the non-stop options to and from Edmonton!",
+      "Amsterdam, Netherlands",
+      "Cancún, Mexico",
+      "Montego Bay, Jamaica",
+      "Punta Cana, Dominican Republic",
+      "Reykjavik, Iceland",
+      "Chicago, IL",
+      "Yellowknife, NT"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "flyyeg-home",
+     "org": "Edmonton Airports (operator, flyyeg.com)",
+     "quote": "Fly non-stop to destinations across Canada, USA, Europe, Mexico and the Caribbean!",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "US border preclearance at Edmonton",
+   "verdict": "confirmed",
+   "inAfter": "The airport has US border preclearance",
+   "note": "Kept without the old count of 'only nine' airports (see the cut).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Edmonton International Airport is one of nine Canadian airports that contain U.S border preclearance facilities."
+    },
+    {
+     "file": "cbp-preclearance",
+     "org": "US Customs and Border Protection",
+     "quote": [
+      "Edmonton Preclearance",
+      "Edmonton International Airport 2312, 1000 Airport Road",
+      "Last Modified: Jun 24, 2026"
+     ],
+     "dated": "2026-06-24"
+    }
+   ]
+  },
+  {
+   "claim": "domestic arrivals clear US customs through US Connections without rechecking bags",
+   "verdict": "corrected",
+   "inAfter": "a passenger arriving on a domestic flight can clear US customs through its US Connections station without rechecking bags",
+   "note": "Was 'its Quick Connect system ... without collecting and rechecking bags or going through security again'. The operator calls it US Connections and routes passengers 'through the US Connections security station at US Customs', so 'without going through security again' is contradicted and dropped; the bags are transferred directly.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Passengers from domestic flights connecting in Edmonton to a US destination use Quick Connect, which enables passengers to clear US Customs and Border Protection without having to claim and recheck baggage"
+    },
+    {
+     "file": "yeg-connection",
+     "org": "Edmonton Airports (operator, flyyeg.com)",
+     "quote": [
+      "Domestic passengers (flights from within Canada) connecting to US destinations will enjoy simple and speedy transfers through US Connections.",
+      "proceed directly to their connecting flights through the US Connections security station at US Customs.",
+      "Your bags will be transferred directly to the US baggage room for security screening and loading onto your US connecting flight."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "SunDog Tours coach from Jasper via Hinton and Edson to the airport",
+   "verdict": "confirmed",
+   "inAfter": "SunDog Tours runs a coach from Jasper through Hinton and Edson to the airport.",
+   "note": "SunDog's own timetable runs Jasper, Hinton, Edson, West Edmonton Mall or downtown, then Edmonton International Airport (arriving 12:30pm). 'Jasper National Park' shortened to 'Jasper', the town the coach starts from. The company writes its name SunDog.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Sundog Tours provides coach service from Jasper National Park via Edmonton, Edson, and Hinton."
+    },
+    {
+     "file": "sundog-edmonton-bus",
+     "org": "SunDog Transportation and Tour Co.",
+     "quote": [
+      "JASPER→ HINTON → EDSON → WEST EDMONTON MALL/DOWNTOWN → EDMONTON INTERNATIONAL AIRPORT",
+      "7:00AM - Depart Jasper",
+      "12:30PM - Arrive Edmonton International Airport"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "yeg-ground",
+     "org": "Edmonton Airports (operator, flyyeg.com)",
+     "quote": "SunDog Transportation and Tours offers a reliable and comfortable daily shuttle service between Edmonton, Edson, Hinton and Jasper.",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "ETS route 747 to Century Park Transit Centre",
+   "verdict": "corrected",
+   "inAfter": "Into the city, Edmonton Transit route 747 runs to Century Park Transit Centre.",
+   "note": "Was 'Century Park LRT station'; Edmonton Transit's own page names the stop Century Park Transit Centre.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Edmonton Transit Service (ETS) provides express service between the Edmonton International Airport and the Century Park LRT Station"
+    },
+    {
+     "file": "ets-airport",
+     "org": "Edmonton Transit Service (City of Edmonton)",
+     "quote": "Running 7 days a week, Route 747 is Edmonton Transit’s direct service from Century Park Transit Centre to the Edmonton International Airport.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "yeg-ground",
+     "org": "Edmonton Airports (operator, flyyeg.com)",
+     "quote": "City of Edmonton 747 bus service",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Edmonton Transit: route 747 from 4.10am to 12.30am, every 30 to 60 minutes",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Edmonton Transit",
+   "inAfter": "Edmonton Transit gives its hours as 4.10am to 12.30am, every 30 to 60 minutes.",
+   "note": "Was 'every thirty minutes from ten past four in the morning until midnight' (Wikipedia). Edmonton Transit's own current page gives a later last bus and a longer gap at some times. Attributed, as a timetable only the operator can state.",
+   "sources": [
+    {
+     "file": "ets-airport",
+     "org": "Edmonton Transit Service (City of Edmonton)",
+     "quote": "The Route 747 bus service runs 7 days a week from 4:10am - 12:30am with 30 to 60 minute intervals.",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Flair Airlines and WestJet fly from here",
+   "verdict": "softened",
+   "inAfter": "Flair Airlines and WestJet both fly from here.",
+   "note": "Was 'the headquarters and hub for Flair Airlines and a main hub for WestJet'. Flair's own site (flyflair.com) answers with a Cloudflare security page and the only other source found for its Edmonton base is a 2022 CTV report, too old for a current base; Wikipedia calls Edmonton a WestJet focus city, not a main hub. The operator's release of 4 September 2026 has both airlines adding winter capacity from Edmonton.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "It serves as the hub for Flair Airlines.",
+      "Edmonton is one of WestJet's focus cities"
+     ]
+    },
+    {
+     "file": "yeg-news-wintersun",
+     "org": "Edmonton Airports (operator, flyyeg.com)",
+     "quote": [
+      "September 4, 2026 (Edmonton, AB )",
+      "Flair is bringing back non-stop service to Cancun, giving Edmonton travellers one more option to one of Mexico's most popular sun destinations.",
+      "WestJet is launching its \"biggest-ever winter sun schedule,\" with capacity from Edmonton increasing 34 per cent"
+     ],
+     "dated": "2026-09-04"
+    }
+   ]
+  },
+  {
+   "claim": "213 room Renaissance hotel attached to the terminal",
+   "verdict": "softened",
+   "inAfter": "There is a 213 room Renaissance hotel attached to the terminal.",
+   "note": "Was 'inside the terminal complex'; the operator says the hotel is joined to the terminal by a skybridge.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The 213-room in-airport Renaissance Edmonton Airport Hotel is located groundside within the terminal complex."
+    },
+    {
+     "file": "yeg-hotels",
+     "org": "Edmonton Airports (operator, flyyeg.com)",
+     "quote": [
+      "Renaissance Edmonton Airport Hotel",
+      "Physically attached to YEG via a skybridge, guests never have to leave the warmth of indoors.",
+      "213 stylish and soundproofed guest rooms & suites"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Alberta's northern gateway",
+   "verdict": "cut",
+   "wasBefore": "Alberta's northern gateway",
+   "why": "A slogan neither the operator nor Wikipedia uses in those words; replaced by the plain 'Edmonton's airport'."
+  },
+  {
+   "claim": "largest in Canada by land area at just under 7,000 acres",
+   "verdict": "cut",
+   "wasBefore": "and the largest airport in Canada by land area at just under 7,000 acres",
+   "why": "Softened to the operator's 'largest major Canadian airport by land area'. The acreage rests on Wikipedia alone: none of the operator's pages read (about, land development, business directory) gives it."
+  },
+  {
+   "claim": "serves over 50 destinations incl. Central America",
+   "verdict": "cut",
+   "wasBefore": "serves over 50 destinations across Canada, the United States, Mexico, the Caribbean, Central America and Europe",
+   "why": "Central America is not on the operator's current list of 53 non-stop destinations; the rest is kept, attributed to the airport."
+  },
+  {
+   "claim": "one of only nine Canadian airports with US preclearance",
+   "verdict": "cut",
+   "wasBefore": "This is one of only nine Canadian airports with US border preclearance",
+   "why": "The count no longer matches the authority: CBP (page modified 24 June 2026) lists ten preclearance locations in Canada, now including Billy Bishop Toronto, and gives Victoria's as a street address rather than an airport. The preclearance itself is kept."
+  },
+  {
+   "claim": "Quick Connect; no security again",
+   "verdict": "cut",
+   "wasBefore": "its Quick Connect system lets a passenger arriving on a domestic flight clear US customs without collecting and rechecking bags or going through security again",
+   "why": "The operator calls the service US Connections and sends passengers through the US Connections security station, which contradicts 'without going through security again'. The bag transfer is kept."
+  },
+  {
+   "claim": "Jasper National Park",
+   "verdict": "cut",
+   "wasBefore": "Sundog Tours runs a coach from Jasper National Park through Hinton and Edson to the airport",
+   "why": "Reworded to SunDog's own spelling and to Jasper, where its timetable starts."
+  },
+  {
+   "claim": "route 747 to Century Park LRT station every 30 minutes, 4.10am to midnight",
+   "verdict": "cut",
+   "wasBefore": "Edmonton Transit route 747 runs to Century Park LRT station every thirty minutes from ten past four in the morning until midnight",
+   "why": "Out of date against Edmonton Transit's own page: the stop is Century Park Transit Centre and buses run 4:10am to 12:30am at 30 to 60 minute intervals."
+  },
+  {
+   "claim": "headquarters and hub for Flair; main hub for WestJet",
+   "verdict": "cut",
+   "wasBefore": "The airport is the headquarters and hub for Flair Airlines and a main hub for WestJet.",
+   "why": "Softened to both airlines flying here (see above). flyflair.com is behind a Cloudflare security page, so Flair's own statement could not be read."
+  },
+  {
+   "claim": "hotel inside the terminal complex",
+   "verdict": "cut",
+   "wasBefore": "There is a 213 room Renaissance hotel inside the terminal complex.",
+   "why": "Softened to 'attached to the terminal': the operator says it is joined by a skybridge."
+  },
+  {
+   "claim": "about 7.7 to 8.1 million passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: verified, but the old text had no passenger figure to replace. The operator gives 8.14 million for 2025 (terminal plus fixed-base operators, most of whose traffic serves energy and mining projects in the north); Statistics Canada counts 7,658,691. 'More than 7.6 million passengers in 2025' would stand on both. The operator also shows 2026 running 2.59 per cent below 2025 to August.",
+   "sources": [
+    {
+     "file": "yeg-passenger-stats",
+     "org": "Edmonton Airports (operator, flyyeg.com)",
+     "quote": [
+      "Annual passenger totals",
+      "2025",
+      "8.14 million",
+      "Month overall -3.35% (Year-to-date: -2.59%)"
+     ],
+     "dated": "2026-08 (monthly report)"
+    },
+    {
+     "file": "statcan-2025-all",
+     "org": "Statistics Canada",
+     "quote": "\"2025\",\"Edmonton International, Alberta\",\"\",\"Total, passengers enplaned and deplaned\",\"Number\",\"223\",\"units\",\"0\",\"v65778870\",\"52.1\",\"7658691\"",
+     "dated": "2025 (reference year)"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Two things matter for a client heading to the States.",
+   "why": "Framing kept from the old text for the preclearance and US Connections facts that follow."
+  }
+ ],
+ "tracerOk": {}
+}
