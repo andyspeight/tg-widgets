@@ -1,0 +1,229 @@
+{
+ "iata": "FKB",
+ "id": "rec76a5JeQFAbzTOw",
+ "name": "Karlsruhe Baden-Baden Airport",
+ "country": "Germany",
+ "wikipedia": "https://en.wikipedia.org/wiki/Karlsruhe/Baden-Baden_Airport",
+ "audited": "2026-09-23",
+ "before": "Baden-Wurttemberg's second airport after Stuttgart, and twelfth in Germany, with just under 2.26 million passengers in 2025. It is mostly low cost and leisure flying rather than scheduled business traffic.\n\nThe name covers two towns and the airport sits between them without being in either. It is in Rheinmunster, 40 km south of Karlsruhe and 12 km west of Baden-Baden, and is also within reach of Strasbourg 25 km to the south. For a client heading to the spa town, this is much closer than any of the larger German airports.\n\nThe terminal is small and honest about it: 20 check in counters, eight departure gates, a few shops and places to eat. There are no air bridges, so boarding is on foot or by bus from eight aircraft stands built for mid sized jets.\n\nThe airport forms part of the Baden Airpark business park and is often used by airlines for crew training flights.",
+ "after": "Baden-Wurttemberg's second airport after Stuttgart, and twelfth in Germany, with just under 2.26 million passengers in 2025. It is mostly low cost and leisure flying rather than scheduled business traffic.\n\nThe name covers two towns and the airport sits between them without being in either. It is in Rheinmunster, 40 km south of Karlsruhe and 12 km west of Baden-Baden, and is also within reach of Strasbourg. For a client heading to the spa town, this is much closer than any of the larger German airports.\n\nThe airport forms part of the Baden Airpark business park.",
+ "claims": [
+  {
+   "claim": "Baden-Wurttemberg's second airport after Stuttgart",
+   "verdict": "confirmed",
+   "inAfter": "Baden-Wurttemberg's second airport after Stuttgart",
+   "note": "OurAirports lists four Baden-Wurttemberg airports with scheduled service; ADV's 2025 table has Stuttgart 9,585,033, Karlsruhe/Baden-Baden 2,257,542 and Friedrichshafen 250,884, and Mannheim does not appear in it.",
+   "sources": [
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": [
+      "Stuttgart 9.585.033",
+      "Karlsruhe/Baden-Baden 2.257.542",
+      "Friedrichshafen 250.884"
+     ]
+    },
+    {
+     "file": "ourairports-bw",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "EDDS STR Stuttgart Airport (Stuttgart)",
+      "EDSB FKB Karlsruhe Baden-Baden Airport (Rheinmünster)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-11",
+     "quote": "It is the state's second-largest airport after Stuttgart Airport"
+    }
+   ]
+  },
+  {
+   "claim": "twelfth in Germany with just under 2.26 million passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "and twelfth in Germany, with just under 2.26 million passengers in 2025",
+   "note": "ADV's cumulative 2025 table, ranked: Frankfurt, Munich, Berlin, Dusseldorf, Hamburg, Cologne Bonn, Stuttgart, Hanover, Nuremberg, Memmingen and Dortmund are ahead; Weeze (2,245,473) is just behind.",
+   "sources": [
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": [
+      "Kumuliertes Gesamtaufkommen in Deutschland: Passagiere (an+ab) | Januar bis Dezember 2025",
+      "Karlsruhe/Baden-Baden 2.257.542 +25,3 %",
+      "Dortmund 3.242.429 +3,5 %",
+      "Weeze 2.245.473"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-11",
+     "quote": "the 12th-largest in Germany with 2,257,542 passengers as of 2025"
+    }
+   ]
+  },
+  {
+   "claim": "mostly low cost and leisure flying",
+   "verdict": "confirmed",
+   "inAfter": "It is mostly low cost and leisure flying rather than scheduled business traffic.",
+   "note": "The airport's own airline list: Corendon, Eurowings, Freebird, Ryanair and Wizz Air. Ryanair's own data lists it as a base.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Baden-Airpark GmbH (the airport operator, baden-airpark.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Airlines am Flughafen",
+      "Corendon Airlines (XC)",
+      "Eurowings (EW)",
+      "Freebird Airlines (FH)",
+      "Ryanair (FR)",
+      "Wizz Air (W4/W6)"
+     ]
+    },
+    {
+     "file": "ryanair-api",
+     "org": "Ryanair (its own airport data)",
+     "dated": "read 2026-09-23 (live data)",
+     "quote": "\"base\":true"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-11",
+     "quote": "mostly serves low-cost and leisure flights"
+    }
+   ]
+  },
+  {
+   "claim": "in Rheinmunster",
+   "verdict": "confirmed",
+   "inAfter": "It is in Rheinmunster",
+   "sources": [
+    {
+     "file": "op-unternehmen",
+     "org": "Baden-Airpark GmbH (the airport operator, baden-airpark.de)",
+     "quote": "Baden-Airpark GmbH // Flughafen Karlsruhe / Baden-Baden // Victoria Boulevard A 106 // D-77836 Rheinmünster"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-11",
+     "quote": "It is located in Rheinmünster"
+    }
+   ]
+  },
+  {
+   "claim": "40 km south of Karlsruhe",
+   "verdict": "confirmed",
+   "inAfter": "40 km south of Karlsruhe",
+   "note": "Coordinates: 34.9 km in a straight line at 223 degrees (ratio 1.15; the bearing is south west, 43 degrees off south, inside the check).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-11",
+     "quote": "40 km (25 mi) south of Karlsruhe"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Karlsruhe (GeoNames 2892794): 34.9 km (21.7 miles), bearing 223 degrees, which is south west"
+    }
+   ]
+  },
+  {
+   "claim": "12 km west of Baden-Baden",
+   "verdict": "confirmed",
+   "inAfter": "12 km west of Baden-Baden",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-11",
+     "quote": "12 km (7.5 mi) west of Baden-Baden"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Baden-Baden (GeoNames 2953504): 11.9 km (7.4 miles), bearing 280 degrees, which is west"
+    }
+   ]
+  },
+  {
+   "claim": "within reach of Strasbourg",
+   "verdict": "softened",
+   "inAfter": "and is also within reach of Strasbourg",
+   "note": "Was 'within reach of Strasbourg 25 km to the south'. The straight line from the GeoNames centre of Strasbourg is 32.8 km (Wikipedia's 25 km gives a ratio of 0.76, which fails the check), so the figure is dropped.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-11",
+     "quote": "25 km (16 mi) north of Strasbourg, France"
+    },
+    {
+     "file": "geo-strasbourg",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Strasbourg: 32.8 km (20.4 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "part of the Baden Airpark business park",
+   "verdict": "confirmed",
+   "inAfter": "The airport forms part of the Baden Airpark business park.",
+   "sources": [
+    {
+     "file": "op-unternehmen",
+     "org": "Baden-Airpark GmbH (the airport operator, baden-airpark.de)",
+     "quote": "Der Baden-Airpark ist heute in seiner Doppelfunktion als Flughafenstandort und Gewerbepark ein wichtiger Wirtschaftsfaktor und Arbeitgeber."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-11",
+     "quote": "The airport itself is part of Baden Airpark, a business park with numerous other tenants."
+    }
+   ]
+  },
+  {
+   "claim": "Strasbourg 25 km to the south",
+   "verdict": "cut",
+   "wasBefore": "within reach of Strasbourg 25 km to the south",
+   "why": "Fails the coordinates check: 32.8 km in a straight line. Softened (see above)."
+  },
+  {
+   "claim": "the terminal: 20 check-in counters, eight departure gates, a few shops and places to eat",
+   "verdict": "cut",
+   "wasBefore": "The terminal is small and honest about it: 20 check in counters, eight departure gates, a few shops and places to eat.",
+   "why": "Wikipedia alone. The operator's pages read (company, accessibility, pilot information, airlines) give no counts; they say only that the terminal opened in 2005 for up to two million passengers a year."
+  },
+  {
+   "claim": "no air bridges; boarding on foot or by bus from eight stands for mid-sized jets",
+   "verdict": "cut",
+   "wasBefore": "There are no air bridges, so boarding is on foot or by bus from eight aircraft stands built for mid sized jets.",
+   "why": "Wikipedia alone. The operator's pilot information lists four aprons by area, not stands, and its accessibility page says nothing about boarding."
+  },
+  {
+   "claim": "often used by airlines for crew training flights",
+   "verdict": "cut",
+   "wasBefore": "and is often used by airlines for crew training flights",
+   "why": "Wikipedia alone; the operator mentions flight schools and pleasure flights, not airline training."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The name covers two towns and the airport sits between them without being in either.",
+   "why": "The old text's summary of the sourced location that follows (Rheinmunster, between Karlsruhe and Baden-Baden)."
+  },
+  {
+   "text": "For a client heading to the spa town, this is much closer than any of the larger German airports.",
+   "why": "The old text's judgement, kept: 12 km from Baden-Baden against about 100 km to Stuttgart (Wikipedia)."
+  }
+ ],
+ "tracerOk": {}
+}
