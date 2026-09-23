@@ -1,0 +1,107 @@
+{
+ "iata": "SDK",
+ "id": "recuXc9lGoOnlIGMy",
+ "name": "Sandakan Airport",
+ "country": "Malaysia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Sandakan_Airport",
+ "audited": "2026-09-23",
+ "before": "Sandakan's airport, about 14 km west of the town centre in Sabah, and a domestic airport rather than an international one, which is worth confirming before routing a client here. It handled 621,513 passengers in 2022, twelfth busiest in Malaysia.\n\nA 2022 runway extension took it to 2,500 metres, enough for aircraft up to an A330, and a 2014 terminal expansion lifted capacity to 750 passengers an hour.\n\nIts origins are grim and worth knowing if clients ask. The Royal Air Force identified the site before the war but the airfield was completed by Japanese forces after the 1942 invasion of Borneo, as a refuelling stop between Malaya and the Philippines. It was built under forced labour by around 1,500 British and Australian prisoners of war brought from Singapore, alongside local and Javanese workers, in conditions marked by severe abuse, malnutrition and disease. It was repurposed for civilian use after the war and began commercial operations in the 1950s.",
+ "after": "Sandakan's airport in Sabah, about 13 km from the town. It has a single runway of 2,500 metres, and its terminal was enlarged in a project finished in 2014.",
+ "claims": [
+  {
+   "claim": "Sandakan's airport in Sabah, about 13 km from the town",
+   "verdict": "corrected",
+   "inAfter": "Sandakan's airport in Sabah, about 13 km from the town.",
+   "note": "Was 'about 14 km west of the town centre'. The ministry gives 13 km; Wikipedia 14 km; both pass the distance check (9.4 km straight line, ratios 1.38 and 1.49), so the government figure is used. 'West' fails the bearing check (computed north west, 316 degrees, 46 degrees off), so no direction is given.",
+   "sources": [
+    {
+     "file": "mot-upgrade",
+     "org": "Malaysian Ministry of Transport",
+     "quote": "Sandakan Airport is situated 13 km from the Town of Sandakan"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 9.4 km (5.8 miles)",
+      "Bearing from the city centre: 316 degrees, which is north west"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is a domestic airport located in Sandakan, Sabah, Malaysia, approximately 14 km (8.7 mi)) west of the town center"
+    }
+   ]
+  },
+  {
+   "claim": "single runway of 2,500 metres",
+   "verdict": "softened",
+   "inAfter": "It has a single runway of 2,500 metres",
+   "note": "The 2022 date of the extension and the A330 rest on Wikipedia alone (see the cut).",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 08/26: 2,500 m (8,202 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "extended the runway to 2,500 meters (8,202 feet)"
+    }
+   ]
+  },
+  {
+   "claim": "terminal enlarged in a project finished in 2014",
+   "verdict": "softened",
+   "inAfter": "its terminal was enlarged in a project finished in 2014",
+   "note": "The ministry gives completion on 29 November 2014 and Wikipedia October 2014, so only the year is stated. Capacity figures disagree (see the cut).",
+   "sources": [
+    {
+     "file": "mot-upgrade",
+     "org": "Malaysian Ministry of Transport",
+     "quote": [
+      "Construction started on 13th April 2011 and the completion date",
+      "was 29th November 2014 with total cost of RM70 million.",
+      "Expansion of floor area from 8,000 m2 to 12,000 m2"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The expansion was completed ahead of schedule in October 2014"
+    }
+   ]
+  },
+  {
+   "claim": "domestic airport rather than international",
+   "verdict": "cut",
+   "wasBefore": "and a domestic airport rather than an international one, which is worth confirming before routing a client here.",
+   "why": "Wikipedia calls it domestic in its first line but also reports RB Link (Royal Brunei) flights to Bandar Seri Begawan from 2019, so its own account is mixed; no current second source either way."
+  },
+  {
+   "claim": "621,513 passengers in 2022, twelfth busiest in Malaysia",
+   "verdict": "cut",
+   "wasBefore": "It handled 621,513 passengers in 2022, twelfth busiest in Malaysia.",
+   "why": "Wikipedia gives exactly the same figures (621,513 passengers, about 11,000 movements) for 2005 as well as 2022, so at least one is wrong. Malaysia Airports' statistics could not be read (the 2020 PDF would not download and the corporate pages render empty in a browser)."
+  },
+  {
+   "claim": "2022 runway extension to 2,500 m, enough for up to an A330; 2014 terminal capacity 750 passengers an hour",
+   "verdict": "cut",
+   "wasBefore": "A 2022 runway extension took it to 2,500 metres, enough for aircraft up to an A330, and a 2014 terminal expansion lifted capacity to 750 passengers an hour.",
+   "why": "Length and year of the terminal work kept. The 2022 date and the A330 rest on Wikipedia alone (the Daily Express report it cites answered 403), and Wikipedia itself says wide-bodies are limited. The ministry gives the upgraded terminal 1,000 passengers at peak, not 750."
+  },
+  {
+   "claim": "wartime origins: RAF site, completed by Japanese forces, built by about 1,500 British and Australian POWs under forced labour, abuse, malnutrition and disease; civil use after the war, commercial operations in the 1950s",
+   "verdict": "cut",
+   "wasBefore": "Its origins are grim and worth knowing if clients ask. The Royal Air Force identified the site before the war but the airfield was completed by Japanese forces after the 1942 invasion of Borneo, as a refuelling stop between Malaya and the Philippines. It was built under forced labour by around 1,500 British and Australian prisoners of war brought from Singapore, alongside local and Javanese workers, in conditions marked by severe abuse, malnutrition and disease. It was repurposed for civilian use after the war and began commercial operations in the 1950s.",
+   "why": "Only Wikipedia ties the airfield to prisoner-of-war labour in the sources that could be read. Sabah Tourism confirms the Sandakan prisoner-of-war camp about 11 km outside the town and the deaths of about 2,400 Australian and British prisoners in 1945, but says nothing about the airfield; the Australian War Memorial's encyclopedia pages do not cover it; the Department of Veterans' Affairs and its Anzac Portal did not respond (503 and 502). Given the subject, it is not stated on one source. Restore it when the Anzac Portal or the War Memorial can be read."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
