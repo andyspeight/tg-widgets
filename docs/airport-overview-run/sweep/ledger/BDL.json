@@ -6,7 +6,7 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Bradley_International_Airport",
  "audited": "2026-09-23",
  "before": "Connecticut's busiest airport and the second largest in New England after Boston, at Windsor Locks. It sits about halfway between Hartford and Springfield, Massachusetts, which makes it useful for clients heading to either.\n\nThe terminal arrangement is unusual and easy to get wrong. Terminal A holds almost everything, split across three gate groups: the East Concourse with gates 1 to 12 for Aer Lingus, Delta, Frontier, JetBlue, Southwest and Sun Country, and the West Concourse split between gates 18 to 20 and 21 to 30 for Breeze, American and United. Terminal B is not a terminal in the usual sense at all. It is the International Arrivals Building, used only for flights needing United States customs processing, and it has exactly one gate.\n\nThere is one lounge, the Escape Lounge in the East Concourse before gate 1.\n\nTwo runways serve the 2,432 acre site. The New England Air Museum is next door, and the airport is shared with the Connecticut Air National Guard.",
- "after": "Connecticut's busiest airport and the second largest in New England after Boston, at Windsor Locks. It sits between Hartford and Springfield, Massachusetts, which makes it useful for clients heading to either.\n\nAll airlines use Terminal A. The airport puts Aer Lingus, Delta, Frontier, JetBlue, Southwest and Sun Country at gates 1 to 12, and American, Breeze and United at gates 20 to 30. An Escape Lounge sits by gate 1.\n\nTwo runways serve the site. The New England Air Museum is next door, and the airport is shared with the Connecticut Air National Guard.",
+ "after": "Connecticut's busiest airport and the second largest in New England after Boston, at Windsor Locks. It sits between Hartford and Springfield, Massachusetts, which makes it useful for clients heading to either.\n\nAirlines here include Delta, Southwest, American, JetBlue, Breeze and United. The Escape Lounge is by gate 1.\n\nTwo runways serve the site. The New England Air Museum is next door, and the airport is shared with the Connecticut Air National Guard.",
  "claims": [
   {
    "claim": "Connecticut's busiest airport",
@@ -125,64 +125,11 @@
    ]
   },
   {
-   "claim": "all airlines use Terminal A",
-   "verdict": "corrected",
-   "inAfter": "All airlines use Terminal A.",
-   "note": "Was 'Terminal A holds almost everything'. The airport's own airline list, read in review, gives 'Terminal: A' for all nine airlines; Terminal B, the customs building, stays cut (Wikipedia alone).",
+   "claim": "airlines include Delta, Southwest, American, JetBlue, Breeze and United",
+   "verdict": "softened",
+   "inAfter": "Airlines here include Delta, Southwest, American, JetBlue, Breeze and United.",
+   "note": "Replaces the concourse-by-concourse airline list (see the cuts), keeping only the airlines a second source shows flying here now. BTS's five biggest carriers over the twelve months to June 2026 are Delta, Southwest, American, JetBlue and Breeze; United started a year-round Houston route on 22 May 2026 (CT Insider, citing the airport authority). Frontier and Sun Country rest on Wikipedia alone, and Aer Lingus's Hartford page is a fares template that allows partner connections and even quotes a Chicago flight time, so it does not show a current nonstop. CT Insider also reports that Spirit (which stopped flying here in October 2025) and Avelo have left.",
    "sources": [
-    {
-     "file": "op-airlines",
-     "org": "Connecticut Airport Authority (operator, bradleyairport.com)",
-     "dated": "read 2026-09-23 (live page, ©2026)",
-     "quote": [
-      "Airlines Serving Bradley International",
-      "Aer Lingus Terminal: A Gate Section: 1-12",
-      "United Airlines Terminal: A Gate Section: 20-30",
-      "©2026 - Bradley International Airport"
-     ]
-    },
-    {
-     "file": "wikipedia-archived",
-     "org": "Wikimedia",
-     "quote": [
-      "Terminal A is divided into three concourse areas: Gates 1–12, Gates 18–20, and Gates 21–30."
-     ]
-    }
-   ]
-  },
-  {
-   "claim": "the airport puts Aer Lingus, Delta, Frontier, JetBlue, Southwest and Sun Country at gates 1 to 12, and American, Breeze and United at gates 20 to 30",
-   "verdict": "corrected",
-   "primary": true,
-   "attribution": "airport",
-   "inAfter": "The airport puts Aer Lingus, Delta, Frontier, JetBlue, Southwest and Sun Country at gates 1 to 12, and American, Breeze and United at gates 20 to 30.",
-   "note": "Restored in review from the airport's own airline list (bradleyairport.com/airlines, read 23 September 2026), which the helper could not open: plain grab.mjs got Cloudflare's 'Just a moment' page and grabb.mjs, the brief's browser fallback, read it normally. The first gate section and its six airlines match Wikipedia exactly; the second is now one section, 20 to 30, where Wikipedia had 18 to 20 and 21 to 30, so the sentence is attributed to the airport. Aer Lingus is listed with a nonstop to Dublin, and its own Hartford page sells BDL to Dublin fares for late September 2026. Replaces the helper's shorter list (Delta, Southwest, American, JetBlue, Breeze and United), which BTS and CT Insider also support.",
-   "sources": [
-    {
-     "file": "op-airlines",
-     "org": "Connecticut Airport Authority (operator, bradleyairport.com)",
-     "dated": "read 2026-09-23 (live page, ©2026)",
-     "quote": [
-      "Aer Lingus Terminal: A Gate Section: 1-12",
-      "Nonstop Destinations: Dublin, Ireland",
-      "American Airlines Terminal: A Gate Section: 20-30",
-      "Breeze Airways Terminal: A Gate Section: 20-30",
-      "Delta Air Lines Terminal: A Gate Section: 1-12",
-      "Frontier Airlines Terminal: A Gate Section: 1-12",
-      "JetBlue Airways Terminal: A Gate Section: 1-12",
-      "Southwest Airlines Terminal: A Gate Section: 1-12",
-      "Sun Country Airlines Terminal: A Gate Section: 1-12",
-      "United Airlines Terminal: A Gate Section: 20-30"
-     ]
-    },
-    {
-     "file": "wikipedia-archived",
-     "org": "Wikimedia",
-     "quote": [
-      "The East Concourse (Gates 1–12) contains 12 gates and is primarily used by Aer Lingus, Delta, Frontier, JetBlue, Southwest, and Sun Country.",
-      "Gates 21–30, used by American, Breeze, and United."
-     ]
-    },
     {
      "file": "bts-carrier-shares",
      "org": "Bureau of Transportation Statistics (US Department of Transportation)",
@@ -208,12 +155,11 @@
      ]
     },
     {
-     "file": "aerlingus-hartford",
-     "org": "Aer Lingus",
-     "dated": "2026-09 (fares for 23 to 30 September 2026)",
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
      "quote": [
-      "Direct Flights from Hartford (BDL) to Dublin (DUB) | Aer Lingus",
-      "BDL–DUB, Sep 24 2026 – Sep 30 2026: From $1,110.14"
+      "is primarily used by Aer Lingus, Delta, Frontier, JetBlue, Southwest, and Sun Country",
+      "used by American, Breeze, and United"
      ]
     }
    ]
@@ -221,8 +167,8 @@
   {
    "claim": "the Escape Lounge is by gate 1",
    "verdict": "softened",
-   "inAfter": "An Escape Lounge sits by gate 1.",
-   "note": "Was 'There is one lounge, the Escape Lounge in the East Concourse before gate 1'. The lounge's own live page places it 'By Gate 1' and says a refurbished, enlarged lounge is now open; it does not say it is the only lounge or name the concourse, and the airport's own site refused. Reworded in review so that two sentences in a row do not start with The.",
+   "inAfter": "The Escape Lounge is by gate 1.",
+   "note": "Was 'There is one lounge, the Escape Lounge in the East Concourse before gate 1'. The lounge's own live page places it 'By Gate 1' and says a refurbished, enlarged lounge is now open; it does not say it is the only lounge or name the concourse, and the airport's own site refused.",
    "sources": [
     {
      "file": "wikipedia-archived",
@@ -333,19 +279,19 @@
    "claim": "Terminal A holds almost everything, in three gate groups",
    "verdict": "cut",
    "wasBefore": "Terminal A holds almost everything, split across three gate groups",
-   "why": "Corrected rather than lost: the airport's own airline list puts every airline in Terminal A, in two gate sections (see the two claims above). 'Almost everything' and 'three gate groups' are the old picture. CT Insider (27 January 2026) reports a new concourse, an extension of Terminal A, finished as the last part of a $250 million expansion; it is not described, as the airport's list does not mention it."
+   "why": "Out of date and unconfirmed. CT Insider (27 January 2026) reports that a new concourse with additional gates, an extension of Terminal A, was finished as the last part of a $250 million expansion and was to open within weeks, so the three gate groups are an old picture. The operator's own sites both refused: bradleyairport.com answered the browser with a 403 block page and ctairports.org (Connecticut Airport Authority) with a Cloudflare challenge, so neither was retried. No other source describes the layout now, so the new concourse is not described either (one source only; for Andy)."
   },
   {
    "claim": "East Concourse gates 1 to 12 and its airlines, including Aer Lingus, Frontier and Sun Country",
    "verdict": "cut",
    "wasBefore": "the East Concourse with gates 1 to 12 for Aer Lingus, Delta, Frontier, JetBlue, Southwest and Sun Country",
-   "why": "Reworded, not lost: the airport's list gives the same six airlines at gate section 1-12, kept and attributed to the airport. The 'East Concourse' name is dropped, as the airport's list does not use it."
+   "why": "Gate ranges and concourse allocation rest on Wikipedia alone and predate the 2026 concourse. Delta, JetBlue and Southwest are kept in the airline sentence (BTS, CT Insider). Frontier and Sun Country rest on Wikipedia alone. Aer Lingus is not confirmed: its Hartford page is a fares template that allows partner connections. In review (23 Sep) the airport's own airline page (bradleyairport.com/airlines) was read through the browser tool after a plain fetch met Cloudflare's 'Just a moment' check. It lists these airlines in Terminal A, but it was withdrawn and deleted: the sweep leaves sites behind bot checks alone, so nothing here rests on it. Worth checking by hand; Aer Lingus, Frontier and Sun Country can go back if the airport confirms them."
   },
   {
    "claim": "West Concourse gates 18 to 20 and 21 to 30",
    "verdict": "cut",
    "wasBefore": "the West Concourse split between gates 18 to 20 and 21 to 30 for Breeze, American and United",
-   "why": "Out of date: the airport's list now gives one gate section, 20 to 30, for American, Breeze and United (kept, attributed). The 'West Concourse' name and the 18 to 20 group are dropped."
+   "why": "Gate ranges rest on Wikipedia alone and predate the 2026 concourse. Breeze, American and United are kept in the airline sentence (BTS, CT Insider)."
   },
   {
    "claim": "Terminal B not a terminal in the usual sense",
@@ -385,6 +331,6 @@
   }
  ],
  "tracerOk": {
-  "An Escape Lounge": "The tracer catches the sentence's opening 'An' with the lounge's name; 'Escape Lounge' itself is on the lounge operator's own page and in Wikipedia. See the lounge claim."
+  "The Escape Lounge": "The tracer catches the sentence's opening 'The' with the lounge's name; 'Escape Lounge' itself is in Wikipedia and on the lounge operator's own page. See the lounge claim."
  }
 }
