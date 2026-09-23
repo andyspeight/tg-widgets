@@ -20,6 +20,7 @@
  *
  * Run: node test/order-upsell-smoke.mjs   (npm run test:order-upsell)
  */
+import { readFileSync } from 'node:fs';
 import { upsellTiles, upsellUrl, bookedProducts, tripShape, partySize, UPSELL_PRODUCTS, NOT_DEEPLINKABLE } from '../public/_order-upsell.js';
 
 let passed = 0, failed = 0;
@@ -175,6 +176,44 @@ console.log('\nthe list');
   const tiles = upsellTiles(PARIS);
   ok('every tile carries a label and a hint for the page',
     tiles.every((t) => t.label && t.hint && t.label.length > 2));
+}
+
+// ── The section on the page ──────────────────────────────────────────────────
+// The widget draws what the API hands it and decides nothing, so what matters
+// here is that it draws it safely and in the right place.
+console.log('\nthe section on the booking page');
+{
+  const widget = readFileSync(new URL('../public/widget-mybooking.js', import.meta.url), 'utf8');
+  ok('the widget keeps the tiles the API sent', /upsell: Array\.isArray\(data\.upsell\)/.test(widget));
+  ok('it sits between the booking and the support block',
+    /renderAmendSection\(order, c\)\}\s*\n\s*\$\{renderUpsell\(upsell, c\)\}/.test(widget));
+  ok('every link is escaped and whitelisted, not pasted in raw',
+    /esc\(safeUrl\(t\.url\)\)/.test(widget));
+  ok('links open in a new tab so the booking is not lost',
+    /target="_blank" rel="noopener noreferrer"/.test(widget));
+  ok('the label and hint are escaped too',
+    /esc\(t\.label\)/.test(widget) && /esc\(t\.hint\)/.test(widget));
+  ok('no tiles means no section at all',
+    /if \(!Array\.isArray\(tiles\) \|\| !tiles\.length\) return ''/.test(widget));
+  ok('the client can switch the whole section off',
+    /c\.display\.showUpsell === false/.test(widget));
+  ok('it honours reduced motion', /prefers-reduced-motion: reduce\) \{ \.tgm-upsell-card/.test(widget));
+
+  const api = readFileSync(new URL('../api/retrieve-order.js', import.meta.url), 'utf8');
+  ok('the API builds the tiles, so the widget has no second copy of the rules',
+    /upsellTiles\(order/.test(api) && !/upsellTiles\(/.test(widget));
+  ok('a tile with no link is dropped rather than drawn dead',
+    /\.filter\(\(t\) => t\.url\)/.test(api));
+  ok('the booking still loads if the upsell throws',
+    /upsell failed, booking returned without it/.test(api));
+  ok('the widget config is hoisted, not read where it is out of scope',
+    /let widgetConfig = \{\};/.test(api));
+
+  const editor = readFileSync(new URL('../public/editor-mybooking.html', import.meta.url), 'utf8');
+  ok('the editor has a switch per product', (editor.match(/data-upsell="/g) || []).length === UPSELL_PRODUCTS.length);
+  ok('and one for the section itself', /data-display="showUpsell"/.test(editor));
+  ok('a config saved before this existed still gets the section',
+    /sw\.classList\.toggle\('on', v !== false\)/.test(editor));
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
