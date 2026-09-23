@@ -1,0 +1,164 @@
+{
+ "iata": "CJU",
+ "id": "recu3aKPyezIIczNT",
+ "name": "Jeju International Airport",
+ "country": "South Korea",
+ "wikipedia": "https://en.wikipedia.org/wiki/Jeju_International_Airport",
+ "audited": "2026-09-23",
+ "before": "South Korea's second largest airport after Incheon, on Jeju island, and home base for Jeju Air.\n\nIt holds a genuine world record. The Jeju to Seoul route is the busiest airline route on the planet. In 2019 there were 85,000 flights across eight airlines and 17 million seats sold between Gimpo and Jeju.\n\nThat volume is the problem. The airport was designed for a maximum of 26 million passengers a year and passed 30 million in 2019, so delays are common and not a sign of anything unusual having gone wrong. Build buffer into connections.\n\nA replacement airport in southern Jeju was announced in 2019 at 4.18 billion dollars, then cancelled by the Ministry of Environment in 2021 over groundwater reserves and protected species. A new 5.1 billion dollar plan was provisionally approved in 2023 with no completion date set, so relief is a long way off.\n\nThe airport opened in 1968 and also serves mainland China, Hong Kong, Japan, Taiwan, Thailand, Malaysia and Singapore.",
+ "after": "The airport for Jeju island in South Korea, at one end of the busiest air route in the world: Jeju to Seoul Gimpo.\n\nThe airport runs over the capacity it was designed for, so build buffer into connections. A second airport at Seongsan was rejected on environmental grounds in 2021, then conditionally approved in 2023 at a cost of about 5.1 billion dollars, so relief is still some way off.\n\nInternational flights include Japan, Taiwan and Singapore.",
+ "claims": [
+  {
+   "claim": "the airport for Jeju island, South Korea",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Jeju island in South Korea",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is located in Jeju City"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Jeju City",
+      "Straight-line distance from the city centre: 2.7 km (1.7 miles)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "one end of the busiest air route in the world, Jeju to Seoul Gimpo",
+   "verdict": "confirmed",
+   "inAfter": "at one end of the busiest air route in the world: Jeju to Seoul Gimpo.",
+   "note": "OAG's September 2026 ranking: Jeju to Gimpo is the world's busiest domestic route with 1.08 million seats, well above the busiest international route (Incheon to Narita, 558,000), though Sapporo to Haneda is only 15,400 seats behind and Jeju capacity is down 16 per cent on a year earlier.",
+   "sources": [
+    {
+     "file": "oag-busiest",
+     "org": "OAG",
+     "dated": "2026-09",
+     "quote": [
+      "The World’s Busiest Domestic route in September 2026 is Jeju International (CJU) to Seoul Gimpo (GMP), offering 1.08 million seats",
+      "offering 558k seats"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is one endpoint of the world's busiest airline route, Jeju to/from Seoul-Gimpo."
+    }
+   ]
+  },
+  {
+   "claim": "runs over its designed capacity",
+   "verdict": "softened",
+   "inAfter": "The airport runs over the capacity it was designed for",
+   "note": "Replaces 'designed for a maximum of 26 million a year and passed 30 million in 2019', figures from 2019 with one source.",
+   "sources": [
+    {
+     "file": "joongang-2023",
+     "org": "Korea JoongAng Daily",
+     "dated": "2023-03-06",
+     "quote": "in order to resolve the overcapacity at the current airport and the increasing demand of traveling to Jeju Island"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Due to the airport operating far beyond its designed passenger capacity"
+    }
+   ]
+  },
+  {
+   "claim": "second airport at Seongsan: rejected on environmental grounds in 2021, conditionally approved in 2023, about 5.1 billion dollars",
+   "verdict": "corrected",
+   "inAfter": "A second airport at Seongsan was rejected on environmental grounds in 2021, then conditionally approved in 2023 at a cost of about 5.1 billion dollars",
+   "note": "Was 'a replacement airport in southern Jeju announced in 2019 at 4.18 billion dollars, cancelled in 2021'. It is a second airport, not a replacement; JoongAng puts Seongsan at the eastern end of the island and dates the plan to 2015, so the 2019 announcement and the southern location are dropped.",
+   "sources": [
+    {
+     "file": "joongang-2023",
+     "org": "Korea JoongAng Daily",
+     "dated": "2023-03-06",
+     "quote": [
+      "The Environment Ministry had rejected the proposal in July 2021 because its strategic environmental evaluation assessment was lacking.",
+      "The Ministry of Environment approved a plan to build a new international airport on Jeju Island Monday",
+      "The project is expected to cost 6.6 trillion won ($5.1 billion).",
+      "in Seongsan-eup in Seogwipo, the eastern end of Jeju Island"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Jeju's second airport would be constructed in Seongsan-eup",
+      "in 2021 the Ministry of Environment cancelled the plans due to their failure to protect the local environment",
+      "A new US$5.1 billion airport plan was provisionally approved in 2023"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "international flights include Japan, Taiwan and Singapore",
+   "verdict": "softened",
+   "inAfter": "International flights include Japan, Taiwan and Singapore.",
+   "note": "Was a list of seven markets. Maeil Business (December 2025) confirms Jeju flights to Tokyo Narita, Osaka and Fukuoka, Taipei and Kaohsiung, and Singapore; mainland China, Hong Kong, Thailand and Malaysia rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "mk-11504679",
+     "org": "Maeil Business News Korea",
+     "dated": "2025-12-23",
+     "quote": [
+      "It is the third direct flight between Jeju and Japan after Tokyo Narita and Osaka.",
+      "T'way Airlines is currently operating flights between Jeju and Osaka, Taipei, Kaohsiung and Singapore."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "as well as international destinations in mainland China, Hong Kong, Japan, Taiwan, Thailand, Malaysia and Singapore"
+    }
+   ]
+  },
+  {
+   "claim": "second largest airport after Incheon; home base for Jeju Air",
+   "verdict": "cut",
+   "wasBefore": "South Korea's second largest airport after Incheon, on Jeju island, and home base for Jeju Air.",
+   "why": "Both rest on Wikipedia alone: Korea Airports Corporation's statistics and the Korean airport statistics page answered 502 or would not render, and jejuair.net answered 403."
+  },
+  {
+   "claim": "2019 route figures: 85,000 flights, eight airlines, 17 million seats",
+   "verdict": "cut",
+   "wasBefore": "It holds a genuine world record. The Jeju to Seoul route is the busiest airline route on the planet. In 2019 there were 85,000 flights across eight airlines and 17 million seats sold between Gimpo and Jeju.",
+   "why": "The ranking is kept with OAG's September 2026 figures; the 2019 numbers are seven years old and single-source."
+  },
+  {
+   "claim": "designed for 26 million, passed 30 million in 2019, delays common",
+   "verdict": "cut",
+   "wasBefore": "That volume is the problem. The airport was designed for a maximum of 26 million passengers a year and passed 30 million in 2019, so delays are common and not a sign of anything unusual having gone wrong. Build buffer into connections.",
+   "why": "The overcapacity is kept (JoongAng, Wikipedia); the 2019 figures and 'delays are common' rest on Wikipedia alone. The advice to build in a buffer is kept as an opinion."
+  },
+  {
+   "claim": "replacement airport in southern Jeju, announced 2019 at 4.18 billion dollars; no completion date",
+   "verdict": "cut",
+   "wasBefore": "A replacement airport in southern Jeju was announced in 2019 at 4.18 billion dollars, then cancelled by the Ministry of Environment in 2021 over groundwater reserves and protected species. A new 5.1 billion dollar plan was provisionally approved in 2023 with no completion date set, so relief is a long way off.",
+   "why": "Rewritten: it is a second airport, JoongAng dates the plan to 2015 and places Seongsan at the eastern end of the island, and 'no completion date' rests on Wikipedia alone."
+  },
+  {
+   "claim": "opened in 1968; serves mainland China, Hong Kong, Thailand and Malaysia",
+   "verdict": "cut",
+   "wasBefore": "The airport opened in 1968 and also serves mainland China, Hong Kong, Japan, Taiwan, Thailand, Malaysia and Singapore.",
+   "why": "The opening year and four of the seven markets rest on Wikipedia alone; Japan, Taiwan and Singapore are kept."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so build buffer into connections",
+   "why": "Advice kept from the old text, following from the sourced overcapacity."
+  },
+  {
+   "text": "so relief is still some way off",
+   "why": "Kept from the old text: the 2023 approval was conditional and no source saved here reports construction."
+  }
+ ],
+ "tracerOk": {}
+}
