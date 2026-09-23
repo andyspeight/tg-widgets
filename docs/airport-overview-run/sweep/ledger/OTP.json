@@ -1,0 +1,181 @@
+{
+ "iata": "OTP",
+ "id": "recYeoRaHraSHtQlh",
+ "name": "Bucharest Henri Coandă International Airport",
+ "country": "Romania",
+ "wikipedia": "https://en.wikipedia.org/wiki/Bucharest_Henri_Coand%C4%83_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Romania's busiest airport, at Otopeni 16.5 km north of central Bucharest, handling over 17 million passengers in 2025. It is the headquarters and hub for TAROM and a base for HiSky, Animawings, FlyOne, Ryanair and Wizz Air.\n\nThe layout confuses people because the three parts are called terminals but are one building. Departures and Arrivals are separate halls joined by a walkway lined with shops, and the Finger Terminal is the airside concourse, split into domestic and international flows. Between them there are 104 check in desks and 38 gates, of which 14 have jetways.\n\nThere is a railway station by the Arrivals hall car park with trains to Gara de Nord running 24 hours a day, operated by CFR and Transferoviar Călători.\n\nTwo parallel runways serve the airport, both 3,500 metres.\n\nBucharest's other airport is the smaller Băneasa Aurel Vlaicu, inside the city. This one was a military airfield until 1965, took civilian traffic from 1969 and was renamed in 2004 after Henri Coandă, who built the Coandă-1910 aircraft and discovered the Coandă effect.",
+ "after": "Romania's busiest airport, at Otopeni, 16.5 km north of central Bucharest. It handled about 17 million passengers in 2025. Ryanair has a base here.\n\nTrains run from the airport's own station to Gara de Nord, Bucharest's main railway station.\n\nTwo parallel runways serve the airport, both 3,500 metres long.\n\nBucharest's other airport, Băneasa Aurel Vlaicu, is inside the city.",
+ "claims": [
+  {
+   "claim": "Romania's busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "Romania's busiest airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is Romania's busiest international airport"
+    },
+    {
+     "file": "eurostat-ro-2025",
+     "org": "Eurostat",
+     "quote": [
+      "Eurostat RO_LROP BUCURESTI/HENRI COANDA airport: passengers carried in 2025: 16,998,844",
+      "Eurostat RO_LRCL CLUJ NAPOCA/AVRAM IANCU airport: passengers carried in 2025: 3,547,053"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "at Otopeni, 16.5 km north of central Bucharest",
+   "verdict": "confirmed",
+   "inAfter": "at Otopeni, 16.5 km north of central Bucharest",
+   "note": "Coordinates: 15.5 km in a straight line at 359 degrees, which is north; ratio 1.06. OurAirports gives the municipality as Otopeni.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "located in Otopeni, 16.5 km (10.3 mi) north of Bucharest"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Otopeni",
+      "Straight-line distance from the city centre: 15.5 km",
+      "Bearing from the city centre: 359 degrees, which is north"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 17 million passengers in 2025",
+   "verdict": "softened",
+   "inAfter": "It handled about 17 million passengers in 2025.",
+   "note": "Was 'over 17 million'. Eurostat gives 16,998,844, just under 17 million; the operator's own figure could not be read (its site refused, 403). 'About 17 million' is true of both.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In 2025, the airport handled over 17 million passengers"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": "passengers carried in 2025: 16,998,844"
+    }
+   ]
+  },
+  {
+   "claim": "Ryanair has a base",
+   "verdict": "confirmed",
+   "inAfter": "Ryanair has a base here.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It also serves as a base of operations for several other airlines, including Animawings, FlyOne, Ryanair and Wizz Air"
+    },
+    {
+     "file": "ryanair-api-otp",
+     "org": "Ryanair",
+     "dated": "2026-09-23",
+     "quote": [
+      "\"iataCode\":\"OTP\"",
+      "\"base\":true"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "trains to Gara de Nord from the airport station",
+   "verdict": "confirmed",
+   "inAfter": "Trains run from the airport's own station to Gara de Nord, Bucharest's main railway station.",
+   "note": "CFR Călători runs the Bucharest North (Gara de Nord) to Henri Coandă Airport route, with trains as late as a 00:30 departure; 'Bucharest's main railway station' is Wikipedia's description.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "An airport rail link service to the main railway station, Gara de Nord (Bucharest North), runs from the Henri Coandă Airport railway station"
+    },
+    {
+     "file": "cfr-aeroport",
+     "org": "CFR Călători (national rail operator)",
+     "dated": "2026-09-23",
+     "quote": [
+      "Single tariff on București Nord – Henri Coandă International Airport route",
+      "R-M 7901 Bucharest North (departure at 00:30) – Mogoșoaia Park – Henri Coandă Airport (arrival at 00:51)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "two parallel runways, both 3,500 m",
+   "verdict": "confirmed",
+   "inAfter": "Two parallel runways serve the airport, both 3,500 metres long.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "contains two parallel runways, both 3,500 metres (11,500 ft) long"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "dated": "2026-09-23",
+     "quote": [
+      "Runway 08L/26R: 3,500 m",
+      "Runway 08R/26L: 3,500 m"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Bucharest's other airport, Băneasa Aurel Vlaicu, inside the city",
+   "verdict": "softened",
+   "inAfter": "Bucharest's other airport, Băneasa Aurel Vlaicu, is inside the city.",
+   "note": "Was 'the smaller Băneasa Aurel Vlaicu'. OurAirports puts Băneasa in Bucharest itself; 'smaller' rests on Wikipedia alone (Băneasa does not report to Eurostat).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the other being the smaller Băneasa Aurel Vlaicu Airport, located within the city"
+    },
+    {
+     "file": "ourairports-bucharest",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": "\"Bucharest Băneasa Aurel Vlaicu International Airport\""
+    }
+   ]
+  },
+  {
+   "claim": "over 17 million in 2025; TAROM headquarters and hub; bases for HiSky, Animawings, FlyOne, Ryanair and Wizz Air",
+   "verdict": "cut",
+   "wasBefore": "Romania's busiest airport, at Otopeni 16.5 km north of central Bucharest, handling over 17 million passengers in 2025. It is the headquarters and hub for TAROM and a base for HiSky, Animawings, FlyOne, Ryanair and Wizz Air.",
+   "why": "Reworded: the position, the traffic (as 'about 17 million') and the Ryanair base are kept. TAROM's headquarters and hub and the other four airlines' bases rest on Wikipedia alone: the airport's site refused (403), TAROM's about page is a 404 and its contact page gives no head office."
+  },
+  {
+   "claim": "layout: Departures, Arrivals and Finger 'terminals' are one building; 104 desks, 38 gates, 14 jetways",
+   "verdict": "cut",
+   "wasBefore": "The layout confuses people because the three parts are called terminals but are one building. Departures and Arrivals are separate halls joined by a walkway lined with shops, and the Finger Terminal is the airside concourse, split into domestic and international flows. Between them there are 104 check in desks and 38 gates, of which 14 have jetways.",
+   "why": "Wikipedia alone; the operator's site refused both a plain request and the browser (403)."
+  },
+  {
+   "claim": "railway station by the Arrivals car park; trains 24 hours a day by CFR and Transferoviar Călători",
+   "verdict": "cut",
+   "wasBefore": "There is a railway station by the Arrivals hall car park with trains to Gara de Nord running 24 hours a day, operated by CFR and Transferoviar Călători.",
+   "why": "Reworded: the station and the trains to Gara de Nord are kept with CFR as the second source. 'Twenty-four hours', the car park position and Transferoviar rest on Wikipedia alone."
+  },
+  {
+   "claim": "smaller Băneasa; military airfield until 1965; civilian from 1969; renamed 2004 after Henri Coandă",
+   "verdict": "cut",
+   "wasBefore": "Bucharest's other airport is the smaller Băneasa Aurel Vlaicu, inside the city. This one was a military airfield until 1965, took civilian traffic from 1969 and was renamed in 2004 after Henri Coandă, who built the Coandă-1910 aircraft and discovered the Coandă effect.",
+   "why": "Băneasa inside the city is kept (OurAirports). 'Smaller' and the whole history rest on Wikipedia alone."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
