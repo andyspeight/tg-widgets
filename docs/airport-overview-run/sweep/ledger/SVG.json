@@ -1,0 +1,221 @@
+{
+ "iata": "SVG",
+ "id": "recXG5Joxc2DsTIq9",
+ "name": "Stavanger Airport, Sola",
+ "country": "Norway",
+ "wikipedia": "https://en.wikipedia.org/wiki/Stavanger_Airport",
+ "audited": "2026-09-23",
+ "before": "Norway's third busiest airport, 11 km south west of central Stavanger in Sola municipality, and the regional hub for the south west of the country.\n\nWhat makes it unusual is the helicopters. Alongside normal airline traffic, two helicopter companies fly from here to the offshore oil installations in the North Sea, and the Royal Norwegian Air Force operates search and rescue helicopters from Sola Air Station on the same site.\n\nFour airlines fly to four domestic destinations and eleven airlines to 35 international ones. The busiest route by far is Stavanger to Oslo Gardermoen, with around 28 flights a day.\n\nThere is an aeronautical museum, Flyhistorisk Museum Sola, in the vicinity.\n\nThe airport is commonly called Sola, after the municipality, so both names turn up in supplier systems.",
+ "after": "Norway's fourth busiest airport, 11 km south west of central Stavanger in Sola municipality.\n\nWhat makes it unusual is the helicopters. Alongside the airlines, Bristow and CHC fly offshore workers from a separate helicopter terminal to the oil installations in the North Sea, and the Royal Norwegian Air Force flies search and rescue helicopters from its base on the military side of the airport.\n\nIts full name is Stavanger Airport, Sola. Many people call it just Sola, so expect to see both names.",
+ "claims": [
+  {
+   "claim": "Norway's fourth busiest airport",
+   "verdict": "corrected",
+   "inAfter": "Norway's fourth busiest airport",
+   "note": "Was 'third busiest'. Trondheim is ahead in 2025 on both counts: Avinor (thousands) Oslo 27,069, Bergen 6,696, Trondheim 4,110, Stavanger 3,975, and 2024 the same order (4,042 against 3,972); Eurostat 2025 Oslo 26,958,409, Bergen 6,512,311, Trondheim 4,109,825, Stavanger 3,764,864.",
+   "sources": [
+    {
+     "file": "avinor-ar2025",
+     "org": "Avinor (operator, avinor.no)",
+     "dated": "2026",
+     "quote": [
+      "Bergen Airport  6 696  6 547 2,3 %",
+      "Stavanger Airport  3 975  3 972 0,1 %",
+      "Trondheim Airport  4 110  4 042 1,7 %"
+     ]
+    },
+    {
+     "file": "eurostat-no",
+     "org": "Eurostat",
+     "dated": "2026-09-23",
+     "quote": [
+      "Eurostat NO_ENVA TRONDHEIM/VAERNES airport: passengers carried in 2025: 4,109,825",
+      "Eurostat NO_ENZV STAVANGER/SOLA airport: passengers carried in 2025: 3,764,864",
+      "Eurostat NO_ENTC TROMSO/LANGNES airport: passengers carried in 2025: 2,883,525"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "11 km south west of central Stavanger in Sola municipality",
+   "verdict": "confirmed",
+   "inAfter": "11 km south west of central Stavanger in Sola municipality",
+   "note": "Coordinates: 11.7 km at 208 degrees, south west (ratio 0.94). Avinor's visiting address is in Sola; the armed forces say their base on the airport is in Sola municipality.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is located 6 NM (11 km; 6.9 mi) southwest of the centre of the city of Stavanger inside the neighboring Sola Municipality"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 11.7 km (7.3 miles)",
+      "Bearing from the city centre: 208 degrees, which is south west"
+     ]
+    },
+    {
+     "file": "avinor-contact",
+     "org": "Avinor (operator, avinor.no)",
+     "dated": "2026-09-23",
+     "quote": "Flyplassvegen 230, 4055 Sola"
+    },
+    {
+     "file": "forsvaret-sola",
+     "org": "Norwegian Armed Forces (forsvaret.no)",
+     "dated": "2026-09-23",
+     "quote": "Luftforsvarets base Sola ligg i Sola kommune"
+    }
+   ]
+  },
+  {
+   "claim": "Bristow and CHC fly offshore workers from a separate helicopter terminal to the North Sea oil installations",
+   "verdict": "confirmed",
+   "inAfter": "Alongside the airlines, Bristow and CHC fly offshore workers from a separate helicopter terminal to the oil installations in the North Sea",
+   "note": "Was 'two helicopter companies'. Avinor's helicopter terminal page (Norwegian) has its own address and names the two operators there, Bristow Norway AS and CHC Helikopter Service. CHC says it flies workers to offshore workplaces off Norway and lists North Sea contracts.",
+   "sources": [
+    {
+     "file": "avinor-helikopterterminalen",
+     "org": "Avinor (operator, avinor.no)",
+     "dated": "2026-09-23",
+     "quote": [
+      "Sola helikopterterminal: Postadresse Flyplassvegen 240 4055 Stavanger lufthavn",
+      "Aktører på helikopterterminalen",
+      "Bristow Norway AS",
+      "CHC Helikopter Service"
+     ]
+    },
+    {
+     "file": "chc-offshore",
+     "org": "CHC Helicopter (chcheli.com)",
+     "dated": "2026-09-23",
+     "quote": [
+      "safely carrying nearly two million passengers each year to workplaces off the coasts of Australia, Brazil, Norway",
+      "CHC secures new North Sea crew change and transportation contract with DNO"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "with both fixed-wing aircraft and helicopter traffic for the offshore North Sea oil installations",
+      "Two helicopter companies operate out of Sola."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the Royal Norwegian Air Force flies search and rescue helicopters from its base on the military side of the airport",
+   "verdict": "confirmed",
+   "inAfter": "the Royal Norwegian Air Force flies search and rescue helicopters from its base on the military side of the airport",
+   "note": "The armed forces' page (Nynorsk): the Air Force's Sola base is the main base of 330 Squadron and 130 Air Wing, which operates Norway's AW101 search and rescue helicopters; 'the military part of Stavanger Airport Sola'. The base is now called 'Luftforsvarets base Sola', not Sola Air Station, so the old name is left out.",
+   "sources": [
+    {
+     "file": "forsvaret-sola",
+     "org": "Norwegian Armed Forces (forsvaret.no)",
+     "dated": "2026-09-23",
+     "quote": [
+      "Luftforsvarets base Sola ligg utanfor Stavanger og er hovudbase for 330 skvadron og 130 luftving.",
+      "130 luftving skal drifte og operere Noregs nye søk- og redningshelikopter, AW101 SAR Queen.",
+      "Den militære delen av Stavanger lufthamn Sola"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "the Royal Norwegian Air Force operates Westland Sea King search and rescue helicopters from Sola Air Station",
+      "The 330 Squadron operated AW101 search and rescue helicopters are the only squadron left at the airport"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "full name Stavanger Airport, Sola",
+   "verdict": "confirmed",
+   "inAfter": "Its full name is Stavanger Airport, Sola.",
+   "note": "Avinor's own address line uses 'Stavanger Airport, Sola'; the armed forces write 'Stavanger lufthamn Sola'.",
+   "sources": [
+    {
+     "file": "avinor-contact",
+     "org": "Avinor (operator, avinor.no)",
+     "dated": "2026-09-23",
+     "quote": "Avinor, Stavanger Airport, Sola, P.O. Box 150"
+    },
+    {
+     "file": "forsvaret-sola",
+     "org": "Norwegian Armed Forces (forsvaret.no)",
+     "dated": "2026-09-23",
+     "quote": "Stavanger lufthamn Sola"
+    }
+   ]
+  },
+  {
+   "claim": "commonly called just Sola",
+   "verdict": "confirmed",
+   "inAfter": "Many people call it just Sola",
+   "note": "Wikipedia says 'commonly known as Sola'; Avinor itself calls the airport's helicopter terminal 'Sola helikopterterminal'.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "commonly known as Sola"
+    },
+    {
+     "file": "avinor-helikopterterminalen",
+     "org": "Avinor (operator, avinor.no)",
+     "dated": "2026-09-23",
+     "quote": "Sola helikopterterminal"
+    }
+   ]
+  },
+  {
+   "claim": "Norway's third busiest; regional hub for the south west",
+   "verdict": "cut",
+   "wasBefore": "Norway's third busiest airport, 11 km south west of central Stavanger in Sola municipality, and the regional hub for the south west of the country.",
+   "why": "'Third' is wrong: Avinor and Eurostat both put Trondheim ahead in 2025 (and Avinor in 2024), so it is now 'fourth'. 'Regional hub for the south west' rests on Wikipedia alone. The location is kept."
+  },
+  {
+   "claim": "Sola Air Station on the same site",
+   "verdict": "cut",
+   "wasBefore": "from Sola Air Station on the same site",
+   "why": "The armed forces now call it 'Luftforsvarets base Sola' (the Air Force's Sola base), so the old name is dropped; the rescue helicopters are kept."
+  },
+  {
+   "claim": "four airlines to four domestic destinations; eleven airlines to 35 international",
+   "verdict": "cut",
+   "wasBefore": "Four airlines fly to four domestic destinations and eleven airlines to 35 international ones.",
+   "why": "Wikipedia alone, and counts like these change every season; Avinor's route page does not give totals."
+  },
+  {
+   "claim": "busiest route to Oslo Gardermoen, around 28 flights a day",
+   "verdict": "cut",
+   "wasBefore": "The busiest route by far is Stavanger to Oslo Gardermoen, with around 28 flights a day.",
+   "why": "Wikipedia alone; no route figures found on Avinor's pages or in its 2025 annual report."
+  },
+  {
+   "claim": "Flyhistorisk Museum Sola nearby",
+   "verdict": "cut",
+   "wasBefore": "There is an aeronautical museum, Flyhistorisk Museum Sola, in the vicinity.",
+   "why": "Wikipedia alone; the museum's own site (flymuseum.no) answered 502."
+  },
+  {
+   "claim": "both names turn up in supplier systems",
+   "verdict": "cut",
+   "wasBefore": "so both names turn up in supplier systems",
+   "why": "Not something a source can confirm; the advice is kept in a plainer form ('expect to see both names')."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "What makes it unusual is the helicopters.",
+   "why": "The original's framing, carried by the two confirmed helicopter facts that follow."
+  },
+  {
+   "text": "so expect to see both names",
+   "why": "Advice drawn from the two confirmed names."
+  }
+ ],
+ "tracerOk": {}
+}
