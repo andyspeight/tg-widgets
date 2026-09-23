@@ -31,42 +31,53 @@
 import { listStays, bookingMoment } from './_order-stays.js';
 
 /**
- * The four we can upsell, in the order they are shown.
+ * What we can upsell, in the order it is shown.
  *
- * Deliberately not the other four canonical products: Flights, Accommodation
- * and Packages are the booking itself rather than an addition, and Extras is a
- * bag of supplier oddments with nothing to search for.
+ * TWO, not the four Andy listed, and the reason is the deep linking spec
+ * rather than a choice. Travelify's document (Darren, read 23 Sep 2026) defines
+ * exactly five search types:
+ *
+ *     Flights · Accommodation · DynamicPackaging · CarRental · TicketsAttractions
+ *
+ * **There is no search type for airport transfers or for airport extras.** Both
+ * are real products on a Travelify order, so we can see when someone has
+ * booked one, and neither can be linked to a live search. A tile for them would
+ * be a button with nowhere to go.
+ *
+ * They stay on the list below as a note rather than an omission, so the next
+ * person does not spend an afternoon rediscovering it. If Travelify add the
+ * search types, adding the tiles back is this constant plus an anchor each.
+ *
+ * Also deliberately absent: Flights, Accommodation and Packages are the booking
+ * itself rather than an addition, and Extras is a bag of supplier oddments with
+ * nothing to search for.
  */
-export const UPSELL_PRODUCTS = Object.freeze(['TicketsAttractions', 'Transfers', 'CarRental', 'AirportExtras']);
+export const UPSELL_PRODUCTS = Object.freeze(['TicketsAttractions', 'CarRental']);
+
+/** Asked for, and not possible yet. See above. */
+export const NOT_DEEPLINKABLE = Object.freeze({
+  Transfers: 'Travelify has no Transfers search type in the deep linking spec.',
+  AirportExtras: 'Travelify has no AirportExtras search type in the deep linking spec.',
+});
 
 /**
- * ⚠ THE SEARCH TYPES BELOW ARE NOT YET CONFIRMED BY TRAVELIFY (23 Sep 2026).
+ * Search types, from Travelify's deep linking document.
  *
- * `TicketsAttractions` is proven: the Event Tickets widgets book through it
- * every day. The other three are the canonical product names on the assumption
- * that the deep link vocabulary matches, which is likely and is not evidence.
- *
- * This matters more than it looks. When the events deep link was built on a
- * reasonable assumption about its parameters, every Book button returned
- * "Unable to match location" and it took a probe to find out why. A wrong `st`
- * here ships four dead buttons onto a customer's own booking page.
- *
- * So: confirm each against Travelify's deep linking spec before this is turned
- * on for clients, and correct it HERE. Nothing else needs to change.
+ * Both verified against the spec's own worked examples. An earlier draft of
+ * this file guessed `Transfers` and `AirportExtras` from the product names and
+ * would have shipped two dead buttons; the same draft anchored attractions on
+ * `dst=CDG` when the spec wants a location NAME, and car hire on a date when
+ * it wants a datetime. Reading the document was worth more than the guessing.
  */
 export const SEARCH_TYPE = Object.freeze({
-  TicketsAttractions: 'TicketsAttractions',   // proven
-  Transfers: 'Transfers',                     // unconfirmed
-  CarRental: 'CarRental',                     // unconfirmed
-  AirportExtras: 'AirportExtras',             // unconfirmed
+  TicketsAttractions: 'TicketsAttractions',
+  CarRental: 'CarRental',
 });
 
 /** What each tile says. Plain, warm, UK English, no exclamation marks. */
 const COPY = Object.freeze({
   TicketsAttractions: { label: 'Things to do', hint: 'Tours, attractions and days out while you are there.' },
-  Transfers: { label: 'Airport transfers', hint: 'Getting from the airport to where you are staying.' },
   CarRental: { label: 'Car hire', hint: 'A car for your trip, picked up when you land.' },
-  AirportExtras: { label: 'Airport extras', hint: 'Parking, lounges and fast track before you fly.' },
 });
 
 /** yyyy-mm-dd from a Travelify date, read as a calendar date and not an instant. */
@@ -102,6 +113,12 @@ export function tripShape(order) {
   let destIata = null;
   let outboundDate = '';
   let inboundDate = '';
+  // Car hire wants a pickup and dropoff CLOCK time, not a date, so carry the
+  // moment they land and the moment they fly home. Both are airport-local
+  // times dressed as UTC by Travelify, which is exactly what bookingMoment
+  // reads back, so the UTC fields ARE the local clock.
+  let arriveAt = '';
+  let departAt = '';
 
   for (const f of flights) {
     const legs = Array.isArray(f.legs) ? f.legs : [];
@@ -118,8 +135,10 @@ export function tripShape(order) {
         originIata = from;
         destIata = to || null;
         outboundDate = dayOf(first.depart);
+        arriveAt = clockOf(last && last.arrive);
       } else if (to && originIata && to === originIata) {
         inboundDate = dayOf(first.depart);
+        departAt = clockOf(first.depart);
       }
     }
   }
@@ -144,11 +163,47 @@ export function tripShape(order) {
     checkIn,
     checkOut,
     stayCount: stays.length,
-    // Where the trip happens, for the searches that need a place rather than an
-    // airport. The destination airport is the steadiest anchor we hold; a city
-    // name off an accommodation record is free text and varies by supplier.
-    destinationAnchor: destIata || null,
+    arriveAt,
+    departAt,
+    // Where the trip actually happens. The spec's location searches want a
+    // NAME plus a country code ("loc=Barcelona&ctry=ES"), not an airport code,
+    // so this comes off the accommodation's own location. A resort or state is
+    // a better answer than a city when the feed carries one, for the same
+    // reason it is in booking-destination.js: people book Costa del Sol, not
+    // Malaga. Falls back to the airport, which the spec allows via loct.
+    place: placeOf(order, destIata),
   };
+}
+
+/** "2027-04-10T14:35" from a Travelify local-time string. */
+export function clockOf(value) {
+  const d = bookingMoment(value);
+  if (!d || Number.isNaN(d.getTime())) return '';
+  return d.toISOString().slice(0, 16);
+}
+
+/**
+ * The destination as the spec wants it: a name, a country code, and which kind
+ * of place it is.
+ *
+ * `country` on an accommodation location is a two-letter code, which is what
+ * `ctry` takes. When there is no accommodation at all, the arrival airport is
+ * a valid location too: the spec's own car hire example uses "pup=BCN" with
+ * "pupt=Airport", so a code is a location name when the type says so.
+ */
+export function placeOf(order, destIata) {
+  const items = (order && Array.isArray(order.items)) ? order.items : [];
+  for (const it of items) {
+    if (!it || (it.product !== 'Accommodation' && it.product !== 'Packages')) continue;
+    const loc = it.accommodation && it.accommodation.location;
+    if (!loc) continue;
+    const name = String(loc.state || loc.city || '').trim();
+    const ctry = String(loc.country || '').trim().toUpperCase();
+    if (name && /^[A-Z]{2}$/.test(ctry)) return { loc: name, ctry, type: 'City' };
+    if (name) return { loc: name, ctry: '', type: 'City' };
+  }
+  if (destIata) return { loc: destIata, ctry: '', type: 'Airport' };
+  return null;
 }
 
 /** Heads on the booking, for the search's party size. */
@@ -156,13 +211,17 @@ export function partySize(order) {
   const t = (order && Array.isArray(order.travellers)) ? order.travellers : [];
   let adults = 0;
   let children = 0;
+  const childAges = [];
   for (const p of t) {
     const type = String((p && (p.type || p.paxType)) || '').toLowerCase();
-    if (type.indexOf('child') !== -1 || type.indexOf('infant') !== -1) children++;
-    else adults++;
+    if (type.indexOf('child') !== -1 || type.indexOf('infant') !== -1) {
+      children++;
+      const age = Number(p && (p.age != null ? p.age : p.paxAge));
+      if (Number.isFinite(age) && age >= 0 && age < 18) childAges.push(Math.round(age));
+    } else adults++;
   }
   // A booking with no traveller list still has to search for somebody.
-  return { adults: adults || 2, children };
+  return { adults: adults || 2, children, childAges };
 }
 
 /**
@@ -194,27 +253,21 @@ export function upsellTiles(order, opts = {}) {
 
     let anchor = null;
     if (product === 'TicketsAttractions') {
-      // Across the stay, where they are staying.
-      if (trip.destinationAnchor && fromDate) {
-        anchor = { dst: trip.destinationAnchor, from: fromDate, to: toDate };
-      }
-    } else if (product === 'Transfers') {
-      // The day they land, from the airport they land at.
-      const day = trip.outboundDate || trip.checkIn;
-      if (trip.destIata && day) {
-        anchor = { dst: trip.destIata, from: day, to: trip.inboundDate || trip.checkOut || day };
+      // Where they are staying, across the whole time they are there.
+      // st=TicketsAttractions&loc=<place>&ctry=<code>&fr=<date>&to=<date>
+      if (trip.place && fromDate) {
+        anchor = { loc: trip.place.loc, ctry: trip.place.ctry, loct: trip.place.type, fr: fromDate, to: toDate };
       }
     } else if (product === 'CarRental') {
-      // Picked up on arrival, dropped off when they leave.
-      const from = trip.outboundDate || trip.checkIn;
-      const to = trip.inboundDate || trip.checkOut || from;
-      if (trip.destIata && from) anchor = { dst: trip.destIata, from, to };
-    } else if (product === 'AirportExtras') {
-      // The one that is NOT at the destination. Parking, a lounge and fast
-      // track all happen at the airport they fly FROM, on the day they fly out,
-      // and the car sits there until they come home.
-      if (trip.originIata && trip.outboundDate) {
-        anchor = { dst: trip.originIata, from: trip.outboundDate, to: trip.inboundDate || trip.outboundDate };
+      // Picked up at the airport they land at, when they land, and dropped off
+      // before they fly home. The spec takes datetimes here, not dates, and a
+      // pickup location type of Airport lets the IATA code be the name.
+      // st=CarRental&pup=<iata>&pupt=Airport&fr=<datetime>&to=<datetime>
+      const from = trip.arriveAt || (trip.outboundDate ? trip.outboundDate + 'T10:00' : '');
+      const to = trip.departAt || (trip.inboundDate ? trip.inboundDate + 'T10:00'
+        : (trip.checkOut ? trip.checkOut + 'T10:00' : ''));
+      if (trip.destIata && from && to) {
+        anchor = { pup: trip.destIata, pupt: 'Airport', pupctry: (trip.place && trip.place.ctry) || '', fr: from, to };
       }
     }
 
@@ -227,6 +280,7 @@ export function upsellTiles(order, opts = {}) {
       ...anchor,
       adults: party.adults,
       children: party.children,
+      childAges: party.childAges,
     });
   }
   return tiles;
@@ -242,10 +296,21 @@ export function upsellUrl(tile, appId) {
   if (!tile || !appId || !tile.st) return '';
   const p = new URLSearchParams();
   p.set('st', tile.st);
-  if (tile.dst) p.set('dst', tile.dst);
-  if (tile.from) p.set('fr', tile.from);
-  if (tile.to && tile.to !== tile.from) p.set('to', tile.to);
+  // Location, however this search type names it.
+  if (tile.loc) { p.set('loc', tile.loc); if (tile.ctry) p.set('ctry', tile.ctry); if (tile.loct) p.set('loct', tile.loct); }
+  if (tile.pup) { p.set('pup', tile.pup); if (tile.pupctry) p.set('pupctry', tile.pupctry); if (tile.pupt) p.set('pupt', tile.pupt); }
+  if (tile.fr) p.set('fr', tile.fr);
+  if (tile.to && tile.to !== tile.fr) p.set('to', tile.to);
   p.set('adt', String(tile.adults || 2));
-  if (tile.children) p.set('chd', String(tile.children));
+  // Children need an AGE EACH or the search is invalid, per the spec: "must
+  // specify an age for each child searched". Without every age we search for
+  // the adults alone rather than send a request Travelify will reject. The
+  // offers widget reached the same conclusion on the same sentence.
+  const ages = Array.isArray(tile.childAges) ? tile.childAges.filter((n) => Number.isFinite(n)) : [];
+  if (tile.children && ages.length === tile.children) {
+    p.set('chd', String(tile.children));
+    for (const a of ages) p.append('chdage', String(a));
+  }
   return 'https://dl.tvllnk.com/deeplink/' + encodeURIComponent(String(appId)) + '?' + p.toString();
+
 }
