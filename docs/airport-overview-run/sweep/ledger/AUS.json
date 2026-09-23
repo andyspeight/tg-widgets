@@ -1,0 +1,315 @@
+{
+ "iata": "AUS",
+ "id": "recHzftxKOgYIQ5kE",
+ "name": "Austin Bergstrom International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Austin%E2%80%93Bergstrom_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Austin's airport, about 5 miles south east of downtown, third busiest in Texas after Dallas Fort Worth and Houston Intercontinental, and 27th busiest in the United States. As of 2023 it ran more than 550 arrivals and departures on a typical weekday to 97 destinations across North America and Europe.\n\nEverything goes through one building. The Barbara Jordan Terminal has 34 gates, of which only six can handle international flights, so international capacity is much tighter than the overall size suggests. Lounges are run by American, Delta and United.\n\nIt has a genuinely Austin touch: a live music stage in the terminal where local bands perform, in keeping with the city's claim to be the live music capital of the world. Note that all but two of the food outlets are past security.\n\nThe airport sits on the former Bergstrom Air Force Base, decommissioned in the early 1990s, and replaced Robert Mueller Municipal Airport as Austin's main airport in 1999.",
+ "after": "Austin's airport, about 8 miles south east of downtown. With about 21.7 million passengers in 2025, it is the third busiest airport in Texas, after Dallas/Fort Worth and George Bush Intercontinental in Houston, and one of the 30 busiest in the United States. Nonstop flights reach destinations across North America and Europe.\n\nThe airport says all its airlines have used the main Barbara Jordan Terminal since 1 April 2026, when the South Terminal closed. Almost all the places to eat are past security. Local musicians play at venues in the terminal on weekdays, in keeping with Austin's claim to be the Live Music Capital of the World.\n\nThe airport sits on the former Bergstrom Air Force Base, which was decommissioned in the early 1990s. It replaced Robert Mueller Municipal Airport as Austin's main airport in 1999.",
+ "claims": [
+  {
+   "claim": "about 8 miles south east of downtown",
+   "verdict": "corrected",
+   "inAfter": "Austin's airport, about 8 miles south east of downtown.",
+   "note": "Was 'about 5 miles', which fails the coordinates check: the straight line from the GeoNames centre is 6.8 miles (11.0 km), a ratio of 0.73. The written sources differ: Wikipedia 5 miles, the FAA master record 5 nautical miles (about 5.8 miles) from its business-district point, the City's own history page eight miles from the Capitol. The text follows the operator, whose figure passes the coordinates check as a road-style distance (ratio 1.18). South east is in every source.",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "Austin-Bergstrom International Airport (City of Austin, operator)",
+     "quote": [
+      "Eight miles from the Capitol was Bergstrom Air Force Base",
+      "Bergstrom Air Force Base, located in Southeast Austin"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 11.0 km (6.8 miles)",
+      "Bearing from the city centre: 135 degrees, which is south east"
+     ],
+     "dated": "2026-09-23 (OurAirports data fetched)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "3 CBD TO AIRPORT (NM): 05 SE",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Located about 5 miles (8 km; 4 nmi) southeast of downtown"
+    }
+   ]
+  },
+  {
+   "claim": "third busiest in Texas after Dallas/Fort Worth and George Bush Intercontinental",
+   "verdict": "confirmed",
+   "inAfter": "the third busiest airport in Texas, after Dallas/Fort Worth and George Bush Intercontinental in Houston",
+   "note": "The FAA table is in rank order: DFW 2nd, IAH 15th, AUS 29th, Dallas Love Field 33rd and Hobby 37th in the US in 2025.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is the third busiest in Texas"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "2 SW TX DFW Fort Worth Dallas-Fort Worth International P L 41,297,009 42,351,316 -2.49%",
+      "15 SW TX IAH Houston George Bush Intcntl/Houston P L 23,265,028 23,349,157 -0.36%",
+      "29 SW TX AUS Austin Austin-Bergstrom International P L 10,651,727 10,678,073 -0.25%",
+      "33 SW TX DAL Dallas Dallas Love Field P M 8,151,354 8,654,991 -5.82%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "one of the 30 busiest in the United States",
+   "verdict": "softened",
+   "inAfter": "one of the 30 busiest in the United States",
+   "note": "Was '27th busiest in the United States'. The FAA's preliminary 2025 table ranks it 29th by enplanements; Wikipedia's 27th is an earlier year. No second source for 29th was found, so the text gives what both support.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "as well as the 27th-busiest airport in the United States by passenger traffic"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "29 SW TX AUS Austin Austin-Bergstrom International P L 10,651,727 10,678,073 -0.25%",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "about 21.7 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "With about 21.7 million passengers in 2025",
+   "note": "New to the text, replacing the 2023 flight and destination counts as the measure of how busy it is. TOTAL passengers, both terminals, arriving plus departing: 21,666,852 in 2025, down 0.44 per cent on 21,762,904 in 2024 (operator's December 2025 report; its enplaned and deplaned totals, 10,857,912 and 10,808,940, add up to it). The operator's FAQ says 2023 was the record year, with over 22 million, so 2025 is not called a record. The FAA's preliminary CY2025 table counts 10,651,727 enplanements (boardings only, about half of total passengers), in line with the operator's enplaned total.",
+   "sources": [
+    {
+     "file": "op-stats-dec2025",
+     "org": "Austin-Bergstrom International Airport (City of Austin, operator)",
+     "quote": [
+      "Aviation Activity Report",
+      "Calendar Year 2025 vs 2024",
+      "Combined Terminals",
+      "AUS Passenger Totals",
+      "1,888,492 1,826,157 3.41% 21,666,852 21,762,904 -0.44%",
+      "960,181 926,479 3.64% 10,857,912 10,882,581 -0.23%",
+      "928,311 899,678 3.18% 10,808,940 10,880,323 -0.66%"
+     ],
+     "dated": "2026-01"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "29 SW TX AUS Austin Austin-Bergstrom International P L 10,651,727 10,678,073 -0.25%",
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "op-faq",
+     "org": "Austin-Bergstrom International Airport (City of Austin, operator)",
+     "quote": "had its busiest year on record in 2023 with over 22 million passengers",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "nonstop flights across North America and Europe",
+   "verdict": "confirmed",
+   "inAfter": "Nonstop flights reach destinations across North America and Europe.",
+   "note": "The operator's list for June 2026 has London Heathrow (British Airways), Frankfurt (Lufthansa) and Amsterdam (KLM) in Europe, with Delta to Paris from 27 March 2027, and Canada, Mexico, Central America and Grand Cayman nearer home. The airlines were not added, as the old text did not name them.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "to 97 destinations in North America and Europe"
+    },
+    {
+     "file": "op-nonstop",
+     "org": "Austin-Bergstrom International Airport (City of Austin, operator)",
+     "quote": [
+      "The information below applies to June 2026 and will be updated monthly.",
+      "London, United Kingdom (LHR- Heathrow Airport)",
+      "Frankfurt, Germany (FRA)",
+      "Amsterdam, Netherlands (AMS)",
+      "Calgary, Alberta Canada (YYC)",
+      "Mexico City, Mexico (MEX)",
+      "Toronto-Pearson, Ontario (YYZ)"
+     ],
+     "dated": "2026-06"
+    }
+   ]
+  },
+  {
+   "claim": "the airport says all its airlines have used the Barbara Jordan Terminal since 1 April 2026, when the South Terminal closed",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport says all its airlines have used the main Barbara Jordan Terminal since 1 April 2026, when the South Terminal closed.",
+   "note": "Replaces 'Everything goes through one building', which rested on Wikipedia calling the Barbara Jordan Terminal the 'main' terminal. The separate South Terminal, used by Allegiant and Frontier, carried 771,354 passengers in 2025 and closed after 31 March 2026; it is being removed for new taxiways. An attributed statement, as for Timisoara: the only source is the airport's own page, because Allegiant's site refused the browser (403), Frontier's airport page has no Austin entry and no news page could be found without a search engine. Worth Andy's eye.",
+   "sources": [
+    {
+     "file": "op-south-terminal",
+     "org": "Austin-Bergstrom International Airport (City of Austin, operator)",
+     "quote": [
+      "Allegiant and Frontier Joined the Main Barbara Jordan Terminal April 1, 2026",
+      "March 31, 2026, was the final day of operations at the South Terminal.",
+      "On April 1, 2026, the South Terminal officially closed",
+      "All commercial airlines at AUS operate under one roof"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "almost all the places to eat are past security",
+   "verdict": "softened",
+   "inAfter": "Almost all the places to eat are past security.",
+   "note": "Was 'all but two of the food outlets are past security'. The operator's current list of 54 shops and restaurants puts only one before security (Half Moon Empanadas, near Checkpoint 2W); Wikipedia says all but two food outlets. The exact number differs, so the text says what both support.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "all but two of which are located inside the secured gate areas of the terminal"
+    },
+    {
+     "file": "op-shopdine",
+     "org": "Austin-Bergstrom International Airport (City of Austin, operator)",
+     "quote": [
+      "Half Moon Empanadas",
+      "Near Checkpoint 2W • Before Security",
+      "Near Gate 11 • After Security"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "local musicians play in the terminal on weekdays; the Live Music Capital of the World",
+   "verdict": "corrected",
+   "inAfter": "Local musicians play at venues in the terminal on weekdays, in keeping with Austin's claim to be the Live Music Capital of the World.",
+   "note": "Was 'a live music stage in the terminal where local bands perform'. The operator lists several stages, Monday to Friday.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "The terminal also has a live music stage on which local bands perform in keeping with the spirit of Austin's proclamation as",
+      "The Live Music Capital of the World"
+     ]
+    },
+    {
+     "file": "op-livemusic",
+     "org": "Austin-Bergstrom International Airport (City of Austin, operator)",
+     "quote": [
+      "The Live Music Capital of the World",
+      "The minute you step into the terminal you can catch local musicians at one of our venues Monday through Friday"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "on the former Bergstrom Air Force Base, decommissioned in the early 1990s",
+   "verdict": "confirmed",
+   "inAfter": "The airport sits on the former Bergstrom Air Force Base, which was decommissioned in the early 1990s.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport lies on the site of what was Bergstrom Air Force Base",
+      "The base was decommissioned in the early 1990s"
+     ]
+    },
+    {
+     "file": "op-history",
+     "org": "Austin-Bergstrom International Airport (City of Austin, operator)",
+     "quote": [
+      "It would have this name until it was decommissioned in the early 1990s",
+      "AUS stands on the foundations of the base named after Captain Bergstrom."
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "replaced Robert Mueller Municipal Airport in 1999",
+   "verdict": "confirmed",
+   "inAfter": "It replaced Robert Mueller Municipal Airport as Austin's main airport in 1999.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "to replace Robert Mueller Municipal Airport as Austin's main airport in 1999"
+    },
+    {
+     "file": "op-history",
+     "org": "Austin-Bergstrom International Airport (City of Austin, operator)",
+     "quote": "In May 1999, Robert Mueller Municipal Airport was closed and Austin-Bergstrom International Airport opened May 23",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "about 5 miles",
+   "verdict": "cut",
+   "wasBefore": "about 5 miles south east of downtown",
+   "why": "Fails the coordinates check (6.8 miles in a straight line) and the operator says eight miles from the Capitol; corrected above."
+  },
+  {
+   "claim": "27th busiest in the United States",
+   "verdict": "cut",
+   "wasBefore": "and 27th busiest in the United States",
+   "why": "Out of date: the FAA ranks it 29th for 2025. Softened to one of the 30 busiest."
+  },
+  {
+   "claim": "550 weekday flights to 97 destinations as of 2023",
+   "verdict": "cut",
+   "wasBefore": "As of 2023 it ran more than 550 arrivals and departures on a typical weekday to 97 destinations across North America and Europe.",
+   "why": "A 2023 count with no current second source; the operator's list changes monthly. Replaced by the 2025 passenger total and the regions served."
+  },
+  {
+   "claim": "everything goes through one building",
+   "verdict": "cut",
+   "wasBefore": "Everything goes through one building.",
+   "why": "Only true since 1 April 2026: until 31 March 2026 Allegiant and Frontier used the separate South Terminal. Replaced by the airport's own statement, attributed."
+  },
+  {
+   "claim": "34 gates, only six international; international capacity tighter than it looks",
+   "verdict": "cut",
+   "wasBefore": "The Barbara Jordan Terminal has 34 gates, of which only six can handle international flights, so international capacity is much tighter than the overall size suggests.",
+   "why": "Only Wikipedia gives the gate counts, and they are changing: the operator's expansion page has three new West Gates due in 2026, a six-gate Concourse M from summer 2026 and rebuilt international arrivals. No current second source for either number."
+  },
+  {
+   "claim": "lounges run by American, Delta and United",
+   "verdict": "cut",
+   "wasBefore": "Lounges are run by American, Delta and United.",
+   "why": "Only Wikipedia; the operator's pages (FAQ, map, shop and dine) list no lounges and the airlines' pages were not reached."
+  },
+  {
+   "claim": "a genuinely Austin touch",
+   "verdict": "cut",
+   "wasBefore": "It has a genuinely Austin touch",
+   "why": "Framing; the live music fact is kept with two sources."
+  },
+  {
+   "claim": "all but two food outlets past security",
+   "verdict": "cut",
+   "wasBefore": "Note that all but two of the food outlets are past security.",
+   "why": "The operator's list now has only one outlet before security; softened to 'almost all'."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

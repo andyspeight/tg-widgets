@@ -1,0 +1,521 @@
+{
+ "iata": "PIT",
+ "id": "recGNQQbyocwof9Wg",
+ "name": "Pittsburgh International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Pittsburgh_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Pittsburgh's airport, about 17 miles west of downtown, serving the wider region and adjacent parts of West Virginia and Ohio.\n\nIts history explains why it feels oversized. A one billion dollar rebuild completed in 1992 was designed largely to US Airways' specification so the airport could become one of their major hubs. The result was called the airport of the future by The New York Times and pioneered modern airport design, with an X-shaped layout to cut walking distance between gates, an underground tram between concourses and a large retail offer, all unusual at the time. Traffic peaked around 20 million passengers in the late 1990s, and US Airways alone ran over 500 daily flights with 12,000 staff here in 2001 before the airline became unstable.\n\nToday it offers flights across North America, the Caribbean and Europe.\n\nAt 10,000 acres it is the largest civil airport by land area in Pennsylvania, with four runways, and it hosts a sizeable United States Air Force base.",
+ "after": "Pittsburgh's airport, about 17 miles west of downtown, serving the wider region. It handled about 9.8 million passengers in 2025.\n\nThe airport was rebuilt in 1992 as a connecting hub for US Airways, and The New York Times called it the airport of the future. An underground train linked the landside terminal to an X-shaped airside terminal, built to keep walks between gates short. Traffic peaked at about 20 million passengers in the 1990s. After two bankruptcies, in 2002 and 2004, US Airways gave up the hub.\n\nA new $1.7 billion landside terminal, built for people starting or ending their trips in Pittsburgh, opened on 18 November 2025. Passengers now walk from security across a bridge to the airside gates, and the underground train has been retired.\n\nToday it offers flights across North America, the Caribbean and Europe. It has four runways and hosts a US Air Force base.",
+ "claims": [
+  {
+   "claim": "Pittsburgh's airport, serving the wider region",
+   "verdict": "softened",
+   "inAfter": "Pittsburgh's airport, about 17 miles west of downtown, serving the wider region.",
+   "note": "Was 'serving the wider region and adjacent parts of West Virginia and Ohio'. The region is confirmed; West Virginia and Ohio rest on Wikipedia alone (see the cut below).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "it is the primary international airport serving the Greater Pittsburgh Region"
+    },
+    {
+     "file": "op-our-airports",
+     "org": "Allegheny County Airport Authority (operator, flypittsburgh.com)",
+     "quote": "We transformed our airport to meet the needs of the Pittsburgh region",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "about 17 miles west of downtown",
+   "verdict": "confirmed",
+   "inAfter": "about 17 miles west of downtown",
+   "note": "Coordinates put it 12.9 miles (20.8 km) from the GeoNames centre in a straight line at 286 degrees, which is west; 17 miles is the road distance (ratio 1.31, inside the gate's tolerance). The FAA record gives 12 nautical miles from the business district.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "About 17 miles (27 km) west of downtown Pittsburgh"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 20.8 km (12.9 miles)",
+      "Bearing from the city centre: 286 degrees, which is west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 9.8 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled about 9.8 million passengers in 2025.",
+   "note": "New to the text, replacing the old text's only traffic figure, a 1990s peak, as the answer to how busy the airport is now. This is TOTAL passengers (arriving plus departing): the operator's December 2025 report gives 9,848,440 for the year, down 1.0 per cent on 9,945,601 in 2024; of these 234,178 were international. The FAA's preliminary CY2025 table counts 4,792,035 enplanements (boardings only, about half of total passengers), which is consistent. Wikipedia's current infobox could not be read (Wikimedia blocked this session).",
+   "sources": [
+    {
+     "file": "op-stats-dec2025",
+     "org": "Allegheny County Airport Authority (operator, flypittsburgh.com)",
+     "quote": [
+      "Summary of Airline Traffic",
+      "December 2025",
+      "Total Passengers 776,817 775,498 0.2% 9,848,440 9,945,601 -1.0%"
+     ],
+     "dated": "2026-03"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "47 EA PA PIT Pittsburgh Pittsburgh International P M 4,792,035 4,862,376 -1.45%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "rebuilt in 1992 as a connecting hub for US Airways",
+   "verdict": "confirmed",
+   "inAfter": "The airport was rebuilt in 1992 as a connecting hub for US Airways",
+   "note": "The airline was called USAir until 1997 (Cranky Flier: 'By then renamed US Airways'); the sources use US Airways, as the text does. The one billion dollar cost rests on Wikipedia alone (Simple Flying repeats it in Wikipedia's words), so it is cut.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport underwent a massive $1 billion rebuilding and expansion that was largely designed to US Airways' specification so it could become one of their major hubs.",
+      "Completed in 1992"
+     ]
+    },
+    {
+     "file": "pghmag-guide",
+     "org": "Pittsburgh Magazine",
+     "quote": [
+      "When the current terminal opened in 1992",
+      "It also was built to be the largest connecting hub for US Airways"
+     ],
+     "dated": "2025-09-02"
+    },
+    {
+     "file": "crankyflier-newterminal",
+     "org": "Cranky Flier",
+     "quote": "it was preparing for a future as a major hub for USAir",
+     "dated": "2025-11-18"
+    }
+   ]
+  },
+  {
+   "claim": "The New York Times called it the airport of the future",
+   "verdict": "confirmed",
+   "inAfter": "The New York Times called it the airport of the future",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "dubbed the \"airport of the future\" by The New York Times"
+    },
+    {
+     "file": "pghmag-guide",
+     "org": "Pittsburgh Magazine",
+     "quote": "When the current terminal opened in 1992, The New York Times called it the \"airport of the future.\"",
+     "dated": "2025-09-02"
+    }
+   ]
+  },
+  {
+   "claim": "an underground train linked the landside terminal to the airside terminal",
+   "verdict": "corrected",
+   "inAfter": "An underground train linked the landside terminal to an X-shaped airside terminal",
+   "note": "Was 'an underground tram between concourses'. The train ran between the two terminal buildings, landside and airside, not between concourses, and it has since been retired (see below), so the text now puts it in the past.",
+   "sources": [
+    {
+     "file": "crankyflier-newterminal",
+     "org": "Cranky Flier",
+     "quote": "There was a large headhouse (landside terminal) and security area connected by an underground train to the giant concourse (airside terminal)",
+     "dated": "2025-11-18"
+    },
+    {
+     "file": "pghmag-guide",
+     "org": "Pittsburgh Magazine",
+     "quote": "the half-mile tram that links the two terminals",
+     "dated": "2025-09-02"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "underground tram to transport passengers around the airport"
+    }
+   ]
+  },
+  {
+   "claim": "X-shaped airside terminal built to keep walks between gates short",
+   "verdict": "confirmed",
+   "inAfter": "an X-shaped airside terminal, built to keep walks between gates short",
+   "note": "CBS Pittsburgh confirms the X wings are still in use after the 2025 works.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "with its X-shape to reduce distance between gates"
+    },
+    {
+     "file": "crankyflier-newterminal",
+     "org": "Cranky Flier",
+     "quote": [
+      "in the shape of an \"X.\"",
+      "It was designed specifically for connecting traffic.",
+      "have very far to walk thanks to the design"
+     ],
+     "dated": "2025-11-18"
+    },
+    {
+     "file": "cbs-faq",
+     "org": "CBS News Pittsburgh (KDKA)",
+     "quote": "you will easily recognize the airside mall and X wings to the revamped gates",
+     "dated": "2025-11-20"
+    }
+   ]
+  },
+  {
+   "claim": "traffic peaked at about 20 million passengers in the 1990s",
+   "verdict": "softened",
+   "inAfter": "Traffic peaked at about 20 million passengers in the 1990s.",
+   "note": "Was 'around 20 million passengers in the late 1990s'. The two sources differ a little: Wikipedia says 20 million in the late 1990s, Pittsburgh Magazine 21 million in the mid-1990s. Both are about 20 million and both are in the 1990s, which is all the text now says.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Traffic peaked at 20 million passengers in the late 1990s"
+    },
+    {
+     "file": "pghmag-guide",
+     "org": "Pittsburgh Magazine",
+     "quote": "At its peak in the mid-'90s, the airport served 21 million passengers per year.",
+     "dated": "2025-09-02"
+    }
+   ]
+  },
+  {
+   "claim": "after two bankruptcies, in 2002 and 2004, US Airways gave up the hub",
+   "verdict": "corrected",
+   "inAfter": "After two bankruptcies, in 2002 and 2004, US Airways gave up the hub.",
+   "note": "Replaces 'before the airline became unstable'.",
+   "sources": [
+    {
+     "file": "triblive-911-25yrs",
+     "org": "TribLive (Pittsburgh Tribune-Review)",
+     "quote": "US Airways declared bankruptcy in both 2002 and 2004, abandoning Pittsburgh International as a hub soon afterward.",
+     "dated": "2026-09-08"
+    },
+    {
+     "file": "crankyflier-newterminal",
+     "org": "Cranky Flier",
+     "quote": [
+      "In 2002, the airline filed for Chapter 11 bankruptcy protection",
+      "filed for bankruptcy again in 2004",
+      "the Pittsburgh hub had been shuttered"
+     ],
+     "dated": "2025-11-18"
+    },
+    {
+     "file": "pghmag-guide",
+     "org": "Pittsburgh Magazine",
+     "quote": "as US Airways struggled through two bankruptcies, it abruptly canceled its lease for the hub",
+     "dated": "2025-09-02"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "USAir declared chapter 11 bankruptcy twice in a row, and reduced operations in Pittsburgh beginning in 2004"
+    }
+   ]
+  },
+  {
+   "claim": "a new $1.7 billion landside terminal",
+   "verdict": "corrected",
+   "inAfter": "A new $1.7 billion landside terminal",
+   "note": "New to the text: the old Overview described the 1992 layout as if it were current and never mentioned the terminal that replaced its landside half.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "An all-new landside terminal opened in November 2025",
+      "from a planned $1.1 billion to $1.7 billion"
+     ]
+    },
+    {
+     "file": "triblive-911-25yrs",
+     "org": "TribLive (Pittsburgh Tribune-Review)",
+     "quote": "$1.7 billion landside terminal opened in November",
+     "dated": "2026-09-08"
+    },
+    {
+     "file": "airlinegeeks-newterminal",
+     "org": "AirlineGeeks",
+     "quote": "Pittsburgh International Airport's new $1.7 billion landside terminal is set to open on November 18th",
+     "dated": "2025-11-14"
+    },
+    {
+     "file": "op-our-airports",
+     "org": "Allegheny County Airport Authority (operator, flypittsburgh.com)",
+     "quote": "a $1.7 billion modernization comprised of a new terminal, new parking complex and extensive improvements to existing facilities",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "built for people starting or ending their trips in Pittsburgh",
+   "verdict": "corrected",
+   "inAfter": "built for people starting or ending their trips in Pittsburgh",
+   "note": "Replaces 'Its history explains why it feels oversized': the old landside terminal was built for a connecting hub, and the new one was built for local travellers. Airport Improvement's article is the operator's own release, so it is counted as the operator.",
+   "sources": [
+    {
+     "file": "triblive-911-25yrs",
+     "org": "TribLive (Pittsburgh Tribune-Review)",
+     "quote": "It allows the airport to serve more arriving and departing passengers versus primarily connecting flights",
+     "dated": "2026-09-08"
+    },
+    {
+     "file": "aim-newera",
+     "org": "Allegheny County Airport Authority (operator, flypittsburgh.com) via Airport Improvement",
+     "quote": "The new terminal is the centerpiece of PIT's transition from a hub connecting passengers from around the country to an origin-and-destination (O&D) airport tailored to better serve the Pittsburgh market."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Officials emphasized that the renovations would make the airport more suited to Pittsburgh, rather than to US Airways."
+    }
+   ]
+  },
+  {
+   "claim": "opened on 18 November 2025",
+   "verdict": "corrected",
+   "inAfter": "opened on 18 November 2025",
+   "sources": [
+    {
+     "file": "bluesky-100days",
+     "org": "Allegheny County Airport Authority (operator, flypittsburgh.com) (Blue Sky News)",
+     "quote": [
+      "Published March 2, 2026",
+      "Just after 2 a.m. on Nov. 18, 2025",
+      "the new terminal was officially open"
+     ],
+     "dated": "2026-03-02"
+    },
+    {
+     "file": "cbs-faq",
+     "org": "CBS News Pittsburgh (KDKA)",
+     "quote": [
+      "November 20, 2025",
+      "day three of operations at the new Pittsburgh International Airport terminal"
+     ],
+     "dated": "2025-11-20"
+    },
+    {
+     "file": "crankyflier-newterminal",
+     "org": "Cranky Flier",
+     "quote": "this very morning, November 18, the airport is opening a revised version of that terminal",
+     "dated": "2025-11-18"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "An all-new landside terminal opened in November 2025"
+    }
+   ]
+  },
+  {
+   "claim": "passengers walk from security across a bridge to the airside gates",
+   "verdict": "corrected",
+   "inAfter": "Passengers now walk from security across a bridge to the airside gates",
+   "sources": [
+    {
+     "file": "airlinegeeks-newterminal",
+     "org": "AirlineGeeks",
+     "quote": "a pedestrian Skybridge connecting the new terminal to the existing airside terminal",
+     "dated": "2025-11-14"
+    },
+    {
+     "file": "op-transformed",
+     "org": "Allegheny County Airport Authority (operator, flypittsburgh.com)",
+     "quote": "the Skybridge connects passengers from the new terminal to the gates, shopping and restaurants",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "cbs-faq",
+     "org": "CBS News Pittsburgh (KDKA)",
+     "quote": "when you come out of the tunnel from TSA into airside: you are a level above the gates",
+     "dated": "2025-11-20"
+    },
+    {
+     "file": "pghmag-guide",
+     "org": "Pittsburgh Magazine",
+     "quote": "Once through security, passengers will walk 160 feet across a bridge and through a tunnel",
+     "dated": "2025-09-02"
+    }
+   ]
+  },
+  {
+   "claim": "the underground train has been retired",
+   "verdict": "corrected",
+   "inAfter": "the underground train has been retired",
+   "note": "Cranky Flier reports its last passenger run on the night of 17 November 2025, the eve of the new terminal's opening.",
+   "sources": [
+    {
+     "file": "crankyflier-newterminal",
+     "org": "Cranky Flier",
+     "quote": "the train connecting the landside terminal to the airside made its last passenger run last night",
+     "dated": "2025-11-18"
+    },
+    {
+     "file": "airlinegeeks-newterminal",
+     "org": "AirlineGeeks",
+     "quote": "The Skybridge will eliminate the airport's need for its underground tram system, which will be decommissioned and closed.",
+     "dated": "2025-11-14"
+    },
+    {
+     "file": "aviationpros-tmp",
+     "org": "Aviation Pros",
+     "quote": "The redesign eliminates the need for an automated people mover",
+     "dated": "2026-04-26"
+    }
+   ]
+  },
+  {
+   "claim": "flights across North America, the Caribbean and Europe",
+   "verdict": "confirmed",
+   "inAfter": "Today it offers flights across North America, the Caribbean and Europe.",
+   "note": "The operator's live nonstop list (read 23 Sep 2026) has seven international destinations: Cancun, Dublin, London Heathrow, Montreal, Punta Cana, Reykjavik and Toronto, plus 58 in the United States. Simple Flying's list of 12 Nov 2025 has the same less Dublin, which Aer Lingus added in 2026. The airlines' names and the European cities were not added, as the old text did not carry them.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "offers passenger flights to destinations throughout North America, Caribbean, and Europe"
+    },
+    {
+     "file": "op-destinations",
+     "org": "Allegheny County Airport Authority (operator, flypittsburgh.com)",
+     "quote": [
+      "Nonstop Destinations",
+      "Atlanta, GA",
+      "Cancún, Mexico",
+      "Dublin, Ireland",
+      "London, United Kingdom (Heathrow)",
+      "Montréal, Canada",
+      "Punta Cana, Dominican Republic",
+      "Reykjavík, Iceland",
+      "Toronto, Canada"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "four runways",
+   "verdict": "confirmed",
+   "inAfter": "It has four runways",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "PIT has four runways"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runways listed: 4",
+     "dated": "2026-09-23 (OurAirports data fetched)"
+    }
+   ]
+  },
+  {
+   "claim": "hosts a US Air Force base",
+   "verdict": "softened",
+   "inAfter": "hosts a US Air Force base",
+   "note": "Was 'a sizeable United States Air Force base'. The FAA's airport master record shows Air National Guard (ANG) and Air Force Reserve Command (AFRC) operations with their own ramp and fuel; 'sizeable' rests on Wikipedia alone. The units' own sites could not be read: 911aw.afrc.af.mil failed at the proxy (tunnel refused) and Military OneSource answered 404 and then 403.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It also hosts a sizable United States Air Force base."
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "PROVIDED BY ANG AND AFRC.(MIL).",
+      "NSTD PAVEMENT MARKINGS ON ANG RAMP",
+      "AFD EFF",
+      "09/03/2026"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "adjacent parts of West Virginia and Ohio",
+   "verdict": "cut",
+   "wasBefore": "and adjacent parts of West Virginia and Ohio",
+   "why": "Only Wikipedia says so. Three operator pages (air service, cargo and real estate) describe the Pittsburgh region, western Pennsylvania and a two-hour drive time, but not these states."
+  },
+  {
+   "claim": "its history explains why it feels oversized",
+   "verdict": "cut",
+   "wasBefore": "Its history explains why it feels oversized.",
+   "why": "Out of date. The new landside terminal of November 2025 was built to right-size the airport (Cranky Flier: 'right-sized for its hub-less reality'); the airside terminal lost a side at the same time. Replaced by what the new terminal is for."
+  },
+  {
+   "claim": "a one billion dollar rebuild",
+   "verdict": "cut",
+   "wasBefore": "A one billion dollar rebuild completed in 1992",
+   "why": "The date and the US Airways hub are kept with two sources. The one billion dollar cost rests on Wikipedia alone; Simple Flying repeats it in Wikipedia's own words, so it does not count."
+  },
+  {
+   "claim": "pioneered modern airport design; all unusual at the time",
+   "verdict": "cut",
+   "wasBefore": "pioneered modern airport design",
+   "why": "Wikipedia's claim; Pittsburgh Magazine says only that it 'served as a model for other airports around the world'. The features themselves are kept, with two sources each."
+  },
+  {
+   "claim": "an underground tram between concourses",
+   "verdict": "cut",
+   "wasBefore": "an underground tram between concourses",
+   "why": "Wrong and out of date: the train ran between the landside and airside terminals, not between concourses, and it was retired in November 2025. Corrected above."
+  },
+  {
+   "claim": "a large retail offer, all unusual at the time",
+   "verdict": "cut",
+   "wasBefore": "a large retail offer, all unusual at the time",
+   "why": "The mall itself is confirmed by name (TribLive and Cranky Flier: the Airmall, 'more than 100 retail and dining brands in the 1990s'), but it declined after 2001 (TribLive) and is history a UK agent does not need, so it was dropped to keep the text near 150 words. 'Unusual at the time' rests on Wikipedia alone."
+  },
+  {
+   "claim": "US Airways alone ran over 500 daily flights with 12,000 staff here in 2001",
+   "verdict": "cut",
+   "wasBefore": "US Airways alone ran over 500 daily flights with 12,000 staff here in 2001",
+   "why": "Only Wikipedia gives these figures. The Cranky Flier article gives departures by year, not daily flights or staff; the 500 figure appears only in a reader's comment under it, which does not count."
+  },
+  {
+   "claim": "before the airline became unstable",
+   "verdict": "cut",
+   "wasBefore": "before the airline became unstable",
+   "why": "Replaced by what happened, with three sources: bankruptcies in 2002 and 2004, then the end of the hub."
+  },
+  {
+   "claim": "10,000 acres; largest civil airport by land area in Pennsylvania",
+   "verdict": "cut",
+   "wasBefore": "At 10,000 acres it is the largest civil airport by land area in Pennsylvania",
+   "why": "The area is disputed: Wikipedia and the FAA master record say 10,000 acres, while the operator's own real estate page gives a total of 8,807 acres (and calls it the eighth largest airport in the US). 'Largest in Pennsylvania' rests on Wikipedia alone."
+  },
+  {
+   "claim": "sizeable",
+   "verdict": "cut",
+   "wasBefore": "a sizeable United States Air Force base",
+   "why": "The base is kept; its size rests on Wikipedia alone."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

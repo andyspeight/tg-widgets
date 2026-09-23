@@ -1,0 +1,330 @@
+{
+ "iata": "TYS",
+ "id": "recItjCxDGH6CBXi7",
+ "name": "McGhee Tyson Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/McGhee_Tyson_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Knoxville, 12 miles south of the city at Alcoa, Tennessee.\n\nIts real value is the national park. The Great Smoky Mountains National Park is a 30 minute drive away, which makes this the sensible arrival for that trip rather than a larger airport further off.\n\nIt is served by several major airlines and employs around 2,700 people. Endeavor Air has a maintenance base here and Allegiant Air a crew base.\n\nTwo parallel runways serve the 2,250 acre site at an elevation of 986 feet, the longer at 10,000 feet. General aviation is handled by Signature Aviation.\n\nThe airport also hosts McGhee Tyson Air National Guard Base, home to a Tennessee Air National Guard air refuelling wing.\n\nIt is named after Charles McGhee Tyson, a United States Navy pilot killed in the First World War.",
+ "after": "The airport for Knoxville, 12 miles south of the city at Alcoa, Tennessee. It handled about 3.6 million passengers in 2025 and is served by several major airlines.\n\nThe National Park Service names it as the nearest major airport in Tennessee to the Great Smoky Mountains National Park, about 45 miles west of the park's Gatlinburg entrance.\n\nEndeavor Air has a maintenance base here and Allegiant Air a crew base. Two parallel runways serve the airport, the longer at 10,000 feet. General aviation is handled by Signature Aviation.\n\nThe airport also hosts a Tennessee Air National Guard air refuelling wing.\n\nIt is named after Charles McGhee Tyson, a pilot killed in the First World War.",
+ "claims": [
+  {
+   "claim": "12 miles south of Knoxville",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Knoxville, 12 miles south of the city",
+   "note": "Coordinates put it 11.1 miles (17.9 km) from the GeoNames centre in a straight line at 202 degrees, which is south (ratio 1.08). The authority's 2025 annual report says 15 miles; its own web page and Wikipedia say 12, which the coordinates support better.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "12 miles (19 km) south of Knoxville, in Alcoa, Tennessee"
+    },
+    {
+     "file": "op-about",
+     "org": "Metropolitan Knoxville Airport Authority (operator, flyknoxville.com)",
+     "quote": "Located just 12 miles south of downtown Knoxville",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 17.9 km (11.1 miles)",
+      "Bearing from the city centre: 202 degrees, which is south"
+     ],
+     "dated": "2026-09-23 (OurAirports data fetched)"
+    }
+   ]
+  },
+  {
+   "claim": "at Alcoa, Tennessee",
+   "verdict": "confirmed",
+   "inAfter": "at Alcoa, Tennessee",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "in Alcoa, Tennessee"
+    },
+    {
+     "file": "op-about",
+     "org": "Metropolitan Knoxville Airport Authority (operator, flyknoxville.com)",
+     "quote": [
+      "2055 Alcoa Hwy",
+      "Alcoa, TN 37701"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "nps-grsm-directions",
+     "org": "US National Park Service",
+     "quote": "located just south of Knoxville in Alcoa",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "about 3.6 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled about 3.6 million passengers in 2025",
+   "note": "New to the text, replacing the staff count (disputed, see below) as the measure of size. TOTAL passengers, arriving plus departing: 3,630,410 in calendar 2025, up 8.7 per cent on 3,339,757 (operator's December 2025 report). The FAA's preliminary CY2025 table counts 1,786,752 enplanements (boardings only, about half of total passengers), up 9.0 per cent, in line with the operator's 1,821,489 enplaned.",
+   "sources": [
+    {
+     "file": "op-stats-dec2025",
+     "org": "Metropolitan Knoxville Airport Authority (operator, flyknoxville.com)",
+     "quote": [
+      "YEAR-TO-DATE AVIATION ACTIVITIES REPORT FOR DECEMBER 2025",
+      "ENPLANED PASSENGERS 1,821,489 1,673,875 147,614 8.82%",
+      "TOTAL PASSENGERS 3,630,410 3,339,757 290,653 8.70%"
+     ],
+     "dated": "2026-03"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "80 SO TN TYS Alcoa McGhee Tyson P S 1,786,752 1,639,080 9.01%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "served by several major airlines",
+   "verdict": "confirmed",
+   "inAfter": "is served by several major airlines",
+   "note": "The operator's airline page (read 23 Sep 2026) lists Allegiant, American, Avelo, Delta, Southwest and United; Southwest began on 5 March 2026 (operator's release). Frontier, on the annual report's list for the year to June 2025, is no longer listed. Names not added, as the old text did not carry them.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "it is served by several major airlines"
+    },
+    {
+     "file": "op-acfr2025",
+     "org": "Metropolitan Knoxville Airport Authority (operator, flyknoxville.com)",
+     "quote": "McGhee Tyson has two parallel runways, and is served by most major U.S. airlines",
+     "dated": "2025-12 (report for the year to 30 June 2025)"
+    },
+    {
+     "file": "op-airlines",
+     "org": "Metropolitan Knoxville Airport Authority (operator, flyknoxville.com)",
+     "quote": [
+      "Allegiant Air",
+      "American Airlines",
+      "Avelo Airlines",
+      "Delta Air Lines",
+      "Southwest Airlines",
+      "United Airlines"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "the NPS names it the nearest major airport in Tennessee to the park, about 45 miles west of the Gatlinburg entrance",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "National Park Service",
+   "inAfter": "The National Park Service names it as the nearest major airport in Tennessee to the Great Smoky Mountains National Park, about 45 miles west of the park's Gatlinburg entrance.",
+   "note": "Replaces 'a 30 minute drive away, which makes this the sensible arrival for that trip rather than a larger airport further off'. The park's own directions page is the authority on getting there, so the sentence is attributed to it. The facts behind it are borne out elsewhere: the authority's 2025 annual report puts the airport 'in the rolling foothills of the Great Smoky Mountains' and says it 'benefitted from its proximity' to the park, and Wikipedia calls it a short drive away.",
+   "sources": [
+    {
+     "file": "nps-grsm-directions",
+     "org": "US National Park Service",
+     "quote": [
+      "Directions - Great Smoky Mountains National Park (U.S. National Park Service)",
+      "The nearest major airport in Tennessee is the McGhee-Tyson Airport (TYS) located just south of Knoxville in Alcoa.",
+      "This airport is approximately 45 miles west of the Gatlinburg entrance to the park."
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-acfr2025",
+     "org": "Metropolitan Knoxville Airport Authority (operator, flyknoxville.com)",
+     "quote": [
+      "McGhee Tyson Airport benefitted from its proximity to the Great Smoky Mountains National Park."
+     ],
+     "dated": "2025-12"
+    }
+   ]
+  },
+  {
+   "claim": "Endeavor Air has a maintenance base here",
+   "verdict": "confirmed",
+   "inAfter": "Endeavor Air has a maintenance base here",
+   "note": "Endeavor is Delta's regional airline. The operator's tenants page also lists Endeavor.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "TYS is home to a maintenance base for Endeavor Air"
+    },
+    {
+     "file": "endeavor-facts",
+     "org": "Endeavor Air (Delta subsidiary)",
+     "quote": [
+      "Endeavor Air is a wholly-owned subsidiary of Delta Air Lines.",
+      "MAINTENANCE BASES",
+      "Knoxville (TYS)"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Allegiant Air a crew base",
+   "verdict": "confirmed",
+   "inAfter": "and Allegiant Air a crew base",
+   "note": "The authority's report says crew and maintenance base. allegiantair.com refused the browser (403) when tried for Austin, so it was not tried again.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "crew base for Allegiant Air"
+    },
+    {
+     "file": "op-acfr2025",
+     "org": "Metropolitan Knoxville Airport Authority (operator, flyknoxville.com)",
+     "quote": "Allegiant Air, which operates a crew and maintenance base at McGhee Tyson Airport",
+     "dated": "2025-12 (report for the year to 30 June 2025)"
+    }
+   ]
+  },
+  {
+   "claim": "two parallel runways, the longer at 10,000 feet",
+   "verdict": "confirmed",
+   "inAfter": "Two parallel runways serve the airport, the longer at 10,000 feet.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It has two parallel runways: 5L/23R is 10,000 by 150 feet"
+    },
+    {
+     "file": "op-acfr2025",
+     "org": "Metropolitan Knoxville Airport Authority (operator, flyknoxville.com)",
+     "quote": [
+      "Runways: RWY 05L-23R 10,000 x 150 ft.",
+      "RWY 05R-23L 9,000 x 150 ft."
+     ],
+     "dated": "2025-12 (as of 30 June 2025)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 05L/23R: 3,048 m (10,000 ft), CON",
+      "Runway 05R/23L: 2,743 m (9,000 ft), ASP",
+      "Runways listed: 2"
+     ],
+     "dated": "2026-09-23 (OurAirports data fetched)"
+    }
+   ]
+  },
+  {
+   "claim": "general aviation handled by Signature Aviation",
+   "verdict": "confirmed",
+   "inAfter": "General aviation is handled by Signature Aviation.",
+   "note": "Signature Aviation is the parent of Signature Flight Support, the name the authority's report uses.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The fixed-base operator (FBO) at TYS is Signature Aviation, the parent company of Signature Flight Support."
+    },
+    {
+     "file": "op-acfr2025",
+     "org": "Metropolitan Knoxville Airport Authority (operator, flyknoxville.com)",
+     "quote": "Fixed Base Operator Signature Flight Support",
+     "dated": "2025-12 (as of 30 June 2025)"
+    },
+    {
+     "file": "op-tenants",
+     "org": "Metropolitan Knoxville Airport Authority (operator, flyknoxville.com)",
+     "quote": "Signature Aviation",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "hosts a Tennessee Air National Guard air refuelling wing",
+   "verdict": "confirmed",
+   "inAfter": "The airport also hosts a Tennessee Air National Guard air refuelling wing.",
+   "note": "The wing is the 134th Air Refueling Wing. The base's name, McGhee Tyson Air National Guard Base, rests on Wikipedia alone and is dropped.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "an air base for the 134th Air Refueling Wing (134 ARW) of the Tennessee Air National Guard"
+    },
+    {
+     "file": "op-acfr2025",
+     "org": "Metropolitan Knoxville Airport Authority (operator, flyknoxville.com)",
+     "quote": "The airport is also home to the Tennessee Air National Guard's 134th Air Refueling Wing.",
+     "dated": "2025-12"
+    }
+   ]
+  },
+  {
+   "claim": "named after Charles McGhee Tyson, a pilot killed in the First World War",
+   "verdict": "softened",
+   "inAfter": "It is named after Charles McGhee Tyson, a pilot killed in the First World War.",
+   "note": "Was 'a United States Navy pilot'. The operator says only that he was a Knoxville-born First World War aviator who lost his life in service; 'Navy' rests on Wikipedia alone (the Tennessee Encyclopedia answered with a bot check, HTTP 202). The operator also dates the opening to October 1937 (not used).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is named for United States Navy pilot Charles McGhee Tyson, who was killed in World War I."
+    },
+    {
+     "file": "op-about",
+     "org": "Metropolitan Knoxville Airport Authority (operator, flyknoxville.com)",
+     "quote": "named in honor of Lt. Charles McGhee Tyson, a Knoxville native and World War I aviator who lost his life in service to his country.",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "its real value is the national park",
+   "verdict": "cut",
+   "wasBefore": "Its real value is the national park.",
+   "why": "A judgement; the park point is now carried by the National Park Service's own statement."
+  },
+  {
+   "claim": "a 30 minute drive to the national park; the sensible arrival rather than a larger airport",
+   "verdict": "cut",
+   "wasBefore": "The Great Smoky Mountains National Park is a 30 minute drive away, which makes this the sensible arrival for that trip rather than a larger airport further off.",
+   "why": "Only Wikipedia gives 30 minutes, and it would mislead: the National Park Service puts the airport about 45 miles from the Gatlinburg entrance, the main way in from Tennessee. The advice about larger airports has no source. Replaced by the Park Service's own words."
+  },
+  {
+   "claim": "employs around 2,700 people",
+   "verdict": "cut",
+   "wasBefore": "employs around 2,700 people",
+   "why": "Sources disagree: Wikipedia about 2,700, the authority's 2025 annual report more than 3,000. Replaced by the 2025 passenger total as the measure of size."
+  },
+  {
+   "claim": "2,250 acre site at an elevation of 986 feet",
+   "verdict": "cut",
+   "wasBefore": "the 2,250 acre site at an elevation of 986 feet",
+   "why": "Both figures are disputed. Area: Wikipedia 2,250 acres, the authority's 2025 annual report 2,756. Elevation: Wikipedia 986 feet, the authority 979, OurAirports 981."
+  },
+  {
+   "claim": "McGhee Tyson Air National Guard Base",
+   "verdict": "cut",
+   "wasBefore": "The airport also hosts McGhee Tyson Air National Guard Base, home to a Tennessee Air National Guard air refuelling wing.",
+   "why": "Reworded: the wing is confirmed by the authority's report; the base's name rests on Wikipedia alone. The unit's own site is on af.mil, which this session's proxy refuses."
+  },
+  {
+   "claim": "a United States Navy pilot",
+   "verdict": "cut",
+   "wasBefore": "a United States Navy pilot killed in the First World War",
+   "why": "'Navy' rests on Wikipedia alone; softened to a pilot killed in the First World War, which both sources support."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "First World War": "UK form of 'World War I', which is how both sources give it."
+ }
+}

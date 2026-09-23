@@ -1,0 +1,282 @@
+{
+ "iata": "CHS",
+ "id": "recHEaStFuCmAVyGm",
+ "name": "Charleston International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Charleston_International_Airport",
+ "audited": "2026-09-23",
+ "before": "South Carolina's busiest airport, about 12 miles north west of downtown Charleston, serving over 6.1 million passengers in 2023, its busiest year on record. It is a focus city for Breeze Airways.\n\nThe military relationship is unusual and worth understanding. Joint Base Charleston owns and operates the runways, and the civilian airport uses them under a joint-use agreement with the Charleston County Aviation Authority. The site is divided into four areas: military to the west, the airline terminal to the south, general aviation to the east and the Boeing plant further south.\n\nThat Boeing plant is where the 787 Dreamliner is assembled, which brings a steady stream of business travel through the airport.\n\nTwo runways serve the combined 2,060 acre site, the longer at 9,001 feet.",
+ "after": "South Carolina's busiest airport, about 12 miles north west of downtown Charleston. It handled about 6.3 million passengers in 2025. Breeze Airways has a base here and has flown from Charleston since 2021.\n\nIt is a joint civil and military airport. Joint Base Charleston, part of the US Air Force, owns and operates the runways. The Charleston Regional Aviation Authority runs the civilian terminal under a joint-use agreement with the base.\n\nTwo runways serve the combined 2,060 acre site, the longer at 9,001 feet.",
+ "claims": [
+  {
+   "claim": "South Carolina's busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "South Carolina's busiest airport",
+   "note": "The FAA's table is in rank order: Charleston is 57th in the US with 3,142,402 enplanements in 2025, ahead of every other South Carolina airport (Myrtle Beach 81st, Greenville-Spartanburg 89th, Columbia 126th, Hilton Head 220th, Florence 337th).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is South Carolina's busiest airport"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "57 SO SC CHS Charleston Charleston AFB/International P M 3,142,402 3,115,194 0.87%",
+      "81 SO SC MYR Myrtle Beach Myrtle Beach International P S 1,743,132 1,894,929 -8.01%",
+      "89 SO SC GSP Greer",
+      "International P S 1,499,920 1,412,702 6.17%",
+      "126 SO SC CAE Columbia Columbia Metro P S 662,756 654,460 1.27%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "about 12 miles north west of downtown Charleston",
+   "verdict": "confirmed",
+   "inAfter": "about 12 miles north west of downtown Charleston",
+   "note": "Coordinates put it 10.3 miles (16.6 km) from the GeoNames centre in a straight line at 324 degrees, which is north west; 12 miles is the road distance (ratio 1.17). The FAA record gives 9 nautical miles north west of the business district.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "approximately 12 miles (19 km) northwest of downtown Charleston"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 16.6 km (10.3 miles)",
+      "Bearing from the city centre: 324 degrees, which is north west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 6.3 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled about 6.3 million passengers in 2025.",
+   "note": "Was 'over 6.1 million passengers in 2023, its busiest year on record'. TOTAL passengers, arriving plus departing, from the operator's calendar-year 2025 operations summary: 3,167,903 enplaned plus 3,173,242 deplaned = 6,341,145 (the sum is ours; the summary gives the two halves). The same method gives 6,153,540 for 2023, matching Wikipedia's 'over 6.1 million', and 6,295,439 for 2024, so 2025 is higher than both, though no source found calls it a record in words, so the text does not. The FAA's preliminary CY2025 table counts 3,142,402 enplanements (boardings only, about half of total passengers), in line with the operator's enplaned figure.",
+   "sources": [
+    {
+     "file": "op-ops-dec2025",
+     "org": "Charleston Regional Aviation Authority (operator, iflychs.com)",
+     "quote": [
+      "OPERATIONS SUMMARY",
+      "Calendar Year 2025",
+      "TOTALS 3,167,903 3,173,242"
+     ],
+     "dated": "2026-01"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "57 SO SC CHS Charleston Charleston AFB/International P M 3,142,402 3,115,194 0.87%",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "Breeze Airways has a base here",
+   "verdict": "softened",
+   "inAfter": "Breeze Airways has a base here",
+   "note": "Was 'It is a focus city for Breeze Airways'. Breeze's chief commercial officer calls it the airline's Charleston base (Post and Courier, January 2025, reprinted on the operator's site), and the operator's June 2026 release shows Breeze still growing here (its 29th nonstop destination from Charleston). flybreeze.com refused the browser (403), so Breeze's own pages could not be read. 'Largest operational base' rests on the Post and Courier alone and is not used.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport serves as a focus city for Breeze Airways."
+    },
+    {
+     "file": "op-breeze-no1",
+     "org": "The Post and Courier (article reprinted on iflychs.com)",
+     "quote": [
+      "Article Provided by the Post and Courier",
+      "January 26, 2025",
+      "noting that includes an expansion of its Charleston base",
+      "CHS is the carrier's largest operational base, employing 1,600 workers locally."
+     ],
+     "dated": "2025-01-26"
+    },
+    {
+     "file": "op-breeze-trenton",
+     "org": "Charleston Regional Aviation Authority (operator, iflychs.com)",
+     "quote": [
+      "June 24, 2026",
+      "The addition of Trenton represents Breeze's 29th nonstop destination from Charleston International Airport."
+     ],
+     "dated": "2026-06-24"
+    }
+   ]
+  },
+  {
+   "claim": "Breeze has flown from Charleston since 2021",
+   "verdict": "corrected",
+   "inAfter": "has flown from Charleston since 2021",
+   "sources": [
+    {
+     "file": "op-breeze-trenton",
+     "org": "Charleston Regional Aviation Authority (operator, iflychs.com)",
+     "quote": "Since launching service in Charleston in 2021, Breeze has steadily expanded its footprint at CHS.",
+     "dated": "2026-06-24"
+    },
+    {
+     "file": "op-breeze-no1",
+     "org": "The Post and Courier (article reprinted on iflychs.com)",
+     "quote": "The inaugural flight on May 27, 2021, took off from Tampa, Fla., and landed in the Lowcountry.",
+     "dated": "2025-01-26"
+    }
+   ]
+  },
+  {
+   "claim": "a joint civil and military airport",
+   "verdict": "confirmed",
+   "inAfter": "It is a joint civil and military airport.",
+   "note": "Replaces the old text's framing 'The military relationship is unusual and worth understanding', keeping the fact and dropping the judgement.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is a joint civil-military airport located in North Charleston"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "CHARLESTON AFB/INTL",
+      "THIS IS A SHARED-USE AIRPORT."
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "Joint Base Charleston, part of the US Air Force, owns and operates the runways",
+   "verdict": "confirmed",
+   "inAfter": "Joint Base Charleston, part of the US Air Force, owns and operates the runways",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Joint Base Charleston owns and operates the runways at the airport"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "10 OWNERSHIP: AIR FORCE",
+      "> 11 OWNER: USAF > 12 ADDRESS: JOINT BASE CHARLESTON",
+      "THE USAF OWNS AND OPERATES ALL RUNWAYS AND THE MAJORITY OF THE TAXIWAYS."
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "the Charleston Regional Aviation Authority runs the civilian terminal under a joint-use agreement",
+   "verdict": "corrected",
+   "inAfter": "The Charleston Regional Aviation Authority runs the civilian terminal under a joint-use agreement with the base.",
+   "note": "Was 'the civilian airport uses them under a joint-use agreement with the Charleston County Aviation Authority', which named the wrong party and an old name. The agreement is between the base and the authority, and the authority now calls itself the Charleston Regional Aviation Authority: its own board page names Helen Hill chair of the Charleston County Aviation Authority from 2019 'a position she still holds today', and its June 2026 release calls her Chair of the Charleston Regional Aviation Authority. The FAA record carries both names, the newer in its latest remark. The date of the change was not found.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is operated by the Charleston County Aviation Authority under a joint-use agreement with Joint Base Charleston."
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "THE CHARLESTON COUNTY AVIATION AUTHORITY OPERATES THE CIVILIAN TERMINAL AND ASSOCIATED TAXIWAYS.",
+      "ELLIOTT SUMMEY IS THE DIR OF ARPTS FOR THE CHARLESTON REGIONAL AVN AUTH."
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "op-board",
+     "org": "Charleston Regional Aviation Authority (operator, iflychs.com)",
+     "quote": [
+      "The Charleston Regional Aviation Authority is governed by an 11-member board.",
+      "In 2019, Hill was elected the first female Board Chair of the Charleston County Aviation Authority, a position she still holds today."
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-breeze-trenton",
+     "org": "Charleston Regional Aviation Authority (operator, iflychs.com)",
+     "quote": "Helen Hill, Chair of the Charleston Regional Aviation Authority",
+     "dated": "2026-06-24"
+    }
+   ]
+  },
+  {
+   "claim": "two runways, the longer at 9,001 feet, on a combined 2,060 acre site",
+   "verdict": "confirmed",
+   "inAfter": "Two runways serve the combined 2,060 acre site, the longer at 9,001 feet.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "covers 2,060 acres (830 ha) and has two runways: 15/33, 9,001 ft"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "22 ACREAGE: 2,060",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 03/21: 2,134 m (7,000 ft), ASP",
+      "Runway 15/33: 2,744 m (9,001 ft), CON",
+      "Runways listed: 2"
+     ],
+     "dated": "2026-09-23 (OurAirports data fetched)"
+    }
+   ]
+  },
+  {
+   "claim": "over 6.1 million passengers in 2023, its busiest year on record",
+   "verdict": "cut",
+   "wasBefore": "serving over 6.1 million passengers in 2023, its busiest year on record",
+   "why": "Out of date: replaced by the operator's 2025 figure (about 6.3 million), with the FAA's enplanements as the second source. The 2023 figure itself matches the operator's own summary (6,153,540)."
+  },
+  {
+   "claim": "focus city for Breeze Airways",
+   "verdict": "cut",
+   "wasBefore": "It is a focus city for Breeze Airways.",
+   "why": "Reworded as a base, the word Breeze's own commercial chief uses (Post and Courier), with the start date added from the operator and the Post and Courier."
+  },
+  {
+   "claim": "the military relationship is unusual and worth understanding",
+   "verdict": "cut",
+   "wasBefore": "The military relationship is unusual and worth understanding.",
+   "why": "A judgement with no source; replaced by the plain fact that it is a joint civil and military airport."
+  },
+  {
+   "claim": "joint-use agreement with the Charleston County Aviation Authority",
+   "verdict": "cut",
+   "wasBefore": "and the civilian airport uses them under a joint-use agreement with the Charleston County Aviation Authority",
+   "why": "Corrected: the authority is a party to the agreement, not the other side of it, and it is now the Charleston Regional Aviation Authority (operator's own pages and the FAA record)."
+  },
+  {
+   "claim": "site divided into four areas",
+   "verdict": "cut",
+   "wasBefore": "The site is divided into four areas: military to the west, the airline terminal to the south, general aviation to the east and the Boeing plant further south.",
+   "why": "Only Wikipedia describes the layout; the FAA record and the operator's pages do not."
+  },
+  {
+   "claim": "the Boeing plant assembles the 787 Dreamliner and brings business travel",
+   "verdict": "cut",
+   "wasBefore": "That Boeing plant is where the 787 Dreamliner is assembled, which brings a steady stream of business travel through the airport.",
+   "why": "Boeing's own pages (US locations and a March 2026 feature) confirm 787 final assembly at Boeing South Carolina, but none of the saved sources other than Wikipedia puts the plant at the airport (Boeing, the FAA record and the operator's pages were checked; the operator mentions only 'Boeing traffic' on the roads). 'A steady stream of business travel' has no source at all."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
