@@ -1,0 +1,77 @@
+{
+ "iata": "FEZ",
+ "id": "recCjDlptYMMxMfKx",
+ "name": "Fes Saïss International Airport",
+ "country": "Morocco",
+ "wikipedia": "https://en.wikipedia.org/wiki/F%C3%A8s%E2%80%93Sa%C3%AFss_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Fez, about 13 km from the city centre, and the practical arrival for the whole Fès-Meknès region.\n\nIt is a straightforward, single runway airport: one asphalt strip of 3,200 metres at an elevation of 579 metres. It passed a million passengers a year in 2017.\n\nGetting into Fez is easy and cheap. Bus number 16 runs regularly between the airport and the city's bus and train stations and takes about forty minutes to the central railway station. Taxis wait at the exit of the passenger terminal and the fare into the centre is fixed at 150 dirhams, which is worth telling a client in advance so there is no negotiation on arrival.",
+ "after": "The airport for Fez, about 13 km from the city centre.\n\nIt is a single-runway airport: one asphalt strip of 3,200 metres at an elevation of 579 metres.",
+ "claims": [
+  {
+   "claim": "the airport for Fez, about 13 km from the centre",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Fez, about 13 km from the city centre.",
+   "note": "Straight line 11.9 km; 13 km is a ratio of 1.09.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "is an airport serving Fez",
+      "The airport Fez Saiss is located about 13 km from the city center of Fez."
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 11.9 km (7.4 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "single runway, asphalt, 3,200 m, elevation 579 m",
+   "verdict": "confirmed",
+   "inAfter": "It is a single-runway airport: one asphalt strip of 3,200 metres at an elevation of 579 metres.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport is at an elevation of 579 metres (1,900 ft) above mean sea level.",
+      "It has one runway designated 09/27 with an asphalt surface measuring 3,200 by 45 metres"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "elevation 1,900 ft (579 m)",
+      "Runway 09/27: 3,200 m (10,499 ft), ASP",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "practical arrival for the whole Fès-Meknès region",
+   "verdict": "cut",
+   "wasBefore": "and the practical arrival for the whole Fès-Meknès region.",
+   "why": "Wikipedia says only that Fez is the region's capital; that the airport serves the whole region has no source."
+  },
+  {
+   "claim": "passed a million passengers a year in 2017",
+   "verdict": "cut",
+   "wasBefore": "It passed a million passengers a year in 2017.",
+   "why": "True but nine years old (Wikipedia's newest figure is 1,417,881 for 2019). The operator, ONDA, publishes the current figures, but onda.ma answers every request with a Cloudflare bot check (403), which the sweep does not try to get round."
+  },
+  {
+   "claim": "bus 16 to the bus and train stations, about 40 minutes; taxis at the exit; fixed fare of 150 dirhams",
+   "verdict": "cut",
+   "wasBefore": "Getting into Fez is easy and cheap. Bus number 16 runs regularly between the airport and the city's bus and train stations and takes about forty minutes to the central railway station. Taxis wait at the exit of the passenger terminal and the fare into the centre is fixed at 150 dirhams, which is worth telling a client in advance so there is no negotiation on arrival.",
+   "why": "All from one unreferenced Wikipedia paragraph. A fare needs two sources, one from the last 12 months; ONDA is behind a bot check and fezairport.com answered 429. Worth restoring when ONDA or the city's transport operator can be read."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
