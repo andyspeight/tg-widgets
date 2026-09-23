@@ -1,0 +1,223 @@
+{
+ "iata": "BLQ",
+ "id": "recPl1EPtz6kzQ73x",
+ "name": "Bologna Guglielmo Marconi Airport",
+ "country": "Italy",
+ "wikipedia": "https://en.wikipedia.org/wiki/Bologna_Guglielmo_Marconi_Airport",
+ "audited": "2026-09-23",
+ "before": "Bologna's airport, about 6 km north west of the city centre, and a practical arrival for the whole of Emilia-Romagna.\n\nThe monorail is the thing to use. The Marconi Express opened in 2020 and runs from the terminal to Bologna Centrale railway station in about seven and a half minutes, replacing the old Aerobus shuttle. From Centrale the rest of the region is a short train ride.\n\nThere are also daily direct buses to Ferrara, Florence, Modena, Ravenna, Rimini and Cervia, so a client can reach the Adriatic coast without changing in the city.\n\nOne practical note for a passenger with reduced mobility or a lot of luggage. There are no jetways at all here: all 24 departure gates are bus gates, so every boarding is by coach.\n\nThe terminal was expanded between 2011 and 2013 to 36,100 square metres. The single runway is 2,800 metres. The airport is named after Guglielmo Marconi, who was born in the city.",
+ "after": "Bologna's airport, about 6 km north west of the city centre and a practical arrival for the whole of Emilia-Romagna.\n\nThe monorail is the thing to use. Marconi Express trains run from the terminal to Bologna Centrale railway station in about seven minutes. From Centrale the rest of the region is a short train ride.\n\nThere are also direct buses to Ferrara, Florence, Modena and Rimini, so a client can reach the Adriatic coast without changing in the city.\n\nOne practical note for a passenger with reduced mobility. The airport lists only three boarding bridges for its 22 gates, and says wheelchair users board with a special vehicle or lift.\n\nIts single runway is 2,800 metres. The airport is named after Guglielmo Marconi, who was born in the city.",
+ "claims": [
+  {
+   "claim": "about 6 km north west of the city centre",
+   "verdict": "confirmed",
+   "inAfter": "about 6 km north west of the city centre",
+   "note": "Coordinates: 6.1 km in a straight line at 319 degrees, north west (ratio 0.98).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-08",
+     "quote": "It is approximately 6 km (3.7 mi) northwest of the city centre"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 6.1 km (3.8 miles)",
+      "Bearing from the city centre: 319 degrees, which is north west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the Marconi Express monorail to Bologna Centrale in about seven minutes",
+   "verdict": "corrected",
+   "inAfter": "Marconi Express trains run from the terminal to Bologna Centrale railway station in about seven minutes.",
+   "note": "Was 'in about seven and a half minutes' (Wikipedia). The monorail's operator and the airport both say 7 minutes.",
+   "sources": [
+    {
+     "file": "marconi-express-home",
+     "org": "Marconi Express (the monorail operator, marconiexpress.it)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "From Bologna Airport to city centre in 7 minutes | Marconi Express Bologna Shuttle"
+    },
+    {
+     "file": "op-bus",
+     "org": "Aeroporto di Bologna (the airport operator, bologna-airport.it)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Monorail train to the city centre",
+      "Travel time: 7 minutes"
+     ]
+    },
+    {
+     "file": "op-marconi-express",
+     "org": "Aeroporto di Bologna (the airport operator, bologna-airport.it)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The monorail train connecting the airport to Bologna central train station"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-08",
+     "quote": "the Marconi Express monorail connects the airport to Bologna Centrale railway station with a travel time of approximately 7.5 minutes."
+    }
+   ]
+  },
+  {
+   "claim": "direct buses to Ferrara, Florence, Modena and Rimini",
+   "verdict": "corrected",
+   "inAfter": "There are also direct buses to Ferrara, Florence, Modena and Rimini",
+   "note": "Was 'daily direct buses to Ferrara, Florence, Modena, Ravenna, Rimini and Cervia'. The airport's current list (read with HTML comments stripped, and checked against the browser's rendering) has Ferrara, Firenze, Modena and a Cesena to Rimini line; Cervia is served only by a taxi transfer service and Ravenna is not listed. 'Daily' is not stated.",
+   "sources": [
+    {
+     "file": "op-bus",
+     "org": "Aeroporto di Bologna (the airport operator, bologna-airport.it)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Ferrara",
+      "Company: Ferrara al Volo",
+      "Firenze",
+      "Company: Ricci Autonoleggi",
+      "Modena",
+      "Cesena - Rimini direct line"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-08",
+     "quote": "The airport has daily direct bus connections with Ferrara, Florence, Modena, Cervia, Ravenna, and Rimini"
+    }
+   ]
+  },
+  {
+   "claim": "the airport lists three boarding bridges for 22 gates; wheelchair users board with a special vehicle or lift",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport lists only three boarding bridges for its 22 gates, and says wheelchair users board with a special vehicle or lift.",
+   "note": "Was 'There are no jetways at all here: all 24 departure gates are bus gates, so every boarding is by coach' (Wikipedia). The operator's own infrastructure page gives 3 boarding bridges and 22 gates, which contradicts it; its accessibility page says wheelchair users need a special vehicle or lift to reach the aircraft. Attributed to the airport, whose figures they are.",
+   "sources": [
+    {
+     "file": "op-runway-infra",
+     "org": "Aeroporto di Bologna (the airport operator, bologna-airport.it)",
+     "dated": "read 2026-09-23 (live page, ©2026)",
+     "quote": [
+      "no. Boarding Bridges: 3",
+      "no. Gates: 22"
+     ]
+    },
+    {
+     "file": "op-move-around",
+     "org": "Aeroporto di Bologna (the airport operator, bologna-airport.it)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "in cases where a wheelchair is used, boarding must be carried out with assistance since it is necessary to use a special dedicated vehicle (or lift) to reach the aircraft"
+    }
+   ]
+  },
+  {
+   "claim": "a single runway of 2,800 metres",
+   "verdict": "confirmed",
+   "inAfter": "Its single runway is 2,800 metres.",
+   "sources": [
+    {
+     "file": "op-runway-infra",
+     "org": "Aeroporto di Bologna (the airport operator, bologna-airport.it)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Runway: 12/30",
+      "Length: 2,800x45 mt"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-08",
+     "quote": "Bologna airport has one runway, 12/30, made of asphalt; its dimensions are 2,800 by 45 metres"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 12/30: 2,803 m (9,196 ft), ASP",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after Guglielmo Marconi, who was born in the city",
+   "verdict": "confirmed",
+   "inAfter": "The airport is named after Guglielmo Marconi, who was born in the city.",
+   "sources": [
+    {
+     "file": "op-company",
+     "org": "Aeroporto di Bologna (the airport operator, bologna-airport.it)",
+     "quote": "© Copyright 2026 Aeroporto Guglielmo Marconi di Bologna S.p.A. - All rights reserved"
+    },
+    {
+     "file": "nobel-marconi",
+     "org": "Nobel Prize Outreach (nobelprize.org)",
+     "quote": "Born: 25 April 1874, Bologna, Italy"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-08",
+     "quote": "The airport is named after Bologna native Guglielmo Marconi (1874–1937), an Italian electrical engineer and Nobel laureate."
+    }
+   ]
+  },
+  {
+   "claim": "the Marconi Express opened in 2020, replacing the old Aerobus shuttle",
+   "verdict": "cut",
+   "wasBefore": "The Marconi Express opened in 2020 and runs from the terminal to Bologna Centrale railway station in about seven and a half minutes, replacing the old Aerobus shuttle.",
+   "why": "The opening year and the Aerobus it replaced rest on Wikipedia alone: neither the monorail's page nor the airport's names them. The journey time is corrected to seven minutes (see above)."
+  },
+  {
+   "claim": "daily buses, and buses to Ravenna and Cervia",
+   "verdict": "cut",
+   "wasBefore": "There are also daily direct buses to Ferrara, Florence, Modena, Ravenna, Rimini and Cervia",
+   "why": "The airport's current list has no Ravenna bus, serves Cervia only by a taxi transfer service and does not say 'daily'. Corrected (see above)."
+  },
+  {
+   "claim": "no jetways; all 24 departure gates are bus gates; every boarding by coach",
+   "verdict": "cut",
+   "wasBefore": "One practical note for a passenger with reduced mobility or a lot of luggage. There are no jetways at all here: all 24 departure gates are bus gates, so every boarding is by coach.",
+   "why": "Contradicted by the operator, which lists 3 boarding bridges and 22 gates. Corrected to the airport's own figures (see above)."
+  },
+  {
+   "claim": "terminal expanded 2011 to 2013 to 36,100 square metres",
+   "verdict": "cut",
+   "wasBefore": "The terminal was expanded between 2011 and 2013 to 36,100 square metres.",
+   "why": "Wikipedia alone, and the operator's own floor areas (19,500, 14,500 and 10,770 square metres) add up to 44,770, not 36,100."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and a practical arrival for the whole of Emilia-Romagna",
+   "why": "The old text's judgement, kept."
+  },
+  {
+   "text": "The monorail is the thing to use.",
+   "why": "The old text's advice, kept; the monorail behind it is sourced."
+  },
+  {
+   "text": "From Centrale the rest of the region is a short train ride.",
+   "why": "The old text's advice, kept; Bologna Centrale is described by the airport as the Italian hub of the high-speed network."
+  },
+  {
+   "text": "so a client can reach the Adriatic coast without changing in the city",
+   "why": "Follows from the sourced Rimini bus."
+  },
+  {
+   "text": "One practical note for a passenger with reduced mobility.",
+   "why": "Framing for the sourced sentence that follows."
+  }
+ ],
+ "tracerOk": {
+  "From Centrale": "The tracer catches the sentence's opening 'From' with the station's name; 'Bologna Centrale' is in the airport's, the monorail's and Wikipedia's pages."
+ }
+}

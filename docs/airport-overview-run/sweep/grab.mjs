@@ -64,7 +64,11 @@ if (res.status) {
     try { decoded = new TextDecoder(cs && !/utf-?8/i.test(cs) ? cs.toLowerCase() : 'utf-8').decode(buf); }
     catch { decoded = buf.toString('utf8'); }
     if (cs && !/utf-?8/i.test(cs)) kind = 'html ' + cs.toLowerCase();
+    // HTML comments first: a comment that wraps markup would otherwise leak its
+    // text (hidden from visitors) into the saved page, with a stray '-->'
+    // (found at Bologna, 23 Sep evening).
     text = decoded
+      .replace(/<!--[\s\S]*?-->/g, ' ')
       .replace(/<script[\s\S]*?<\/script>/gi, ' ')
       .replace(/<style[\s\S]*?<\/style>/gi, ' ')
       .replace(/<br\s*\/?>/gi, '\n')
