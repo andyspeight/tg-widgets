@@ -1,0 +1,148 @@
+{
+ "iata": "PMO",
+ "id": "recydOIo1LQc3IECZ",
+ "name": "Falcone–Borsellino Airport",
+ "country": "Italy",
+ "wikipedia": "https://en.wikipedia.org/wiki/Palermo_Airport",
+ "audited": "2026-09-23",
+ "before": "Palermo's airport, at Cinisi about 35 km west north west of the city, and second busiest in Sicily after Catania with 9,220,905 passengers in 2025.\n\nThe train is the easy way in and often overlooked. Punta Raisi station sits at the airport and is the north western end of the Palermo metropolitan railway, running to Palermo Centrale roughly every 30 minutes from early morning until around ten at night. Buses also run to Palermo, Catania, Messina and across Sicily.\n\nThe name carries weight locally. The airport is named after Giovanni Falcone and Paolo Borsellino, the two leading anti-mafia judges murdered by the mafia. It was previously called Punta Raisi, after the cape it sits on, and that older name is still in wide use.\n\nIt opened in 1960 to replace Boccadifalco, whose short runway and mountainous surroundings made jet operations unsafe.",
+ "after": "Palermo's airport, about 35 km west north west of the city. It is the second busiest in Sicily after Catania, with 9,220,905 passengers in 2025.\n\nThe train is the easy way in and often overlooked: there is a railway station at the airport, with trains into Palermo.\n\nIts official name is Falcone Borsellino, but the older name, Punta Raisi, is still in use.",
+ "claims": [
+  {
+   "claim": "about 35 km west north west of Palermo",
+   "verdict": "confirmed",
+   "inAfter": "about 35 km west north west of the city",
+   "note": "Coordinates: 24.7 km in a straight line at 286 degrees (west north west is 292.5; ratio 1.41, a road distance).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "19 NM (35 km; 22 mi) west-northwest of Palermo"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 24.7 km (15.4 miles)",
+      "Bearing from the city centre: 286 degrees"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "second busiest in Sicily after Catania; 9,220,905 passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "the second busiest in Sicily after Catania, with 9,220,905 passengers in 2025",
+   "note": "Assaeroporti's 2025 year file: Catania 12,369,485, Palermo 9,220,905, Trapani 1,007,409, Comiso 134,495. Eurostat counts 9,280,993 for Palermo and 12,356,128 for Catania; PalermoToday (March 2026) gives 9.2 million.",
+   "sources": [
+    {
+     "file": "assaeroporti-2025",
+     "org": "Assaeroporti (Italian airports association)",
+     "dated": "2025 year totals (December 2025 file)",
+     "quote": [
+      "10 | Catania | 81003 | -1.9 | 12369485",
+      "25 | Palermo | 64841 | -0.4 | 9220905 | 3.4"
+     ]
+    },
+    {
+     "file": "eurostat-it",
+     "org": "Eurostat",
+     "dated": "2026-09-23",
+     "quote": [
+      "Eurostat IT_LICC CATANIA/FONTANAROSSA airport: passengers carried in 2025: 12,356,128",
+      "Eurostat IT_LICJ PALERMO/PUNTA RAISI airport: passengers carried in 2025: 9,280,993"
+     ]
+    },
+    {
+     "file": "palermotoday-rotte",
+     "org": "PalermoToday (Palermo news)",
+     "dated": "2026-03-26",
+     "quote": "Nel 2025 lo scalo ha raggiunto 9,2 milioni di passeggeri"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the second biggest airport in Sicily in terms of passengers after Catania-Fontanarossa Airport, with 9,220,905 passengers handled in 2025"
+    }
+   ]
+  },
+  {
+   "claim": "a railway station at the airport with trains into Palermo",
+   "verdict": "softened",
+   "inAfter": "there is a railway station at the airport, with trains into Palermo",
+   "note": "Was the station's name, its place on the metropolitan line and the timetable (every 30 minutes, early morning to about 10pm), which rest on Wikipedia alone: the airport's site, Trenitalia and RFI could not be read. In April 2023 the airport company's chairman urged Palermo people to take the train to the airport, saying he did so every day and found it empty.",
+   "sources": [
+    {
+     "file": "palermotoday-tratte",
+     "org": "PalermoToday (Palermo news)",
+     "dated": "2023-04-03",
+     "quote": "Consiglio ai palermitani di prendere il treno per recarsi all'aeroporto"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport's railway facility, Punta Raisi railway station, is the northwestern terminus of Palermo metropolitan railway service. It links the airport with Palermo Centrale railway station."
+    }
+   ]
+  },
+  {
+   "claim": "official name Falcone Borsellino; Punta Raisi still in use",
+   "verdict": "softened",
+   "inAfter": "Its official name is Falcone Borsellino, but the older name, Punta Raisi, is still in use.",
+   "note": "Was 'named after Giovanni Falcone and Paolo Borsellino, the two leading anti-mafia judges murdered by the mafia ... that older name is still in wide use'. PalermoToday uses the official name; Eurostat still files the airport as PALERMO/PUNTA RAISI. Who the name honours rests on Wikipedia in the sources that could be read (the airport's own site refused), so it is not in the text.",
+   "sources": [
+    {
+     "file": "palermotoday-rotte",
+     "org": "PalermoToday (Palermo news)",
+     "dated": "2026-03-26",
+     "quote": "aeroporto internazionale Falcone Borsellino di Palermo"
+    },
+    {
+     "file": "eurostat-it",
+     "org": "Eurostat",
+     "dated": "2026-09-23",
+     "quote": "Eurostat IT_LICJ PALERMO/PUNTA RAISI airport"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Falcone Borsellino Airport",
+      "formerly Punta Raisi Airport"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "at Cinisi",
+   "verdict": "cut",
+   "wasBefore": "at Cinisi about 35 km west north west of the city",
+   "why": "'At Cinisi' rests on Wikipedia alone (OurAirports gives Palermo as the municipality); the distance and direction are kept."
+  },
+  {
+   "claim": "Punta Raisi station, north western end of the metropolitan railway, every 30 minutes until about 10pm; buses across Sicily",
+   "verdict": "cut",
+   "wasBefore": "Punta Raisi station sits at the airport and is the north western end of the Palermo metropolitan railway, running to Palermo Centrale roughly every 30 minutes from early morning until around ten at night. Buses also run to Palermo, Catania, Messina and across Sicily.",
+   "why": "Wikipedia alone: the airport's site (aeroportodipalermo.it) and Trenitalia refused both tools, RFI's station page does not exist and GESAP's old site answered 405. The station and the trains into Palermo are kept."
+  },
+  {
+   "claim": "named after the anti-mafia judges Falcone and Borsellino; 'The name carries weight locally'",
+   "verdict": "cut",
+   "wasBefore": "The name carries weight locally. The airport is named after Giovanni Falcone and Paolo Borsellino, the two leading anti-mafia judges murdered by the mafia. It was previously called Punta Raisi, after the cape it sits on, and that older name is still in wide use.",
+   "why": "Who the name honours and the cape rest on Wikipedia alone in the sources that could be read. The two names are kept. Worth restoring from the airport's own site when it can be read."
+  },
+  {
+   "claim": "opened in 1960 to replace Boccadifalco",
+   "verdict": "cut",
+   "wasBefore": "It opened in 1960 to replace Boccadifalco, whose short runway and mountainous surroundings made jet operations unsafe.",
+   "why": "Wikipedia alone; the airport's history could not be read."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The train is the easy way in and often overlooked",
+   "why": "The old text's judgement, kept: in April 2023 the airport company's chairman said he took the train every day and found it empty (PalermoToday)."
+  }
+ ],
+ "tracerOk": {}
+}
