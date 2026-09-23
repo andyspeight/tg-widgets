@@ -1,0 +1,447 @@
+{
+ "iata": "FOR",
+ "id": "rec9gIwbuTLN5LTnJ",
+ "name": "Pinto Martins International Airport",
+ "country": "Brazil",
+ "wikipedia": "https://en.wikipedia.org/wiki/Fortaleza_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Fortaleza, 6 km south of the city centre, and one of the Brazilian airports now run by Fraport Brasil rather than by Infraero, which held it from 1974 until the end of 2017.\n\nThe current passenger terminal opened in February 1998 in the southern part of the site and covers 35,000 square metres. The older 1966 terminal on the north side is still in use, as the general aviation terminal for private aircraft, executive charters and air taxi work. A second wave of investment followed in the run up to the 2014 World Cup, when Fortaleza was a host city, covering the terminal, the apron and the parking.\n\nSome facilities are shared with Fortaleza Air Force Base, and the site began as a 1930s runway that became an Allied base in the Second World War, supporting operations across the South Atlantic.\n\nIt is named after Euclides Pinto Martins, a Ceará born aviator who in 1922 helped pioneer the air route between New York and Rio de Janeiro.",
+ "after": "The airport for Fortaleza, 6 km south of the city centre, and one of the Brazilian airports now run by Fraport Brasil rather than by Infraero, which held it until the end of 2017.\n\nIts current passenger terminal opened in February 1998. Work to extend it for the 2014 World Cup was left unfinished, and Fraport enlarged the terminal between 2018 and 2020. The old passenger terminal now serves general aviation and air taxis.\n\nFortaleza Air Force Base is next door. In the Second World War the airfield was an Allied air base.\n\nIt is named after Euclides Pinto Martins, a Ceará born aviator who in 1922 helped pioneer the air route between New York and Rio de Janeiro.",
+ "claims": [
+  {
+   "claim": "the airport for Fortaleza",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Fortaleza",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the international airport located 6 km (4 mi) south of downtown Fortaleza, Brazil"
+    },
+    {
+     "file": "aisweb-sbfz",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": [
+      "Pinto Martins (SBFZ) Fortaleza/CE",
+      "INTL"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "6 km south of the city centre",
+   "verdict": "confirmed",
+   "inAfter": "6 km south of the city centre",
+   "note": "The coordinates give 6.6 km in a straight line at 170 degrees (south); 6 km is a ratio of 0.91, inside the tolerance.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "located 6 km (4 mi) south of downtown Fortaleza"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 6.6 km",
+      "Bearing from the city centre: 170 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "one of the Brazilian airports now run by Fraport Brasil",
+   "verdict": "confirmed",
+   "inAfter": "one of the Brazilian airports now run by Fraport Brasil",
+   "note": "Checked for a 2025 or 2026 change of operator, as happened to the Motiva airports: none. Fraport Brasil still runs Fortaleza and Porto Alegre (release of 29 August 2026) and added a third, Jericoacoara, on 1 September 2026. DECEA's live entry names FRAPORT as the aerodrome's operator. OurAirports' home link (fortaleza-airport.com.br) is the domain read here. Fraport AG's own pages are the same organisation as Fraport Brasil and are not counted twice.",
+   "sources": [
+    {
+     "file": "op-9anos",
+     "org": "Fraport Brasil (airport operator)",
+     "quote": [
+      "A nova operação se soma aos aeroportos de Fortaleza e Porto Alegre, administrados pela concessionária desde 2017.",
+      "29 agosto 2026"
+     ],
+     "dated": "2026-08-29"
+    },
+    {
+     "file": "aisweb-sbfz",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": [
+      "Pinto Martins (SBFZ) Fortaleza/CE",
+      "FRAPORT"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "fraport-ag-fortaleza",
+     "org": "Fraport AG (operator's parent)",
+     "quote": "Management, operation, and expansion of the two Brazilian airports Pinto Martins in Fortaleza and Comandante Ariston Pessoa in Jericoacoara"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "operated by Fraport Brasil"
+    }
+   ]
+  },
+  {
+   "claim": "Infraero ran it until the end of 2017",
+   "verdict": "confirmed",
+   "inAfter": "rather than by Infraero, which held it until the end of 2017",
+   "note": "Fraport Brasil started operations on 2 January 2018 after a joint transition with Infraero that began in September 2017.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "to December 31, 2017, the facility was operated by Infraero"
+    },
+    {
+     "file": "fraport-begins-2018",
+     "org": "Fraport AG (operator's parent)",
+     "quote": [
+      "2018-01-02",
+      "today started operations at Fortaleza’s Pinto Martins International Airport (FOR)",
+      "Infraero, the state-owned authority that previously ran both airports"
+     ],
+     "dated": "2018-01-02"
+    },
+    {
+     "file": "dn-letreiro",
+     "org": "Diário do Nordeste (Fortaleza newspaper)",
+     "quote": [
+      "Em 2018, a Fraport, empresa alemã, assumiu a administração do Aeroporto de Fortaleza",
+      "12 de Setembro de 2019"
+     ],
+     "dated": "2019-09-12"
+    }
+   ]
+  },
+  {
+   "claim": "current passenger terminal opened in February 1998",
+   "verdict": "confirmed",
+   "inAfter": "Its current passenger terminal opened in February 1998.",
+   "note": "Diário do Nordeste marks the 19th anniversary of the current terminal's opening on Tuesday 7 February 2017, so it opened on 7 February 1998.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It was opened in February 1998."
+    },
+    {
+     "file": "dn-aniversario",
+     "org": "Diário do Nordeste (Fortaleza newspaper)",
+     "quote": [
+      "comemora o 19º ano de abertura do atual terminal de passageiros, inaugurado em 1998",
+      "Nesta terça-feira (7)",
+      "06 de Fevereiro de 2017"
+     ],
+     "dated": "2017-02-06"
+    }
+   ]
+  },
+  {
+   "claim": "the World Cup extension was left unfinished",
+   "verdict": "corrected",
+   "inAfter": "Work to extend it for the 2014 World Cup was left unfinished",
+   "note": "Was 'A second wave of investment followed in the run up to the 2014 World Cup ... covering the terminal, the apron and the parking', which reads as if the work was done. Wikipedia describes only Infraero's 2009 plan, due for completion in November 2013. Both Fortaleza papers report the terminal extension stopped in May 2014, when Infraero ended its contract with the CPM Novo Fortaleza consortium, and was still an abandoned building site under a court dispute in April 2018.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "investment plan to upgrade the airport focusing on the preparations for the 2014 FIFA World Cup"
+    },
+    {
+     "file": "dn-fraport-juiz",
+     "org": "Diário do Nordeste (Fortaleza newspaper)",
+     "quote": [
+      "para inspecionar a área do Aeroporto que devia ter sido feita para a Copa",
+      "Estrutura inacabada deixada pelo consórcio CPM Novo Fortaleza",
+      "06 de Abril de 2018"
+     ],
+     "dated": "2018-04-06"
+    },
+    {
+     "file": "opovo-maquinas-2018",
+     "org": "O Povo (Fortaleza newspaper)",
+     "quote": [
+      "paralisadas desde maio de 2014",
+      "o canteiro de obras abandonado do Aeroporto de Fortaleza",
+      "18/04/2018"
+     ],
+     "dated": "2018-04-18"
+    }
+   ]
+  },
+  {
+   "claim": "Fraport enlarged the terminal between 2018 and 2020",
+   "verdict": "corrected",
+   "inAfter": "Fraport enlarged the terminal between 2018 and 2020",
+   "note": "Replaces the World Cup investment line with the enlargement that was actually built. The operator dates the start of work on the terminal to May 2018 and the end of phase 1B to April 2020; Wikipedia gives 27 April 2018 and 14 April 2020; O Povo (2018) says phases 1B and C are the terminal enlargement. Only the years are given.",
+   "sources": [
+    {
+     "file": "op-sobre",
+     "org": "Fraport Brasil (airport operator)",
+     "quote": [
+      "O i nício das obras no Terminal de Passageiros e pista de pouso e decolagem acontece em Maio.",
+      "Em Abril, conclusão das obras Fase 1B"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "On April 27, 2018, the construction of the two-story terminal extension started",
+      "and finally on April 14, 2020, the renovation was completed."
+     ]
+    },
+    {
+     "file": "opovo-maquinas-2018",
+     "org": "O Povo (Fortaleza newspaper)",
+     "quote": "na amplia&ccedil;&atilde;o do terminal, valor referente &agrave;s fases 1B e C das obras",
+     "dated": "2018-04-18"
+    },
+    {
+     "file": "op-9anos",
+     "org": "Fraport Brasil (airport operator)",
+     "quote": "Foram entregues obras estruturais importantes, como a ampliação e modernização dos terminais de passageiros",
+     "dated": "2026-08-29"
+    }
+   ]
+  },
+  {
+   "claim": "the old passenger terminal now serves general aviation and air taxis",
+   "verdict": "softened",
+   "inAfter": "The old passenger terminal now serves general aviation and air taxis.",
+   "note": "Was 'The older 1966 terminal on the north side is still in use, as the general aviation terminal for private aircraft, executive charters and air taxi work'. Diário do Nordeste (2015) puts the air taxi terminals in the old passenger terminal's area; DECEA's live entry still lists a general aviation terminal (TAG) with its own apron. The 1966 date, the north side and executive charters rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "this former passenger terminal now serves as a general aviation terminal for private aircraft, where general aviation, executive, and air taxi operations occur"
+    },
+    {
+     "file": "dn-segunda-pista",
+     "org": "Diário do Nordeste (Fortaleza newspaper)",
+     "quote": [
+      "na área do terminal antigo de passageiros, onde hoje operam terminais de taxi aéreos",
+      "13 de Agosto de 2015"
+     ],
+     "dated": "2015-08-13"
+    },
+    {
+     "file": "aisweb-sbfz",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": "terminal de aviação geral (TAG)",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Fortaleza Air Force Base is next door",
+   "verdict": "softened",
+   "inAfter": "Fortaleza Air Force Base is next door.",
+   "note": "Was 'Some facilities are shared with Fortaleza Air Force Base'. Wikipedia now puts that in the past tense ('were shared') and the Air Force's own site (fab.mil.br) answers with Cloudflare's bot check, so what is shared today could not be confirmed. Diário do Nordeste shows the base adjoining the airport (an aerial photo of both, and a 2015 plan for the base to give up land for a second airport runway); DECEA registers the aerodrome for public and military use (PUB/MIL).",
+   "sources": [
+    {
+     "file": "dn-segunda-pista",
+     "org": "Diário do Nordeste (Fortaleza newspaper)",
+     "quote": [
+      "Foto aérea do Aeroporto Pinto Martins e da Base Aérea mostra a exiguidade de espaços livres para construção de uma nova pista de pousos e decolagens",
+      "Para a construção, é preciso que a Base Aérea de Fortaleza ceda uma parte da sua área"
+     ],
+     "dated": "2015-08-13"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Some facilities were shared with Fortaleza Air Force Base."
+    },
+    {
+     "file": "aisweb-sbfz",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": "PUB/MIL",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "an Allied air base in the Second World War",
+   "verdict": "softened",
+   "inAfter": "In the Second World War the airfield was an Allied air base.",
+   "note": "Was 'became an Allied base in the Second World War, supporting operations across the South Atlantic'. The 1952 law renamed 'o aeroporto do Cocorote' in Fortaleza as Aeroporto Pinto Martins; Diário do Nordeste's history column says that in the war, when Brazil lent air base areas at Natal and Fortaleza to the Allies, a new unit, Adjacent Field, was set up as the Base Aérea do Cocorote. The South Atlantic role rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "During World War II, the airport was an important Allied base supporting South Atlantic operations."
+    },
+    {
+     "file": "dn-pici-cocorote",
+     "org": "Diário do Nordeste (Fortaleza newspaper)",
+     "quote": [
+      "Tempos da Segunda Guerra Mundial. O Brasil apoiou as nações aliadas.",
+      "Deu-se a criação do Adjacent Field, situado no Alto da Balança (Aerolândia) e designado Base Aérea do Cocorote.",
+      "30 de Janeiro de 2018"
+     ],
+     "dated": "2018-01-30"
+    },
+    {
+     "file": "planalto-lei-1602",
+     "org": "Presidency of Brazil (Planalto law archive)",
+     "quote": [
+      "Aeroporto Pinto Martins",
+      "o aeroporto do Cocorote, em Fortaleza"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after Euclides Pinto Martins",
+   "verdict": "confirmed",
+   "inAfter": "It is named after Euclides Pinto Martins",
+   "note": "Law 1,602 of 13 May 1952 gave the airport the name Aeroporto Pinto Martins; the 1953 naming law kept it.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is named after Euclides Pinto Martins"
+    },
+    {
+     "file": "dn-letreiro",
+     "org": "Diário do Nordeste (Fortaleza newspaper)",
+     "quote": [
+      "faz homenagem ao aviador cearense Euclides Pinto Martins",
+      "O equipamento recebeu o nome do aviador após sanção da Lei Federal 1.602 de 13 de maio de 1952"
+     ],
+     "dated": "2019-09-12"
+    },
+    {
+     "file": "planalto-lei-1602",
+     "org": "Presidency of Brazil (Planalto law archive)",
+     "quote": "Aeroporto Pinto Martins"
+    }
+   ]
+  },
+  {
+   "claim": "a Ceará born aviator",
+   "verdict": "confirmed",
+   "inAfter": "a Ceará born aviator",
+   "note": "Born in Camocim, Ceará, on 15 April 1892 (Diário do Nordeste).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "a Ceará-born aviator"
+    },
+    {
+     "file": "dn-letreiro",
+     "org": "Diário do Nordeste (Fortaleza newspaper)",
+     "quote": "O aviador cearense nasceu em 15 de abril de 1892, na cidade de Camocim",
+     "dated": "2019-09-12"
+    }
+   ]
+  },
+  {
+   "claim": "in 1922 helped pioneer the air route between New York and Rio de Janeiro",
+   "verdict": "confirmed",
+   "inAfter": "who in 1922 helped pioneer the air route between New York and Rio de Janeiro",
+   "note": "Diário do Nordeste: he left New York on 4 September 1922 with the pilot Walter Hinton and reached Rio on 8 February 1923, the first flight between the two cities over the Atlantic. The flight began in 1922, which both sources give; the arrival in 1923 is not added.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "who in 1922 was one of the pioneers of the air link between New York City and Rio de Janeiro"
+    },
+    {
+     "file": "dn-letreiro",
+     "org": "Diário do Nordeste (Fortaleza newspaper)",
+     "quote": [
+      "por ter realizado o primeiro voo sobre o Oceano Atlântico entre as cidades de Nova York e Rio de Janeiro na década de 1920",
+      "Pinto Martins partiu de Nova York no dia 4 de setembro de 1922 e chegou ao Rio de Janeiro no dia 8 de fevereiro de 1923",
+      "Associado ao piloto Walter Hinton"
+     ],
+     "dated": "2019-09-12"
+    }
+   ]
+  },
+  {
+   "claim": "Infraero from 1974",
+   "verdict": "cut",
+   "wasBefore": "from 1974",
+   "why": "The start year rests on Wikipedia alone; the end of Infraero's time (2017) is kept, from Fraport and Diário do Nordeste."
+  },
+  {
+   "claim": "terminal in the southern part of the site",
+   "verdict": "cut",
+   "wasBefore": "in the southern part of the site",
+   "why": "Wikipedia alone; no second source places the terminal on the site."
+  },
+  {
+   "claim": "terminal covers 35,000 square metres",
+   "verdict": "cut",
+   "wasBefore": "covers 35,000 square metres",
+   "why": "That is the size of the 1998 building before Fraport's enlargement of 2018 to 2020, so it is out of date; no source gives the size now."
+  },
+  {
+   "claim": "1966 terminal on the north side, executive charters",
+   "verdict": "cut",
+   "wasBefore": "The older 1966 terminal on the north side is still in use, as the general aviation terminal for private aircraft, executive charters and air taxi work.",
+   "why": "Softened to the old terminal serving general aviation and air taxis (Wikipedia, Diário do Nordeste, DECEA). The 1966 date, the north side and executive charters rest on Wikipedia alone."
+  },
+  {
+   "claim": "second wave of investment for the World Cup covering terminal, apron and parking",
+   "verdict": "cut",
+   "wasBefore": "A second wave of investment followed in the run up to the 2014 World Cup, when Fortaleza was a host city, covering the terminal, the apron and the parking.",
+   "why": "Misleading: the World Cup extension stopped in May 2014 and was left unfinished (Diário do Nordeste, O Povo). Corrected, with Fraport's 2018 to 2020 enlargement. 'When Fortaleza was a host city' rests on Wikipedia alone among the saved pages."
+  },
+  {
+   "claim": "facilities shared with the air base",
+   "verdict": "cut",
+   "wasBefore": "Some facilities are shared with Fortaleza Air Force Base",
+   "why": "Wikipedia now says 'were shared'; the Air Force's site (www2.fab.mil.br/bafz) answered with Cloudflare's 'Just a moment' bot check, so it was not tried again. Softened to the base being next door."
+  },
+  {
+   "claim": "began as a 1930s runway",
+   "verdict": "cut",
+   "wasBefore": "the site began as a 1930s runway",
+   "why": "Wikipedia alone. Diário do Nordeste has the air base created by a 1933 decree and activated in 1936, but does not place it on this site, and its history column says Adjacent Field (Cocorote) was set up during the war."
+  },
+  {
+   "claim": "supporting operations across the South Atlantic",
+   "verdict": "cut",
+   "wasBefore": "supporting operations across the South Atlantic",
+   "why": "Wikipedia alone; Diário do Nordeste's column describes the Fortaleza bases backing operations from Natal and hunting submarines off Ceará, not the South Atlantic as such."
+  },
+  {
+   "claim": "about 6.2 million passengers in 2025, up 8.9 per cent",
+   "verdict": "cut",
+   "why": "Held back: the old text gives no traffic figure, so this replaces nothing. Fraport's 2025 annual report gives 6,166,329 passengers (+8.9 per cent) and 'approximately 6.2 million'; Wikipedia's infobox gives 6,161,283 (+9 per cent), a 0.1 per cent difference. Both round to about 6.2 million.",
+   "sources": [
+    {
+     "file": "fraport-ar2025",
+     "org": "Fraport AG (operator's parent)",
+     "quote": [
+      "Fortaleza 100 6,166,329 +8.9",
+      "approximately 6.2 million passengers (+8.9%)"
+     ],
+     "dated": "2025 annual report"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 6,161,283 9%"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "Second World War": "Wikipedia says 'World War II' and Diário do Nordeste 'Segunda Guerra Mundial'; UK usage is the Second World War."
+ }
+}

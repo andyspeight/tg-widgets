@@ -54,6 +54,8 @@ finished, passing example). Follow both exactly.
    policy forbids that site: record it and move on, and let no other tool
    try it. Do not use curl or wget at all (added 23 Sep evening, after
    two chained retries on egress-blocked sites).
+   A site's own search page counts as a search page, and a blocked site is
+   not fetched again just to read the refusal (added 23 Sep late evening).
    Make sure an "official" site really is the airport's: compare the domain
    with OurAirports' home link (in scratchpad/sweep/airports.csv) or the
    Wikipedia infobox. billund-airport.com, for one, is a hijacked spam site.

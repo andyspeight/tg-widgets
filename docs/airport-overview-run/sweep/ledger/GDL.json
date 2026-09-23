@@ -1,0 +1,446 @@
+{
+ "iata": "GDL",
+ "id": "recFyJaNughNfvGyN",
+ "name": "Guadalajara International Airport",
+ "country": "Mexico",
+ "wikipedia": "https://en.wikipedia.org/wiki/Guadalajara_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Mexico's third busiest airport, in Tlajomulco de Zúñiga about 17 km south east of downtown Guadalajara. It handled 18,696,600 passengers in 2025 and ranks ninth in Latin America.\n\nIt is the largest hub for Volaris and the airline's main gateway to the United States, as well as a hub for Viva and a focus city for Aeroméxico. Flights reach across Mexico, the Americas and Europe.\n\nTwo points of practical detail. The airport sits at 1,529 metres above sea level, and the single terminal is currently undergoing renovation, so expect building works. Two runways serve it, the longer at 4,000 metres.\n\nIt is officially named after Miguel Hidalgo y Costilla, a leader of the Mexican War of Independence, and is operated by Grupo Aeroportuario del Pacífico.",
+ "after": "Mexico's third busiest airport, in Tlajomulco de Zúñiga about 17 km south of downtown Guadalajara. In 2025 it handled about 18.7 million passengers.\n\nIt is Volaris's largest hub and a major base for its flights to the United States. Aeroméxico also flies from here. Flights reach across Mexico and the rest of the Americas.\n\nThe airport sits at 1,529 metres above sea level. Two runways serve it, the longer at 4,000 metres. Its operator, Grupo Aeroportuario del Pacífico, plans a new terminal building in its 2025 to 2029 investment programme.\n\nIt is named after Miguel Hidalgo y Costilla, a leader of the Mexican independence movement.",
+ "claims": [
+  {
+   "claim": "Mexico's third busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "Mexico's third busiest airport",
+   "note": "GAP's own airport page is undated and parts of it are old (it says 'two terminals' and its airline page still lists Interjet), so the 2025 figures were checked as well: Guadalajara 18.7 million (GAP), behind Cancún, which ASUR's annual report of 16 April 2026 says was second in Mexico in 2025 on AFAC's figures, and ahead of Monterrey (15.6 million, OMA) and Tijuana (12.65 million, GAP). AFAC's own national table (gob.mx) is behind a bot check, so the Mexico City airports' 2025 figures were not read; the rank rests on Wikipedia's 2025 infobox and GAP's statement, with the operator figures consistent with it.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is Mexico's third-busiest airport in passenger traffic, aircraft operations, and cargo volume"
+    },
+    {
+     "file": "gap-gdl-page",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "quote": "It is the third busiest airport in Mexico, only after the International Airport of Mexico City",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "asur-20f-2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator of Cancún)",
+     "quote": [
+      "which was the second busiest airport in Mexico in 2025 in terms of passenger traffic",
+      "Dated: April 16, 2026"
+     ],
+     "dated": "2026-04-16"
+    },
+    {
+     "file": "gap-dec2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "quote": [
+      "Guadalajara 1,690.6 1,846.9 9.2% 17,848.7 18,696.6 4.8%",
+      "Tijuana* 1,136.9 1,106.0 (2.7%) 12,545.8 12,650.0 0.8%"
+     ],
+     "dated": "2026-01-06"
+    },
+    {
+     "file": "oma-dec2025-pdf",
+     "org": "Grupo Aeroportuario del Centro Norte (OMA, operator of Monterrey)",
+     "quote": [
+      "Ciudad de México, México, 7 de enero de 2026",
+      "Monterrey 1,319,827 1,419,232 7.5 13,581,599 15,623,275 15.0"
+     ],
+     "dated": "2026-01-07"
+    }
+   ]
+  },
+  {
+   "claim": "in Tlajomulco de Zúñiga",
+   "verdict": "confirmed",
+   "inAfter": "in Tlajomulco de Zúñiga",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is located in the municipality of Tlajomulco de Zúñiga"
+    },
+    {
+     "file": "gap-gdl-page",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "quote": [
+      "Carretera Guadalajara Chapala km 17.5",
+      "Tlajomulco de Zuñiga, Jalisco"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "about 17 km south of downtown Guadalajara",
+   "verdict": "corrected",
+   "inAfter": "about 17 km south of downtown Guadalajara",
+   "note": "Was 'south east', Wikipedia's word. The operator says south, and the coordinates put it at 167 degrees from the city centre, which is south (south east passes the tolerance only as the adjacent point). The distance holds: 17.6 km in a straight line.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "approximately 17 kilometres (11 mi) southeast of Downtown Guadalajara"
+    },
+    {
+     "file": "gap-gdl-page",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "quote": "Located 17 kilometers south of Guadalajara",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 17.6 km (10.9 miles)",
+      "Bearing from the city centre: 167 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 18.7 million passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "In 2025 it handled about 18.7 million passengers.",
+   "note": "GAP reports in thousands (18,696.6); Wikipedia's 18,696,600 is the same figure. Up 4.8 per cent on 17,848.7 thousand in 2024.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In 2024, it handled 17,848,700 passengers, and 18,696,600 in 2025."
+    },
+    {
+     "file": "gap-dec2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "quote": [
+      "Guadalajara, Jalisco, México, 6 de enero de 2026",
+      "Pasajeros Totales (miles):",
+      "Guadalajara 1,690.6 1,846.9 9.2% 17,848.7 18,696.6 4.8%"
+     ],
+     "dated": "2026-01-06"
+    },
+    {
+     "file": "gap-pres-2q26",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "quote": [
+      "Guadalajara 12,279.2 12,873.6 4.8% 17,848.7 18,696.6 4.8%",
+      "Source: Passenger traffic reports as of August 31, 2026."
+     ],
+     "dated": "2026-09 (traffic to 31 August 2026 on the page)"
+    }
+   ]
+  },
+  {
+   "claim": "Volaris's largest hub and a major base for its US flights",
+   "verdict": "confirmed",
+   "inAfter": "It is Volaris's largest hub and a major base for its flights to the United States.",
+   "note": "'Gateway to' is banned in house style, so 'main gateway to the United States' becomes 'a major base for its flights to the United States', the word Volaris itself uses being 'major'. Volaris's 10 September 2026 announcement (carried by Nashville airport) gives Guadalajara more than 65 destinations and more than 100 daily flights from 1 October. In 2018 Volaris put it second to Mexico City by operations (Milenio); the 2026 statement is followed.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is the largest hub for Volaris, serving as the airline's main gateway to the United States."
+    },
+    {
+     "file": "bna-volaris",
+     "org": "Metropolitan Nashville Airport Authority (Volaris announcement)",
+     "quote": [
+      "Sep 10th, 2026",
+      "Volaris Turns Guadalajara Into Its Major Gateway to the United States with Three New Routes",
+      "solidifying its position as Volaris's most important hub",
+      "Volaris' largest hub"
+     ],
+     "dated": "2026-09-10"
+    },
+    {
+     "file": "aviacionline-volaris-hub",
+     "org": "Aviacionline",
+     "quote": [
+      "viernes 7 de agosto de 2026",
+      "Guadalajara se refuerza como hub principal"
+     ],
+     "dated": "2026-08-07"
+    }
+   ]
+  },
+  {
+   "claim": "Aeroméxico flies from here",
+   "verdict": "softened",
+   "inAfter": "Aeroméxico also flies from here.",
+   "note": "Softened from 'a focus city for Aeroméxico', a label only Wikipedia gives. GAP lists Aeroméxico's new Guadalajara to Seattle route in December 2025, and Aeroméxico has announced Guadalajara to Paris from 13 April 2027 (held back below).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "a focus city for Aeroméxico"
+    },
+    {
+     "file": "gap-dec2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "quote": [
+      "Nuevas Rutas",
+      "Guadalajara – Seattle: Aeroméxico"
+     ],
+     "dated": "2026-01-06"
+    },
+    {
+     "file": "aviacionline-am-paris",
+     "org": "Aviacionline",
+     "quote": [
+      "lunes 7 de septiembre de 2026",
+      "Aeroméxico will launch direct Guadalajara (GDL)–Paris (CDG) flights on April 13, 2027"
+     ],
+     "dated": "2026-09-07"
+    }
+   ]
+  },
+  {
+   "claim": "flights across Mexico and the rest of the Americas",
+   "verdict": "softened",
+   "inAfter": "Flights reach across Mexico and the rest of the Americas.",
+   "note": "Europe dropped (see the cut). Domestic 12.7 million and international 6.0 million passengers in 2025 (GAP); new routes to Calgary, Montreal and Seattle in December 2025 (GAP); Volaris's existing Bogotá route and its Medellín and Guatemala City routes from December 2026 (Aviacionline).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "offering flights across Mexico, the Americas, and Europe"
+    },
+    {
+     "file": "gap-dec2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "quote": [
+      "Pasajeros Nacionales (miles):",
+      "Guadalajara 1,083.7 1,214.3 12.0% 11,939.5 12,727.9 6.6%",
+      "Guadalajara 606.9 632.6 4.2% 5,909.1 5,968.7 1.0%",
+      "Guadalajara – Calgary: WestJet",
+      "Guadalajara – Montreal: Air Transat"
+     ],
+     "dated": "2026-01-06"
+    },
+    {
+     "file": "aviacionline-volaris-hub",
+     "org": "Aviacionline",
+     "quote": "se sumará a la ya existente entre Guadalajara y Bogotá",
+     "dated": "2026-08-07"
+    }
+   ]
+  },
+  {
+   "claim": "elevation 1,529 metres",
+   "verdict": "confirmed",
+   "inAfter": "The airport sits at 1,529 metres above sea level.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "situated at an elevation of 1,529 metres (5,016 ft) above sea level"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "elevation 5,016 ft (1,529 m)"
+    }
+   ]
+  },
+  {
+   "claim": "two runways, the longer 4,000 metres",
+   "verdict": "confirmed",
+   "inAfter": "Two runways serve it, the longer at 4,000 metres.",
+   "note": "The second runway (3,538 m) opened in July 2023 (Wikipedia, Aviacionline).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "featuring two asphalt runways: Runway 11R/29L measuring 4,000 metres (13,000 ft), and Runway 11L/29R measuring 3,538 metres (11,608 ft)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 11L/29R: 3,538 m (11,608 ft), ASP",
+      "Runway 11R/29L: 4,000 m (13,123 ft), ASPH",
+      "Runways listed: 2"
+     ]
+    },
+    {
+     "file": "gap-gdl-page",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "quote": "It has two runways",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "operated by Grupo Aeroportuario del Pacífico",
+   "verdict": "confirmed",
+   "inAfter": "Its operator, Grupo Aeroportuario del Pacífico,",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Guadalajara International Airport is operated by Grupo Aeroportuario del Pacífico (GAP)"
+    },
+    {
+     "file": "gap-aug2026",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "quote": [
+      "September 4, 2026",
+      "operates 12 airports throughout Mexico’s Pacific region, including the major cities of Guadalajara and Tijuana"
+     ],
+     "dated": "2026-09-04"
+    }
+   ]
+  },
+  {
+   "claim": "new terminal building planned in the 2025 to 2029 programme",
+   "verdict": "corrected",
+   "inAfter": "plans a new terminal building in its 2025 to 2029 investment programme",
+   "note": "Replaces 'the single terminal is currently undergoing renovation, so expect building works', which no source from the last 12 months supports. Nothing new has opened: GAP's September 2026 presentation shows the new terminal building as a project in its 2025 to 2029 development programme. The size is not given because the sources differ (69,000 square metres in February 2025; 87,388 in the 2026 presentation).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "part of a larger $2.52 billion USD master plan for 2025–2029",
+      "a $1.07 billion USD investment in a new 69,000 square metres (740,000 sq ft) terminal"
+     ]
+    },
+    {
+     "file": "gap-pres-2q26",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "quote": [
+      "MDP Mexico 2025-2029",
+      "New terminal building",
+      "87,388 sqm of terminal area (+107%)",
+      "Guadalajara – Future airport development",
+      "Source: Passenger traffic reports as of August 31, 2026."
+     ],
+     "dated": "2026-09 (traffic to 31 August 2026 on the page)"
+    },
+    {
+     "file": "aviacionline-gap-invest",
+     "org": "Aviacionline",
+     "quote": [
+      "GAP will invest $1.07 billion USD to build a 69,000-square-meter passenger terminal",
+      "master plan for 2025–2029"
+     ],
+     "dated": "2025-02-12"
+    }
+   ]
+  },
+  {
+   "claim": "named after Miguel Hidalgo y Costilla, a leader of the independence movement",
+   "verdict": "confirmed",
+   "inAfter": "It is named after Miguel Hidalgo y Costilla, a leader of the Mexican independence movement.",
+   "note": "'Officially' dropped: GAP says the airport is 'also called' Miguel Hidalgo y Costilla Airport.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is named after Miguel Hidalgo y Costilla, a leader of the Mexican War of Independence"
+    },
+    {
+     "file": "gap-gdl-page",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "quote": "also called Miguel Hidalgo y Costilla Airport",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "encyclopedia-hidalgo",
+     "org": "Encyclopedia of Latin American History and Culture (Encyclopedia.com)",
+     "quote": "leader of the Mexican Independence movement (1810–1811)"
+    }
+   ]
+  },
+  {
+   "claim": "ninth in Latin America",
+   "verdict": "cut",
+   "wasBefore": "and ranks ninth in Latin America",
+   "why": "Wikipedia alone; no regional ranking (ACI or similar) could be read."
+  },
+  {
+   "claim": "Viva hub",
+   "verdict": "cut",
+   "wasBefore": "as well as a hub for Viva",
+   "why": "Airline bases are time-sensitive and nothing from the last 12 months says Viva has a hub here. The newest reports found are Mexico Business News (2 August 2024, eight new Guadalajara routes) and SDP Noticias (4 June 2025, Viva dropping its Ciudad Obregón route); GAP's 2026 monthly releases list no new Viva routes from Guadalajara."
+  },
+  {
+   "claim": "focus city for Aeroméxico",
+   "verdict": "cut",
+   "wasBefore": "a focus city for Aeroméxico",
+   "why": "'Focus city' is Wikipedia's label only; softened to 'Aeroméxico also flies from here', which GAP and Aviacionline support."
+  },
+  {
+   "claim": "flights to Europe",
+   "verdict": "cut",
+   "wasBefore": "Flights reach across Mexico, the Americas and Europe.",
+   "why": "No current European route could be confirmed. Aeroméxico's page on its Guadalajara to Madrid flights shows only 'Site Maintenance'; the one European route found is Aeroméxico's Guadalajara to Paris from 13 April 2027 (Aviacionline, 7 September 2026), a single source, held back below."
+  },
+  {
+   "claim": "two points of practical detail",
+   "verdict": "cut",
+   "wasBefore": "Two points of practical detail.",
+   "why": "Framing for the elevation and the building works; the works claim is replaced, so the lead-in goes."
+  },
+  {
+   "claim": "single terminal under renovation, expect building works",
+   "verdict": "cut",
+   "wasBefore": "the single terminal is currently undergoing renovation, so expect building works",
+   "why": "Wikipedia alone and undated; no source from the last 12 months describes works at the existing terminal. Replaced by the planned new terminal (GAP, September 2026). The terminal count is also disputed: GAP's own undated airport page says 'two terminals'."
+  },
+  {
+   "claim": "officially named",
+   "verdict": "cut",
+   "wasBefore": "It is officially named after Miguel Hidalgo y Costilla",
+   "why": "'Officially' rests on Wikipedia; GAP says 'also called'. The naming itself is kept."
+  },
+  {
+   "claim": "Aeroméxico to Paris from April 2027",
+   "verdict": "cut",
+   "why": "Held back: Aeroméxico will fly Guadalajara to Paris Charles de Gaulle three times a week from 13 April 2027 (Aviacionline, 7 September 2026, reporting Aeroméxico's statement). One source; it would restore Europe to the text once a second (Aeroméxico's own release) is saved.",
+   "sources": [
+    {
+     "file": "aviacionline-am-paris",
+     "org": "Aviacionline",
+     "quote": [
+      "lunes 7 de septiembre de 2026",
+      "Aeroméxico will launch direct Guadalajara (GDL)–Paris (CDG) flights on April 13, 2027"
+     ],
+     "dated": "2026-09-07"
+    }
+   ]
+  },
+  {
+   "claim": "Jalisco security events, February 2026",
+   "verdict": "cut",
+   "why": "Held back: after security events across Jalisco on 22 February 2026, 120 flights were cancelled at Guadalajara that day and 103 the next (GAP), and traffic fell in March. The FCDO's current advice (updated 22 September 2026) warns against all but essential travel only to parts of Jalisco south and south-west of Lake Chapala and some northern municipalities, not Guadalajara or Tlajomulco. The old text says nothing on security, so nothing to replace.",
+   "sources": [
+    {
+     "file": "gap-feb2026",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "quote": [
+      "As a result of the events that took place in various locations of the State of Jalisco on February",
+      "on February 22, 120 cancellations were recorded at Guadalajara Airport"
+     ],
+     "dated": "2026-03-06"
+    },
+    {
+     "file": "fcdo-mexico-warnings",
+     "org": "UK FCDO",
+     "quote": [
+      "Updated:",
+      "22 September 2026",
+      "FCDO advises against all but essential travel to the areas south and south-west of Lake Chapala to the border with the state of Colima."
+     ],
+     "dated": "2026-09-22"
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

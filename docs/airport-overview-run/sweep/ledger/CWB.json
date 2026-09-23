@@ -1,0 +1,496 @@
+{
+ "iata": "CWB",
+ "id": "recDy2f3HzU1b1l44",
+ "name": "Curitiba-Afonso Pena International Airport",
+ "country": "Brazil",
+ "wikipedia": "https://en.wikipedia.org/wiki/Afonso_Pena_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Curitiba's airport, 18 km south east of downtown in the neighbouring municipality of São José dos Pinhais. It is operated by ASUR, and a shuttle bus and the 208 city bus route both run into the centre.\n\nThe terminal is a good one: 45,000 square metres, fourteen jetways and rated for up to 15 million passengers. It opened in 1996, and the terminal it replaced became the cargo building.\n\nOne thing to warn clients about. The weather here is unreliable, and winter mornings in particular bring fog and smog that can hold flights. The secondary runway 11/29 is small and its equipment is dated, so there is less flexibility than a two runway layout suggests. The main runway was lengthened in 2008 and there are plans to lift it to Category III instrument approaches.\n\nThe airport was built during the Second World War by the Brazilian Air Force with the United States Army, finished in 1945 too late to see much use, and opened to civil traffic in January 1946. It is named after Afonso Pena, the sixth President of Brazil.",
+ "after": "Curitiba's airport, 18 km south east of the city centre in the municipality of São José dos Pinhais. It is operated by ASUR, and buses run into the centre.\n\nThe terminal has fourteen jetways and is rated for about 15 million passengers a year. It opened in 1996, and the terminal it replaced became the cargo building.\n\nThe airport was built during the Second World War by Brazil's Air Ministry with the United States Army and finished in 1945, shortly before the war ended. It opened to civil traffic in January 1946 and is named after Afonso Pena, the sixth President of Brazil.",
+ "claims": [
+  {
+   "claim": "Curitiba's airport",
+   "verdict": "confirmed",
+   "inAfter": "Curitiba's airport",
+   "note": "The main airport for Curitiba; Bacacheri (BFH), inside the city, is a small airport run by the same concession company.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the main airport serving Curitiba"
+    },
+    {
+     "file": "aisweb-sbct",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": [
+      "Afonso Pena (SBCT) Curitiba/PR",
+      "INTL"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-sobre",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": "o Aeroporto Internacional de Curitiba dispõe de cadeiras de rodas",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "18 km from the city centre",
+   "verdict": "confirmed",
+   "inAfter": "18 km south east of the city centre",
+   "note": "Was '18 km south east of downtown'. The coordinates give 14.9 km in a straight line from Curitiba's centre at 139 degrees (south east); 18 km by road is a ratio of 1.21, inside the tolerance. The coordinates tool's own CHECK line measured from a different São José (in Santa Catarina, 238 km away) and is not relevant.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is located 18 km (11 mi) southeast of downtown Curitiba."
+    },
+    {
+     "file": "op-como-chegar",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": "18 km do centro de Curitiba - Av. Rocha Pombo - Águas Belas, São José dos Pinhais - PR",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 14.9 km"
+    }
+   ]
+  },
+  {
+   "claim": "south east of the city centre",
+   "verdict": "confirmed",
+   "inAfter": "south east of the city centre",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "southeast of downtown Curitiba"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 139 degrees, which is south east"
+    }
+   ]
+  },
+  {
+   "claim": "in the municipality of São José dos Pinhais",
+   "verdict": "confirmed",
+   "inAfter": "in the municipality of São José dos Pinhais",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "located in the municipality of São José dos Pinhais, in the state of Paraná"
+    },
+    {
+     "file": "op-sobre",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": "Localizado no município de São José dos Pinhais",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "planalto-lei-7343",
+     "org": "Presidency of Brazil (Planalto law archive)",
+     "quote": "o aeroporto atualmente em funcionamento"
+    }
+   ]
+  },
+  {
+   "claim": "operated by ASUR",
+   "verdict": "confirmed",
+   "inAfter": "It is operated by ASUR",
+   "note": "ASUR, the Mexican airport group, completed its purchase of Motiva's whole airport platform on 1 September 2026 and took over operations that day; the concession company, its staff and its website carry on (the site still shows the Motiva and CCR names, and DECEA's live entry still names 'CCR AEROPORTOS' as the aerodrome's operator). Motiva, the seller, is counted as a separate organisation from ASUR and the airport company ASUR now owns. OurAirports' home link (ccraeroportos.com.br/curitiba-pr) is CCR's old domain; the airport's pages are now at aeroportos.motiva.com.br, which Wikipedia's infobox also gives.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is operated by ASUR."
+    },
+    {
+     "file": "motiva-asur-consolida",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": [
+      "A partir de hoje, a ASUR assume as operações previstas na transação no Brasil",
+      "Curitiba (PR) — Aeroporto Internacional Afonso Pena — CWB",
+      "01/09/2026"
+     ],
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "motiva-conclui-venda",
+     "org": "Motiva (seller, formerly CCR)",
+     "quote": [
+      "concluiu hoje a venda de 100% da sua plataforma de aeroportos para a mexicana Grupo Aeroportuario del Sureste (ASUR)",
+      "A Motiva Aeroportos, agora integralmente vendida à ASUR, reúne 20 operações aeroportuárias",
+      "como os aeroportos de Curitiba, Belo Horizonte e Goiânia"
+     ],
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "asur-closing-pdf",
+     "org": "ASUR (buyer)",
+     "quote": [
+      "Mexico City, September 1, 2026",
+      "As a result of the transaction, ASUR has added to its portfolio 20 airports across four markets"
+     ],
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "aisweb-sbct",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": "CCR AEROPORTOS",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "buses run into the centre",
+   "verdict": "softened",
+   "inAfter": "buses run into the centre",
+   "note": "Was 'a shuttle bus and the 208 city bus route both run into the centre'. The operator's live transport page lists no airport shuttle and no route 208: it names lines 515 (Terminal Central to the airport) and E32 (airport to Terminal Boqueirão), run by Auto Viação São José dos Pinhais, and its about page says buses are an option for reaching central Curitiba. Curitiba's transport authority (URBS) shows its lines only through a script-driven picker, so the route numbers could not be checked there.",
+   "sources": [
+    {
+     "file": "op-sobre",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": "Para chegar ao centro Curitiba, são 31 minutos de carro, e você também conta com opções de ônibus, aluguel de carro e táxi.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport operates a shuttle bus to the center of Curitiba"
+    },
+    {
+     "file": "op-como-chegar",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": [
+      "Auto Viação São José dos Pinhais",
+      "515 l Terminal Central - Aeroporto 1 E32, Aeroporto - Terminal Boqueirão"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "fourteen jetways",
+   "verdict": "confirmed",
+   "inAfter": "The terminal has fourteen jetways",
+   "note": "The operator's January 2026 release: 28 aircraft stands, 14 of them with boarding bridges. Its fact sheet agrees (10 plus 4 contact stands on apron 1).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "has 14 jetways"
+    },
+    {
+     "file": "op-80anos",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": [
+      "uma estrutura que comporta 28 posições para aeronaves, sendo 14 delas equipadas com pontes de embarque",
+      "13/01/2026"
+     ],
+     "dated": "2026-01-13"
+    }
+   ]
+  },
+  {
+   "claim": "rated for about 15 million passengers a year",
+   "verdict": "confirmed",
+   "inAfter": "is rated for about 15 million passengers a year",
+   "note": "Was 'rated for up to 15 million passengers'. The operator gives a capacity of about 14.8 million a year (fact sheet, and its history for the 2016 enlargement); Wikipedia says 15 million.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is capable of handling 15 million passengers annually"
+    },
+    {
+     "file": "op-sobre",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": [
+      "Passageiros (capacidade/ ano): 14,8 milhões, aproximadamente.",
+      "capacidade de 14,8 milhões de passageiros ao ano"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "the terminal opened in 1996",
+   "verdict": "confirmed",
+   "inAfter": "It opened in 1996",
+   "note": "Opened on 26 July 1996 (operator's history).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "This terminal is used until 1996 when the much larger terminal opened."
+    },
+    {
+     "file": "op-sobre",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": "As obras de construção de um terminal foram iniciadas em 1991 e a inauguração aconteceu no dia 26 de julho de 1996",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "the old terminal became the cargo building",
+   "verdict": "confirmed",
+   "inAfter": "the terminal it replaced became the cargo building",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "After the new terminal opened, the older terminal became a cargo terminal."
+    },
+    {
+     "file": "op-80anos",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": "Em 1996, a antiga estrutura foi convertida em terminal de cargas, e foi inaugurado um terminal de passageiros maior e mais moderno",
+     "dated": "2026-01-13"
+    },
+    {
+     "file": "airporttech",
+     "org": "Airport Technology (trade press)",
+     "quote": "The old passenger terminal was refurbished and converted into a cargo terminal."
+    }
+   ]
+  },
+  {
+   "claim": "built in the Second World War by Brazil's Air Ministry with the United States Army",
+   "verdict": "corrected",
+   "inAfter": "The airport was built during the Second World War by Brazil's Air Ministry with the United States Army",
+   "note": "Was 'by the Brazilian Air Force'. The builder was the Ministério da Aeronáutica (the Air Ministry, which Wikipedia calls the Brazilian Air Force Ministry), working with the US Army's engineers, between May 1944 and April 1945.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "was built by the Brazilian Air Force Ministry in partnership with the United States Army during the Second World War"
+    },
+    {
+     "file": "op-80anos",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": "construída entre maio de 1944 e abril de 1945, durante a Segunda Guerra Mundial, em cooperação entre o Ministério da Aeronáutica do Brasil e o Exército dos Estados Unidos",
+     "dated": "2026-01-13"
+    },
+    {
+     "file": "op-sobre",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": "pelo Ministério da Aeronáutica em cooperação com o Departamento de Engenharia do Exército Norte-Americano",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "finished in 1945, shortly before the war ended",
+   "verdict": "confirmed",
+   "inAfter": "finished in 1945, shortly before the war ended",
+   "note": "The operator dates completion to April 1945.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "since its construction was completed only in 1945, shortly before the end of the war"
+    },
+    {
+     "file": "op-80anos",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": [
+      "construída entre maio de 1944 e abril de 1945, durante a Segunda Guerra Mundial",
+      "Com o fim do conflito, a estrutura deixou de ter função exclusivamente militar"
+     ],
+     "dated": "2026-01-13"
+    }
+   ]
+  },
+  {
+   "claim": "opened to civil traffic in January 1946",
+   "verdict": "confirmed",
+   "inAfter": "It opened to civil traffic in January 1946",
+   "note": "On 24 January 1946 (both sources).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On January 24, 1946, it was dedicated as a civil airport."
+    },
+    {
+     "file": "op-80anos",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": "sendo oficialmente inaugurada como aeroporto civil em 24 de janeiro de 1946",
+     "dated": "2026-01-13"
+    }
+   ]
+  },
+  {
+   "claim": "named after Afonso Pena, the sixth President of Brazil",
+   "verdict": "confirmed",
+   "inAfter": "is named after Afonso Pena, the sixth President of Brazil",
+   "note": "Law 7,343 of 1985 formally gave the airport the name Afonso Pena; the operator says the 1946 opening already honoured the sixth president.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "it is named after Afonso Augusto Moreira Pena",
+      "the 6th President of Brazil"
+     ]
+    },
+    {
+     "file": "op-sobre",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": "uma homenagem ao sexto presidente da República",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "planalto-lei-7343",
+     "org": "Presidency of Brazil (Planalto law archive)",
+     "quote": "Passa a denominar-se \"Afonso Pena\" o aeroporto atualmente em funcionamento"
+    }
+   ]
+  },
+  {
+   "claim": "downtown",
+   "verdict": "cut",
+   "wasBefore": "18 km south east of downtown",
+   "why": "Reworded to 'the city centre' (the operator's 'centro de Curitiba'); the distance and direction are kept."
+  },
+  {
+   "claim": "neighbouring municipality",
+   "verdict": "cut",
+   "wasBefore": "in the neighbouring municipality of São José dos Pinhais",
+   "why": "No saved source calls São José dos Pinhais neighbouring; the municipality itself is kept (Wikipedia, operator, the 1985 law)."
+  },
+  {
+   "claim": "a shuttle bus and route 208",
+   "verdict": "cut",
+   "wasBefore": "a shuttle bus and the 208 city bus route both run into the centre",
+   "why": "Neither is on the operator's live transport page, which lists lines 515 and E32; URBS's line list could not be read. Softened to buses running into the centre (operator, Wikipedia)."
+  },
+  {
+   "claim": "the terminal is a good one",
+   "verdict": "cut",
+   "wasBefore": "The terminal is a good one",
+   "why": "Opinion; the support for it would be the operator's own awards, which the brief says not to repeat."
+  },
+  {
+   "claim": "45,000 square metres",
+   "verdict": "cut",
+   "wasBefore": "45,000 square metres",
+   "why": "Sources disagree: Wikipedia 45,000 m2, the operator's fact sheet 77,160 m2, the operator's history 112,176 m2 after the 2016 enlargement, and Airport Technology (about 2012) 26,000 m2."
+  },
+  {
+   "claim": "warning lead-in",
+   "verdict": "cut",
+   "wasBefore": "One thing to warn clients about.",
+   "why": "The warning it introduced could not be confirmed (below)."
+  },
+  {
+   "claim": "fog and smog on winter mornings hold flights",
+   "verdict": "cut",
+   "wasBefore": "The weather here is unreliable, and winter mornings in particular bring fog and smog that can hold flights.",
+   "why": "Wikipedia alone after more than three tries. Bem Paraná answered with Cloudflare's 'Just a moment' check and Aeroin with a 'Javascript is required ... before you are allowed to see this page' gate (neither tried again); Banda B refused the link lister (403); Folha answers 'Blocked by egress policy' (one browser attempt on its old http address was made before that answer was read; the proxy refused it and nothing loaded); the own-site searches of Tribuna do Paraná, G1, CNN Brasil and Agência Brasil returned nothing usable; the operator's FAQ, travel guide and Airport Technology do not mention fog. Worth restoring if a Curitiba news report of fog closures can be read."
+  },
+  {
+   "claim": "secondary runway small with dated equipment",
+   "verdict": "cut",
+   "wasBefore": "The secondary runway 11/29 is small and its equipment is dated, so there is less flexibility than a two runway layout suggests.",
+   "why": "'Dated equipment' rests on Wikipedia alone. For Andy: DECEA's live entry shows runway 11/29 (1,798 m) with non-precision approaches only, against a Category II approach on runway 15 and Category I on 33 of the 2,218 m main runway."
+  },
+  {
+   "claim": "main runway lengthened in 2008",
+   "verdict": "cut",
+   "wasBefore": "The main runway was lengthened in 2008",
+   "why": "Wikipedia alone; the operator's history records runway improvements in 2012 but no 2008 lengthening."
+  },
+  {
+   "claim": "plans for Category III",
+   "verdict": "cut",
+   "wasBefore": "there are plans to lift it to Category III instrument approaches",
+   "why": "Stale: Airport Technology reported a Category III system as part of works due by April 2013, and DECEA's live entry still gives runway 15 Category II (as installed in 2002, operator). No current plan found."
+  },
+  {
+   "claim": "by the Brazilian Air Force",
+   "verdict": "cut",
+   "wasBefore": "by the Brazilian Air Force",
+   "why": "Corrected to Brazil's Air Ministry (the Ministério da Aeronáutica), which the operator and Wikipedia name as the builder."
+  },
+  {
+   "claim": "too late to see much use",
+   "verdict": "cut",
+   "wasBefore": "too late to see much use",
+   "why": "Wikipedia alone ('never saw heavy military movement'); softened to finished shortly before the war ended."
+  },
+  {
+   "claim": "about 6.1 million passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: the old text gives no traffic figure, so this replaces nothing. Panrotas (Motiva's 2025 figures, 2 February 2026) gives 6.1 million and Wikipedia's infobox 6,082,222 (+17 per cent). The operator's own January 2026 release says 'cerca de 5 milhões' a year, which looks out of date against its December 2025 month alone (540,916).",
+   "sources": [
+    {
+     "file": "panrotas-motiva-2025",
+     "org": "Panrotas (trade press, Motiva figures)",
+     "quote": [
+      "Curitiba , com 6,1 milh&otilde;es de passageiros",
+      "02/02/2026"
+     ],
+     "dated": "2026-02-02"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 6,082,222 17%"
+     ]
+    },
+    {
+     "file": "op-80anos",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": "Anualmente, cerca de 5 milhões de passageiros passam pelo terminal",
+     "dated": "2026-01-13"
+    },
+    {
+     "file": "op-rma-202512",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": [
+      "540.916",
+      "12/2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "TAP flies from Lisbon since 2 July 2026",
+   "verdict": "cut",
+   "why": "Held back: the old text names no airlines, so this replaces nothing. TAP started Lisbon to Curitiba on 2 July 2026, three a week (Tuesday, Thursday, Saturday) on an A330-200 that continues to Rio de Janeiro, returning from Rio to Lisbon; the airport calls it its first regular route to Europe. TAP's own page lists Curitiba among its destinations. Worth adding for UK agents if Andy agrees.",
+   "sources": [
+    {
+     "file": "op-tap-2026",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": [
+      "A TAP Air Portugal inaugurou na quinta-feira, 2 de julho, sua nova rota entre Lisboa e Curitiba",
+      "A operação conta com três frequências semanais, realizadas às terças, quintas e sábados, com aeronaves Airbus A330-200",
+      "Após a escala na capital paranaense, a aeronave segue para o Rio de Janeiro."
+     ],
+     "dated": "2026-07-02"
+    },
+    {
+     "file": "tap-curitiba",
+     "org": "TAP Air Portugal",
+     "quote": "Curitiba",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "Brazil's Air Ministry": "The Ministério da Aeronáutica, as the operator names it; Wikipedia calls it the 'Brazilian Air Force Ministry'."
+ }
+}

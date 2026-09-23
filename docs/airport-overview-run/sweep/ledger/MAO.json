@@ -1,0 +1,339 @@
+{
+ "iata": "MAO",
+ "id": "recFVviaay9XMAh6H",
+ "name": null,
+ "country": "Brazil",
+ "wikipedia": "https://en.wikipedia.org/wiki/Eduardo_Gomes_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Manaus's airport, 14 km north of downtown, run by Vinci Airports, and a more interesting building than most.\n\nThe name has a story. It was designed to handle Concorde and was originally called the Supersonic Airport of Manaus, a name it lost in December 1973 while still being built, in favour of Air Marshal Eduardo Gomes.\n\nIt opened in March 1976, replacing Ponta Pelada, which became the Manaus Air Force Base. At the time it was the most modern airport in Brazil and the first in the country with jet bridges.\n\nTerminal 1 handles all domestic and international passengers, and Terminal 2, from 1985, takes general aviation. Freight matters a great deal here: three cargo terminals covering 49,000 square metres can process up to 12,000 tonnes a month, two of them handling exports and one imports.\n\nThe airport was enlarged again ahead of the 2014 World Cup, when Manaus was a host city. An Infraero assessment in 2011 put it in good shape, running at less than 70 per cent of capacity.",
+ "after": "Manaus's airport, north of the city centre, run by Vinci Airports.\n\nThe name has a story. It was originally called the Supersonic Airport of Manaus, a name it lost in December 1973 in favour of Air Marshal Eduardo Gomes.\n\nOpened in March 1976, it replaced Ponta Pelada, which became the Manaus Air Force Base.\n\nFreight matters a great deal here, and the airport says its cargo terminal is the third largest in Brazil.",
+ "claims": [
+  {
+   "claim": "Manaus's airport",
+   "verdict": "confirmed",
+   "inAfter": "Manaus's airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is an international airport serving Manaus, Brazil"
+    },
+    {
+     "file": "aisweb-sbeg",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": [
+      "Eduardo Gomes (SBEG) Manaus/AM",
+      "INTL"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "north of the city centre",
+   "verdict": "softened",
+   "inAfter": "north of the city centre",
+   "note": "Was '14 km north of downtown'. The coordinates give 7.6 km in a straight line at 339 degrees (north); 14 km is a ratio of 1.85, outside the tolerance, and no written source other than Wikipedia gives a distance, so the figure is cut and only the direction kept. The operator places the airport in the Tarumã district of Manaus's west zone (zona oeste), which is the city's administrative zone, not a compass bearing from the centre.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "north of downtown Manaus"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 7.6 km",
+      "Bearing from the city centre: 339 degrees, which is north"
+     ]
+    },
+    {
+     "file": "op-sobre",
+     "org": "Manaus Airport (operator, part of VINCI Airports)",
+     "quote": "Localizado na zona oeste de Manaus, no bairro Tarumã",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "run by Vinci Airports",
+   "verdict": "confirmed",
+   "inAfter": "run by Vinci Airports",
+   "note": "Checked for a 2025 or 2026 change of operator: none. VINCI Airports' concession company, Concessionária dos Aeroportos da Amazônia, has run it since 2022 (the concession was won in April 2021); DECEA's live entry names that company as operator. OurAirports' home link (airport-manaus.com.br) is the domain read here.",
+   "sources": [
+    {
+     "file": "op-sobre",
+     "org": "Manaus Airport (operator, part of VINCI Airports)",
+     "quote": "Desde 2022, é administrado pela Concessionária dos Aeroportos da Amazônia, integrante da rede VINCI Airports",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-50anos",
+     "org": "Manaus Airport (operator, part of VINCI Airports)",
+     "quote": [
+      "Sob gestão da VINCI Airports desde 2022",
+      "30 de Março de 2026"
+     ],
+     "dated": "2026-03-30"
+    },
+    {
+     "file": "aisweb-sbeg",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": "CONCESSIONÁRIA DOS AEROPORTOS DA AMAZONIA S.A.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is operated by Vinci Airports."
+    }
+   ]
+  },
+  {
+   "claim": "originally called the Supersonic Airport of Manaus",
+   "verdict": "confirmed",
+   "inAfter": "It was originally called the Supersonic Airport of Manaus",
+   "note": "Law 5,967 of 11 December 1973 is headed 'Dá denominação ao aeroporto supersônico de Manaus'.",
+   "sources": [
+    {
+     "file": "camara-lei-5967",
+     "org": "Chamber of Deputies of Brazil (federal law archive)",
+     "quote": [
+      "Dá denominação ao aeroporto supersônico de Manaus.",
+      "O aeroporto supersônico de Manaus é denominado \"Aeroporto Eduardo Gomes\"."
+     ],
+     "dated": "1973-12-11"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the name of the facility was changed from Supersonic Airport of Manaus"
+    }
+   ]
+  },
+  {
+   "claim": "renamed in December 1973",
+   "verdict": "confirmed",
+   "inAfter": "a name it lost in December 1973",
+   "sources": [
+    {
+     "file": "camara-lei-5967",
+     "org": "Chamber of Deputies of Brazil (federal law archive)",
+     "quote": "LEI Nº 5.967, DE 11 DE DEZEMBRO DE 1973",
+     "dated": "1973-12-11"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On 11 December 1973, while still under construction"
+    }
+   ]
+  },
+  {
+   "claim": "in favour of Air Marshal Eduardo Gomes",
+   "verdict": "confirmed",
+   "inAfter": "in favour of Air Marshal Eduardo Gomes",
+   "note": "Eduardo Gomes was promoted to marechal-do-ar (Air Marshal) on retiring in September 1960 (FGV CPDOC). The operator says the airport is officially named Aeroporto Internacional Eduardo Gomes.",
+   "sources": [
+    {
+     "file": "camara-lei-5967",
+     "org": "Chamber of Deputies of Brazil (federal law archive)",
+     "quote": "O aeroporto supersônico de Manaus é denominado \"Aeroporto Eduardo Gomes\".",
+     "dated": "1973-12-11"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Air Marshal Eduardo Gomes"
+    },
+    {
+     "file": "cpdoc-eduardo-gomes",
+     "org": "FGV CPDOC (biographical dictionary)",
+     "quote": "Em setembro de 1960 Eduardo Gomes foi reformado compulsoriamente, sendo promovido a marechal-do ar."
+    },
+    {
+     "file": "op-50anos-expo",
+     "org": "Manaus Airport (operator, part of VINCI Airports)",
+     "quote": [
+      "Inaugurado em 1976 e batizado oficialmente como Aeroporto Internacional Eduardo Gomes",
+      "22 de Maio de 2026"
+     ],
+     "dated": "2026-05-22"
+    }
+   ]
+  },
+  {
+   "claim": "opened in March 1976",
+   "verdict": "confirmed",
+   "inAfter": "Opened in March 1976",
+   "note": "Wikipedia gives 31 March 1976; the operator marked its 50th anniversary on Thursday 26 March 2026. Both put the opening in March 1976, so only the month is given.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "it was commissioned on 31 March 1976"
+    },
+    {
+     "file": "op-50anos",
+     "org": "Manaus Airport (operator, part of VINCI Airports)",
+     "quote": [
+      "o Manaus Airport completa 50 anos de existência, nesta quinta-feira (26)",
+      "Inaugurado em 1976",
+      "30 de Março de 2026"
+     ],
+     "dated": "2026-03-30"
+    }
+   ]
+  },
+  {
+   "claim": "replaced Ponta Pelada, which became the Manaus Air Force Base",
+   "verdict": "confirmed",
+   "inAfter": "it replaced Ponta Pelada, which became the Manaus Air Force Base",
+   "note": "OurAirports lists Ponta Pelada today as 'Ponta Pelada Airport / Manaus Air Base', tagged military, with no airline service.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Eduardo Gomes International Airport replaced Ponta Pelada Airport as the main public airport of Manaus in 1976.",
+      "Ponta Pelada was then renamed Manaus Air Force Base and began handling exclusively military operations."
+     ]
+    },
+    {
+     "file": "ourairports-sbmn",
+     "org": "OurAirports",
+     "quote": [
+      "Ponta Pelada Airport / Manaus Air Base",
+      "#military",
+      "Airline service? no"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "freight matters a great deal here",
+   "verdict": "confirmed",
+   "inAfter": "Freight matters a great deal here",
+   "note": "The operator describes the airport's central role in the region's passenger and cargo logistics; Wikipedia ranks Manaus third in Brazil for cargo handled in 2024.",
+   "sources": [
+    {
+     "file": "op-50anos",
+     "org": "Manaus Airport (operator, part of VINCI Airports)",
+     "quote": "desempenha papel fundamental na logística de passageiros e cargas na região",
+     "dated": "2026-03-30"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In terms of cargo handled, in 2024 Manaus was the third-busiest in Brazil, behind São Paulo-Guarulhos and Campinas."
+    }
+   ]
+  },
+  {
+   "claim": "the airport says its cargo terminal is the third largest in Brazil",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "the airport says its cargo terminal is the third largest in Brazil",
+   "note": "Replaces the old cargo figures (three terminals, 49,000 m2, 12,000 tonnes a month, two export and one import), which the operator's own figures contradict (more than 45,000 m2 and more than 300,000 tonnes). Attributed, as a ranking the operator gives on its cargo page and in its 2026 releases; Wikipedia's third place for cargo handled in 2024 is a related but different measure.",
+   "sources": [
+    {
+     "file": "op-cargo",
+     "org": "Manaus Airport (operator, part of VINCI Airports)",
+     "quote": "3º maior do País",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-50anos",
+     "org": "Manaus Airport (operator, part of VINCI Airports)",
+     "quote": "abrigando o terceiro maior terminal de cargas do país",
+     "dated": "2026-03-30"
+    }
+   ]
+  },
+  {
+   "claim": "14 km from downtown",
+   "verdict": "cut",
+   "wasBefore": "14 km north of downtown",
+   "why": "Fails the coordinates check (7.6 km in a straight line, ratio 1.85) and no second written source gives a distance. The direction is kept."
+  },
+  {
+   "claim": "a more interesting building than most",
+   "verdict": "cut",
+   "wasBefore": "and a more interesting building than most",
+   "why": "Opinion with nothing behind it."
+  },
+  {
+   "claim": "designed to handle Concorde",
+   "verdict": "cut",
+   "wasBefore": "It was designed to handle Concorde",
+   "why": "Wikipedia alone. The 1973 law confirms only the 'aeroporto supersônico' name; Infraero's old history page no longer resolves (DNS failure), Amazonas Atual answered with Cloudflare's 'Sorry, you have been blocked' (not tried again) and the operator's 50th-anniversary releases do not mention Concorde."
+  },
+  {
+   "claim": "while still being built",
+   "verdict": "cut",
+   "wasBefore": "while still being built",
+   "why": "Wikipedia alone; the law gives the date but not the state of the works."
+  },
+  {
+   "claim": "most modern in Brazil, first with jet bridges",
+   "verdict": "cut",
+   "wasBefore": "At the time it was the most modern airport in Brazil and the first in the country with jet bridges.",
+   "why": "Two superlatives on Wikipedia alone; the operator's anniversary releases do not repeat them."
+  },
+  {
+   "claim": "Terminal 1 for all passengers, Terminal 2 for general aviation since 1985",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 handles all domestic and international passengers, and Terminal 2, from 1985, takes general aviation.",
+   "why": "Wikipedia alone; the operator's about, check-in, business and cargo pages and DECEA's entry give no terminal split (its FAQ address is a 404)."
+  },
+  {
+   "claim": "three cargo terminals, 49,000 m2, 12,000 tonnes a month, export and import split",
+   "verdict": "cut",
+   "wasBefore": "three cargo terminals covering 49,000 square metres can process up to 12,000 tonnes a month, two of them handling exports and one imports",
+   "why": "Contradicted by the operator, which gives one cargo terminal of more than 45,000 m2 able to move more than 300,000 tonnes; the export and import split rests on Wikipedia alone. Replaced by the airport's own ranking, attributed."
+  },
+  {
+   "claim": "enlarged ahead of the 2014 World Cup, Manaus a host city",
+   "verdict": "cut",
+   "wasBefore": "The airport was enlarged again ahead of the 2014 World Cup, when Manaus was a host city.",
+   "why": "Wikipedia describes only Infraero's 2009 plan; no second source found (Agência Brasil's tag pages for the airport carry nothing on it)."
+  },
+  {
+   "claim": "Infraero's 2011 capacity assessment",
+   "verdict": "cut",
+   "wasBefore": "An Infraero assessment in 2011 put it in good shape, running at less than 70 per cent of capacity.",
+   "why": "Fifteen years out of date, from a former operator; not a passenger figure, so no 2025 total replaces it."
+  },
+  {
+   "claim": "2025 passengers",
+   "verdict": "cut",
+   "why": "Held back: the old text gives no traffic figure, and the sources disagree. The operator says 3.342 million passengers in 2025, up 13.4 per cent, its best since the concession began; Wikipedia's infobox gives 3,181,366, up 11 per cent. Needs a regulator's figure (ANAC) to settle.",
+   "sources": [
+    {
+     "file": "op-50anos",
+     "org": "Manaus Airport (operator, part of VINCI Airports)",
+     "quote": "com 3,342 milhões de embarques e desembarques entre janeiro e dezembro, o melhor resultado desde o início da concessão",
+     "dated": "2026-03-30"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 3,181,366 11%"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The name has a story.",
+   "why": "Lead-in kept from the old text; the naming facts that follow (the supersonic name, the 1973 law, Eduardo Gomes) are each sourced."
+  }
+ ],
+ "tracerOk": {}
+}

@@ -1,0 +1,384 @@
+{
+ "iata": "MTY",
+ "id": "recVemr8OagQgUwES",
+ "name": "Monterrey International Airport",
+ "country": "Mexico",
+ "wikipedia": "https://en.wikipedia.org/wiki/Monterrey_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Mexico's fourth busiest airport by passenger numbers, and growing quickly: 15.6 million passengers in 2025, up from 13.6 million the year before. It serves Greater Monterrey from Apodaca in Nuevo León, sits at 390 metres above sea level and works as the main hub for Viva, Magnicharters and Aerus, with Volaris treating it as a focus city.\n\nThe route map is wider than the domestic traffic suggests, reaching across Mexico and the Americas and out to Asia and Europe. Two runways handle it. The primary, 11/29, is 3,000 metres long with an ILS approach, and a shorter second runway at 1,800 metres takes lighter aircraft.\n\nAlongside the scheduled airlines it carries flight training, general aviation and the national airspace navigation service, so the apron is busier and more mixed than at a purely commercial field. It is operated by Grupo Aeroportuario Centro Norte and named after Mariano Escobedo, a nineteenth century general from the state.",
+ "after": "Monterrey's airport handled 15.6 million passengers in 2025, up 15 per cent on 13.6 million the year before. It serves Greater Monterrey from Apodaca in Nuevo León, sits at 390 metres above sea level and is the main hub for Viva. Volaris also flies here, as does the regional airline Aerus.\n\nThe route map reaches across Mexico and the rest of the Americas and out to Asia and Europe. Two runways handle it: the main one is 3,000 metres long and the second 1,800 metres.\n\nIt also handles general aviation, and is operated by Grupo Aeroportuario del Centro Norte (OMA).",
+ "claims": [
+  {
+   "claim": "15.6 million passengers in 2025, up 15 per cent on 13.6 million",
+   "verdict": "confirmed",
+   "inAfter": "Monterrey's airport handled 15.6 million passengers in 2025, up 15 per cent on 13.6 million the year before.",
+   "note": "OMA's December 2025 release: 15,623,275 in 2025 against 13,581,599 in 2024, up 15.0 per cent (terminal passengers, all types of aviation, transit excluded). The percentage replaces 'growing quickly'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2025, it handled 15,623,275 passengers, up from 13,581,599 in 2024."
+    },
+    {
+     "file": "oma-dec2025-pdf",
+     "org": "Grupo Aeroportuario del Centro Norte (OMA, operator)",
+     "quote": [
+      "Ciudad de México, México, 7 de enero de 2026",
+      "Monterrey 1,319,827 1,419,232 7.5 13,581,599 15,623,275 15.0",
+      "Pasajeros Totales*"
+     ],
+     "dated": "2026-01-07"
+    }
+   ]
+  },
+  {
+   "claim": "serves Greater Monterrey from Apodaca in Nuevo León",
+   "verdict": "confirmed",
+   "inAfter": "It serves Greater Monterrey from Apodaca in Nuevo León",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "is an international airport serving Greater Monterrey, Nuevo León, Mexico",
+      "The airport is located in Apodaca, Nuevo León, Mexico"
+     ]
+    },
+    {
+     "file": "oma-mty-airlines",
+     "org": "Grupo Aeroportuario del Centro Norte (OMA, operator)",
+     "quote": "Aeropuerto Internacional de Monterrey, Terminal C, Apodaca",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "oma-dec2025",
+     "org": "Grupo Aeroportuario del Centro Norte (OMA, operator)",
+     "quote": "Monterrey, el tercer más grande centro metropolitano en México",
+     "dated": "2026-01-07"
+    }
+   ]
+  },
+  {
+   "claim": "390 metres above sea level",
+   "verdict": "confirmed",
+   "inAfter": "sits at 390 metres above sea level",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "at an elevation of 390 metres (1,280 ft) above mean sea level"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "elevation 1,278 ft (390 m)"
+    }
+   ]
+  },
+  {
+   "claim": "main hub for Viva",
+   "verdict": "confirmed",
+   "inAfter": "is the main hub for Viva",
+   "note": "Viva's own words at the Monterrey to New York JFK launch, carried in OMA's release of 4 June 2026; it also runs more than 50 routes from Monterrey.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is the main hub for Viva, Magnicharters, and Aerus."
+    },
+    {
+     "file": "oma-viva-nyc",
+     "org": "Grupo Aeroportuario del Centro Norte (OMA, operator) quoting Viva",
+     "quote": [
+      "04 junio 2026",
+      "Monterrey es nuestro principal hub de operaciones",
+      "Actualmente, Viva opera más de 50 rutas directas desde y hacia Monterrey"
+     ],
+     "dated": "2026-06-04"
+    }
+   ]
+  },
+  {
+   "claim": "Volaris and Aerus also fly here",
+   "verdict": "softened",
+   "inAfter": "Volaris also flies here, as does the regional airline Aerus.",
+   "note": "Softened from 'main hub for ... Aerus' and 'Volaris treating it as a focus city' (see the cuts). OMA's live airline list for Monterrey names both; OMA's releases of March 2026 cover Aerus reopening Monterrey to Tampico (2 March) and starting Monterrey to McAllen (27 March).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "It also serves as a focus city for Volaris",
+      "Regional airline Aerus began operations at Monterrey International Airport in 2023, establishing a hub with domestic and short-haul international routes."
+     ]
+    },
+    {
+     "file": "oma-mty-airlines",
+     "org": "Grupo Aeroportuario del Centro Norte (OMA, operator)",
+     "quote": [
+      "Comunícate al 55 1102 8000 para atención y asistencia de Volaris.",
+      "Comunícate al 81 4170 7676 para atención y asistencia de Aerus."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "oma-aerus-tampico",
+     "org": "Grupo Aeroportuario del Centro Norte (OMA, operator)",
+     "quote": [
+      "03 marzo 2026",
+      "La ruta Monterrey–Tampico retomó operaciones el 2 de marzo de 2026 y opera con seis frecuencias semanales."
+     ],
+     "dated": "2026-03-03"
+    }
+   ]
+  },
+  {
+   "claim": "routes across Mexico, the rest of the Americas, Asia and Europe",
+   "verdict": "confirmed",
+   "inAfter": "The route map reaches across Mexico and the rest of the Americas and out to Asia and Europe.",
+   "note": "Europe: Aeroméxico to Paris and Madrid and Iberia to Madrid (OMA's destination pages); Iberia's Madrid route opened on 2 June 2026, three a week, as a June to October summer route (Iberia, OMA). Asia: OMA's live Seoul page lists Aeroméxico to Incheon. The rest of the Americas: Air Canada, American, Avianca, Copa, Delta and United on OMA's airline list, and its Bogotá and Toronto pages.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "offering flights across Mexico, the Americas, Asia, and Europe"
+    },
+    {
+     "file": "oma-mty-destinos",
+     "org": "Grupo Aeroportuario del Centro Norte (OMA, operator)",
+     "quote": [
+      "París Francia",
+      "Madrid España",
+      "Bogotá Colombia",
+      "Toronto Canadá"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "oma-mty-seul",
+     "org": "Grupo Aeroportuario del Centro Norte (OMA, operator)",
+     "quote": [
+      "Comunícate al 55 5133 4000 para atención y asistencia de Aeroméxico.",
+      "Incheon International Airport"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "oma-mty-airlines",
+     "org": "Grupo Aeroportuario del Centro Norte (OMA, operator)",
+     "quote": [
+      "Comunícate al 1 888 247 2262 para atención y asistencia de Air Canada.",
+      "Comunícate al +57 601 401 3434 para atención y asistencia de Avianca.",
+      "Comunícate al +34 91 333 6767 para atención y asistencia de Iberia."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "iberia-mty",
+     "org": "Iberia",
+     "quote": [
+      "14 October 2025",
+      "The airline's direct flights between Madrid and Monterrey will begin operating on 2 June 2026, with three frequencies per week, on Tuesdays, Fridays, and Saturdays"
+     ],
+     "dated": "2025-10-14"
+    },
+    {
+     "file": "oma-dec2025-pdf",
+     "org": "Grupo Aeroportuario del Centro Norte (OMA, operator)",
+     "quote": [
+      "Monterrey 1,074,750 1,171,622 9.0 11,356,769 13,092,125 15.3",
+      "Monterrey 245,077 247,610 1.0 2,224,830 2,531,150 13.8"
+     ],
+     "dated": "2026-01-07"
+    }
+   ]
+  },
+  {
+   "claim": "two runways, 3,000 and 1,800 metres",
+   "verdict": "confirmed",
+   "inAfter": "Two runways handle it: the main one is 3,000 metres long and the second 1,800 metres.",
+   "note": "OurAirports gives the second runway as 1,801 m. The runway designators are left out (see the cut).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "features two runways",
+      "measures 3,000 by 45 metres (9,843 by 148 ft)",
+      "The secondary runway, 16/34, measures 1,800 by 30 metres (5,906 by 98 ft)"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 12/30: 3,000 m (9,843 ft), ASP",
+      "Runway 16/34: 1,801 m (5,909 ft), ASP",
+      "Runways listed: 2"
+     ]
+    },
+    {
+     "file": "oma-runway",
+     "org": "Grupo Aeroportuario del Centro Norte (OMA, operator)",
+     "quote": [
+      "24 junio 2026",
+      "con dimensiones de 3,000 metros de longitud por 45 metros de ancho",
+      "la pista auxiliar"
+     ],
+     "dated": "2026-06-24"
+    }
+   ]
+  },
+  {
+   "claim": "handles general aviation",
+   "verdict": "confirmed",
+   "inAfter": "It also handles general aviation",
+   "note": "What survives of the flight training, general aviation and air navigation line: general aviation was 0.6 per cent of OMA's December 2025 passengers across its airports.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "accommodates flight training and general aviation"
+    },
+    {
+     "file": "oma-dec2025",
+     "org": "Grupo Aeroportuario del Centro Norte (OMA, operator)",
+     "quote": "el 99.4% provino de la aviación comercial y el 0.6% de la aviación general",
+     "dated": "2026-01-07"
+    }
+   ]
+  },
+  {
+   "claim": "operated by Grupo Aeroportuario del Centro Norte (OMA)",
+   "verdict": "confirmed",
+   "inAfter": "is operated by Grupo Aeroportuario del Centro Norte (OMA)",
+   "note": "OMA's own name for itself includes 'del'; the old text had Grupo Aeroportuario Centro Norte.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Monterrey Airport is operated by Grupo Aeroportuario Centro Norte (OMA)"
+    },
+    {
+     "file": "oma-dec2025",
+     "org": "Grupo Aeroportuario del Centro Norte (OMA, operator)",
+     "quote": "Grupo Aeroportuario del Centro Norte, S.A.B. de C.V., mejor conocido como OMA, opera y administra 13 aeropuertos internacionales",
+     "dated": "2026-01-07"
+    }
+   ]
+  },
+  {
+   "claim": "Mexico's fourth busiest",
+   "verdict": "cut",
+   "wasBefore": "Mexico's fourth busiest airport by passenger numbers",
+   "why": "Wikipedia alone. AFAC's national table on gob.mx answers with an Akamai challenge page and OMA's investor site (ir.oma.aero) with a SiteGround CAPTCHA; OMA's own releases give Monterrey's total but no national rank. The operators' 2025 totals put Monterrey (15.6 million) behind Guadalajara (18.7 million, GAP) and ahead of Tijuana (12.65 million, GAP), with Cancún second (ASUR, citing AFAC), but the Mexico City airports' figures could not be read to close the ranking."
+  },
+  {
+   "claim": "growing quickly",
+   "verdict": "cut",
+   "wasBefore": "and growing quickly",
+   "why": "Replaced by the growth figure itself: up 15.0 per cent in 2025 (OMA)."
+  },
+  {
+   "claim": "main hub for Magnicharters and Aerus",
+   "verdict": "cut",
+   "wasBefore": "Viva, Magnicharters and Aerus",
+   "why": "Magnicharters is not on OMA's current list of the airport's airlines, so it goes. Aerus is kept as flying from here (OMA, March 2026); 'main hub' for Aerus is Wikipedia's word only."
+  },
+  {
+   "claim": "Volaris focus city",
+   "verdict": "cut",
+   "wasBefore": "with Volaris treating it as a focus city",
+   "why": "'Focus city' is Wikipedia's label only; softened to 'Volaris also flies here', from OMA's live airline list."
+  },
+  {
+   "claim": "route map wider than the domestic traffic suggests",
+   "verdict": "cut",
+   "wasBefore": "The route map is wider than the domestic traffic suggests",
+   "why": "Framing, dropped for a plain statement of where the routes go. Domestic passengers were 13.1 of the 15.6 million in 2025 (OMA)."
+  },
+  {
+   "claim": "runway 11/29",
+   "verdict": "cut",
+   "wasBefore": "The primary, 11/29,",
+   "why": "Sources disagree on the designator: Wikipedia's text says 11/29, its infobox and OurAirports say 12/30. The length is kept."
+  },
+  {
+   "claim": "ILS approach",
+   "verdict": "cut",
+   "wasBefore": "with an ILS approach",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "second runway takes lighter aircraft",
+   "verdict": "cut",
+   "wasBefore": "takes lighter aircraft",
+   "why": "Not what the sources say: Wikipedia calls the second runway seldom used, and OMA says only that it can take some compatible aircraft while the main runway is resurfaced (held back below)."
+  },
+  {
+   "claim": "flight training",
+   "verdict": "cut",
+   "wasBefore": "it carries flight training",
+   "why": "Wikipedia alone. General aviation is kept (OMA)."
+  },
+  {
+   "claim": "national airspace navigation service",
+   "verdict": "cut",
+   "wasBefore": "the national airspace navigation service",
+   "why": "Wikipedia alone. SENEAM's own page is on gob.mx, which answers with an Akamai challenge page; not tried again."
+  },
+  {
+   "claim": "apron busier and more mixed",
+   "verdict": "cut",
+   "wasBefore": "so the apron is busier and more mixed than at a purely commercial field",
+   "why": "An unsourced comparison."
+  },
+  {
+   "claim": "named after Mariano Escobedo, a nineteenth century general from the state",
+   "verdict": "cut",
+   "wasBefore": "named after Mariano Escobedo, a nineteenth century general from the state",
+   "why": "The naming rests on Wikipedia alone: OMA's pages call it Monterrey International Airport, and OurAirports' 'General Mariano Escobedo' keyword sits beside a Wikipedia link, so it is not independent. The encyclopedia confirms Escobedo was a 19th-century Mexican army commander born in Galeana, Nuevo León, but not the naming. Restore it when a second source for the official name (OMA's annual report or Mexico's AIP) can be read."
+  },
+  {
+   "claim": "main runway resurfacing, September to December 2026",
+   "verdict": "cut",
+   "why": "Held back: OMA is resurfacing the 3,000 m main runway between September and December 2026, mostly overnight, with the auxiliary runway taking some compatible aircraft meanwhile (OMA, 24 June 2026). One source, and a fact the old text has nothing to replace; worth a line for Andy while the works run, as an attributed statement.",
+   "sources": [
+    {
+     "file": "oma-runway",
+     "org": "Grupo Aeroportuario del Centro Norte (OMA, operator)",
+     "quote": [
+      "24 junio 2026",
+      "OMA llevará a cabo una renovación preventiva de su pista principal entre septiembre y diciembre del presente año",
+      "La rehabilitación se realizará principalmente durante la madrugada"
+     ],
+     "dated": "2026-06-24"
+    }
+   ]
+  },
+  {
+   "claim": "terminal expansion under way; nothing new opened",
+   "verdict": "cut",
+   "why": "Held back: the airport has three terminals, A, B and C, linked by a free shuttle (Wikipedia). OMA is spending MX$8 billion on it in 2026 to 2030; a new three-gate lounge in Terminal A and a broader terminal expansion are under way, due over the coming years, and a light rail terminal is due by the end of 2026 (Mexico Business News, 6 April 2026). No new terminal has opened. The old text says nothing about terminals.",
+   "sources": [
+    {
+     "file": "mbn-oma-invest",
+     "org": "Mexico Business News",
+     "quote": [
+      "Mon, 04/06/2026",
+      "Infrastructure expansion includes a new boarding lounge with three gates in Terminal A",
+      "A broader terminal expansion is also underway, with completion expected in the coming years"
+     ],
+     "dated": "2026-04-06"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "There are three terminals:"
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

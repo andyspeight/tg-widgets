@@ -1,0 +1,392 @@
+{
+ "iata": "POA",
+ "id": "recEGJ1AIs3MHfpcy",
+ "name": "Porto Alegre-Salgado Filho International Airport",
+ "country": "Brazil",
+ "wikipedia": "https://en.wikipedia.org/wiki/Salgado_Filho_Porto_Alegre_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Porto Alegre and the wider metropolitan area sits 9 km from the city centre, which makes it one of the easier Brazilian arrivals to plan around. A people mover has connected the terminal to the metro network since 2013, and from the airport metro station most of the surrounding cities are reachable without changing to a taxi. Bus routes T5, T11 and B09 also run between Terminal 1 and the city.\n\nIt is operated by Fraport Brasil and has carried the name of Joaquim Pedro Salgado Filho, the senator who became Brazil's first Air Force minister, since 1951.\n\nOne thing worth knowing when looking at historic schedules: the airport did not run normally through much of 2024. There were no flights at all between 4 and 26 May, and from late May until 20 October services moved to Canoas Air Force Base with restrictions. Anything compared against that period will not reflect how the airport usually works.",
+ "after": "The airport for Porto Alegre and the wider metropolitan area sits 9 km from the city centre. City bus routes T5 and T11 run to the airport.\n\nIt is operated by Fraport Brasil and has carried the name of Joaquim Pedro Salgado Filho, Brazil's first Air Force minister and later a senator, since 1951.\n\nOne thing worth knowing when looking at historic schedules: the airport did not run normally through much of 2024. There were no flights at all between 4 and 26 May, and from late May until 20 October services moved to Canoas Air Force Base with restrictions. Flights returned to the airport on 21 October, with full operations from 16 December. Anything compared against that period will not reflect how the airport usually works.",
+ "claims": [
+  {
+   "claim": "the airport for Porto Alegre and the wider metropolitan area",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Porto Alegre and the wider metropolitan area",
+   "note": "Agência Brasil puts it at more than 90 per cent of Rio Grande do Sul's air traffic.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the airport serving Porto Alegre and the region of Greater Porto Alegre, Brazil"
+    },
+    {
+     "file": "agbr-reabre-out2024",
+     "org": "Agência Brasil (state news agency)",
+     "quote": [
+      "Responsável por mais de 90% do tráfego aéreo no Rio Grande do Sul, o Aeroporto Salgado Filho",
+      "Publicado em 20/10/2024"
+     ],
+     "dated": "2024-10-20"
+    },
+    {
+     "file": "aisweb-sbpa",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": [
+      "Salgado Filho (SBPA) Porto Alegre/RS",
+      "INTL"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "9 km from the city centre",
+   "verdict": "confirmed",
+   "inAfter": "sits 9 km from the city centre",
+   "note": "The coordinates give 7.4 km in a straight line (54 degrees, north east); 9 km by road is a ratio of 1.22, inside the tolerance.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is located 9 km (6 mi) from downtown Porto Alegre."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 7.4 km"
+    }
+   ]
+  },
+  {
+   "claim": "city bus routes T5 and T11 run to the airport",
+   "verdict": "softened",
+   "inAfter": "City bus routes T5 and T11 run to the airport.",
+   "note": "Was 'Bus routes T5, T11 and B09 also run between Terminal 1 and the city'. The city bus company Carris lists T5 and T11 (with Saturday and Sunday variants T51, T52 and T111) ending at the airport; B09 is not on its list. Since September 2019 all airlines use the one passenger terminal (operator), so 'Terminal 1' is dropped.",
+   "sources": [
+    {
+     "file": "carris-home",
+     "org": "Carris (Porto Alegre city bus company)",
+     "quote": [
+      "T11 - SERRARIA/III PERIMETRAL/AEROPORTO",
+      "T5 - P.BELAS/PARQ. REDENCAO/CRISTOVAO/AEROPORTO"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Bus routes T5, T11, and B09 link Terminal 1 - International Airport to the city of Porto Alegre."
+    },
+    {
+     "file": "op-sobre",
+     "org": "Fraport Brasil (airport operator)",
+     "quote": "Todas as operações de companhias aéreas passam a operar no Terminal de Passageiros.",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "operated by Fraport Brasil",
+   "verdict": "confirmed",
+   "inAfter": "It is operated by Fraport Brasil",
+   "note": "Checked for a 2025 or 2026 change of operator: none. Fraport Brasil has run it since 2 January 2018 and still does (29 August 2026); DECEA's live entry names FRAPORT. OurAirports' home link (portoalegre-airport.com.br) is the domain read here. Fraport AG's pages are the same organisation and are not counted twice.",
+   "sources": [
+    {
+     "file": "op-sobre",
+     "org": "Fraport Brasil (airport operator)",
+     "quote": "é a empresa responsável pela administração do aeroporto de Porto Alegre",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-9anos",
+     "org": "Fraport Brasil (airport operator)",
+     "quote": [
+      "A nova operação se soma aos aeroportos de Fortaleza e Porto Alegre, administrados pela concessionária desde 2017.",
+      "29 agosto 2026"
+     ],
+     "dated": "2026-08-29"
+    },
+    {
+     "file": "aisweb-sbpa",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": [
+      "Salgado Filho (SBPA) Porto Alegre/RS",
+      "FRAPORT"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "fraport-ag-poa",
+     "org": "Fraport AG (operator's parent)",
+     "quote": "the operational takeover of the airport took place on 2018/01/02"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is operated by Fraport Brasil."
+    }
+   ]
+  },
+  {
+   "claim": "named after Joaquim Pedro Salgado Filho since 1951",
+   "verdict": "confirmed",
+   "inAfter": "has carried the name of Joaquim Pedro Salgado Filho",
+   "note": "Law 1,457 of 12 October 1951 renamed São João Airport 'Salgado Filho'; the 1953 naming law kept it.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Since October 12, 1951, it is named after the Senator and first Minister of the Brazilian Air Force Joaquim Pedro Salgado Filho"
+    },
+    {
+     "file": "planalto-lei-1457",
+     "org": "Presidency of Brazil (Planalto law archive)",
+     "quote": [
+      "12 DE OUTUBRO DE",
+      "situado no distrito do mesmo nome, em Porto Alegre, no Rio Grande do Sul, passa a denominar-se Salgado Filho."
+     ],
+     "dated": "1951-10-12"
+    },
+    {
+     "file": "cpdoc-salgado-filho",
+     "org": "FGV CPDOC (biographical dictionary)",
+     "quote": "Em sua homenagem, o aeroporto de Porto Alegre passou a chamar-se Aeroporto Salgado Filho."
+    }
+   ]
+  },
+  {
+   "claim": "since 1951",
+   "verdict": "confirmed",
+   "inAfter": "since 1951",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On October 12, 1951, São João Federal Airport was renamed Salgado Filho Airport"
+    },
+    {
+     "file": "planalto-lei-1457",
+     "org": "Presidency of Brazil (Planalto law archive)",
+     "quote": [
+      "12 DE OUTUBRO DE",
+      "1951."
+     ],
+     "dated": "1951-10-12"
+    }
+   ]
+  },
+  {
+   "claim": "Brazil's first Air Force minister and later a senator",
+   "verdict": "corrected",
+   "inAfter": "Brazil's first Air Force minister and later a senator",
+   "note": "Was 'the senator who became Brazil's first Air Force minister', which has the order backwards: he was the first holder of the new Air Ministry (Ministério da Aeronáutica), which created the Brazilian Air Force, from January 1941 to 1945, and a senator for Rio Grande do Sul from 1947 until he died in an air crash in July 1950.",
+   "sources": [
+    {
+     "file": "cpdoc-salgado-filho",
+     "org": "FGV CPDOC (biographical dictionary)",
+     "quote": [
+      "min. Aer. 1941-1945; sen. RS 1947-1950.",
+      "Salgado Filho foi nomeado para o recém-criado Ministério da Aeronáutica, tendo sido seu primeiro titular.",
+      "Salgado Filho foi eleito senador pelo Rio Grande do Sul"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the Senator and first Minister of the Brazilian Air Force"
+    }
+   ]
+  },
+  {
+   "claim": "the airport did not run normally through much of 2024",
+   "verdict": "confirmed",
+   "inAfter": "the airport did not run normally through much of 2024",
+   "note": "Checked against sources from the last 12 months: Fraport's 2025 annual report calls 2024 'heavily affected by the flood-related suspension of flight operations' and says the airport almost fully recovered in 2025; its live history page dates the reopening to October 2024. Nothing since then suggests another closure.",
+   "sources": [
+    {
+     "file": "fraport-ar2025",
+     "org": "Fraport AG (operator's parent)",
+     "quote": [
+      "which was heavily affected by the flood -related suspension of flight operations",
+      "2025, the airport almost fully recovered following the operational interruption due to flooding in 2024"
+     ],
+     "dated": "2025 annual report"
+    },
+    {
+     "file": "agbr-reabre-out2024",
+     "org": "Agência Brasil (state news agency)",
+     "quote": "após cerca de 170 dias fora de operação devido aos estragos causados pelas chuvas que atingiram o estado em abril e maio",
+     "dated": "2024-10-20"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On May 3, 2024 due to catastrophic flooding affecting the State of Rio Grande do Sul and in particular to the flooding of the airport, all operations were suspended indefinitely."
+    }
+   ]
+  },
+  {
+   "claim": "no flights at all between 4 and 26 May",
+   "verdict": "confirmed",
+   "inAfter": "There were no flights at all between 4 and 26 May",
+   "note": "Take-offs and landings stopped at 8pm on 3 May 2024 (Agência Brasil, that evening), and the first flight moved to Canoas Air Force Base landed on 27 May (Agência Brasil, that day).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "There were no flights between 4 and 26 May 2024."
+    },
+    {
+     "file": "agbr-suspende-2024",
+     "org": "Agência Brasil (state news agency)",
+     "quote": [
+      "os pousos e decolagens foram suspensos por tempo indeterminado",
+      "Publicado em 03/05/2024 - 20:57"
+     ],
+     "dated": "2024-05-03"
+    },
+    {
+     "file": "agbr-canoas-primeiro-voo",
+     "org": "Agência Brasil (state news agency)",
+     "quote": [
+      "recebeu hoje (27) o primeiro voo comercial remanejado do Aeroporto Internacional Salgado Filho",
+      "Publicado em 27/05/2024 - 14:54"
+     ],
+     "dated": "2024-05-27"
+    }
+   ]
+  },
+  {
+   "claim": "from late May until 20 October services moved to Canoas Air Force Base with restrictions",
+   "verdict": "confirmed",
+   "inAfter": "from late May until 20 October services moved to Canoas Air Force Base with restrictions",
+   "note": "Flights used Canoas Air Force Base, about 10 km away, from 27 May; check-in moved from a shopping-centre terminal back to Salgado Filho on 15 July, with passengers bussed to the base; commercial flights came back to Salgado Filho on Monday 21 October.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Between 27 May and 20 October 2024 flights were operated at Canoas Air Force Base with restrictions."
+    },
+    {
+     "file": "agbr-canoas-primeiro-voo",
+     "org": "Agência Brasil (state news agency)",
+     "quote": [
+      "A Base Aérea de Canoas (RS), na região metropolitana de Porto Alegre, recebeu hoje (27) o primeiro voo comercial remanejado",
+      "O acesso de passageiros à Base Aérea será exclusivo para aqueles que realizaram os procedimentos de embarque no ParkShopping Canoas"
+     ],
+     "dated": "2024-05-27"
+    },
+    {
+     "file": "agbr-reabre-out2024",
+     "org": "Agência Brasil (state news agency)",
+     "quote": [
+      "Os voos comerciais serão retomados a partir desta segunda-feira (21) no Aeroporto Salgado Filho",
+      "de/para a Base Aérea de Canoas, a cerca de 10 quilômetros de distância, de onde os aviões partiam ou chegavam"
+     ],
+     "dated": "2024-10-20"
+    },
+    {
+     "file": "panrotas-canoas-2024",
+     "org": "Panrotas (trade press)",
+     "quote": "Processamento de passageiros e controle de segurança chegam ao Salgado Filho a partir de 15 de julho"
+    }
+   ]
+  },
+  {
+   "claim": "flights returned on 21 October, full operations from 16 December",
+   "verdict": "corrected",
+   "inAfter": "Flights returned to the airport on 21 October, with full operations from 16 December.",
+   "note": "The old text implied normal service from 21 October. From then until 16 December the airport ran domestic flights only, on part of the runway, up to 128 a day between 8am and 10pm; the full 3.2 km runway, 24-hour operation and the return of international flights (from January 2025) followed on 16 December 2024. Fraport's live history page confirms the October 2024 reopening.",
+   "sources": [
+    {
+     "file": "agbr-reabre-out2024",
+     "org": "Agência Brasil (state news agency)",
+     "quote": [
+      "Os voos comerciais serão retomados a partir desta segunda-feira (21) no Aeroporto Salgado Filho",
+      "mesmo operando com apenas parte da pista principal, o Salgado Filho já comporta até 128 operações domésticas por dia"
+     ],
+     "dated": "2024-10-20"
+    },
+    {
+     "file": "agbr-ininterrupto-dez2024",
+     "org": "Agência Brasil (state news agency)",
+     "quote": [
+      "voltou a operar com sua estrutura plenamente recuperada",
+      "entregou hoje (16) a pista principal, de 3,2 km de extensão",
+      "Publicado em 16/12/2024 - 16:27"
+     ],
+     "dated": "2024-12-16"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "This first phase happened on October 21, 2024.",
+      "The second phase, with full resumption of operations took place on December 16, 2024."
+     ]
+    },
+    {
+     "file": "op-sobre",
+     "org": "Fraport Brasil (airport operator)",
+     "quote": "Em outubro de 2024, o Aeroporto Internacional Salgado Filho reabriu suas operações após um intenso processo de reconstrução",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "one of the easier Brazilian arrivals to plan around",
+   "verdict": "cut",
+   "wasBefore": "which makes it one of the easier Brazilian arrivals to plan around",
+   "why": "Opinion that leaned on the metro link, which could not be confirmed as running (below)."
+  },
+  {
+   "claim": "people mover to the metro since 2013; surrounding cities by metro",
+   "verdict": "cut",
+   "wasBefore": "A people mover has connected the terminal to the metro network since 2013, and from the airport metro station most of the surrounding cities are reachable without changing to a taxi.",
+   "why": "Not confirmed as running since the May 2024 floods, and a transport link needs a source from the last 12 months. Trensurb, which runs the people mover (Aeromóvel) and the metro, timed out and then answered 502; Correio do Povo, GZH and G1 all answer 'Blocked by egress policy', so no other tool tried them; Panrotas's search path does not exist; the operator's site has no transport page. A lead only, not evidence: Correio do Povo's own search listing (read with the link lister before its pages proved blocked) shows a headline of 11 May 2026 saying the Aeromóvel's repair, R$ 38 million over up to 12 months, has been added to the federal PAC programme, which suggests it is still out of service. For Andy to check by hand."
+  },
+  {
+   "claim": "route B09 and 'Terminal 1'",
+   "verdict": "cut",
+   "wasBefore": "Bus routes T5, T11 and B09 also run between Terminal 1 and the city.",
+   "why": "B09 is not on Carris's list and rests on Wikipedia alone; 'Terminal 1' is an old name, as all airlines have used the one passenger terminal since September 2019 (operator). T5 and T11 are kept."
+  },
+  {
+   "claim": "the senator who became minister",
+   "verdict": "cut",
+   "wasBefore": "the senator who became Brazil's first Air Force minister",
+   "why": "Wrong order: minister 1941 to 1945, senator 1947 to 1950 (FGV CPDOC). Corrected."
+  },
+  {
+   "claim": "about 7.5 million passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: the old text gives no traffic figure, so this replaces nothing. Fraport's 2025 annual report gives 7,512,942 (+93.2 per cent on the flood year), about 7.2 million of them domestic; Wikipedia's infobox gives 7,513,020 (+94 per cent). Still below 2019 (8,298,205, Fraport).",
+   "sources": [
+    {
+     "file": "fraport-ar2025",
+     "org": "Fraport AG (operator's parent)",
+     "quote": [
+      "Porto Alegre 100 7,512,942 +93.2",
+      "Both domestic traffic, with approximately 7.2 million passengers (+90.9%)"
+     ],
+     "dated": "2025 annual report"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 7,513,020 94%"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Anything compared against that period will not reflect how the airport usually works.",
+   "why": "Advice kept from the old text; it follows from the confirmed closure, the Canoas months and the restricted reopening."
+  }
+ ],
+ "tracerOk": {}
+}

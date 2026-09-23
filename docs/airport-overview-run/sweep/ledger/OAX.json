@@ -1,0 +1,315 @@
+{
+ "iata": "OAX",
+ "id": "recRzBmRMCcB1YsWi",
+ "name": "Xoxocotlán International Airport",
+ "country": "Mexico",
+ "wikipedia": "https://en.wikipedia.org/wiki/Oaxaca_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Oaxaca's airport, in the southern suburb of Santa Cruz Xoxocotlán, and one of the faster growing in Mexico as the city's popularity has risen. It carried 1,864,967 passengers in 2025, up on 1,787,428 the year before.\n\nIt is a single storey terminal of 7,548 square metres handling both domestic and international flights, with eight gates that open straight onto the apron. There are no air bridges here, so passengers walk out to the aircraft along open air walkways, which is worth knowing when a client is travelling with young children or in the rain.\n\nThe runway is 2,450 metres at an elevation of 1,521 metres, with nine stands for narrow bodied aircraft and room for up to 22 movements an hour.\n\nThe airport is run by ASUR and is the hub for the regional airline Aerotucán. It also hosts Mexican Army facilities, courier operations and flight training.\n\nThe name comes from the Nahuatl word xocotl, meaning a sour or sweet and sour fruit.",
+ "after": "Oaxaca's airport, officially Xoxocotlán International Airport, stands in a southern suburb of the city. It carried 1,864,967 passengers in 2025, up on 1,787,428 the year before.\n\nIts terminal, of 7,548 square metres, handles both domestic and international flights. Aeroméxico, Viva Aerobus, Volaris and United fly here.\n\nThe runway is 2,450 metres at an elevation of 1,521 metres, with room for up to 22 movements an hour.\n\nASUR runs the airport, which also has a general aviation building for small private aircraft.",
+ "claims": [
+  {
+   "claim": "officially Xoxocotlán International Airport",
+   "verdict": "confirmed",
+   "inAfter": "Oaxaca's airport, officially Xoxocotlán International Airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "officially Xoxocotlán International Airport"
+    },
+    {
+     "file": "asur-airports",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": "Airport name: Xoxocotlán International Airport",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "asur-20f-2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": "Oaxaca International Airport (the “Oaxaca Airport”) serves the city of Oaxaca",
+     "dated": "2026-04-16"
+    }
+   ]
+  },
+  {
+   "claim": "in a southern suburb of the city",
+   "verdict": "softened",
+   "inAfter": "stands in a southern suburb of the city",
+   "note": "The municipality's name (Santa Cruz Xoxocotlán) is dropped, as only Wikipedia gives it; the coordinates put the airport 6.8 km due south of the centre (181 degrees), and ASUR's address is km 7.5 of the Oaxaca to Puerto Ángel road.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "a southern suburb of Oaxaca City"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 6.8 km (4.2 miles)",
+      "Bearing from the city centre: 181 degrees, which is south"
+     ]
+    },
+    {
+     "file": "asur-oax-contact",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": "Oaxaca International Airport. Carretera Oaxaca-Puerto Angel Km 7.5, Oaxaca, Edo. de Oaxaca.",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "1,864,967 passengers in 2025, up on 1,787,428",
+   "verdict": "confirmed",
+   "inAfter": "It carried 1,864,967 passengers in 2025, up on 1,787,428 the year before.",
+   "note": "Up 4.3 per cent (ASUR). ASUR's Mexican figures leave out transit and general aviation passengers.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It served 1,787,428 passengers in 2024, and 1,864,967 passengers in 2025."
+    },
+    {
+     "file": "asur-dec2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": [
+      "Ciudad de México 6 de enero 2026",
+      "Tráfico Total México 3,803,399 3,786,341 (0.4) 41,420,330 40,595,729 (2.0)",
+      "OAX Oaxaca 164,614 167,938 2.0 1,787,428 1,864,967 4.3"
+     ],
+     "dated": "2026-01-06"
+    }
+   ]
+  },
+  {
+   "claim": "terminal of 7,548 square metres, domestic and international flights",
+   "verdict": "confirmed",
+   "inAfter": "Its terminal, of 7,548 square metres, handles both domestic and international flights.",
+   "note": "'Single storey' is dropped (see the cut). In 2025, 1,591,821 domestic and 273,146 international passengers (ASUR).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "with a total area of 7,548 square metres (81,250 sq ft)",
+      "It accommodates both arrivals and departures for domestic and international flights."
+     ]
+    },
+    {
+     "file": "asur-airports",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": "Terminal area: 7,548 m2 (81,245 sq ft)",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "asur-dec2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": [
+      "OAX Oaxaca 137,952 139,909 1.4 1,531,111 1,591,821 4.0",
+      "Tráfico Internacional 2,072,310 2,069,807 (0.1) 21,611,380 20,900,043 (3.3)",
+      "OAX Oaxaca 26,662 28,029 5.1 256,317 273,146 6.6"
+     ],
+     "dated": "2026-01-06"
+    }
+   ]
+  },
+  {
+   "claim": "Aeroméxico, Viva Aerobus, Volaris and United fly here",
+   "verdict": "corrected",
+   "inAfter": "Aeroméxico, Viva Aerobus, Volaris and United fly here.",
+   "note": "Replaces 'the hub for the regional airline Aerotucán', which could not be confirmed (see the cut): the airlines named are the four on ASUR's live Oaxaca list, and El Universal (7 October 2025) has the same three Mexican airlines from Mexico City and United from Houston. El Universal also names American from Dallas and Volaris (and seasonally Frontier) from Los Angeles; American is not on ASUR's list, so it is not named.",
+   "sources": [
+    {
+     "file": "asur-oax-airlines",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": [
+      "Oaxaca - Airlines, Links and Tours",
+      "Aeroméxico &gt; www.aeromexico.com",
+      "VivaAerobus &gt; www.vivaaerobus.com",
+      "Volaris &gt; www.volaris.com",
+      "United Airlines &gt; www.united.com"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "eluniversal-oax-directos",
+     "org": "El Universal Oaxaca",
+     "quote": [
+      "07-10-25",
+      "Las aerolíneas que operan vuelos directos desde aquí son Aeroméxico, Volaris y Viva Aerobús",
+      "Desde el Aeropuerto Intercontinental George Bush (IAH), la aerolínea United Airlines ofrece vuelos directos."
+     ],
+     "dated": "2025-10-07"
+    }
+   ]
+  },
+  {
+   "claim": "runway 2,450 metres, elevation 1,521 metres, 22 movements an hour",
+   "verdict": "confirmed",
+   "inAfter": "The runway is 2,450 metres at an elevation of 1,521 metres, with room for up to 22 movements an hour.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "This runway is 2,450 metres (8,040 ft) in length",
+      "The airport is situated at an elevation of 1,521 metres (4,990 ft) above mean sea level",
+      "The airport has the capacity to handle up to 22 operations per hour."
+     ]
+    },
+    {
+     "file": "asur-airports",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": [
+      "01-19 = 2,450 x 45 m (8,038 X 148 ft)",
+      "1,521 m (4,990 ft) Largest aircraft: MD11 Runway capacity – operations per hour: 22"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "asur-20f-2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": "The airport has one runway with a length of 2,450 meters (1.5 miles)",
+     "dated": "2026-04-16"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "elevation 4,989 ft (1,521 m)",
+      "Runway 01/19: 2,450 m (8,038 ft), ASP"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "run by ASUR",
+   "verdict": "confirmed",
+   "inAfter": "ASUR runs the airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is operated by Grupo Aeroportuario del Sureste (ASUR)"
+    },
+    {
+     "file": "asur-20f-2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": [
+      "Grupo Aeroportuario del Sureste, S.A.B. de C.V., or ASUR, is a corporation",
+      "Mérida, Minatitlán, Oaxaca, Tapachula, Veracruz and Villahermosa"
+     ],
+     "dated": "2026-04-16"
+    }
+   ]
+  },
+  {
+   "claim": "general aviation building for small private aircraft",
+   "verdict": "confirmed",
+   "inAfter": "which also has a general aviation building for small private aircraft",
+   "note": "What survives of the military, courier and flight training line (see the cut).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "designated spaces for general aviation",
+      "The general aviation apron offers parking for fixed-wing aircraft and heliports for private aviation."
+     ]
+    },
+    {
+     "file": "asur-20f-2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": "The airport also includes a general aviation building for small private airplanes with 38 positions",
+     "dated": "2026-04-16"
+    }
+   ]
+  },
+  {
+   "claim": "one of the faster growing in Mexico",
+   "verdict": "cut",
+   "wasBefore": "and one of the faster growing in Mexico as the city's popularity has risen",
+   "why": "Wikipedia alone, and not borne out by 2025: Oaxaca grew 4.3 per cent, less than Mérida (6.5) and Veracruz (9.3) among ASUR's own airports (ASUR, January 2026). The passenger totals are kept."
+  },
+  {
+   "claim": "municipality of Santa Cruz Xoxocotlán",
+   "verdict": "cut",
+   "wasBefore": "in the southern suburb of Santa Cruz Xoxocotlán",
+   "why": "The municipality rests on Wikipedia alone; ASUR gives only the road address. Softened to 'a southern suburb', which the coordinates confirm, and the official name Xoxocotlán is kept."
+  },
+  {
+   "claim": "single storey terminal",
+   "verdict": "cut",
+   "wasBefore": "It is a single storey terminal",
+   "why": "Sources disagree: Wikipedia says single-storey, while ASUR's airport map shows Terminal 1 with a first and a second floor. The area is kept."
+  },
+  {
+   "claim": "eight gates straight onto the apron",
+   "verdict": "cut",
+   "wasBefore": "with eight gates that open straight onto the apron",
+   "why": "Wikipedia alone for the gate count. ASUR's annual report gives the terminal nine contact positions and its technical page six Code C stands, all at the terminal and none remote."
+  },
+  {
+   "claim": "no air bridges; walk to the aircraft",
+   "verdict": "cut",
+   "wasBefore": "There are no air bridges here, so passengers walk out to the aircraft along open air walkways, which is worth knowing when a client is travelling with young children or in the rain.",
+   "why": "Wikipedia alone. ASUR's annual report names boarding bridges or telescopic corridors at its other airports and none at Oaxaca (nine contact positions), which suggests there are none but does not say so. A practical point worth restoring if ASUR or a second source states it."
+  },
+  {
+   "claim": "nine stands for narrow-bodied aircraft",
+   "verdict": "cut",
+   "wasBefore": "with nine stands for narrow bodied aircraft",
+   "why": "Sources disagree: Wikipedia has nine stands mainly for narrow-bodies and ASUR's annual report nine contact positions, but ASUR's technical page gives six Code C stands (or four C and one D)."
+  },
+  {
+   "claim": "hub for Aerotucán",
+   "verdict": "cut",
+   "wasBefore": "and is the hub for the regional airline Aerotucán",
+   "why": "No current source: Aerotucán's .com.mx site shows a WordPress critical error, the aerotucan.com route page Wikipedia cites is a 404, and neither ASUR's airline list nor El Universal's October 2025 list of direct routes mentions it. Replaced by the airlines both sources name."
+  },
+  {
+   "claim": "Army facilities, courier operations and flight training",
+   "verdict": "cut",
+   "wasBefore": "It also hosts Mexican Army facilities, courier operations and flight training.",
+   "why": "Wikipedia alone (its own body text describes Air Force Base No. 15, not the Army). SEDENA's page on gob.mx answers with an Akamai challenge page. The general aviation building is kept (ASUR)."
+  },
+  {
+   "claim": "name from the Nahuatl xocotl",
+   "verdict": "cut",
+   "wasBefore": "The name comes from the Nahuatl word xocotl, meaning a sour or sweet and sour fruit.",
+   "why": "Only Wikipedia ties the name to xocotl. The Online Nahuatl Dictionary (University of Oregon) confirms xocotl means 'a sour fruit; or, fruit in general' but not 'sweet and sour', and has no entry for Xoxocotlán; INAFED's municipal encyclopedia did not answer."
+  },
+  {
+   "claim": "operating hours 06:00 to 20:00",
+   "verdict": "cut",
+   "why": "Held back: ASUR's technical page gives Oaxaca's operating hours as 0600-2000. One source, and a fact the old text has nothing to replace; useful for late arrivals if Andy wants it.",
+   "sources": [
+    {
+     "file": "asur-airports",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": "1,521 m (4,990 ft) Largest aircraft: MD11 Runway capacity – operations per hour: 22 Operating hours: 0600-2000",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Hurricane Polo warning, week of 21 September 2026",
+   "verdict": "cut",
+   "why": "Held back: the FCDO (updated 22 September 2026) reports Hurricane Polo bringing heavy rain to parts of Guerrero, Michoacán and Oaxaca states in the week of 21 September, with a hurricane warning in place. Transient, and nothing in the old text to replace; flagged in case clients are travelling now.",
+   "sources": [
+    {
+     "file": "fcdo-mexico-warnings",
+     "org": "UK FCDO",
+     "quote": [
+      "22 September 2026",
+      "Hurricane Polo is bringing heavy rainfall across Mexico’s southwestern coast, including parts of Guerrero, Michoacan and Oaxaca states."
+     ],
+     "dated": "2026-09-22"
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

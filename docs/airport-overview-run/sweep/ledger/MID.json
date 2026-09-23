@@ -1,0 +1,301 @@
+{
+ "iata": "MID",
+ "id": "rec0oGs4MmK5Zbuy2",
+ "name": "Manuel Crescencio Rejón International Airport",
+ "country": "Mexico",
+ "wikipedia": "https://en.wikipedia.org/wiki/M%C3%A9rida_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The gateway to Yucatan, and one of the fastest growing airports in Mexico: just under 3.7 million passengers in 2024 and close to 3.94 million in 2025. That puts it ninth in the country by passenger numbers.\n\nThe location is the selling point. It sits inside the Merida urban area, less than 5 km south west of the city centre, so transfers are short in a way they are not at most Mexican gateways.\n\nRoutes run across Mexico and out to the United States, Canada, Central America and the Caribbean, with Viva treating it as a focus city. It is operated by Grupo Aeroportuario del Sureste.\n\nThe site does more than scheduled passenger work. It houses the Mexican airspace navigation service and an army presence, and carries flight training and general aviation alongside the airlines. The name honours Manuel Crescencio Garcia Rejon, a jurist and politician from Yucatan.",
+ "after": "Mérida's airport, serving the city and the surrounding state of Yucatán. It handled just under 3.7 million passengers in 2024 and close to 3.94 million in 2025.\n\nThe location is the selling point. It sits less than 5 km south west of the city centre, so transfers are short.\n\nRoutes run across Mexico, and there are international flights too. It is operated by Grupo Aeroportuario del Sureste (ASUR). There is also a separate general aviation building.\n\nThe name honours Manuel Crescencio Rejón, a politician from Yucatán.",
+ "claims": [
+  {
+   "claim": "serves Mérida and the surrounding state of Yucatán",
+   "verdict": "confirmed",
+   "inAfter": "Mérida's airport, serving the city and the surrounding state of Yucatán",
+   "note": "Replaces 'The gateway to Yucatan' ('gateway to' is banned in house style) with what both sources say. Wikipedia's 'primary' is not repeated: ASUR says only that it serves the city and the surrounding areas of the state.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It serves as the primary international gateway to Mérida and the State of Yucatán"
+    },
+    {
+     "file": "asur-20f-2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": [
+      "serves the inland city of Mérida",
+      "surrounding areas in the state of Yucatán",
+      "Dated: April 16, 2026"
+     ],
+     "dated": "2026-04-16"
+    }
+   ]
+  },
+  {
+   "claim": "just under 3.7 million passengers in 2024 and close to 3.94 million in 2025",
+   "verdict": "confirmed",
+   "inAfter": "It handled just under 3.7 million passengers in 2024 and close to 3.94 million in 2025.",
+   "note": "ASUR's December 2025 release and Wikipedia give the same totals: 3,699,877 (2024) and 3,939,692 (2025), up 6.5 per cent. ASUR's Mexican figures leave out transit and general aviation passengers.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2024, it handled 3,699,877 passengers; in 2025, the number increased to 3,939,692 passengers."
+    },
+    {
+     "file": "asur-dec2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": [
+      "Ciudad de México 6 de enero 2026",
+      "Tráfico Total México 3,803,399 3,786,341 (0.4) 41,420,330 40,595,729 (2.0)",
+      "MID Mérida 339,127 378,715 11.7 3,699,877 3,939,692 6.5",
+      "Se excluyen pasajeros en tránsito y de aviación general"
+     ],
+     "dated": "2026-01-06"
+    },
+    {
+     "file": "asur-20f-2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": [
+      "Mérida 2,079.5 3,079.6 3,674.1 3,699.9 3,939.7",
+      "In 2025, approximately 3.9 million passengers traveled through Mérida Airport."
+     ],
+     "dated": "2026-04-16"
+    }
+   ]
+  },
+  {
+   "claim": "less than 5 km south west of the city centre",
+   "verdict": "confirmed",
+   "inAfter": "It sits less than 5 km south west of the city centre",
+   "note": "Coordinates: 4.7 km in a straight line, bearing 210 degrees (south west).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "less than 5 kilometres (3.1 mi) southwest of the city centre"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 4.7 km (2.9 miles)",
+      "Bearing from the city centre: 210 degrees, which is south west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "domestic routes across Mexico, plus international flights",
+   "verdict": "softened",
+   "inAfter": "Routes run across Mexico, and there are international flights too.",
+   "note": "Softened from the named regions (see the cut). ASUR's 2025 figures for Mérida: 3,536,308 domestic and 403,384 international passengers; its annual report says the substantial majority are domestic.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "offering flights to and from Mexico, the United States, Canada, Central America, and the Caribbean"
+    },
+    {
+     "file": "asur-dec2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": [
+      "Tráfico Doméstico 1,731,089 1,716,534 (0.8) 19,808,950 19,695,686 (0.6)",
+      "MID Mérida 301,942 336,177 11.3 3,324,415 3,536,308 6.4",
+      "Tráfico Internacional 2,072,310 2,069,807 (0.1) 21,611,380 20,900,043 (3.3)",
+      "MID Mérida 37,185 42,538 14.4 375,462 403,384 7.4"
+     ],
+     "dated": "2026-01-06"
+    },
+    {
+     "file": "asur-20f-2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": "The substantial majority of this airport’s passengers are domestic.",
+     "dated": "2026-04-16"
+    }
+   ]
+  },
+  {
+   "claim": "operated by Grupo Aeroportuario del Sureste (ASUR)",
+   "verdict": "confirmed",
+   "inAfter": "It is operated by Grupo Aeroportuario del Sureste (ASUR).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is operated by the Grupo Aeroportuario del Sureste (ASUR)."
+    },
+    {
+     "file": "asur-20f-2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": [
+      "Grupo Aeroportuario del Sureste, S.A.B. de C.V., or ASUR, is a corporation",
+      "We hold concessions to operate, maintain and develop nine airports in the southeast region of Mexico",
+      "Mérida, Minatitlán, Oaxaca, Tapachula, Veracruz and Villahermosa"
+     ],
+     "dated": "2026-04-16"
+    }
+   ]
+  },
+  {
+   "claim": "separate general aviation building",
+   "verdict": "confirmed",
+   "inAfter": "There is also a separate general aviation building.",
+   "note": "What survives of 'carries flight training and general aviation alongside the airlines'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "There is also a dedicated general aviation terminal"
+    },
+    {
+     "file": "asur-20f-2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": "The airport has one terminal and one general aviation building",
+     "dated": "2026-04-16"
+    }
+   ]
+  },
+  {
+   "claim": "named after Manuel Crescencio Rejón, a politician from Yucatán",
+   "verdict": "softened",
+   "inAfter": "The name honours Manuel Crescencio Rejón, a politician from Yucatán.",
+   "note": "Name spelt as the airport's official name has it (ASUR: Licenciado Manuel Crescencio Rejón); Wikipedia gives García Rejón. 'Jurist' is dropped (see the cut): the encyclopedia calls him a politician and cabinet minister, born in Yucatán.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is named in honor of the jurist and politician Manuel Crescencio García Rejón, who was originally from Yucatán."
+    },
+    {
+     "file": "asur-airports",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": "Licenciado Manuel Crescencio Rejón International Airport"
+    },
+    {
+     "file": "encyclopedia-rejon",
+     "org": "Encyclopedia of Latin American History and Culture (Encyclopedia.com)",
+     "quote": [
+      "Mexican politician and cabinet minister",
+      "Rejón was born into a poor family in Bolonchenticul, Yucatán, and educated in Mérida."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "one of the fastest growing airports in Mexico",
+   "verdict": "cut",
+   "wasBefore": "one of the fastest growing airports in Mexico",
+   "why": "Wikipedia alone. No national comparison could be read: AFAC's statistics on gob.mx answer with an Akamai challenge page. The growth itself shows in the two passenger totals kept (6.5 per cent in 2025, ASUR)."
+  },
+  {
+   "claim": "ninth in Mexico by passengers",
+   "verdict": "cut",
+   "wasBefore": "That puts it ninth in the country by passenger numbers.",
+   "why": "Wikipedia alone (lead and infobox). AFAC's statistics page on gob.mx answered grab.mjs with an Akamai 'Challenge Validation' page (a bot check) and was not tried again; ASUR's annual report ranks Mérida only among ASUR's own airports (second)."
+  },
+  {
+   "claim": "inside the Mérida urban area",
+   "verdict": "cut",
+   "wasBefore": "It sits inside the Merida urban area",
+   "why": "Wikipedia alone. The distance and bearing are kept, from Wikipedia and the coordinates check."
+  },
+  {
+   "claim": "transfers shorter than at most Mexican airports",
+   "verdict": "cut",
+   "wasBefore": "in a way they are not at most Mexican gateways",
+   "why": "An unsourced comparison with other airports. The short transfer follows from the sourced distance and is kept as opinion."
+  },
+  {
+   "claim": "routes to the United States, Canada, Central America and the Caribbean",
+   "verdict": "cut",
+   "wasBefore": "out to the United States, Canada, Central America and the Caribbean",
+   "why": "No second source dated in the last 12 months for the regions. United States: Viva Aerobus's seasonal Los Angeles flights (to become year-round from the second half of 2026) are reported by Quadratín on 8 September 2025, just outside 12 months; Mexico News Daily's report is behind a bot check and American Airlines' newsroom refused the browser. Canada: Air Canada adds Toronto from 21 November 2026 (PAX, 7 April 2026), one source, held back below. Central America: the only story found (Guatemala City) dates from 2022. Caribbean: nothing found. Softened to 'international flights too', which ASUR's 2025 figures and Wikipedia both support."
+  },
+  {
+   "claim": "Viva focus city",
+   "verdict": "cut",
+   "wasBefore": "with Viva treating it as a focus city",
+   "why": "Airline bases are time-sensitive and nothing from the last 12 months says so: the hub reports are Yucatán Magazine (31 August 2022) and Mexico Business News (Friday 9 August 2024, three aircraft based). Viva's own site is a JavaScript app that returns no text."
+  },
+  {
+   "claim": "lead-in to the non-airline paragraph",
+   "verdict": "cut",
+   "wasBefore": "The site does more than scheduled passenger work.",
+   "why": "Introduced the air traffic control and military line, which is cut."
+  },
+  {
+   "claim": "houses the Mexican airspace navigation service",
+   "verdict": "cut",
+   "wasBefore": "It houses the Mexican airspace navigation service",
+   "why": "Wikipedia alone. SENEAM's own page is on gob.mx (Akamai challenge page) and the ICAO paper Wikipedia cites answered with Cloudflare's 'Just a moment' check; neither was tried again."
+  },
+  {
+   "claim": "army presence",
+   "verdict": "cut",
+   "wasBefore": "and an army presence",
+   "why": "Wikipedia alone, and its own body text describes an Air Force base (No. 8), not the Army. SEDENA's page is on gob.mx (Akamai challenge page)."
+  },
+  {
+   "claim": "flight training",
+   "verdict": "cut",
+   "wasBefore": "and carries flight training",
+   "why": "Wikipedia alone. General aviation is kept, from ASUR's annual report."
+  },
+  {
+   "claim": "a jurist",
+   "verdict": "cut",
+   "wasBefore": "a jurist and politician from Yucatan",
+   "why": "'Jurist' is Wikipedia's word only; the encyclopedia calls him a Mexican politician and cabinet minister, born in Yucatán, which is kept."
+  },
+  {
+   "claim": "Air Canada from Toronto from November 2026",
+   "verdict": "cut",
+   "why": "Held back: Air Canada adds Mérida from Toronto on Mondays and Saturdays, 21 November 2026 to 17 April 2027 (PAX, 7 April 2026). One source, and it would name an airline the text no longer carries; for Andy to add if a second source (Air Canada's own release) is saved.",
+   "sources": [
+    {
+     "file": "paxnews-aircanada",
+     "org": "PAX (Pax Global Media)",
+     "quote": [
+      "04-07-2026",
+      "Mérida, Mexico (MID)* Toronto (YYZ) Mon, Sat Nov. 21, 2026-Apr. 17, 2027"
+     ],
+     "dated": "2026-04-07"
+    }
+   ]
+  },
+  {
+   "claim": "one passenger terminal, enlarged 2022 to 2023; no new terminal",
+   "verdict": "cut",
+   "why": "Held back: Mérida still has one passenger terminal (ASUR annual report, 16 April 2026), enlarged rather than replaced (capacity doubled in 2022, Mexico Business News; ASUR's 2023 spending went on the continued terminal expansion). No new terminal has opened. The old text says nothing about terminals, so there is nothing to replace.",
+   "sources": [
+    {
+     "file": "asur-20f-2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator)",
+     "quote": [
+      "The airport has one terminal and one general aviation building",
+      "the terminal building, commercial platform and roads of Merida Airport"
+     ],
+     "dated": "2026-04-16"
+    },
+    {
+     "file": "mbn-viva-hub",
+     "org": "Mexico Business News",
+     "quote": "The airport’s capacity was doubled in 2022",
+     "dated": "2024-08-09 (the page shows Fri, 08/09/2024)"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The location is the selling point.",
+   "why": "The old text's framing, kept: it introduces the sourced distance that follows."
+  },
+  {
+   "text": "so transfers are short",
+   "why": "Follows from the sourced distance (4.7 km in a straight line from the centre)."
+  }
+ ],
+ "tracerOk": {}
+}
