@@ -1,0 +1,151 @@
+{
+ "iata": "VRN",
+ "id": "recmNEMpax2Ttvrys",
+ "name": "Verona Villafranca Valerio Catullo Airport",
+ "country": "Italy",
+ "wikipedia": "https://en.wikipedia.org/wiki/Verona_Villafranca_Airport",
+ "audited": "2026-09-23",
+ "before": "Verona's airport, 10 km south west of the city at the junction of the A4 from Milan to Venice and the A22 up to the Brenner Pass. It draws from a population of more than four million across Verona, Brescia, Mantua, Trentino and South Tyrol.\n\nLake Garda is the reason many clients use it. From June to September ATV buses 164, 183 and 184 run hourly from the airport to the towns along the lake. Year round, the Aerobus shuttle connects to Verona Porta Nuova station.\n\nThe airport has an unusual piece of equipment. A fog dispersal system has been running since 2003, and together with an ILS Category IIIb approach it lets aircraft land in visibility as low as 75 metres.\n\nDepartures and arrivals are in two buildings side by side, with the bus stand directly outside arrivals.\n\nThe site was established in 1916 as a military airfield and only began civil flying in 1961.",
+ "after": "Verona's airport, 10 km south west of the city.\n\nLake Garda is the reason many clients use it. ATV's line 482 runs hourly from the airport to Peschiera and San Benedetto on the lake in season (until 18 October in 2026), with line 483 on to Lazise, Bardolino, Garda and Malcesine. Year round, ATV's Verona Airlink shuttle reaches Verona Porta Nuova station in 15 minutes and runs every 20 minutes.\n\nThe site began as a military airfield and started civil flying in 1961.",
+ "claims": [
+  {
+   "claim": "10 km south west of Verona",
+   "verdict": "confirmed",
+   "inAfter": "10 km south west of the city",
+   "note": "Coordinates: 9.6 km at 240 degrees, south west (ratio 1.04).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "10 km (6.2 mi) southwest of Verona"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 9.6 km (6.0 miles)",
+      "Bearing from the city centre: 240 degrees, which is south west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "ATV line 482 hourly to Peschiera and San Benedetto in season (until 18 October 2026); line 483 to Lazise, Bardolino, Garda and Malcesine",
+   "verdict": "corrected",
+   "inAfter": "ATV's line 482 runs hourly from the airport to Peschiera and San Benedetto on the lake in season (until 18 October in 2026), with line 483 on to Lazise, Bardolino, Garda and Malcesine.",
+   "primary": true,
+   "attribution": "ATV",
+   "note": "Was 'From June to September ATV buses 164, 183 and 184 run hourly from the airport to the towns along the lake'. ATV's own airport page (Italian) now gives line 482, hourly, to Villafranca, Valeggio, Peschiera and San Benedetto until 18 October 2026, changing there to line 483 for the eastern shore. Attributed to ATV, whose timetable it is; Wikipedia's line numbers are out of date.",
+   "sources": [
+    {
+     "file": "atv-aeroporto",
+     "org": "ATV (Azienda Trasporti Verona, the bus operator, atv.verona.it)",
+     "dated": "2026 (the page gives the season's end, 18 ottobre 2026)",
+     "quote": [
+      "Fino al 18 ottobre 2026, con la linea 482, ogni ora, bus diretto dall'Aeroporto Catullo a Villafranca, Valeggio, Peschiera, San Benedetto.",
+      "A Peschiera/San Benedetto, cambio con la linea 483 per Lazise, Bardolino, Garda, Torri del Benaco, Brenzone sul Garda, Malcesine."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a year-round shuttle to Verona Porta Nuova station",
+   "verdict": "confirmed",
+   "inAfter": "Year round, ATV's Verona Airlink shuttle reaches Verona Porta Nuova station",
+   "note": "Was 'the Aerobus shuttle'; ATV now calls it Verona Airlink.",
+   "sources": [
+    {
+     "file": "atv-aeroporto",
+     "org": "ATV (Azienda Trasporti Verona, the bus operator, atv.verona.it)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Il servizio Verona Airlink collega la Stazione di Porta Nuova con l'Aeroporto Catullo in 15 minuti.",
+      "Navetta operativa tutti i giorni"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "A shuttle bus service, Aerobus (199) operated by ATV, connects Verona-Villafranca Airport directly with Verona Porta Nuova station"
+    }
+   ]
+  },
+  {
+   "claim": "ATV: 15 minutes, every 20 minutes",
+   "verdict": "corrected",
+   "inAfter": "ATV's Verona Airlink shuttle reaches Verona Porta Nuova station in 15 minutes and runs every 20 minutes",
+   "primary": true,
+   "attribution": "ATV",
+   "sources": [
+    {
+     "file": "atv-aeroporto",
+     "org": "ATV (Azienda Trasporti Verona, the bus operator, atv.verona.it)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "collega la Stazione di Porta Nuova con l'Aeroporto Catullo in 15 minuti",
+      "Navetta operativa tutti i giorni, ogni 20 minuti"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "began as a military airfield; civil flying from 1961",
+   "verdict": "confirmed",
+   "inAfter": "The site began as a military airfield and started civil flying in 1961.",
+   "note": "The operator dates the military origins to the Second World War; Wikipedia says 1916. The year is left out.",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "Aeroporto Valerio Catullo di Verona Villafranca (operator, aeroportoverona.it)",
+     "dated": "2026-09-23 (live page; copyright 2025)",
+     "quote": [
+      "Verona Valerio Catullo Airport has military origins dating back to World War II.",
+      "In 1961 it began its civil activity with the first charter flights and national connections."
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In 1961, it began its civil activity with the first charter flights"
+    }
+   ]
+  },
+  {
+   "claim": "at the junction of the A4 and A22; catchment of more than four million",
+   "verdict": "cut",
+   "wasBefore": "at the junction of the A4 from Milan to Venice and the A22 up to the Brenner Pass. It draws from a population of more than four million across Verona, Brescia, Mantua, Trentino and South Tyrol.",
+   "why": "Wikipedia alone; the operator's company profile address is dead (405) and its other pages refuse the link lister and plain requests."
+  },
+  {
+   "claim": "ATV buses 164, 183 and 184 from June to September; Aerobus",
+   "verdict": "cut",
+   "wasBefore": "From June to September ATV buses 164, 183 and 184 run hourly from the airport to the towns along the lake. Year round, the Aerobus shuttle connects to Verona Porta Nuova station.",
+   "why": "Out of date on ATV's own page: the lake service is now line 482 (with 483 onward) until 18 October in 2026, and the shuttle is Verona Airlink. Replaced above."
+  },
+  {
+   "claim": "fog dispersal system since 2003; ILS CAT IIIb; 75 metres",
+   "verdict": "cut",
+   "wasBefore": "The airport has an unusual piece of equipment. A fog dispersal system has been running since 2003, and together with an ILS Category IIIb approach it lets aircraft land in visibility as low as 75 metres.",
+   "why": "Wikipedia alone; the operator's history page folds its later sections away and its other pages could not be read."
+  },
+  {
+   "claim": "departures and arrivals in two buildings side by side; bus stand outside arrivals",
+   "verdict": "cut",
+   "wasBefore": "Departures and arrivals are in two buildings side by side, with the bus stand directly outside arrivals.",
+   "why": "Wikipedia alone, and Wikipedia's current article says a new passenger terminal is being built, so the layout may be changing."
+  },
+  {
+   "claim": "established in 1916",
+   "verdict": "cut",
+   "wasBefore": "The site was established in 1916 as a military airfield and only began civil flying in 1961.",
+   "why": "The operator dates its military origins to the Second World War, not 1916; the military start and 1961 are kept."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Lake Garda is the reason many clients use it.",
+   "why": "The old text's judgement, kept; the bus facts that follow are sourced."
+  }
+ ],
+ "tracerOk": {}
+}
