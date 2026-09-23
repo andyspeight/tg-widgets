@@ -1,0 +1,233 @@
+{
+ "iata": "BVA",
+ "id": "rec41nFJEHR90VA3V",
+ "name": "Beauvais-Tillé airport",
+ "country": "France",
+ "wikipedia": "https://en.wikipedia.org/wiki/Beauvais%E2%80%93Till%C3%A9_Airport",
+ "audited": "2026-09-23",
+ "before": "Branded Paris-Beauvais, and that name does a lot of work. The airport is 69 km north north west of the city, in Hauts-de-France rather than the Paris region, so a client booking what looks like a Paris flight needs to be told about the transfer before they book rather than after.\n\nWhat it is good at is cheap seats. It is used mainly by low cost and charter airlines and handled just under four million passengers in 2016, which made it the tenth busiest airport in France.\n\nThe approach is better equipped than the terminal suggests. Runway 12 has a CAT III instrument landing system allowing landings in visibility down to 75 metres, which matters in a part of France that gets real winter fog.\n\nIt grew from a single 1979 hangar after Ryanair started flying to Dublin in 1997. A second terminal followed in 2010 and a new control tower in 2019.",
+ "after": "Branded Paris-Beauvais, and that name does a lot of work. The airport is 69 km north north west of Paris, in Hauts-de-France rather than the Paris region, so a client booking what looks like a Paris flight needs to be told about the transfer before they book rather than after.\n\nWhat it is good at is cheap seats. The French airports' association says low-cost airlines carried more than 99 per cent of its traffic in 2025, when it handled about 6.7 million passengers and ranked ninth in France.\n\nIts approach is better equipped than the terminal suggests. It has a Category III instrument landing system for very low visibility, which matters in a part of France that gets real winter fog.\n\nThe airport grew from a single terminal building of 1979 after Ryanair started flying to Dublin in 1997. A second terminal followed, and a new control tower in 2019.",
+ "claims": [
+  {
+   "claim": "branded Paris-Beauvais",
+   "verdict": "confirmed",
+   "inAfter": "Branded Paris-Beauvais",
+   "sources": [
+    {
+     "file": "op-home",
+     "org": "Aéroport Paris-Beauvais (SAGEB and Bellova, the airport operator, aeroportparisbeauvais.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Aéroport Paris-Beauvais"
+    },
+    {
+     "file": "uaf-2025",
+     "org": "Union des Aéroports Français (the French airports' association, aeroport.fr)",
+     "dated": "2025 results (published April 2026)",
+     "quote": "9 Paris - Beauvais 6 677 608"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-30",
+     "quote": "Despite its brand name, the airport is located in the Hauts-de-France region"
+    }
+   ]
+  },
+  {
+   "claim": "69 km north north west of Paris, in Hauts-de-France",
+   "verdict": "confirmed",
+   "inAfter": "The airport is 69 km north north west of Paris, in Hauts-de-France rather than the Paris region",
+   "note": "Coordinates: 69.0 km from the GeoNames centre of Paris at 346 degrees, north north west. 'Of the city' became 'of Paris' for clarity. GeoNames puts Beauvais in the Hauts-de-France region.",
+   "sources": [
+    {
+     "file": "geo-paris",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from Paris (GeoNames 2988507, 48.8534, 2.3488): 69.0 km, bearing from Paris 346 degrees, which is north north west",
+      "FR.32 Hauts-de-France"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-30",
+     "quote": "Despite its brand name, the airport is located in the Hauts-de-France region and 69 km (43 mi) north-northwest of Paris."
+    }
+   ]
+  },
+  {
+   "claim": "more than 99 per cent low cost in 2025; about 6.7 million passengers; ninth in France",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "association",
+   "inAfter": "The French airports' association says low-cost airlines carried more than 99 per cent of its traffic in 2025, when it handled about 6.7 million passengers and ranked ninth in France.",
+   "note": "Was 'It is used mainly by low cost and charter airlines and handled just under four million passengers in 2016, which made it the tenth busiest airport in France'. A passenger total replaces a passenger total. UAF, the French airports' association, gives 6,677,608 for 2025, ninth in metropolitan France, and more than 99 per cent low cost; Eurostat gives 6,675,611. Eurostat's own order puts it eighth only because it books most of Basel-Mulhouse's traffic to Switzerland, so the rank is attributed to UAF.",
+   "sources": [
+    {
+     "file": "uaf-2025",
+     "org": "Union des Aéroports Français (the French airports' association, aeroport.fr)",
+     "dated": "2025 results (published April 2026)",
+     "quote": [
+      "Classement par passagers des aéroports de France",
+      "9 Paris - Beauvais 6 677 608",
+      "6 Bâle - Mulhouse 9 629 416",
+      "et dépasse 99 % dans cinq d’entre eux : Rodez, Paris Beauvais, Carcassonne, Béziers et Nîmes."
+     ]
+    },
+    {
+     "file": "eurostat-fr",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat FR_LFOB BEAUVAIS-TILLE airport: passengers carried in 2025: 6,675,611",
+      "Eurostat FR_LFSB BALE-MULHOUSE airport: passengers carried in 2025: 926,010"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-30",
+     "quote": "is mostly used by charter and low-cost airlines"
+    }
+   ]
+  },
+  {
+   "claim": "a Category III ILS for landings in very low visibility, fog",
+   "verdict": "confirmed",
+   "inAfter": "It has a Category III instrument landing system for very low visibility",
+   "note": "The operator: a Category III ILS lets aircraft operate in very poor visibility (fog, heavy rain). Runway 12 and the 75 metre figure rest on Wikipedia alone (cut below).",
+   "sources": [
+    {
+     "file": "op-historique",
+     "org": "Aéroport Paris-Beauvais (SAGEB and Bellova, the airport operator, aeroportparisbeauvais.com)",
+     "dated": "read 2026-09-23 (the operator's history page)",
+     "quote": "ILS Catégorie III, permettant d’opérer les mouvements d’avion par très faibles conditions de visibilité (brouillard, fortes pluies)."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-30",
+     "quote": [
+      "The main runway has an Instrument landing system CAT III for runway 12",
+      "This enables aircraft to land at the airport in bad weather conditions, with visibility as low as 75 metres."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a single terminal of 1979; Ryanair to Dublin from 1997",
+   "verdict": "corrected",
+   "inAfter": "The airport grew from a single terminal building of 1979 after Ryanair started flying to Dublin in 1997.",
+   "note": "Was 'from a single 1979 hangar'. The operator calls the 1979 building Terminal 1; Wikipedia calls it a simple hangar used as the terminal. Both date it to 1979 and Ryanair's Dublin route to 1997.",
+   "sources": [
+    {
+     "file": "op-historique",
+     "org": "Aéroport Paris-Beauvais (SAGEB and Bellova, the airport operator, aeroportparisbeauvais.com)",
+     "dated": "read 2026-09-23 (the operator's history page)",
+     "quote": [
+      "le Terminal 1 est inauguré en 1979",
+      "ouvrir sa première ligne Beauvais/Dublin en 1997"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-30",
+     "quote": "When the low-cost airline Ryanair chose Beauvais–Tillé in May 1997 for three daily connections with Dublin, the terminal of this regional airport consisted of a simple hangar built in 1979."
+    }
+   ]
+  },
+  {
+   "claim": "a second terminal, and a new control tower in 2019",
+   "verdict": "confirmed",
+   "inAfter": "A second terminal followed, and a new control tower in 2019.",
+   "note": "The operator's history names the second terminal but its sentence has no year ('la construction d'un second terminal en et d'un système...'); Wikipedia's 2010 is cut (below).",
+   "sources": [
+    {
+     "file": "op-historique",
+     "org": "Aéroport Paris-Beauvais (SAGEB and Bellova, the airport operator, aeroportparisbeauvais.com)",
+     "dated": "read 2026-09-23 (the operator's history page)",
+     "quote": [
+      "la construction d’un second terminal",
+      "Une nouvelle tour de contrôle est mise en service début 2019"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-30",
+     "quote": [
+      "a second terminal of 6,000 square metres",
+      "The new control tower has been active since 22 January 2019."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "mainly low cost and charter; just under four million in 2016; tenth in France",
+   "verdict": "cut",
+   "wasBefore": "It is used mainly by low cost and charter airlines and handled just under four million passengers in 2016, which made it the tenth busiest airport in France.",
+   "why": "Superseded by the 2025 figures, and UAF puts low-cost airlines at more than 99 per cent of its traffic. Corrected (see above)."
+  },
+  {
+   "claim": "runway 12; visibility down to 75 metres",
+   "verdict": "cut",
+   "wasBefore": "Runway 12 has a CAT III instrument landing system allowing landings in visibility down to 75 metres",
+   "why": "The runway and the 75 metre figure rest on Wikipedia alone; the operator confirms the Category III system and the low-visibility use, which are kept."
+  },
+  {
+   "claim": "a single 1979 hangar",
+   "verdict": "cut",
+   "wasBefore": "It grew from a single 1979 hangar",
+   "why": "The operator calls the 1979 building its Terminal 1. Corrected (see above)."
+  },
+  {
+   "claim": "the second terminal in 2010",
+   "verdict": "cut",
+   "wasBefore": "A second terminal followed in 2010",
+   "why": "The year rests on Wikipedia alone; the operator's own sentence leaves it out."
+  },
+  {
+   "claim": "the Aérobus coach to Paris; a Ryanair base since late 2020; the Bellova concession",
+   "verdict": "cut",
+   "why": "Held back: new facts that replace nothing, from the operator's history: its Aérobus coaches to Paris (since 2022, with new routes to La Défense, La Villette, Saint-Denis and Disneyland Paris since 2024), Ryanair's base since late 2020, and a 30-year concession to Bellova from 2024, with works due to start in 2026.",
+   "sources": [
+    {
+     "file": "op-historique",
+     "org": "Aéroport Paris-Beauvais (SAGEB and Bellova, the airport operator, aeroportparisbeauvais.com)",
+     "dated": "read 2026-09-23 (the operator's history page)",
+     "quote": [
+      "la compagnie Ryanair ouvre sa base opérationnelle sur l’aéroport fin 2020",
+      "En 2024, la gestion et l'exploitation de l'Aéroport Paris-Beauvais sont confiées à la société Bellova dans le cadre d'une concession de 30 ans."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and that name does a lot of work",
+   "why": "The old text's judgement, kept: the airport is 69 km from Paris in another region (sourced)."
+  },
+  {
+   "text": "so a client booking what looks like a Paris flight needs to be told about the transfer before they book rather than after",
+   "why": "The old text's advice, kept."
+  },
+  {
+   "text": "What it is good at is cheap seats.",
+   "why": "The old text's framing, kept; the low-cost share that follows is sourced."
+  },
+  {
+   "text": "Its approach is better equipped than the terminal suggests.",
+   "why": "The old text's framing, kept; the landing system that follows is sourced."
+  },
+  {
+   "text": "which matters in a part of France that gets real winter fog",
+   "why": "The old text's judgement, kept; the operator names fog as what the system is for."
+  }
+ ],
+ "tracerOk": {
+  "Branded Paris": "The tracer reads the opening word with the name; 'Paris-Beauvais' is on the operator's page and in UAF's table.",
+  "The French": "The tracer reads the opening word with 'French'; the association is named in the source's org, and France is in UAF's own text."
+ }
+}
