@@ -1,0 +1,522 @@
+{
+ "iata": "TIJ",
+ "id": "rectLXCv7Ix6lYtYo",
+ "name": null,
+ "country": "Mexico",
+ "wikipedia": "https://en.wikipedia.org/wiki/Tijuana_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Tijuana's airport, 5 km north east of downtown, serving the San Diego-Tijuana area and its five million people. It is fifth busiest in Mexico, handling around 12,650,000 passengers in 2025.\n\nIt has a feature almost no other airport has. The airport sits right on the border and is genuinely binational: the Cross Border Xpress is a pedestrian bridge that lets ticketed passengers walk across from a terminal on the United States side directly into the Mexican terminal. Just over 4 million passengers used CBX in 2025. For a client flying into Mexico from San Diego, or out of Tijuana to elsewhere in Mexico, this turns a border crossing into a short walk.\n\nThe network is mostly domestic, 37 destinations within Mexico, with Volaris using it as a hub. It is not a long haul gateway.\n\nOne runway of 3,000 metres serves 27 parking positions, 12 of them at the terminal. The control tower is one of the tallest in Mexico.",
+ "after": "Tijuana's airport, 5 km north east of downtown, serving the San Diego-Tijuana area. The fifth busiest in Mexico, it handled around 12.65 million passengers in 2025.\n\nIt has a feature almost no other airport has. The airport sits right on the border and is genuinely binational: the Cross Border Xpress (CBX) is a pedestrian bridge that lets ticketed passengers walk across from a terminal on the United States side directly into the Mexican terminal. Just over 4 million passengers used CBX in 2025. For a client coming from San Diego to fly on within Mexico, this turns a border crossing into a short walk.\n\nThe network is mostly domestic, and GAP, which runs the airport, counts 38 routes. Volaris is the main airline.\n\nIt has a single runway of 2,960 metres. The control tower is one of the tallest in Mexico.",
+ "claims": [
+  {
+   "claim": "5 km north east of downtown",
+   "verdict": "confirmed",
+   "inAfter": "5 km north east of downtown",
+   "note": "Coordinates: 5.3 km at 37 degrees, north east (ratio 0.94).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport located 5 km (3.1 mi; 2.7 nmi) northeast of downtown Tijuana"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 5.3 km (3.3 miles)",
+      "Bearing from the city centre: 37 degrees, which is north east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "serving the San Diego-Tijuana area",
+   "verdict": "confirmed",
+   "inAfter": "serving the San Diego-Tijuana area",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It serves the surrounding San Diego–Tijuana metropolitan area"
+    },
+    {
+     "file": "gap-ia2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2025 annual report (it refers to February 2026)",
+     "quote": [
+      "directly connected to Tijuana International Airport, enabling seamless travel between Southern California and Mexico",
+      "As we celebrated our 20th anniversary as a public company in February 2026"
+     ]
+    },
+    {
+     "file": "gap-tij-cbx",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "undated live page, read 2026-09-23",
+     "quote": "The CBX terminal located in San Diego offers an array of services such as:"
+    }
+   ]
+  },
+  {
+   "claim": "fifth busiest in Mexico",
+   "verdict": "confirmed",
+   "inAfter": "The fifth busiest in Mexico",
+   "note": "GAP's own undated airport page, written from 2022 traffic, calls Tijuana the fourth busiest, after Mexico City, Cancún and Guadalajara. Monterrey has since passed it: 15,623,275 passengers in 2025 (OMA) against Tijuana's 12,650.0 thousand (GAP). The three ahead in 2022 stayed ahead in 2025: Mexico City 44,605,576 (AICM), Cancún 29,345.5 thousand and second in Mexico on AFAC's figures (ASUR), Guadalajara 18,696.6 thousand (GAP). The next airport, Los Cabos, had 7,529.9 thousand (GAP). So fifth, as Wikipedia says for 2025.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport ranks as the fifth busiest in Mexico for both passenger numbers and aircraft movements"
+    },
+    {
+     "file": "gap-tij-about",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "undated live page, citing 2022 traffic",
+     "quote": [
+      "which handled 12.3 million passengers in 2022",
+      "the fourth busiest in Mexico , after the airports in Mexico City, Cancun and Guadalajara"
+     ]
+    },
+    {
+     "file": "oma-dec2025-pdf",
+     "org": "Grupo Aeroportuario del Centro Norte (OMA, operator of Monterrey)",
+     "dated": "2026-01-07",
+     "quote": [
+      "Ciudad de México, México, 7 de enero de 2026",
+      "Monterrey 1,319,827 1,419,232 7.5 13,581,599 15,623,275 15.0"
+     ]
+    },
+    {
+     "file": "gap-dec2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2026-01-06",
+     "quote": [
+      "Pasajeros Totales (miles):",
+      "Guadalajara 1,690.6 1,846.9 9.2% 17,848.7 18,696.6 4.8%",
+      "Tijuana* 1,136.9 1,106.0 (2.7%) 12,545.8 12,650.0 0.8%",
+      "Los Cabos 694.4 685.7 (1.2%) 7,488.1 7,529.9 0.6%"
+     ]
+    },
+    {
+     "file": "asur-20f-2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator of Cancún)",
+     "dated": "2026-04-16",
+     "quote": [
+      "which was the second busiest airport in Mexico in 2025 in terms of passenger traffic",
+      "Cancún 22,318.5 30,343.0 32,750.4 30,411.5 29,345.5"
+     ]
+    },
+    {
+     "file": "aicm-stats-2025",
+     "org": "Aeropuerto Internacional de la Ciudad de México (AICM, operator of Mexico City)",
+     "dated": "2026-01-16",
+     "quote": "Total Anual 28,243,160 17,116,325 45,359,485 27,123,430 17,482,146 44,605,576 -4.0 2.1 -1.7"
+    }
+   ]
+  },
+  {
+   "claim": "around 12.65 million passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "it handled around 12.65 million passengers in 2025",
+   "note": "GAP: 12,650.0 thousand in 2025, up 0.8 per cent. The total counts CBX users, whom GAP classes as international passengers.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It handled 12,545,800 passengers in 2024 and reached 12,650,000 in 2025"
+    },
+    {
+     "file": "gap-dec2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2026-01-06",
+     "quote": [
+      "Guadalajara, Jalisco, México, 6 de enero de 2026",
+      "Pasajeros Totales (miles):",
+      "Tijuana* 1,136.9 1,106.0 (2.7%) 12,545.8 12,650.0 0.8%",
+      "*Pasajeros usuarios del CBX en Tijuana en ambos sentidos están clasificados como internacionales."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a feature almost no other airport has",
+   "verdict": "confirmed",
+   "inAfter": "It has a feature almost no other airport has.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "This rare feature allows passengers to walk across the border using the CBX pedestrian bridge."
+    },
+    {
+     "file": "gap-ia2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2025 annual report (it refers to February 2026)",
+     "quote": "CBX is a one-of-a-kind cross-border passenger terminal located in the United States"
+    }
+   ]
+  },
+  {
+   "claim": "right on the border and binational",
+   "verdict": "confirmed",
+   "inAfter": "The airport sits right on the border and is genuinely binational",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Situated adjacent to the Mexico–United States border, Tijuana Airport is a geographically binational airport"
+    },
+    {
+     "file": "gap-ia2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2025 annual report (it refers to February 2026)",
+     "quote": "CBX is a one-of-a-kind cross-border passenger terminal located in the United States and directly connected to Tijuana International Airport"
+    },
+    {
+     "file": "gap-tij-about",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "undated live page, citing 2022 traffic",
+     "quote": "near the border between the U.S. and Mexico"
+    }
+   ]
+  },
+  {
+   "claim": "CBX, a pedestrian bridge for ticketed passengers from a US terminal into the Mexican terminal",
+   "verdict": "confirmed",
+   "inAfter": "the Cross Border Xpress (CBX) is a pedestrian bridge that lets ticketed passengers walk across from a terminal on the United States side directly into the Mexican terminal",
+   "note": "GAP: a 390 ft bridge exclusively for the airport's passengers, with CBX tickets from 19.95 US dollars one way.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "having direct access to its terminal from Mexico and from its Cross Border Xpress (CBX) facility in the United States"
+    },
+    {
+     "file": "gap-tij-cbx",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "undated live page, read 2026-09-23",
+     "quote": [
+      "Cross Border Xpress (CBX) is a 390ft long pedestrian bridge exclusively for passengers of the Tijuana International Airport that allows travelers to cross the border between Mexico and the United States.",
+      "CBX ticket prices start at $19.95 per passenger for one-way tickets"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "just over 4 million used CBX in 2025",
+   "verdict": "confirmed",
+   "inAfter": "Just over 4 million passengers used CBX in 2025.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "of which 4,018,100 were international passengers using the CBX terminal"
+    },
+    {
+     "file": "gap-dec2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2026-01-06",
+     "quote": [
+      "Usuarios CBX (miles):",
+      "Tijuana 414.3 383.1 (7.5%) 4,048.6 4,018.1 (0.8%)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "for a client coming from San Diego, a short walk",
+   "verdict": "softened",
+   "inAfter": "For a client coming from San Diego to fly on within Mexico, this turns a border crossing into a short walk.",
+   "note": "Was 'For a client flying into Mexico from San Diego, or out of Tijuana to elsewhere in Mexico'. Kept to what both sources describe: a passenger from the US side crosses the bridge, clears Mexican formalities and goes on to the departure gates without leaving the airport (GAP: 'without having to leave the Tijuana International Airport').",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": [
+      "Departing passengers enter the CBX terminal on the U.S. side, cross the pedestrian bridge into Mexico, clear immigration and customs, and proceed to the departure concourses.",
+      "a 120-metre (390 ft) bridge across the border"
+     ]
+    },
+    {
+     "file": "gap-tij-cbx",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "undated live page, read 2026-09-23",
+     "quote": [
+      "CBX is a fast, easy, and safe border crossing passenger can access without having to leave the Tijuana International Airport.",
+      "390ft long pedestrian bridge"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the network is mostly domestic",
+   "verdict": "confirmed",
+   "inAfter": "The network is mostly domestic",
+   "note": "GAP counts 68 per cent of 2025 passengers as domestic, and nearly all the rest are CBX users, whom it classes as international (4,018.1 of 4,094.0 thousand); its five main destinations are all in Mexico.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport functions primarily as a domestic gateway"
+    },
+    {
+     "file": "gap-ia2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2025 annual report (it refers to February 2026)",
+     "quote": [
+      "2025 AIRPORTS RESULTS Tijuana 307.6",
+      "Main destinations Mexico City, Guadalajara, Culiacan, Leon, and Monterrey",
+      "Traffic share 68% Domestic 32% International"
+     ]
+    },
+    {
+     "file": "gap-tij-expansion",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2025-10-28",
+     "quote": "siendo el aeropuerto de GAP con mayor conectividad doméstica en el país"
+    }
+   ]
+  },
+  {
+   "claim": "GAP runs the airport",
+   "verdict": "confirmed",
+   "inAfter": "GAP, which runs the airport",
+   "note": "Not in the old text; named so that the route count can be attributed.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is operated by Grupo Aeroportuario del Pacífico."
+    },
+    {
+     "file": "gap-dec2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2026-01-06",
+     "quote": "principales ciudades como Guadalajara y Tijuana"
+    }
+   ]
+  },
+  {
+   "claim": "GAP counts 38 routes",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "GAP",
+   "inAfter": "GAP, which runs the airport, counts 38 routes",
+   "note": "Replaces '37 destinations within Mexico' (Wikipedia). The operator's own count: 38 routes in October 2025 and 38 destinations in its 2025 annual report; GAP does not say how many are domestic, so the text does not either.",
+   "sources": [
+    {
+     "file": "gap-tij-expansion",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2025-10-28",
+     "quote": [
+      "Tijuana, Baja California. 28 de octubre de 2025.",
+      "Actualmente, cuenta con 38 rutas"
+     ]
+    },
+    {
+     "file": "gap-ia2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2025 annual report (it refers to February 2026)",
+     "quote": "38 Destinations 7 Airlines Main destinations Mexico City, Guadalajara"
+    }
+   ]
+  },
+  {
+   "claim": "Volaris is the main airline",
+   "verdict": "softened",
+   "inAfter": "Volaris is the main airline.",
+   "note": "Softened from 'with Volaris using it as a hub': 'hub' is Wikipedia's word. GAP names Volaris first of its main airlines; Wikipedia calls it the largest operator; Volaris itself (A21, 5 March 2026) gives an average of 71 daily flights and 64 per cent of the seats on flights in Baja California.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "Volaris remains the largest operator in the airport, offering flights to 35 domestic destinations."
+    },
+    {
+     "file": "gap-ia2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2025 annual report (it refers to February 2026)",
+     "quote": "Main airlines Volaris, Viva, and Aeromexico"
+    },
+    {
+     "file": "a21-volaris",
+     "org": "A21 (reporting Volaris)",
+     "dated": "2026-03-05",
+     "quote": [
+      "5 marzo, 2026",
+      "La aerolínea inició operaciones en Tijuana en 2006",
+      "con un promedio de 71 vuelos diarios",
+      "ofertando el 64% de los asientos disponibles para vuelos en Baja California"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a single runway of 2,960 metres",
+   "verdict": "corrected",
+   "inAfter": "It has a single runway of 2,960 metres.",
+   "note": "Was 3,000 metres, the figure in Wikipedia's text; the operator, OurAirports and Wikipedia's own infobox give 2,960 m. The old 10/28 runway is closed.",
+   "sources": [
+    {
+     "file": "gap-tij-about",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "undated live page, citing 2022 traffic",
+     "quote": "09/27 2,960 m 9,711 ft"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 09/27: 2,960 m (9,711 ft), CON",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": [
+      "r1_length_m = 2960",
+      "r2_number = <s>10/28</s> (closed)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "control tower one of the tallest in Mexico",
+   "verdict": "confirmed",
+   "inAfter": "The control tower is one of the tallest in Mexico.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport's control tower is one of the tallest in Mexico."
+    },
+    {
+     "file": "gap-tij-about",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "undated live page, citing 2022 traffic",
+     "quote": "a control tower high-tech, one of the highest in Mexico"
+    }
+   ]
+  },
+  {
+   "claim": "five million people",
+   "verdict": "cut",
+   "wasBefore": "and its five million people",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "for a client out of Tijuana",
+   "verdict": "cut",
+   "wasBefore": "For a client flying into Mexico from San Diego, or out of Tijuana to elsewhere in Mexico",
+   "why": "Reworded to what the sources describe (a San Diego passenger crossing by CBX to fly on). The FCDO now advises against all but essential travel to the city of Tijuana itself, excepting the airport and CBX (held back below)."
+  },
+  {
+   "claim": "37 destinations within Mexico",
+   "verdict": "cut",
+   "wasBefore": "37 destinations within Mexico",
+   "why": "Wikipedia's count; replaced by the operator's own, 38 routes (see above)."
+  },
+  {
+   "claim": "Volaris uses it as a hub",
+   "verdict": "cut",
+   "wasBefore": "with Volaris using it as a hub",
+   "why": "'Hub' is Wikipedia's label; softened to 'the main airline' (see above)."
+  },
+  {
+   "claim": "not a long haul gateway",
+   "verdict": "cut",
+   "wasBefore": "It is not a long haul gateway.",
+   "why": "Doubtful: Wikipedia records Hainan Airlines restoring its three-a-week Beijing flights through Tijuana in July 2024, and Hainan is on GAP's airline list for the airport. No source from the last 12 months settles whether it still flies, so the line goes rather than being turned round."
+  },
+  {
+   "claim": "runway 3,000 metres",
+   "verdict": "cut",
+   "wasBefore": "One runway of 3,000 metres",
+   "why": "The operator and OurAirports give 2,960 m; corrected (see above)."
+  },
+  {
+   "claim": "27 parking positions, 12 at the terminal",
+   "verdict": "cut",
+   "wasBefore": "serves 27 parking positions, 12 of them at the terminal",
+   "why": "Wikipedia alone; GAP's page gives the terminal 23 gates, and GAP's expansion adds nine aircraft positions (October 2025)."
+  },
+  {
+   "claim": "FCDO advice on Tijuana",
+   "verdict": "cut",
+   "why": "Held back, and the most important point for Andy: the FCDO (updated 22 September 2026) advises against all but essential travel to the city of Tijuana, except airside transit through Tijuana airport, the CBX bridge and toll road 1D and the Via Rápida to the border, and warns that travel against its advice can invalidate insurance. It calls Tijuana an extremely violent city. A UK client using CBX or connecting airside is within the advice; one staying in Tijuana is not. It replaces nothing in the old text, so it is not added without Andy's say-so.",
+   "sources": [
+    {
+     "file": "fcdo-mexico-warnings",
+     "org": "UK FCDO",
+     "dated": "2026-09-22",
+     "quote": [
+      "22 September 2026",
+      "FCDO advises against all but essential travel to the city of Tijuana, except:",
+      "airside transit through Tijuana airport",
+      "the Cross Border Xpress bridge from the airport linking terminals across the Mexican-US border",
+      "Your travel insurance could be invalidated if you travel against advice from the Foreign, Commonwealth and Development Office (FCDO)."
+     ]
+    },
+    {
+     "file": "fcdo-mexico-regional",
+     "org": "UK FCDO",
+     "quote": "Tijuana is an extremely violent city."
+    }
+   ]
+  },
+  {
+   "claim": "fog, and a Category II landing system from October 2026",
+   "verdict": "cut",
+   "why": "Held back: GAP says fog can limit operations for a time, and that a Category II instrument landing system (decision height 100 ft, down from 200) starts in October 2026, which it expects to let 98 per cent of the year's operations run unaffected by low visibility (GAP, 10 September 2026). New, one organisation.",
+   "sources": [
+    {
+     "file": "gap-tij-sep2026",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2026-09-10",
+     "quote": [
+      "Tijuana, Baja California, a 10 de septiembre de 2026.",
+      "registra episodios de neblina que pueden limitar temporalmente las operaciones aéreas",
+      "se encuentra listo para iniciar en octubre operaciones con el Sistema de Aterrizaje por Instrumentos (ILS, por sus siglas en inglés) categoría II"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "terminal works from late 2026 to 2029",
+   "verdict": "cut",
+   "why": "Held back: GAP is enlarging the terminal, with work on the building from the second half of 2026 (seven new gates, 50 per cent more baggage belts), finishing in 2029 with 47 per cent more floor space; a new taxiway opened in July 2025 (GAP, 28 October 2025). New, one organisation.",
+   "sources": [
+    {
+     "file": "gap-tij-expansion",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2025-10-28",
+     "quote": [
+      "se iniciarán los trabajos en el edificio terminal, que contará con siete nuevas puertas de abordaje",
+      "Se prevé que estas obras concluyan en 2029, lo que permitirá incrementar en 47% la superficie total del edificio terminal"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "traffic down in 2026",
+   "verdict": "cut",
+   "why": "Held back: January to August 2026 the airport handled 8,154.5 thousand passengers, down 4.4 per cent on the same months of 2025 (GAP, 4 September 2026). New, one organisation.",
+   "sources": [
+    {
+     "file": "gap-aug2026",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2026-09-04",
+     "quote": [
+      "Guadalajara, Jalisco, Mexico, September 4, 2026",
+      "Tijuana* 1,112.4 1,125.9 1.2% 8,531.1 8,154.5 (4.4%)"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

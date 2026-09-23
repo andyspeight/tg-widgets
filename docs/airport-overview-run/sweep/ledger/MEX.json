@@ -1,0 +1,490 @@
+{
+ "iata": "MEX",
+ "id": "recoHX5kM0VNgAtUQ",
+ "name": "Mexico City Benito Juárez International Airport",
+ "country": "Mexico",
+ "wikipedia": "https://en.wikipedia.org/wiki/Mexico_City_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Mexico's busiest airport, 5 km east of downtown Mexico City, and as of 2025 third busiest in Latin America. It handled 44,605,576 passengers in 2025 across more than 25 airlines and over 100 destinations.\n\nThe constraint to understand is capacity. The airport operates at full capacity and is one of the busiest two-runway airports in the world, with 850 aircraft movements a day. Its two parallel runways sit less than 300 metres apart, which rules out simultaneous operations, so the airport cannot simply add flights. Delays are structural, not occasional.\n\nAltitude matters here too. At 2,230 metres the airport is classified as hot and high, where thinner air reduces aircraft performance.\n\nThere are two passenger terminals. They are not close together, so confirm which one a client departs from.\n\nMexico City has two other airports, Toluca and Felipe Ángeles, which between them take some of the overflow.\n\nIt is named after Benito Juárez, the nineteenth century president.",
+ "after": "Mexico's busiest airport and one of the busiest in Latin America, about 5 km east of downtown Mexico City. It handled 44,605,576 passengers in 2025, 1.7 per cent fewer than in 2024, and the airport's own list names 22 airlines.\n\nThe airport runs at full capacity, with about 850 aircraft movements a day on two parallel runways only about 300 metres apart. It sits at 2,230 metres above sea level.\n\nThe two passenger terminals are linked by a train that needs a boarding pass, so confirm which one a client departs from.\n\nAnother airport, Felipe Ángeles, opened in 2022 to share Mexico City's traffic, and all-cargo flights moved there in 2023.\n\nIt is named after Benito Juárez, the nineteenth century president.",
+ "claims": [
+  {
+   "claim": "Mexico's busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "Mexico's busiest airport",
+   "note": "AICM counted 44,605,576 passengers in 2025. ASUR, citing AFAC, says Cancún was Mexico's second busiest airport in 2025, with 29,345.5 thousand, so Mexico City is first. AICM's own capacity study calls it the country's main point of air connectivity.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the busiest airport in Mexico"
+    },
+    {
+     "file": "asur-20f-2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator of Cancún)",
+     "dated": "2026-04-16",
+     "quote": [
+      "which was the second busiest airport in Mexico in 2025 in terms of passenger traffic",
+      "Cancún 22,318.5 30,343.0 32,750.4 30,411.5 29,345.5",
+      "Dated: April 16, 2026"
+     ]
+    },
+    {
+     "file": "aicm-stats-2025",
+     "org": "Aeropuerto Internacional de la Ciudad de México (AICM, the airport operator)",
+     "dated": "2026-01-16",
+     "quote": [
+      "AICM en Cifras Diciembre 2025 Ultima actualización 16 de enero de 2026",
+      "Total Anual 28,243,160 17,116,325 45,359,485 27,123,430 17,482,146 44,605,576 -4.0 2.1 -1.7"
+     ]
+    },
+    {
+     "file": "aicm-capacity-v10",
+     "org": "Aeropuerto Internacional de la Ciudad de México (AICM, the airport operator)",
+     "dated": "undated capacity study; it reports data to December 2025",
+     "quote": "principal punto de conectividad aérea del país"
+    }
+   ]
+  },
+  {
+   "claim": "one of the busiest in Latin America",
+   "verdict": "softened",
+   "inAfter": "one of the busiest in Latin America",
+   "note": "Softened from 'as of 2025 third busiest in Latin America', which rests on Wikipedia alone; AICM's own study calls it one of Latin America's main airport hubs by operations and by passengers.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "as of 2025 ranks as the third-busiest in Latin America"
+    },
+    {
+     "file": "aicm-capacity-v10",
+     "org": "Aeropuerto Internacional de la Ciudad de México (AICM, the airport operator)",
+     "dated": "undated capacity study; it reports data to December 2025",
+     "quote": [
+      "constituye uno de los principales nodos aeroportuarios de América Latina, tanto por el volumen de operaciones, como por la cantidad de pasajeros atendidos anualmente",
+      "Tabla 11 Pasajeros por franja horaria T1 Diciembre 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 5 km east of downtown Mexico City",
+   "verdict": "confirmed",
+   "inAfter": "about 5 km east of downtown Mexico City",
+   "note": "The coordinates put the airport's reference point 6.1 km from the GeoNames centre at 82 degrees (east), a ratio of 0.82, inside the stated tolerance; 'about' added.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "5 kilometres (3.1 mi) east of Downtown"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 6.1 km (3.8 miles)",
+      "Bearing from the city centre: 82 degrees, which is east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "44,605,576 passengers in 2025, down 1.7 per cent",
+   "verdict": "confirmed",
+   "inAfter": "It handled 44,605,576 passengers in 2025, 1.7 per cent fewer than in 2024",
+   "note": "AICM: 44,605,576 commercial passengers in 2025 against 45,359,485 in 2024, down 1.7 per cent (27.1 million domestic, 17.5 million international). Wikipedia's infobox gives 44,605,800; its text and AICM agree on 44,605,576.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the airport handled 44,605,576 passengers in 2025, marking a 1.7% decrease from the previous year"
+    },
+    {
+     "file": "aicm-stats-2025",
+     "org": "Aeropuerto Internacional de la Ciudad de México (AICM, the airport operator)",
+     "dated": "2026-01-16",
+     "quote": [
+      "AICM en Cifras Diciembre 2025 Ultima actualización 16 de enero de 2026",
+      "Total Anual 28,243,160 17,116,325 45,359,485 27,123,430 17,482,146 44,605,576 -4.0 2.1 -1.7"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the airport's own list names 22 airlines",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "the airport's own list names 22 airlines",
+   "note": "Replaces 'more than 25 airlines and over 100 destinations' (Wikipedia). AICM's live page of airlines operating at the airport names 22, from ANA to WestJet, among them British Airways, Iberia, Lufthansa, Air France, KLM, Turkish Airlines and Emirates. It leaves out some carriers Wikipedia lists (Magnicharters, for one), so it is given as the airport's list, not as a total. No destination count from the airport was found, so 'over 100 destinations' is cut.",
+   "sources": [
+    {
+     "file": "aicm-aerolineas",
+     "org": "Aeropuerto Internacional de la Ciudad de México (AICM, the airport operator)",
+     "dated": "read 2026-09-23 (live page, copyright 2026)",
+     "quote": [
+      "Líneas aéreas que operan en el aeropuerto",
+      "ANA Contacto AEROMEXICO Contacto AIR CANADA Contacto AIR FRANCE Contacto AMERICAN AIRLINES Contacto AVIANCA Contacto BRITISH AIRWAYS Contacto CHINA SOUTHERN AIRLINES Contacto COPA AIRLINES Contacto DELTA Contacto IBERIA Contacto KLM Contacto LATAM Contacto LUFTHANSA Contacto FLAIR AIRLINES Contacto UNITED Contacto VIVA AEROBUS Contacto VOLARIS Contacto EMIRATES Contacto TURKISH AIRLINES Contacto HAINAN AIRLINES Contacto WESTJET Contacto"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "runs at full capacity",
+   "verdict": "confirmed",
+   "inAfter": "The airport runs at full capacity",
+   "note": "AICM's own capacity study describes it as a saturated airport.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the airport operates at full capacity"
+    },
+    {
+     "file": "aicm-capacity-v10",
+     "org": "Aeropuerto Internacional de la Ciudad de México (AICM, the airport operator)",
+     "dated": "undated capacity study; it reports data to December 2025",
+     "quote": "Su condición de aeropuerto saturado"
+    }
+   ]
+  },
+  {
+   "claim": "about 850 aircraft movements a day",
+   "verdict": "confirmed",
+   "inAfter": "with about 850 aircraft movements a day",
+   "note": "AICM counted 313,467 aircraft movements in 2025 (commercial and general aviation), about 859 a day; 'about' added.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "with 850 aircraft movements per day"
+    },
+    {
+     "file": "aicm-stats-2025",
+     "org": "Aeropuerto Internacional de la Ciudad de México (AICM, the airport operator)",
+     "dated": "2026-01-16",
+     "quote": [
+      "Total Anual 214,333 108,094 322,427 197,986 115,481 313,467 -7.6 6.8 -2.8",
+      "Operaciones Totales| Comerciales y de Aviación General"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "two parallel runways about 300 metres apart",
+   "verdict": "corrected",
+   "inAfter": "on two parallel runways only about 300 metres apart",
+   "note": "Was 'less than 300 metres apart'. OurAirports' threshold coordinates put the two centrelines 306 to 309 m apart, a little over 300, so 'less than' goes and 'about' stays.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "has two parallel runways separated by less than 300 metres (980 ft)"
+    },
+    {
+     "file": "geo-runways",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Distance of runway 05R/23L's two ends from runway 05L/23R's centreline: 309 m and 306 m",
+      "Separation between the two parallel runway centrelines: about 308 m"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runways listed: 2"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "has two parallel runways separated by less than 300 metres (980 ft), which restricts simultaneous operations"
+    }
+   ]
+  },
+  {
+   "claim": "2,230 metres above sea level",
+   "verdict": "confirmed",
+   "inAfter": "It sits at 2,230 metres above sea level.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "At 2,230 metres (7,320 ft) elevation"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "elevation 7,316 ft (2,230 m)"
+    }
+   ]
+  },
+  {
+   "claim": "two passenger terminals linked by a train that needs a boarding pass",
+   "verdict": "confirmed",
+   "inAfter": "The two passenger terminals are linked by a train that needs a boarding pass",
+   "note": "Reworded from 'They are not close together'. Wikipedia puts the terminals 3 km apart, which no second source gives, so the distance is not stated; both it and AICM describe the Aerotrén between them, open only to passengers with a boarding pass (AICM: free, 05:00 to 23:00). AICM's 2025 figures split traffic 46 per cent Terminal 1 and 54 per cent Terminal 2.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": [
+      "The airport has two passenger terminals and two runways.",
+      "The two terminals are 3 kilometres (1.9 mi) apart.",
+      "The Aerotrén people mover, available only to passengers with a boarding pass and airline crew"
+     ]
+    },
+    {
+     "file": "aicm-aerotren",
+     "org": "Aeropuerto Internacional de la Ciudad de México (AICM, the airport operator)",
+     "dated": "read 2026-09-23 (live page, copyright 2026)",
+     "quote": [
+      "El Aerotrén del AICM facilita el traslado de pasajeros entre las Terminales 1 y 2.",
+      "Es gratuito",
+      "Es necesario presentar tu pase de abordar"
+     ]
+    },
+    {
+     "file": "aicm-stats-2025",
+     "org": "Aeropuerto Internacional de la Ciudad de México (AICM, the airport operator)",
+     "dated": "2026-01-16",
+     "quote": [
+      "Terminal 1 Terminal 2 Totales",
+      "Terminal 1 46% Terminal 2 54%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Felipe Ángeles opened in 2022 to share Mexico City's traffic",
+   "verdict": "corrected",
+   "inAfter": "Another airport, Felipe Ángeles, opened in 2022 to share Mexico City's traffic",
+   "note": "Replaces 'two other airports, Toluca and Felipe Ángeles, which between them take some of the overflow'. Toluca's part rests on Wikipedia alone and is cut (see below). ASUR: AIFA was built to handle Mexico City air traffic and began operating on 21 March 2022.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "construction began on Felipe Ángeles International Airport at Santa Lucía, which opened in 2022. Intended as a secondary airport for Mexico City"
+    },
+    {
+     "file": "asur-20f-2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator of Cancún)",
+     "dated": "2026-04-16",
+     "quote": [
+      "to handle Mexico City air traffic",
+      "AIFA started operating on March 21, 2022"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "all-cargo flights moved to Felipe Ángeles in 2023",
+   "verdict": "corrected",
+   "inAfter": "and all-cargo flights moved there in 2023",
+   "note": "What the 'overflow' in the old text actually is, made specific: a February 2023 decree moved all-cargo flights from Mexico City to AIFA, and AICM says no dedicated cargo flight has landed there since 1 September 2023; mixed passenger and cargo flights stay.",
+   "sources": [
+    {
+     "file": "asur-20f-2025",
+     "org": "Grupo Aeroportuario del Sureste (ASUR, operator of Cancún)",
+     "dated": "2026-04-16",
+     "quote": [
+      "all cargo and freight flights departing from the Mexico City International Airport would be relocated to depart from the AIFA airport",
+      "had to move their operations to another terminal by September 1, 2023"
+     ]
+    },
+    {
+     "file": "aicm-acerca",
+     "org": "Aeropuerto Internacional de la Ciudad de México (AICM, the airport operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Desde el primero de septiembre de 2023, todos los vuelos de carga dedicada dejaron de aterrizar en el AICM",
+      "Permanecen en el AICM las operaciones mixtas de pasajeros y carga."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "In 2023, the Mexican government attempted to decongest the airport by relocating all cargo flights to Felipe Ángeles Airport"
+    }
+   ]
+  },
+  {
+   "claim": "named after Benito Juárez, the nineteenth century president",
+   "verdict": "confirmed",
+   "inAfter": "It is named after Benito Juárez, the nineteenth century president.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "officially Benito Juárez International Airport",
+      "It is named after 19th-century president Benito Juárez."
+     ]
+    },
+    {
+     "file": "aicm-acerca",
+     "org": "Aeropuerto Internacional de la Ciudad de México (AICM, the airport operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "el Aeropuerto Internacional Benito Juárez Ciudad de México"
+    },
+    {
+     "file": "encyclopedia-juarez",
+     "org": "Encyclopedia of Latin American History and Culture (Encyclopedia.com)",
+     "quote": "president of Mexico (1858–1872)"
+    }
+   ]
+  },
+  {
+   "claim": "third busiest in Latin America",
+   "verdict": "cut",
+   "wasBefore": "and as of 2025 third busiest in Latin America",
+   "why": "Wikipedia alone; no regional ranking could be read. Softened to 'one of the busiest in Latin America' (see above)."
+  },
+  {
+   "claim": "more than 25 airlines and over 100 destinations",
+   "verdict": "cut",
+   "wasBefore": "across more than 25 airlines and over 100 destinations",
+   "why": "Counts from Wikipedia alone. Replaced by the airport's own list of 22 airlines (see above); the airport gives no destination count."
+  },
+  {
+   "claim": "capacity is the constraint to understand",
+   "verdict": "cut",
+   "wasBefore": "The constraint to understand is capacity.",
+   "why": "Framing; the capacity facts that survive are kept (see above)."
+  },
+  {
+   "claim": "one of the busiest two-runway airports in the world",
+   "verdict": "cut",
+   "wasBefore": "and is one of the busiest two-runway airports in the world",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "runways less than 300 metres apart",
+   "verdict": "cut",
+   "wasBefore": "Its two parallel runways sit less than 300 metres apart",
+   "why": "OurAirports' coordinates put the centrelines 306 to 309 m apart; corrected to 'about 300 metres' (see above)."
+  },
+  {
+   "claim": "rules out simultaneous operations, so the airport cannot simply add flights",
+   "verdict": "cut",
+   "wasBefore": "which rules out simultaneous operations, so the airport cannot simply add flights",
+   "why": "The runway point rests on Wikipedia alone, and 'cannot add flights' is overstated: AICM's capacity study says the hourly limit was raised by one in 2025, to 44 operations an hour (held back below)."
+  },
+  {
+   "claim": "delays are structural",
+   "verdict": "cut",
+   "wasBefore": "Delays are structural, not occasional.",
+   "why": "No source, and contradicted by AICM's own figures: on-time performance rose from 84.04 per cent to 86.55 per cent between 2024 and 2025 (held back below)."
+  },
+  {
+   "claim": "altitude matters",
+   "verdict": "cut",
+   "wasBefore": "Altitude matters here too.",
+   "why": "Framing; the elevation itself is kept (see above)."
+  },
+  {
+   "claim": "classified as hot and high, thinner air reduces aircraft performance",
+   "verdict": "cut",
+   "wasBefore": "the airport is classified as hot and high, where thinner air reduces aircraft performance",
+   "why": "Wikipedia alone; the elevation is kept with OurAirports as the second source."
+  },
+  {
+   "claim": "terminals not close together",
+   "verdict": "cut",
+   "wasBefore": "They are not close together",
+   "why": "Reworded: the 3 km gap rests on Wikipedia alone, so the text now gives the train between them, which AICM confirms (see above)."
+  },
+  {
+   "claim": "Toluca takes some of the overflow",
+   "verdict": "cut",
+   "wasBefore": "Mexico City has two other airports, Toluca and Felipe Ángeles, which between them take some of the overflow.",
+   "why": "Toluca's role in Mexico City's airport system rests on Wikipedia alone. Felipe Ángeles is kept with ASUR and AICM as second sources (see above)."
+  },
+  {
+   "claim": "renovation works in both terminals through 2027",
+   "verdict": "cut",
+   "why": "Held back: an MXN 8 billion renovation began in 2025 ahead of the World Cup (Wikipedia); works paused between May and August 2026 for the tournament and a second phase began in August 2026 in both terminals, running through 2027 (Aviacionline, 5 August 2026). Useful to an agent (expect building works), but nothing in the old text to replace.",
+   "sources": [
+    {
+     "file": "aviacionline-aicm-obras",
+     "org": "Aviacionline",
+     "dated": "2026-08-05",
+     "quote": [
+      "miércoles 5 de agosto de 2026",
+      "La segunda fase de remodelación integral del Aeropuerto Internacional Benito Juárez Ciudad de México (AICM) inició este mes e incluirá obras en las áreas de pasajeros y operativas que se extenderán a lo largo de 2027"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "In 2025, an MXN 8 billion (approx. USD 460 million) renovation began, scheduled for completion by mid-2026"
+    }
+   ]
+  },
+  {
+   "claim": "hourly limit raised to 44 and punctuality up",
+   "verdict": "cut",
+   "why": "Held back: AICM's capacity study says the limit went from 43 to 44 operations an hour in 2025 and on-time performance rose from 84.04 per cent to 86.55 per cent. The airport's own figures, one organisation; they explain two cuts above.",
+   "sources": [
+    {
+     "file": "aicm-capacity-v10",
+     "org": "Aeropuerto Internacional de la Ciudad de México (AICM, the airport operator)",
+     "dated": "undated capacity study; it reports data to December 2025",
+     "quote": [
+      "concluyó en la viabilidad de incrementar a 44 operaciones por hora",
+      "límite operativo (43 operaciones por hora)",
+      "elevar el indicador del 84.04% al 86.55%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: volcanic ash has disrupted flights; use authorised airport taxis",
+   "verdict": "cut",
+   "why": "Held back: the FCDO says ash from Popocatépetl has previously disrupted air travel and caused cancellations at Benito Juárez International Airport, and that at airports only authorised pre-paid taxis should be used. Mexico City is not among the areas it advises against (updated 22 September 2026). A warning with nothing in the old text to replace.",
+   "sources": [
+    {
+     "file": "fcdo-mexico-safety",
+     "org": "UK FCDO",
+     "quote": [
+      "Ash fall from Popocatépetl has previously disrupted air travel and caused flight cancellations at Benito Juarez International Airport in Mexico City.",
+      "At airports, only use authorised pre-paid airport taxi services."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "direct flights from Heathrow",
+   "verdict": "cut",
+   "why": "Held back, for Andy: the UK Civil Aviation Authority counted 293,512 passengers between Heathrow and Mexico City in 2025 (297,852 in 2024), all on scheduled flights, and British Airways is on the airport's own airline list. The only direct UK link; the old text says nothing about UK flights, so there is nothing to replace.",
+   "sources": [
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2025 (table run 25/02/2026)",
+     "quote": [
+      "25/02/2026 16:41,2025,85,CENTRAL AMERICA,MEXICO,1,HEATHROW,MEXICO CITY,293512,293512,0,297852,297852,0,-1.4571"
+     ]
+    },
+    {
+     "file": "aicm-aerolineas",
+     "org": "Aeropuerto Internacional de la Ciudad de México (AICM, the airport operator)",
+     "dated": "read 2026-09-23 (live page, copyright 2026)",
+     "quote": "BRITISH AIRWAYS"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so confirm which one a client departs from",
+   "why": "Practical advice kept from the old text, following from the verified fact that the two terminals are linked only by a train; not a factual claim."
+  }
+ ],
+ "tracerOk": {}
+}

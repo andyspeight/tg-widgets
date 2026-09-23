@@ -1,0 +1,170 @@
+{
+ "iata": "BIA",
+ "id": "recg7Yl96eNgAJeBT",
+ "name": "Bastia-Poretta International airport",
+ "country": "France",
+ "wikipedia": "https://en.wikipedia.org/wiki/Bastia%E2%80%93Poretta_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Bastia and the north of Corsica, 17 km south south east of the city at Lucciana.\n\nIt has one story worth telling a client. On 31 July 1944 Antoine de Saint-Exupéry, the legendary French pilot, took off from this airfield on a reconnaissance flight over France in a Lockheed P-38 Lightning and never came back.\n\nThe airport was in American hands at the time, used by the United States Army Air Forces Twelfth Air Force through 1944, with night fighter, photographic reconnaissance and bombardment units all based here at different points that year.",
+ "after": "The airport for Bastia and the north of Corsica, 17 km south south east of the city at Lucciana.\n\nIt has one story worth telling a client. On 31 July 1944 Antoine de Saint-Exupéry, the French pilot and author, took off from the wartime airfield at Borgo, in Corsica, on a reconnaissance flight over occupied France and never came back. The airport honours him with a memorial in front of its terminal, where it marks the anniversary.",
+ "claims": [
+  {
+   "claim": "the airport for Bastia and the north of Corsica",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Bastia and the north of Corsica",
+   "note": "Haute-Corse (Upper Corsica) is the island's northern department; the operator describes the airport as rooted in its economy.",
+   "sources": [
+    {
+     "file": "op-histoire",
+     "org": "CCI de Haute-Corse / EPCI de Corse (the airport operator, bastia-aeroport.cci.corsica)",
+     "dated": "read 2026-09-23 (the airport's history page)",
+     "quote": [
+      "Aéroport Bastia Poretta",
+      "s'est ancré dans l'économie de la Haute-Corse"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-24",
+     "quote": [
+      "is an airport serving Bastia on the French Mediterranean island of Corsica",
+      "both of which are communes of the Upper Corsica department"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "17 km south south east of Bastia, at Lucciana",
+   "verdict": "confirmed",
+   "inAfter": "17 km south south east of the city at Lucciana.",
+   "note": "Coordinates: 16.8 km from the GeoNames centre of Bastia at 171 degrees, inside the check for south south east. The operator's address is Poretta, 20290 Lucciana.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 16.8 km (10.5 miles)",
+      "Bearing from the city centre: 171 degrees"
+     ]
+    },
+    {
+     "file": "op-saint-exupery",
+     "org": "CCI de Haute-Corse / EPCI de Corse (the airport operator, bastia-aeroport.cci.corsica)",
+     "dated": "read 2026-09-23 (page footer)",
+     "quote": [
+      "Poretta",
+      "20290 LUCCIANA"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-24",
+     "quote": "It is located 17 km (11 mi) south-southeast of Bastia at Lucciana"
+    }
+   ]
+  },
+  {
+   "claim": "on 31 July 1944 Saint-Exupery took off from the wartime airfield at Borgo on a reconnaissance flight over occupied France and never came back",
+   "verdict": "corrected",
+   "inAfter": "On 31 July 1944 Antoine de Saint-Exupéry, the French pilot and author, took off from the wartime airfield at Borgo, in Corsica, on a reconnaissance flight over occupied France and never came back.",
+   "note": "Was 'took off from this airfield ... in a Lockheed P-38 Lightning'. The sources disagree on the airfield. English Wikipedia and the memorial at the terminal say this one; French Wikipedia says that, contrary to the memorial, he left from the field just to the north, called Bastia-Borgo, and his estate's own site says he took off from Borgo. The text follows the estate and French Wikipedia and makes no claim for Poretta. The aircraft for his last flight rests on English Wikipedia alone and is dropped.",
+   "sources": [
+    {
+     "file": "saintex-biographie",
+     "org": "Antoine de Saint-Exupéry's official site (run for his estate, antoinedesaintexupery.org)",
+     "dated": "read 2026-09-23 (the biography page)",
+     "quote": [
+      "Le 31 juillet, Saint Exupéry décolle de Borgo, en Corse, pour sa dixième mission, un vol de reconnaissance aérienne au-dessus de la France occupée, dont il ne reviendra jamais.",
+      "Écrivain, humaniste et aviateur"
+     ]
+    },
+    {
+     "file": "wikipedia-fr",
+     "org": "Wikimedia (French Wikipedia)",
+     "dated": "current revision, read 2026-09-23",
+     "quote": "ce n'est pas de Poretta que décollera Antoine de Saint-Exupéry pour sa dernière mission mais du terrain juste au Nord, qui s'appelait Bastia-Borgo."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-24",
+     "quote": "On 31 July 1944, Antoine de Saint-Exupéry, the legendary French pilot, took off from this airport and disappeared, on a reconnaissance flight over France in a Lockheed P-38 Lightning."
+    }
+   ]
+  },
+  {
+   "claim": "the airport honours him with a memorial in front of its terminal, where it marks the anniversary",
+   "verdict": "confirmed",
+   "inAfter": "The airport honours him with a memorial in front of its terminal, where it marks the anniversary.",
+   "note": "The operator's news page (18 Aug 2026): on 31 July the airport once again paid tribute, with wreaths laid at the memorial facing its terminal.",
+   "sources": [
+    {
+     "file": "op-saint-exupery",
+     "org": "CCI de Haute-Corse / EPCI de Corse (the airport operator, bastia-aeroport.cci.corsica)",
+     "dated": "news item of 18 Aug 2026",
+     "quote": [
+      "Ce 31 juillet, l’aéroport de Bastia a une nouvelle fois rendu hommage à Antoine de Saint-Exupéry, disparu en mission en 1944.",
+      "devant la stèle érigée en sa mémoire, face à notre aérogare"
+     ]
+    },
+    {
+     "file": "wikipedia-fr",
+     "org": "Wikimedia (French Wikipedia)",
+     "dated": "current revision, read 2026-09-23",
+     "quote": "la stèle située à l'entrée de l'aérogare actuelle"
+    }
+   ]
+  },
+  {
+   "claim": "took off from this airfield in a Lockheed P-38 Lightning",
+   "verdict": "cut",
+   "wasBefore": "On 31 July 1944 Antoine de Saint-Exupéry, the legendary French pilot, took off from this airfield on a reconnaissance flight over France in a Lockheed P-38 Lightning and never came back.",
+   "why": "Disputed: the memorial and English Wikipedia say this airfield; French Wikipedia and his estate's site say Borgo, the field just to the north. The aircraft for the last flight rests on English Wikipedia alone. Corrected (see above)."
+  },
+  {
+   "claim": "in American hands in 1944: the USAAF Twelfth Air Force, with night fighter, photographic reconnaissance and bombardment units",
+   "verdict": "cut",
+   "wasBefore": "The airport was in American hands at the time, used by the United States Army Air Forces Twelfth Air Force through 1944, with night fighter, photographic reconnaissance and bombardment units all based here at different points that year.",
+   "why": "Wikipedia alone (the English and French articles are one publisher). The 47th Bomb Group's own history says only that the group moved to Corsica on 11 July 1944, without naming the airfield, and the operator's history starts in 1945. The unit list may also run Poretta and Borgo together: the photographic reconnaissance squadrons it lists flew with Saint-Exupéry's group, which his estate places at Borgo.",
+   "sources": [
+    {
+     "file": "bg47-history",
+     "org": "47th Bomb Group association (47thbombgroup.org)",
+     "dated": "read 2026-09-23",
+     "quote": "Corsica, 11 Jul 1944"
+    }
+   ]
+  },
+  {
+   "claim": "fourteenth in France with about 1.5 million passengers in 2025; the runway lengthened in 1986; the first million in 2009",
+   "verdict": "cut",
+   "why": "Held back: new facts that replace nothing. The French airports' association ranks Bastia fourteenth in France with 1,532,265 passengers in 2025 (Eurostat 1,529,936); the operator's history has the runway built in 1954 and lengthened to 2,510 m in 1986, and the first million passengers in 2009.",
+   "sources": [
+    {
+     "file": "uaf-2025",
+     "org": "Union des Aéroports Français (the French airports' association, aeroport.fr)",
+     "dated": "2025 results (published April 2026)",
+     "quote": "14 Bastia - Poretta 1 532 265"
+    },
+    {
+     "file": "op-histoire",
+     "org": "CCI de Haute-Corse / EPCI de Corse (the airport operator, bastia-aeroport.cci.corsica)",
+     "dated": "read 2026-09-23 (the airport's history page)",
+     "quote": [
+      "La piste est allongée jusqu'à 2 510 mètres",
+      "1 011 820"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "It has one story worth telling a client.",
+   "why": "The old text's framing, kept; the story that follows is sourced."
+  }
+ ],
+ "tracerOk": {}
+}

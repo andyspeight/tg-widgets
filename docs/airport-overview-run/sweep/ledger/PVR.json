@@ -1,0 +1,399 @@
+{
+ "iata": "PVR",
+ "id": "recvLItfETRf1ut5T",
+ "name": null,
+ "country": "Mexico",
+ "wikipedia": "https://en.wikipedia.org/wiki/Licenciado_Gustavo_D%C3%ADaz_Ordaz_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Puerto Vallarta, inside the urban area and just 1 km north of Marina Vallarta, which makes for very short transfers. It is also the gateway to Riviera Nayarit and the Jalisco coast, and works all year round.\n\nIt is growing fast. It served 6,803,500 passengers in 2024 and 6,947,700 in 2025, making it seventh busiest in Mexico overall and fifth busiest for international traffic, with 24 airlines flying to 57 destinations, 41 of them international.\n\nFor a British client the useful detail is that it takes direct flights from the United Kingdom as well as the United States and Canada.\n\nThe single runway is 3,100 metres at an elevation of just 7 metres. The two-storey terminal puts check-in and arrivals with customs and baggage on the ground floor.\n\nIt is officially Licenciado Gustavo Díaz Ordaz International Airport, after the former president, though nobody calls it that.",
+ "after": "The airport for Puerto Vallarta and Riviera Nayarit, 7.5 km north of the city centre, which makes for short transfers.\n\nIt handled 6,947,700 passengers in 2025, up from 6,803,500 in 2024, and the airport says 17 airlines fly here in 2026 on 54 routes. Traffic has since fallen: GAP, which runs it, counts 12.4 per cent fewer passengers from January to August 2026, after unrest in Jalisco in February led airlines to cancel flights.\n\nThere are no direct flights from Britain on record: the UK Civil Aviation Authority counted no passengers between the two in 2025, after 8,882 on charter flights from Manchester in 2024.\n\nThe single runway is 3,100 metres, at an elevation of just 7 metres.\n\nIts full name is Licenciado Gustavo Díaz Ordaz International Airport, after the former president, though it is usually called Puerto Vallarta International Airport.",
+ "claims": [
+  {
+   "claim": "the airport for Puerto Vallarta and Riviera Nayarit",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Puerto Vallarta and Riviera Nayarit",
+   "note": "Reworded from 'It is also the gateway to Riviera Nayarit and the Jalisco coast': 'gateway to' is banned in house style. The operator names Riviera Nayarit; 'the Jalisco coast' and 'works all year round' are Wikipedia's alone and are cut.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "is an international airport serving Puerto Vallarta, Jalisco, Mexico",
+      "It serves as a gateway to the Mexican tourist destination of Riviera Nayarit"
+     ]
+    },
+    {
+     "file": "gap-pvr-page",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, the airport operator)",
+     "dated": "undated live page, read 2026-09-23",
+     "quote": "It deals with domestic and international air traffic of Puerto Vallarta and Riviera Nayarit."
+    }
+   ]
+  },
+  {
+   "claim": "7.5 km north of the city centre",
+   "verdict": "corrected",
+   "inAfter": "7.5 km north of the city centre",
+   "note": "Replaces 'inside the urban area and just 1 km north of Marina Vallarta', which rests on Wikipedia alone and cannot be checked against the coordinates (Marina Vallarta is not a GeoNames centre). The operator gives 7.5 km from the city, with its address at Km 7.5 of the road to Tepic; the coordinates give 7.4 km at 340 degrees, north (ratio 1.01). Wikipedia also places it north of Marina Vallarta.",
+   "sources": [
+    {
+     "file": "gap-pvr-page",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, the airport operator)",
+     "dated": "undated live page, read 2026-09-23",
+     "quote": [
+      "The airport is located 7.5 kilometers from the city of Puerto Vallarta",
+      "Km. 7.5 Carretera a Tepic"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 7.4 km (4.6 miles)",
+      "Bearing from the city centre: 340 degrees, which is north"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "just one km north of Marina Vallarta"
+    }
+   ]
+  },
+  {
+   "claim": "6,947,700 passengers in 2025, up from 6,803,500 in 2024",
+   "verdict": "confirmed",
+   "inAfter": "It handled 6,947,700 passengers in 2025, up from 6,803,500 in 2024",
+   "note": "GAP reports in thousands (6,803.5 and 6,947.7, up 2.1 per cent). GAP calls 2025 a record year, at close to 6.9 million.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "in 2024, it served 6,803,500 passengers, increasing to 6,947,700 in 2025"
+    },
+    {
+     "file": "gap-dec2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, the airport operator)",
+     "dated": "2026-01-06",
+     "quote": [
+      "Guadalajara, Jalisco, México, 6 de enero de 2026",
+      "Pasajeros Totales (miles):",
+      "Puerto Vallarta 685.5 712.9 4.0% 6,803.5 6,947.7 2.1%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the airport says 17 airlines and 54 routes in 2026",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "the airport says 17 airlines fly here in 2026 on 54 routes",
+   "note": "Replaces '24 airlines flying to 57 destinations, 41 of them international' (Wikipedia). The airport's own figures in April 2026: 17 airlines, and 54 active routes once the eight routes added this year are flying. GAP's 2025 annual report gave 18 airlines and 53 destinations. The airport's administrator is quoted for the airline count. In review, \"this year\" became \"in 2026\" so the sentence does not go stale.",
+   "sources": [
+    {
+     "file": "gap-pvr-may2026",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, the airport operator)",
+     "dated": "2026-04-20",
+     "quote": [
+      "Jalisco a 20 de abril de 202 6",
+      "alcanzará un total de 54 rutas activas nacionales e internacionales",
+      "Actualmente, en el Aeropuerto de Puerto Vallarta operan 17 aerolíneas"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "traffic down 12.4 per cent, January to August 2026",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "GAP",
+   "inAfter": "Traffic has since fallen: GAP, which runs it, counts 12.4 per cent fewer passengers from January to August 2026",
+   "note": "Replaces 'It is growing fast', which was true of neither year: 2025 grew 2.1 per cent (a record, GAP says) and 2026 has fallen. GAP's August release: 4,233.0 thousand passengers in January to August 2026 against 4,831.9 thousand a year earlier, with international traffic down 19.7 per cent. The operator's own figures, so attributed.",
+   "sources": [
+    {
+     "file": "gap-aug2026",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, the airport operator)",
+     "dated": "2026-09-04",
+     "quote": [
+      "Guadalajara, Jalisco, Mexico, September 4, 2026",
+      "Total Terminal Passengers (in thousands):",
+      "Puerto Vallarta 475.8 426.9 (10.3%) 4,831.9 4,233.0 (12.4%)",
+      "Puerto Vallarta 161.8 119.2 (26.3%) 2,712.5 2,178.1 (19.7%)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "unrest in Jalisco in February led airlines to cancel flights",
+   "verdict": "corrected",
+   "inAfter": "after unrest in Jalisco in February led airlines to cancel flights",
+   "note": "On 22 February 2026 the army killed the leader of the Jalisco New Generation Cartel, which set off roadblocks and burning vehicles across the state (KATU, citing AP). That day airlines cancelled all international and most domestic flights at the airport (GAP): 89 cancellations on 22 February and 52 on 23 February. GAP says the events affected travel demand, and Puerto Vallarta's traffic fell from March.",
+   "sources": [
+    {
+     "file": "gap-pvr-feb2026-notice",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, the airport operator)",
+     "dated": "2026-02-22",
+     "quote": [
+      "Puerto Vallarta, Jalisco, a 22 de febrero de 2026.",
+      "por decisión de las líneas aéreas, hoy domingo 22 de febrero de 2026, todas las operaciones internacionales y la mayoría de las nacionales se encuentran canceladas"
+     ]
+    },
+    {
+     "file": "gap-feb2026",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, the airport operator)",
+     "dated": "2026-03-06",
+     "quote": [
+      "Guadalajara, Jalisco, Mexico, March 6, 2026",
+      "on February 22, 120 cancellations were recorded at Guadalajara Airport, 89 at Puerto Vallarta Airport"
+     ]
+    },
+    {
+     "file": "gap-1q26",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, the airport operator)",
+     "dated": "2026-04-20",
+     "quote": [
+      "Guadalajara, Jalisco, Mexico, April 20, 2026",
+      "security -related events in the state of Jalisco during February 2026 led to temporary disruptions in mobility and affected travel demand to certain destinations"
+     ]
+    },
+    {
+     "file": "katu-unrest",
+     "org": "KATU (Portland television news)",
+     "dated": "2026-02-22",
+     "quote": [
+      "Sun, February 22, 2026 at 3:34 PM",
+      "A military operation in western Mexico targeting one of the country's most powerful cartel leaders triggered widespread violence",
+      "A spokesperson said 24 flights to Puerto Vallarta, Guadalajara and Manzanillo were canceled today due to the unrest in Mexico."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "GAP runs the airport",
+   "verdict": "confirmed",
+   "inAfter": "GAP, which runs it",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Operated by Grupo Aeroportuario del Pacífico"
+    },
+    {
+     "file": "gap-dec2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, the airport operator)",
+     "dated": "2026-01-06",
+     "quote": "cuatro destinos turísticos en Puerto Vallarta, Los Cabos, La Paz y Manzanillo"
+    }
+   ]
+  },
+  {
+   "claim": "no direct flights from Britain on record, per the UK Civil Aviation Authority",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Civil Aviation Authority",
+   "inAfter": "There are no direct flights from Britain on record: the UK Civil Aviation Authority counted no passengers between the two in 2025, after 8,882 on charter flights from Manchester in 2024.",
+   "note": "Replaces 'it takes direct flights from the United Kingdom', which Wikipedia still says ('offering flights to and from Mexico, the United States, Canada, and the United Kingdom'). The CAA's 2025 table of international routes from UK reporting airports (run 25 February 2026) has a single Puerto Vallarta row, Manchester: 0 passengers in 2025, 8,882 in 2024, all on charter flights. No other UK airport has a Puerto Vallarta row. TUI's own site refused automated reads (Akamai 403 to both tools), so no airline's plans for later seasons could be checked; the text therefore says 'on record' and names the year. The US and Canada are covered by the airport's own route and airline counts.",
+   "sources": [
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2025 (table run 25/02/2026)",
+     "quote": [
+      "rundate,report_period,region_num,foreign_region,foreign_country,uk_group,uk_apt,foreign_apt,ty_t_pax,ty_s_pax,ty_c_pax,ly_t_pax,ly_s_pax,ly_c_pax,pc_change",
+      "25/02/2026 16:41,2025,85,CENTRAL AMERICA,MEXICO,2,MANCHESTER,PUERTO VALLARTA,0,0,0,8882,0,8882,-100"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "single runway of 3,100 metres, elevation 7 metres",
+   "verdict": "confirmed",
+   "inAfter": "The single runway is 3,100 metres, at an elevation of just 7 metres.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "at an elevation of 7 metres (23 ft) above mean sea level",
+      "It features a single runway, designated as 04/22, measuring 3,100 metres (10,200 ft) in length with an asphalt surface."
+     ]
+    },
+    {
+     "file": "gap-pvr-page",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, the airport operator)",
+     "dated": "undated live page, read 2026-09-23",
+     "quote": "It has a runway of 3,100 meters long and 45 meters wide with 04-22 designation"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 04/22: 3,100 m (10,171 ft), ASP",
+      "Runways listed: 1",
+      "elevation 23 ft (7 m)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "full name Licenciado Gustavo Díaz Ordaz International Airport, after the former president",
+   "verdict": "confirmed",
+   "inAfter": "Its full name is Licenciado Gustavo Díaz Ordaz International Airport, after the former president",
+   "note": "'Officially' becomes 'its full name': the operator gives both names side by side. Díaz Ordaz was president of Mexico from 1964 to 1970.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Licenciado Gustavo Díaz Ordaz International Airport (Spanish: Aeropuerto Internacional Licenciado Gustavo Díaz Ordaz)",
+      "it is named after President Gustavo Díaz Ordaz"
+     ]
+    },
+    {
+     "file": "gap-pvr-page-es",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, the airport operator)",
+     "dated": "undated live page, read 2026-09-23",
+     "quote": "El Aeropuerto Internacional Licenciado Gustavo D&iacute;az Ordaz o Aeropuerto Internacional de Puerto Vallarta"
+    },
+    {
+     "file": "gap-pvr-page",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, the airport operator)",
+     "dated": "undated live page, read 2026-09-23",
+     "quote": "The airport was named in memory of Mexico's President Gustavo Diaz Ordaz."
+    },
+    {
+     "file": "encyclopedia-diaz-ordaz",
+     "org": "Encyclopedia of Latin American History and Culture (Encyclopedia.com)",
+     "quote": "Díaz Ordaz was the president of Mexico from 1964 to 1970."
+    }
+   ]
+  },
+  {
+   "claim": "usually called Puerto Vallarta International Airport",
+   "verdict": "softened",
+   "inAfter": "though it is usually called Puerto Vallarta International Airport",
+   "note": "Softened from 'though nobody calls it that': the operator itself uses both names, and its releases say Aeropuerto Internacional de Puerto Vallarta.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "simply known as Puerto Vallarta International Airport"
+    },
+    {
+     "file": "gap-pvr-page",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, the airport operator)",
+     "dated": "undated live page, read 2026-09-23",
+     "quote": "The Gustavo Diaz Ordaz International Airport or Puerto Vallarta International Airport"
+    },
+    {
+     "file": "gap-pvr-may2026",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, the airport operator)",
+     "dated": "2026-04-20",
+     "quote": "El Aeropuerto Internacional de Puerto Vallarta (PVR)"
+    }
+   ]
+  },
+  {
+   "claim": "inside the urban area, 1 km north of Marina Vallarta",
+   "verdict": "cut",
+   "wasBefore": "inside the urban area and just 1 km north of Marina Vallarta",
+   "why": "Wikipedia alone, and the coordinates cannot test a distance from Marina Vallarta. Replaced by the operator's 7.5 km from the city, which the coordinates bear out (see above)."
+  },
+  {
+   "claim": "gateway to Riviera Nayarit and the Jalisco coast, all year round",
+   "verdict": "cut",
+   "wasBefore": "It is also the gateway to Riviera Nayarit and the Jalisco coast, and works all year round.",
+   "why": "'Gateway to' is banned in house style; Riviera Nayarit is kept with the operator as second source, while 'the Jalisco coast' and 'all year round' rest on Wikipedia alone."
+  },
+  {
+   "claim": "growing fast",
+   "verdict": "cut",
+   "wasBefore": "It is growing fast.",
+   "why": "Out of date: 2.1 per cent growth in 2025, then down 12.4 per cent in January to August 2026 (GAP). Corrected (see above)."
+  },
+  {
+   "claim": "seventh busiest in Mexico, fifth for international traffic",
+   "verdict": "cut",
+   "wasBefore": "making it seventh busiest in Mexico overall and fifth busiest for international traffic",
+   "why": "Wikipedia contradicts itself (its text says seventh for 2025, its infobox eighth) and the national tables (AFAC, on gob.mx) sit behind an Akamai challenge. The operators' 2025 figures cannot settle it: Puerto Vallarta's 6.95 million is close to Felipe Ángeles's, whose 2025 total was not read. For international traffic GAP counts Tijuana's CBX users as international (4.09 million), which would put Tijuana ahead of Puerto Vallarta's 3.82 million, so the order depends on the definition."
+  },
+  {
+   "claim": "24 airlines to 57 destinations, 41 international",
+   "verdict": "cut",
+   "wasBefore": "with 24 airlines flying to 57 destinations, 41 of them international",
+   "why": "Wikipedia's counts; replaced by the airport's own, 17 airlines and 54 routes (see above)."
+  },
+  {
+   "claim": "direct flights from the United Kingdom",
+   "verdict": "cut",
+   "wasBefore": "For a British client the useful detail is that it takes direct flights from the United Kingdom as well as the United States and Canada.",
+   "why": "Out of date: the UK CAA counted no passengers between any UK airport and Puerto Vallarta in 2025 (Manchester's charter flights carried 8,882 in 2024). Corrected (see above)."
+  },
+  {
+   "claim": "two-storey terminal, check-in and arrivals on the ground floor",
+   "verdict": "cut",
+   "wasBefore": "The two-storey terminal puts check-in and arrivals with customs and baggage on the ground floor.",
+   "why": "Wikipedia alone, and about to be overtaken: GAP is finishing a new terminal building (held back below)."
+  },
+  {
+   "claim": "officially, nobody calls it that",
+   "verdict": "cut",
+   "wasBefore": "It is officially Licenciado Gustavo Díaz Ordaz International Airport, after the former president, though nobody calls it that.",
+   "why": "'Officially' and 'nobody calls it that' overstate it: the operator uses both names. Reworded (see above)."
+  },
+  {
+   "claim": "new terminal due by the end of 2026",
+   "verdict": "cut",
+   "why": "Held back: GAP's new terminal building, its flagship project at about MXN 9,000 million, was 71 per cent built in April 2026 and is due by the end of 2026, lifting annual capacity to more than 8 million passengers (GAP annual report; GAP, 20 April 2026). Wikipedia dates the start of building to 2022. A new terminal, with nothing in the text to replace once the old terminal description is cut; worth adding when it opens.",
+   "sources": [
+    {
+     "file": "gap-ia2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, the airport operator)",
+     "dated": "2025 annual report (it refers to February 2026)",
+     "quote": [
+      "the completion of the new Terminal 2 at the Puerto Vallarta International Airport. We remain on schedule to deliver this facility by the end of 2026",
+      "a total investment of approximately MXP 9,000 million"
+     ]
+    },
+    {
+     "file": "gap-pvr-may2026",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, the airport operator)",
+     "dated": "2026-04-20",
+     "quote": "Nuevo Edificio Terminal (NET), que registra un avance del 71%"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "In 2022, the construction of a new Terminal 2 officially began."
+    }
+   ]
+  },
+  {
+   "claim": "FCDO position on Jalisco",
+   "verdict": "cut",
+   "why": "Held back: the FCDO (updated 22 September 2026) advises against all but essential travel only to parts of Jalisco south and south-west of Lake Chapala and some northern municipalities; Puerto Vallarta is not among them. Recorded so the position is on file.",
+   "sources": [
+    {
+     "file": "fcdo-mexico-warnings",
+     "org": "UK FCDO",
+     "dated": "2026-09-22",
+     "quote": [
+      "22 September 2026",
+      "FCDO advises against all but essential travel to the areas south and south-west of Lake Chapala to the border with the state of Colima."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which makes for short transfers",
+   "why": "Kept from the old text ('very short' toned down): a judgement that follows from the verified 7.5 km, not a separate claim."
+  }
+ ],
+ "tracerOk": {
+  "Civil Aviation Authority": "The body that publishes the saved route table (caa.co.uk download, run 25/02/2026); the CSV itself carries only data columns, not the publisher's name."
+ }
+}

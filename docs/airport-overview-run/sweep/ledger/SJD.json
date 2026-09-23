@@ -1,0 +1,493 @@
+{
+ "iata": "SJD",
+ "id": "recbfnKm3oWpNvh6s",
+ "name": "Los Cabos International Airport",
+ "country": "Mexico",
+ "wikipedia": "https://en.wikipedia.org/wiki/Los_Cabos_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The gateway to Los Cabos, 10 km north of San José del Cabo at the southern tip of the Baja California Peninsula. It handled 7,529,900 passengers in 2025, sixth busiest in Mexico and fourth for international passengers.\n\nThe traffic is overwhelmingly North American. Most United States and Canadian mainline carriers treat this as a destination airport, and it also sits on the busy corridor between the Baja California Peninsula and mainland Mexico. More than 50 destinations are served across the Americas and Europe.\n\nThere are two terminals, split domestic and international rather than by airline. Terminal 1 handles domestic flights from a single storey building of 16,580 square metres, with eight gates on the ground level that passengers walk out to, plus a VIP lounge on a mezzanine.\n\nThe single runway is 3,000 metres, with apron space for 22 narrow bodied aircraft and the ability to take wide bodies.\n\nNote there is a second, much smaller airport in the region. Cabo San Lucas International is about 26 km south, so check which one a ticket names.",
+ "after": "The main airport for Los Cabos, 11 km north of San José del Cabo, near the southern tip of the Baja California Peninsula. It handled 7,529,900 passengers in 2025.\n\nMost were on international flights, 62 per cent by the count of GAP, which runs the airport. GAP names its main destinations as Mexico City, Los Angeles, Guadalajara, Dallas-Fort Worth and Tijuana. Its main airlines, the operator says, are Volaris, Viva, American, Alaska and United. Flights reach more than 50 destinations across the Americas and Europe.\n\nTerminal 1 takes domestic flights and Terminal 2 international ones.\n\nThe single runway is 3,000 metres.\n\nA second, smaller airport, Cabo San Lucas International, lies to the south west, so check which one a ticket names.",
+ "claims": [
+  {
+   "claim": "the main airport for Los Cabos",
+   "verdict": "confirmed",
+   "inAfter": "The main airport for Los Cabos",
+   "note": "Reworded from 'The gateway to Los Cabos': 'gateway to' is banned in house style. OurAirports' home link for this airport, loscabosairport.com, is not the airport's site: its own policies page says it is an independent website not affiliated with GAP, so nothing here rests on it.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "serving as the main gateway to the Los Cabos region",
+      "It is the larger of two airports in the Los Cabos region"
+     ]
+    },
+    {
+     "file": "gap-sjd-page",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "undated live page (its footer says 2013), read 2026-09-23",
+     "quote": "The airport serves the area of Los Cabos San Jose del Cabo and Cabo San Lucas."
+    },
+    {
+     "file": "geo-csl",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Los Cabos International Airport (MMSD, SJD) at 23.151919, -109.720731; OurAirports type: large_airport",
+      "Cabo San Lucas International Airport (MMSL, CSW) at 22.949072, -109.939479; OurAirports type: medium_airport"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "11 km north of San José del Cabo",
+   "verdict": "corrected",
+   "inAfter": "11 km north of San José del Cabo",
+   "note": "Was 10 km (Wikipedia). The operator gives 11 km and the straight line from the GeoNames centre is 11.0 km, so a road distance of 10 km cannot be right. The bearing is 351 degrees, north.",
+   "sources": [
+    {
+     "file": "gap-sjd-page",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "undated live page (its footer says 2013), read 2026-09-23",
+     "quote": "is located 11 kilometers from San Jose del Cabo"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 11.0 km (6.8 miles)",
+      "Bearing from the city centre: 351 degrees, which is north"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Los Cabos International Airport is situated 10 kilometres (6.2 mi) north of San José del Cabo"
+    }
+   ]
+  },
+  {
+   "claim": "near the southern tip of the Baja California Peninsula",
+   "verdict": "confirmed",
+   "inAfter": "near the southern tip of the Baja California Peninsula",
+   "note": "The Los Cabos tourism board (the Fideicomiso de Turismo de Los Cabos, a public tourism trust) is the second source; Condor's own Los Cabos page says the same. Britannica was tried and answered with a Cloudflare check, so it was left alone. The tourism board's separate airports page was not used: its details are visibly unreliable (it calls SJD a single terminal and gives Cabo San Lucas airport a 3,042 m runway, where OurAirports has 2,133 m).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the Los Cabos region on the southern tip of the Baja California Peninsula"
+    },
+    {
+     "file": "visitloscabos-home",
+     "org": "Fideicomiso de Turismo de Los Cabos (Los Cabos tourism board)",
+     "dated": "read 2026-09-23 (live page, copyright 2026)",
+     "quote": [
+      "At the southernmost tip of the Baja California Peninsula",
+      "2026 Fideicomiso de Turismo de Los Cabos"
+     ]
+    },
+    {
+     "file": "condor-los-cabos",
+     "org": "Condor",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "An der Südspitze der Halbinsel Baja California gelegen"
+    }
+   ]
+  },
+  {
+   "claim": "7,529,900 passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "It handled 7,529,900 passengers in 2025.",
+   "note": "GAP reports in thousands (7,529.9), up 0.6 per cent on 7,488.1 thousand in 2024; Wikipedia's 7,529,900 is the same figure.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In 2024, Los Cabos International Airport handled 7,488,200 passengers, and 7,529,900 in 2025."
+    },
+    {
+     "file": "gap-dec2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2026-01-06",
+     "quote": [
+      "Guadalajara, Jalisco, México, 6 de enero de 2026",
+      "Pasajeros Totales (miles):",
+      "Los Cabos 694.4 685.7 (1.2%) 7,488.1 7,529.9 0.6%"
+     ]
+    },
+    {
+     "file": "gap-ia2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2025 annual report (it refers to February 2026)",
+     "quote": [
+      "As we celebrated our 20th anniversary as a public company in February 2026",
+      "Los Cabos 7,530"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "62 per cent of passengers international, by GAP's count",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "GAP",
+   "inAfter": "Most were on international flights, 62 per cent by the count of GAP",
+   "note": "Replaces 'The traffic is overwhelmingly North American', which no source puts that way. GAP's annual report gives 38 per cent domestic and 62 per cent international for 2025, and its December 2025 release has 4,688.3 thousand international passengers of 7,529.9 thousand (62.3 per cent). The operator's own statistic, so it is attributed. GAP's May 2025 count of its 52 destinations (12 in Mexico, 31 in the US, 8 in Canada, one in Europe) bears the old sentence out, but is more than 12 months old.",
+   "sources": [
+    {
+     "file": "gap-ia2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2025 annual report (it refers to February 2026)",
+     "quote": [
+      "2025 AIRPORTS RESULTS Los Cabos 621.6",
+      "Traffic share 38% Domestic 62% International"
+     ]
+    },
+    {
+     "file": "gap-dec2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2026-01-06",
+     "quote": [
+      "Pasajeros Internacionales (miles):",
+      "Los Cabos 443.0 447.6 1.0% 4,657.7 4,688.3 0.7%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "GAP runs the airport",
+   "verdict": "confirmed",
+   "inAfter": "GAP, which runs the airport",
+   "note": "Not in the old text; named so that the operator's figures that follow can be attributed.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Operated by Grupo Aeroportuario del Pacífico (GAP)"
+    },
+    {
+     "file": "gap-dec2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2026-01-06",
+     "quote": [
+      "opera doce aeropuertos a lo largo de la región pacífico de México",
+      "cuatro destinos turísticos en Puerto Vallarta, Los Cabos, La Paz y Manzanillo"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "GAP's main destinations: Mexico City, Los Angeles, Guadalajara, Dallas-Fort Worth and Tijuana",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "GAP",
+   "inAfter": "GAP names its main destinations as Mexico City, Los Angeles, Guadalajara, Dallas-Fort Worth and Tijuana",
+   "note": "Replaces 'it also sits on the busy corridor between the Baja California Peninsula and mainland Mexico' (Wikipedia's 'high-traffic air corridor'). The operator's own list of main destinations shows the domestic links (Mexico City, Guadalajara, Tijuana) and the US ones, so it is given as GAP's.",
+   "sources": [
+    {
+     "file": "gap-ia2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2025 annual report (it refers to February 2026)",
+     "quote": [
+      "2025 AIRPORTS RESULTS Los Cabos 621.6",
+      "Main destinations Mexico City, Los Angeles, Guadalajara, Dallas-Fort Worth and Tijuana"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "GAP's main airlines: Volaris, Viva, American, Alaska and United",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "operator",
+   "inAfter": "Its main airlines, the operator says, are Volaris, Viva, American, Alaska and United",
+   "note": "Replaces 'Most United States and Canadian mainline carriers treat this as a destination airport', which is Wikipedia's framing. GAP's live airline list for the airport bears out the wider point: it names American, Alaska, Delta, United, Southwest, JetBlue, Frontier, Sun Country, Air Canada and WestJet among 17 airlines (the annual report counts 16).",
+   "sources": [
+    {
+     "file": "gap-ia2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2025 annual report (it refers to February 2026)",
+     "quote": [
+      "52 Destinations 16 Airlines Main destinations Mexico City",
+      "Main airlines Volaris, Viva, American Airlines, Alaska Airlines, and United Airlines"
+     ]
+    },
+    {
+     "file": "gap-sjd-airlines-2",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "undated live page, read 2026-09-23",
+     "quote": [
+      "American Airlines IATA Code: AA",
+      "Alaska Airlines IATA Code: ASA",
+      "United Airlines IATA Code: UAL"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "more than 50 destinations across the Americas and Europe",
+   "verdict": "confirmed",
+   "inAfter": "Flights reach more than 50 destinations across the Americas and Europe.",
+   "note": "The airport's own count in May 2026 is 'more than 50' (its 2025 annual report says 52). Europe is Condor from Frankfurt: its own page sells the route, twice a week, with fares from December 2026 to March 2027, and GAP's May 2025 count had Frankfurt as the one European destination. Beyond North America in the Americas, Copa began Los Cabos to Panama City in December 2025 (GAP).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It offers flights to more than 50 destinations across the Americas and Europe"
+    },
+    {
+     "file": "gap-sjd-may2026",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2026-05-26",
+     "quote": [
+      "B.C.S. a 26 de mayo de 202 6",
+      "con operaciones hacia más de 50 destinos nacionales e internacionales"
+     ]
+    },
+    {
+     "file": "gap-sjd-2025-invest",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2025-05-06",
+     "quote": [
+      "San José del Cabo, Baja California Sur, 6 de mayo de 2025",
+      "conectando con 52 destinos: 12 destinos nacionales, 31 en Estados Unidos, 8 en Canadá y uno en Europa (Frankfurt)"
+     ]
+    },
+    {
+     "file": "condor-los-cabos",
+     "org": "Condor",
+     "dated": "read 2026-09-23 (live page, fares shown for December 2026 to March 2027)",
+     "quote": [
+      "Condor bringt Sie zweimal pro Woche ab Frankfurt am Main (FRA) per Direktflug",
+      "Dez. 2026"
+     ]
+    },
+    {
+     "file": "gap-dec2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2026-01-06",
+     "quote": "Los Cabos – Ciudad de Panamá: Copa Airlines"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 1 takes domestic flights and Terminal 2 international ones",
+   "verdict": "softened",
+   "inAfter": "Terminal 1 takes domestic flights and Terminal 2 international ones.",
+   "note": "Was 'There are two terminals, split domestic and international rather than by airline'. Both sources agree that Terminal 1 takes the domestic flights and Terminal 2 the international ones ('only' is GAP's word alone, so it is left out); GAP's page adds that Terminal 1 also takes some international flights, which is why 'rather than by airline' is cut. The terminal count is not stated: GAP's undated page still says three terminals and a Terminal 4 under construction, while Wikipedia says the old Terminal 3 was merged into Terminal 2 between 2018 and 2020 and there are now two. GAP's current plans are to enlarge Terminal 2, with automated migration gates (held back below).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-05",
+     "quote": [
+      "houses arrival and departure facilities for domestic flights within a single-story building",
+      "Terminal 2 was subsequently added to accommodate increased international flights",
+      "The ground floor manages arrivals with customs and immigration facilities"
+     ]
+    },
+    {
+     "file": "gap-sjd-page",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "undated live page (its footer says 2013), read 2026-09-23",
+     "quote": "Terminal 1 serves all domestic operations and some international flights, while Terminal 2 works for international operations only."
+    }
+   ]
+  },
+  {
+   "claim": "single runway of 3,000 metres",
+   "verdict": "confirmed",
+   "inAfter": "The single runway is 3,000 metres.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport features a single runway, designated as 16/34, measuring 3,000 metres (9,800 ft) with an asphalt surface."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 16/34: 3,000 m (9,843 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-05",
+     "quote": "The airport features a single runway, designated as 16/34, measuring 3,000 metres (9,800 ft) with an asphalt surface."
+    }
+   ]
+  },
+  {
+   "claim": "a second, smaller airport, Cabo San Lucas International, to the south west",
+   "verdict": "corrected",
+   "inAfter": "A second, smaller airport, Cabo San Lucas International, lies to the south west",
+   "note": "Was 'much smaller' and 'about 26 km south'. OurAirports puts Cabo San Lucas airport 31.8 km from this one in a straight line, at 225 degrees (south west; Wikipedia's 'south' is the adjacent point), so 26 km cannot be right even by road and no distance is given. 'Smaller' rests on Wikipedia and OurAirports (a medium airport with a 2,133 m runway, against a large airport with 3,000 m); 'much' is dropped.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the smaller Cabo San Lucas International Airport is located approximately 26 kilometres (16 mi) to the south"
+    },
+    {
+     "file": "geo-csl",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Bearing from Los Cabos International Airport to Cabo San Lucas International Airport: 225 degrees, which is south west",
+      "Straight-line distance between the two airports: 31.8 km (19.7 miles)",
+      "Cabo San Lucas International Airport (MMSL, CSW) at 22.949072, -109.939479; OurAirports type: medium_airport",
+      "Runway 11/29: 2,133 m (6,998 ft), ASP"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "10 km north",
+   "verdict": "cut",
+   "wasBefore": "10 km north of San José del Cabo",
+   "why": "Slightly short: the operator gives 11 km and the straight line is 11.0 km. Corrected to 11 km (see above)."
+  },
+  {
+   "claim": "sixth busiest in Mexico and fourth for international passengers",
+   "verdict": "cut",
+   "wasBefore": "sixth busiest in Mexico and fourth for international passengers",
+   "why": "Wikipedia alone. Its source is AFAC's national table on gob.mx, which answers with an Akamai challenge page and was not tried. GAP's 2025 annual report, releases and September 2026 presentation give Los Cabos's own traffic but no national rank (the presentation's top-ten chart is an image); ASUR's 2025 20-F ranks only Cancún. Without the Mexico City airports' 2025 figures the order cannot be closed."
+  },
+  {
+   "claim": "traffic overwhelmingly North American",
+   "verdict": "cut",
+   "wasBefore": "The traffic is overwhelmingly North American.",
+   "why": "No source puts it that way; replaced by GAP's own split (62 per cent international in 2025) and its main destinations and airlines (see above)."
+  },
+  {
+   "claim": "most US and Canadian mainline carriers treat it as a destination airport",
+   "verdict": "cut",
+   "wasBefore": "Most United States and Canadian mainline carriers treat this as a destination airport",
+   "why": "Wikipedia's framing; replaced by the main airlines GAP names (see above)."
+  },
+  {
+   "claim": "on the busy corridor between the peninsula and mainland Mexico",
+   "verdict": "cut",
+   "wasBefore": "it also sits on the busy corridor between the Baja California Peninsula and mainland Mexico",
+   "why": "Wikipedia alone; replaced by GAP's main destinations, which include Mexico City, Guadalajara and Tijuana (see above)."
+  },
+  {
+   "claim": "two terminals, split domestic and international rather than by airline",
+   "verdict": "cut",
+   "wasBefore": "There are two terminals, split domestic and international rather than by airline.",
+   "why": "'Rather than by airline' has no source, and GAP's own page says Terminal 1 also takes some international flights. The count is left out because GAP's undated page still says three. What both sources agree on is kept (see above)."
+  },
+  {
+   "claim": "Terminal 1: single storey, 16,580 square metres, eight walk-out gates, VIP lounge on a mezzanine",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 handles domestic flights from a single storey building of 16,580 square metres, with eight gates on the ground level that passengers walk out to, plus a VIP lounge on a mezzanine.",
+   "why": "Wikipedia alone; the operator's pages give none of these details."
+  },
+  {
+   "claim": "apron for 22 narrow bodies, can take wide bodies",
+   "verdict": "cut",
+   "wasBefore": "with apron space for 22 narrow bodied aircraft and the ability to take wide bodies",
+   "why": "Wikipedia alone. GAP's May 2025 plan adds seven aircraft stands and 52 per cent more apron, but gives no current count."
+  },
+  {
+   "claim": "much smaller, about 26 km south",
+   "verdict": "cut",
+   "wasBefore": "Note there is a second, much smaller airport in the region. Cabo San Lucas International is about 26 km south",
+   "why": "The distance is too short (31.8 km in a straight line between the two airports, OurAirports) and the direction is south west; 'much' has no second source. Reworded (see above)."
+  },
+  {
+   "claim": "traffic down in 2026",
+   "verdict": "cut",
+   "why": "Held back: January to August 2026 the airport handled 4,976.4 thousand passengers, down 5.5 per cent on the same months of 2025, with international traffic down 8.0 per cent (GAP, 4 September 2026). A new fact that replaces nothing in the old text; one organisation.",
+   "sources": [
+    {
+     "file": "gap-aug2026",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2026-09-04",
+     "quote": [
+      "Guadalajara, Jalisco, Mexico, September 4, 2026",
+      "Total Terminal Passengers (in thousands):",
+      "Los Cabos 563.0 528.3 (6.2%) 5,265.7 4,976.4 (5.5%)",
+      "Los Cabos 292.3 243.9 (16.6%) 3,303.4 3,037.7 (8.0%)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2 to be enlarged, 2025 to 2029",
+   "verdict": "cut",
+   "why": "Held back: GAP's 2025 to 2029 plan puts about MXN 6,991 million into the airport, led by an enlarged and reconfigured Terminal 2 with new gates and automated migration gates. GAP's own figures for the enlargement disagree (39 per cent in May 2025, 37 per cent in its annual report, 58 per cent in May 2026), so no size would be given. Works that replace nothing in the old text; one organisation.",
+   "sources": [
+    {
+     "file": "gap-sjd-may2026",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2026-05-26",
+     "quote": [
+      "inversiones por $6,991 millones de pesos",
+      "incrementar en 58% su superficie actual"
+     ]
+    },
+    {
+     "file": "gap-sjd-2025-invest",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2025-05-06",
+     "quote": [
+      "la ampliación de la Terminal 2, que crecerá 39% en superficie",
+      "12 filtros de migración autónomos"
+     ]
+    },
+    {
+     "file": "gap-ia2025",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2025 annual report (it refers to February 2026)",
+     "quote": "Expansion of Terminal 2, increasing space by 37%, adding boarding gates and automated processing areas."
+    }
+   ]
+  },
+  {
+   "claim": "new Canadian airlines this winter",
+   "verdict": "cut",
+   "why": "Held back: Porter is to start flights from Toronto, Edmonton and Ottawa this winter and Air Transat from Montreal (GAP, 26 May 2026). New routes that replace nothing; one organisation (Porter's own release on Business Wire answered 403 and was not needed).",
+   "sources": [
+    {
+     "file": "gap-sjd-may2026",
+     "org": "Grupo Aeroportuario del Pacífico (GAP, operator)",
+     "dated": "2026-05-26",
+     "quote": [
+      "iniciará operaciones este invierno conectando a Los Cabos con Toronto (YYZ), Edmonton (YEG) y Ottawa",
+      "AirTransat conectará a Los Cabos con Montreal"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FCDO position on Baja California Sur",
+   "verdict": "cut",
+   "why": "Held back: the FCDO (updated 22 September 2026) says Baja California Sur is unaffected by its warnings for the state of Baja California, and notes drug-related crime in Baja California Sur, including Los Cabos. Nothing in the old text to replace; recorded so the position is on file.",
+   "sources": [
+    {
+     "file": "fcdo-mexico-warnings",
+     "org": "UK FCDO",
+     "dated": "2026-09-22",
+     "quote": [
+      "Updated: 22 September 2026",
+      "There is another state called Baja California Sur that is unaffected by these warnings."
+     ]
+    },
+    {
+     "file": "fcdo-mexico-regional",
+     "org": "UK FCDO",
+     "quote": "There is drug-related crime in Baja California Sur, including Los Cabos."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so check which one a ticket names",
+   "why": "Practical advice kept from the old text, following from the verified fact that there is a second airport near Cabo San Lucas; not a factual claim."
+  }
+ ],
+ "tracerOk": {}
+}
