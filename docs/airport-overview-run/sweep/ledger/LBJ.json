@@ -1,0 +1,472 @@
+{
+ "iata": "LBJ",
+ "id": "recnHMHpH9zvWBsUI",
+ "name": "Komodo Airport",
+ "country": "Indonesia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Komodo_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport at Labuan Bajo sits on the western tip of Flores Island, in the East Nusa Tenggara province, and it exists largely because of what lies offshore. Komodo National Park is the draw, and this is the way in for almost everyone who goes. The name is a nod to the dragon itself, the monitor lizard found nowhere else, though most visitors arrive with boat trips, snorkelling and island hopping in mind as much as reptiles.\n\nIt was once called Mutiara II, and the shift to international status reflects how quickly Labuan Bajo has grown as a destination. Flights come in from Jakarta, Surabaya and Denpasar on Bali, which is the usual hop for anyone already on a two centre trip. There are also international services from Kuala Lumpur and Singapore, useful for clients who want to skip Bali altogether. Smaller regional flights connect onward across Flores to Bajawa, Ende and Maumere, which suits travellers heading east overland.\n\nLabuan Bajo itself is the capital of West Manggarai Regency, a working harbour town that has taken on a second life as a base for boat charters and dive operators.",
+ "after": "The airport at Labuan Bajo sits on the island of Flores, in East Nusa Tenggara province. Komodo National Park is the draw, and the airport is the main way in. The name is a nod to the dragon itself, the giant lizard found in the wild nowhere else.\n\nIt was once called Mutiara II and became an international airport in 2024. Flights come in from Jakarta, Surabaya and Denpasar on Bali, the easy hop on a two centre trip. There are also international flights from Kuala Lumpur and Singapore, useful for clients who want to skip Bali altogether. Smaller regional flights head east to Bajawa, Ende and Maumere.\n\nLabuan Bajo itself is the capital of West Manggarai Regency.",
+ "claims": [
+  {
+   "claim": "the airport at Labuan Bajo",
+   "verdict": "confirmed",
+   "inAfter": "The airport at Labuan Bajo",
+   "note": "The regulator gives its address in Labuan Bajo (Jl. Yohanes Sehadun); on the coordinates it is 1.7 km north of GeoNames' point for the town.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Nama Bandar Udara Komodo",
+      "Alamat Bandar Udara Jl. Yohanes Sehadun, Labuan Bajo"
+     ]
+    },
+    {
+     "file": "geo-labuanbajo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 1.7 km (1.1 miles)",
+      "Bearing from the city centre: 2 degrees, which is north"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "is an international airport serving the town of Labuan Bajo"
+    }
+   ]
+  },
+  {
+   "claim": "on the island of Flores",
+   "verdict": "softened",
+   "inAfter": "sits on the island of Flores",
+   "note": "Was 'sits on the western tip of Flores Island'. The regulator's own airport unit says the airport is on Flores; 'the western tip' rests on Wikipedia alone (the Flores airports it flies to all lie east of it on OurAirports' coordinates, but no source says 'tip').",
+   "sources": [
+    {
+     "file": "upbu-sejarah",
+     "org": "Komodo Airport unit of the Directorate General of Civil Aviation (UPBU Komodo, hubud.kemenhub.go.id/upbu/komodo)",
+     "dated": "read 2026-09-23",
+     "quote": "Bandara ini terletak di Pulau Flores"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "located on the western tip of Flores Island in East Nusa Tenggara, Indonesia"
+    }
+   ]
+  },
+  {
+   "claim": "in East Nusa Tenggara province",
+   "verdict": "confirmed",
+   "inAfter": "in East Nusa Tenggara province",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": "Provinsi NUSA TENGGARA TIMUR"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "located on the western tip of Flores Island in East Nusa Tenggara, Indonesia"
+    }
+   ]
+  },
+  {
+   "claim": "Komodo National Park is the draw, and the airport is the main way in",
+   "verdict": "softened",
+   "inAfter": "Komodo National Park is the draw, and the airport is the main way in.",
+   "note": "Was 'this is the way in for almost everyone who goes'. CNBC (January 2025) calls Labuan Bajo the town considered the gateway to the park, reached from it by boat, but also says many international visitors have come by cruise ship, so 'almost everyone' is too strong. Wikipedia calls the airport the primary gateway to the park.",
+   "sources": [
+    {
+     "file": "cnbc-2025",
+     "org": "CNBC (cnbc.com)",
+     "dated": "2025-01-14",
+     "quote": [
+      "Published Tue, Jan 14 2025 11:05 PM EST",
+      "Labuan Bajo, the Indonesian town considered the \"gateway\" to Komodo National Park",
+      "The park, which is spread across several islands in Indonesia, is accessible from Labuan Bajo via boat.",
+      "with many international travelers opting to visit the area by cruise ship"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "the airport functions as the primary gateway to the park and other surrounding tourist destinations"
+    }
+   ]
+  },
+  {
+   "claim": "the name is a nod to the dragon itself",
+   "verdict": "confirmed",
+   "inAfter": "The name is a nod to the dragon itself",
+   "note": "The airport unit's history: in 1991, as the ancient animal the komodo became famous, the local government's proposal changed the name from Mutiara II to Komodo Airport.",
+   "sources": [
+    {
+     "file": "upbu-sejarah",
+     "org": "Komodo Airport unit of the Directorate General of Civil Aviation (UPBU Komodo, hubud.kemenhub.go.id/upbu/komodo)",
+     "dated": "read 2026-09-23",
+     "quote": "Pada tahun 1991 dengan mulai terkenalnya binatang purba yaitu komodo maka dengan usulan pemerintah setempat nama Pelabuahan Udara Mutiara II diganti menjadi Bandar Udara Komodo di Labuan Bajo sampai sekarang."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "Named after the Komodo dragon"
+    }
+   ]
+  },
+  {
+   "claim": "the giant lizard found in the wild nowhere else",
+   "verdict": "softened",
+   "inAfter": "the giant lizard found in the wild nowhere else",
+   "note": "Was 'the monitor lizard found nowhere else'. CNBC, citing UNESCO: the largest lizard species in the world, found in the wild only in Komodo National Park; Wikipedia: endemic to the park. 'Monitor' is not in the saved sources, so 'giant lizard'.",
+   "sources": [
+    {
+     "file": "cnbc-2025",
+     "org": "CNBC (cnbc.com)",
+     "dated": "2025-01-14",
+     "quote": [
+      "Komodo dragons, the largest species of lizard in the world, according to UNESCO",
+      "Komodo National Park is the only place where these lizards are found in the wild"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "an iconic species endemic to the nearby Komodo National Park"
+    }
+   ]
+  },
+  {
+   "claim": "once called Mutiara II",
+   "verdict": "confirmed",
+   "inAfter": "It was once called Mutiara II",
+   "note": "The airport unit's history: first named Mutiara II airport, opened in 1980, renamed Komodo in 1991. OurAirports also lists 'Mutiara II Airport' among its other names.",
+   "sources": [
+    {
+     "file": "upbu-sejarah",
+     "org": "Komodo Airport unit of the Directorate General of Civil Aviation (UPBU Komodo, hubud.kemenhub.go.id/upbu/komodo)",
+     "dated": "read 2026-09-23",
+     "quote": "Bandar Udara Komodo semula bernama Pelabuhan Udara Mutiara II yang diresmikan pada tahun 1980"
+    },
+    {
+     "file": "geo-labuanbajo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "keywords: Komodo Labuan Bajo International Airport, Mutiara II Airport, WRKO"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "formerly known as Mutiara II Airport"
+    }
+   ]
+  },
+  {
+   "claim": "became an international airport in 2024",
+   "verdict": "corrected",
+   "inAfter": "became an international airport in 2024",
+   "note": "Was 'the shift to international status reflects how quickly Labuan Bajo has grown as a destination', undated. detik (March 2025) gives the transport minister's decision, number 31 of 2024, dated 2 April 2024, as Wikipedia does; CNBC dates the first international flights (AirAsia from Kuala Lumpur) to 2024; the regulator's live page lists the airport's use as international.",
+   "sources": [
+    {
+     "file": "detik-4negara",
+     "org": "detikcom (detik.com/bali)",
+     "dated": "2025-03-19",
+     "quote": [
+      "Rabu, 19 Mar 2025 13:39 WIB",
+      "Penetapan itu melalui Keputusan Menteri Perhubungan (Kepmenhub) Nomor 31 Tahun 2024 tertanggal 2 April 2024."
+     ]
+    },
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": "Penggunaan Internasional"
+    },
+    {
+     "file": "cnbc-2025",
+     "org": "CNBC (cnbc.com)",
+     "dated": "2025-01-14",
+     "quote": "International flights to Labuan Bajo's airport, named \"Komodo International Airport,\" started in 2024, with the launch of AirAsia flights from Kuala Lumpur, Malaysia."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "On 2 April 2024, the Ministry of Transportation officially granted Komodo International Airport international status."
+    }
+   ]
+  },
+  {
+   "claim": "flights from Jakarta, Surabaya and Denpasar on Bali",
+   "verdict": "confirmed",
+   "inAfter": "Flights come in from Jakarta, Surabaya and Denpasar on Bali",
+   "note": "The regulator's live list names the airports: Soekarno-Hatta (Jakarta: Garuda Indonesia, Batik Air, Citilink, Indonesia AirAsia), Juanda (Surabaya: Super Air Jet) and I Gusti Ngurah Rai (Denpasar, Bali: Garuda Indonesia, Batik Air, Indonesia AirAsia).",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Daftar Rute Domestik",
+      "Soekarno Hatta Garuda Indonesia",
+      "Juanda Super Air Jet",
+      "I Gusti Ngurah Rai Garuda Indonesia"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "It now offers regular flights to major Indonesian cities such as Jakarta, Surabaya, and Denpasar (Bali)"
+    }
+   ]
+  },
+  {
+   "claim": "international flights from Kuala Lumpur and Singapore",
+   "verdict": "confirmed",
+   "inAfter": "There are also international flights from Kuala Lumpur and Singapore",
+   "note": "The regulator's live list: AirAsia to Kuala Lumpur (three a week) and Scoot to Singapore Changi (two a week). The Singapore route changed hands: Jetstar Asia flew it from 20 March 2025 until it stopped flying on 31 July 2025 (detik, 1 August 2025, with Scoot then in talks); Wikipedia says Scoot took it over.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Daftar Rute Internasional",
+      "Kuala Lumpur International Airport AirAsia Berhad",
+      "Changi International Airport Scoot"
+     ]
+    },
+    {
+     "file": "detik-scoot",
+     "org": "detikcom (detik.com/bali)",
+     "dated": "2025-08-01",
+     "quote": [
+      "Jumat, 01 Agu 2025 19:15 WIB",
+      "resmi ditutup pada 31 Juli 2025",
+      "Maskapai Scoot dikabarkan tertarik melayani rute Singapura-Labuan Bajo menggantikan Jetstar Asia Airways."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": [
+      "as well as international connections to Kuala Lumpur in Malaysia, and Singapore",
+      "the route was terminated on 31 July 2025 and subsequently taken over by Scoot"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "regional flights east to Bajawa, Ende and Maumere",
+   "verdict": "confirmed",
+   "inAfter": "Smaller regional flights head east to Bajawa, Ende and Maumere.",
+   "note": "Was 'connect onward across Flores to Bajawa, Ende and Maumere'. The regulator lists Wings Air ATR 72s to Soa (daily), H. Hasan Aroeboesman (daily) and Fransiskus Xaverius Seda (three a week); OurAirports names these Bajawa Soa, Ende and Frans Xavier Seda (Maumere) and puts all three east of Komodo Airport (131, 199 and 259 km, the same distances the regulator gives). 'Across Flores' rests on Wikipedia alone, so the direction is given instead.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "H. Hasan Aroeboesman Wings Air",
+      "Soa Wings Air",
+      "Fransiskus Xaverius Seda Wings Air"
+     ]
+    },
+    {
+     "file": "geo-labuanbajo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Bajawa Soa (Turelelo) Airport (OurAirports WATB, IATA BJW)",
+      "H. Hasan Aroeboesman (Ende) Airport (OurAirports WATE, IATA ENE), municipality Ende",
+      "keywords: WRKC, Fransiskus Xavierius Seda, Maumere, Wai Oti: 259.0 km from Komodo Airport, bearing 94 degrees, which is east"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "The airport also supports regional air travel within Flores, with services to towns including Bajawa, Ende, and Maumere."
+    }
+   ]
+  },
+  {
+   "claim": "Labuan Bajo is the capital of West Manggarai Regency",
+   "verdict": "confirmed",
+   "inAfter": "Labuan Bajo itself is the capital of West Manggarai Regency.",
+   "note": "GeoNames classes Labuan Bajo PPLA2, the seat of a second-order division (a regency), with admin2 code 5315; the regulator's own list of regencies gives code 53.15 as Kabupaten Manggarai Barat (West Manggarai), and its airport page places Labuan Bajo in that regency.",
+   "sources": [
+    {
+     "file": "geo-labuanbajo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "City centre: Labuan Bajo (GeoNames 1638868) at -8.4964, 119.8877, population 188,724; GeoNames class PPLA2, the seat of a second-order division; GeoNames admin1 18, admin2 5315"
+    },
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Kabupaten / Kota KABUPATEN MANGGARAI BARAT",
+      "Jl. Yohanes Sehadun, Labuan Bajo"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "the capital of West Manggarai Regency"
+    }
+   ]
+  },
+  {
+   "claim": "on the western tip of Flores",
+   "verdict": "cut",
+   "wasBefore": "sits on the western tip of Flores Island, in the East Nusa Tenggara province",
+   "why": "'Western tip' rests on Wikipedia alone. Softened to 'on the island of Flores' (see above)."
+  },
+  {
+   "claim": "it exists largely because of what lies offshore",
+   "verdict": "cut",
+   "wasBefore": "and it exists largely because of what lies offshore",
+   "why": "An inference with no source, and not quite right: the airport unit's history has it built in 1975 for small aircraft, opened in 1980 and renamed for the komodo in 1991 as the animal became famous."
+  },
+  {
+   "claim": "the way in for almost everyone who goes",
+   "verdict": "cut",
+   "wasBefore": "and this is the way in for almost everyone who goes",
+   "why": "Too strong: CNBC notes many international visitors have come by cruise ship. Softened to 'the main way in' (see above)."
+  },
+  {
+   "claim": "the monitor lizard found nowhere else",
+   "verdict": "cut",
+   "wasBefore": "the monitor lizard found nowhere else",
+   "why": "Reworded to what the sources say (see above)."
+  },
+  {
+   "claim": "most visitors arrive with boat trips, snorkelling and island hopping in mind",
+   "verdict": "cut",
+   "wasBefore": "though most visitors arrive with boat trips, snorkelling and island hopping in mind as much as reptiles",
+   "why": "A generalisation about visitors with no source. CNBC alone says the park is reached by boat from Labuan Bajo and that the town is popular with divers; UNESCO's page answered with a Cloudflare check and Kompas's with a robot check, and neither was tried again."
+  },
+  {
+   "claim": "international status reflects how quickly Labuan Bajo has grown",
+   "verdict": "cut",
+   "wasBefore": "and the shift to international status reflects how quickly Labuan Bajo has grown as a destination",
+   "why": "An inference; the fact of international status, dated to 2024, is kept (see above)."
+  },
+  {
+   "claim": "Denpasar is the usual hop on a two centre trip",
+   "verdict": "cut",
+   "wasBefore": "which is the usual hop for anyone already on a two centre trip",
+   "why": "'Usual' is unsourced; softened to advice, 'the easy hop on a two centre trip' (see opinion)."
+  },
+  {
+   "claim": "international services from Kuala Lumpur and Singapore",
+   "verdict": "cut",
+   "wasBefore": "There are also international services from Kuala Lumpur and Singapore",
+   "why": "Reworded to 'international flights'; confirmed (see above)."
+  },
+  {
+   "claim": "regional flights across Flores; suits travellers heading east overland",
+   "verdict": "cut",
+   "wasBefore": "Smaller regional flights connect onward across Flores to Bajawa, Ende and Maumere, which suits travellers heading east overland.",
+   "why": "The towns are kept (see above); 'across Flores' rests on Wikipedia alone and the overland advice is the old text's own, so both go."
+  },
+  {
+   "claim": "a working harbour town, a base for boat charters and dive operators",
+   "verdict": "cut",
+   "wasBefore": ", a working harbour town that has taken on a second life as a base for boat charters and dive operators",
+   "why": "One source only: CNBC says the park is reached by boat from Labuan Bajo and that the town is popular with divers. Three tries for a second source failed (UNESCO: Cloudflare check; Kompas: robot check; detik's August 2025 route report does not mention it). Worth restoring when a second source can be read.",
+   "sources": [
+    {
+     "file": "cnbc-2025",
+     "org": "CNBC (cnbc.com)",
+     "dated": "2025-01-14",
+     "quote": [
+      "The park, which is spread across several islands in Indonesia, is accessible from Labuan Bajo via boat.",
+      "Popular with divers, Labuan Bajo was named one of 10 New Balis in 2016"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "volcanic ash closure in November 2024",
+   "verdict": "cut",
+   "why": "Held back: ash from Mount Lewotobi Laki-laki, in East Flores, closed the airport from 9 November 2024 (detik; Wikipedia), with flights normal again from 17 November by detik's account, while Wikipedia gives the closure as 9 to 19 November. The FCDO's general Indonesia advice says ash clouds can affect flight schedules and regional airports. It replaces nothing in the old text; a line such as 'volcanic ash on Flores can close the airport, as it did for over a week in November 2024' would need Andy's say-so.",
+   "sources": [
+    {
+     "file": "detik-reopen-2024",
+     "org": "detikcom (travel.detik.com)",
+     "dated": "2024-11-19",
+     "quote": [
+      "Selasa, 19 Nov 2024 18:35 WIB",
+      "Bandara ini tutup sejak 9 November 2024 akibat terdampak erupsi Gunung Lewotobi Laki-laki di Flores Timur, NTT.",
+      "Mulai Minggu (17/11/2024) hingga hari ini, aktivitas penerbangan sudah normal kembali."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "Between 9 and 19 November 2024, Komodo International Airport was temporarily closed due to the eruption of Mount Lewotobi."
+    },
+    {
+     "file": "fcdo-safety",
+     "org": "FCDO (gov.uk foreign travel advice, Indonesia: safety and security)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Ash clouds can affect flight schedules and the operation of regional airports. Check with your airline or travel company for the latest information."
+    }
+   ]
+  },
+  {
+   "claim": "who runs the airport (sources disagree)",
+   "verdict": "cut",
+   "why": "Held back, for Andy: Wikipedia's infobox names Cardig Aero Services as operator (the 2020 partnership tender won with Changi Airports International), but the regulator's live page lists the airport as run by its own unit (UPT Ditjen Hubud, class II), and detik (August 2025) quotes the head of that unit, UPBU Komodo, on the Singapore route. The old text names no operator, so nothing changes in the text.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Kelas Kelas II",
+      "Pengelola UPT Ditjen Hubud"
+     ]
+    },
+    {
+     "file": "detik-scoot",
+     "org": "detikcom (detik.com/bali)",
+     "dated": "2025-08-01",
+     "quote": "Kepala Kantor Unit Penyelenggara Bandar Udara (UPBU) Komodo Ceppy Triono"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "In 2020, Indonesia's publicly listed air transportation services company PT Cardig Aero Service (CAS Group), in partnership with Changi Airports International (CAI)"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "the easy hop on a two centre trip",
+   "why": "Advice kept from the old text ('the usual hop'), softened; it follows from the Denpasar flights (sourced)."
+  },
+  {
+   "text": "useful for clients who want to skip Bali altogether",
+   "why": "The old text's advice; it follows from the direct Kuala Lumpur and Singapore flights (sourced)."
+  }
+ ],
+ "tracerOk": {}
+}

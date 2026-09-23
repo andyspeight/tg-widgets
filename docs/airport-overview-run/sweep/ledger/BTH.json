@@ -1,0 +1,437 @@
+{
+ "iata": "BTH",
+ "id": "recuV04J4SW6gQGAP",
+ "name": "Hang Nadim International Airport",
+ "country": "Indonesia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Hang_Nadim_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Batam's airport, in the Riau Islands, and the main way in and out of the island alongside the ferries. Singapore is about 30 km to the north.\n\nThe runway is the striking thing. At 4,025 metres it is the largest in Indonesia and second longest in Southeast Asia, and it takes 747s, 777s and the A380. That is because it was developed to handle aircraft diverting from Singapore Changi in emergencies or bad weather, not because of its own traffic. The site covers 1,800 hectares of which only about 40 per cent is normally in use.\n\nIt has run 24 hours a day since May 2014 and is second busiest in Sumatra after Medan, with flights to Jakarta, Surabaya, Medan and Balikpapan, international services to Malaysia and seasonal Hajj flights.\n\nLion Air has built up a base here partly because Jakarta's Soekarno-Hatta is so congested.\n\nThe airport shares its facilities with an Indonesian Air Force base and has a growing aircraft maintenance operation.",
+ "after": "Batam's airport, in the Riau Islands. Singapore Changi Airport is about 30 km to the north west.\n\nThe runway is the striking thing. At 4,025 metres it is the longest in Indonesia, and it takes wide bodies up to a Boeing 747. Singapore-bound flights divert here when the weather at Changi is bad.\n\nFlights run to Jakarta, Surabaya, Medan and Balikpapan. International flights go to Malaysia and South Korea.\n\nIt also has a growing aircraft maintenance operation, run by the Lion Air group's Batam Aero Technic.",
+ "claims": [
+  {
+   "claim": "Batam's airport, in the Riau Islands",
+   "verdict": "confirmed",
+   "inAfter": "Batam's airport, in the Riau Islands.",
+   "note": "The regulator places it at Batu Besar, Nongsa, in the city of Batam, Riau Islands province (Kepulauan Riau).",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Nama Bandar Udara Hang Nadim",
+      "Provinsi KEPULAUAN RIAU",
+      "Kabupaten / Kota KOTA BATAM"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "is an international airport located in Batam, the largest city in Riau Islands province, Indonesia"
+    }
+   ]
+  },
+  {
+   "claim": "Singapore Changi Airport is about 30 km to the north west",
+   "verdict": "corrected",
+   "inAfter": "Singapore Changi Airport is about 30 km to the north west.",
+   "note": "Was 'Singapore is about 30 km to the north'. The 30 km is Wikipedia's distance to Changi Airport, and both coordinate sets agree: 29.0 km at 331 degrees (OurAirports) and 30.1 km at 332 degrees (Wikipedia's coordinates), which is north west on the eight-point compass. The coordinates check had measured the figure from Batam's centre, which it does not describe.",
+   "sources": [
+    {
+     "file": "geo-airports",
+     "org": "OurAirports (computed)",
+     "quote": "Straight-line distance from Hang Nadim International Airport to Singapore Changi Airport (OurAirports WSSS): 29.0 km, bearing 331 degrees, which is north west"
+    },
+    {
+     "file": "wikipedia-coords",
+     "org": "Wikimedia (computed from the article coordinates)",
+     "quote": "Straight-line distance from Hang Nadim International Airport to Changi Airport, from the Wikipedia coordinates: 30.1 km, bearing 332 degrees, which is north west"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "Singapore Changi Airport located approximately 30 kilometres (19 miles) away"
+    }
+   ]
+  },
+  {
+   "claim": "at 4,025 metres the runway is the longest in Indonesia",
+   "verdict": "confirmed",
+   "inAfter": "At 4,025 metres it is the longest in Indonesia",
+   "note": "The regulator verifies the runway at 4,025 by 45 m (OurAirports rounds it to 4,029 m). On OurAirports' runway data for every Indonesian airport with scheduled flights it is the longest, ahead of Kualanamu (3,750 m) and Soekarno-Hatta (3,660 m). Wikipedia's 'largest runway' means longest.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": "Dimensi Terverifikasi 4.025,00 x 45,00 m"
+    },
+    {
+     "file": "ourairports-id-runways",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "WIDD ID Hang Nadim International Airport 04/22 13218 ft 4029 m ASP",
+      "WIMM ID Kualanamu International Airport 05/23 12303 ft 3750 m asphalt/concrete"
+     ]
+    },
+    {
+     "file": "antara-en-divert",
+     "org": "Antara (national news agency, en.antaranews.com)",
+     "dated": "2013-07-26",
+     "quote": "Hang Nadim Airport has a 4.025 km runway"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": [
+      "The airport has the largest runway in Indonesia",
+      "The airport has a single runway measuring 4,025 x 45 meters"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "it takes wide bodies up to a Boeing 747",
+   "verdict": "softened",
+   "inAfter": "it takes wide bodies up to a Boeing 747",
+   "note": "Was 'it takes 747s, 777s and the A380'. The regulator's critical aircraft, the largest type the airport is designed for, is the Boeing 747-400, and it classes the airport 4E, the code for 747-size aircraft. The A380 is a larger code F type, so it is cut; the 777 rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Critical Aircraft BOEING 747-400",
+      "Klasifikasi 4E"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "capable of accommodating wide-body aircraft such as the Boeing 747 and Airbus A380"
+    }
+   ]
+  },
+  {
+   "claim": "Singapore-bound flights divert here when the weather at Changi is bad",
+   "verdict": "softened",
+   "inAfter": "Singapore-bound flights divert here when the weather at Changi is bad.",
+   "note": "Was 'That is because it was developed to handle aircraft diverting from Singapore Changi in emergencies or bad weather, not because of its own traffic.' Antara (July 2013) reports two Singapore-bound aircraft diverting here in heavy rain at Changi and quotes the airport: when Changi's weather is bad, many planes divert to Hang Nadim. The claim that the runway was built for that purpose rests on Wikipedia's lead alone, and Wikipedia's own history says the runway was extended in anticipation of an international hub (see the cuts).",
+   "sources": [
+    {
+     "file": "antara-en-divert",
+     "org": "Antara (national news agency, en.antaranews.com)",
+     "dated": "2013-07-26",
+     "quote": [
+      "July 26, 2013 23:30 GMT+700",
+      "Two Singapore-bound Airbus planes diverted their flights to Hang Nadim Airport in Batam island as heavy rains fell in Changi Airport on Friday, a spokesman said.",
+      "Normally if weather at Changi Airport is bad, many planes will divert their fights to Hang Nadim Airport"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "to handle diversions of aircraft from Singapore Changi Airport located approximately 30 kilometres (19 miles) away in the case of emergencies or inclement weather"
+    }
+   ]
+  },
+  {
+   "claim": "flights run to Jakarta, Surabaya, Medan and Balikpapan",
+   "verdict": "confirmed",
+   "inAfter": "Flights run to Jakarta, Surabaya, Medan and Balikpapan.",
+   "note": "The regulator's live route list names the airports: Soekarno-Hatta (Jakarta), Juanda (Surabaya), Kualanamu (Medan) and Sultan Aji Muhammad Sulaiman (Balikpapan), among about 30 domestic routes.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Daftar Rute Domestik",
+      "Soekarno Hatta Garuda Indonesia",
+      "Juanda Lion Air",
+      "Kualanamu Internasional Citilink",
+      "Sultan Aji Muhammad Sulaiman Lion Air"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "is served by flights to major Indonesian cities such as Jakarta, Surabaya, Medan, and Balikpapan"
+    }
+   ]
+  },
+  {
+   "claim": "international flights go to Malaysia and South Korea",
+   "verdict": "corrected",
+   "inAfter": "International flights go to Malaysia and South Korea.",
+   "note": "Was 'international services to Malaysia'. The regulator's live list has Batik Air to Kuala Lumpur and to Subang (Sultan Abdul Aziz Shah) and Jeju Air to Seoul Incheon, four a week. Batam Pos (July 2025) quotes the operator's chief executive: Jeju Air's flights to South Korea began in October 2024, followed by Kuala Lumpur early in 2025. (The list also has an entry 'Sydney International Airport, Batik Air Malaysia, ATR 72, daily', which cannot be right for an ATR 72 and is not used.)",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Daftar Rute Internasional",
+      "Kuala Lumpur International Airport Batik Air",
+      "Sultan Abdul Aziz Shah Batik Air",
+      "Incheon International Airport Jeju Air"
+     ]
+    },
+    {
+     "file": "batampos-t2",
+     "org": "Batam Pos (metropolis.batampos.co.id)",
+     "dated": "2025-07-12",
+     "quote": [
+      "Sabtu, 12 Jul 2025 - 18:50 WIB",
+      "Sejak Oktober 2024, penerbangan Jeju Air ke Korea Selatan sudah dibuka, disusul rute Kuala Lumpur pada awal 2025."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "It also offers international services to Malaysia"
+    }
+   ]
+  },
+  {
+   "claim": "a growing aircraft maintenance operation, run by the Lion Air group's Batam Aero Technic",
+   "verdict": "confirmed",
+   "inAfter": "It also has a growing aircraft maintenance operation, run by the Lion Air group's Batam Aero Technic.",
+   "note": "Was 'has a growing aircraft maintenance operation'; now names who runs it. detik (20 November 2025): the civil aviation director general opened Hangar F of Batam Aero Technic, owned by the Lion Group, in Batam on 19 November 2025 (its seventh hangar, in detik's related headline). Wikipedia: the Lion Air Group set up Batam Aero Technic in 2014 and built its maintenance facilities at the airport, which is 'gradually transforming into a hub for aircraft maintenance'.",
+   "sources": [
+    {
+     "file": "detik-mro",
+     "org": "detikcom (travel.detik.com)",
+     "dated": "2025-11-20",
+     "quote": [
+      "Kamis, 20 Nov 2025 11:44 WIB",
+      "peresmian Hangar F Batam Aero Technic milik Lion Group, di Batam, Rabu (19/11/2025)",
+      "Lion Group Resmikan Hangar Ketujuh Batam Aero Technic"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": [
+      "The airport also has an aircraft maintenance facility which is gradually transforming into a hub for aircraft maintenance.",
+      "In 2014, the Lion Air Group established its subsidiary, Batam Aero Technic (BAT), which invested in Hang Nadim International Airport through the development of Maintenance, Repair, and Overhaul (MRO) facilities."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the main way in and out of the island alongside the ferries",
+   "verdict": "cut",
+   "wasBefore": "and the main way in and out of the island alongside the ferries",
+   "why": "Wikipedia alone. The FCDO's Indonesia entry page says nothing about Batam, and no other readable source makes the comparison with the ferries."
+  },
+  {
+   "claim": "Singapore is about 30 km to the north",
+   "verdict": "cut",
+   "wasBefore": "Singapore is about 30 km to the north.",
+   "why": "The 30 km is the distance to Changi Airport, which lies north west. Corrected (see above)."
+  },
+  {
+   "claim": "the largest (longest) runway in Indonesia and second longest in Southeast Asia",
+   "verdict": "cut",
+   "wasBefore": "and second longest in Southeast Asia",
+   "why": "Contradicted by OurAirports' runway data for South East Asian airports with scheduled flights: Mandalay (4,268 m) and Kuala Lumpur (4,124 m and 4,050 m) are longer, so Hang Nadim's is the third longest airport runway, not the second. The Indonesian ranking is kept (see above).",
+   "sources": [
+    {
+     "file": "ourairports-sea-runways",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "VYMD MM Mandalay International Airport 17/35 14003 ft 4268 m CON",
+      "WMKK MY Kuala Lumpur International Airport 14L/32R 13530 ft 4124 m PEM",
+      "WMKK MY Kuala Lumpur International Airport 14R/32L 13288 ft 4050 m PEM",
+      "WIDD ID Hang Nadim International Airport 04/22 13218 ft 4029 m ASP"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "the second-longest in Southeast Asia"
+    }
+   ]
+  },
+  {
+   "claim": "takes 777s and the A380",
+   "verdict": "cut",
+   "wasBefore": "and it takes 747s, 777s and the A380",
+   "why": "The A380 is disputed: the regulator's critical aircraft is the 747-400 and its 4E class is for 747-size aircraft, while the A380 is code F; the 777 rests on Wikipedia alone. Softened to 'wide bodies up to a Boeing 747' (see above).",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Critical Aircraft BOEING 747-400",
+      "Klasifikasi 4E"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "developed to handle diversions from Changi, not because of its own traffic",
+   "verdict": "cut",
+   "wasBefore": "That is because it was developed to handle aircraft diverting from Singapore Changi in emergencies or bad weather, not because of its own traffic.",
+   "why": "The reason for the runway's length rests on Wikipedia's lead alone, and Wikipedia's own history says the runway was extended in anticipation of an international hub. The diversions themselves are kept (see above).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "The runway was further extended to 3,600 x 45 meters, a move made in anticipation of Hang Nadim becoming an international hub."
+    }
+   ]
+  },
+  {
+   "claim": "1,800 hectares, only about 40 per cent normally in use",
+   "verdict": "cut",
+   "wasBefore": "The site covers 1,800 hectares of which only about 40 per cent is normally in use.",
+   "why": "Wikipedia alone. Its source, BP Batam's airport page, answered with an upstream connection timeout (503) and its archived copy is in the web archive, which the network policy blocks."
+  },
+  {
+   "claim": "has run 24 hours a day since May 2014",
+   "verdict": "cut",
+   "wasBefore": "It has run 24 hours a day since May 2014",
+   "why": "The start is confirmed as a plan (The Jakarta Post, 22 May 2014: round the clock from the end of May) and by Wikipedia, but no source from the last 12 months says the airport still runs 24 hours a day: the regulator's page gives no hours and the operator's site refused plain requests (429). Left out rather than stated as current.",
+   "sources": [
+    {
+     "file": "jakpost-2014",
+     "org": "The Jakarta Post (thejakartapost.com)",
+     "dated": "2014-05-22",
+     "quote": [
+      "Published on May. 22, 2014",
+      "We will start operating 24 hours a day by the end of May."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "By the end of May 2014, it was the sixth airport in Indonesia to operate 24 hours a day."
+    }
+   ]
+  },
+  {
+   "claim": "second busiest in Sumatra after Medan",
+   "verdict": "cut",
+   "wasBefore": "and is second busiest in Sumatra after Medan",
+   "why": "No ranking from the last 12 months could be read: Statistics Indonesia refused the Surabaya helper's requests, and the regulator's 2025 counts on its airport pages are not full-year totals. Wikipedia alone. The traffic figures that exist disagree (see the held-back note)."
+  },
+  {
+   "claim": "international services to Malaysia",
+   "verdict": "cut",
+   "wasBefore": "international services to Malaysia and seasonal Hajj flights",
+   "why": "Malaysia is kept and South Korea added (see above)."
+  },
+  {
+   "claim": "seasonal Hajj flights",
+   "verdict": "cut",
+   "wasBefore": "and seasonal Hajj flights",
+   "why": "No source from the last 12 months: the operator's own hajj release is for 2023 (its site then refused plain requests, 429), Batam Pos (July 2025) mentions direct umrah flights to Jeddah, not hajj, and the regulator's live list of scheduled international routes has no Jeddah route.",
+   "sources": [
+    {
+     "file": "batampos-t2",
+     "org": "Batam Pos (metropolis.batampos.co.id)",
+     "dated": "2025-07-12",
+     "quote": "Bahkan, penerbangan langsung umrah ke Jeddah juga sudah mulai berjalan dari Bandara Hang Nadim."
+    }
+   ]
+  },
+  {
+   "claim": "Lion Air has built up a base here, partly because Soekarno-Hatta is congested",
+   "verdict": "cut",
+   "wasBefore": "Lion Air has built up a base here partly because Jakarta's Soekarno-Hatta is so congested.",
+   "why": "The flying base and its reason rest on Wikipedia alone (Lion Air's release on Kontan's press-release site answered a CloudFront 'Request blocked' 403). What two sources do confirm is the Lion Air group's maintenance base, Batam Aero Technic, which is kept (see above).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "Lion Air has developed a base at the airport as Soekarno–Hatta International Airport is severely congested."
+    }
+   ]
+  },
+  {
+   "claim": "shares its facilities with an Indonesian Air Force base",
+   "verdict": "cut",
+   "wasBefore": "The airport shares its facilities with an Indonesian Air Force base and has a growing aircraft maintenance operation.",
+   "why": "The Air Force base (Lanud Hang Nadim) rests on Wikipedia alone: its source, RRI's report, answered with a Cloudflare check and was not tried again. The maintenance operation is kept (see above).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "Hang Nadim International Airport also share its facility with Hang Nadim Air Force Base"
+    }
+   ]
+  },
+  {
+   "claim": "operator, Terminal 1 renovation and Terminal 2 plan",
+   "verdict": "cut",
+   "why": "Held back: the airport is run under a public-private partnership by PT Bandara Internasional Batam (the operator's own site), the consortium Wikipedia describes as Angkasa Pura I, Incheon International Airport Corporation and Wijaya Karya (awarded March 2021, 25 years). Batam Pos (12 July 2025) quotes its chief executive: Terminal 1 has been fully renovated and a Terminal 2 for up to 10 million passengers is planned for 2026. It replaces nothing in the old text, and the Terminal 2 date has no source from the last 12 months.",
+   "sources": [
+    {
+     "file": "op-profil",
+     "org": "PT Bandara Internasional Batam (the operator, bthairport.com)",
+     "dated": "read 2026-09-23",
+     "quote": "PT Bandara Internasional Batam sah terbentuk berdasarkan Keputusan Menteri Hukum dan Hak Asasi Manusia"
+    },
+    {
+     "file": "batampos-t2",
+     "org": "Batam Pos (metropolis.batampos.co.id)",
+     "dated": "2025-07-12",
+     "quote": [
+      "Pembangunan Terminal 2 Bandara Internasional Hang Nadim Batam direncanakan dibangun pada tahun 2026 mendatang.",
+      "saat ini BIB telah menyelesaikan renovasi besar-besaran pada Terminal 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "In March 2021, a PPP for the expansion of the airport was awarded to a consortium of Angkasa Pura I, Incheon International Airport Corporation and state-owned construction company PT Wijaya Karya."
+    }
+   ]
+  },
+  {
+   "claim": "annual traffic (disputed)",
+   "verdict": "cut",
+   "why": "Held back, and the sources disagree: Wikipedia's infobox gives 4,173,425 passengers for 2024 from the regulator, while the operator's chief executive told Batam Pos in July 2025 that traffic was only 3.8 to 3.9 million a year, below 2019's 4.2 million. No figure is given.",
+   "sources": [
+    {
+     "file": "batampos-t2",
+     "org": "Batam Pos (metropolis.batampos.co.id)",
+     "dated": "2025-07-12",
+     "quote": "Saat ini, trafik Bandara Hang Nadim baru menyentuh angka 3,8 hingga 3,9 juta penumpang per tahun, di bawah capaian 2019 yang sempat mencapai 4,2 juta."
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-07",
+     "quote": "stat1_data = 4,173,425"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The runway is the striking thing.",
+   "why": "The old text's framing, kept; the runway facts that follow are sourced."
+  }
+ ],
+ "tracerOk": {
+  "South Korea": "Batam Pos gives the country in Indonesian ('Korea Selatan'); the regulator lists Incheon International Airport."
+ }
+}

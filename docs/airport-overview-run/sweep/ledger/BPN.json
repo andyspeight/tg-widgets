@@ -1,0 +1,556 @@
+{
+ "iata": "BPN",
+ "id": "recqoGSeAi5D3pNbO",
+ "name": "Sultan Aji Muhammad Sulaiman Sepinggan International Airport",
+ "country": "Indonesia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Sultan_Aji_Muhammad_Sulaiman_Sepinggan_Airport",
+ "audited": "2026-09-23",
+ "before": "The main airport for Balikpapan and the largest in East Kalimantan, on the Indonesian side of Borneo. It flies domestically to Jakarta, Surabaya and Denpasar, and internationally to Singapore, Malaysia and Brunei.\n\nIts importance is about to grow. The airport is set to become one of the main gateways to Nusantara, Indonesia's new capital city, connected to it by a toll road.\n\nThe terminal is a good one. Opened in September 2014 and covering 110,000 square metres, it was built for 10 million passengers a year to replace an old building rated for just 1.7 million that was handling 7.1 million. It is branded an eco-airport, with a water recycling plant and energy efficient air conditioning, and has 11 jet bridges, 74 check-in counters and 8 baggage carousels. Airports Council International named it the second best airport in the world for service quality in its size band in 2018.\n\nOne thing to warn a nervous flyer about: the single runway extends into a densely built up area, and landings here are often described as dramatic and demanding.\n\nIt is still widely called Sepinggan Airport.",
+ "after": "The main airport for Balikpapan and East Kalimantan. Flights run to Jakarta, Surabaya and Denpasar. International flights go to Singapore and Kuala Lumpur.\n\nThe airport puts its growing traffic down to Balikpapan's place as the main way into Nusantara, the new capital being built in East Kalimantan.\n\nIts terminal dates from 2014, built for 10 million passengers a year to replace an old building rated for just 1.7 million that handled 7.1 million in 2013. Designed as an eco-airport, it opened with 11 jet bridges, 74 check-in counters and 8 baggage carousels. Airports Council International placed it second in the world for service among airports handling 5 to 15 million passengers a year, in awards for 2017 presented in 2018.\n\nIt is still widely called Sepinggan Airport.",
+ "claims": [
+  {
+   "claim": "the main airport for Balikpapan and East Kalimantan",
+   "verdict": "softened",
+   "inAfter": "The main airport for Balikpapan and East Kalimantan.",
+   "note": "Was 'The main airport for Balikpapan and the largest in East Kalimantan'. The operator (July 2026) calls it the main gateway airport for East Kalimantan ('bandara pintu gerbang utama menuju Kalimantan Timur') and the regulator places it in the city of Balikpapan. 'Largest' has no second source from the last 12 months (detik's 2014 advertorial called it the largest in eastern Indonesia; detik in 2025 says only that it is Kalimantan's one international airport), so it becomes 'main'.",
+   "sources": [
+    {
+     "file": "op-semester1-2026",
+     "org": "Sultan Aji Muhammad Sulaiman Sepinggan International Airport (PT Angkasa Pura Indonesia, the operator, sepinggan-airport.com)",
+     "dated": "2026-07-10",
+     "quote": [
+      "BALIKPAPAN, 10 Juli 2026",
+      "bandara pintu gerbang utama menuju Kalimantan Timur"
+     ]
+    },
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Provinsi KALIMANTAN TIMUR",
+      "Kabupaten / Kota KOTA BALIKPAPAN"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": [
+      "is an international airport serving the city of Balikpapan and adjacent areas of East Kalimantan",
+      "it serves as the primary gateway to Balikpapan and East Kalimantan"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "flights run to Jakarta, Surabaya and Denpasar",
+   "verdict": "confirmed",
+   "inAfter": "Flights run to Jakarta, Surabaya and Denpasar.",
+   "note": "The regulator's live route list names airports, not cities: Soekarno-Hatta (Jakarta; Garuda Indonesia, Lion Air, Citilink, Batik Air, Pelita Air, Super Air Jet), Juanda (Surabaya; Lion Air, Citilink, Super Air Jet, Pelita Air) and I Gusti Ngurah Rai (Denpasar, Bali; Citilink, Lion Air, Indonesia AirAsia). detik (September 2025) names Jakarta and Bali among the routes.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Daftar Rute Domestik",
+      "Soekarno Hatta Garuda Indonesia",
+      "Juanda Lion Air",
+      "I Gusti Ngurah Rai Citilink"
+     ]
+    },
+    {
+     "file": "detik-menilik",
+     "org": "detikcom (detik.com/kalimantan)",
+     "dated": "2025-09-21",
+     "quote": "Rute dari bandara cukup banyak, mulai dari Batam, Jakarta, Yogyakarta, Solo, Bali, Lombok, dan Sulawesi."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "offering regular domestic flights to major Indonesian cities such as Jakarta, Surabaya, and Denpasar"
+    }
+   ]
+  },
+  {
+   "claim": "international flights go to Singapore and Kuala Lumpur",
+   "verdict": "corrected",
+   "inAfter": "International flights go to Singapore and Kuala Lumpur.",
+   "note": "Was 'internationally to Singapore, Malaysia and Brunei'. The regulator's live list (read 23 September 2026) has three international routes: Kuala Lumpur (AirAsia, three a week; Malaysia Airlines, two a week) and Singapore Changi (Scoot, four a week). Kaltim Post (August 2024) quotes the airport listing the same three when Malaysia Airlines started. Brunei is cut (below).",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Daftar Rute Internasional",
+      "Kuala Lumpur International Airport AirAsia Berhad",
+      "Changi International Airport Scoot",
+      "Kuala Lumpur International Airport Malaysia Airlines"
+     ]
+    },
+    {
+     "file": "kaltimpost-mas",
+     "org": "Kaltim Post (kaltimpost.jawapos.com)",
+     "dated": "2024-08-13",
+     "quote": [
+      "Dipublikasikan Selasa, 13 Ags 2024 | 18:06 WIB",
+      "Khususnya rute Kuala Lumpur – Balikpapan – Kuala Lumpur.",
+      "saat ini rute penerbangan internasional sudah ada dari Scoot dengan rute Singapura – Balikpapan dan Air Asia rute Kuala Lumpur – Balikpapan"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "along with international routes to Singapore, Malaysia, and Brunei"
+    }
+   ]
+  },
+  {
+   "claim": "the airport puts its growing traffic down to Balikpapan's place as the main way into Nusantara",
+   "verdict": "softened",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport puts its growing traffic down to Balikpapan's place as the main way into Nusantara",
+   "note": "Replaces 'Its importance is about to grow. The airport is set to become one of the main gateways to Nusantara' (Wikipedia's forward-looking line; see the cuts). The airport's general manager, in its release of 10 July 2026 on first-half traffic, says the rise in passengers and freight owes much to Balikpapan's strategic position as the main 'beranda' (front porch, the way in) of the Nusantara capital, which brings official, business and leisure trips. Attributed to the airport, whose own page it is.",
+   "sources": [
+    {
+     "file": "op-semester1-2026",
+     "org": "Sultan Aji Muhammad Sulaiman Sepinggan International Airport (PT Angkasa Pura Indonesia, the operator, sepinggan-airport.com)",
+     "dated": "2026-07-10",
+     "quote": [
+      "BALIKPAPAN, 10 Juli 2026",
+      "Peningkatan arus penumpang dan barang ini tidak lepas dari posisi strategis Kota Balikpapan sebagai beranda utama Ibu Kota Nusantara yang memicu tingginya intensitas perjalanan dinas, bisnis, maupun wisata"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Nusantara, the new capital being built in East Kalimantan",
+   "verdict": "confirmed",
+   "inAfter": "Nusantara, the new capital being built in East Kalimantan.",
+   "note": "The old text called it 'Indonesia's new capital city'. detik (September 2025) places Nusantara's zero point in East Kalimantan and says the site is being worked on for the planned move of the capital, so 'being built' is used. The operator's July 2026 release calls it the Nusantara capital (Ibu Kota Nusantara).",
+   "sources": [
+    {
+     "file": "detik-menilik",
+     "org": "detikcom (detik.com/kalimantan)",
+     "dated": "2025-09-21",
+     "quote": [
+      "Kalimantan Timur (Kaltim) juga dikenal karena menjadi lokasi Titik Nol Nusantara, ikon dari Ibu Kota Nusantara (IKN)",
+      "Lokasi IKN sedang digarap untuk wacana pindah ibu kota."
+     ]
+    },
+    {
+     "file": "op-semester1-2026",
+     "org": "Sultan Aji Muhammad Sulaiman Sepinggan International Airport (PT Angkasa Pura Indonesia, the operator, sepinggan-airport.com)",
+     "dated": "2026-07-10",
+     "quote": "beranda utama Ibu Kota Nusantara"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "With the development of Nusantara—Indonesia’s new capital city located near Balikpapan"
+    }
+   ]
+  },
+  {
+   "claim": "the terminal opened in 2014",
+   "verdict": "corrected",
+   "inAfter": "Its terminal dates from 2014",
+   "note": "Was 'Opened in September 2014'. The operator put the new terminal into use on 22 March 2014 (its advertorial of that day); Wikipedia has operations from 23 March 2014 and the official inauguration by the president in September 2014, which it dates both 15 and 16 September. So only the year is given.",
+   "sources": [
+    {
+     "file": "detik-2014",
+     "org": "PT Angkasa Pura I, then the operator (paid advertorial on news.detik.com)",
+     "dated": "2014-03-22",
+     "quote": [
+      "Sabtu, 22 Mar 2014 01:00 WIB",
+      "PT Angkasa Pura I (Persero) secara resmi mengumumkan penggunaan terminal baru Bandara Internasional Sepinggan Balikpapan pada hari ini, Sabtu, 22 Maret 2014."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": [
+      "The new terminal began operations on 23 March 2014 and was officially inaugurated by then-president Susilo Bambang Yudhoyono on 16 September 2014.",
+      "Officially opened on 15 September 2014"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "built for 10 million passengers a year",
+   "verdict": "confirmed",
+   "inAfter": "built for 10 million passengers a year",
+   "note": "The regulator's live page now splits the capacity between a domestic terminal (8,265,920 a year) and an international one (2,967,341), about 11.2 million in all; the text keeps the design figure as a fact about the building as built.",
+   "sources": [
+    {
+     "file": "detik-2014",
+     "org": "PT Angkasa Pura I, then the operator (paid advertorial on news.detik.com)",
+     "dated": "2014-03-22",
+     "quote": "Terminal seluas 110.000 m 2 dengan kapasitas 10 juta penumpang per tahun"
+    },
+    {
+     "file": "republika-2018",
+     "org": "Republika (republika.co.id)",
+     "dated": "2018-09-14",
+     "quote": "Farid said currently Sepinggan airport has an annual handling capacity of 10 million passengers."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "Designed to accommodate up to 10 million passengers annually"
+    }
+   ]
+  },
+  {
+   "claim": "to replace an old building rated for just 1.7 million that handled 7.1 million in 2013",
+   "verdict": "confirmed",
+   "inAfter": "to replace an old building rated for just 1.7 million that handled 7.1 million in 2013",
+   "note": "Both sources give the year of the 7.1 million, 2013, which the text now states.",
+   "sources": [
+    {
+     "file": "detik-2014",
+     "org": "PT Angkasa Pura I, then the operator (paid advertorial on news.detik.com)",
+     "dated": "2014-03-22",
+     "quote": "Dengan kapasitas hanya 1,7 juta penumpang per tahun, bandara kebanggaan masyarakat Kalimantan Timur ini telah melayani 7,1 juta penumpang di tahun 2013"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": [
+      "7.1 million passengers used the airport in 2013",
+      "far exceeding the old terminal's capacity of just 1.7 million"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "designed as an eco-airport",
+   "verdict": "confirmed",
+   "inAfter": "Designed as an eco-airport",
+   "note": "Was 'It is branded an eco-airport'. The operator's 2014 advertorial calls the concept an eco-airport; detik (2025) says the terminal was built to an eco green building concept.",
+   "sources": [
+    {
+     "file": "detik-2014",
+     "org": "PT Angkasa Pura I, then the operator (paid advertorial on news.detik.com)",
+     "dated": "2014-03-22",
+     "quote": "Bandara ini mengusung konsep eco-airport"
+    },
+    {
+     "file": "detik-menilik",
+     "org": "detikcom (detik.com/kalimantan)",
+     "dated": "2025-09-21",
+     "quote": "Terminal bandara dibangun dengan konsep eco green building"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "Branded as an eco-airport"
+    }
+   ]
+  },
+  {
+   "claim": "it opened with 11 jet bridges, 74 check-in counters and 8 baggage carousels",
+   "verdict": "confirmed",
+   "inAfter": "it opened with 11 jet bridges, 74 check-in counters and 8 baggage carousels",
+   "note": "The operator's 2014 advertorial lists 11 garbarata (jet bridges), 74 check-in counters and 8 conveyors; detik (21 September 2025) gives the same three counts as current. Put as the terminal as opened, since detik's article is just over 12 months old and the regulator's page gives no counts.",
+   "sources": [
+    {
+     "file": "detik-2014",
+     "org": "PT Angkasa Pura I, then the operator (paid advertorial on news.detik.com)",
+     "dated": "2014-03-22",
+     "quote": "Terdapat 11 unit garbarata, 74 konter check-in , 8 unit conveyor"
+    },
+    {
+     "file": "detik-menilik",
+     "org": "detikcom (detik.com/kalimantan)",
+     "dated": "2025-09-21",
+     "quote": [
+      "Minggu, 21 Sep 2025 15:01 WIB",
+      "11 unit garbarata, 74 check ini counter dan 8 unit ban berjalan (conveyor belt)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "11 jet bridges, 74 check-in counters, 8 baggage carousels"
+    }
+   ]
+  },
+  {
+   "claim": "Airports Council International placed it second in the world for service among airports handling 5 to 15 million passengers a year, in awards for 2017 presented in 2018",
+   "verdict": "confirmed",
+   "inAfter": "Airports Council International placed it second in the world for service among airports handling 5 to 15 million passengers a year, in awards for 2017 presented in 2018.",
+   "note": "Was 'named it the second best airport in the world for service quality in its size band in 2018'. Republika (14 September 2018) says the award was ACI's Airport Service Quality Awards 2017, handed to Angkasa Pura I at ACI's summit in Halifax that week; the text now says so.",
+   "sources": [
+    {
+     "file": "republika-2018",
+     "org": "Republika (republika.co.id)",
+     "dated": "2018-09-14",
+     "quote": [
+      "Jumat 14 Sep 2018 14:14 WIB",
+      "has been named the second best in service in the world for ones with annual handling capacity of 5 million to 15 million passengers",
+      "Airport Service Quality (ASQ) Awards 2017 from the Airport Council International"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "In 2018, Airports Council International named it the second-best airport in the world for service quality among those handling 5 to 15 million passengers annually."
+    }
+   ]
+  },
+  {
+   "claim": "still widely called Sepinggan Airport",
+   "verdict": "confirmed",
+   "inAfter": "It is still widely called Sepinggan Airport.",
+   "note": "detik (2025) says it is also often called Sepinggan Airport; Kaltim Post's headline calls it Bandara Sepinggan, and the operator itself writes 'Bandara SAMS Sepinggan' (July 2026).",
+   "sources": [
+    {
+     "file": "detik-menilik",
+     "org": "detikcom (detik.com/kalimantan)",
+     "dated": "2025-09-21",
+     "quote": "Bandara Internasional Sultan Aji Muhammad Sulaiman juga kerap disebut Bandara Sepinggan"
+    },
+    {
+     "file": "kaltimpost-tol",
+     "org": "Kaltim Post (kaltimpost.jawapos.com)",
+     "dated": "2025-01-21",
+     "quote": "Bandara Sepinggan Balikpapan Segera Terhubung dengan Tol"
+    },
+    {
+     "file": "op-semester1-2026",
+     "org": "Sultan Aji Muhammad Sulaiman Sepinggan International Airport (PT Angkasa Pura Indonesia, the operator, sepinggan-airport.com)",
+     "dated": "2026-07-10",
+     "quote": [
+      "BALIKPAPAN, 10 Juli 2026",
+      "Bandara SAMS Sepinggan tercatat melayani"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "formerly named and still commonly known as Sepinggan Airport"
+    }
+   ]
+  },
+  {
+   "claim": "the largest in East Kalimantan",
+   "verdict": "cut",
+   "wasBefore": "the largest in East Kalimantan",
+   "why": "No second source from the last 12 months says 'largest'. Softened to 'the main airport for Balikpapan and East Kalimantan' (see above)."
+  },
+  {
+   "claim": "on the Indonesian side of Borneo",
+   "verdict": "cut",
+   "wasBefore": "on the Indonesian side of Borneo",
+   "why": "No saved source places the airport on Borneo in words: the regulator, the operator and Wikipedia say East Kalimantan (and Wikipedia 'Kalimantan, Indonesia'). Left out rather than written from general knowledge; East Kalimantan stays."
+  },
+  {
+   "claim": "internationally to Singapore, Malaysia and Brunei",
+   "verdict": "cut",
+   "wasBefore": "and internationally to Singapore, Malaysia and Brunei",
+   "why": "Brunei is not on the regulator's live list of international routes (read 23 September 2026: Kuala Lumpur and Singapore only), and Kaltim Post's list of the airport's international routes in August 2024 had none to Brunei; detik (21 September 2025) still named Brunei, as Wikipedia does. With no current source, Brunei goes. Corrected to Singapore and Kuala Lumpur (see above).",
+   "sources": [
+    {
+     "file": "detik-menilik",
+     "org": "detikcom (detik.com/kalimantan)",
+     "dated": "2025-09-21",
+     "quote": "Penerbangan internasional Bandara Balikpapan melayani tiga rute yakni tujuan Malaysia, Singapura, dan Brunei Darussalam."
+    },
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": "Daftar Rute Internasional"
+    }
+   ]
+  },
+  {
+   "claim": "its importance is about to grow",
+   "verdict": "cut",
+   "wasBefore": "Its importance is about to grow.",
+   "why": "A forecast with no source; replaced by the airport's own account of its growing traffic and Nusantara (see above)."
+  },
+  {
+   "claim": "set to become one of the main gateways to Nusantara, Indonesia's new capital city",
+   "verdict": "cut",
+   "wasBefore": "The airport is set to become one of the main gateways to Nusantara, Indonesia's new capital city",
+   "why": "Wikipedia's forward-looking line, and the picture has moved: detik (September 2025) says Nusantara is to have its own international airport not far from Sepinggan, and the regulator's page for Balikpapan already lists 'Internasional Nusantara' as the nearest airport, 23.9 km away. Replaced by the airport's own current account, attributed (see above).",
+   "sources": [
+    {
+     "file": "detik-menilik",
+     "org": "detikcom (detik.com/kalimantan)",
+     "dated": "2025-09-21",
+     "quote": [
+      "Kalimantan juga rencananya bakal punya Bandara Nusantara, letaknya tak jauh dari Bandara Sepinggan.",
+      "Sambil menanti bandara internasional untuk Ibu Kota Nusantara (IKN) tersebut, Bandara Sepinggan hingga kini masih terus beroperasi."
+     ]
+    },
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": "Daftar Bandara Terdekat Internasional Nusantara 23.9 km"
+    }
+   ]
+  },
+  {
+   "claim": "connected to Nusantara by a toll road",
+   "verdict": "cut",
+   "wasBefore": "connected to it by a toll road",
+   "why": "Not yet true of the airport itself. Kaltim Post (21 January 2025) reports that the airport's own toll link (Sepinggan to the Balikpapan to Samarinda toll road, sections 1A and 1B of the Nusantara toll road plan) was to be tendered in early February 2025 for completion in 2027, and that travellers from the airport meanwhile join the toll road at the Manggar gate, about 30 minutes away. Nothing from the last 12 months confirms progress, so the toll road is left out.",
+   "sources": [
+    {
+     "file": "kaltimpost-tol",
+     "org": "Kaltim Post (kaltimpost.jawapos.com)",
+     "dated": "2025-01-21",
+     "quote": [
+      "Dipublikasikan Selasa, 21 Jan 2025 | 13:25 WIB",
+      "Tol ini adalah Segmen Bandara Sepinggan-Tol Balikpapan Samarinda (Balsam) yang merupakan bagian dari rencana Jalan Tol IKN Seksi 1A dan 1B.",
+      "Lelang pekerjaan ini akan dilakukan pada awal Februari 2025 dengan target pekerjaan selesai pada tahun 2027 melalui skema proyek multiyears.",
+      "harus melalui Gerbang Tol Manggar terlebih dahulu yang menghabiskan waktu kurang lebih 30 menit"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "will be connected to it via a toll road"
+    }
+   ]
+  },
+  {
+   "claim": "the terminal is a good one",
+   "verdict": "cut",
+   "wasBefore": "The terminal is a good one.",
+   "why": "The old text's judgement; the dated ACI award that backed it is kept instead (see above)."
+  },
+  {
+   "claim": "opened in September 2014",
+   "verdict": "cut",
+   "wasBefore": "Opened in September 2014",
+   "why": "The terminal was in use from March 2014 (the operator) and officially inaugurated in September (Wikipedia, which gives two dates). Corrected to 2014 (see above)."
+  },
+  {
+   "claim": "covering 110,000 square metres",
+   "verdict": "cut",
+   "wasBefore": "and covering 110,000 square metres",
+   "why": "Confirmed as built (the operator's 2014 advertorial, detik 2025 and Wikipedia all give 110,000 m2), but the regulator's live page now lists two terminal buildings, 103,342 m2 domestic and 18,016 m2 international, so a present-tense size would mislead. Left out.",
+   "sources": [
+    {
+     "file": "detik-2014",
+     "org": "PT Angkasa Pura I, then the operator (paid advertorial on news.detik.com)",
+     "dated": "2014-03-22",
+     "quote": "Terminal seluas 110.000 m 2"
+    },
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Luas 103.342,00 m 2 Kapasitas 8.265.920 Penumpang/Tahun Kategori Domestik",
+      "Luas 18.016,00 m 2 Kapasitas 2.967.341 Penumpang/Tahun Kategori Internasional"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a water recycling plant and energy efficient air conditioning",
+   "verdict": "cut",
+   "wasBefore": "It is branded an eco-airport, with a water recycling plant and energy efficient air conditioning, and has 11 jet bridges",
+   "why": "The 2014 design is confirmed (the operator's advertorial: air conditioning managed to cut energy use and waste water reused), but Wikipedia also reports the operator saying in 2018 that air conditioning took more than half the airport's operating costs, so 'energy efficient' is not repeated and the water plant is left out for length. The eco-airport design and the three counts are kept, the counts as the terminal opened (see above).",
+   "sources": [
+    {
+     "file": "detik-2014",
+     "org": "PT Angkasa Pura I, then the operator (paid advertorial on news.detik.com)",
+     "dated": "2014-03-22",
+     "quote": "pengaturan air conditioner untuk mengurangi konsumsi energi, serta pemanfaatan air limbah yang dapat digunakan kembali"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "However in 2018, Angkasa Pura revealed that Sultan Aji Muhammad Sulaiman Airport wastes a significant amount of electricity."
+    }
+   ]
+  },
+  {
+   "claim": "ACI named it second best for service quality in its size band in 2018",
+   "verdict": "cut",
+   "wasBefore": "Airports Council International named it the second best airport in the world for service quality in its size band in 2018.",
+   "why": "Reworded: the award was ACI's Airport Service Quality Awards 2017, presented in September 2018 (Republika). Kept (see above)."
+  },
+  {
+   "claim": "the single runway extends into a densely built up area; landings dramatic and demanding",
+   "verdict": "cut",
+   "wasBefore": "One thing to warn a nervous flyer about: the single runway extends into a densely built up area, and landings here are often described as dramatic and demanding.",
+   "why": "Wikipedia alone. Its source, the East Kalimantan transport office's page 'Bandara Sepinggan dikepung rumah', now answers 404 and its archived copy is in the web archive, which the network policy blocks. The single runway itself is confirmed (the regulator lists one, 2,500 by 45 m; OurAirports lists one) but on its own is not worth a sentence.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 07/25: 2,500 m (8,202 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "Due to its single runway extending into a densely built-up area, landings at the airport are often described as both visually dramatic and technically challenging for pilots."
+    }
+   ]
+  },
+  {
+   "claim": "first-half 2026 traffic: 2,392,873 passengers",
+   "verdict": "cut",
+   "why": "Held back: the airport's own release of 10 July 2026 gives 2,392,873 passengers, 21,789 aircraft movements and about 23,847 tonnes of cargo for January to June 2026. The old text gives no current passenger figure (its 7.1 million is the 2013 history of the terminal), so this replaces nothing; it would go in as an attributed figure if Andy wants one. No full-year 2025 total could be read: Statistics Indonesia refused the Surabaya helper's requests, and the regulator's 'Lalu Lintas Udara (2025)' count on the airport page (2,884,602) is not a full-year total.",
+   "sources": [
+    {
+     "file": "op-semester1-2026",
+     "org": "Sultan Aji Muhammad Sulaiman Sepinggan International Airport (PT Angkasa Pura Indonesia, the operator, sepinggan-airport.com)",
+     "dated": "2026-07-10",
+     "quote": [
+      "BALIKPAPAN, 10 Juli 2026",
+      "Sepanjang enam bulan pertama di tahun 2026, Bandara SAMS Sepinggan tercatat melayani sebanyak 2.392.873 pergerakan penumpang."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Nusantara is getting its own airport, about 24 km away",
+   "verdict": "cut",
+   "why": "Held back: the regulator's page for Balikpapan lists 'Internasional Nusantara' as the nearest airport, 23.9 km away, and detik (September 2025) says Nusantara is to have its own international airport not far from Sepinggan. Worth adding when its passenger flights and opening can be dated from two sources; it replaces nothing in the old text.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": "Daftar Bandara Terdekat Internasional Nusantara 23.9 km"
+    },
+    {
+     "file": "detik-menilik",
+     "org": "detikcom (detik.com/kalimantan)",
+     "dated": "2025-09-21",
+     "quote": "Kalimantan juga rencananya bakal punya Bandara Nusantara, letaknya tak jauh dari Bandara Sepinggan."
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

@@ -50,7 +50,9 @@ finished, passing example). Follow both exactly.
    moment...", "checking your browser", "Enable JavaScript and cookies to
    continue", Imperva/Incapsula, a CAPTCHA, a "security check required"
    page), the site is behind a bot check: stop there, do NOT try grabb.mjs,
-   and record the block (tightened 23 Sep evening). Only a quote that
+   and record the block (tightened 23 Sep evening). A 429 ('too many
+   requests') is a refusal too, not an empty page: do not follow it with
+   grabb.mjs (added 23 Sep night). Only a quote that
    appears in a page saved by grab.mjs or grabb.mjs counts.
    Read grab.mjs's answer before you do anything else: never chain
    grabb.mjs, or any other fetch, into the same command as grab.mjs. An
