@@ -1,0 +1,274 @@
+{
+ "iata": "TNA",
+ "id": "recgmDQuHhap9x5UY",
+ "name": "Jinan Yaoqiang International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Jinan_Yaoqiang_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Shandong's provincial capital airport, about 33 km north east of Jinan, and twenty fifth busiest in China with 20,329,972 passengers in 2025. It runs roughly 150 routes to more than 90 cities and averages 1,100 flights a day.\n\nLine 3 of the Jinan Metro serves the airport, and by road it connects to the Jinan Ring, the Beijing to Shanghai and the Qingdao to Yinchuan expressways.\n\nLong haul has come and gone. Sichuan Airlines opened a non-stop service to Los Angeles in December 2016, and Condor flew to Frankfurt from February 2022 until January 2023, when it moved the route to Hefei. Check what is actually flying before assuming a direct European link.\n\nThe terminal covers 114,000 square metres with 24 air bridges and is rated for 12 million passengers a year, a figure the airport has comfortably passed.\n\nIt opened on 26 July 1992, replacing Jinan Zhangzhuang, with the current terminal following in March 2005.",
+ "after": "Shandong's provincial capital airport, about 33 km north east of Jinan, and twenty fifth busiest in China with 20,329,972 passengers in 2025.\n\nLine 3 of the Jinan Metro serves the airport.\n\nCondor flew to Frankfurt from February 2022 but dropped the route in 2023. Check what is actually flying before assuming a direct European link.",
+ "claims": [
+  {
+   "claim": "Shandong's provincial capital airport",
+   "verdict": "confirmed",
+   "inAfter": "Shandong's provincial capital airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "an airport serving Jinan, the capital of East China's Shandong province"
+    },
+    {
+     "file": "jinangov-20251204",
+     "org": "Jinan Municipal Government (english.jinan.gov.cn)",
+     "quote": "from Jinan, capital of Shandong province",
+     "dated": "2025-12-04"
+    }
+   ]
+  },
+  {
+   "claim": "about 33 km north east of Jinan",
+   "verdict": "confirmed",
+   "inAfter": "about 33 km north east of Jinan",
+   "note": "Coordinates: 28.7 km in a straight line at 43 degrees, north east (ratio 1.15). Travel China Guide gives about 29 km north east.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is located approximately 33 km (21 mi) northeast of the city center"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 28.7 km (17.8 miles)",
+      "Bearing from the city centre: 43 degrees, which is north east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "25th busiest in China, 20,329,972 passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "twenty fifth busiest in China with 20,329,972 passengers in 2025",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 济南/遥墙: passenger rank 25 in China; passengers 2025: 20,329,972"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In 2025, Jinan Yaoqiang International Airport was the 25th busiest airport in China, with 20,329,972 passengers."
+    }
+   ]
+  },
+  {
+   "claim": "Line 3 of the Jinan Metro serves the airport",
+   "verdict": "confirmed",
+   "inAfter": "Line 3 of the Jinan Metro serves the airport.",
+   "note": "Line 3's northern extension reached the airport on 22 November 2024, at Airport South station beside Terminal 1 (iQilu). The Jinan government's September 2026 piece on a Line 3 village station puts the airport 16 minutes away by metro.",
+   "sources": [
+    {
+     "file": "iqilu-20241121",
+     "org": "iQilu (Shandong Radio and Television news site)",
+     "dated": "2024-11-21",
+     "quote": [
+      "济南轨道交通3号线二期计划于11月22日11时通车运营",
+      "也是3号线一期的北延段，与机场衔接"
+     ]
+    },
+    {
+     "file": "jinangov-metro-20260917",
+     "org": "Jinan Municipal Government (english.jinan.gov.cn)",
+     "dated": "2026-09-17",
+     "quote": [
+      "Its connection to Jinan Metro Line 3",
+      "Jinan Yaoqiang International Airport is about 12 km away and can be reached by metro in roughly 16 minutes."
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is served by Line 3 of Jinan Metro."
+    }
+   ]
+  },
+  {
+   "claim": "Condor flew to Frankfurt from February 2022",
+   "verdict": "confirmed",
+   "inAfter": "Condor flew to Frankfurt from February 2022",
+   "sources": [
+    {
+     "file": "condor-jinan",
+     "org": "Condor (airline newsroom)",
+     "dated": "2022-02-25",
+     "quote": [
+      "25 February 2022",
+      "Condor now flies non-stop from Frankfurt to Jinan in the Chinese province of Shandong every Monday"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In February 2022, Jinan gained direct flights to Europe with Condor, starting with Frankfurt."
+    }
+   ]
+  },
+  {
+   "claim": "Condor dropped the route in 2023",
+   "verdict": "softened",
+   "inAfter": "but dropped the route in 2023",
+   "note": "Was 'until January 2023, when it moved the route to Hefei'. The sources disagree on the detail: Wikipedia says Condor stopped in January 2023 and started flying to Hefei; AeroRoutes (21 March 2023) says Condor's summer 2023 flights to Hefei and Jinan were both replaced by Hangzhou from 1 May 2023. Both put the end in 2023, so only the year is given.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "in January 2023, Condor ceased the service again"
+    },
+    {
+     "file": "aeroroutes-230321",
+     "org": "AeroRoutes",
+     "dated": "2023-03-21",
+     "quote": [
+      "Published at 1500GMT 21MAR23",
+      "The new service to Hangzhou will be replacing previously filed 1 weekly flight each to Hefei and Jinan."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "150 routes to more than 90 cities",
+   "verdict": "cut",
+   "wasBefore": "It runs roughly 150 routes to more than 90 cities",
+   "why": "Route counts need a source from the last 12 months. Besides Wikipedia, the only count found is the 21st Century Business Herald's of October 2024 ('more than 150 routes to more than 90 cities'); the airport's own site (jnairport.com) answered 503 and 405, and the Jinan government article Wikipedia cites for this now redirects to the site's home page.",
+   "sources": [
+    {
+     "file": "21jingji-20241009",
+     "org": "21st Century Business Herald (21jingji.com)",
+     "dated": "2024-10-09",
+     "quote": [
+      "南财济南 2024-10-09 16:19",
+      "济南机场通达国内外90余个城市，开通150余条航线"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "averages 1,100 flights a day",
+   "verdict": "cut",
+   "wasBefore": "averages 1,100 flights a day",
+   "why": "Contradicted by CAAC's 2025 table: 145,034 aircraft movements in the year, which is about 400 take-offs and landings a day, not 1,100 flights. Wikipedia is the only source for 1,100."
+  },
+  {
+   "claim": "expressway connections",
+   "verdict": "cut",
+   "wasBefore": "and by road it connects to the Jinan Ring, the Beijing to Shanghai and the Qingdao to Yinchuan expressways",
+   "why": "Wikipedia alone; no second source found."
+  },
+  {
+   "claim": "long haul has come and gone",
+   "verdict": "cut",
+   "wasBefore": "Long haul has come and gone.",
+   "why": "Contradicted. The Jinan government reports Hainan Airlines flights from Jinan to Paris via Chongqing, twice a week, from 11 March 2026 (held back below, one source), and the 21st Century Business Herald (October 2024) reports Jinan's first direct Sydney route from November 2023.",
+   "sources": [
+    {
+     "file": "jinangov-paris-20260313",
+     "org": "Jinan Municipal Government (english.jinan.gov.cn)",
+     "dated": "2026-03-13",
+     "quote": "A new intercontinental flight connecting Jinan, Chongqing, and Paris was inaugurated on March 11, expanding Shandong province's air link with Europe."
+    },
+    {
+     "file": "21jingji-20241009",
+     "org": "21st Century Business Herald (21jingji.com)",
+     "dated": "2024-10-09",
+     "quote": "继去年11月首次开通赴澳大利亚悉尼的直飞航线后"
+    }
+   ]
+  },
+  {
+   "claim": "Sichuan Airlines to Los Angeles from December 2016",
+   "verdict": "cut",
+   "wasBefore": "Sichuan Airlines opened a non-stop service to Los Angeles in December 2016",
+   "why": "Wikipedia alone. Its source, Routes (routesonline.com), answered with a Cloudflare block page ('Sorry, you have been blocked'), so it was not tried again by any route. No current source says whether the flight still runs."
+  },
+  {
+   "claim": "Condor stopped in January 2023 and moved the route to Hefei",
+   "verdict": "cut",
+   "wasBefore": "until January 2023, when it moved the route to Hefei",
+   "why": "Sources disagree: AeroRoutes (21 March 2023) has Condor replacing its filed Hefei and Jinan flights with Hangzhou from 1 May 2023. Softened to 'dropped the route in 2023'."
+  },
+  {
+   "claim": "terminal of 114,000 square metres, 24 air bridges, 12 million capacity, comfortably passed",
+   "verdict": "cut",
+   "wasBefore": "The terminal covers 114,000 square metres with 24 air bridges and is rated for 12 million passengers a year, a figure the airport has comfortably passed.",
+   "why": "The area and the 12 million capacity rest on Wikipedia's reading of the airport's 2017 website; the airport's site did not answer. Travel China Guide (August 2025) gives about 11 hectares and 24 boarding bridges but no capacity. The building is now called Terminal 1, and a second terminal is being built in the airport's second phase (iQilu, November 2024), so a description of 'the terminal' will date; no source from the last 12 months says whether Terminal 2 has opened."
+  },
+  {
+   "claim": "replacing Jinan Zhangzhuang; current terminal March 2005",
+   "verdict": "cut",
+   "wasBefore": "It opened on 26 July 1992, replacing Jinan Zhangzhuang, with the current terminal following in March 2005.",
+   "why": "The exact opening day, Zhangzhuang and the March 2005 terminal rest on Wikipedia alone. The year of opening is kept (Travel China Guide)."
+  },
+  {
+   "claim": "Hainan Airlines Jinan to Paris via Chongqing, twice weekly, from 11 March 2026",
+   "verdict": "cut",
+   "sources": [
+    {
+     "file": "jinangov-paris-20260313",
+     "org": "Jinan Municipal Government (english.jinan.gov.cn)",
+     "dated": "2026-03-13",
+     "quote": [
+      "A new intercontinental flight connecting Jinan, Chongqing, and Paris was inaugurated on March 11, expanding Shandong province's air link with Europe.",
+      "Operated by Hainan Airlines using Boeing 787-9 aircraft, the service offers twice-weekly flights with 291 seats."
+     ]
+    }
+   ],
+   "why": "Held back: one source only. It would replace 'Long haul has come and gone' and matters to a UK agent (a one-stop service to Europe), but no second publisher could be read: Hainan Airlines' Chinese site answered 502, the Chongqing government's English site 502, the Shandong government's English site did not connect, and neither Air Journal nor AeroRoutes (Hainan Airlines listings) carries the Jinan service. The Jinan English site is produced by China Daily, so a China Daily copy would not count as a second organisation. Was to read: \"Hainan Airlines has flown twice a week to Paris, stopping in Chongqing, since March 2026.\""
+  },
+  {
+   "claim": "a second terminal is being built",
+   "verdict": "cut",
+   "sources": [
+    {
+     "file": "iqilu-20241121",
+     "org": "iQilu (Shandong Radio and Television news site)",
+     "dated": "2024-11-21",
+     "quote": "机场北站位于济南机场二期改扩建工程综合交通中心下方，待机场二期改扩建工程完成后，可实现与T2航站楼一体化换乘"
+    }
+   ],
+   "why": "Held back: a new terminal replaces nothing in the old text, and the only source is from November 2024 (the metro's Airport North station will serve Terminal 2 when the airport's second phase is finished). Whether Terminal 2 has opened needs a source from the last 12 months; none could be read."
+  },
+  {
+   "claim": "opened in 1992",
+   "verdict": "cut",
+   "wasBefore": "It opened on 26 July 1992",
+   "why": "Cut in review (23 Sep evening). The helper kept the year with Travel China Guide as the only second source; the brief allows travel guides only as a tie-breaker, never as the second source. The day and month rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "was completed and opened to traffic on 26 July 1992"
+    },
+    {
+     "file": "travelchinaguide",
+     "org": "Travel China Guide",
+     "dated": "2025-08-13",
+     "quote": [
+      "Jinan Airport was opened in 1992",
+      "Last updated on Aug. 13, 2025"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Check what is actually flying before assuming a direct European link.",
+   "why": "The old text's advice, kept: the only European service found (Hainan Airlines to Paris, from March 2026) stops in Chongqing and rests on one source, so checking is still the right advice."
+  }
+ ],
+ "tracerOk": {}
+}

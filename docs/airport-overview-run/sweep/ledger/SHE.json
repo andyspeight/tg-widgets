@@ -1,0 +1,184 @@
+{
+ "iata": "SHE",
+ "id": "recpS12FgKpkLrTuH",
+ "name": "Shenyang Taoxian International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Shenyang_Taoxian_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Shenyang, capital of Liaoning province, about 20 km south of the city centre in Hunnan District. It is a hub for China Southern and was 21st busiest in China with 24,938,062 passengers in 2025.\n\nGetting into the city is straightforward: Shenyang tram lines 2 and 6 both serve the airport.\n\nLong haul is thin and has come and gone. Lufthansa flew the first intercontinental route from Shenyang to Frankfurt in April 2012, dropped it in October 2016 and relaunched it in March 2018. Sichuan Airlines added Vancouver later in 2012. Check what is actually operating rather than relying on an older route map.\n\nThe airport opened on 16 April 1989, replacing Dongta Airport, which had been the city's field since 1921 and could no longer cope.",
+ "after": "The airport for Shenyang, capital of Liaoning province, about 20 km south of the city centre. It was 21st busiest in China with 24,938,062 passengers in 2025.\n\nLufthansa's Frankfurt flights have come and gone. Check what is actually operating rather than relying on an older route map.",
+ "claims": [
+  {
+   "claim": "the airport for Shenyang",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Shenyang",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 沈阳/桃仙: passenger rank 21 in China; passengers 2025: 24,938,062"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport serving Shenyang"
+    }
+   ]
+  },
+  {
+   "claim": "capital of Liaoning province",
+   "verdict": "confirmed",
+   "inAfter": "capital of Liaoning province",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Shenyang, the capital of Northeast China's Liaoning province"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "GeoNames class PPLA, the capital of a first-order division (state, province or region)"
+    }
+   ]
+  },
+  {
+   "claim": "about 20 km south of the city centre",
+   "verdict": "confirmed",
+   "inAfter": "about 20 km south of the city centre",
+   "note": "Coordinates: 17.5 km in a straight line at 166 degrees, south (ratio 1.15). Travel China Guide (updated 12 August 2025) gives 18 km, in the southern suburbs.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is located about 20 km (12 mi) south of the city center"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 17.5 km (10.9 miles)",
+      "Bearing from the city centre: 166 degrees, which is south"
+     ]
+    },
+    {
+     "file": "travelchinaguide",
+     "org": "Travel China Guide",
+     "dated": "2025-08-12",
+     "quote": [
+      "Situated in Taoxian Town, southern suburb of Shenyang, Shenyang Taoxian International Airport is 11 miles (18 kilometers) from the city center.",
+      "Last updated on Aug. 12, 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "21st busiest in China, 24,938,062 passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "It was 21st busiest in China with 24,938,062 passengers in 2025.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 沈阳/桃仙: passenger rank 21 in China; passengers 2025: 24,938,062"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "was the 21st busiest airport in China with 24,938,062 passengers in 2025"
+    }
+   ]
+  },
+  {
+   "claim": "Lufthansa's Frankfurt flights have come and gone",
+   "verdict": "softened",
+   "inAfter": "Lufthansa's Frankfurt flights have come and gone.",
+   "note": "Replaces the Lufthansa dates, which rest on Wikipedia alone and stop at the 2018 relaunch. Both sources show the service starting and stopping: Wikipedia (dropped October 2016, back March 2018) and AeroRoutes, which says Lufthansa last flew it, three times a week, until February 2020.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Lufthansa offered the first intercontinental service out of Shenyang, to Frankfurt, Germany, in April 2012 but discontinued it on 28 October 2016, before relaunching it on 27 March 2018."
+    },
+    {
+     "file": "aeroroutes-240320",
+     "org": "AeroRoutes",
+     "dated": "2024-03-20",
+     "quote": [
+      "Published at 0300GMT 20MAR24",
+      "as Lufthansa last operated 3 weekly flights until February 2020."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in Hunnan District",
+   "verdict": "cut",
+   "wasBefore": "in Hunnan District",
+   "why": "Wikipedia alone. Travel China Guide places it in Taoxian Town without naming the district; the Shenyang and Hunnan government sites answered 510 and 502."
+  },
+  {
+   "claim": "hub for China Southern",
+   "verdict": "cut",
+   "wasBefore": "It is a hub for China Southern and was 21st busiest",
+   "why": "Wikipedia alone. China Southern's own about pages load empty (English and Chinese), and nothing from the last 12 months was found: AeroRoutes' China Southern listings mention Shenyang routes only up to December 2024."
+  },
+  {
+   "claim": "tram lines 2 and 6 serve the airport",
+   "verdict": "cut",
+   "wasBefore": "Getting into the city is straightforward: Shenyang tram lines 2 and 6 both serve the airport.",
+   "why": "The line numbers rest on Wikipedia alone, and a transport link needs a source from the last 12 months. Travel China Guide (updated 12 August 2025, just outside 12 months) only says a 'trolley car' is available and has metro Line 2 ending at Quanyunlu, short of the airport. Shenyang Metro's site answered 502, the Shenyang government 510, the Hunnan district 502 and the Liaoning government 502; the airport's own site could not be identified (Wikipedia's official link is a 2011 archive copy)."
+  },
+  {
+   "claim": "long haul is thin and has come and gone",
+   "verdict": "cut",
+   "wasBefore": "Long haul is thin and has come and gone.",
+   "why": "Not current: China Southern brought Shenyang to Frankfurt back from 24 April 2024 (AeroRoutes, held back below), and no source from the last 12 months says whether it still runs. The Lufthansa part is kept."
+  },
+  {
+   "claim": "Lufthansa dates 2012, 2016, 2018",
+   "verdict": "cut",
+   "wasBefore": "Lufthansa flew the first intercontinental route from Shenyang to Frankfurt in April 2012, dropped it in October 2016 and relaunched it in March 2018.",
+   "why": "The dates rest on Wikipedia alone: its sources at Routes (routesonline.com) answer with a Cloudflare block page and were not tried again by any route. The sentence also stopped at the 2018 relaunch; AeroRoutes says Lufthansa last flew in February 2020."
+  },
+  {
+   "claim": "Sichuan Airlines to Vancouver, 2012",
+   "verdict": "cut",
+   "wasBefore": "Sichuan Airlines added Vancouver later in 2012.",
+   "why": "Wikipedia alone; its source at Routes is behind the same Cloudflare block. No current source says the route runs."
+  },
+  {
+   "claim": "opened 16 April 1989, replacing Dongta (1921), which could no longer cope",
+   "verdict": "cut",
+   "wasBefore": "The airport opened on 16 April 1989, replacing Dongta Airport, which had been the city's field since 1921 and could no longer cope.",
+   "why": "Wikipedia alone. The only other page found, a contractor's project note (horseen.com), says the airport was 'built in 1988', which neither confirms nor settles the opening date."
+  },
+  {
+   "claim": "China Southern Shenyang to Frankfurt from April 2024",
+   "verdict": "cut",
+   "sources": [
+    {
+     "file": "aeroroutes-240320",
+     "org": "AeroRoutes",
+     "dated": "2024-03-20",
+     "quote": [
+      "China Southern Adds Shenyang – Frankfurt From late-April 2024",
+      "From 24APR24, A350-900XWB aircraft to operate this route on weekly basis."
+     ]
+    }
+   ],
+   "why": "Held back: one source, from March 2024, and nothing from the last 12 months says the weekly Guangzhou to Shenyang to Frankfurt flight still runs. Worth adding for a UK agent if a current source confirms it. Was to read: \"China Southern has flown to Frankfurt once a week since April 2024.\""
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Check what is actually operating rather than relying on an older route map.",
+   "why": "The old text's advice, kept: long-haul service here has changed several times (Lufthansa stopped in 2020; China Southern restarted Frankfurt in 2024, one source)."
+  }
+ ],
+ "tracerOk": {
+  "Lufthansa's Frankfurt": "The tracer joins the possessive 'Lufthansa's' with 'Frankfurt'; both names are in Wikipedia and in AeroRoutes. See the Lufthansa claim."
+ }
+}

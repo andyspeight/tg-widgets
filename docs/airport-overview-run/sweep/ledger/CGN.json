@@ -1,0 +1,378 @@
+{
+ "iata": "CGN",
+ "id": "recMWx4RPcVbIckUL",
+ "name": "Cologne Bonn Airport",
+ "country": "Germany",
+ "wikipedia": "https://en.wikipedia.org/wiki/Cologne_Bonn_Airport",
+ "audited": "2026-09-23",
+ "before": "One airport for Cologne and Bonn, in the district of Porz, 12 km south east of Cologne and 16 km north east of Bonn. It passed 10 million passengers in 2024, its first year above pre-pandemic levels, and is seventh largest in Germany for passengers and third for cargo.\n\nThe round the clock licence is what sets it apart. This is one of very few 24 hour airports in Germany, which is why it is a hub for FedEx Express and UPS Airlines as well as for Eurowings.\n\nThere are three runways across 1,000 hectares, and the whole site sits within the Wahner Heide nature reserve.\n\nIt is worth knowing what else is here. The airport hosts the training centre for the German and European astronaut programmes, part of the European Space Agency, and the German Aerospace Center's old A300 ZERO-G aircraft, which used to fly zero gravity research, now stands outside near Terminal 2 as an interactive museum exhibit.\n\nThe airport is named after Konrad Adenauer, a Cologne native and the first post-war Chancellor of West Germany.",
+ "after": "One airport for Cologne and Bonn, in the south of Cologne and 16 km north east of Bonn. In 2025 it handled 10.1 million passengers, still more than 2 million short of 2019. It is sixth in Germany for passengers and third for cargo.\n\nRound the clock opening is what sets it apart. The airport says it is the only one in Germany where UPS, FedEx and DHL all run a hub.\n\nThere are three runways across about 1,000 hectares.\n\nIt is worth knowing what else is here. Next door, on the German Aerospace Center's site, is the European Space Agency's astronaut centre, where Europe's astronauts train.\n\nThe airport is named after Konrad Adenauer, a Cologne native and the first post-war Chancellor of West Germany.",
+ "claims": [
+  {
+   "claim": "one airport for Cologne and Bonn, in the south of Cologne",
+   "verdict": "corrected",
+   "inAfter": "One airport for Cologne and Bonn, in the south of Cologne",
+   "note": "Was 'in the district of Porz, 12 km south east of Cologne'. The operator puts the airport in the south of the city of Cologne, next to Bonn. Porz rests on Wikipedia alone and the 12 km fails the coordinates check (see the cuts). The coordinates put it 15.5 km from the GeoNames centre of Cologne, bearing 119 degrees (south east).",
+   "sources": [
+    {
+     "file": "op-kurz-erklaert",
+     "org": "Flughafen Köln/Bonn GmbH (the airport operator, koeln-bonn-airport.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Er liegt im Süden der Millionenstadt Köln in direkter Nachbarschaft zu Bonn."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": [
+      "The airport is located in the district of Porz",
+      "The airport is centrally located in the Cologne Bonn Region"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 15.5 km (9.6 miles)",
+      "Bearing from the city centre: 119 degrees, which is south east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "16 km north east of Bonn",
+   "verdict": "confirmed",
+   "inAfter": "16 km north east of Bonn.",
+   "note": "Coordinates: 15.0 km from the GeoNames centre of Bonn at 13 degrees (ratio 1.07; the bearing is 32 degrees off north east, inside the check).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "16 km (9.9 mi; 8.6 nmi) northeast of Bonn"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Bonn (GeoNames 2946447): 15.0 km (9.3 miles), bearing 13 degrees, which is north"
+    }
+   ]
+  },
+  {
+   "claim": "10.1 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "In 2025 it handled 10.1 million passengers",
+   "note": "Was 'It passed 10 million passengers in 2024'. A passenger total replaces a passenger total: the operator's release of 7 January 2026 gives 10.1 million for 2025 (its table: 10,059.6 thousand), ADV 10,060,452 and Eurostat 10,047,440.",
+   "sources": [
+    {
+     "file": "op-2025-traffic",
+     "org": "Flughafen Köln/Bonn GmbH (the airport operator, koeln-bonn-airport.de)",
+     "dated": "7 Jan 2026",
+     "quote": [
+      "7. Januar 2026",
+      "Passagierverkehr bleibt trotz schwieriger Rahmenbedingungen mit 10,1 Millionen Fluggästen auf hohem Niveau."
+     ]
+    },
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": [
+      "Kumuliertes Gesamtaufkommen in Deutschland: Passagiere (an+ab) | Januar bis Dezember 2025",
+      "Köln/Bonn 10.060.452 +0,5 %"
+     ]
+    },
+    {
+     "file": "eurostat-de",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat DE_EDDK KOELN/BONN airport: passengers carried in 2025: 10,047,440"
+    }
+   ]
+  },
+  {
+   "claim": "still more than 2 million short of 2019",
+   "verdict": "corrected",
+   "inAfter": "still more than 2 million short of 2019.",
+   "note": "Replaces 'its first year above pre-pandemic levels', which is wrong: the operator's own table has 12,369.0 thousand passengers in 2019 and 10,012.5 thousand in 2024, and its 2025 release says more than 2 million passengers are still missing against 2019. Eurostat agrees (12,350,829 in 2019).",
+   "sources": [
+    {
+     "file": "op-2025-traffic",
+     "org": "Flughafen Köln/Bonn GmbH (the airport operator, koeln-bonn-airport.de)",
+     "dated": "7 Jan 2026",
+     "quote": "Im Vergleich zum Vor-Corona-Jahr 2019 fehlten deshalb weiterhin mehr als 2 Millionen Reisende."
+    },
+    {
+     "file": "op-daten-fakten",
+     "org": "Flughafen Köln/Bonn GmbH (the airport operator, koeln-bonn-airport.de)",
+     "dated": "read 2026-09-23 (live page, figures to 2025)",
+     "quote": [
+      "leer 2025 2024 2023 2022 2021 2020 2019",
+      "Flugg&auml;ste Tsd. 10.059,6 10.012,5 9.763,4 8.756,9 4.253,8 3.081,4 12.369,0"
+     ]
+    },
+    {
+     "file": "eurostat-series",
+     "org": "Eurostat",
+     "dated": "annual data to 2025",
+     "quote": [
+      "Eurostat DE_EDDK KOELN/BONN airport: passengers carried in 2019: 12,350,829",
+      "Eurostat DE_EDDK KOELN/BONN airport: passengers carried in 2025: 10,047,440"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "sixth in Germany for passengers",
+   "verdict": "corrected",
+   "inAfter": "It is sixth in Germany for passengers",
+   "note": "Was 'seventh largest in Germany for passengers'. In 2025 ADV and Eurostat both put it sixth, behind Frankfurt, Munich, Berlin, Dusseldorf and Hamburg and ahead of Stuttgart (ADV 9,585,033).",
+   "sources": [
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": [
+      "Köln/Bonn 10.060.452 +0,5 %",
+      "Hamburg 14.770.812",
+      "Stuttgart 9.585.033 +4,7 %"
+     ]
+    },
+    {
+     "file": "eurostat-de",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat DE_EDDH HAMBURG airport: passengers carried in 2025: 14,770,495",
+      "Eurostat DE_EDDK KOELN/BONN airport: passengers carried in 2025: 10,047,440",
+      "Eurostat DE_EDDS STUTTGART airport: passengers carried in 2025: 9,571,997"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "third in Germany for cargo",
+   "verdict": "confirmed",
+   "inAfter": "and third for cargo.",
+   "note": "ADV 2025: Frankfurt 2,071,665 tonnes, Leipzig/Halle 1,391,681, Cologne Bonn 842,377. Eurostat has the same order. The operator gives about 840,000 tonnes.",
+   "sources": [
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": [
+      "Kumuliertes Gesamtaufkommen in Deutschland: Cargo-Aufkommen (an+ab) | Januar bis Dezember 2025",
+      "Frankfurt 2.071.665 +1,1 %",
+      "Leipzig/Halle 1.391.681 +0,4 %",
+      "Köln/Bonn 842.377 -0,4 %"
+     ]
+    },
+    {
+     "file": "eurostat-de-freight",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat DE_EDDP LEIPZIG/HALLE airport: freight and mail loaded and unloaded in 2025: 1,390,730 tonnes",
+      "Eurostat DE_EDDK KOELN/BONN airport: freight and mail loaded and unloaded in 2025: 829,548 tonnes"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "the third-largest in terms of cargo operations"
+    }
+   ]
+  },
+  {
+   "claim": "open round the clock",
+   "verdict": "confirmed",
+   "inAfter": "Round the clock opening is what sets it apart.",
+   "note": "The operator's facts page gives its operating hours as 24 hours. 'What sets it apart' is the old text's judgement, kept.",
+   "sources": [
+    {
+     "file": "op-daten-fakten",
+     "org": "Flughafen Köln/Bonn GmbH (the airport operator, koeln-bonn-airport.de)",
+     "dated": "read 2026-09-23 (live page, figures to 2025)",
+     "quote": [
+      "Betriebszeit",
+      "24 Stunden"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "Cologne Bonn Airport is one of the country's few 24-hour airports"
+    }
+   ]
+  },
+  {
+   "claim": "the only German airport where UPS, FedEx and DHL all run a hub",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport says it is the only one in Germany where UPS, FedEx and DHL all run a hub.",
+   "note": "Replaces 'which is why it is a hub for FedEx Express and UPS Airlines as well as for Eurowings'. The operator's own claim, attributed; Wikipedia also has UPS and FedEx hubs here. The causal 'which is why' and Eurowings are cut (below).",
+   "sources": [
+    {
+     "file": "op-kurz-erklaert",
+     "org": "Flughafen Köln/Bonn GmbH (the airport operator, koeln-bonn-airport.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Zudem ist er der einzige deutsche Flughafen, an dem die großen Expressdienstleister UPS, FedEx und DHL ein Drehkreuz betreiben."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "Cologne Bonn Airport is a hub for FedEx Express and UPS Airlines"
+    }
+   ]
+  },
+  {
+   "claim": "three runways across about 1,000 hectares",
+   "verdict": "confirmed",
+   "inAfter": "There are three runways across about 1,000 hectares.",
+   "sources": [
+    {
+     "file": "op-daten-fakten",
+     "org": "Flughafen Köln/Bonn GmbH (the airport operator, koeln-bonn-airport.de)",
+     "dated": "read 2026-09-23 (live page, figures to 2025)",
+     "quote": [
+      "Das Gelände des Köln Bonn Airport ist rund 1.000 Hektar groß. Er verfügt über drei Startbahnen",
+      "Interkontinentalbahn: 3.815 Meter"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 13L/31R: 3,815 m (12,516 ft), ASP",
+      "Runways listed: 3"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "The facility covers 1,000 hectares (2,500 acres) and contains three runways."
+    }
+   ]
+  },
+  {
+   "claim": "next door, on the German Aerospace Center's site, ESA's astronaut centre, where Europe's astronauts train",
+   "verdict": "corrected",
+   "inAfter": "Next door, on the German Aerospace Center's site, is the European Space Agency's astronaut centre, where Europe's astronauts train.",
+   "note": "Was 'The airport hosts the training centre for the German and European astronaut programmes'. The German Aerospace Center (DLR) says ESA's European Astronaut Centre (EAC) is on its 55 hectare Cologne site, with the airport in the immediate neighbourhood; ESA calls the EAC home to Europe's astronauts. ESA's page answered a plain 403 and was read with grabb.mjs, as the brief allows.",
+   "sources": [
+    {
+     "file": "dlr-koeln",
+     "org": "German Aerospace Center (DLR, dlr.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Auf dem 1959 eröffneten, 55 Hektar großen Gelände ist neben den Forschungs- und Zentraleinrichtungen des DLR auch das Astronautenzentrum EAC der Europäischen Weltraumorganisation ESA angesiedelt. In unmittelbarer Nachbarschaft befinden sich der modernste Windkanal Europas, der Europäische Transschall-Windkanal (ETW) sowie der Flughafen Köln/Bonn."
+    },
+    {
+     "file": "esa-eac",
+     "org": "European Space Agency (esa.int)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "About the European Astronaut Centre (EAC)",
+      "Home to astronauts in Europe",
+      "almost tripling its current number of representatives in Cologne, Germany."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "It is also a host of a training centre for the German (DLR) and European (EAC) astronaut programmes, part of the European Space Agency."
+    }
+   ]
+  },
+  {
+   "claim": "named after Konrad Adenauer, a Cologne native and the first post-war Chancellor of West Germany",
+   "verdict": "confirmed",
+   "inAfter": "The airport is named after Konrad Adenauer, a Cologne native and the first post-war Chancellor of West Germany.",
+   "note": "The operator: the airport has officially carried the name 'Konrad Adenauer' since 1994, and Cologne was his home city. The Federal Chancellery's list of chancellors since 1949 opens with Adenauer, 1949 to 1963.",
+   "sources": [
+    {
+     "file": "op-adenauer",
+     "org": "Flughafen Köln/Bonn GmbH (the airport operator, koeln-bonn-airport.de)",
+     "dated": "read 2026-09-23 (live page, 2026)",
+     "quote": [
+      "Konrad Adenauer (1876 – 1967) prägt und gestaltet als Politiker und Staatsmann seine Heimatstadt Köln",
+      "Seit 1994 trägt der Flughafen Köln/Bonn offiziell den Namenszusatz „Konrad Adenauer“ zu Ehren des großen Rheinländers."
+     ]
+    },
+    {
+     "file": "bk-kanzler",
+     "org": "Federal Chancellery (bundeskanzler.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Bundeskanzler seit 1949",
+      "Konrad Adenauer",
+      "1949 - 1963"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "The airport is named after Cologne native Konrad Adenauer, the first post-war Chancellor of West Germany."
+    }
+   ]
+  },
+  {
+   "claim": "in the district of Porz",
+   "verdict": "cut",
+   "wasBefore": "in the district of Porz",
+   "why": "Wikipedia alone. The operator says only that the airport is in the south of Cologne, which is kept; its imprint and travel pages do not name the district."
+  },
+  {
+   "claim": "12 km south east of Cologne",
+   "verdict": "cut",
+   "wasBefore": "12 km south east of Cologne",
+   "why": "Fails the coordinates check: 15.5 km from the GeoNames centre (ratio 0.78). No other source gives a distance to the city centre, so the text keeps only what the operator says (in the south of Cologne)."
+  },
+  {
+   "claim": "passed 10 million in 2024, its first year above pre-pandemic levels",
+   "verdict": "cut",
+   "wasBefore": "It passed 10 million passengers in 2024, its first year above pre-pandemic levels",
+   "why": "Superseded by 2025, and the pre-pandemic claim is wrong: 2019 had 12.37 million (operator) or 12.35 million (Eurostat), and the operator says 2025 was still more than 2 million short. Corrected (see above)."
+  },
+  {
+   "claim": "seventh largest in Germany for passengers",
+   "verdict": "cut",
+   "wasBefore": "is seventh largest in Germany for passengers",
+   "why": "Sixth in 2025 on both ADV and Eurostat. Corrected (see above)."
+  },
+  {
+   "claim": "one of very few 24 hour airports in Germany, which is why it is a hub for FedEx and UPS as well as Eurowings",
+   "verdict": "cut",
+   "wasBefore": "This is one of very few 24 hour airports in Germany, which is why it is a hub for FedEx Express and UPS Airlines as well as for Eurowings.",
+   "why": "'Very few' and the 'which is why' link rest on no source beyond Wikipedia's 'few'; the 24 hour opening is kept, and the hubs are kept as the airport's own statement (see above). The Eurowings hub rests on Wikipedia alone: none of the operator's pages read tonight names it."
+  },
+  {
+   "claim": "the whole site within the Wahner Heide nature reserve",
+   "verdict": "cut",
+   "wasBefore": "and the whole site sits within the Wahner Heide nature reserve",
+   "why": "Wikipedia alone, and it says the airport is surrounded by the reserve, not within it. The operator's sustainability pages read do not name it."
+  },
+  {
+   "claim": "the A300 ZERO-G on show near Terminal 2",
+   "verdict": "cut",
+   "wasBefore": "and the German Aerospace Center's old A300 ZERO-G aircraft, which used to fly zero gravity research, now stands outside near Terminal 2 as an interactive museum exhibit",
+   "why": "Wikipedia alone: neither DLR's Cologne site page nor the airport's visitor, tours and terrace pages mention the aircraft."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "It is worth knowing what else is here.",
+   "why": "The old text's signpost for the sourced astronaut centre that follows."
+  }
+ ],
+ "tracerOk": {
+  "German Aerospace Center's": "The possessive of 'German Aerospace Center', which is in Wikipedia's saved text (DLR's own page uses the German name).",
+  "European Space Agency's": "The possessive of 'European Space Agency', which is on ESA's page and in Wikipedia."
+ }
+}

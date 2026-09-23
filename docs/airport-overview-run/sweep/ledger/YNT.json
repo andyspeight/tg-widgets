@@ -1,0 +1,232 @@
+{
+ "iata": "YNT",
+ "id": "recipdaX0igPuQ8cL",
+ "name": "Yantai Penglai International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Yantai_Penglai_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Yantai's airport, 43 km from the city centre in Penglai District, which is a long way out and worth factoring into a transfer.\n\nIt is new. Construction started in December 2009 and the airport opened on 28 May 2015, when every flight serving Yantai transferred over from the old Laishan Airport. The first arrival was a China Eastern service from Beijing that landed five minutes after midnight.\n\nIt has not grown as fast as planned. The 80,000 square metre terminal and 3,400 metre runway were built for 12 million passengers and 90,000 tonnes of cargo a year by 2020, but the airport handled 8,036,554 passengers and 72,622 tonnes in 2025, well short of those projections. In practical terms that means it is not congested.\n\nSkytrax rates it three stars.\n\nIt was originally called Yantai Chaoshui International and took its current name in April 2014.",
+ "after": "Yantai's airport, 43 km from the city centre, which is a long way out and worth factoring into a transfer.\n\nIt is new. The airport opened on 28 May 2015, when every flight serving Yantai transferred over from the old Laishan Airport.\n\nTerminal 2 opened in 2024, and the airport says it can handle 23 million passengers and 200,000 tonnes of cargo a year. Traffic in 2025 was 8,036,554 passengers and 72,622 tonnes, well short of that. In practical terms that means it is not congested.",
+ "claims": [
+  {
+   "claim": "Yantai's airport",
+   "verdict": "confirmed",
+   "inAfter": "Yantai's airport",
+   "note": "CAAC's 2025 table has one airport for Yantai, 烟台/蓬莱; the old Laishan airport no longer has scheduled flights.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 烟台/蓬莱: passenger rank 45 in China; passengers 2025: 8,036,554"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport serving the city of Yantai"
+    }
+   ]
+  },
+  {
+   "claim": "43 km from the city centre",
+   "verdict": "confirmed",
+   "inAfter": "43 km from the city centre",
+   "note": "Coordinates: 45.6 km in a straight line (ratio 0.94, inside the check's range). The old text's 'in Penglai District' is cut (see below).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is located 43 kilometres (27 mi) from the city center"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 45.6 km (28.3 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "opened on 28 May 2015",
+   "verdict": "confirmed",
+   "inAfter": "The airport opened on 28 May 2015",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "Yantai International Airport (operator, ytairport.com.cn)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "2015年5月28日",
+      "烟台国际机场转场至蓬莱。"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the airport was opened on 28 May 2015"
+    },
+    {
+     "file": "skytrax",
+     "org": "Skytrax",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Opened in 2015, Terminal 1 handled over 10 million passengers in 2019."
+    }
+   ]
+  },
+  {
+   "claim": "every flight moved over from the old Laishan Airport",
+   "verdict": "confirmed",
+   "inAfter": "when every flight serving Yantai transferred over from the old Laishan Airport",
+   "note": "The operator's history runs from Laishan (it calls the airport 烟台莱山国际机场 up to 2009) to the move to Penglai on 28 May 2015 (转场, the whole airport relocating).",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "Yantai International Airport (operator, ytairport.com.cn)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "烟台莱山国际机场新建3200米跑道启用。",
+      "烟台国际机场转场至蓬莱。"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "when all flights serving Yantai were transferred from the old Laishan Airport"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2 opened in 2024",
+   "verdict": "corrected",
+   "inAfter": "Terminal 2 opened in 2024",
+   "note": "Replaces the old text's '80,000 square metre terminal ... built for 12 million passengers', which described the 2015 building. The operator lists Terminal 2 entering use on 28 June 2024 (under its 2024 heading) and events in Terminal 2 in 2025; Terminal 2 was the core of the airport's second phase, which the Yantai government lists among 2024's completed projects ('the airport's second phase moved into operation'). Wikipedia does not mention Terminal 2 at all. Only the operator gives the day, so the text gives the year.",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "Yantai International Airport (operator, ytairport.com.cn)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "烟台机场T2航站楼正式投入使用",
+      "烟台机场二期工程T2航站楼工程顺利完工，正式进入全面竣工验收阶段。",
+      "烟台东航食品在T2航站楼组织开展了2025年"
+     ]
+    },
+    {
+     "file": "yantaigov-report2025",
+     "org": "Yantai Municipal Government (2025 government work report)",
+     "dated": "2025-01-14",
+     "quote": [
+      "日期：2025-01-14",
+      "一、2024年工作回顾",
+      "烟台机场二期转场运营"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the airport says it can handle 23 million passengers and 200,000 tonnes a year",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "the airport says it can handle 23 million passengers and 200,000 tonnes of cargo a year",
+   "note": "Replaces '12 million passengers and 90,000 tonnes of cargo a year by 2020'. The capacity is the operator's own statement about its own terminal, so the text names it.",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "Yantai International Airport (operator, ytairport.com.cn)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "可满足年旅客吞吐量2300万人次、货邮吞吐量20万吨的发展需求"
+    }
+   ]
+  },
+  {
+   "claim": "8,036,554 passengers and 72,622 tonnes in 2025",
+   "verdict": "confirmed",
+   "inAfter": "Traffic in 2025 was 8,036,554 passengers and 72,622 tonnes",
+   "note": "CAAC: 8,036,554 passengers (down 6.9 per cent on 2024) and 72,622.4 tonnes of cargo and mail (down 7 per cent). 'Well short of that' compares these with the operator's stated capacity: about a third of the passenger figure.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "passengers 2025: 8,036,554; passengers 2024: 8,633,572; change -6.9%"
+    },
+    {
+     "file": "caac-2025-cargo",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "cargo and mail 2025: 72,622 tonnes"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "in 2025, the actual number of passenger movements was only 8,036,554 while the actual cargo movements were 72,622.4 tons"
+    }
+   ]
+  },
+  {
+   "claim": "in Penglai District",
+   "verdict": "cut",
+   "wasBefore": "in Penglai District",
+   "why": "Sources disagree on the district: Wikipedia puts the airport near Chaoshui in Penglai District, while the operator's own postal address puts its office in Chaoshui town under the Yantai Development Zone (烟台市开发区潮水镇). The distance is kept."
+  },
+  {
+   "claim": "construction started December 2009",
+   "verdict": "cut",
+   "wasBefore": "Construction started in December 2009",
+   "why": "Wikipedia alone; the operator's history does not record it and the 2014 Yantai government report only calls it the new airport."
+  },
+  {
+   "claim": "first arrival, China Eastern from Beijing at 00:05",
+   "verdict": "cut",
+   "wasBefore": "The first arrival was a China Eastern service from Beijing that landed five minutes after midnight.",
+   "why": "Wikipedia alone; the cited CARNOC and Bandao reports no longer load (empty page, 'news not found')."
+  },
+  {
+   "claim": "not grown as fast as planned",
+   "verdict": "cut",
+   "wasBefore": "It has not grown as fast as planned.",
+   "why": "Rests on the 2020 projection, which is Wikipedia's alone. The comparison the text now makes is with the operator's stated capacity."
+  },
+  {
+   "claim": "80,000 square metre terminal and 3,400 m runway built for 12 million and 90,000 tonnes by 2020",
+   "verdict": "cut",
+   "wasBefore": "The 80,000 square metre terminal and 3,400 metre runway were built for 12 million passengers and 90,000 tonnes of cargo a year by 2020",
+   "why": "Out of date: it described the 2015 terminal, and Terminal 2 has been in use since 2024 (operator; Yantai government). The 80,000 square metres and the 2020 projections rest on Wikipedia alone. The runway's 3,400 m is confirmed by OurAirports but is left out as it no longer carries the point."
+  },
+  {
+   "claim": "well short of those projections",
+   "verdict": "cut",
+   "wasBefore": "well short of those projections",
+   "why": "The projections are cut; the comparison is now with the operator's stated capacity ('well short of that')."
+  },
+  {
+   "claim": "Skytrax three stars",
+   "verdict": "cut",
+   "wasBefore": "Skytrax rates it three stars.",
+   "why": "Skytrax's live page still shows a 3-Star Domestic Airport rating, but its assessment is of Terminal 1 and says 'A new Terminal 2 is being built'. Passengers have used Terminal 2 since 2024, so the rating describes the old building."
+  },
+  {
+   "claim": "originally Yantai Chaoshui International, renamed April 2014",
+   "verdict": "cut",
+   "wasBefore": "It was originally called Yantai Chaoshui International and took its current name in April 2014.",
+   "why": "Wikipedia alone. Its source, a NetEase report of April 2014, now answers 404, and the Yantai government's 2014 work report calls it only the new airport."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which is a long way out and worth factoring into a transfer",
+   "why": "The old text's advice, kept: 45.6 km in a straight line from the city centre (coordinates)."
+  },
+  {
+   "text": "It is new.",
+   "why": "The old text's judgement, kept: the airport opened in 2015 and its terminal in 2024."
+  },
+  {
+   "text": "In practical terms that means it is not congested.",
+   "why": "The old text's judgement, kept: 2025 traffic was about a third of the capacity the airport gives for Terminal 2."
+  }
+ ],
+ "tracerOk": {
+  "200,000": "The operator writes 20万吨 (20 ten-thousands of tonnes), which is 200,000 tonnes; see the capacity claim."
+ }
+}

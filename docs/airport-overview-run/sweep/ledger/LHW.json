@@ -1,0 +1,314 @@
+{
+ "iata": "LHW",
+ "id": "recsLkACPhNH9lcrQ",
+ "name": "Lanzhou Zhongchuan International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Lanzhou_Zhongchuan_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Lanzhou, capital of Gansu province, and a hub for the province and for western China. It carried 17.7 million passengers in 2025, ranking 29th busiest in China.\n\nThe distance is the headline. It is 71 km north west of downtown Lanzhou, which is a long way by any standard, so a transfer here needs real time allowed for it.\n\nThe airport is essentially brand new inside. Terminal 3 opened on 20 March 2025 and took over all flights from the two older terminals. At 400,000 square metres with 87 gates across four piers, it dwarfs its predecessors, and has a ground transportation centre attached. Terminal 2 closed for renovation and is expected to become a cargo terminal.\n\nAny guidance referring to Terminal 1 or Terminal 2 for passenger flights is now out of date.\n\nIt is a focus city for China Eastern, Spring Airlines and Hainan Airlines, and opened in 1970.",
+ "after": "The main airport for Gansu, serving its capital, Lanzhou. It carried 17.7 million passengers in 2025, ranking 29th busiest in China.\n\nThe distance is the headline. It is 71 km north west of downtown Lanzhou, which is a long way by any standard, so a transfer here needs real time allowed for it.\n\nThe airport is essentially brand new inside. Terminal 3 opened on 20 March 2025 and took over all flights from the two older terminals. At 400,000 square metres, with four piers, it dwarfs its predecessors and has a ground transportation centre attached.\n\nAny guidance referring to Terminal 1 or Terminal 2 for passenger flights is now out of date.\n\nIt opened in 1970.",
+ "claims": [
+  {
+   "claim": "the main airport for Gansu, serving its capital, Lanzhou",
+   "verdict": "softened",
+   "inAfter": "The main airport for Gansu, serving its capital, Lanzhou",
+   "note": "Was 'the airport for Lanzhou, capital of Gansu province, and a hub for the province and for western China'. CAAC 2025: Lanzhou 17,734,885 passengers; the next Gansu airports, Dunhuang and Jiayuguan, about 1.28 million each, and the other six smaller still.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "is an international airport serving Lanzhou, the capital of Northwest China's Gansu province",
+      "serves as a major air hub for the province of Gansu"
+     ]
+    },
+    {
+     "file": "caac-2025-gansu",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "Row 兰州/中川: passenger rank 29 in China; passengers 2025: 17734885",
+      "Row 敦煌/莫高: passenger rank 94 in China; passengers 2025: 1285341",
+      "Row 嘉峪关/酒泉: passenger rank 95 in China; passengers 2025: 1280756"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "GeoNames class PPLA, the capital of a first-order division (state, province or region)"
+    }
+   ]
+  },
+  {
+   "claim": "17.7 million passengers in 2025, 29th busiest",
+   "verdict": "confirmed",
+   "inAfter": "It carried 17.7 million passengers in 2025, ranking 29th busiest in China.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 兰州/中川: passenger rank 29 in China; passengers 2025: 17,734,885"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Passenger traffic at Lanzhou Airport in 2025 was 17.7 million.",
+      "In 2025, the airport was ranked 29th busiest in China."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "71 km north west of downtown Lanzhou",
+   "verdict": "confirmed",
+   "inAfter": "It is 71 km north west of downtown Lanzhou",
+   "note": "Coordinates: 54.6 km in a straight line at 339 degrees (north, with north west the adjacent point, 24 degrees off); ratio 1.30, so 71 km reads as the road distance.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is located 71 kilometres (44 mi) northwest of downtown Lanzhou."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 54.6 km (33.9 miles)",
+      "Bearing from the city centre: 339 degrees, which is north"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 3 opened on 20 March 2025",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 3 opened on 20 March 2025",
+   "note": "Gansu Daily, three days before: the phase three works were declared complete on 16 March and operations would switch over at midnight on 20 March, when Terminal 3 would open. Wikipedia's current revision (14 September 2026) says it opened on that day. No source from the last 12 months outside Wikipedia could be read: the operator's site (lzzcairport.com, OurAirports' home link) failed to connect, Xinhua's Gansu index answered 502, the Gansu transport department answered 412 with an empty page, and the CAAC Gansu regulator's 2026 items do not name a terminal. The same pairing was accepted for Urumqi's 2025 terminal move.",
+   "sources": [
+    {
+     "file": "xinhua-gs-20250317",
+     "org": "Gansu Daily (on Xinhua's Gansu site)",
+     "dated": "2025-03-17",
+     "quote": [
+      "2025-03-17 08:54:51",
+      "来源：甘肃日报",
+      "等待3月20日零时转场运营时间的到来。届时，兰州中川国际机场T3航站楼正式启用。"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It officially opened on 20 March 2025."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Terminal 3 and the expanded facilities officially opened on 20 March 2025."
+    }
+   ]
+  },
+  {
+   "claim": "took over all flights from the two older terminals",
+   "verdict": "confirmed",
+   "inAfter": "and took over all flights from the two older terminals",
+   "note": "Gansu Daily calls the switch a 转场, the whole airport's operation moving over at midnight on 20 March; Terminal 3 stands east of Terminals 1 and 2.",
+   "sources": [
+    {
+     "file": "xinhua-gs-20250317",
+     "org": "Gansu Daily (on Xinhua's Gansu site)",
+     "dated": "2025-03-17",
+     "quote": [
+      "等待3月20日零时转场运营时间的到来",
+      "横亘在T1、T2航站楼以东的开阔区域"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The new Terminal 3, which replaced the two older terminals is scheduled to handle all flights from 20 March 2025 onwards."
+    }
+   ]
+  },
+  {
+   "claim": "400,000 square metres",
+   "verdict": "confirmed",
+   "inAfter": "At 400,000 square metres",
+   "sources": [
+    {
+     "file": "xinhua-gs-20250317",
+     "org": "Gansu Daily (on Xinhua's Gansu site)",
+     "dated": "2025-03-17",
+     "quote": "40万平方米的T3航站楼"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "With a floor area of 400,000 square metres"
+    }
+   ]
+  },
+  {
+   "claim": "four piers",
+   "verdict": "confirmed",
+   "inAfter": "with four piers",
+   "sources": [
+    {
+     "file": "xinhua-gs-20250317",
+     "org": "Gansu Daily (on Xinhua's Gansu site)",
+     "dated": "2025-03-17",
+     "quote": "4条曲线柔美的指廊向四周延伸而出"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "arranged over four piers"
+    }
+   ]
+  },
+  {
+   "claim": "it dwarfs its predecessors",
+   "verdict": "confirmed",
+   "inAfter": "it dwarfs its predecessors",
+   "note": "Gansu Daily: four times the floor area of Terminals 1 and 2 together.",
+   "sources": [
+    {
+     "file": "xinhua-gs-20250317",
+     "org": "Gansu Daily (on Xinhua's Gansu site)",
+     "dated": "2025-03-17",
+     "quote": "T3航站楼面积是现有T1、T2面积总和的4倍"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "it dwarfs Terminals 1 and 2"
+    }
+   ]
+  },
+  {
+   "claim": "ground transportation centre attached",
+   "verdict": "confirmed",
+   "inAfter": "and has a ground transportation centre attached",
+   "sources": [
+    {
+     "file": "xinhua-gs-20250317",
+     "org": "Gansu Daily (on Xinhua's Gansu site)",
+     "dated": "2025-03-17",
+     "quote": [
+      "27万平方米的综合交通中心",
+      "与T3航站楼构成壮观的建筑主体"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The newly opened Terminal 3 is directly connected with a Ground Transportation Center"
+    }
+   ]
+  },
+  {
+   "claim": "guidance naming Terminal 1 or 2 is out of date",
+   "verdict": "confirmed",
+   "inAfter": "Any guidance referring to Terminal 1 or Terminal 2 for passenger flights is now out of date.",
+   "note": "Follows from the move of all flights to Terminal 3 above.",
+   "sources": [
+    {
+     "file": "xinhua-gs-20250317",
+     "org": "Gansu Daily (on Xinhua's Gansu site)",
+     "dated": "2025-03-17",
+     "quote": "等待3月20日零时转场运营时间的到来"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The new Terminal 3, which replaced the two older terminals"
+    }
+   ]
+  },
+  {
+   "claim": "opened in 1970",
+   "verdict": "confirmed",
+   "inAfter": "It opened in 1970.",
+   "sources": [
+    {
+     "file": "xinhua-gs-20250317",
+     "org": "Gansu Daily (on Xinhua's Gansu site)",
+     "dated": "2025-03-17",
+     "quote": "中川机场于1970年7月通航。"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It was opened in 1970"
+    }
+   ]
+  },
+  {
+   "claim": "a hub for the province and for western China",
+   "verdict": "cut",
+   "wasBefore": "and a hub for the province and for western China",
+   "why": "Softened to the main airport for Gansu (CAAC 2025 table). 'Western China' rests on Wikipedia alone; Gansu Daily gives an international hub only as the provincial airport group's aim."
+  },
+  {
+   "claim": "87 gates",
+   "verdict": "cut",
+   "wasBefore": "with 87 gates",
+   "why": "Wikipedia alone. Gansu Daily gives 111 aircraft stands for the whole third phase, which is a different measure, so no gate count is given."
+  },
+  {
+   "claim": "Terminal 2 closed for renovation, to become a cargo terminal",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 closed for renovation and is expected to become a cargo terminal.",
+   "why": "Wikipedia alone, and a plan; no second source found. The operator's site did not connect."
+  },
+  {
+   "claim": "focus city for China Eastern, Spring Airlines and Hainan Airlines",
+   "verdict": "cut",
+   "wasBefore": "It is a focus city for China Eastern, Spring Airlines and Hainan Airlines",
+   "why": "Wikipedia alone; airline labels need a current source and none could be read (the operator's site did not connect)."
+  },
+  {
+   "claim": "railway station at Terminal 3",
+   "verdict": "cut",
+   "sources": [
+    {
+     "file": "railway-12306-stations",
+     "org": "China Railway 12306",
+     "dated": "2026-09-23",
+     "quote": "@zcd|中川机场东|ZRJ|zhongchuanjichangdong|zcjcd|3268|2102|兰州|||"
+    },
+    {
+     "file": "xinhua-gs-20250317",
+     "org": "Gansu Daily (on Xinhua's Gansu site)",
+     "dated": "2025-03-17",
+     "quote": "三期扩建工程的投运，使兰州中川国际机场成为集航空、铁路、轨道、公路等多种交通方式于一体、无缝换乘的综合交通枢纽"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Terminal 3 is served by Zhongchuan Airport Railway East Station",
+      "Travel time to Lanzhou West railway station is 38 minutes."
+     ]
+    }
+   ],
+   "why": "Held back: the old text never mentions the railway, so this replaces nothing, but it matters for a 71 km transfer. China Railway lists a Zhongchuan Airport East station (中川机场东) under Lanzhou, Gansu Daily says the third phase joined rail and road to the airport, and Wikipedia says the station serves Terminal 3 with trains to Lanzhou West in 38 minutes (the journey time is Wikipedia's alone). Was to read: \"Trains run from Zhongchuan Airport East station, beside Terminal 3, into Lanzhou.\""
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The distance is the headline.",
+   "why": "The old text's judgement, kept: 71 km by road, 54.6 km in a straight line."
+  },
+  {
+   "text": "which is a long way by any standard, so a transfer here needs real time allowed for it",
+   "why": "The old text's advice, kept on the confirmed distance."
+  },
+  {
+   "text": "The airport is essentially brand new inside.",
+   "why": "The old text's judgement, kept: all flights have used Terminal 3 since March 2025, four times the floor area of the old terminals together."
+  }
+ ],
+ "tracerOk": {}
+}
