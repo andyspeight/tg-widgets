@@ -1,0 +1,236 @@
+{
+ "iata": "BLL",
+ "id": "recWFI46TMF8XJTMr",
+ "name": "Billund Airport",
+ "country": "Denmark",
+ "wikipedia": "https://en.wikipedia.org/wiki/Billund_Airport",
+ "audited": "2026-09-23",
+ "before": "Denmark's second airport, just outside Billund, and one of the country's busiest cargo centres as well as a charter destination. It carries more than three million passengers a year and is tenth busiest in the Nordic countries.\n\nThe Lego connection is not a coincidence. The airport began in 1961 as a private 800 metre runway and hangar built by Godtfred Kirk Christiansen, son of the Lego Group's founder, north of his factory. Neighbouring municipalities joined as owners, a proper airport was built during 1964 and it opened that November. Passengers were handled in Lego's own hangar until the first terminal opened in spring 1966, and Lego's former chief pilot became its first director.\n\nRoad distances are worth knowing when placing a client: Vejle is 28 km, Kolding 41 km, Esbjerg 61 km and Aarhus 98 km. Airport buses serve all of those plus Horsens, Skanderborg and Give.\n\nThe main runway takes aircraft as large as a 747, though almost all 747 movements here are freight.",
+ "after": "Denmark's second airport, just outside Billund. It is one of the country's busiest cargo centres as well as a charter destination, and carries more than three million passengers a year.\n\nOpened in 1964 in an old hangar with a single control tower, it is owned by local municipalities.\n\nAirport buses run to Vejle, Kolding, Give, Esbjerg, Horsens, Skanderborg and Aarhus, connecting with trains.",
+ "claims": [
+  {
+   "claim": "Denmark's second airport",
+   "verdict": "confirmed",
+   "inAfter": "Denmark's second airport",
+   "note": "2025: Copenhagen 32.4 million, Billund 3.0 million, Aalborg 1.5 million (Statistics Denmark, in thousands; Eurostat).",
+   "sources": [
+    {
+     "file": "statbank-flyv31",
+     "org": "Statistics Denmark (StatBank table FLYV31)",
+     "dated": "2025",
+     "quote": [
+      "Copenhagen;1000 PASSENGERS, TOTAL ;2025;32409",
+      "Billund;1000 PASSENGERS, TOTAL ;2025;3029",
+      "Aalborg;1000 PASSENGERS, TOTAL ;2025;1483"
+     ]
+    },
+    {
+     "file": "eurostat-dk",
+     "org": "Eurostat",
+     "dated": "2026-09-23",
+     "quote": [
+      "Eurostat DK_EKCH KOBENHAVN/KASTRUP airport: passengers carried in 2025: 32,355,272",
+      "Eurostat DK_EKBI BILLUND airport: passengers carried in 2025: 3,017,857",
+      "Eurostat DK_EKYT AALBORG airport: passengers carried in 2025: 1,480,777"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "just outside Billund",
+   "verdict": "confirmed",
+   "inAfter": "just outside Billund",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Located 1 nautical mile (1.9 km; 1.2 mi) northeast of Billund"
+    },
+    {
+     "file": "op-fakta-historie",
+     "org": "Billund Lufthavn (operator, bll.dk)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Passagerterminalen 10"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": "OurAirports municipality: Billund"
+    }
+   ]
+  },
+  {
+   "claim": "one of the country's busiest cargo centres",
+   "verdict": "confirmed",
+   "inAfter": "one of the country's busiest cargo centres",
+   "note": "Eurostat 2025: Copenhagen 229,478 tonnes, Billund 35,846, then Esbjerg 710. The operator counts close to 90,000 tons in 2025, apparently including road feeder services.",
+   "sources": [
+    {
+     "file": "eurostat-dk-freight",
+     "org": "Eurostat",
+     "dated": "2026-09-23",
+     "quote": [
+      "Eurostat DK_EKCH KOBENHAVN/KASTRUP airport: freight and mail loaded and unloaded in 2025: 229,478 tonnes",
+      "Eurostat DK_EKBI BILLUND airport: freight and mail loaded and unloaded in 2025: 35,846 tonnes"
+     ]
+    },
+    {
+     "file": "op-cargo",
+     "org": "Billund Lufthavn (operator, bll.dk)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "With close to 90,000 tons of cargo in 2025"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "it serves as one of the country's busiest air cargo centres"
+    }
+   ]
+  },
+  {
+   "claim": "a charter destination",
+   "verdict": "confirmed",
+   "inAfter": "as well as a charter destination",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "as well as a charter airline destination"
+    },
+    {
+     "file": "op-fakta-historie",
+     "org": "Billund Lufthavn (operator, bll.dk)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "skabe optimale betingelser for flyselskaberne, charteroperatørerne og godstransportørerne"
+    }
+   ]
+  },
+  {
+   "claim": "more than three million passengers a year",
+   "verdict": "confirmed",
+   "inAfter": "carries more than three million passengers a year",
+   "note": "Over three million in each year 2022 to 2025 (Eurostat 3.68, 3.93, 3.89 and 3.02 million; Statistics Denmark 3,904,000 in 2024 and 3,029,000 in 2025). 2025 was down sharply on 2024.",
+   "sources": [
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "dated": "2026-09-23",
+     "quote": [
+      "Eurostat DK_EKBI Billund Airport: passengers carried in 2024: 3,891,475",
+      "Eurostat DK_EKBI Billund Airport: passengers carried in 2025: 3,017,857"
+     ]
+    },
+    {
+     "file": "statbank-flyv31",
+     "org": "Statistics Denmark (StatBank table FLYV31)",
+     "dated": "2025",
+     "quote": [
+      "Billund;1000 PASSENGERS, TOTAL ;2024;3904",
+      "Billund;1000 PASSENGERS, TOTAL ;2025;3029"
+     ]
+    },
+    {
+     "file": "op-fakta-historie",
+     "org": "Billund Lufthavn (operator, bll.dk)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "vores knap fire mio. passagerer"
+    }
+   ]
+  },
+  {
+   "claim": "opened in 1964 in an old hangar with a single control tower",
+   "verdict": "confirmed",
+   "inAfter": "Opened in 1964 in an old hangar with a single control tower",
+   "note": "The operator's own history (Danish): 'opened in 1964 in an old hangar with a single control tower and a 1,660 metre asphalt runway'. Wikipedia says passengers used Lego's hangar until 1966.",
+   "sources": [
+    {
+     "file": "op-fakta-historie",
+     "org": "Billund Lufthavn (operator, bll.dk)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Billund Lufthavn åbnede i 1964 i en gammel hangar med et enkelt kontroltårn"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "the airport opened on 1 November, with one runway at 1660 meters in length",
+      "and a control tower"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "owned by local municipalities",
+   "verdict": "confirmed",
+   "inAfter": "it is owned by local municipalities",
+   "note": "The operator lists its owners since 1 January 2007: Vejle (34.3 per cent), Kolding (25.9), Billund (15), Horsens (10.7), Fredericia (6.9), Hedensted (6.1) and others.",
+   "sources": [
+    {
+     "file": "op-fakta",
+     "org": "Billund Lufthavn (operator, bll.dk)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Vi har offentlige ejere",
+      "Fra den 1. januar 2007 er ejerkredsen: Vejle Kommune (34,3 %), Kolding kommune (25,9 %), Billund Kommune (15 %)"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Its 50% shareholding was then distributed among municipalities in the county"
+    }
+   ]
+  },
+  {
+   "claim": "airport buses to Vejle, Kolding, Give, Esbjerg, Horsens, Skanderborg and Aarhus, connecting with trains",
+   "verdict": "confirmed",
+   "inAfter": "Airport buses run to Vejle, Kolding, Give, Esbjerg, Horsens, Skanderborg and Aarhus, connecting with trains.",
+   "sources": [
+    {
+     "file": "op-bus",
+     "org": "Billund Lufthavn (operator, bll.dk)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "De mange busser forbinder ligeledes lufthavnen med toget i både Vejle, Give, Esbjerg, Skanderborg, Aarhus og København.",
+      "Rute 180: Grindsted og Esbjerg",
+      "Rute 119: Give",
+      "Rute 166: Kolding",
+      "Rute 43: Vejle",
+      "Vejle-Horsens-Skanderborg-Aarhus"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "There are airport buses to Horsens, Skanderborg and Aarhus as well as Vejle, Give, Kolding, and Esbjerg"
+    }
+   ]
+  },
+  {
+   "claim": "tenth busiest in the Nordic countries",
+   "verdict": "cut",
+   "wasBefore": "and is tenth busiest in the Nordic countries",
+   "why": "Wikipedia alone, undated."
+  },
+  {
+   "claim": "Lego origins: 1961 private 800 m runway by Godtfred Kirk Christiansen; opened November 1964; Lego's hangar until 1966; Lego's chief pilot as director",
+   "verdict": "cut",
+   "wasBefore": "The Lego connection is not a coincidence. The airport began in 1961 as a private 800 metre runway and hangar built by Godtfred Kirk Christiansen, son of the Lego Group's founder, north of his factory. Neighbouring municipalities joined as owners, a proper airport was built during 1964 and it opened that November. Passengers were handled in Lego's own hangar until the first terminal opened in spring 1966, and Lego's former chief pilot became its first director.",
+   "why": "The operator's own history confirms the 1964 opening in an old hangar with one control tower, and its owners; the Lego story, the 1961 private runway, November, 1966 and the chief pilot rest on Wikipedia alone."
+  },
+  {
+   "claim": "road distances: Vejle 28 km, Kolding 41 km, Esbjerg 61 km, Aarhus 98 km",
+   "verdict": "cut",
+   "wasBefore": "Road distances are worth knowing when placing a client: Vejle is 28 km, Kolding 41 km, Esbjerg 61 km and Aarhus 98 km.",
+   "why": "Wikipedia alone; the operator's bus page gives routes, not distances. The bus towns are kept."
+  },
+  {
+   "claim": "main runway takes a 747; 747 movements mostly freight",
+   "verdict": "cut",
+   "wasBefore": "The main runway takes aircraft as large as a 747, though almost all 747 movements here are freight.",
+   "why": "Wikipedia alone."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
