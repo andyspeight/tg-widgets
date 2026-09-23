@@ -185,3 +185,5 @@ two sources is `Done`, and Done is servable. That is Andy's call, asked on
 | 23 Sep 2026 | LOS Lagos | Verified and pushed. 7 kept, 4 cut. Caught: the layout was built around the 1979 terminal, which has been closed since airlines moved to the 2022 terminal by October 2023 and is being rebuilt (22 months from 2025); a fire there in February 2026; "Nigeria's largest airline" is only an aim on Air Peace's own site |
 
 Integrity pull, evening of 23 Sep: all 23 pushed records match their ledgers word for word, carry Verified Date 2026-09-23 and kept their Status. The other 576 Overview records are unchanged since the morning snapshot.
+
+Second integrity pull, 23 Sep, after 51 pushes: all 51 match their ledgers word for word (same record ids), carry Verified Date 2026-09-23 and kept their Status. The other 548 Overview records are unchanged since the morning snapshot.
