@@ -33,52 +33,69 @@ import { listStays, bookingMoment } from './_order-stays.js';
 /**
  * What we can upsell, in the order it is shown.
  *
- * TWO, not the four Andy listed, and the reason is the deep linking spec
- * rather than a choice. Travelify's document (Darren, read 23 Sep 2026) defines
- * exactly five search types:
+ * Travelify's deep linking document (Darren, 2022) describes five search types:
  *
  *     Flights · Accommodation · DynamicPackaging · CarRental · TicketsAttractions
  *
- * **There is no search type for airport transfers or for airport extras.** Both
- * are real products on a Travelify order, so we can see when someone has
- * booked one, and neither can be linked to a live search. A tile for them would
- * be a button with nowhere to go.
+ * It is NOT the whole list. Our own Event Tickets widgets have been booking
+ * through `TicketAccommodation` and `TicketAccommodationFlight` since August
+ * 2026, both from live links Andy supplied, and neither appears in the
+ * document. So "it is not in the spec" says the document is old, not that the
+ * search type does not exist.
  *
- * They stay on the list below as a note rather than an omission, so the next
- * person does not spend an afternoon rediscovering it. If Travelify add the
- * search types, adding the tiles back is this constant plus an anchor each.
+ * Which leaves `proved`. A tile is only shown once its link has been opened
+ * against the live service and landed on a real search:
  *
- * Also deliberately absent: Flights, Accommodation and Packages are the booking
- * itself rather than an addition, and Extras is a bag of supplier oddments with
- * nothing to search for.
+ *   - TicketsAttractions and CarRental are built from the document's own worked
+ *     examples, parameter for parameter.
+ *   - Transfers and AirportExtras are read across from Car Rental, which is the
+ *     nearest product the document does describe. That is a reasoned shape, not
+ *     a verified one, and the difference matters on a customer's booking: a
+ *     search type the service does not know gives them a button that 400s.
+ *     `npm run test:order-upsell` prints the exact URL each one would produce,
+ *     so opening it in a browser settles it; when it lands on a search, this
+ *     flag goes true and the tile ships.
+ *
+ * The same rule the Event Tickets deeplink works to, and for the same reason: a
+ * missing button is honest and a dead one is not.
+ *
+ * Deliberately absent whatever happens: Flights, Accommodation and Packages are
+ * the booking itself rather than an addition, and Extras is a bag of supplier
+ * oddments with nothing to search for.
  */
-export const UPSELL_PRODUCTS = Object.freeze(['TicketsAttractions', 'CarRental']);
+export const UPSELL_CATALOGUE = Object.freeze([
+  Object.freeze({
+    product: 'TicketsAttractions', st: 'TicketsAttractions', proved: true,
+    label: 'Things to do', hint: 'Tours, attractions and days out while you are there.',
+  }),
+  Object.freeze({
+    product: 'CarRental', st: 'CarRental', proved: true,
+    label: 'Car hire', hint: 'A car for your trip, picked up when you land.',
+  }),
+  Object.freeze({
+    product: 'Transfers', st: 'Transfers', proved: false,
+    label: 'Airport transfers', hint: 'A ride from the airport to where you are staying, and back.',
+  }),
+  Object.freeze({
+    product: 'AirportExtras', st: 'AirportExtras', proved: false,
+    label: 'Airport extras', hint: 'Parking, lounges and fast track at the airport you fly from.',
+  }),
+]);
 
-/** Asked for, and not possible yet. See above. */
-export const NOT_DEEPLINKABLE = Object.freeze({
-  Transfers: 'Travelify has no Transfers search type in the deep linking spec.',
-  AirportExtras: 'Travelify has no AirportExtras search type in the deep linking spec.',
-});
+/** The tiles a customer can actually be shown, in order. */
+export const UPSELL_PRODUCTS = Object.freeze(
+  UPSELL_CATALOGUE.filter((t) => t.proved).map((t) => t.product));
 
-/**
- * Search types, from Travelify's deep linking document.
- *
- * Both verified against the spec's own worked examples. An earlier draft of
- * this file guessed `Transfers` and `AirportExtras` from the product names and
- * would have shipped two dead buttons; the same draft anchored attractions on
- * `dst=CDG` when the spec wants a location NAME, and car hire on a date when
- * it wants a datetime. Reading the document was worth more than the guessing.
- */
-export const SEARCH_TYPE = Object.freeze({
-  TicketsAttractions: 'TicketsAttractions',
-  CarRental: 'CarRental',
-});
+/** Built, and waiting on one click against the live service. See above. */
+export const AWAITING_PROOF = Object.freeze(
+  UPSELL_CATALOGUE.filter((t) => !t.proved).map((t) => t.product));
+
+/** Search type by product, for every tile in the catalogue. */
+export const SEARCH_TYPE = Object.freeze(
+  UPSELL_CATALOGUE.reduce((acc, t) => { acc[t.product] = t.st; return acc; }, {}));
 
 /** What each tile says. Plain, warm, UK English, no exclamation marks. */
-const COPY = Object.freeze({
-  TicketsAttractions: { label: 'Things to do', hint: 'Tours, attractions and days out while you are there.' },
-  CarRental: { label: 'Car hire', hint: 'A car for your trip, picked up when you land.' },
-});
+const COPY = new Map(UPSELL_CATALOGUE.map((t) => [t.product, { label: t.label, hint: t.hint }]));
 
 /** yyyy-mm-dd from a Travelify date, read as a calendar date and not an instant. */
 export function dayOf(value) {
@@ -119,6 +136,11 @@ export function tripShape(order) {
   // reads back, so the UTC fields ARE the local clock.
   let arriveAt = '';
   let departAt = '';
+  // Airport extras are bought at the airport they fly FROM and last as long as
+  // the car is parked, so they need the other two clocks: the moment they leave
+  // and the moment they get back.
+  let leaveAt = '';
+  let backAt = '';
 
   for (const f of flights) {
     const legs = Array.isArray(f.legs) ? f.legs : [];
@@ -135,10 +157,12 @@ export function tripShape(order) {
         originIata = from;
         destIata = to || null;
         outboundDate = dayOf(first.depart);
+        leaveAt = clockOf(first.depart);
         arriveAt = clockOf(last && last.arrive);
       } else if (to && originIata && to === originIata) {
         inboundDate = dayOf(first.depart);
         departAt = clockOf(first.depart);
+        backAt = clockOf(last && last.arrive);
       }
     }
   }
@@ -165,6 +189,8 @@ export function tripShape(order) {
     stayCount: stays.length,
     arriveAt,
     departAt,
+    leaveAt,
+    backAt,
     // Where the trip actually happens. The spec's location searches want a
     // NAME plus a country code ("loc=Barcelona&ctry=ES"), not an airport code,
     // so this comes off the accommodation's own location. A resort or state is
@@ -338,6 +364,10 @@ export function partySize(order) {
 export function upsellTiles(order, opts = {}) {
   if (!order) return [];
   const enabled = (opts && opts.enabled) || {};
+  // `include` is for the test and the staff probe: it builds a tile for a
+  // product that is in the catalogue but not yet proved, so its real URL can be
+  // read off and opened. It is never passed by the API.
+  const include = (opts && Array.isArray(opts.include)) ? opts.include : [];
   const booked = bookedProducts(order);
   const trip = tripShape(order);
   const party = partySize(order);
@@ -348,7 +378,9 @@ export function upsellTiles(order, opts = {}) {
   const toDate = trip.checkOut || trip.inboundDate || fromDate;
 
   const tiles = [];
-  for (const product of UPSELL_PRODUCTS) {
+  const wanted = include.length ? UPSELL_CATALOGUE.filter((t) => t.proved || include.includes(t.product)).map((t) => t.product)
+    : UPSELL_PRODUCTS;
+  for (const product of wanted) {
     if (booked.has(product)) continue;
     if (enabled[product] === false) continue;
 
@@ -370,14 +402,42 @@ export function upsellTiles(order, opts = {}) {
       if (trip.destIata && from && to) {
         anchor = { pup: trip.destIata, pupt: 'Airport', pupctry: (trip.place && trip.place.ctry) || '', fr: from, to };
       }
+    } else if (product === 'Transfers') {
+      // Read across from Car Rental, which is the nearest product the document
+      // describes: a pickup, a dropoff, and a datetime on each. A transfer runs
+      // from the airport they land at to where they are staying, so unlike car
+      // hire the dropoff is a real second place rather than "back where you
+      // started", and the document's own drp/drpctry/drpt carry it.
+      // st=Transfers&pup=<iata>&pupt=Airport&drp=<place>&drpt=City&fr=&to=
+      if (trip.destIata && trip.place && trip.arriveAt && trip.departAt) {
+        anchor = {
+          pup: trip.destIata, pupctry: trip.place.ctry, pupt: 'Airport',
+          drp: trip.place.loc, drpctry: trip.place.ctry, drpt: trip.place.type,
+          fr: trip.arriveAt, to: trip.departAt,
+        };
+      }
+    } else if (product === 'AirportExtras') {
+      // Parking, a lounge and fast track belong to the airport they FLY FROM
+      // and to the whole time the car is parked: out on the outbound departure,
+      // back on the inbound arrival. Not the week in Paris, which is the reason
+      // each product states its own anchor rather than sharing the trip's.
+      // The origin airport's country is not on the booking, and the document
+      // lets a location stand on its code when the type says Airport.
+      // st=AirportExtras&loc=<iata>&loct=Airport&fr=<datetime>&to=<datetime>
+      if (trip.originIata && trip.leaveAt) {
+        anchor = {
+          loc: trip.originIata, ctry: '', loct: 'Airport',
+          fr: trip.leaveAt, to: trip.backAt || trip.leaveAt,
+        };
+      }
     }
 
     if (!anchor) continue;   // nothing to search for beats a link that dead-ends
     tiles.push({
       product,
       st: SEARCH_TYPE[product],
-      label: COPY[product].label,
-      hint: COPY[product].hint,
+      label: COPY.get(product).label,
+      hint: COPY.get(product).hint,
       ...anchor,
       adults: party.adults,
       children: party.children,
@@ -402,6 +462,9 @@ export function upsellUrl(tile, appId) {
   // Location, however this search type names it.
   if (tile.loc) { p.set('loc', tile.loc); if (tile.ctry) p.set('ctry', tile.ctry); if (tile.loct) p.set('loct', tile.loct); }
   if (tile.pup) { p.set('pup', tile.pup); if (tile.pupctry) p.set('pupctry', tile.pupctry); if (tile.pupt) p.set('pupt', tile.pupt); }
+  // A transfer is dropped somewhere other than where it was picked up. Car hire
+  // sends none and the document returns it to the pickup, which is right.
+  if (tile.drp) { p.set('drp', tile.drp); if (tile.drpctry) p.set('drpctry', tile.drpctry); if (tile.drpt) p.set('drpt', tile.drpt); }
   if (tile.fr) p.set('fr', tile.fr);
   if (tile.to && tile.to !== tile.fr) p.set('to', tile.to);
   // The party, as three separate counts, because Travelify prices them as three
