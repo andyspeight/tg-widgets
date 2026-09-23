@@ -1,0 +1,152 @@
+{
+ "iata": "BDS",
+ "id": "recOALO3G38k1Emfz",
+ "name": "Brindisi Airport",
+ "country": "Italy",
+ "wikipedia": "https://en.wikipedia.org/wiki/Brindisi_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Brindisi and the Salento, 6 km from the city centre, and the obvious arrival for the heel of Italy. It also goes by Papola Casale and Salento Airport, so all three names turn up in supplier systems.\n\nThere is more going on here than the passenger traffic suggests. Since 1994 the airport has been the United Nations' main global logistics base for peacekeeping operations, taking over from Pisa, and since 2000 it has held the United Nations Humanitarian Response Depot, run by the World Food Programme, from which aid is sent to disaster zones worldwide. Its position in the Mediterranean and its road and port connections a few kilometres away also make it important to Italian defence and to NATO.\n\nIt began as a military airfield in the 1920s and only became legally a civilian airport in 2008, with the military side still operating under its own name.\n\nCommercial flights to Rome date from the 1930s, and Alitalia took the route over after the Second World War.",
+ "after": "Brindisi's airport, a few kilometres from the city centre and the obvious arrival for the Salento and the heel of Italy. It is also listed as Brindisi Casale, so expect both names in supplier systems.\n\nThere is more going on here than the passenger traffic suggests. Since 1994 Brindisi has hosted the United Nations' logistics base, chosen for its airfield and harbour and now the UN Global Service Centre, which supports peace operations worldwide. The city also holds one of the hubs of the UN Humanitarian Response Depot, run by the World Food Programme, from which aid is sent to emergencies around the world.",
+ "claims": [
+  {
+   "claim": "Brindisi's airport, a few kilometres from the city centre",
+   "verdict": "softened",
+   "inAfter": "Brindisi's airport, a few kilometres from the city centre",
+   "note": "Was '6 km from the city centre' (Wikipedia). The straight line from the GeoNames centre is only 3.0 km (ratio 2.0, which fails the coordinates check), so the distance is softened to what both support.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "is an airport in Brindisi, in southern Italy, located 6 kilometres (3.7 mi) from the city centre."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 3.0 km (1.8 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "also listed as Brindisi Casale",
+   "verdict": "softened",
+   "inAfter": "It is also listed as Brindisi Casale, so expect both names in supplier systems.",
+   "note": "Was 'It also goes by Papola Casale and Salento Airport, so all three names turn up in supplier systems'. Eurostat's own label is BRINDISI/CASALE; Papola and Salento Airport rest on Wikipedia alone (see the cut).",
+   "sources": [
+    {
+     "file": "eurostat-it",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat IT_LIBR BRINDISI/CASALE airport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "also known as Brindisi Papola Casale Airport and Salento Airport"
+    }
+   ]
+  },
+  {
+   "claim": "since 1994 the UN logistics base, chosen for its airfield and harbour, now the UN Global Service Centre supporting peace operations worldwide",
+   "verdict": "corrected",
+   "inAfter": "Since 1994 Brindisi has hosted the United Nations' logistics base, chosen for its airfield and harbour and now the UN Global Service Centre, which supports peace operations worldwide.",
+   "note": "Was 'Since 1994 the airport has been the United Nations' main global logistics base for peacekeeping operations, taking over from Pisa'. The UN's own history: the Pisa supply depot could not absorb the stock, so a site with an airfield and harbour side by side was sought, and in 1994 the first permanent UN Logistics Base was set up in Brindisi; it has since become the Global Service Centre serving all peace operations.",
+   "sources": [
+    {
+     "file": "ungsc-history",
+     "org": "United Nations Global Service Centre (ungsc.org)",
+     "quote": [
+      "The United Nations Global Service Centre (UNGSC) evolved from a logistics base founded in 1994 to support UN Peacekeeping Operations in the Balkans, to a comprehensive operational hub serving all peace operations worldwide",
+      "so began the search to find a suitable location where an airfield and harbor were adjacent to each other.",
+      "In 1994, a small Southern Italian city of Brindisi was identified as the ideal location, and the first permanent Logistics Base of the United Nations (UNLB) was established."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "in 1994 the airport was chosen as the main global logistics base by the United Nations to support its peacekeeping and peace enforcement operations around the world"
+    }
+   ]
+  },
+  {
+   "claim": "one of the hubs of the UN Humanitarian Response Depot, run by the World Food Programme",
+   "verdict": "confirmed",
+   "inAfter": "The city also holds one of the hubs of the UN Humanitarian Response Depot, run by the World Food Programme, from which aid is sent to emergencies around the world.",
+   "note": "WFP lists Brindisi among UNHRD's five hubs (with Accra, Kuala Lumpur, Panama City and Dubai).",
+   "sources": [
+    {
+     "file": "wfp-unhrd",
+     "org": "World Food Programme (wfp.org)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Managed by the World Food Programme (WFP), UNHRD enables humanitarian actors to pre-position and stockpile relief items",
+      "Hubs strategically located around the globe, in Italy (Brindisi)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "It has since then been managed by the World Food Programme and officially known as the United Nations Humanitarian Response Depot (UNHRD)."
+    }
+   ]
+  },
+  {
+   "claim": "6 km from the city centre",
+   "verdict": "cut",
+   "wasBefore": "6 km from the city centre",
+   "why": "Fails the coordinates check (3.0 km in a straight line). Softened (see above)."
+  },
+  {
+   "claim": "Papola and Salento Airport as names",
+   "verdict": "cut",
+   "wasBefore": "It also goes by Papola Casale and Salento Airport, so all three names turn up in supplier systems.",
+   "why": "Wikipedia alone for Papola and Salento Airport. The operator's site (aeroportidipuglia.it) answers with a security check (see Bari), and the Italian Air Force site did not answer tonight. Ryanair's own data calls it simply Brindisi. Casale stays (Eurostat)."
+  },
+  {
+   "claim": "the UN's main global logistics base, taking over from Pisa",
+   "verdict": "cut",
+   "wasBefore": "the airport has been the United Nations' main global logistics base for peacekeeping operations, taking over from Pisa",
+   "why": "Reworded to what the UN's own history says (see above): the base was set up in Brindisi because the Pisa depot could not absorb the stock, not as a move of the Pisa depot."
+  },
+  {
+   "claim": "the humanitarian depot since 2000",
+   "verdict": "cut",
+   "wasBefore": "since 2000 it has held the United Nations Humanitarian Response Depot, run by the World Food Programme, from which aid is sent to disaster zones worldwide",
+   "why": "The year 2000 rests on Wikipedia alone; WFP's page lists the Brindisi hub without a date. Reworded (see above)."
+  },
+  {
+   "claim": "important to Italian defence and to NATO",
+   "verdict": "cut",
+   "wasBefore": "Its position in the Mediterranean and its road and port connections a few kilometres away also make it important to Italian defence and to NATO.",
+   "why": "Wikipedia alone. The operator's site (aeroportidipuglia.it) answers with a security check (see Bari), and the Italian Air Force site did not answer tonight."
+  },
+  {
+   "claim": "a military airfield in the 1920s, legally civilian since 2008, the military side under its own name",
+   "verdict": "cut",
+   "wasBefore": "It began as a military airfield in the 1920s and only became legally a civilian airport in 2008, with the military side still operating under its own name.",
+   "why": "Wikipedia alone. The operator's site (aeroportidipuglia.it) answers with a security check (see Bari), and the Italian Air Force site did not answer tonight."
+  },
+  {
+   "claim": "flights to Rome from the 1930s; Alitalia after the Second World War",
+   "verdict": "cut",
+   "wasBefore": "Commercial flights to Rome date from the 1930s, and Alitalia took the route over after the Second World War.",
+   "why": "Wikipedia alone. The operator's site (aeroportidipuglia.it) answers with a security check (see Bari), and the Italian Air Force site did not answer tonight."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and the obvious arrival for the Salento and the heel of Italy",
+   "why": "The old text's judgement, kept."
+  },
+  {
+   "text": "There is more going on here than the passenger traffic suggests.",
+   "why": "The old text's framing, kept; the UN facts that follow are sourced."
+  }
+ ],
+ "tracerOk": {
+  "Brindisi Casale": "Eurostat's label is BRINDISI/CASALE and Wikipedia gives Brindisi Papola Casale; the tracer cannot see the slash as a space."
+ }
+}
