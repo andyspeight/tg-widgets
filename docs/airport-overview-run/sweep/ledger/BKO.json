@@ -1,0 +1,173 @@
+{
+ "iata": "BKO",
+ "id": "recfaABXy1JuTVgtZ",
+ "name": null,
+ "country": "Mali",
+ "wikipedia": "https://en.wikipedia.org/wiki/Modibo_Keita_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Mali's main airport, about 15 km south of central Bamako, managed by Aéroports du Mali.\n\nSecurity is the first thing to establish before any booking. The airport was stormed by JNIM militants on 17 September 2024 as part of coordinated attacks across Bamako, during which aircraft were destroyed, fire was opened at the presidential hangar and a World Food Programme humanitarian aircraft was damaged. It was attacked again on 25 April 2026 as part of a larger offensive. Check current advice and operating status directly rather than relying on a schedule.\n\nThe airport itself opened in 1974 and was substantially upgraded between 2007 and 2012 in a 181 million dollar project funded by the Millennium Challenge Corporation, a United States aid agency.\n\nTraffic grew steadily through the 2000s, from just over 400,000 passengers in 1999 to 516,000 by 2005, with 27 carriers operating at least weekly in the 2007 to 2008 period.\n\nIt sits alongside Air Base 101, used by the Malian Air Force. The airport was formerly called Bamako-Sénou.",
+ "after": "Modibo Keita International, formerly Bamako-Sénou, is Bamako's international airport, south of the city centre.\n\nSecurity comes first. On 17 September 2024 JNIM militants attacked the airport as part of coordinated attacks in Bamako, and published videos of fighters firing into the presidential hangar and destroying aircraft; a World Food Programme plane was damaged. Coordinated attacks across Mali on 25 April 2026 reached the area around the airport again.\n\nThe FCDO advises against all travel to Mali and tells British nationals there to leave by commercial flight if they judge it safe to do so.",
+ "claims": [
+  {
+   "claim": "Modibo Keita International, formerly Bamako-Sénou",
+   "verdict": "confirmed",
+   "inAfter": "Modibo Keita International, formerly Bamako-Sénou",
+   "note": "The record itself has no airport name; the owner may want to fill it with Modibo Keita International Airport.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Modibo Keita International Airport (IATA: BKO, ICAO: GABS) (formerly the Bamako–Sénou International Airport)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "Airport: Modibo Keita International Airport (OurAirports GABS, IATA BKO)"
+    },
+    {
+     "file": "mcc-compact",
+     "org": "Millennium Challenge Corporation (US government)",
+     "quote": "Bamako-Sénou Airport Improvement Project"
+    }
+   ]
+  },
+  {
+   "claim": "Bamako's international airport, south of the city centre",
+   "verdict": "corrected",
+   "inAfter": "is Bamako's international airport, south of the city centre",
+   "note": "Was '15 km south of central Bamako'. Coordinates give 8.8 km in a straight line at 162 degrees (south) from the GeoNames centre, a ratio of 1.70, outside the tolerance, and no second written source gives a distance, so the figure goes and the direction stays.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "is an international airport serving Bamako, the capital of Mali",
+      "south of Bamako city centre"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Bamako",
+      "Bearing from the city centre: 162 degrees, which is south"
+     ]
+    },
+    {
+     "file": "fcdo-mali-safety",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": "Bamako International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "17 September 2024 JNIM attack on the airport: presidential hangar, aircraft, WFP plane damaged",
+   "verdict": "corrected",
+   "inAfter": "On 17 September 2024 JNIM militants attacked the airport as part of coordinated attacks in Bamako, and published videos of fighters firing into the presidential hangar and destroying aircraft; a World Food Programme plane was damaged.",
+   "note": "Was 'aircraft were destroyed, fire was opened at the presidential hangar', stated as fact. Both sources attribute the destruction to JNIM's own claims and videos, so the text does too. Al Jazeera's 'on Tuesday', in a report dated Friday 20 September 2024, is 17 September.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "On 17 September 2024, the airport was stormed by Jama'at Nusrat al-Islam wal Muslimin militants as part of a series of coordinated attacks across multiple locations in Bamako.",
+      "The JNIM claimed to have destroyed aircraft and opened fire at the presidential hangar.",
+      "An aircraft used for humanitarian work by the World Food Programme was also damaged."
+     ]
+    },
+    {
+     "file": "aljazeera-2024",
+     "org": "Al Jazeera",
+     "dated": "2024-09-20",
+     "quote": [
+      "carried out the attack on an elite police training academy and the nearby airport on Tuesday",
+      "It published videos on social media that showed its fighters firing randomly into the windows of the presidential hangar and destroying aircraft.",
+      "A plane used for humanitarian work by the World Food Programme (WFP) was one of those damaged"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "25 April 2026 coordinated attacks reached the area around the airport",
+   "verdict": "softened",
+   "inAfter": "Coordinated attacks across Mali on 25 April 2026 reached the area around the airport again.",
+   "note": "Wikipedia says the airport was attacked; the FCDO says the attacks were in its vicinity and closed it temporarily. The text keeps what both say. Al Jazeera's liveblog of the day is closed and its entries did not load.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport was attacked by JNIM again on 25 April 2026 as part of a larger offensive."
+    },
+    {
+     "file": "fcdo-mali-safety",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": "on 25 April 2026, a series of coordinated attacks occurred in multiple locations including Kidal, Gao, Kati, Severe and in the vicinity of Bamako International Airport (leading to the airport’s temporary closure)"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: against all travel to Mali; leave by commercial flight if safe",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "The FCDO advises against all travel to Mali and tells British nationals there to leave by commercial flight if they judge it safe to do so.",
+   "note": "Attributed statement, checked against the FCDO page (updated 10 July 2026, still current 23 September 2026).",
+   "sources": [
+    {
+     "file": "fcdo-mali",
+     "org": "UK Foreign, Commonwealth and Development Office (FCDO)",
+     "quote": [
+      "FCDO advises against all travel to Mali.",
+      "If you’re in Mali, you should leave immediately by commercial flight if you judge it safe to do so.",
+      "23 September 2026",
+      "10 July 2026"
+     ],
+     "dated": "2026-07-10"
+    }
+   ]
+  },
+  {
+   "claim": "main airport, 15 km south, managed by Aéroports du Mali",
+   "verdict": "cut",
+   "wasBefore": "Mali's main airport, about 15 km south of central Bamako, managed by Aéroports du Mali.",
+   "why": "Reworded: the name, the old name and the direction are kept. The 15 km fails the coordinates check (8.8 km, ratio 1.70) and 'main' and the manager rest on Wikipedia alone (the operator's site shows only a menu)."
+  },
+  {
+   "claim": "security first; stormed 17 Sep 2024 as first worded",
+   "verdict": "cut",
+   "wasBefore": "Security is the first thing to establish before any booking. The airport was stormed by JNIM militants on 17 September 2024 as part of coordinated attacks across Bamako, during which aircraft were destroyed, fire was opened at the presidential hangar and a World Food Programme humanitarian aircraft was damaged.",
+   "why": "Reworded to attribute the destruction to JNIM's own videos, as both sources do."
+  },
+  {
+   "claim": "attacked again 25 April 2026; check advice",
+   "verdict": "cut",
+   "wasBefore": "It was attacked again on 25 April 2026 as part of a larger offensive. Check current advice and operating status directly rather than relying on a schedule.",
+   "why": "Reworded to what Wikipedia and the FCDO both say; the FCDO's own advice now closes the text."
+  },
+  {
+   "claim": "opened 1974; upgraded 2007 to 2012, $181m, MCC",
+   "verdict": "cut",
+   "wasBefore": "The airport itself opened in 1974 and was substantially upgraded between 2007 and 2012 in a 181 million dollar project funded by the Millennium Challenge Corporation, a United States aid agency.",
+   "why": "The 1974 date and the $181 million have one source. MCC's own page confirms an airport project in its 2006 to 2012 compact (a new terminal, a longer runway) but not the sum, and says the compact was terminated early after the 2012 coup. Not worth a sentence next to the security picture."
+  },
+  {
+   "claim": "traffic 1999 to 2005; 27 carriers 2007-08",
+   "verdict": "cut",
+   "wasBefore": "Traffic grew steadily through the 2000s, from just over 400,000 passengers in 1999 to 516,000 by 2005, with 27 carriers operating at least weekly in the 2007 to 2008 period.",
+   "why": "Twenty years stale and single-source."
+  },
+  {
+   "claim": "alongside Air Base 101; formerly Bamako-Sénou",
+   "verdict": "cut",
+   "wasBefore": "It sits alongside Air Base 101, used by the Malian Air Force. The airport was formerly called Bamako-Sénou.",
+   "why": "The air base has one source. The former name is kept in the first sentence."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Security comes first.",
+   "why": "Advice kept from the old text; it follows from the attacks and the FCDO advice that come next."
+  }
+ ],
+ "tracerOk": {}
+}

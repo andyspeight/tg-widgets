@@ -1,0 +1,153 @@
+{
+ "iata": "VIJ",
+ "id": "recydf6fuxt60AOB8",
+ "name": "Virgin Gorda Airport",
+ "country": "British Virgin Islands",
+ "wikipedia": "https://en.wikipedia.org/wiki/Virgin_Gorda_Airport",
+ "audited": "2026-09-23",
+ "before": "A small airport on Virgin Gorda in the British Virgin Islands.\n\nTreat scheduled service here as something to verify rather than assume. The airport has a long history of commuter airlines flying in from San Juan and the US Virgin Islands, including American Eagle, Sunaire as Eastern Express, Crown Air, Virgin Island Airways, Vieques Air Link and the Tortola-based Air BVI, but all of those are past operations. Check current schedules directly before quoting a client.\n\nThe aircraft that served it tell you the scale: Twin Otters, Britten-Norman Islanders, Cessna 402s, all short take-off types.\n\nTortola is very close. Air BVI once ran a no-reservation shuttle between Beef Island on Tortola and Virgin Gorda with a flight time of five minutes.",
+ "after": "The airport on Virgin Gorda in the British Virgin Islands, also called Taddy Bay Airport. Its runway is short and unpaved.\n\nTradewind Aviation offers scheduled flights from San Juan, and charter flights come in from around the region. Check current schedules before quoting a client.",
+ "claims": [
+  {
+   "claim": "the airport on Virgin Gorda in the British Virgin Islands",
+   "verdict": "confirmed",
+   "inAfter": "The airport on Virgin Gorda in the British Virgin Islands",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is an airport on Virgin Gorda in the British Virgin Islands"
+    },
+    {
+     "file": "bvitourism-air",
+     "org": "BVI Tourism (official tourist board)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Taddy Bay Airport, Virgin Gorda (VIJ)"
+    }
+   ]
+  },
+  {
+   "claim": "also called Taddy Bay Airport",
+   "verdict": "corrected",
+   "inAfter": "also called Taddy Bay Airport",
+   "note": "New to the text but it corrects the identity: the territory's airports authority and tourist board both use Taddy Bay, and Wikipedia does not. The record's own name (Virgin Gorda Airport) is left for the owner to decide.",
+   "sources": [
+    {
+     "file": "bviaa-taddybay",
+     "org": "BVI Airports Authority",
+     "quote": "Taddy Bay International Airport (IATA: VIJ, ICAO: TUPW) is the airport on Virgin Gorda, British Virgin Islands."
+    },
+    {
+     "file": "bvitourism-air",
+     "org": "BVI Tourism (official tourist board)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Taddy Bay Airport, Virgin Gorda (VIJ)"
+    }
+   ]
+  },
+  {
+   "claim": "runway is short and unpaved",
+   "verdict": "confirmed",
+   "inAfter": "Its runway is short and unpaved.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The runway at the airport remains an unpaved, sand and gravel airstrip."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "Runway 03/21: 945 m (3,100 ft), GRAVEL"
+    },
+    {
+     "file": "tradewind-vij",
+     "org": "Tradewind Aviation",
+     "dated": "2026-09-23 (live page)",
+     "quote": "perfectly suited for landing on this relatively short runway"
+    }
+   ]
+  },
+  {
+   "claim": "Tradewind Aviation offers scheduled flights from San Juan",
+   "verdict": "corrected",
+   "inAfter": "Tradewind Aviation offers scheduled flights from San Juan",
+   "note": "Replaces the list of past airlines. The tourist board gives the season as 10 December 2026 to 12 April 2027 and also names Cape Air (from San Juan and St Thomas) and Seaborne (from St Thomas); Wikipedia and the airports authority's page, which copies Wikipedia word for word, say Air Sunshine is the only scheduled airline. With the sources split, only Tradewind, which confirms its own service, is named.",
+   "sources": [
+    {
+     "file": "tradewind-vij",
+     "org": "Tradewind Aviation",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Tradewind scheduled service flights are available to Virgin Gorda from San Juan (SJU)"
+    },
+    {
+     "file": "bvitourism-air",
+     "org": "BVI Tourism (official tourist board)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Tradewind Aviation - Scheduled flights between San Juan and Tortola from Dec. 19, 2026 to April 12, 2027 and  San Juan and Virgin Gorda Dec. 10, 2026 to April 12 2027."
+    }
+   ]
+  },
+  {
+   "claim": "charter flights come in from around the region",
+   "verdict": "confirmed",
+   "inAfter": "and charter flights come in from around the region",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "currently operates on demand, non-scheduled charter service to the airport"
+    },
+    {
+     "file": "bvitourism-air",
+     "org": "BVI Tourism (official tourist board)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Charter airline service can be arranged from almost anywhere in the Caribbean, as well."
+    },
+    {
+     "file": "tradewind-vij",
+     "org": "Tradewind Aviation",
+     "dated": "2026-09-23 (live page)",
+     "quote": "or for island hopping from Antigua, the U.S. Virgin Islands, and other points in the Caribbean"
+    }
+   ]
+  },
+  {
+   "claim": "small airport on Virgin Gorda",
+   "verdict": "cut",
+   "wasBefore": "A small airport on Virgin Gorda in the British Virgin Islands.",
+   "why": "Reworded with the Taddy Bay name."
+  },
+  {
+   "claim": "treat scheduled service as something to verify",
+   "verdict": "cut",
+   "wasBefore": "Treat scheduled service here as something to verify rather than assume.",
+   "why": "Replaced by the confirmed Tradewind service and the closing advice."
+  },
+  {
+   "claim": "past commuter airlines list",
+   "verdict": "cut",
+   "wasBefore": "The airport has a long history of commuter airlines flying in from San Juan and the US Virgin Islands, including American Eagle, Sunaire as Eastern Express, Crown Air, Virgin Island Airways, Vieques Air Link and the Tortola-based Air BVI, but all of those are past operations.",
+   "why": "History from Wikipedia alone, of no use for booking."
+  },
+  {
+   "claim": "aircraft types",
+   "verdict": "cut",
+   "wasBefore": "The aircraft that served it tell you the scale: Twin Otters, Britten-Norman Islanders, Cessna 402s, all short take-off types.",
+   "why": "Only Wikipedia, and historical."
+  },
+  {
+   "claim": "Tortola close; Air BVI five-minute shuttle",
+   "verdict": "cut",
+   "wasBefore": "Tortola is very close. Air BVI once ran a no-reservation shuttle between Beef Island on Tortola and Virgin Gorda with a flight time of five minutes.",
+   "why": "A 1980 timetable quoted by Wikipedia alone."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Check current schedules before quoting a client.",
+   "why": "Advice kept from the old text: the sources disagree on which airlines fly, and the scheduled service is seasonal."
+  }
+ ],
+ "tracerOk": {}
+}
