@@ -6,12 +6,12 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Sanaa_International_Airport",
  "audited": "2026-09-23",
  "before": "Yemen's principal international airport, in Sanaa, serving the capital and the whole of the northern provinces. Before the war it carried about 1.7 million passengers a year, 80 per cent of all air travel in Yemen, on an average of 38 flights a day.\n\nVery little of that holds now, and anyone looking at this airport needs current information rather than a description. Civilian flights stopped in March 2015 when a no-fly zone was imposed over the country. The runway and terminal were severely damaged by bombardment in April 2015, and the airport was bombed again in November 2017 and December 2021. It has been closed and reopened repeatedly, at times only for humanitarian aid and United Nations medical flights, with commercial flights resuming in May 2022.\n\nThe airport itself is a single 3,200 metre runway shared with the Al-Dailami air base, an apron with 27 stands and a passenger terminal dating from the 1970s.\n\nTreat any schedule for this airport as provisional and verify it before booking.",
- "after": "The airport for Yemen's capital, Sanaa, which is held by the Houthis. The FCDO advises against all travel to Yemen.\n\nCommercial flights resumed in May 2022 after six years, but the airport has been struck repeatedly since. Israeli air strikes hit it in December 2024 and again in May 2025, when they destroyed the last civilian plane Yemenia was flying from Sanaa. On 13 July 2026, forces of Yemen's internationally recognised government bombed the runway to stop a plane from Iran landing.\n\nIt has a single runway. Treat any schedule as provisional and verify it before booking.",
+ "after": "Sanaa's airport serves Yemen's capital, which is held by the Houthis. The FCDO advises against all travel to Yemen.\n\nCommercial flights resumed in May 2022 after six years, but the airport has been struck repeatedly since. Israeli air strikes hit it in December 2024 and again in May 2025, when they destroyed the last civilian plane Yemenia was flying from Sanaa. On 13 July 2026, forces of Yemen's internationally recognised government bombed the runway to stop a plane from Iran landing.\n\nIt has a single runway. Treat any schedule as provisional and verify it before booking.",
  "claims": [
   {
    "claim": "the airport for Yemen's capital, Sanaa",
    "verdict": "softened",
-   "inAfter": "The airport for Yemen's capital, Sanaa",
+   "inAfter": "Sanaa's airport serves Yemen's capital",
    "note": "Was 'Yemen's principal international airport ... serving the whole of the northern provinces', which rested on 2007 traffic.",
    "sources": [
     {
@@ -233,5 +233,6 @@
    "why": "Advice that follows from the sourced strikes and the FCDO's warning that airports and airspace can close at short notice."
   }
  ],
- "tracerOk": {}
+ "tracerOk": {},
+ "revised": "23 Sep: reworded so no two sentences in a row start with the same word (house style); facts unchanged"
 }

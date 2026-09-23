@@ -6,7 +6,7 @@
  "wikipedia": "https://en.wikipedia.org/wiki/N'djili_International_Airport",
  "audited": "2026-09-23",
  "before": "Kinshasa's principal international airport and the busiest in the country, about 20 km east of Kinshasa in the commune of Nsele, on the edge of the Pool Malebo and reached by Lumumba Boulevard. It is named after the nearby Ndjili River.\n\nThe runway has an unusual history. When the airport was inaugurated in 1959 its runway measured 4,700 metres and was among the longest in the world. Modernisation since the early 2000s has shortened it to about 3,300 metres.\n\nOne passenger terminal handles both domestic and international flights. The aprons are divided by purpose: the central one for airlines, an eastern apron for the Congolese air force and charter work, and a western apron for maintenance.\n\nThe airport is run by the state-owned Régie des Voies Aériennes, which handles air traffic control and meteorology as well as the terminal.\n\nIt ranked 39th busiest in Africa in 2009 and 43rd by 2016. Construction began in 1953, replacing the older Ndolo Airport.",
- "after": "N'djili is Kinshasa's international airport, about 20 km east of the city centre. It is run by the state-owned Régie des Voies Aériennes (RVA).\n\nIt is being rebuilt. In June 2025 the government gave the project to Infrarose for 36 months, with a new terminal for 5 million passengers a year, and on 30 June 2026 President Tshisekedi reopened the renovated rotunda, the original terminal hall of 1959.\n\nThe FCDO advises against all but essential travel to the districts of N'djili and Kimbanseke south of the airport's main access road.",
+ "after": "N'djili is Kinshasa's international airport, about 20 km east of the city centre. It is run by the state-owned Régie des Voies Aériennes (RVA).\n\nThe airport is being rebuilt. In June 2025 the government gave the project to Infrarose for 36 months, with a new terminal for 5 million passengers a year, and on 30 June 2026 President Tshisekedi reopened the renovated rotunda, the original terminal hall of 1959.\n\nThe FCDO advises against all but essential travel to the districts of N'djili and Kimbanseke south of the airport's main access road.",
  "claims": [
   {
    "claim": "N'djili is Kinshasa's international airport, about 20 km east of the city centre",
@@ -60,7 +60,7 @@
   {
    "claim": "it is being rebuilt",
    "verdict": "corrected",
-   "inAfter": "It is being rebuilt.",
+   "inAfter": "The airport is being rebuilt.",
    "note": "The RVA said on 30 June 2026 that works are under way and the rotunda is a small part of them.",
    "sources": [
     {
@@ -190,5 +190,6 @@
   }
  ],
  "opinion": [],
- "tracerOk": {}
+ "tracerOk": {},
+ "revised": "23 Sep: reworded so no two sentences in a row start with the same word (house style); facts unchanged"
 }

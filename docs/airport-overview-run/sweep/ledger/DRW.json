@@ -6,7 +6,7 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Darwin_International_Airport",
  "audited": "2026-09-23",
  "before": "The main and only international airport serving Darwin, 8 km from the city centre in the northern suburb of Eaton. It is Australia's eleventh busiest, with almost 1.8 million passengers in the 2024 financial year.\n\nDomestic and international services operate from a single terminal building, which keeps connections simple. Flights reach regional Northern Territory destinations, the rest of Australia and Southeast Asia, which makes Darwin a practical stepping stone between Australia and Asia.\n\nThe airport shares its runways with RAAF Base Darwin, which occupies the southern side of the field along with the Darwin Aviation Museum. Civil operations are concentrated on the northern side.\n\nTwo solar arrays supply part of the airport's electricity. The first, opened in August 2016, covers six hectares and was described at the time as the largest airside photovoltaic system in the world.\n\nDarwin was one of only two Australian airfields listed as an emergency landing site for the Space Shuttle.",
- "after": "Darwin's airport, 8 km from the city centre in the suburb of Eaton. It was Australia's eleventh busiest in the 2024 financial year, with almost 1.8 million passengers.\n\nIt is a joint civil and military airfield, sharing its runways with RAAF Base Darwin.\n\nIts first solar array, switched on in August 2016, was described at the time as the world's largest airport solar system.",
+ "after": "Darwin's airport, 8 km from the city centre in the suburb of Eaton. It was Australia's eleventh busiest in the 2024 financial year, with almost 1.8 million passengers.\n\nThe airfield is joint civil and military, sharing its runways with RAAF Base Darwin.\n\nIts first solar array, switched on in August 2016, was described at the time as the world's largest airport solar system.",
  "claims": [
   {
    "claim": "Darwin's airport",
@@ -101,7 +101,7 @@
   {
    "claim": "joint civil-military airfield sharing runways with RAAF Base Darwin",
    "verdict": "confirmed",
-   "inAfter": "It is a joint civil and military airfield, sharing its runways with RAAF Base Darwin.",
+   "inAfter": "The airfield is joint civil and military, sharing its runways with RAAF Base Darwin.",
    "sources": [
     {
      "file": "wikipedia-archived",
@@ -180,5 +180,6 @@
   }
  ],
  "opinion": [],
- "tracerOk": {}
+ "tracerOk": {},
+ "revised": "23 Sep: reworded so no two sentences in a row start with the same word (house style); facts unchanged"
 }

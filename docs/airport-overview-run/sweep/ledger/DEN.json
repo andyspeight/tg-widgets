@@ -6,7 +6,7 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Denver_International_Airport",
  "audited": "2026-09-23",
  "before": "One of the biggest airports in the world, about 25 miles north east of downtown Denver by road, and in practice closer to Aurora than to Denver itself, which is where most of the airport hotels are.\n\nThe scale is hard to overstate. It set an all-time record in 2025 with 82,427,962 passengers and has been in the world's top 20 and the United States top 10 every year since 2000. It is the largest operating hub for Southwest, Frontier and, since 2024, United as well, with 26 airlines flying non-stop to 230 destinations across the Americas, Europe and Asia.\n\nRunway 16R/34L is 16,000 feet, the longest public use runway in North America and fifth longest in the world.\n\nThe site covers 33,531 acres on the western edge of the Great Plains, with the Front Range of the Rockies in view.\n\nIt is the largest employer in Colorado with over 40,000 people, and opened on 28 February 1995, replacing Stapleton.",
- "after": "One of the twenty busiest airports in the world, about 25 miles north east of downtown Denver by road. It set an all-time record in 2025 with 82,427,962 passengers and has non-stop flights to more than 200 destinations.\n\nIt is a hub for United and the main base for Frontier, and Southwest runs one of its operating bases here.\n\nThe site covers more than 50 square miles, and runway 16R/34L, at 16,000 feet, is the longest of its six runways.\n\nIt opened on 28 February 1995, replacing Stapleton.",
+ "after": "One of the twenty busiest airports in the world, about 25 miles north east of downtown Denver by road. It set an all-time record in 2025 with 82,427,962 passengers and has non-stop flights to more than 200 destinations.\n\nUnited uses it as a hub and Frontier as its main base, and Southwest runs one of its operating bases here.\n\nThe site covers more than 50 square miles, and runway 16R/34L, at 16,000 feet, is the longest of its six runways.\n\nIt opened on 28 February 1995, replacing Stapleton.",
  "claims": [
   {
    "claim": "one of the twenty busiest in the world",
@@ -95,7 +95,7 @@
   {
    "claim": "hub for United",
    "verdict": "softened",
-   "inAfter": "It is a hub for United",
+   "inAfter": "United uses it as a hub",
    "note": "The Overview said DEN became United's largest hub in 2024; sources disagree on when and on what measure, so it says hub.",
    "sources": [
     {
@@ -116,7 +116,7 @@
   {
    "claim": "main base for Frontier",
    "verdict": "confirmed",
-   "inAfter": "the main base for Frontier",
+   "inAfter": "Frontier as its main base",
    "sources": [
     {
      "file": "wikipedia-archived",
@@ -293,5 +293,6 @@
   }
  ],
  "opinion": [],
- "tracerOk": {}
+ "tracerOk": {},
+ "revised": "23 Sep: reworded so no two sentences in a row start with the same word (house style); facts unchanged"
 }

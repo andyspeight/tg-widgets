@@ -6,7 +6,7 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Yangon_International_Airport",
  "audited": "2026-09-23",
  "before": "Myanmar's main and busiest international airport, in Mingaladon township 15 km north of central Yangon. It is often still called Mingaladon Airport.\n\nThe terminal numbering is counterintuitive and catches people out. Terminal 1 handles all international flights. Terminal 3 handles domestic. Terminal 2, which used to be the international terminal, closed in July 2018 for extensive renovation. So international does not mean Terminal 2 here, despite what older material says.\n\nTerminal 1 opened in March 2016 and raised the airport's capacity from 2.7 million passengers a year to 6 million. Terminal 3 followed in December 2016, replacing the old domestic building.\n\nA modernisation programme from 2003 produced a terminal designed to IATA service standards with separate floors for arrivals and departures, an automated baggage system and four air bridges able to handle four 747s, along with a runway extended to 3,414 metres.",
- "after": "Myanmar's main and busiest international airport, about 15 km north of central Yangon, with a single 3,414 metre runway.\n\nCheck the terminal before quoting. Terminal 1, opened in March 2016, is the international terminal and Terminal 3 the domestic one. Terminal 2, the old international building, was closed for renovation.\n\nThe FCDO advises against all travel to parts of Myanmar and all but essential travel to others, so check its advice for any onward journey.",
+ "after": "Myanmar's main and busiest international airport, about 15 km north of central Yangon, with a single 3,414 metre runway.\n\nCheck the terminal before quoting. Terminal 1, opened in March 2016, is the international terminal and Terminal 3 the domestic one. Its old international building, Terminal 2, was closed for renovation.\n\nThe FCDO advises against all travel to parts of Myanmar and all but essential travel to others, so check its advice for any onward journey.",
  "claims": [
   {
    "claim": "Myanmar's main and busiest international airport",
@@ -113,7 +113,7 @@
   {
    "claim": "Terminal 2, the old international building, was closed for renovation",
    "verdict": "softened",
-   "inAfter": "Terminal 2, the old international building, was closed for renovation.",
+   "inAfter": "Its old international building, Terminal 2, was closed for renovation.",
    "note": "Wikipedia says it closed in July 2018 and all international flights use Terminal 1; the operator's undated page says it is undergoing a facelift. A Global New Light of Myanmar headline cited by Wikipedia (Myanmar Airways International moving its Singapore flights to Terminal 2) suggests it may be back in use, but the page refused the fetcher, so its present state is not stated: hence the advice to check.",
    "sources": [
     {
@@ -188,5 +188,6 @@
    "why": "Advice attached to the attributed FCDO statement."
   }
  ],
- "tracerOk": {}
+ "tracerOk": {},
+ "revised": "23 Sep: reworded so no two sentences in a row start with the same word (house style); facts unchanged"
 }

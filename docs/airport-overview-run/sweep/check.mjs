@@ -128,6 +128,11 @@ for (const code of process.argv.slice(2).map(s => s.toUpperCase())) {
   for (const w of BANNED) if (new RegExp('\\b' + w + '\\b', 'i').test(after)) { errs.push('banned'); console.log('  FAIL banned word: ' + w); }
   for (const rx of US) for (const m of after.match(rx) || []) if (!US_OK.has(m.toLowerCase())) warns.push('US spelling? ' + m);
   for (const m of after.match(/\b[\w'’-]+, [\w'’ -]{1,40}, (?:and|or) /g) || []) warns.push('Oxford comma? "' + m.trim() + '"');
+  // house rule: no two consecutive sentences start with the same word (across paragraphs too)
+  const firstWords = sentences.map(s => (s.match(/^["']?([\w'’]+)/) || [])[1] || '');
+  for (let i = 1; i < firstWords.length; i++) {
+    if (firstWords[i] && firstWords[i].toLowerCase() === firstWords[i - 1].toLowerCase()) warns.push(`two sentences in a row start with "${firstWords[i]}"`);
+  }
   const words = after.trim().split(/\s+/).length;
   for (const w of warns) console.log('  look ' + w);
   console.log(`  ${words} words.  ${errs.length ? 'NOT READY (' + errs.length + ' problems)' : 'READY TO PUSH'}`);

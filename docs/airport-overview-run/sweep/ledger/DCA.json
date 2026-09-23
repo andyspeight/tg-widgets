@@ -6,7 +6,7 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Ronald_Reagan_Washington_National_Airport",
  "audited": "2026-09-23",
  "before": "The closest airport to the centre of Washington, five miles away in Arlington County, and the busiest in the metropolitan area with 26.29 million passengers in 2024. It is a hub for American Airlines and serves 108 nonstop destinations.\n\nTwo things will catch out an unprepared client. First, there are no immigration and customs facilities here at all, so the only international flights that can land are those from airports with United States preclearance, mainly in Canada and the Caribbean. Second, the two terminals are not connected once a passenger is through security, so moving between them means clearing again.\n\nThere are 59 gates with jetways, nine in Terminal 1 and fifty in Terminal 2 across concourses B to E. The numbering changed in 2022, so old gate numbers now carry a concourse letter, and Gate 33 for instance became Gate C33.\n\nThe airport opened in 1941, part of the original terminal is still Terminal 1, and it was renamed after Ronald Reagan in 1998. Its main runway is the busiest in the country.",
- "after": "Washington's close-in airport sits just south of the city centre and is a hub for American Airlines. It handled 24.9 million passengers in 2025.\n\nIt is a short-haul airport: under the federal Perimeter Rule, nonstop flights are limited to about 1,250 miles from Washington, with some longer routes allowed as exceptions.\n\nTerminal 1, part of the original 1941 building, has nine gates; the rest are in Terminal 2, opened in 1997. The airport was renamed after Ronald Reagan in 1998.",
+ "after": "Washington's close-in airport sits just south of the city centre and is a hub for American Airlines. It handled 24.9 million passengers in 2025.\n\nReagan National is a short-haul airport: under the federal Perimeter Rule, nonstop flights are limited to about 1,250 miles from Washington, with some longer routes allowed as exceptions.\n\nTerminal 1, part of the original 1941 building, has nine gates; the rest are in Terminal 2, opened in 1997. The airport was renamed after Ronald Reagan in 1998.",
  "claims": [
   {
    "claim": "Washington's close-in airport, just south of the city centre",
@@ -78,7 +78,7 @@
   {
    "claim": "short-haul airport; Perimeter Rule about 1,250 miles, with exceptions",
    "verdict": "corrected",
-   "inAfter": "It is a short-haul airport: under the federal Perimeter Rule, nonstop flights are limited to about 1,250 miles from Washington, with some longer routes allowed as exceptions.",
+   "inAfter": "Reagan National is a short-haul airport: under the federal Perimeter Rule, nonstop flights are limited to about 1,250 miles from Washington, with some longer routes allowed as exceptions.",
    "note": "Replaces the customs line (no customs facilities, preclearance only), which has one source; the Perimeter Rule explains the same thing for a UK agent: nothing long-haul lands here. The operator lists the current exceptions: Denver, Las Vegas, Los Angeles, Phoenix, Salt Lake City, San Francisco, Seattle, Portland, San Diego and Austin. Not described as western routes because Wikipedia records a past exemption for San Juan.",
    "sources": [
     {
@@ -169,5 +169,6 @@
   }
  ],
  "opinion": [],
- "tracerOk": {}
+ "tracerOk": {},
+ "revised": "23 Sep: reworded so no two sentences in a row start with the same word (house style); facts unchanged"
 }

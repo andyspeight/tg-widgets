@@ -6,7 +6,7 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Jeju_International_Airport",
  "audited": "2026-09-23",
  "before": "South Korea's second largest airport after Incheon, on Jeju island, and home base for Jeju Air.\n\nIt holds a genuine world record. The Jeju to Seoul route is the busiest airline route on the planet. In 2019 there were 85,000 flights across eight airlines and 17 million seats sold between Gimpo and Jeju.\n\nThat volume is the problem. The airport was designed for a maximum of 26 million passengers a year and passed 30 million in 2019, so delays are common and not a sign of anything unusual having gone wrong. Build buffer into connections.\n\nA replacement airport in southern Jeju was announced in 2019 at 4.18 billion dollars, then cancelled by the Ministry of Environment in 2021 over groundwater reserves and protected species. A new 5.1 billion dollar plan was provisionally approved in 2023 with no completion date set, so relief is a long way off.\n\nThe airport opened in 1968 and also serves mainland China, Hong Kong, Japan, Taiwan, Thailand, Malaysia and Singapore.",
- "after": "The airport for Jeju island in South Korea, at one end of the busiest air route in the world: Jeju to Seoul Gimpo.\n\nThe airport runs over the capacity it was designed for, so build buffer into connections. A second airport at Seongsan was rejected on environmental grounds in 2021, then conditionally approved in 2023 at a cost of about 5.1 billion dollars, so relief is still some way off.\n\nInternational flights include Japan, Taiwan and Singapore.",
+ "after": "The airport for Jeju island in South Korea, at one end of the busiest air route in the world: Jeju to Seoul Gimpo.\n\nTraffic runs over the capacity the airport was designed for, so build buffer into connections. A second airport at Seongsan was rejected on environmental grounds in 2021, then conditionally approved in 2023 at a cost of about 5.1 billion dollars, so relief is still some way off.\n\nInternational flights include Japan, Taiwan and Singapore.",
  "claims": [
   {
    "claim": "the airport for Jeju island, South Korea",
@@ -53,7 +53,7 @@
   {
    "claim": "runs over its designed capacity",
    "verdict": "softened",
-   "inAfter": "The airport runs over the capacity it was designed for",
+   "inAfter": "Traffic runs over the capacity the airport was designed for",
    "note": "Replaces 'designed for a maximum of 26 million a year and passed 30 million in 2019', figures from 2019 with one source.",
    "sources": [
     {
@@ -160,5 +160,6 @@
    "why": "Kept from the old text: the 2023 approval was conditional and no source saved here reports construction."
   }
  ],
- "tracerOk": {}
+ "tracerOk": {},
+ "revised": "23 Sep: reworded so no two sentences in a row start with the same word (house style); facts unchanged"
 }

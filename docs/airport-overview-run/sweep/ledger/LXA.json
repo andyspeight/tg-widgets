@@ -6,7 +6,7 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Lhasa_Gonggar_International_Airport",
  "audited": "2026-09-23",
  "before": "Tibet's main airport, and one of the highest in the world at over 3,500 metres above sea level. It handled more than 6 million passengers in 2024.\n\nThe distance needs explaining to a client. The airport is in Gonggar County in Shannan, about 62 km south west of Lhasa. A tunnel and the Lhasa Airport Expressway opened in July 2011 and cut 40 minutes off the journey, so the shuttle bus into Lhasa now takes about 40 to 60 minutes.\n\nIt was built where it is because there was no room near Lhasa. The site sits on the southern bank of the Yarlung Tsangpo, the Brahmaputra, where the river is wide and the ground flat enough for runways. Within 30 km in every direction there are mountains between 5,362 and 6,126 metres.\n\nThe airport was first built in 1965, gained a second runway in 1994 and a second terminal in 2004, and its third terminal opened in 2021.\n\nBuild a gentle first day into any Tibet itinerary. Clients arrive at altitude before they have done anything at all.",
- "after": "Tibet's main airport and one of the highest in the world, at 3,570 metres above sea level. It handled 6.3 million passengers in 2025.\n\nThe distance needs explaining to a client. The airport is in Gonggar County in Shannan, just over 60 km south west of Lhasa. The Lhasa Airport Expressway opened in July 2011, and the shuttle bus or a taxi into the city now takes up to an hour.\n\nIts third terminal, the largest in Tibet, opened in 2021.\n\nBuild a gentle first day into any Tibet itinerary. Clients arrive at altitude before they have done anything at all.",
+ "after": "Tibet's main airport and one of the highest in the world, at 3,570 metres above sea level. It handled 6.3 million passengers in 2025.\n\nExplain the distance to a client. The airport is in Gonggar County in Shannan, just over 60 km south west of Lhasa. Since the Lhasa Airport Expressway opened in July 2011, the shuttle bus or a taxi into the city takes up to an hour.\n\nIts third terminal, the largest in Tibet, opened in 2021.\n\nBuild a gentle first day into any Tibet itinerary. Clients arrive at altitude before they have done anything at all.",
  "claims": [
   {
    "claim": "Tibet's main airport",
@@ -143,7 +143,7 @@
   {
    "claim": "shuttle bus or taxi up to an hour",
    "verdict": "softened",
-   "inAfter": "the shuttle bus or a taxi into the city now takes up to an hour",
+   "inAfter": "the shuttle bus or a taxi into the city takes up to an hour",
    "note": "Wikipedia says 40 to 60 minutes; the travel guide says about 59 minutes by taxi or shuttle and about 52 by taxi. Up to an hour fits both.",
    "sources": [
     {
@@ -229,7 +229,7 @@
  ],
  "opinion": [
   {
-   "text": "The distance needs explaining to a client.",
+   "text": "Explain the distance to a client.",
    "why": "A lead-in to the sourced distance and journey time."
   },
   {
@@ -241,5 +241,6 @@
    "why": "As above."
   }
  ],
- "tracerOk": {}
+ "tracerOk": {},
+ "revised": "23 Sep: reworded so no two sentences in a row start with the same word (house style); facts unchanged"
 }

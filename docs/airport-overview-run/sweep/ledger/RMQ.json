@@ -1,0 +1,141 @@
+{
+ "iata": "RMQ",
+ "id": "recrDBaJHcyzKCN7x",
+ "name": "Taichung International Airport / Ching Chuang Kang Air Base",
+ "country": "Taiwan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Taichung_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Taichung's airport, sixth busiest in Taiwan, with scheduled flights to China, Hong Kong, Japan, Macau, South Korea and Vietnam.\n\nIt is a useful alternative to flying into Taipei for a client based in central Taiwan, though the network is regional rather than long haul, so most itineraries will still route through Taoyuan.\n\nIt is often still listed as Ching Chuan Kang Airport, so both names turn up in supplier systems.\n\nCivilian services began on 5 March 2004, replacing the old Shuinan Airport nearer the city centre. It was promoted to international status on 3 January 2017 and renamed Taichung International Airport at that point.",
+ "after": "Taichung's airport, with scheduled flights to mainland China, Hong Kong, Japan, Macau, South Korea and Vietnam.\n\nIt is a useful alternative to flying into Taipei for a client based in central Taiwan, though the network is regional rather than long haul, so most itineraries will still route through Taoyuan.\n\nChing Chuan Kang Airport is its other name, so both turn up in supplier systems.\n\nCivilian flights moved here from the old Shuinan Airport in March 2004.",
+ "claims": [
+  {
+   "claim": "Taichung's airport",
+   "verdict": "confirmed",
+   "inAfter": "Taichung's airport",
+   "sources": [
+    {
+     "file": "tca-intro",
+     "org": "Taichung International Airport (Civil Aeronautics Administration, operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "臺中國際機場 Taichung International Airport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is an international airport located in Taichung, Taiwan"
+    }
+   ]
+  },
+  {
+   "claim": "scheduled flights to mainland China, Hong Kong, Japan, Macau, South Korea and Vietnam",
+   "verdict": "confirmed",
+   "inAfter": "with scheduled flights to mainland China, Hong Kong, Japan, Macau, South Korea and Vietnam.",
+   "note": "The operator's live flight board on 23 September 2026 shows Chengdu (China), Hong Kong, Okinawa and Narita (Japan), Macau, Incheon and Busan (South Korea), and Ho Chi Minh City and Hanoi (Vietnam). Taipei Times reports new Japan routes in 2026 (Starlux to Tokyo and Kumamoto from March, China Airlines to Okinawa from July).",
+   "sources": [
+    {
+     "file": "tca-fids",
+     "org": "Taichung International Airport (Civil Aeronautics Administration, operator)",
+     "dated": "2026-09-23 (live board)",
+     "quote": [
+      "香港",
+      "澳門",
+      "沖繩",
+      "仁川",
+      "釜山",
+      "胡志明",
+      "河內",
+      "成都",
+      "成田"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "with scheduled services to China, Hong Kong, Japan, Macau, South Korea, and Vietnam"
+    },
+    {
+     "file": "tt-2026-03",
+     "org": "Taipei Times",
+     "dated": "2026-03-31",
+     "quote": "Starlux Airlines is expanding its operations in central Taiwan, starting with the launch yesterday of its Taichung-Tokyo route and Taichung-Kumamoto service today."
+    }
+   ]
+  },
+  {
+   "claim": "other name Ching Chuan Kang Airport",
+   "verdict": "confirmed",
+   "inAfter": "Ching Chuan Kang Airport is its other name",
+   "note": "The operator's own history calls the site 清泉崗機場 (Ching Chuan Kang airport); OurAirports lists it as Taichung International Airport / Ching Chuang Kang Air Base.",
+   "sources": [
+    {
+     "file": "tca-intro",
+     "org": "Taichung International Airport (Civil Aeronautics Administration, operator)",
+     "quote": "臺中航空站於93年3月6日自水湳機場搬遷至清泉崗機場營運"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Ching Chuan Kang Airport has since become the only airport serving Taichung."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Airport: Taichung International Airport / Ching Chuang Kang Air Base"
+    }
+   ]
+  },
+  {
+   "claim": "civilian flights moved from Shuinan Airport in March 2004",
+   "verdict": "softened",
+   "inAfter": "Civilian flights moved here from the old Shuinan Airport in March 2004.",
+   "note": "Was 'Civilian services began on 5 March 2004'. The operator dates the move from Shuinan to 6 March 2004 (ROC year 93), Wikipedia to 5 March, so only the month is given. 'Nearer the city centre' is Wikipedia's alone.",
+   "sources": [
+    {
+     "file": "tca-intro",
+     "org": "Taichung International Airport (Civil Aeronautics Administration, operator)",
+     "quote": "臺中航空站於93年3月6日自水湳機場搬遷至清泉崗機場營運"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "civilian services began on 5 March 2004, replacing the old Shuinan Airport located closer to downtown Taichung"
+    }
+   ]
+  },
+  {
+   "claim": "sixth busiest in Taiwan",
+   "verdict": "cut",
+   "wasBefore": "Taichung's airport, sixth busiest in Taiwan,",
+   "why": "Wikipedia's 2023 ranking alone; the Civil Aeronautics Administration's statistics file it cites answered 404."
+  },
+  {
+   "claim": "promoted to international status on 3 January 2017 and renamed",
+   "verdict": "cut",
+   "wasBefore": "It was promoted to international status on 3 January 2017 and renamed Taichung International Airport at that point.",
+   "why": "Wikipedia alone; the operator's history does not give the date. The current name is confirmed by the operator."
+  },
+  {
+   "claim": "replacing the old Shuinan Airport nearer the city centre; 5 March 2004",
+   "verdict": "cut",
+   "wasBefore": "Civilian services began on 5 March 2004, replacing the old Shuinan Airport nearer the city centre.",
+   "why": "The day disagrees (operator 6 March, Wikipedia 5 March) and 'nearer the city centre' is Wikipedia's alone; kept as March 2004."
+  },
+  {
+   "claim": "often still listed; both names in supplier systems",
+   "verdict": "cut",
+   "wasBefore": "It is often still listed as Ching Chuan Kang Airport, so both names turn up in supplier systems.",
+   "why": "'Often still' dropped; the two names are kept."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "It is a useful alternative to flying into Taipei for a client based in central Taiwan, though the network is regional rather than long haul, so most itineraries will still route through Taoyuan.",
+   "why": "The old text's advice, kept: the sourced route list is regional (East and South East Asia only)."
+  },
+  {
+   "text": "so both turn up in supplier systems",
+   "why": "Advice following from the two sourced names."
+  }
+ ],
+ "tracerOk": {}
+}
