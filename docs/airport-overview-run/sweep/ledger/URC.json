@@ -1,0 +1,201 @@
+{
+ "iata": "URC",
+ "id": "recyRjP4TmPt8YPPY",
+ "name": "Ürümqi Tianshan International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/%C3%9Cr%C3%BCmqi_Tianshan_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Ürümqi, capital of Xinjiang, 16 km north west of downtown. It handled 29,179,737 passengers in 2025, eighteenth busiest in China, as a hub for China Southern and a focus city for Hainan Airlines.\n\nIt is the most capable airport in any of China's five autonomous regions, the only one rated 4F class, which is the category that takes the largest aircraft. Three runways serve the site, two of them 3,600 metres and the third 3,200 metres, and the apron holds over 30 aircraft.\n\nTerminal 1 is worth identifying before travel. After renovation it handles mainly regional Xinjiang routes and low cost carriers including Tianjin Airlines, Capital Aviation and Spring Airlines, with 19 check-in counters and six security channels. It reopened on 1 April 2014 after nearly two and a half years closed.\n\nThe airport sits at an elevation of 648 metres and the original terminal dates from 1974.",
+ "after": "The airport for Ürümqi, capital of Xinjiang, 16 km north west of downtown. It handled 29.2 million passengers in 2025, the 18th busiest in China.\n\nThe airport changed in 2025. It was renamed from Diwopu to Tianshan in March, and passenger flights moved into a new North Terminal, Terminal 4, as the old Terminals 1 to 3 closed. Older guidance that sends clients to Terminal 1 is out of date.\n\nThree runways serve the site, two of them 3,600 metres and the third 3,200 metres. The airport sits at an elevation of 648 metres.",
+ "claims": [
+  {
+   "claim": "the airport for Ürümqi, capital of Xinjiang, 16 km north west of downtown",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Ürümqi, capital of Xinjiang, 16 km north west of downtown.",
+   "note": "Straight line 15.8 km at 322 degrees (north west); ratio 1.01.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is an international airport serving Ürümqi, the capital of Northwest China's Xinjiang Uygur Autonomous Region. It is located in the Diwopu township of Xinshi district, 16 km (9.9 mi) northwest of downtown Ürümqi."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "GeoNames class PPLA, the capital of a first-order division",
+      "Straight-line distance from the city centre: 15.8 km (9.8 miles)",
+      "Bearing from the city centre: 322 degrees, which is north west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "29.2 million passengers in 2025, 18th in China",
+   "verdict": "confirmed",
+   "inAfter": "It handled 29.2 million passengers in 2025, the 18th busiest in China.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "Civil Aviation Administration of China",
+     "dated": "2026-02-26",
+     "quote": "passenger rank 18 in China; passengers 2025: 29,179,737"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the airport handled 29,179,737 passengers in 2025, making it the 18th busiest airport in China by passenger traffic"
+    }
+   ]
+  },
+  {
+   "claim": "renamed from Diwopu to Tianshan in March 2025",
+   "verdict": "corrected",
+   "inAfter": "It was renamed from Diwopu to Tianshan in March",
+   "note": "New in the text: it replaces the out-of-date Terminal 1 paragraph, and the old name is still in older systems and guides. CAAC updated the name in March 2025 (The Paper, 20 March).",
+   "sources": [
+    {
+     "file": "xjgov-rename",
+     "org": "Xinjiang government (Xinjiang Daily)",
+     "dated": "2025-03",
+     "quote": [
+      "定了！“乌鲁木齐天山国际机场”正式获批",
+      "乌鲁木齐地窝堡国际机场已变更为“乌鲁木齐天山国际机场”"
+     ]
+    },
+    {
+     "file": "thepaper-t4",
+     "org": "The Paper",
+     "dated": "2025-03-20",
+     "quote": [
+      "3月20日，微信公众号“新疆日报”等多家新疆媒体发布消息称",
+      "乌鲁木齐地窝堡国际机场已变更为“乌鲁木齐天山国际机场”，这标志着乌鲁木齐地窝堡国际机场已正式完成更名手续。"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It was renamed from Ürümqi Diwopu International Airport to Ürümqi Tianshan International Airport in March 2025."
+    }
+   ]
+  },
+  {
+   "claim": "passenger flights moved to the new North Terminal (Terminal 4) in 2025; Terminals 1 to 3 closed",
+   "verdict": "corrected",
+   "inAfter": "passenger flights moved into a new North Terminal, Terminal 4, as the old Terminals 1 to 3 closed.",
+   "note": "Replaces the Terminal 1 paragraph. The Xinjiang government's March 2025 report says the main part of the expansion was about to go into full use, with Terminal 4 and a pair of F-class runways on the north side opening and Terminals 1 to 3 closing or being converted, while the south runway stays for cargo. Wikipedia (current revision, 14 Sep 2026) dates the North Terminal's opening to 17 April 2025 and lists Terminals 1 to 3 as closed. The operator's site (xjairport.com) answered 502 and 405.",
+   "sources": [
+    {
+     "file": "xjgov-rename",
+     "org": "Xinjiang government (Xinjiang Daily)",
+     "dated": "2025-03",
+     "quote": "届时T1-3航站楼进行关闭或改造，T4航站楼、北飞行区一组F类近距跑道全面启用"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "On 17 April 2025, the North Terminal officially opened.",
+      "Terminal 1 (closed)",
+      "Terminal 2 (closed)",
+      "Terminal 3 (closed)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "older guidance pointing to Terminal 1 is out of date",
+   "verdict": "corrected",
+   "inAfter": "Older guidance that sends clients to Terminal 1 is out of date.",
+   "note": "Follows from the closure above; the old text itself sent clients to Terminal 1.",
+   "sources": [
+    {
+     "file": "xjgov-rename",
+     "org": "Xinjiang government (Xinjiang Daily)",
+     "dated": "2025-03",
+     "quote": "届时T1-3航站楼进行关闭或改造"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Terminal 1 (closed)"
+    }
+   ]
+  },
+  {
+   "claim": "three runways, two of 3,600 m and one of 3,200 m",
+   "verdict": "confirmed",
+   "inAfter": "Three runways serve the site, two of them 3,600 metres and the third 3,200 metres.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 07/25: 3,600 m (11,811 ft), ASP",
+      "Runway 08L/26R: 3,200 m (10,498 ft), PEM",
+      "Runway 08R/26L: 3,600 m (11,811 ft), PEM"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The first runway (07/25) was built in 1994",
+      "runway length 3,600 meters (11,811 ft), 60 meters (197 ft) wide",
+      "runway 3,200 meters (10,499 ft) long"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "elevation 648 m",
+   "verdict": "confirmed",
+   "inAfter": "The airport sits at an elevation of 648 metres.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "elevation 2,125 ft (648 m)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "elevation 648 meters"
+    }
+   ]
+  },
+  {
+   "claim": "exact figure; hub for China Southern, focus city for Hainan Airlines",
+   "verdict": "cut",
+   "wasBefore": "It handled 29,179,737 passengers in 2025, eighteenth busiest in China, as a hub for China Southern and a focus city for Hainan Airlines.",
+   "why": "Traffic kept, rounded. The hub and focus-city labels rest on Wikipedia alone; AeroRoutes (Nov 2023) shows China Southern international flights from Urumqi but does not call it a hub, and it is nearly three years old."
+  },
+  {
+   "claim": "the only 4F airport among China's five autonomous regions; apron for over 30 aircraft",
+   "verdict": "cut",
+   "wasBefore": "It is the most capable airport in any of China's five autonomous regions, the only one rated 4F class, which is the category that takes the largest aircraft. Three runways serve the site, two of them 3,600 metres and the third 3,200 metres, and the apron holds over 30 aircraft.",
+   "why": "The runways are kept. The autonomous-region comparison is Wikipedia's alone (the Xinjiang report confirms F-class runways, not the comparison), and the 30-aircraft apron describes the airport before the new terminal."
+  },
+  {
+   "claim": "Terminal 1 for regional routes and low cost carriers; 19 counters, six security channels; reopened 1 April 2014",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 is worth identifying before travel. After renovation it handles mainly regional Xinjiang routes and low cost carriers including Tianjin Airlines, Capital Aviation and Spring Airlines, with 19 check-in counters and six security channels. It reopened on 1 April 2014 after nearly two and a half years closed.",
+   "why": "Out of date: Terminals 1 to 3 closed when the new Terminal 4 opened in 2025."
+  },
+  {
+   "claim": "original terminal dates from 1974",
+   "verdict": "cut",
+   "wasBefore": "and the original terminal dates from 1974.",
+   "why": "That terminal is closed; Wikipedia alone."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The airport changed in 2025.",
+   "why": "Lead-in to the two sourced 2025 changes that follow."
+  }
+ ],
+ "tracerOk": {
+  "29.2": "29,179,737 rounded (CAAC, Wikipedia)"
+ }
+}
