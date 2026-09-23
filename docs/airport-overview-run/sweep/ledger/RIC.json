@@ -1,0 +1,539 @@
+{
+ "iata": "RIC",
+ "id": "recZ4jaNR91p70iyT",
+ "name": "Richmond International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Richmond_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Central Virginia's airport, about 7 miles south east of downtown Richmond in Sandston, and third busiest in the state behind the two Washington airports. Seven carriers fly non-stop to 26 destinations.\n\nIt has been rebuilt twice this century. A complete redesign announced in 2005 took the terminal from a single storey with 12 gates to a two level building with upper level departures and lower level arrivals, 22 gates, a new control tower and parking for 10,500. A second expansion ran from late 2018 to 2021, adding gates to the A Concourse and widening the Concourse B security area from four lanes to six.\n\nInternational flying is seasonal and works through gate B15, which reopened for Cancun, Toronto and Punta Cana.\n\nThe airport covers 2,500 acres and is a joint civil and military site, taking in the former Air National Guard station now used by the US Army Reserve and Virginia Army National Guard.\n\nIt is owned and run by the Capital Region Airport Commission, set up in 1975 and answerable to Richmond and three surrounding counties.",
+ "after": "Central Virginia's airport, a short drive south east of downtown Richmond in Henrico County, and third busiest in the state behind the two Washington airports. The airport lists nine airlines, with nonstop flights to major US cities and connections beyond.\n\nA renovation completed in 2007 gave the terminal two levels, with departures upstairs and arrivals below. Each of the two concourses, A and B, has its own security checkpoint. A $253 million project will merge them into one, letting passengers move freely between concourses; work is due to begin in late 2026.\n\nBreeze Airways plans twice-weekly seasonal flights to Cancún from 8 January 2027.\n\nIt is owned and run by the Capital Region Airport Commission, set up in 1975 and answerable to the City of Richmond and the counties of Chesterfield, Hanover and Henrico. Military aircraft use the airport too.",
+ "claims": [
+  {
+   "claim": "Central Virginia's airport",
+   "verdict": "confirmed",
+   "inAfter": "Central Virginia's airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Richmond International Airport is the busiest airport in central Virginia"
+    },
+    {
+     "file": "op-acfr-fy24",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": "serve the air transportation needs of Central Virginia",
+     "dated": "2024 (annual report for the year to 30 June 2024)"
+    },
+    {
+     "file": "op-airport-info",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": "providing a high-quality and competitive air service marketplace for the citizens of Central Virginia",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "a short drive from downtown Richmond",
+   "verdict": "softened",
+   "inAfter": "a short drive south east of downtown Richmond",
+   "note": "Replaces 'about 7 miles', whose figure the sources do not agree on (see the cut below). The operator says a few minutes and the Greater Richmond Partnership, the region's economic development body, a 10-minute drive; both support 'a short drive'.",
+   "sources": [
+    {
+     "file": "op-ground",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": "is only a few short minutes from downtown Richmond",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "grp-transport",
+     "org": "Greater Richmond Partnership (regional economic development organisation)",
+     "quote": "The Richmond International Airport (RIC) is a 10-minute drive from downtown Richmond",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "south east of downtown Richmond",
+   "verdict": "confirmed",
+   "inAfter": "south east of downtown Richmond",
+   "note": "Coordinates put it at 113 degrees from the GeoNames centre, which is south east on an 8-point rose, half a degree past the boundary with east. The FAA record ('06 E') and the operator's field information and annual reports ('6 miles east of downtown Richmond') say east, which is the adjacent point; both words pass the gate.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is about 7 miles (11 km) southeast of downtown Richmond"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 113 degrees, which is south east"
+    }
+   ]
+  },
+  {
+   "claim": "in Henrico County",
+   "verdict": "softened",
+   "inAfter": "in Henrico County",
+   "note": "Was 'in Sandston' (see the cut below). The county is in every source.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "an unincorporated community (in Henrico County)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "5 COUNTY:",
+      "HENRICO VA",
+      "AIRPORT MASTER RECORD"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "wtvr-breeze-cancun",
+     "org": "WTVR CBS 6 (Scripps)",
+     "quote": "HENRICO COUNTY, Va. — Breeze Airways announced a new seasonal nonstop route from Richmond International Airport",
+     "dated": "2026-05-05 (date in the page URL)"
+    }
+   ]
+  },
+  {
+   "claim": "third busiest in Virginia behind the two Washington airports",
+   "verdict": "confirmed",
+   "inAfter": "third busiest in the state behind the two Washington airports",
+   "note": "The FAA's preliminary CY2025 table (boardings) puts Dulles 22nd and Reagan National 28th in the US, then Richmond 64th with 2,481,863, only just ahead of Norfolk (65th, 2,466,474). Close enough that the order could change in a later year.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the third-busiest in the state behind Washington Reagan and Washington Dulles"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "22 EA VA IAD Dulles Washington Dulles International P L 13,859,569 13,003,234 6.59%",
+      "28 EA VA DCA Arlington Ronald Reagan Washington Ntl P L 12,003,594 12,750,892 -5.86%",
+      "64 EA VA RIC Highland Springs Richmond International P M 2,481,863 2,456,422 1.04%",
+      "65 EA VA ORF Norfolk Norfolk International P M 2,466,474 2,444,897 0.88%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "about 4.9 million passengers in 2025",
+   "verdict": "cut",
+   "note": "New to the text, as the answer to how busy it is, replacing the stale carrier and destination counts. TOTAL passengers, arriving plus departing: the operator's December 2025 report gives 4,922,994 for calendar 2025, up 0.8 per cent on 4,884,093 in 2024 (2,464,795 enplaned). The FAA's preliminary CY2025 table counts 2,481,863 enplanements (boardings only, about half of total passengers), which is consistent. The operator also reports a record 4.96 million for its fiscal year to June 2026 (release of 29 July 2026); not used, as no second source was saved for it.",
+   "sources": [
+    {
+     "file": "op-stats-dec2025",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": [
+      "RICHMOND INTERNATIONAL AIRPORT",
+      "AVIATION ACTIVITY REPORT",
+      "Total 418,762 421,064 -0.55% 4,922,994 4,884,093 0.80% 2,581,695 2,509,663 2.87%",
+      "December Calendar Year to Date Fiscal Year to Date"
+     ],
+     "dated": "2026-01"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "64 EA VA RIC Highland Springs Richmond International P M 2,481,863 2,456,422 1.04%",
+     "dated": "2026-07-08"
+    }
+   ],
+   "why": "Held back in review (23 Sep): verified with two sources, but a new fact that replaces nothing in the old text, which the sweep's rule keeps out. Andy can add it; the sources stay listed here. Was to read: \"It handled about 4.9 million passengers in 2025.\"."
+  },
+  {
+   "claim": "the airport lists nine airlines, nonstop to major US cities with connections beyond",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport lists nine airlines, with nonstop flights to major US cities and connections beyond.",
+   "note": "Replaces 'Seven carriers fly non-stop to 26 destinations', which is out of date. The operator's live airline page names nine: Allegiant, American, Breeze, Delta, Frontier, JetBlue, Southwest, Sun Country and United. It reflects Spirit's shutdown on 2 May 2026 (the operator's release of that day). An attributed statement, as for Austin and Timisoara: no second source for the count could be read (the Bureau of Transportation Statistics page needs a form post, Visit Richmond and Breeze answered 403, BermudAir 502). The operator's 'About' paragraph still lists BermudAir and Spirit, so it is older than the airline page. BizSense reported a BermudAir route to Bermuda in 2025; whether it still runs could not be confirmed, so the text does not mention it. Worth Andy's eye.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": [
+      "We host nine air carriers, each offering non-stop flights to major domestic destinations and connecting service to points around the globe",
+      "Allegiant",
+      "American Airlines",
+      "Breeze Airways",
+      "Delta",
+      "Frontier Airlines",
+      "JetBlue Airways",
+      "Southwest Airlines",
+      "Sun Country Airlines",
+      "United"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "a renovation completed in 2007",
+   "verdict": "softened",
+   "inAfter": "A renovation completed in 2007 gave the terminal two levels",
+   "note": "Was 'A complete redesign announced in 2005'. The completion in 2007 is in both sources (the operator's timeline puts this renovation under 2007); the 2005 announcement rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Construction on the two-level terminal was completed in spring 2007"
+    },
+    {
+     "file": "op-airport-info",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": [
+      "2007",
+      "The airport completed the construction of a multimillion-dollar renovation that expanded the terminal building by 155,000 square feet"
+     ],
+     "dated": "2026-09-23 (live page, history timeline)"
+    }
+   ]
+  },
+  {
+   "claim": "departures upstairs and arrivals below",
+   "verdict": "confirmed",
+   "inAfter": "with departures upstairs and arrivals below",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "including upper-level departures and lower-level arrivals"
+    },
+    {
+     "file": "op-terminal-guide",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": "two-level terminal featuring upper-level departure and lower-level arrival areas",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "two concourses, A and B, each with its own security checkpoint",
+   "verdict": "corrected",
+   "inAfter": "Each of the two concourses, A and B, has its own security checkpoint.",
+   "note": "Replaces the old line on widening the Concourse B security area from four lanes to six, which BizSense contradicts (each existing checkpoint has four lanes, November 2025). Useful to a traveller: the two checkpoints are separate.",
+   "sources": [
+    {
+     "file": "op-faqs",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": "Security screening checkpoints for concourses A and B open at 4:00 a.m. daily",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-fy27-budget",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": "The transformative project will merge two separate checkpoints, currently located at concourses A and B, into one central location",
+     "dated": "2026-05-29"
+    },
+    {
+     "file": "bizsense-checkpoint-nov25",
+     "org": "Richmond BizSense",
+     "quote": "While RIC currently has two separate checkpoints, one for each of its concourses",
+     "dated": "2025-11-26"
+    },
+    {
+     "file": "bizsense-roundup-2025",
+     "org": "Richmond BizSense",
+     "quote": "consolidate the two existing checkpoints that lead into RIC’s A and B concourses",
+     "dated": "2025-12-30"
+    }
+   ]
+  },
+  {
+   "claim": "a $253 million project will merge the checkpoints into one",
+   "verdict": "corrected",
+   "inAfter": "A $253 million project will merge them into one",
+   "note": "New, replacing the stale security lane detail. The cost was given as $200 million in November and December 2025 (BizSense); the operator's FY2027 budget (29 May 2026) and BizSense (29 April 2026) now give $253 million, which the text uses.",
+   "sources": [
+    {
+     "file": "op-fy27-budget",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": [
+      "Estimated at a cost of $253.1 million",
+      "merge two separate checkpoints, currently located at concourses A and B, into one central location"
+     ],
+     "dated": "2026-05-29"
+    },
+    {
+     "file": "bizsense-lounge-apr26",
+     "org": "Richmond BizSense",
+     "quote": "a $253 million project that’ll significantly transform RIC’s main terminal",
+     "dated": "2026-04-29"
+    }
+   ]
+  },
+  {
+   "claim": "passengers will be able to move freely between concourses",
+   "verdict": "corrected",
+   "inAfter": "letting passengers move freely between concourses",
+   "sources": [
+    {
+     "file": "op-fy27-budget",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": "allowing passengers to freely move between concourses",
+     "dated": "2026-05-29"
+    },
+    {
+     "file": "bizsense-checkpoint-nov25",
+     "org": "Richmond BizSense",
+     "quote": "this will allow passengers to flow freely between concourses",
+     "dated": "2025-11-26"
+    }
+   ]
+  },
+  {
+   "claim": "work due to begin in late 2026",
+   "verdict": "corrected",
+   "inAfter": "work is due to begin in late 2026",
+   "note": "Forward-looking. The operator speaks of enabling projects and BizSense of construction, both in late 2026; 'work' covers both. BizSense adds that construction will take years; not in the text, as the operator gives no length.",
+   "sources": [
+    {
+     "file": "op-fy27-budget",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": "Enabling projects for the Consolidated Security Screening Checkpoint are planned to begin in late 2026.",
+     "dated": "2026-05-29"
+    },
+    {
+     "file": "bizsense-lounge-apr26",
+     "org": "Richmond BizSense",
+     "quote": "Construction of the security checkpoint is planned to begin in late 2026.",
+     "dated": "2026-04-29"
+    }
+   ]
+  },
+  {
+   "claim": "Breeze Airways: twice-weekly seasonal Cancún flights from 8 January 2027",
+   "verdict": "corrected",
+   "inAfter": "Breeze Airways plans twice-weekly seasonal flights to Cancún from 8 January 2027.",
+   "note": "Replaces the stale 'International flying is seasonal and works through gate B15, which reopened for Cancun, Toronto and Punta Cana'. In May 2026 both the airport and Breeze said Richmond had not had a nonstop flight to Cancún for more than a decade. WTVR gives 'Jan. 8' in a story of 5 May 2026; the operator and BizSense give the year.",
+   "sources": [
+    {
+     "file": "op-breeze-cancun",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": [
+      "added the new winter-spring seasonal route to Cancún with service beginning January 8, 2027",
+      "The RIC-CUN route will operate twice weekly on Mondays and Fridays."
+     ],
+     "dated": "2026-05-05"
+    },
+    {
+     "file": "wtvr-breeze-cancun",
+     "org": "WTVR CBS 6 (Scripps)",
+     "quote": "Breeze Airways announced a new seasonal nonstop route from Richmond International Airport to Cancun, Mexico on Mondays and Fridays starting on Jan. 8.",
+     "dated": "2026-05-05 (date in the page URL)"
+    },
+    {
+     "file": "bizsense-europe-jul26",
+     "org": "Richmond BizSense",
+     "quote": "In January 2027, Breeze Airways will begin nonstop service from Richmond to Cancún, Mexico.",
+     "dated": "2026-07-01"
+    },
+    {
+     "file": "airlinegeeks-breeze-11",
+     "org": "AirlineGeeks",
+     "quote": "Richmond, Virginia, and Tampa will also see service to Cancun, beginning in the winter of 2026-27.",
+     "dated": "2026-05-05"
+    }
+   ]
+  },
+  {
+   "claim": "owned and run by the Capital Region Airport Commission",
+   "verdict": "confirmed",
+   "inAfter": "It is owned and run by the Capital Region Airport Commission",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The Capital Region Airport Commission (CRAC) owns and operates Richmond International Airport."
+    },
+    {
+     "file": "op-commission",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": "the Capital Region Airport Commission owns and operates Richmond International Airport (RIC)",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "> 11 OWNER:",
+      "CAPITAL REGION ARPT COMM."
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "set up in 1975",
+   "verdict": "confirmed",
+   "inAfter": "set up in 1975",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Established in 1975 by the Virginia General Assembly"
+    },
+    {
+     "file": "op-commission",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": "Established in 1975 by an act of the Virginia General Assembly",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "answerable to the City of Richmond and the counties of Chesterfield, Hanover and Henrico",
+   "verdict": "confirmed",
+   "inAfter": "answerable to the City of Richmond and the counties of Chesterfield, Hanover and Henrico",
+   "note": "Was 'Richmond and three surrounding counties'; the counties are now named, as both sources name them.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the commission is overseen by representatives of the counties of Chesterfield, Hanover, and Henrico, and the City of Richmond"
+    },
+    {
+     "file": "op-commission",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": [
+      "governed by 14 Commissioners appointed by the four Richmond-area jurisdictions",
+      "City of Richmond",
+      "County of Chesterfield",
+      "County of Hanover",
+      "County of Henrico"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "military aircraft use the airport",
+   "verdict": "softened",
+   "inAfter": "Military aircraft use the airport too.",
+   "note": "Was 'a joint civil and military site, taking in the former Air National Guard station now used by the US Army Reserve and Virginia Army National Guard' (see the cut below). The operator's figures count 7,713 military aircraft movements in 2025 and the FAA record marks an Air National Guard (ANG) aircraft parking ramp.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "A joint civil-military public airport"
+    },
+    {
+     "file": "op-stats-dec2025",
+     "org": "Richmond International Airport (Capital Region Airport Commission, operator, flyrichmond.com)",
+     "quote": [
+      "Aircraft Operations",
+      "Military 606 555 9.19% 7,713 7,533 2.39% 3,588 3,940 -8.93%"
+     ],
+     "dated": "2026-01"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "ANG ACFT PRKG RAMP",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "about 7 miles from downtown",
+   "verdict": "cut",
+   "wasBefore": "about 7 miles",
+   "why": "The sources do not agree on the figure: Wikipedia says about 7 miles (11 km); the operator's field information and its annual reports for 2021 and 2024 say 6 miles east of downtown; the FAA record says 6 nautical miles (about 6.9 statute miles). The coordinates give 8.4 miles in a straight line from the GeoNames centre. Figure dropped, direction kept, and 'a short drive' added from two sources."
+  },
+  {
+   "claim": "in Sandston",
+   "verdict": "cut",
+   "wasBefore": "in Sandston",
+   "why": "Only Wikipedia places it in Sandston; the FAA's CY2025 table gives its city as Highland Springs, and the operator and the FAA record give a Richmond postal address. Softened to Henrico County, which every source gives."
+  },
+  {
+   "claim": "seven carriers to 26 destinations",
+   "verdict": "cut",
+   "wasBefore": "Seven carriers fly non-stop to 26 destinations.",
+   "why": "Out of date. The operator's live airline page now lists nine airlines, given as the airport's own statement; no current destination count was found."
+  },
+  {
+   "claim": "rebuilt twice this century",
+   "verdict": "cut",
+   "wasBefore": "It has been rebuilt twice this century.",
+   "why": "Framing that undercounts: the operator's timeline lists a Concourse B expansion (2002), a new control tower (2004), the terminal renovation (2007), a garage extension (2010) and a Concourse A extension (from 2018). The 2007 renovation is kept."
+  },
+  {
+   "claim": "redesign announced in 2005",
+   "verdict": "cut",
+   "wasBefore": "A complete redesign announced in 2005",
+   "why": "The 2005 announcement rests on Wikipedia alone; the 2007 completion is kept with two sources."
+  },
+  {
+   "claim": "from a single storey with 12 gates to 22 gates",
+   "verdict": "cut",
+   "wasBefore": "took the terminal from a single storey with 12 gates",
+   "why": "Contradicted by the operator's history: a 1995 expansion at Concourse A increased the number of gates to 14, and a 2002 Concourse B expansion was a 50 per cent increase in gates, both before 2005. The 22-gate figure rests on Wikipedia alone."
+  },
+  {
+   "claim": "22 gates",
+   "verdict": "cut",
+   "wasBefore": "22 gates",
+   "why": "Wikipedia alone, and inconsistent with the operator's history (see above). The operator's annual reports give 28 gates since 2021."
+  },
+  {
+   "claim": "a new control tower as part of the 2005 redesign",
+   "verdict": "cut",
+   "wasBefore": "a new control tower",
+   "why": "The operator dates the new air traffic control tower to 2004 (dedicated by the FAA), before the 2005 announcement it is attached to here."
+  },
+  {
+   "claim": "parking for 10,500",
+   "verdict": "cut",
+   "wasBefore": "parking for 10,500",
+   "why": "The operator gives 10,000 on-site spaces after the 2010 garage extension; Wikipedia gives 10,500. Disputed, and new parking decks are being planned (BizSense, December 2025)."
+  },
+  {
+   "claim": "second expansion late 2018 to 2021 adding gates to Concourse A",
+   "verdict": "cut",
+   "wasBefore": "A second expansion ran from late 2018 to 2021, adding gates to the A Concourse",
+   "why": "The start is confirmed (Wikipedia: late 2018; operator: a $28 million, six-gate extension of Concourse A in 2018), but the 2021 finish rests on Wikipedia alone and the history matters less to an agent than the checkpoint change now coming. Dropped to keep the text under 150 words."
+  },
+  {
+   "claim": "Concourse B security widened from four lanes to six",
+   "verdict": "cut",
+   "wasBefore": "widening the Concourse B security area from four lanes to six",
+   "why": "Contradicted: BizSense (26 November 2025) says each existing checkpoint has four lanes. The operator's 2021 report confirms a Concourse B checkpoint widening project, but not six lanes. Replaced by the current two-checkpoint layout and the merger planned."
+  },
+  {
+   "claim": "international flights through gate B15 to Cancun, Toronto and Punta Cana",
+   "verdict": "cut",
+   "wasBefore": "International flying is seasonal and works through gate B15, which reopened for Cancun, Toronto and Punta Cana.",
+   "why": "Out of date. In May 2026 the airport and Breeze both said Richmond had had no nonstop flight to Cancún for more than a decade; Air Canada's Toronto service dates from 2008 and Air Canada is not on the operator's airline list; B15 rests on Wikipedia alone. Replaced by the Breeze Cancún route due in January 2027."
+  },
+  {
+   "claim": "2,500 acres",
+   "verdict": "cut",
+   "wasBefore": "The airport covers 2,500 acres",
+   "why": "Disputed: the FAA record and Wikipedia give 2,500 acres, while the operator's annual reports (2021 and 2024) say the airport owns 3,078 acres."
+  },
+  {
+   "claim": "joint civil and military site with the former ANG station used by the Army Reserve and Virginia Army National Guard",
+   "verdict": "cut",
+   "wasBefore": "is a joint civil and military site, taking in the former Air National Guard station now used by the US Army Reserve and Virginia Army National Guard",
+   "why": "The units and the transfer of the station rest on Wikipedia alone: the Virginia National Guard's site failed at the proxy (tunnel refused) and was not retried. Softened to military aircraft using the airport, which the operator's figures and the FAA record support."
+  },
+  {
+   "claim": "answerable to Richmond and three surrounding counties (old wording)",
+   "verdict": "cut",
+   "wasBefore": "answerable to Richmond and three surrounding counties",
+   "why": "Reworded with the counties named. 'Surrounding' is a description neither source uses; the operator calls them the four Richmond-area jurisdictions."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

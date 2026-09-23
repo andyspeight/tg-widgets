@@ -1,0 +1,412 @@
+{
+ "iata": "MCI",
+ "id": "recbZbR8QpqJvsuch",
+ "name": "Kansas City International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Kansas_City_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Kansas City's airport, 15 miles north west of downtown in Platte County, and completely rebuilt. A new terminal complex opened in 2023, replacing the one that had been there since the airport opened in 1972.\n\nThe new building is a single terminal with 40 gates across two concourses, 13 in A and 27 in B. International arrivals without pre-clearance are handled at gates A12, A14 and A16. There is a seven storey car park attached with 6,219 spaces and electric vehicle charging.\n\nIt flies non-stop to 47 airports, including Cancún, Montego Bay and San José del Cabo.\n\nGround transport is the weak point. There is an hourly public bus from downtown and several private shared shuttles out to regional cities such as Columbia, Topeka and Lawrence, but no rail link. Plans for one go back to the 1960s, and the city commissioned fresh proposals ahead of the 2026 World Cup.\n\nWorth a look while waiting: the terminal carries commissioned work by 28 artists, paid for through a percent for art programme.",
+ "after": "Kansas City's airport, north west of downtown in Platte County. A new single terminal opened in 2023, replacing the terminals in use since the airport opened in 1972.\n\nThe terminal has two concourses, A and B, with a US customs facility for international arrivals. A seven-storey car park stands across from it. The FAA's preliminary figures show about 5.6 million passengers boarding flights here in 2025.\n\nGround transport is the weak point. RideKC's route 229 bus runs hourly between the terminal and downtown Kansas City, a ride of just under an hour. There is no rail link.\n\nWorth a look while waiting: the terminal carries commissioned work by 28 artists, paid for through a percent for art programme.",
+ "claims": [
+  {
+   "claim": "Kansas City's airport",
+   "verdict": "confirmed",
+   "inAfter": "Kansas City's airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport in Kansas City, Missouri"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "> 1 ASSOC CITY:",
+      "KANSAS CITY",
+      "> 11 OWNER:",
+      "CITY OF KANSAS CITY"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "north west of downtown",
+   "verdict": "confirmed",
+   "inAfter": "north west of downtown",
+   "note": "The distance is dropped (see the cut below); the direction is in every source.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "located 15 miles (24 km) northwest of Downtown Kansas City in Platte County, Missouri"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "3 CBD TO AIRPORT (NM):",
+      "15 NW"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 333 degrees, which is north west"
+    }
+   ]
+  },
+  {
+   "claim": "in Platte County",
+   "verdict": "confirmed",
+   "inAfter": "in Platte County",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "in Platte County, Missouri"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "5 COUNTY:",
+      "PLATTE MO"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "a new single terminal opened in 2023",
+   "verdict": "confirmed",
+   "inAfter": "A new single terminal opened in 2023",
+   "note": "KSHB's parking guide gives the first day of use as Tuesday 28 February 2023.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "a new complex in the airport was completed in 2023, replacing the old one",
+      "The airport has a single terminal with 40 gates and two concourses"
+     ]
+    },
+    {
+     "file": "kshb-evacuation-mar26",
+     "org": "KSHB 41 (Scripps)",
+     "quote": "Sunday was the first time officials evacuated the entire terminal since it opened in 2023.",
+     "dated": "2026-03-09 (from the page's publication metadata, read by the helper; not in the saved text)"
+    },
+    {
+     "file": "kshb-worldcup-ready-sep25",
+     "org": "KSHB 41 (Scripps)",
+     "quote": "Since the brand new single terminal opened in 2023, millions of passengers have used the airport.",
+     "dated": "2025-09-12 (from the page's publication metadata, read by the helper; not in the saved text)"
+    },
+    {
+     "file": "kshb-parking-2023",
+     "org": "KSHB 41 (Scripps)",
+     "quote": "When passengers use the new terminal at Kansas City International Airport beginning Tuesday, Feb. 28",
+     "dated": "2023-02-23 (from the page's publication metadata, read by the helper; not in the saved text)"
+    }
+   ]
+  },
+  {
+   "claim": "replacing the terminals in use since the airport opened in 1972",
+   "verdict": "corrected",
+   "inAfter": "replacing the terminals in use since the airport opened in 1972",
+   "note": "Was 'replacing the one that had been there since the airport opened in 1972'. The old airport had several terminals; KSHB reported before the move that terminals B and C, the two still in use, would be razed. The new terminal is described as it is now, not as the old horseshoe terminals.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport was opened in 1972 and a new complex in the airport was completed in 2023, replacing the old one."
+    },
+    {
+     "file": "kshb-opening-2023",
+     "org": "KSHB 41 (Scripps)",
+     "quote": [
+      "When Kansas City International Airport opened in 1972",
+      "As time kept going, so did the deterioration of the current terminals.",
+      "Facility designs from 1972 do not effectively serve security needs in the 21st century."
+     ],
+     "dated": "2023-02-25 (from the page's publication metadata, read by the helper; not in the saved text)"
+    },
+    {
+     "file": "kshb-parking-2023",
+     "org": "KSHB 41 (Scripps)",
+     "quote": "Current terminals B and C will be razed.",
+     "dated": "2023-02-23 (from the page's publication metadata, read by the helper; not in the saved text)"
+    }
+   ]
+  },
+  {
+   "claim": "two concourses, A and B",
+   "verdict": "softened",
+   "inAfter": "two concourses, A and B",
+   "note": "Was '40 gates across two concourses, 13 in A and 27 in B'; the gate counts are cut (below). KSHB names Concourse B in March 2026.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport has a single terminal with 40 gates and two concourses"
+    },
+    {
+     "file": "kshb-guide-2023",
+     "org": "KSHB 41 (Scripps)",
+     "quote": "Concourse A and Concourse B are minutes apart via an indoor skywalk.",
+     "dated": "2023-03-01 (from the page's publication metadata, read by the helper; not in the saved text)"
+    },
+    {
+     "file": "kshb-evacuation-mar26",
+     "org": "KSHB 41 (Scripps)",
+     "quote": "a bomb was located in Concourse B and in the parking garage",
+     "dated": "2026-03-09 (from the page's publication metadata, read by the helper; not in the saved text)"
+    }
+   ]
+  },
+  {
+   "claim": "a US customs facility for international arrivals",
+   "verdict": "softened",
+   "inAfter": "with a US customs facility for international arrivals",
+   "note": "Was 'International arrivals without pre-clearance are handled at gates A12, A14 and A16'; the gate numbers rest on Wikipedia alone. KSHB's report (12 September 2025) is just over a year old; KSHB also reported international charter flights from Curaçao landing at KCI for the World Cup in June 2026.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Non precleared international arrivals are processed at gates A12, A14, and A16."
+    },
+    {
+     "file": "kshb-worldcup-ready-sep25",
+     "org": "KSHB 41 (Scripps)",
+     "quote": [
+      "U.S. Customs and Border Protection has also established a staffing plan to handle the influx.",
+      "Our international arrivals throughput is probably among the fastest in the United States"
+     ],
+     "dated": "2025-09-12 (from the page's publication metadata, read by the helper; not in the saved text)"
+    },
+    {
+     "file": "kshb-curacao-jun26",
+     "org": "KSHB 41 (Scripps)",
+     "quote": "The charters will leave Curaçao International Airport and arrive at Kansas City International Airport in the early afternoon on Thursday, Friday and Saturday.",
+     "dated": "2026-06-17 (from the page's publication metadata, read by the helper; not in the saved text)"
+    }
+   ]
+  },
+  {
+   "claim": "a seven-storey car park across from the terminal",
+   "verdict": "softened",
+   "inAfter": "A seven-storey car park stands across from it.",
+   "note": "Was 'a seven storey car park attached with 6,219 spaces and electric vehicle charging'; the space count and the charging rest on Wikipedia alone. KSHB reported new garage rates from 15 September 2026, so the garage is in current use.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The terminal is connected to an adjacent seven-story parking garage"
+    },
+    {
+     "file": "kshb-guide-2023",
+     "org": "KSHB 41 (Scripps)",
+     "quote": "At the main parking garage, there are seven floors with thousands of parking spots.",
+     "dated": "2023-03-01 (from the page's publication metadata, read by the helper; not in the saved text)"
+    },
+    {
+     "file": "kshb-parking-2023",
+     "org": "KSHB 41 (Scripps)",
+     "quote": "KCI will charge drivers $25 per day to park in the new garage directly across from the new terminal.",
+     "dated": "2023-02-23 (from the page's publication metadata, read by the helper; not in the saved text)"
+    },
+    {
+     "file": "kshb-parking-sep26",
+     "org": "KSHB 41 (Scripps)",
+     "quote": "Garage — Increases from $28 to $30 per day",
+     "dated": "2026-09-08 (from the page's publication metadata, read by the helper; not in the saved text)"
+    }
+   ]
+  },
+  {
+   "claim": "FAA: about 5.6 million passengers boarded here in 2025",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FAA",
+   "inAfter": "The FAA's preliminary figures show about 5.6 million passengers boarding flights here in 2025.",
+   "note": "Replaces the stale count of 47 nonstop airports (see the cut below) as the measure of how busy it is, as for Kahului. ENPLANEMENTS (boardings only), attributed to the FAA, whose own table is the source: 5,613,974 in CY2025, down 5.09 per cent on 5,915,078 in 2024, 40th in the US. The operator's own figures could not be read: flykci.com was refused at the proxy (502 to CONNECT) and kcmo.gov answered 403.",
+   "sources": [
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration (FAA)",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "40 CE MO MCI Kansas City Kansas City International P M 5,613,974 5,915,078 -5.09%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "RideKC route 229 runs hourly between the terminal and downtown",
+   "verdict": "confirmed",
+   "inAfter": "RideKC's route 229 bus runs hourly between the terminal and downtown Kansas City",
+   "note": "RideKC's live timetable (weekday and Sunday read on 23 September 2026) runs from 'KCI AIRPORT NEW TERMINAL' to the East Village Transit Center, the downtown hub at 13th and Charlotte, about once an hour. KCUR (6 April 2026) says it is the only RideKC line that serves the airport. The World Cup pop-up routes were temporary, and Johnson County's free pilot shuttle was ending the weekend after 18 September 2026 (KSHB).",
+   "sources": [
+    {
+     "file": "ridekc-229",
+     "org": "RideKC (Kansas City Area Transportation Authority)",
+     "quote": [
+      "229 Boardwalk–KCI provides a direct connection between the Northland and Kansas City International Airport",
+      "KCI AIRPORT NEW TERMINAL 6:00 AM 7:00 AM 8:00 AM 9:00 AM",
+      "EAST VILLAGE - BAY C 6:59",
+      "Major downtown transit hub connecting local, regional, and express RideKC services, located at 13th & Charlotte."
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "kcur-229-apr26",
+     "org": "KCUR (Kansas City public radio)",
+     "quote": [
+      "Currently, RideKC only maintains one bus line that drops off at the airport, the 229, beginning at the East Village Transit Center",
+      "And it runs only once per hour, which is less frequent than I would like."
+     ],
+     "dated": "2026-04-06"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The Kansas City Area Transportation Authority has public bus service to the airport from Downtown Kansas City that runs every hour."
+    }
+   ]
+  },
+  {
+   "claim": "a ride of just under an hour",
+   "verdict": "corrected",
+   "inAfter": "a ride of just under an hour",
+   "note": "New detail, in place of the regional shuttles and the World Cup transit plans (cut below); it also stands in for the dropped distance.",
+   "sources": [
+    {
+     "file": "kcur-229-apr26",
+     "org": "KCUR (Kansas City public radio)",
+     "quote": "At just under an hour, the bus ride from downtown Kansas City to MCI",
+     "dated": "2026-04-06"
+    },
+    {
+     "file": "ridekc-229",
+     "org": "RideKC (Kansas City Area Transportation Authority)",
+     "quote": [
+      "KCI AIRPORT NEW TERMINAL 6:00",
+      "EAST VILLAGE - BAY C 6:59"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "no rail link",
+   "verdict": "confirmed",
+   "inAfter": "There is no rail link.",
+   "sources": [
+    {
+     "file": "kcur-229-apr26",
+     "org": "KCUR (Kansas City public radio)",
+     "quote": "A proposed rail to the airport has sadly failed to materialize.",
+     "dated": "2026-04-06"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Plans for a fixed rail connection to the airport date back to the 1960s"
+    }
+   ]
+  },
+  {
+   "claim": "work by 28 artists through a percent for art programme",
+   "verdict": "confirmed",
+   "inAfter": "the terminal carries commissioned work by 28 artists, paid for through a percent for art programme",
+   "note": "Kansas City's programme is called One Percent for Art (KSHB).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The terminal has works of public art from 28 commissioned artists funded through a percent for art program."
+    },
+    {
+     "file": "kshb-art-2023",
+     "org": "KSHB 41 (Scripps)",
+     "quote": [
+      "Kansas City’s “One Percent for Art” program made it possible for the new terminal to feature 28 pieces",
+      "28 artists, 19 of those having ties to the Kansas City area, were commissioned"
+     ],
+     "dated": "2023-02-24 (from the page's publication metadata, read by the helper; not in the saved text)"
+    }
+   ]
+  },
+  {
+   "claim": "15 miles from downtown",
+   "verdict": "cut",
+   "wasBefore": "15 miles",
+   "why": "The sources do not agree on the figure: Wikipedia says 15 miles (24 km), the FAA record 15 nautical miles (about 17 statute miles, 28 km); the coordinates give 15.7 miles (25.3 km) in a straight line. The operator's site could not be read. Figure dropped, direction kept; the bus time now gives a sense of the distance."
+  },
+  {
+   "claim": "completely rebuilt",
+   "verdict": "cut",
+   "wasBefore": "and completely rebuilt",
+   "why": "Overstated: the terminal was replaced in 2023; nothing says the airfield was rebuilt."
+  },
+  {
+   "claim": "replacing the one terminal",
+   "verdict": "cut",
+   "wasBefore": "replacing the one that had been there",
+   "why": "The old airport had more than one terminal (KSHB: terminals B and C were to be razed). Corrected to 'the terminals'."
+  },
+  {
+   "claim": "40 gates, 13 in A and 27 in B",
+   "verdict": "cut",
+   "wasBefore": "with 40 gates across two concourses, 13 in A and 27 in B",
+   "why": "Only Wikipedia gives the counts; the operator's site (flykci.com) was refused at the proxy and kcmo.gov answered 403, and no news source saved gives them. The two concourses are kept."
+  },
+  {
+   "claim": "international arrivals at gates A12, A14 and A16",
+   "verdict": "cut",
+   "wasBefore": "International arrivals without pre-clearance are handled at gates A12, A14 and A16.",
+   "why": "The gate numbers rest on Wikipedia alone. Softened to the customs facility, which KSHB confirms."
+  },
+  {
+   "claim": "6,219 spaces and electric vehicle charging",
+   "verdict": "cut",
+   "wasBefore": "attached with 6,219 spaces and electric vehicle charging",
+   "why": "Wikipedia alone; KSHB says only 'thousands of parking spots'. The seven floors are kept."
+  },
+  {
+   "claim": "nonstop to 47 airports including Cancún, Montego Bay and San José del Cabo",
+   "verdict": "cut",
+   "wasBefore": "It flies non-stop to 47 airports, including Cancún, Montego Bay and San José del Cabo.",
+   "why": "Out of date: Wikipedia dates the count to October 2022. No current list could be read (operator's site refused at the proxy, city site 403). Replaced by the FAA's 2025 boardings figure. KSHB (16 October 2025) reports that KCI has no nonstop flights to Europe and that travellers connect through Chicago, New York or Atlanta; not added, as no second source was found."
+  },
+  {
+   "claim": "private shared shuttles to Columbia, Topeka and Lawrence",
+   "verdict": "cut",
+   "wasBefore": "several private shared shuttles out to regional cities such as Columbia, Topeka and Lawrence",
+   "why": "Wikipedia alone; the operator's ground transport page could not be reached."
+  },
+  {
+   "claim": "old wording of the bus sentence",
+   "verdict": "cut",
+   "wasBefore": "There is an hourly public bus from downtown",
+   "why": "Reworded with the route named from RideKC's own timetable; the facts are kept."
+  },
+  {
+   "claim": "rail plans from the 1960s; fresh proposals ahead of the 2026 World Cup",
+   "verdict": "cut",
+   "wasBefore": "Plans for one go back to the 1960s, and the city commissioned fresh proposals ahead of the 2026 World Cup.",
+   "why": "The 1960s date rests on Wikipedia alone, and the World Cup has now been played: what ran were temporary pop-up bus routes (KCUR) and a Johnson County pilot shuttle that ended in September 2026 (KSHB). No rail link has been built, which the text keeps."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Ground transport is the weak point.",
+   "why": "The old text's framing, kept. The facts after it are sourced (one hourly RideKC route, just under an hour from downtown, no rail link), and KCUR's reporter reached the same view on 6 April 2026: 'World Cup tourists, and locals, need better options'."
+  }
+ ],
+ "tracerOk": {}
+}

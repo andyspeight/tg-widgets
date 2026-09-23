@@ -1,0 +1,430 @@
+{
+ "iata": "ROC",
+ "id": "recaQEtGbvnGhCT5K",
+ "name": "Frederick Douglass Greater Rochester International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Greater_Rochester_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Rochester's airport, three miles south west of downtown and inside the city limits, owned and run by Monroe County.\n\nThe terminal is neatly arranged across two levels. Shops, restaurants and all 21 gates are on the top level, with offices, ground equipment and United States customs and immigration below. There are two concourses, ten gates in A and eleven in B, and both are named after Rochester figures: Frederick Douglass and Susan B. Anthony. The airport itself carries Douglass's name.\n\nThree runways serve the 1,136 acre site, the longest at 8,001 feet, and there is a cargo terminal in the north west corner.\n\nThe 642nd Aviation Support Battalion, part of the 42nd Infantry Division, is based here.",
+ "after": "Rochester's airport, a few miles south west of downtown, owned and run by Monroe County.\n\nThe terminal has two levels, with shops, restaurants and all 21 gates on the upper level. There is also a US customs office. Its two concourses are named after Rochester figures: A after Frederick Douglass and B after Susan B Anthony. The airport itself carries Douglass's name.\n\nThree runways serve the 1,136 acre site, the longest at 8,001 feet.",
+ "claims": [
+  {
+   "claim": "Rochester's airport",
+   "verdict": "confirmed",
+   "inAfter": "Rochester's airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is a public airport located within the City of Rochester"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "> 1 ASSOC CITY:",
+      "ROCHESTER",
+      "FREDERICK DOUGLASS/GREATER ROCHESTER INTL"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "op-info",
+     "org": "Frederick Douglass Greater Rochester International Airport (Monroe County and Monroe County Airport Authority, operator, rocairport.com)",
+     "quote": "It is a small hub airport which handles approximately 120 flights per day",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "a few miles from downtown",
+   "verdict": "softened",
+   "inAfter": "a few miles south west of downtown",
+   "note": "Was 'three miles'. The sources do not agree on the figure: Wikipedia says three miles (4.8 km), the operator 'four miles southwest of the City of Rochester', the FAA record 3 nautical miles (about 3.5 statute miles). The coordinates give 3.8 miles (6.1 km) in a straight line, so Wikipedia's 4.8 km fails the gate (ratio 0.79). 'A few miles' is what every source supports.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "three miles (4.8 km) southwest of Downtown"
+    },
+    {
+     "file": "op-directions",
+     "org": "Frederick Douglass Greater Rochester International Airport (Monroe County and Monroe County Airport Authority, operator, rocairport.com)",
+     "quote": "The airport is conveniently located four miles southwest of the City of Rochester",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "3 CBD TO AIRPORT (NM):",
+      "03 SW"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 6.1 km (3.8 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "south west of downtown",
+   "verdict": "confirmed",
+   "inAfter": "south west of downtown",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "southwest of Downtown"
+    },
+    {
+     "file": "op-directions",
+     "org": "Frederick Douglass Greater Rochester International Airport (Monroe County and Monroe County Airport Authority, operator, rocairport.com)",
+     "quote": "four miles southwest of the City of Rochester",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 229 degrees, which is south west"
+    }
+   ]
+  },
+  {
+   "claim": "owned and run by Monroe County",
+   "verdict": "confirmed",
+   "inAfter": "owned and run by Monroe County",
+   "note": "The FAA names the county as owner. The operator's authority page describes the Monroe County Airport Authority, a public benefit corporation included in the county's reporting entity, which operates the airport's facilities with the county.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is owned and operated by Monroe County."
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "> 11 OWNER:",
+      "COUNTY OF MONROE"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "op-mcaa",
+     "org": "Frederick Douglass Greater Rochester International Airport (Monroe County and Monroe County Airport Authority, operator, rocairport.com)",
+     "quote": "The Monroe County Airport Authority (MCAA) is a public benefit corporation that was created to finance, construct, develop, operate and maintain aviation and other related facilities and services with the County of Monroe and is included in the reporting entity of the County.",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "about 2.8 million passengers in 2025",
+   "verdict": "cut",
+   "note": "New to the text, as the measure of size in place of the cut cargo, city-limits and battalion lines; the old text said nothing about how busy the airport is. TOTAL passengers, arriving plus departing: the operator's 2025 annual report gives 'some 2.8 million', up almost 4.5 per cent on 2024, and its statistics page 1,401,228 scheduled enplanements in 2025 (about half of the total). The FAA's preliminary CY2025 table counts 1,385,078 enplanements (boardings only), which is consistent. Flag for Andy: a new fact, added because the Overview otherwise had no traffic line.",
+   "sources": [
+    {
+     "file": "op-annual-2025",
+     "org": "Frederick Douglass Greater Rochester International Airport (Monroe County and Monroe County Airport Authority, operator, rocairport.com)",
+     "quote": [
+      "ANNUAL REPORT",
+      "2025 was a year of growth and achievement",
+      "The year saw some 2.8 million passengers at the airport, almost a 4.5% increase from 2024"
+     ],
+     "dated": "2026 (annual report for 2025)"
+    },
+    {
+     "file": "op-info",
+     "org": "Frederick Douglass Greater Rochester International Airport (Monroe County and Monroe County Airport Authority, operator, rocairport.com)",
+     "quote": [
+      "2025",
+      "Scheduled Passenger Enplanements: 1,401,228"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "94 EA NY ROC Rochester",
+      "Rochester International P S 1,385,078 1,331,837 4.00%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ],
+   "why": "Held back in review (23 Sep): verified with two sources, but a new fact that replaces nothing in the old text, which the sweep's rule keeps out. Andy can add it; the sources stay listed here. Was to read: \"It handled about 2.8 million passengers in 2025.\"."
+  },
+  {
+   "claim": "the terminal has two levels",
+   "verdict": "softened",
+   "inAfter": "The terminal has two levels",
+   "note": "Was 'The terminal is neatly arranged across two levels'; 'neatly' was a judgement.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "This terminal has two concourses, each with two stories."
+    },
+    {
+     "file": "op-info",
+     "org": "Frederick Douglass Greater Rochester International Airport (Monroe County and Monroe County Airport Authority, operator, rocairport.com)",
+     "quote": "ROC features a modern two-story terminal",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "shops and restaurants on the upper level",
+   "verdict": "confirmed",
+   "inAfter": "with shops, restaurants and all 21 gates on the upper level",
+   "note": "The operator's pages put check-in and security on the upper level, the main food court past security, and baggage claim down the escalators from the food court.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The top level of the terminal is home to shops, restaurants, bathrooms, and all gates."
+    },
+    {
+     "file": "op-help",
+     "org": "Frederick Douglass Greater Rochester International Airport (Monroe County and Monroe County Airport Authority, operator, rocairport.com)",
+     "quote": [
+      "The upper level entrance leads to the ticket counters and security checkpoint.",
+      "To get to the baggage claim, go down the stairs/escalators located in the central food court area."
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-food",
+     "org": "Frederick Douglass Greater Rochester International Airport (Monroe County and Monroe County Airport Authority, operator, rocairport.com)",
+     "quote": [
+      "Located Post-Security",
+      "Taste of Rochester, offers local area favorites located in the Airport's main food court."
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "all 21 gates on the upper level",
+   "verdict": "confirmed",
+   "inAfter": "all 21 gates on the upper level",
+   "note": "The operator's live terminal map numbers A1 to A11 and B1 to B10, 21 in all.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "The terminal has a total of twenty-one gates",
+      "The top level of the terminal is home to shops, restaurants, bathrooms, and all gates."
+     ]
+    },
+    {
+     "file": "op-info",
+     "org": "Frederick Douglass Greater Rochester International Airport (Monroe County and Monroe County Airport Authority, operator, rocairport.com)",
+     "quote": "Number of Passenger Gates: 21",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-help",
+     "org": "Frederick Douglass Greater Rochester International Airport (Monroe County and Monroe County Airport Authority, operator, rocairport.com)",
+     "quote": "Floor 2 - Departures Ticketing, security, gates, drop off, etc.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-map",
+     "org": "Frederick Douglass Greater Rochester International Airport (Monroe County and Monroe County Airport Authority, operator, rocairport.com)",
+     "quote": [
+      "A1",
+      "A11",
+      "A10",
+      "B1",
+      "B10"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "a US customs office",
+   "verdict": "softened",
+   "inAfter": "There is also a US customs office.",
+   "note": "Was 'United States customs and immigration below'. The operator's map shows a U.S. Customs Office and an International Arrivals Hall, but it draws both floors together, so which level the office is on could not be read; the level is dropped.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The bottom level is home to offices, ground service equipment, and US Customs and Immigration."
+    },
+    {
+     "file": "op-map",
+     "org": "Frederick Douglass Greater Rochester International Airport (Monroe County and Monroe County Airport Authority, operator, rocairport.com)",
+     "quote": [
+      "U.S. CustomsOffice",
+      "InternationalArrivals Hall"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "two concourses named after Frederick Douglass (A) and Susan B Anthony (B)",
+   "verdict": "confirmed",
+   "inAfter": "Its two concourses are named after Rochester figures: A after Frederick Douglass and B after Susan B Anthony.",
+   "note": "Initials written without stops, in the house style used for George HW Bush.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Concourse A is named after Frederick Douglass and concourse B is named after Susan B. Anthony."
+    },
+    {
+     "file": "op-history",
+     "org": "Frederick Douglass Greater Rochester International Airport (Monroe County and Monroe County Airport Authority, operator, rocairport.com)",
+     "quote": "In honor of two great Rochesterians, Concourse A was named in honor of Frederick Douglass and Concourse B was named in honor of Susan B. Anthony.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-map",
+     "org": "Frederick Douglass Greater Rochester International Airport (Monroe County and Monroe County Airport Authority, operator, rocairport.com)",
+     "quote": [
+      "Susan B. Anthony Concourse B",
+      "Frederick Douglass Concourse A"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "the airport carries Douglass's name",
+   "verdict": "confirmed",
+   "inAfter": "The airport itself carries Douglass's name.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Frederick Douglass Greater Rochester International Airport (IATA: ROC, ICAO: KROC, FAA LID: ROC)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "> 2 AIRPORT NAME:",
+      "FREDERICK DOUGLASS/GREATER ROCHESTER INTL"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "op-welcome",
+     "org": "Frederick Douglass Greater Rochester International Airport (Monroe County and Monroe County Airport Authority, operator, rocairport.com)",
+     "quote": "Welcome and thank you for choosing the Frederick Douglass - Greater Rochester International Airport (ROC) for your air travel!",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "three runways on a 1,136 acre site",
+   "verdict": "confirmed",
+   "inAfter": "Three runways serve the 1,136 acre site",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport covers 1,136 acres (460 ha)",
+      "It has three runways"
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "22 ACREAGE:",
+      "1,136"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runways listed: 3"
+    }
+   ]
+  },
+  {
+   "claim": "longest runway 8,001 feet",
+   "verdict": "confirmed",
+   "inAfter": "the longest at 8,001 feet",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "4/22: 8,001 ft × 150 ft (2,439 m × 46 m), asphalt"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runway 04/22: 2,439 m (8,001 ft), ASP"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "8,001",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "three miles from downtown",
+   "verdict": "cut",
+   "wasBefore": "three miles",
+   "why": "Fails the coordinates check (4.8 km against 6.1 km in a straight line, ratio 0.79), and the sources give three miles, four miles and 3 nautical miles. Softened to 'a few miles'."
+  },
+  {
+   "claim": "inside the city limits",
+   "verdict": "cut",
+   "wasBefore": "and inside the city limits",
+   "why": "Only Wikipedia says so. The operator describes the airport as 'four miles southwest of the City of Rochester', which does not settle it, and the FAA record gives only the associated city."
+  },
+  {
+   "claim": "neatly arranged",
+   "verdict": "cut",
+   "wasBefore": "The terminal is neatly arranged across two levels.",
+   "why": "Framing; the two levels are kept."
+  },
+  {
+   "claim": "offices, ground equipment and customs below",
+   "verdict": "cut",
+   "wasBefore": "with offices, ground equipment and United States customs and immigration below",
+   "why": "The offices and ground equipment rest on Wikipedia alone; the operator's pages put arrivals, baggage claim and pick-up on the lower level instead. The customs office is kept without a level."
+  },
+  {
+   "claim": "ten gates in A and eleven in B",
+   "verdict": "cut",
+   "wasBefore": "ten gates in A and eleven in B",
+   "why": "Contradicted: the operator's live terminal map numbers eleven gates in Concourse A (A1 to A11) and ten in B (B1 to B10). The total of 21 is kept; the split has only one source each way."
+  },
+  {
+   "claim": "old wording of the concourse sentence",
+   "verdict": "cut",
+   "wasBefore": "There are two concourses, ten gates in A and eleven in B, and both are named after Rochester figures",
+   "why": "Reworded without the gate split; the names are kept."
+  },
+  {
+   "claim": "cargo terminal in the north west corner",
+   "verdict": "cut",
+   "wasBefore": "and there is a cargo terminal in the north west corner",
+   "why": "The location rests on Wikipedia alone. The operator's aviation page confirms air cargo facilities but not where they are; of little use to an agent."
+  },
+  {
+   "claim": "642nd Aviation Support Battalion based here",
+   "verdict": "cut",
+   "wasBefore": "The 642nd Aviation Support Battalion, part of the 42nd Infantry Division, is based here.",
+   "why": "Only Wikipedia places the battalion at the airport. The New York National Guard's own pages put its headquarters at the Patriot Way armory in Rochester (42 Patriot Way) without saying that is on the airport, and none of the operator's pages mention it."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

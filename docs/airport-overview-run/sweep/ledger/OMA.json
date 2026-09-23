@@ -1,0 +1,456 @@
+{
+ "iata": "OMA",
+ "id": "recdKkHY4GBV4CXmG",
+ "name": "Eppley Airfield",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Eppley_Airfield",
+ "audited": "2026-09-23",
+ "before": "Nebraska's busiest airport, three miles north east of downtown Omaha on the west bank of the Missouri. It handles more arrivals and departures than every other airport in the state put together.\n\nThe terminals split by airline, which makes it easy to brief a client. The South Terminal and Concourse A take Alaska, Allegiant, American, Delta and Frontier. The North Terminal and Concourse B take Southwest and United, and the consolidated car hire facility is attached to it.\n\nThe airport is in the middle of the BuildOMA modernisation programme, which has already taken one gate out of service, so expect the layout to keep changing.\n\nPublic transport is thin. Metro Transit line 106 runs at rush hour on weekdays only, and Express Arrow intercity coaches to Norfolk call at the terminal. For most clients that means a car or a taxi.\n\nThree runways serve the 2,650 acre site, which sits close to four interstates.",
+ "after": "Nebraska's busiest airport, a few miles north east of downtown Omaha. It handles more passengers than every other airport in the state put together.\n\nThe terminals split by airline, which makes it easy to brief a client. Alaska, Allegiant, American, Delta and Frontier use the South Terminal and Concourse A. Southwest and United use the North Terminal and Concourse B.\n\nThe airport is in the middle of its Build OMA modernisation, due to be complete in 2028 with a single security checkpoint for all passengers. Expect the layout to keep changing until then; the airport advises allowing extra time.\n\nPublic transport is thin. Metro Transit route 106 runs at rush hour on weekdays only. For most clients that means a car or a taxi.\n\nThree runways serve the 2,650 acre site.",
+ "claims": [
+  {
+   "claim": "Nebraska's busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "Nebraska's busiest airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "it is the busiest airport in Nebraska"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "61 CE NE OMA Omaha Eppley Airfield P M 2,565,135 2,583,212 -0.70%",
+      "217 CE NE LNK Lincoln Lincoln P N 134,898 129,968 3.79%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "a few miles from downtown",
+   "verdict": "softened",
+   "inAfter": "a few miles north east of downtown Omaha",
+   "note": "Was 'three miles'. The sources do not agree on the figure: Wikipedia says three miles (5 km), the operator four miles (twice), the FAA record 3 nautical miles (about 3.5 statute miles). The coordinates give 4.0 miles (6.5 km) in a straight line, so Wikipedia's figure fails the gate (ratio 0.77). 'A few miles' is what every source supports.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "located three miles (5 km) northeast of downtown Omaha, Nebraska"
+    },
+    {
+     "file": "op-directions",
+     "org": "Omaha Airport Authority (operator, flyoma.com and its Build OMA site)",
+     "quote": "(Four Miles Northeast of Downtown Omaha)",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-facts",
+     "org": "Omaha Airport Authority (operator, flyoma.com and its Build OMA site)",
+     "quote": "Located four miles from downtown Omaha, Nebraska",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "3 CBD TO AIRPORT (NM):",
+      "03 NE"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 6.5 km (4.0 miles)",
+      "Bearing from the city centre: 37 degrees, which is north east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "north east of downtown",
+   "verdict": "confirmed",
+   "inAfter": "north east of downtown Omaha",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "northeast of downtown Omaha"
+    },
+    {
+     "file": "op-directions",
+     "org": "Omaha Airport Authority (operator, flyoma.com and its Build OMA site)",
+     "quote": "(Four Miles Northeast of Downtown Omaha)",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 37 degrees, which is north east"
+    }
+   ]
+  },
+  {
+   "claim": "more passengers than every other airport in the state put together",
+   "verdict": "softened",
+   "inAfter": "It handles more passengers than every other airport in the state put together",
+   "note": "Was 'more arrivals and departures than every other airport in the state put together'. The FAA's CY2025 table lists seven Nebraska airports: Omaha's 2,565,135 boardings against 269,069 at the other six together (Lincoln 134,898, Grand Island 75,908, Kearney 24,236, North Platte 15,344, Scottsbluff 14,729, Alliance 3,954). No source for aircraft movements was saved, so the text now says passengers.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "with more arrivals and departures than all other airports in the state combined"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "61 CE NE OMA Omaha Eppley Airfield P M 2,565,135 2,583,212 -0.70%",
+      "217 CE NE LNK Lincoln Lincoln P N 134,898 129,968 3.79%",
+      "252 CE NE GRI Grand Island Central Nebraska Regional P N 75,908 67,747 12.05%",
+      "342 CE NE EAR Kearney Kearney Regional P N 24,236 14,130 71.52%",
+      "377 CE NE LBF North Platte",
+      "Field P N 15,344 16,537 -7.21%",
+      "381 CE NE BFF Scottsbluff",
+      "Regional/Wm B Heilig Field P N 14,729 13,841 6.42%",
+      "500 CE NE AIA Alliance Alliance Municipal CS None 3,954 4,207 -6.01%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "more than 5.2 million passengers in 2025",
+   "verdict": "cut",
+   "note": "New to the text, as the measure of how busy it is. TOTAL passengers, arriving plus departing, from the operator's facts page; the FAA's preliminary CY2025 table counts 2,565,135 enplanements (boardings only, about half of total passengers), which is consistent.",
+   "sources": [
+    {
+     "file": "op-facts",
+     "org": "Omaha Airport Authority (operator, flyoma.com and its Build OMA site)",
+     "quote": [
+      "Eppley Airfield is a medium-hub airport that served over 5.2 million passengers in 2025.",
+      "Total 2025 passengers: 5.2 million"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "61 CE NE OMA Omaha Eppley Airfield P M 2,565,135 2,583,212 -0.70%",
+     "dated": "2026-07-08"
+    }
+   ],
+   "why": "Held back in review (23 Sep): verified with two sources, but a new fact that replaces nothing in the old text, which the sweep's rule keeps out. Andy can add it; the sources stay listed here. Was to read: \"more than 5.2 million in 2025\"."
+  },
+  {
+   "claim": "the terminals split by airline",
+   "verdict": "confirmed",
+   "inAfter": "The terminals split by airline",
+   "note": "'Which makes it easy to brief a client' is the old text's framing, kept; the split itself is sourced below.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Omaha Airport Authority (operator, flyoma.com and its Build OMA site)",
+     "quote": [
+      "Alaska Airlines Concourse A (South)",
+      "Southwest Airlines Concourse B (North)"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The North Terminal, including Concourse B, includes gates B11 through B19, baggage claims 5 and 6, and serves Southwest Airlines and United Airlines."
+    }
+   ]
+  },
+  {
+   "claim": "Alaska, Allegiant, American, Delta and Frontier at the South Terminal and Concourse A",
+   "verdict": "confirmed",
+   "inAfter": "Alaska, Allegiant, American, Delta and Frontier use the South Terminal and Concourse A.",
+   "note": "Reworded from 'The South Terminal and Concourse A take...' so that three sentences in a row no longer start with 'The'.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Omaha Airport Authority (operator, flyoma.com and its Build OMA site)",
+     "quote": [
+      "Alaska Airlines Concourse A (South)",
+      "Allegiant Air Concourse A (South)",
+      "American Airlines Concourse A (South)",
+      "Delta Air Lines Concourse A (South)",
+      "Frontier Airlines Concourse A (South)"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The South Terminal, including Concourse A, includes gates A1 through A10, baggage claims 1 and 2, and serves Alaska Airlines, Allegiant Air, American Airlines, Delta Air Lines, and Frontier Airlines."
+    }
+   ]
+  },
+  {
+   "claim": "Southwest and United at the North Terminal and Concourse B",
+   "verdict": "confirmed",
+   "inAfter": "Southwest and United use the North Terminal and Concourse B.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Omaha Airport Authority (operator, flyoma.com and its Build OMA site)",
+     "quote": [
+      "Southwest Airlines Concourse B (North)",
+      "United Airlines Concourse B (North)"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "serves Southwest Airlines and United Airlines"
+    }
+   ]
+  },
+  {
+   "claim": "in the middle of the Build OMA modernisation",
+   "verdict": "confirmed",
+   "inAfter": "The airport is in the middle of its Build OMA modernisation",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the airport's BuildOMA Terminal Modernization Project"
+    },
+    {
+     "file": "buildoma-terminal",
+     "org": "Omaha Airport Authority (operator, flyoma.com and its Build OMA site)",
+     "quote": "Much more than a renovation, this comprehensive overhaul will touch every corner of the terminal",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "kmtv-eppley-upgrades-mar26",
+     "org": "KMTV 3 News Now (Scripps)",
+     "quote": "Eppley Airfield is undergoing massive renovations that will transform and expand the airport into brand-new space",
+     "dated": "2026-03-19 (from the page's publication metadata, read by the helper; not in the saved text)"
+    }
+   ]
+  },
+  {
+   "claim": "due to be complete in 2028",
+   "verdict": "corrected",
+   "inAfter": "due to be complete in 2028",
+   "note": "New, replacing 'which has already taken one gate out of service' (cut below) with where the programme stands now.",
+   "sources": [
+    {
+     "file": "buildoma-terminal",
+     "org": "Omaha Airport Authority (operator, flyoma.com and its Build OMA site)",
+     "quote": "The Terminal Modernization Program is estimated to be complete in 2028.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "kmtv-eppley-upgrades-mar26",
+     "org": "KMTV 3 News Now (Scripps)",
+     "quote": "The project is on schedule to be fully open by 2028.",
+     "dated": "2026-03-19 (from the page's publication metadata, read by the helper; not in the saved text)"
+    }
+   ]
+  },
+  {
+   "claim": "with a single security checkpoint for all passengers",
+   "verdict": "corrected",
+   "inAfter": "with a single security checkpoint for all passengers",
+   "note": "The operator also promises a single, unified concourse, but KMTV does not mention it, so the text does not.",
+   "sources": [
+    {
+     "file": "buildoma-terminal",
+     "org": "Omaha Airport Authority (operator, flyoma.com and its Build OMA site)",
+     "quote": "A single TSA security screening checkpoint makes understanding where to go simple and intuitive.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "kmtv-eppley-upgrades-mar26",
+     "org": "KMTV 3 News Now (Scripps)",
+     "quote": [
+      "connected by a central pavilion for security",
+      "pointing to where security checks will be located for all travelers"
+     ],
+     "dated": "2026-03-19 (from the page's publication metadata, read by the helper; not in the saved text)"
+    }
+   ]
+  },
+  {
+   "claim": "expect the layout to keep changing until then",
+   "verdict": "confirmed",
+   "inAfter": "Expect the layout to keep changing until then",
+   "sources": [
+    {
+     "file": "buildoma-terminal",
+     "org": "Omaha Airport Authority (operator, flyoma.com and its Build OMA site)",
+     "quote": "This project will roll out in planned phases to minimize disruptions to travelers and ensure the airport remains operational along the way.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "kmtv-eppley-upgrades-mar26",
+     "org": "KMTV 3 News Now (Scripps)",
+     "quote": "Portions of the new construction will open in roughly a year.",
+     "dated": "2026-03-19 (from the page's publication metadata, read by the helper; not in the saved text)"
+    }
+   ]
+  },
+  {
+   "claim": "the airport advises allowing extra time",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "the airport advises allowing extra time",
+   "note": "An attributed statement: the airport's own advice, checked against its own page.",
+   "sources": [
+    {
+     "file": "buildoma-terminal",
+     "org": "Omaha Airport Authority (operator, flyoma.com and its Build OMA site)",
+     "quote": "Travelers should plan for extra time when arriving at the airport as impact to traveling schedules is determined by the phase of construction we are currently experiencing.",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Metro Transit route 106 at rush hour on weekdays only",
+   "verdict": "confirmed",
+   "inAfter": "Metro Transit route 106 runs at rush hour on weekdays only.",
+   "note": "Metro's current timetable (file version 2607) runs weekday trips only, from about 5 to 9 in the morning and 2.30 to 6.30 in the afternoon, between downtown, the airport terminal and the North Omaha Transit Center. Metro names it Route 106, the Eppley Connector.",
+   "sources": [
+    {
+     "file": "metro-106-pdf",
+     "org": "Metro Transit (Regional Metropolitan Transit Authority of Omaha)",
+     "quote": [
+      "106 Eppley Connector",
+      "Operates Weekdays only",
+      "Eppley Airport",
+      "5:11a 5:18 5:18a 5:23",
+      "2:34p 2:39 2:44"
+     ],
+     "dated": "2026 (timetable file 2607)"
+    },
+    {
+     "file": "metro-106",
+     "org": "Metro Transit (Regional Metropolitan Transit Authority of Omaha)",
+     "quote": [
+      "Route 106 - Eppley Connector",
+      "Downtown",
+      "Eppley Airfield",
+      "North Omaha Transit Center"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Metro Transit Line 106 provides limited weekday-only rush-hour service southbound toward downtown and northbound toward the North Omaha Transit Center."
+    }
+   ]
+  },
+  {
+   "claim": "three runways, 2,650 acres",
+   "verdict": "confirmed",
+   "inAfter": "Three runways serve the 2,650 acre site.",
+   "sources": [
+    {
+     "file": "op-facts",
+     "org": "Omaha Airport Authority (operator, flyoma.com and its Build OMA site)",
+     "quote": [
+      "Total land area: 2,650 acres",
+      "Runway 14R: 9,502 feet x 150 feet",
+      "Runway 18: 8,154 feet x 150 feet",
+      "Runway 14L: 8,501 feet x 150 feet"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "22 ACREAGE:",
+      "2,650"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Eppley Airfield covers 2,650 acres",
+      "The airfield has three runways: 14R/32L, 14L/32R, and 18/36."
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runways listed: 3"
+    }
+   ]
+  },
+  {
+   "claim": "three miles from downtown",
+   "verdict": "cut",
+   "wasBefore": "three miles",
+   "why": "Fails the coordinates check (5 km against 6.5 km in a straight line, ratio 0.77), and the sources give three miles, four miles and 3 nautical miles. Softened to 'a few miles'."
+  },
+  {
+   "claim": "on the west bank of the Missouri",
+   "verdict": "cut",
+   "wasBefore": "on the west bank of the Missouri",
+   "why": "Only Wikipedia says so; none of the operator's pages, the FAA record or the news saved mentions the river."
+  },
+  {
+   "claim": "more arrivals and departures than every other airport in the state",
+   "verdict": "cut",
+   "wasBefore": "It handles more arrivals and departures than every other airport in the state put together.",
+   "why": "Reworded to passengers, the measure the FAA table gives; see the kept claim."
+  },
+  {
+   "claim": "old wording of the South Terminal sentence",
+   "verdict": "cut",
+   "wasBefore": "The South Terminal and Concourse A take Alaska, Allegiant, American, Delta and Frontier.",
+   "why": "Reworded (house rule: no two sentences in a row starting with the same word); the facts are kept."
+  },
+  {
+   "claim": "consolidated car hire facility attached to the North Terminal",
+   "verdict": "cut",
+   "wasBefore": "and the consolidated car hire facility is attached to it",
+   "why": "The operator now puts the rental counters in its Customer Service Building and the cars on the first two floors of the North Garage; it does not say the facility is attached to the North Terminal, so only Wikipedia does."
+  },
+  {
+   "claim": "BuildOMA has taken one gate out of service",
+   "verdict": "cut",
+   "wasBefore": "which has already taken one gate out of service",
+   "why": "Only Wikipedia (gate B20 removed), and out of date as a description of the works: KMTV reported in March 2026 that the next phases open in about a year. Replaced by the completion date and the single checkpoint."
+  },
+  {
+   "claim": "Express Arrow coaches to Norfolk",
+   "verdict": "cut",
+   "wasBefore": "and Express Arrow intercity coaches to Norfolk call at the terminal",
+   "why": "Only Wikipedia says so. Express Arrow's site answered with an empty page (HTTP 202, apparently a bot check) and was not retried; the operator's local transport page lists private shuttles and hotel shuttles only."
+  },
+  {
+   "claim": "close to four interstates",
+   "verdict": "cut",
+   "wasBefore": "which sits close to four interstates",
+   "why": "Only Wikipedia names the four; the operator's directions page gives only the address."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Public transport is thin.",
+   "why": "The old text's framing, kept. The facts after it are sourced: Metro's only airport route runs on weekday mornings and afternoons only, and the operator's own transport page lists private and hotel shuttles."
+  },
+  {
+   "text": "For most clients that means a car or a taxi.",
+   "why": "Advice that follows from the sourced bus times; the operator's ground transport pages list rental cars, taxis and ride apps."
+  }
+ ],
+ "tracerOk": {}
+}
