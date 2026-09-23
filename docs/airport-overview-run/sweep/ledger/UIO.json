@@ -1,0 +1,587 @@
+{
+ "iata": "UIO",
+ "id": "recTDxJbSNEN5HAT8",
+ "name": "Mariscal Sucre International Airport",
+ "country": "Ecuador",
+ "wikipedia": "https://en.wikipedia.org/wiki/Mariscal_Sucre_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Ecuador's busiest airport, at Tababela about 18 km east of Quito, which is why locals often just call it Tababela.\n\nIt replaced a 53-year-old airport of the same name in February 2013 and is ten times larger, covering 1,500 hectares. It was the first airport in the Western Hemisphere to earn a five-star Skytrax rating.\n\nIt is the main hub for Avianca Ecuador and the largest hub for LATAM Ecuador. It was also the hub for TAME, the national flag carrier, until the government liquidated that airline in 2020.\n\nCargo is a bigger part of the picture than most passengers realise. The airport handled about 364,674 tonnes in 2024, fifth in Latin America and the Caribbean, and roughly 92 per cent of export cargo was flowers.\n\nOne routing quirk to check: KLM's Quito to Amsterdam service makes a stop in Guayaquil.\n\nThe airport is named after the independence leader Antonio José de Sucre.",
+ "after": "Ecuador's busiest airport, at Tababela, about 20 to 25 km north east of central Quito.\n\nIn February 2013 it replaced the old airport of the same name, which sat in the middle of the city. Its 1,500 hectare site is ten times larger. Skytrax rates it a five-star regional airport, the only five-star airport in Latin America and the Caribbean.\n\nAvianca and LATAM both fly from here.\n\nCargo is a bigger part of the picture than most passengers realise. The airport handled about 400,000 tonnes in 2025, and flowers make up the bulk of its exports. Quiport, which runs the airport, says an ACI-LAC ranking in May 2026 put it fourth for air cargo in Latin America and the Caribbean.\n\nThe airport is named after Antonio José de Sucre.",
+ "claims": [
+  {
+   "claim": "Ecuador's busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "Ecuador's busiest airport",
+   "note": "INEC's latest airport-level split (its transport bulletin of August 2025, 2024 figures from the DGAC) puts Quito first for international passengers, 53.9 per cent of arrivals and 51.2 per cent of departures, with Guayaquil next. The operator (20 February 2026) calls Quito Ecuador's main way in and out, and counted about 5.4 million passengers in 2025 (held back below). Guayaquil's own airport authority calls Guayaquil the second busiest airport in Ecuador. No 2025 airport-by-airport passenger table could be read: the DGAC's 2025 statistical bulletin is linked only through its intranet login.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-16",
+     "quote": "It is the busiest airport in Ecuador."
+    },
+    {
+     "file": "inec-estra-2024",
+     "org": "INEC (Ecuador's national statistics institute, ecuadorencifras.gob.ec), from DGAC data",
+     "dated": "2025-08 (bulletin N° 01-2025, 2024 figures)",
+     "quote": [
+      "N° 01-2025-Transporte",
+      "Agosto· 2025",
+      "cuales 1.268.601 lo hicieron por el aeropuer to de Quito, representando el 53,9%",
+      "utilizaron el aeropuerto de Quito, es decir el 51,2%"
+     ]
+    },
+    {
+     "file": "quiport-13-anos",
+     "org": "Quiport (Corporación Quiport, the operator, quiport.com)",
+     "dated": "2026-02-20",
+     "quote": [
+      "20 Feb 2026",
+      "consolidando a Quito como la principal puerta de entrada y salida del Ecuador"
+     ]
+    },
+    {
+     "file": "aag-home",
+     "org": "Autoridad Aeroportuaria de Guayaquil (Guayaquil's municipal airport authority, aag.org.ec)",
+     "dated": "read 2026-09-23 (live page, which links its 2025 accountability report)",
+     "quote": "Es el segundo aeropuerto con más movimiento de pasajeros en Ecuador."
+    }
+   ]
+  },
+  {
+   "claim": "at Tababela",
+   "verdict": "confirmed",
+   "inAfter": "at Tababela",
+   "note": "The operator's corporate site (quiport.com; the DGAC's AIP and its February 2026 release name Corporación Quiport as the operator) and Quito's municipal tourism company both place the airport in Tababela parish.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-16",
+     "quote": "It is located in the Tababela parish"
+    },
+    {
+     "file": "quiport-corp",
+     "org": "Quiport (Corporación Quiport, the operator, quiport.com)",
+     "dated": "read 2026-09-23 (live page, copyright 2026)",
+     "quote": "Aeropuerto Internacional Mariscal Sucre de Quito, Ecuador, ubicado en Tababela, a 24 kilómetros de la capital del país"
+    },
+    {
+     "file": "visitquito-mapa",
+     "org": "Quito Turismo (Quito's municipal tourism company, visitquito.ec)",
+     "dated": "traveller map uploaded July 2025",
+     "quote": "Parroquia de Tababela, Este de Quito"
+    }
+   ]
+  },
+  {
+   "claim": "about 20 to 25 km north east of central Quito",
+   "verdict": "corrected",
+   "inAfter": "about 20 to 25 km north east of central Quito",
+   "note": "Was 'about 18 km east of Quito'. Good sources disagree on the distance: Wikipedia and Airport Technology give about 18 km, which is shorter than the 22.2 km straight line from the GeoNames city centre; the DGAC's AIP gives 20.5 km from the city centre at 060 degrees; the operator says 24 km from the capital; Quito Turismo gives 37 km from the urban area by road, 50 to 60 minutes. The text gives the range the regulator's and the operator's figures span, which the straight line also falls in (ratio 0.9 to 1.1). Direction: the AIP's 060 degrees and the computed 59 degrees are both north east; Wikipedia and Quito Turismo say east, the adjacent point.",
+   "sources": [
+    {
+     "file": "aip-seqm",
+     "org": "DGAC Ecuador (AIP Ecuador, AD 2 SEQM, ais.aviacioncivil.gob.ec)",
+     "dated": "read 2026-09-23 (AIP in force)",
+     "quote": [
+      "Dirección y distancia desde (ciudad)",
+      "060°, 20.5 KM del centro de la ciudad de Quito"
+     ]
+    },
+    {
+     "file": "quiport-corp",
+     "org": "Quiport (Corporación Quiport, the operator, quiport.com)",
+     "dated": "read 2026-09-23 (live page, copyright 2026)",
+     "quote": "ubicado en Tababela, a 24 kilómetros de la capital del país"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 22.2 km (13.8 miles)",
+      "Bearing from the city centre: 59 degrees, which is north east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "In February 2013 it replaced the old airport of the same name",
+   "verdict": "confirmed",
+   "inAfter": "In February 2013 it replaced the old airport of the same name",
+   "note": "The operator marks the anniversary on 20 February (its thirteenth in 2026). The old airport's age ('53-year-old') is cut below.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-16",
+     "quote": "The airport opened in February 2013 and replaced the 53-year old airport of the same name."
+    },
+    {
+     "file": "airporttech-quito",
+     "org": "Airport Technology (aviation trade press, airport-technology.com)",
+     "quote": [
+      "earlier served by the old Mariscal Sucre International airport",
+      "It also operated the old airport until it was replaced by the new airport in February 2013."
+     ]
+    },
+    {
+     "file": "quiport-13-anos",
+     "org": "Quiport (Corporación Quiport, the operator, quiport.com)",
+     "dated": "2026-02-20",
+     "quote": [
+      "20 Feb 2026",
+      "Este 20 de febrero celebramos el decimotercer aniversario del Aeropuerto Internacional de Quito"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the old airport sat in the middle of the city",
+   "verdict": "confirmed",
+   "inAfter": "which sat in the middle of the city",
+   "note": "Added from the same sources as the replacement, so an agent reading an old reference to the city-centre airport knows it has gone.",
+   "sources": [
+    {
+     "file": "airporttech-quito",
+     "org": "Airport Technology (aviation trade press, airport-technology.com)",
+     "quote": "The old airport was completely surrounded by urban development in the middle of the city"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-16",
+     "quote": "located in the middle of a mountainous city"
+    }
+   ]
+  },
+  {
+   "claim": "a 1,500 hectare site, ten times larger than the old airport",
+   "verdict": "confirmed",
+   "inAfter": "Its 1,500 hectare site is ten times larger.",
+   "sources": [
+    {
+     "file": "airporttech-quito",
+     "org": "Airport Technology (aviation trade press, airport-technology.com)",
+     "quote": "The new airport was built on a 1,500ha site, which is ten times larger than the old airport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-16",
+     "quote": "covers 1,500 hectares (3,707 acres) which is ten times larger than the airport it replaced."
+    }
+   ]
+  },
+  {
+   "claim": "Skytrax rates it five stars, the only such airport in Latin America and the Caribbean",
+   "verdict": "corrected",
+   "inAfter": "Skytrax rates it a five-star regional airport, the only five-star airport in Latin America and the Caribbean.",
+   "note": "Was 'the first airport in the Western Hemisphere to earn a five-star Skytrax rating' (cut below). Skytrax's 2026 list has twelve 5-Star hub airports (none in the Americas) and eight 5-Star Regional Airports, of which only Houston Hobby and Quito are in the Americas; the operator (February 2026) says it is the only one in Latin America and the Caribbean. Skytrax certifies Quito in its regional category. Review (23 Sep): 'regional' added, as Skytrax certifies Quito under its 5-Star Regional Airport Rating.",
+   "sources": [
+    {
+     "file": "skytrax-5star-airports",
+     "org": "Skytrax (skytraxratings.com)",
+     "dated": "2026 list",
+     "quote": [
+      "In 2026, there are currently twelve hub 5-Star Airports and eight 5-Star Regional Airports",
+      "5-STAR REGIONAL AIRPORTS",
+      "Houston William P. Hobby Airport",
+      "Quito Mariscal Sucre International Airport"
+     ]
+    },
+    {
+     "file": "skytrax-quito",
+     "org": "Skytrax (skytraxratings.com)",
+     "dated": "read 2026-09-23 (live page, copyright 2026)",
+     "quote": "Quito Mariscal Sucre International Airport is Certified with the 5-Star Regional Airport Rating"
+    },
+    {
+     "file": "quiport-13-anos",
+     "org": "Quiport (Corporación Quiport, the operator, quiport.com)",
+     "dated": "2026-02-20",
+     "quote": "El aeropuerto es el único en América Latina y el Caribe con calificación 5 estrellas por parte de Skytrax"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-16",
+     "quote": "It was the first 5-star airport in the Western Hemisphere as rated by Skytrax."
+    }
+   ]
+  },
+  {
+   "claim": "Avianca and LATAM both fly from here",
+   "verdict": "softened",
+   "inAfter": "Avianca and LATAM both fly from here.",
+   "note": "Was 'the main hub for Avianca Ecuador and the largest hub for LATAM Ecuador' (cut below). Guayaquil's live departures board on 23 September 2026 shows Avianca (AV) and LATAM (LA) flights to Quito, and Guayaquil's operator names Avianca and Latam as its only domestic airlines; El Universo (23 June 2026) reports LATAM Airlines Ecuador opening Quito to Santiago; the DGAC names LATAM Ecuador and Avianca Ecuador as two of the three airlines that dominated its market in 2025. No current source ranks Quito as either airline's main or largest hub, and Wikipedia's Guayaquil article lists both airlines as hubs there too.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-16",
+     "quote": "The airport currently serves as the main hub for Avianca Ecuador and the largest hub for LATAM Ecuador."
+    },
+    {
+     "file": "tagsa-salidas-nac",
+     "org": "TAGSA (Terminal Aeroportuaria de Guayaquil, Guayaquil airport's operator, tagsa.aero)",
+     "dated": "live departures board read 2026-09-23",
+     "quote": [
+      "23/09/2026",
+      "LA 1407 Quito",
+      "AV 1603 Quito"
+     ]
+    },
+    {
+     "file": "tagsa-aerolineas",
+     "org": "TAGSA (Terminal Aeroportuaria de Guayaquil, Guayaquil airport's operator, tagsa.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Aerolíneas con rutas nacionales",
+      "Avianca",
+      "Latam"
+     ]
+    },
+    {
+     "file": "eluniverso-latam-scl",
+     "org": "El Universo (Ecuadorian national newspaper, eluniverso.com)",
+     "dated": "2026-06-23",
+     "quote": [
+      "23 de junio, 2026 - 10h30",
+      "Latam Airlines abrió la venta de boletos para la nueva ruta directa Quito-Santiago",
+      "gerente comercial de Latam Airlines Ecuador"
+     ]
+    },
+    {
+     "file": "dgac-rendicion-2025",
+     "org": "DGAC Ecuador (civil aviation directorate, aviacioncivil.gob.ec)",
+     "dated": "2026-04-28",
+     "quote": [
+      "este martes 28 de abril de 2026",
+      "tres (3) aerolíneas dominaron el mercado: LATAM Ecuador (51%), Avianca Ecuador (40%) y Aeroregional (9%)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "cargo about 400,000 tonnes in 2025",
+   "verdict": "corrected",
+   "inAfter": "The airport handled about 400,000 tonnes in 2025",
+   "note": "Was 'about 364,674 tonnes in 2024' (Quiport's 2024 report via Wikipedia; the operator's rectified 2024 figure is 364,000, so the old figure was right but a year stale). A cargo total replaces a cargo total. The 2025 figures differ a little by source: the DGAC 397,798.54 tonnes (its release of 29 January 2026, dated from its own news index), Quiport 402,832 (its 2025 sustainability report, July 2026), 405,024 on ACI-LAC's count as Quiport reports it and 407,000 in Quiport's preliminary figure of January 2026. 'About 400,000' is what they all support. The DGAC's figures put Guayaquil, the next airport, at 26,991.92 tonnes.",
+   "sources": [
+    {
+     "file": "dgac-2025-pasajeros",
+     "org": "DGAC Ecuador (civil aviation directorate, aviacioncivil.gob.ec)",
+     "dated": "2026-01-29",
+     "quote": [
+      "El aeropuerto internacional Mariscal Sucre, de Quito, lidera este campo con 397.798,54",
+      "seguido del aeropuerto internacional José Joaquín de Olmedo, de Guayaquil, con 26.991,92 toneladas métricas"
+     ]
+    },
+    {
+     "file": "dgac-noticias-p4",
+     "org": "DGAC Ecuador (civil aviation directorate, aviacioncivil.gob.ec)",
+     "dated": "news index read 2026-09-23",
+     "quote": [
+      "29 de enero , 2026 , 11:34 am",
+      "El transporte aéreo ecuatoriano movilizó a 8 millones de pasajeros en el 2025"
+     ]
+    },
+    {
+     "file": "quiport-memoria-2025",
+     "org": "Quiport (Corporación Quiport, the operator, quiport.com)",
+     "dated": "2026-07-16",
+     "quote": [
+      "16 Jul 2026",
+      "manejó 402 832 toneladas métricas de carga"
+     ]
+    },
+    {
+     "file": "quiport-asi-fue-2025",
+     "org": "Quiport (Corporación Quiport, the operator, quiport.com)",
+     "dated": "2026-01-02",
+     "quote": [
+      "02 Ene 2026",
+      "el volumen de carga creció de 364 mil toneladas métricas en 2024* a 407 mil toneladas en 2025**"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "flowers make up the bulk of its exports",
+   "verdict": "softened",
+   "inAfter": "and flowers make up the bulk of its exports",
+   "note": "Was 'roughly 92 per cent of export cargo was flowers' (2024). The DGAC (January 2026) says flowers still predominate in the exports; the operator gives 93 per cent for 2025 and 'more than 92 per cent' in May 2026. Only the operator measures the share, so the text says 'the bulk'.",
+   "sources": [
+    {
+     "file": "dgac-2025-pasajeros",
+     "org": "DGAC Ecuador (civil aviation directorate, aviacioncivil.gob.ec)",
+     "dated": "2026-01-29",
+     "quote": "En este ítem, el producto que predomina en las exportaciones continúa siendo las flores."
+    },
+    {
+     "file": "quiport-asi-fue-2025",
+     "org": "Quiport (Corporación Quiport, the operator, quiport.com)",
+     "dated": "2026-01-02",
+     "quote": "especialmente en exportación de flores, que corresponden al 93 % de la carga exportada desde el aeropuerto de Quito"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-16",
+     "quote": "approximately 92 percent of export air cargo consisted of flowers"
+    }
+   ]
+  },
+  {
+   "claim": "Quiport runs the airport",
+   "verdict": "confirmed",
+   "inAfter": "Quiport, which runs the airport",
+   "note": "Named because the next claim is the operator's own statement.",
+   "sources": [
+    {
+     "file": "dgac-pista-feb2026",
+     "org": "DGAC Ecuador (civil aviation directorate, aviacioncivil.gob.ec)",
+     "quote": "la Corporación Quiport, empresa operadora del aeropuerto capitalino"
+    },
+    {
+     "file": "aip-seqm",
+     "org": "DGAC Ecuador (AIP Ecuador, AD 2 SEQM, ais.aviacioncivil.gob.ec)",
+     "quote": "Corporación Quiport S.A."
+    },
+    {
+     "file": "quiport-corp",
+     "org": "Quiport (Corporación Quiport, the operator, quiport.com)",
+     "dated": "read 2026-09-23 (live page, copyright 2026)",
+     "quote": "Corporación Quiport S.A. es la empresa que tiene a su cargo la gestión integral del Aeropuerto Internacional Mariscal Sucre de Quito"
+    },
+    {
+     "file": "airporttech-quito",
+     "org": "Airport Technology (aviation trade press, airport-technology.com)",
+     "quote": "The new airport is being operated by Quiport under a concession lasting until 2040."
+    }
+   ]
+  },
+  {
+   "claim": "Quiport: fourth in Latin America and the Caribbean for air cargo (ACI-LAC, May 2026)",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Quiport",
+   "inAfter": "Quiport, which runs the airport, says an ACI-LAC ranking in May 2026 put it fourth for air cargo in Latin America and the Caribbean.",
+   "note": "Was 'fifth in Latin America and the Caribbean' (2024, via Wikipedia). The operator reports that ACI-LAC's latest ranking, published 6 May 2026, moved Quito from fifth to fourth, behind Bogotá, Guarulhos and Felipe Ángeles and ahead of Santiago. ACI-LAC's own news page answered 500 (one try), so the ranking is given as the operator's statement, attributed.",
+   "sources": [
+    {
+     "file": "quiport-cuarto-carga",
+     "org": "Quiport (Corporación Quiport, the operator, quiport.com)",
+     "dated": "2026-05-06",
+     "quote": [
+      "06 May 2026",
+      "al escalar desde el quinto al cuarto lugar en el ranking de carga aérea de América Latina y el Caribe, de acuerdo con el más reciente reporte del Consejo Internacional de Aeropuertos de América Latina y el Caribe (ACI-LAC, por sus siglas en inglés), publicado hoy, miércoles 6 de mayo"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after Antonio José de Sucre",
+   "verdict": "confirmed",
+   "inAfter": "The airport is named after Antonio José de Sucre.",
+   "note": "Quito Turismo's traveller map gives the airport's full name, Mariscal Antonio José de Sucre. 'The independence leader' is cut below.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-16",
+     "quote": "The airport is named after independence leader Antonio José de Sucre."
+    },
+    {
+     "file": "visitquito-mapa",
+     "org": "Quito Turismo (Quito's municipal tourism company, visitquito.ec)",
+     "dated": "traveller map uploaded July 2025",
+     "quote": "AEROPUERTO INTERNACIONAL INTERNATIONAL AIRPORT MARISCAL ANTONIO JOSÉ DE SUCRE"
+    }
+   ]
+  },
+  {
+   "claim": "about 18 km east of Quito",
+   "verdict": "cut",
+   "wasBefore": "at Tababela about 18 km east of Quito",
+   "why": "Corrected to about 20 to 25 km north east of central Quito (above): the DGAC's AIP gives 20.5 km at 060 degrees, the operator 24 km, and 18 km is shorter than the 22.2 km straight line.",
+   "sources": [
+    {
+     "file": "airporttech-quito",
+     "org": "Airport Technology (aviation trade press, airport-technology.com)",
+     "quote": "approximately 18km away from the centre of Quito"
+    }
+   ]
+  },
+  {
+   "claim": "locals often just call it Tababela",
+   "verdict": "cut",
+   "wasBefore": "which is why locals often just call it Tababela",
+   "why": "Wikipedia alone. The operator and Quito Turismo place the airport in Tababela (kept) but do not call it by that name; the operator's passenger site (aeropuertoquito.aero) answers with Cloudflare's 'Sorry, you have been blocked' page (a bot check, not tried again)."
+  },
+  {
+   "claim": "a 53-year-old airport",
+   "verdict": "cut",
+   "wasBefore": "It replaced a 53-year-old airport of the same name in February 2013 and is ten times larger, covering 1,500 hectares.",
+   "why": "The old airport's age rests on Wikipedia alone (Airport Technology and the operator do not date it; El Comercio's 2013 report now answers 404). The replacement in February 2013, the same name and the 1,500 hectares, ten times larger, are kept, reworded (above)."
+  },
+  {
+   "claim": "first airport in the Western Hemisphere with five Skytrax stars",
+   "verdict": "cut",
+   "wasBefore": "It was the first airport in the Western Hemisphere to earn a five-star Skytrax rating.",
+   "why": "Wikipedia alone: the operator's news item it cites is on aeropuertoquito.aero (Cloudflare block) and its archived copy is on the egress-blocked web archive; Skytrax's own pages give the rating but no 'first'. Replaced by Skytrax's current list (above)."
+  },
+  {
+   "claim": "main hub for Avianca Ecuador and largest hub for LATAM Ecuador",
+   "verdict": "cut",
+   "wasBefore": "It is the main hub for Avianca Ecuador and the largest hub for LATAM Ecuador.",
+   "why": "Softened to 'Avianca and LATAM both fly from here' (above). No current source ranks Quito as either airline's main or largest hub, and Wikipedia's Guayaquil article lists both airlines as hubs at Guayaquil too."
+  },
+  {
+   "claim": "TAME's hub until its liquidation in 2020",
+   "verdict": "cut",
+   "wasBefore": "It was also the hub for TAME, the national flag carrier, until the government liquidated that airline in 2020.",
+   "why": "Wikipedia alone. TAME's own site (tame.com.ec), which Wikipedia cites, no longer resolves (DNS), and no other readable source dates the liquidation. The DGAC's 2025 figures name only LATAM Ecuador, Avianca Ecuador and Aeroregional as the airlines that dominated its market, so TAME is not flying, but the history is not restated."
+  },
+  {
+   "claim": "about 364,674 tonnes of cargo in 2024",
+   "verdict": "cut",
+   "wasBefore": "The airport handled about 364,674 tonnes in 2024",
+   "why": "Superseded by the 2025 total, about 400,000 tonnes (above)."
+  },
+  {
+   "claim": "fifth in Latin America and the Caribbean",
+   "verdict": "cut",
+   "wasBefore": "fifth in Latin America and the Caribbean",
+   "why": "Superseded: the operator reports ACI-LAC's May 2026 ranking put Quito fourth (above, attributed)."
+  },
+  {
+   "claim": "roughly 92 per cent of export cargo was flowers",
+   "verdict": "cut",
+   "wasBefore": "and roughly 92 per cent of export cargo was flowers",
+   "why": "Softened to 'flowers make up the bulk of its exports' (above): only the operator measures the share, now 93 per cent for 2025."
+  },
+  {
+   "claim": "KLM's Quito to Amsterdam service stops in Guayaquil",
+   "verdict": "cut",
+   "wasBefore": "One routing quirk to check: KLM's Quito to Amsterdam service makes a stop in Guayaquil.",
+   "why": "Not confirmed as current. Guayaquil's live boards on 23 September 2026 show KLM's KL 755 arriving from Amsterdam at 17:05 and leaving for Amsterdam at 18:35, with no Quito leg shown; BES-reporter (July 2024, more than 12 months old) says only that KLM flies between Quito, Guayaquil and Amsterdam. Quito's own flight board is on the Cloudflare-blocked passenger site and KLM's newsroom refused the link lister (503). For Andy: worth checking whether KLM still serves Quito at all, and which way the stop runs.",
+   "sources": [
+    {
+     "file": "besreporter-klm",
+     "org": "BES-reporter (Caribbean Netherlands news, bes-reporter.com)",
+     "dated": "2024-07-23",
+     "quote": [
+      "23 July 2024",
+      "Currently, KLM still operates weekly direct flights between Quito, Guayaquil, and Amsterdam."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-16",
+     "quote": "KLM's flight from Quito to Amsterdam makes a stop in Guayaquil."
+    }
+   ]
+  },
+  {
+   "claim": "the independence leader",
+   "verdict": "cut",
+   "wasBefore": "The airport is named after the independence leader Antonio José de Sucre.",
+   "why": "The description rests on Wikipedia alone; Quito Turismo's map gives only the title Mariscal (Marshal). The name is kept (above)."
+  },
+  {
+   "claim": "FCDO: state of emergency covering Pichincha from 15 September 2026",
+   "verdict": "cut",
+   "why": "Held back: the FCDO (updated 16 September 2026) reports a 60-day state of emergency from 15 September in eight provinces, Pichincha (Quito's province) among them, with more police and military on the streets; its night curfew applies to four coastal provinces, not Pichincha, and the FCDO does not advise against travel to Quito. It also warns that volcanic ash can close airports at short notice. Nothing in the old text to replace. For Andy to decide.",
+   "sources": [
+    {
+     "file": "fcdo-ecuador-warnings",
+     "org": "UK FCDO",
+     "dated": "2026-09-16 (still current at 23 September 2026)",
+     "quote": [
+      "16 September 2026",
+      "The Ecuadorean government has declared a 60-day state of emergency as of 15 September, for security reasons in the following 8 provinces:",
+      "Pichincha",
+      "It includes curfew hours (from 12am to 5am) for the provinces of El Oro, Guayas, Los Rios and Manabi, from 17 to 30 September."
+     ]
+    },
+    {
+     "file": "fcdo-ecuador-safety",
+     "org": "UK FCDO",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Ashfall from volcanoes can disrupt flights and close airports at short notice."
+    }
+   ]
+  },
+  {
+   "claim": "authorised taxi booths; getting into Quito",
+   "verdict": "cut",
+   "why": "Held back: the FCDO says there are authorised taxi booths at Quito and Guayaquil international airports; Quito Turismo's traveller map gives 37 km from the urban area, 50 to 60 minutes, buses from the Carcelén, Río Coca and Quitumbe terminals, an express coach from Parque Bicentenario and fixed taxi fares of 25 to 33 US dollars. The transfer time and fares have one source each. Useful to an agent, but nothing in the old text to replace. For Andy to decide.",
+   "sources": [
+    {
+     "file": "fcdo-ecuador-safety",
+     "org": "UK FCDO",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "There are authorised taxi booths at Quito and Guayaquil international airports, and potentially at other domestic airports."
+    },
+    {
+     "file": "visitquito-mapa",
+     "org": "Quito Turismo (Quito's municipal tourism company, visitquito.ec)",
+     "dated": "traveller map uploaded July 2025",
+     "quote": [
+      "37 km. del área urbana, 50 a 60",
+      "Aeropuerto - Zona Mariscal USD 25",
+      "Aeropuerto - Sur de la ciudad USD 33"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 5.4 million passengers in 2025; the airport's own counts",
+   "verdict": "cut",
+   "why": "Held back: the operator counted about 5.4 million passengers in 2025 (5.3 million in 2024), and in February 2026 listed 11 passenger airlines serving 8 domestic and 13 international destinations. A new measure with nothing in the old text to replace (the operator is the only source for the total).",
+   "sources": [
+    {
+     "file": "quiport-asi-fue-2025",
+     "org": "Quiport (Corporación Quiport, the operator, quiport.com)",
+     "dated": "2026-01-02",
+     "quote": [
+      "Durante 2025, el aeropuerto de Quito movilizó 5.4 millones de pasajeros",
+      "año en que se movilizaron 5.3 millones de pasajeros"
+     ]
+    },
+    {
+     "file": "quiport-13-anos",
+     "org": "Quiport (Corporación Quiport, the operator, quiport.com)",
+     "dated": "2026-02-20",
+     "quote": "Actualmente contamos con 8 destinos nacionales y 13 internacionales , atendidos por 11 aerolíneas de pasajeros."
+    }
+   ]
+  },
+  {
+   "claim": "terminal expansion finished in 2025",
+   "verdict": "cut",
+   "why": "Held back: the operator's expansion, 17,647 square metres more terminal and 35,000 of apron for 74.2 million US dollars, came into use in 2025 and raised capacity from 5 to 7 million passengers a year (operator only). Nothing in the old text to replace.",
+   "sources": [
+    {
+     "file": "quiport-asi-fue-2025",
+     "org": "Quiport (Corporación Quiport, the operator, quiport.com)",
+     "dated": "2026-01-02",
+     "quote": "Estas mejoras incrementan la capacidad del aeropuerto de 5 a 7 millones de pasajeros anuales."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Cargo is a bigger part of the picture than most passengers realise.",
+   "why": "A signpost kept from the old text; the sourced cargo total, the flowers and the regional ranking follow."
+  }
+ ],
+ "tracerOk": {
+  "25": "The top of the range spanned by the regulator's 20.5 km and the operator's 24 km.",
+  "400,000": "Rounded: the DGAC's 397,798.54 and the operator's 402,832 tonnes for 2025."
+ }
+}

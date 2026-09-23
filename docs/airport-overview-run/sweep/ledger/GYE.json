@@ -1,0 +1,426 @@
+{
+ "iata": "GYE",
+ "id": "rec8beyjH2VSAKVcs",
+ "name": "José Joaquín de Olmedo International Airport",
+ "country": "Ecuador",
+ "wikipedia": "https://en.wikipedia.org/wiki/José_Joaquín_de_Olmedo_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Ecuador's second busiest airport, on the Avenida de las Americas and only 5 km north of central Guayaquil, which makes for an unusually short airport transfer.\n\nThe airport sits in the flat delta of the Guayas River with level ground on every side, and the 2,790 metre runway takes aircraft as large as a 747 or an A340-600. A domestic expansion in 2014 lifted capacity to around 7.5 million passengers a year.\n\nOne thing to flag when quoting: an exit tax is charged on all international tickets out of this airport. Check whether the fare a client is looking at already includes it.\n\nThe airport is named after Jose Joaquin de Olmedo, a poet who was the first mayor of Guayaquil and later president of Ecuador. It was previously called Simon Bolivar International, a name still used by airports in Venezuela and Colombia, so be careful which one a supplier means.",
+ "after": "Ecuador's second busiest airport, on the Avenida de las Américas and 5 km north of central Guayaquil.\n\nThe single runway is 2,790 metres long. An enlarged domestic terminal opened in July 2014, lifting capacity to more than 7 million passengers a year.\n\nOne thing to know when quoting: the international departure tax is included in the ticket price, so it is not paid at the airport.\n\nThe airport is named after José Joaquín de Olmedo. It was previously called Simón Bolívar International, a name still used by airports in Venezuela and Colombia, so be careful which one a supplier means.",
+ "claims": [
+  {
+   "claim": "Ecuador's second busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "Ecuador's second busiest airport",
+   "note": "Guayaquil's own municipal airport authority says so on its live site. INEC's latest airport-level split (bulletin of August 2025, 2024 figures from the DGAC) has Guayaquil second to Quito for international passengers, about 1.06 million arrivals and 1.16 million departures in thousands against Quito's 1.27 and 1.24 million, far ahead of Manta; the DGAC's 2025 figures put it second for cargo too. No 2025 passenger total for Guayaquil could be read: its operator publishes none on its site, and the DGAC's 2025 bulletin sits behind its intranet login.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "It is the second busiest airport in Ecuador."
+    },
+    {
+     "file": "aag-home",
+     "org": "Autoridad Aeroportuaria de Guayaquil (Guayaquil's municipal airport authority, aag.org.ec)",
+     "dated": "read 2026-09-23 (live page, which links its 2025 accountability report)",
+     "quote": [
+      "Rendición de Cuentas 2025",
+      "Es el segundo aeropuerto con más movimiento de pasajeros en Ecuador."
+     ]
+    },
+    {
+     "file": "inec-estra-2024",
+     "org": "INEC (Ecuador's national statistics institute, ecuadorencifras.gob.ec), from DGAC data",
+     "dated": "2025-08 (bulletin N° 01-2025, 2024 figures)",
+     "quote": [
+      "N° 01-2025-Transporte",
+      "Agosto· 2025",
+      "1.268,6 1.056,7 27,7 1,0 1.242,7 1.157,0 25,5 1,1 Quito Guayaquil Manta Esmeraldas"
+     ]
+    },
+    {
+     "file": "dgac-2025-pasajeros",
+     "org": "DGAC Ecuador (civil aviation directorate, aviacioncivil.gob.ec)",
+     "dated": "2026-01-29 (dated from DGAC's news index, saved for UIO as dgac-noticias-p4)",
+     "quote": "seguido del aeropuerto internacional José Joaquín de Olmedo, de Guayaquil, con 26.991,92 toneladas métricas"
+    }
+   ]
+  },
+  {
+   "claim": "on the Avenida de las Américas",
+   "verdict": "confirmed",
+   "inAfter": "on the Avenida de las Américas",
+   "note": "The DGAC's AIP gives the operator's address on the avenue. Accents restored ('Americas' in the old text).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "The airport is on the Avenida de las Américas, 5 kilometres (3 mi) north of Guayaquil's centre."
+    },
+    {
+     "file": "aip-segu",
+     "org": "DGAC Ecuador (AIP Ecuador, AD 2 SEGU, ais.aviacioncivil.gob.ec)",
+     "dated": "read 2026-09-23 (AIP in force)",
+     "quote": [
+      "Terminal Aeroportuaria de Guayaquil S.A. - TAGSA",
+      "Av. De las Américas S/N"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "only 5 km north of central Guayaquil",
+   "verdict": "confirmed",
+   "inAfter": "5 km north of central Guayaquil",
+   "note": "The coordinates put it 4.3 km north of the GeoNames city centre (ratio 1.16, bearing 4 degrees); the DGAC's AIP and the operator both place it inside the urban area, to the north of the city. Review (23 Sep): 'only' dropped, since the FCDO advises against all but essential travel to Guayas (held back below) and the text should not sell the trip into town.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "5 kilometres (3 mi) north of Guayaquil's centre"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 4.3 km (2.7 miles)",
+      "Bearing from the city centre: 4 degrees, which is north"
+     ]
+    },
+    {
+     "file": "aip-segu",
+     "org": "DGAC Ecuador (AIP Ecuador, AD 2 SEGU, ais.aviacioncivil.gob.ec)",
+     "dated": "read 2026-09-23 (AIP in force)",
+     "quote": [
+      "Dirección y distancia desde (ciudad)",
+      "Dentro del perímetro urbano al N de la ciudad"
+     ]
+    },
+    {
+     "file": "tagsa-terminal",
+     "org": "TAGSA (Terminal Aeroportuaria de Guayaquil, the operator, tagsa.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Dentro del perímetro urbano del Norte de la ciudad de Guayaquil."
+    }
+   ]
+  },
+  {
+   "claim": "a single runway, 2,790 metres long",
+   "verdict": "confirmed",
+   "inAfter": "The single runway is 2,790 metres long.",
+   "note": "The DGAC's AIP lists runway 21 at 2,790 x 45 m and runway 03 at 2,684 x 45 m (its declared take-off runs are 2,790 and 2,684 m); the operator's technical page quotes the 2,684 m figure, so the two differ only by direction. OurAirports gives 2,790 m and one runway.",
+   "sources": [
+    {
+     "file": "aip-segu",
+     "org": "DGAC Ecuador (AIP Ecuador, AD 2 SEGU, ais.aviacioncivil.gob.ec)",
+     "dated": "read 2026-09-23 (AIP in force)",
+     "quote": [
+      "SEGU AD 2.12 CARACTERÍSTICAS FÍSICAS DE LAS PISTAS",
+      "2684 x 45",
+      "2790 x 45"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 03/21: 2,790 m (9,154 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "The runway length of 2,790 metres"
+    },
+    {
+     "file": "tagsa-terminal",
+     "org": "TAGSA (Terminal Aeroportuaria de Guayaquil, the operator, tagsa.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Número de designación de pista: 03/21.",
+      "Longitud de pista: 2684 m."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "an enlarged domestic terminal opened in July 2014, lifting capacity to more than 7 million a year",
+   "verdict": "softened",
+   "inAfter": "An enlarged domestic terminal opened in July 2014, lifting capacity to more than 7 million passengers a year.",
+   "note": "Was 'a domestic expansion in 2014 lifted capacity to around 7.5 million passengers a year'. The operator inaugurated the enlarged domestic terminal on 31 July 2014 and gave its capacity as more than 7 million passengers a year; Wikipedia says up to 7.5 million. 'More than 7 million' is what both support.",
+   "sources": [
+    {
+     "file": "tagsa-noticias-2014",
+     "org": "TAGSA (Terminal Aeroportuaria de Guayaquil, the operator, tagsa.aero)",
+     "dated": "2014-07-31",
+     "quote": [
+      "el día 31 de julio TAGSA inauguró la obras de ampliación de la terminal nacional",
+      "con capacidad para recibir a mas de 7 millones de pasajeros anuales"
+     ]
+    },
+    {
+     "file": "tagsa-terminal",
+     "org": "TAGSA (Terminal Aeroportuaria de Guayaquil, the operator, tagsa.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "En el mes de Julio del 2014 se hizo la entrega formal de la ampliación de la Terminal Nacional del Aeropuerto de Guayaquil"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "In July 2014, the airport domestic area was enlarged; now the airport is capable of handling up to 7.5 million passengers per year."
+    }
+   ]
+  },
+  {
+   "claim": "the international departure tax is included in the ticket price, not paid at the airport",
+   "verdict": "corrected",
+   "inAfter": "the international departure tax is included in the ticket price, so it is not paid at the airport",
+   "note": "Was 'an exit tax is charged on all international tickets out of this airport. Check whether the fare a client is looking at already includes it.' The operator's current FAQ answers the question of an airport or international departure tax: its value is included in the air ticket. Wikipedia says the same: the tax is levied on international tickets and no longer paid at the window. So the advice to check the fare is out of date.",
+   "sources": [
+    {
+     "file": "tagsa-faq",
+     "org": "TAGSA (Terminal Aeroportuaria de Guayaquil, the operator, tagsa.aero)",
+     "dated": "read 2026-09-23 (live page, with 2026 rules on the same page)",
+     "quote": [
+      "¿Debo pagar alguna tasa aeroportuaria para poder viajar (impuesto de salida internacional)?",
+      "el valor de la tasa aeroportuaria está incluido en el ticket aéreo",
+      "¿Cuál es la norma vigente sobre la salida de divisas (ISD) para viajes internacionales en 2026?"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "An exit tax is levied on all international tickets, however, it is no longer required to pay at the window when exiting the country."
+    }
+   ]
+  },
+  {
+   "claim": "named after José Joaquín de Olmedo",
+   "verdict": "confirmed",
+   "inAfter": "The airport is named after José Joaquín de Olmedo.",
+   "note": "The DGAC's AIP and the operator use the name. Accents restored ('Jose Joaquin' in the old text). His biography is cut below.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "The airport was named after José Joaquín de Olmedo"
+    },
+    {
+     "file": "aip-segu",
+     "org": "DGAC Ecuador (AIP Ecuador, AD 2 SEGU, ais.aviacioncivil.gob.ec)",
+     "quote": "SEGU - GUAYAQUIL / José Joaquín de Olmedo Intl."
+    },
+    {
+     "file": "tagsa-terminal",
+     "org": "TAGSA (Terminal Aeroportuaria de Guayaquil, the operator, tagsa.aero)",
+     "quote": "Aeropuerto Internacional José Joaquín de Olmedo."
+    }
+   ]
+  },
+  {
+   "claim": "previously called Simón Bolívar International",
+   "verdict": "confirmed",
+   "inAfter": "It was previously called Simón Bolívar International",
+   "note": "OurAirports keeps 'Simon Bolivar International Airport' as the other name on Guayaquil's record, and the city's airport authority has a section headed 'APTO SIMÓN BOLÍVAR'. Accents restored.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "It was changed from Simón Bolívar International Airport"
+    },
+    {
+     "file": "ourairports-simon-bolivar",
+     "org": "OurAirports (airports.csv, other-names field)",
+     "quote": "Row: 6056,\"SEGU\",\"large_airport\",\"José Joaquín de Olmedo International Airport\",-2.15742,-79.883598,19,\"SA\",\"EC\",\"EC-G\",\"Guayaquil\",\"yes\",\"SEGU\",\"GYE\",\"SEGU\",,,\"https://en.wikipedia.org/wiki/José_Joaquín_de_Olmedo_International_Airport\",\"Simon Bolivar International Airport\""
+    },
+    {
+     "file": "aag-home",
+     "org": "Autoridad Aeroportuaria de Guayaquil (Guayaquil's municipal airport authority, aag.org.ec)",
+     "quote": "APTO SIMÓN BOLÍVAR"
+    }
+   ]
+  },
+  {
+   "claim": "a name still used by airports in Venezuela and Colombia",
+   "verdict": "confirmed",
+   "inAfter": "a name still used by airports in Venezuela and Colombia",
+   "note": "Caracas (Maiquetía, Venezuela) and Santa Marta (Colombia), per Wikipedia and OurAirports' current records.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "which is currently the name of the airports in Caracas, Venezuela, and Santa Marta, Colombia."
+    },
+    {
+     "file": "ourairports-simon-bolivar",
+     "org": "OurAirports (airports.csv)",
+     "quote": [
+      "Row: 6161,\"SKSM\",\"medium_airport\",\"Simón Bolívar International Airport\",11.1196,-74.2306,22,\"SA\",\"CO\",\"CO-MAG\",\"Santa Marta\"",
+      "Row: 6300,\"SVMI\",\"large_airport\",\"Maiquetía Simón Bolívar International Airport\",10.602214,-66.991174,234,\"SA\",\"VE\",\"VE-X\",\"Maiquetía\""
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "an unusually short airport transfer",
+   "verdict": "cut",
+   "wasBefore": "which makes for an unusually short airport transfer",
+   "why": "'Unusually' is a comparison no source makes. The distance itself is kept. The clause is not softened to 'a short transfer' either: the FCDO advises against all but essential travel to Guayas province, Guayaquil included, with only airside transit at the airport exempt (held back below), so the text should not sell the trip into town."
+  },
+  {
+   "claim": "flat delta of the Guayas River, level ground on every side",
+   "verdict": "cut",
+   "wasBefore": "The airport sits in the flat delta of the Guayas River with level ground on every side",
+   "why": "Wikipedia alone; the operator's and the AIP's pages read describe the site only as inside the city's urban area to the north."
+  },
+  {
+   "claim": "takes aircraft as large as a 747 or an A340-600",
+   "verdict": "cut",
+   "wasBefore": "and the 2,790 metre runway takes aircraft as large as a 747 or an A340-600",
+   "why": "Good sources disagree on the largest aircraft: Wikipedia names the Boeing 747 and Airbus A340-600, while the operator gives its critical aircraft as the Boeing 777-200 (fire category 9). The runway length is kept (above).",
+   "sources": [
+    {
+     "file": "tagsa-terminal",
+     "org": "TAGSA (Terminal Aeroportuaria de Guayaquil, the operator, tagsa.aero)",
+     "quote": [
+      "Categoría de protección : 9.",
+      "Aeronave crítica : Boeing 777-200."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "The runway can accommodate Boeing 747 and Airbus A340-600 aircraft."
+    }
+   ]
+  },
+  {
+   "claim": "capacity around 7.5 million",
+   "verdict": "cut",
+   "wasBefore": "A domestic expansion in 2014 lifted capacity to around 7.5 million passengers a year.",
+   "why": "Softened to 'more than 7 million' (above): the operator's own 2014 figure is 'more than 7 million'; 7.5 million is Wikipedia's."
+  },
+  {
+   "claim": "exit tax: check whether the fare includes it",
+   "verdict": "cut",
+   "wasBefore": "One thing to flag when quoting: an exit tax is charged on all international tickets out of this airport. Check whether the fare a client is looking at already includes it.",
+   "why": "Out of date: the operator says the airport tax is included in the air ticket (corrected above)."
+  },
+  {
+   "claim": "Olmedo was a poet, the first mayor of Guayaquil and later president of Ecuador",
+   "verdict": "cut",
+   "wasBefore": "a poet who was the first mayor of Guayaquil and later president of Ecuador",
+   "why": "Wikipedia alone: the operator, the airport authority and the AIP give only the name, and no other readable source was found. The name is kept (above)."
+  },
+  {
+   "claim": "FCDO: against all but essential travel to Guayas province; state of emergency and curfew",
+   "verdict": "cut",
+   "why": "Held back, and recommended for Andy: the FCDO (updated 16 September 2026) advises against all but essential travel to Guayas and six other coastal provinces, with airside transit within Guayaquil Airport exempt. A 60-day state of emergency from 15 September covers Guayas, with a curfew from midnight to 5am in Guayas and three other provinces from 17 to 30 September. The FCDO also says Guayaquil's murder rate is very high, and that there are authorised taxi booths at Quito and Guayaquil international airports. Nothing in the old text to replace, so under the like-for-like rule it stays out, but it is the single most important thing a UK agent should know about this airport.",
+   "sources": [
+    {
+     "file": "fcdo-ecuador-warnings",
+     "org": "UK FCDO",
+     "dated": "2026-09-16 (still current at 23 September 2026)",
+     "quote": [
+      "16 September 2026",
+      "FCDO advises against all but essential travel to the Coastal Region provinces of:",
+      "Guayas",
+      "This does not apply to airside transit within Guayaquil Airport in Guayas province.",
+      "The Ecuadorean government has declared a 60-day state of emergency as of 15 September, for security reasons in the following 8 provinces:",
+      "It includes curfew hours (from 12am to 5am) for the provinces of El Oro, Guayas, Los Rios and Manabi, from 17 to 30 September."
+     ]
+    },
+    {
+     "file": "fcdo-ecuador-safety",
+     "org": "UK FCDO",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "The murder rate in Guayaquil is very high, but is mainly gang-related.",
+      "There are authorised taxi booths at Quito and Guayaquil international airports, and potentially at other domestic airports."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Galápagos flights and the transit control card",
+   "verdict": "cut",
+   "why": "Held back: the operator's FAQ says travellers to Galápagos pay 20 US dollars for the Transit Control Card at the Galápagos Government Council office in the departures hall (06:00 to 12:00); its departures board on 23 September 2026 shows Avianca and LATAM flights to Baltra and San Cristóbal; Wikipedia says all mainland flights to the islands stop in Guayaquil. Useful to an agent, but nothing in the old text to replace.",
+   "sources": [
+    {
+     "file": "tagsa-faq",
+     "org": "TAGSA (Terminal Aeroportuaria de Guayaquil, the operator, tagsa.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "cancelar una tasa de USD 20 para obtener su Tarjeta de Control de Tránsito (TCT)"
+    },
+    {
+     "file": "tagsa-salidas-nac",
+     "org": "TAGSA (Terminal Aeroportuaria de Guayaquil, the operator, tagsa.aero)",
+     "dated": "live departures board read 2026-09-23",
+     "quote": [
+      "AV 1632 Baltra",
+      "LA 1419 San Cristóbal"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "All domestic flights going from the Ecuadorian mainland to the Galápagos Islands make a stop in Guayaquil"
+    }
+   ]
+  },
+  {
+   "claim": "who flies here and who runs it",
+   "verdict": "cut",
+   "why": "Held back: the operator lists Avianca and Latam for domestic routes and Air Europa, American Airlines, Avianca, Copa Airlines, KLM, Latam, Iberia and JetBlue for international ones; its board on 23 September 2026 shows KLM to Amsterdam and Iberia to Madrid. TAGSA, part of Corporación América Airports, runs the airport under a concession from the city's airport authority until 27 July 2031. The old text names no airline or operator.",
+   "sources": [
+    {
+     "file": "tagsa-aerolineas-int",
+     "org": "TAGSA (Terminal Aeroportuaria de Guayaquil, the operator, tagsa.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Aerolíneas con rutas internacionales",
+      "KLM",
+      "Iberia",
+      "JetBlue"
+     ]
+    },
+    {
+     "file": "tagsa-salidas-int",
+     "org": "TAGSA (Terminal Aeroportuaria de Guayaquil, the operator, tagsa.aero)",
+     "dated": "live departures board read 2026-09-23",
+     "quote": [
+      "KL 755 Amsterdam 18:35",
+      "IB 132 Madrid 11:25"
+     ]
+    },
+    {
+     "file": "tagsa-about",
+     "org": "TAGSA (Terminal Aeroportuaria de Guayaquil, the operator, tagsa.aero)",
+     "quote": [
+      "dar ejecución integra a dicho Contrato hasta el 27 de julio del 2031",
+      "TAGSA es una filial de Corporación América Airports"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so be careful which one a supplier means.",
+   "why": "Advice kept from the old text; it follows from the verified former name and the two airports that still use it."
+  }
+ ],
+ "tracerOk": {}
+}

@@ -1,0 +1,356 @@
+{
+ "iata": "VVI",
+ "id": "recsLidULYT4Wh6wB",
+ "name": "Viru Viru International Airport",
+ "country": "Bolivia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Viru_Viru_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Bolivia's busiest airport and its primary air terminal, 17 km north of Santa Cruz de la Sierra. It handled 4.12 million passengers in 2023.\n\nMost international traffic into Bolivia comes through here rather than through La Paz, with routes across South America, North America and Europe, and it is a major focus city for Boliviana de Aviación. For a client heading to La Paz or the altiplano, routing through Santa Cruz also means arriving at low altitude first, which is worth considering.\n\nThe airport is run by NAABOL, a state agency created in March 2022. Before that it was operated under concession by SABSA until the government nationalised it in 2013.\n\nIt was inaugurated in 1983 to replace the older El Trompillo Airport, and became the country's main gateway for international flights straight away.",
+ "after": "Bolivia's main hub for intercontinental flights, 17 km north of Santa Cruz de la Sierra.\n\nMuch of Bolivia's international traffic uses it rather than La Paz. For a client heading to La Paz or the altiplano, routing through Santa Cruz also means arriving at low altitude first, which is worth considering.\n\nThe airport is run by NAABOL, a state company, which took over in March 2022 from SABSA. SABSA had held the concession since 1997 and was nationalised in 2013.\n\nIt opened in 1983 to replace El Trompillo, the city's older airport.",
+ "claims": [
+  {
+   "claim": "Bolivia's busiest airport",
+   "verdict": "cut",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-21",
+     "quote": "In 2023, the airport handled 4.12 million passengers, making it the busiest airport in Bolivia."
+    },
+    {
+     "file": "naabol-rpc-final-2025",
+     "org": "NAABOL (Navegación Aérea y Aeropuertos Bolivianos, the operator, naabol.gob.bo)",
+     "dated": "2026 (final 2025 accountability report; cites an extract of 17/02/2026)",
+     "quote": [
+      "RENDICIÓN PÚBLICA DE CUENTAS FINAL",
+      "Reporte SIGEP del 17/02/2026",
+      "iv. Proyecto: Ampliación de Plataforma, Pasillo y Puente de Abordaje Nº 8 Aeropuerto Viru Viru",
+      "aproximadamente a 2.739.019 pasajeros (Fuente: Anuario Estadístico DGAC 2024)",
+      "vi. Proyecto: Implementación Puente de Abordaje 4 Aeropuerto Internacional El Alto",
+      "aproximadamente a 2.387.458 pasajeros, conforme a los registros estadísticos disponibles"
+     ]
+    }
+   ],
+   "wasBefore": "Bolivia's busiest airport",
+   "why": "Review (23 Sep): Wikipedia's 2023 ranking is the only source for the whole country. NAABOL's final 2025 report puts Viru Viru (about 2,739,019 passengers, from the DGAC's 2024 yearbook) ahead of El Alto (about 2,387,458), but as the number of passengers its projects serve, and it gives no figure for Cochabamba, the third large airport. The DGAC's site links no yearbook, and INE publishes air passenger flows by route, not by airport. Replaced by the operator's own description, Bolivia's main hub for intercontinental flights (above)."
+  },
+  {
+   "claim": "17 km north of Santa Cruz de la Sierra",
+   "verdict": "confirmed",
+   "inAfter": "17 km north of Santa Cruz de la Sierra",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-21",
+     "quote": "located 17 km (11 mi) north of the city"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 16.5 km (10.2 miles)",
+      "Bearing from the city centre: 17 degrees, which is north"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the country's main hub for intercontinental flights",
+   "verdict": "confirmed",
+   "inAfter": "Bolivia's main hub for intercontinental flights",
+   "note": "Replaces the vaguer 'its primary air terminal' with the operator's own description. Review (23 Sep): moved to the opening line in place of 'Bolivia's busiest airport' (cut below).",
+   "sources": [
+    {
+     "file": "naabol-viruviru",
+     "org": "NAABOL (Navegación Aérea y Aeropuertos Bolivianos, the operator, naabol.gob.bo)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Inaugurado en 1983, Viru Viru es el principal centro de conexiones intercontinentales de Bolivia."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-21",
+     "quote": "It is Bolivia's primary air terminal, handling much of the international traffic into the country."
+    }
+   ]
+  },
+  {
+   "claim": "much of Bolivia's international traffic uses it rather than La Paz",
+   "verdict": "softened",
+   "inAfter": "Much of Bolivia's international traffic uses it rather than La Paz",
+   "note": "Was 'Most international traffic into Bolivia comes through here rather than through La Paz'. Wikipedia's articles on both airports say 'much'; the El Alto article explains why: wide-bodied aircraft cannot take off at full load from El Alto's altitude. The operator calls Viru Viru Bolivia's main intercontinental hub. No source gives a share, so 'much', not 'most'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-21",
+     "quote": "handling much of the international traffic into the country"
+    },
+    {
+     "file": "wikipedia-elalto",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-08 (El Alto International Airport article)",
+     "quote": "much of the international traffic to and from Bolivia operates out of Viru Viru International Airport in Santa Cruz de la Sierra which is located at a much lower elevation"
+    },
+    {
+     "file": "naabol-viruviru",
+     "org": "NAABOL (Navegación Aérea y Aeropuertos Bolivianos, the operator, naabol.gob.bo)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Viru Viru es el principal centro de conexiones intercontinentales de Bolivia"
+    }
+   ]
+  },
+  {
+   "claim": "arriving at low altitude first",
+   "verdict": "confirmed",
+   "inAfter": "routing through Santa Cruz also means arriving at low altitude first",
+   "note": "Viru Viru sits at 373 m; El Alto, the La Paz airport, at more than 4,000 m (see ledger/LPB.json).",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Airport: Viru Viru International Airport (OurAirports SLVR, IATA VVI) at -17.6448, -63.1354, elevation 1,224 ft (373 m)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-21",
+     "quote": "elevation_m = 373"
+    },
+    {
+     "file": "wikipedia-elalto",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-08 (El Alto International Airport article)",
+     "quote": "At an elevation of 4,061.5 metres (13,325 ft)"
+    }
+   ]
+  },
+  {
+   "claim": "run by NAABOL, a state company",
+   "verdict": "confirmed",
+   "inAfter": "The airport is run by NAABOL, a state company",
+   "note": "Was 'a state agency'. Opinión and the Bolivian government call NAABOL a state company ('empresa estatal'); Wikipedia calls it a state-owned agency.",
+   "sources": [
+    {
+     "file": "naabol-viruviru",
+     "org": "NAABOL (Navegación Aérea y Aeropuertos Bolivianos, the operator, naabol.gob.bo)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Con el apoyo de NAABOL, este aeropuerto ha experimentado mejoras constantes"
+    },
+    {
+     "file": "opinion-sabsa-naabol",
+     "org": "Opinión (Cochabamba daily newspaper, opinion.com.bo)",
+     "dated": "2022-02-24",
+     "quote": "la nueva empresa estatal Navegación Aérea y Aeropuertos Bolivianos (NAABOL)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-21",
+     "quote": "This state-owned agency now manages the airports in Bolivia."
+    }
+   ]
+  },
+  {
+   "claim": "NAABOL took over from SABSA in March 2022",
+   "verdict": "corrected",
+   "inAfter": "which took over in March 2022 from SABSA",
+   "note": "Was 'a state agency created in March 2022'. The government announced on 24 February 2022 that SABSA would pass to NAABOL from 1 March, when SABSA's 25-year concession ended, and Opinión already calls NAABOL 'recently created' then; so March 2022 is when it took over, not when it was created.",
+   "sources": [
+    {
+     "file": "opinion-sabsa-naabol",
+     "org": "Opinión (Cochabamba daily newspaper, opinion.com.bo)",
+     "dated": "2022-02-24",
+     "quote": [
+      "24 de febrero de 2022 (20:40 h.)",
+      "Servicios de Aeropuertos Bolivianos (SABSA) pasará desde el 1 de marzo a formar parte de la nueva empresa estatal Navegación Aérea y Aeropuertos Bolivianos (NAABOL)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-21",
+     "quote": "SABSA has been substituted in March 2022 by the newly established government agency Navegación Aérea y Aeropuertos Bolivianos (NAABOL)."
+    }
+   ]
+  },
+  {
+   "claim": "SABSA held the concession from 1997 and was nationalised in 2013",
+   "verdict": "corrected",
+   "inAfter": "SABSA had held the concession since 1997 and was nationalised in 2013.",
+   "note": "Was 'operated under concession by SABSA until the government nationalised it in 2013', which read as if SABSA stopped in 2013. The concession was signed in 1997 for 25 years; in 2013 the state nationalised 99 per cent of SABSA's shares, and SABSA went on running the airport until NAABOL took over in 2022.",
+   "sources": [
+    {
+     "file": "opinion-sabsa-naabol",
+     "org": "Opinión (Cochabamba daily newspaper, opinion.com.bo)",
+     "dated": "2022-02-24",
+     "quote": [
+      "el contrato de concesión firmado el 28 de febrero de 1997",
+      "A partir de la nacionalización en 2013, mediante Decreto Supremo 1494 se nacionalizó el 99% de las acciones de SABSA"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-21",
+     "quote": [
+      "On 1 March 1997, the government of Bolivia entered into a 25-year contract with Airport Group International to operate the three largest airports in Bolivia",
+      "The airport was nationalized by the Bolivian government in 2013."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "opened in 1983 to replace El Trompillo, the city's older airport",
+   "verdict": "confirmed",
+   "inAfter": "It opened in 1983 to replace El Trompillo, the city's older airport.",
+   "sources": [
+    {
+     "file": "naabol-viruviru",
+     "org": "NAABOL (Navegación Aérea y Aeropuertos Bolivianos, the operator, naabol.gob.bo)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Inaugurado en 1983"
+    },
+    {
+     "file": "naabol-trompillo",
+     "org": "NAABOL (Navegación Aérea y Aeropuertos Bolivianos, the operator, naabol.gob.bo)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "funcionó como el principal aeropuerto internacional de la ciudad hasta la década de 1980, cuando fue reemplazado por Viru Viru"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-21",
+     "quote": "inaugurated in 1983, to replace the obsolete El Trompillo Airport"
+    }
+   ]
+  },
+  {
+   "claim": "El Trompillo reopened to commercial flights in July 2025",
+   "verdict": "cut",
+   "sources": [
+    {
+     "file": "lavoz-trompillo-2025",
+     "org": "La Voz de Tarija (Bolivian newspaper, lavozdetarija.com), agency report",
+     "dated": "2025-07-23",
+     "quote": [
+      "23/07/2025 - 21:38",
+      "Luego de ocho años, este miércoles se reiniciaron las operaciones comerciales desde el aeropuerto de El Trompillo de la ciudad de Santa Cruz."
+     ]
+    },
+    {
+     "file": "naabol-rpc-final-2025",
+     "org": "NAABOL (Navegación Aérea y Aeropuertos Bolivianos, the operator, naabol.gob.bo)",
+     "dated": "2026 (final 2025 accountability report)",
+     "quote": "Habilitación del Aeropuerto “El Trompillo” de la ciudad de Santa Cruz."
+    },
+    {
+     "file": "naabol-trompillo",
+     "org": "NAABOL (Navegación Aérea y Aeropuertos Bolivianos, the operator, naabol.gob.bo)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "operando principalmente vuelos privados y militares, así como algunas operaciones comerciales limitadas"
+    }
+   ],
+   "why": "Held back (review, 23 Sep): a new fact that replaces nothing in the old text, which says only that Viru Viru replaced El Trompillo in 1983 (still true). Commercial flights restarted at El Trompillo on 23 July 2025 after eight years (La Voz de Tarija, from agencies); NAABOL lists enabling El Trompillo among its 2025 results, and its live airport page says El Trompillo has some limited commercial operations. Recommended for Andy: a domestic flight from Santa Cruz may leave from El Trompillo, not Viru Viru. The old text's 'to replace the older El Trompillo Airport' left the impression that Santa Cruz now has one airport. Commercial passenger flights restarted at El Trompillo on 23 July 2025, after eight years, with BoA's regional flights (La Voz de Tarija, from agencies); NAABOL lists enabling El Trompillo among its 2025 results, and its airport page says El Trompillo has some limited commercial operations. The same report is more than 12 months old, but NAABOL's report of early 2026 and its live page carry the change forward."
+  },
+  {
+   "claim": "its primary air terminal",
+   "verdict": "cut",
+   "wasBefore": "and its primary air terminal",
+   "why": "Reworded to the operator's own description, the country's main hub for intercontinental flights (above)."
+  },
+  {
+   "claim": "4.12 million passengers in 2023",
+   "verdict": "cut",
+   "wasBefore": "It handled 4.12 million passengers in 2023.",
+   "why": "The counts disagree too much to state one: Wikipedia gives 4,116,329 for 2023 (from SABSA's statistics), while NAABOL's 2025 report gives about 2,739,019 for 2024 from the DGAC's statistical yearbook, most likely counted differently. No 2025 total could be read (NAABOL's 'statistical bulletin' download is an ISO brochure; BoA's and the DGAC's sites give none). For Andy: a current total needs the DGAC yearbook itself.",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2023",
+      "stat1_data = 4,116,329"
+     ]
+    },
+    {
+     "file": "naabol-rpc-final-2025",
+     "org": "NAABOL (Navegación Aérea y Aeropuertos Bolivianos, the operator, naabol.gob.bo)",
+     "quote": "aproximadamente a 2.739.019 pasajeros (Fuente: Anuario Estadístico DGAC 2024)"
+    }
+   ]
+  },
+  {
+   "claim": "most international traffic comes through here",
+   "verdict": "cut",
+   "wasBefore": "Most international traffic into Bolivia comes through here rather than through La Paz",
+   "why": "Softened to 'much' (above): no source gives a share."
+  },
+  {
+   "claim": "routes across South America, North America and Europe",
+   "verdict": "cut",
+   "wasBefore": "with routes across South America, North America and Europe",
+   "why": "No source from the last 12 months could be read for the route map: BoA's site shows Imperva's bot check, NAABOL publishes no airline list, and Aviacionline's Santa Cruz route index stops in November 2023. The operator's 'main hub for intercontinental flights' is kept (above)."
+  },
+  {
+   "claim": "a major focus city for Boliviana de Aviación",
+   "verdict": "cut",
+   "wasBefore": "and it is a major focus city for Boliviana de Aviación",
+   "why": "Wikipedia alone for Viru Viru: BoA's own site is behind a bot check, and the current BoA reports read place it at La Paz and at El Trompillo, not Viru Viru."
+  },
+  {
+   "claim": "a state agency created in March 2022",
+   "verdict": "cut",
+   "wasBefore": "a state agency created in March 2022",
+   "why": "Corrected (above): March 2022 is when NAABOL took over from SABSA; it already existed in February 2022. NAABOL's own institution page returned only server errors."
+  },
+  {
+   "claim": "operated under concession by SABSA until nationalised in 2013",
+   "verdict": "cut",
+   "wasBefore": "Before that it was operated under concession by SABSA until the government nationalised it in 2013.",
+   "why": "Reworded (above): SABSA held the concession from 1997, was nationalised in 2013 and kept running the airport until 2022."
+  },
+  {
+   "claim": "the country's main gateway for international flights straight away",
+   "verdict": "cut",
+   "wasBefore": "and became the country's main gateway for international flights straight away",
+   "why": "'Straight away' rests on Wikipedia alone. The airport's role today, the main intercontinental hub, is kept (above)."
+  },
+  {
+   "claim": "FCDO: State of Emergency; taxi robberies in Santa Cruz",
+   "verdict": "cut",
+   "why": "Held back: the FCDO (updated 22 September 2026) reports a State of Emergency to restrict protests and roadblocks, warns that blockades can close roads to and from airports, and notes more robberies of people taking taxis in Santa Cruz, La Paz and Rurrenabaque (order radio taxis by phone). Nothing in the old text to replace. For Andy to decide.",
+   "sources": [
+    {
+     "file": "fcdo-bolivia-warnings",
+     "org": "UK FCDO",
+     "dated": "2026-09-22",
+     "quote": [
+      "22 September 2026",
+      "A State of Emergency has been declared in Bolivia, giving police and armed forces powers to remove roadblocks, disrupt protests and detain those not complying with the new measures for up to 8 hours without charge."
+     ]
+    },
+    {
+     "file": "fcdo-bolivia-safety",
+     "org": "UK FCDO",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "There has been an increase in robberies from people taking taxis in Santa Cruz, La Paz and Rurrenabaque.",
+      "Protests or demonstrations may result in widespread road blockades, including on roads to and from airports."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which is worth considering",
+   "why": "Advice kept from the old text; it follows from the verified altitudes (373 m here, more than 4,000 m at El Alto)."
+  }
+ ],
+ "tracerOk": {
+  "Much of Bolivia's": "The tracer catches the possessive together with the sentence's opening word; Bolivia is in every saved source, and the claim rests on Wikipedia and NAABOL."
+ }
+}

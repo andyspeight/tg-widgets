@@ -1,0 +1,274 @@
+{
+ "iata": "LPB",
+ "id": "rec92ST8mUo1AcRpd",
+ "name": "El Alto International Airport",
+ "country": "Bolivia",
+ "wikipedia": "https://en.wikipedia.org/wiki/El_Alto_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The highest international airport in the world, at 4,061 metres above sea level, and the seventh highest commercial airport anywhere. It is in the city of El Alto, 13 km west of La Paz and a good deal higher than it, so clients arrive at altitude before they have done anything at all. Build a gentle first day into any itinerary.\n\nThe terminal has shops selling Bolivian handicrafts, bookshops, duty free and cafes and restaurants in the main lobby and in both the domestic and international departure areas.\n\nThe airport has been in service since the first half of the twentieth century and was rebuilt in the late 1960s, with a lengthened runway and a new terminal opened in 1965.\n\nIt was the main hub for Lloyd Aereo Boliviano until the airline stopped flying in 2007, and is now a focus city for Boliviana de Aviacion, the state carrier.",
+ "after": "The highest airport with scheduled flights outside China, at more than 4,000 metres above sea level. It is in the city of El Alto, west of La Paz, so clients arrive at altitude before they have done anything at all. Build a gentle first day into any itinerary.\n\nIt has been in use since the first half of the twentieth century and was officially opened in 1965. Its terminal was modernised in the 2000s.\n\nBoliviana de Aviación flies from here.",
+ "claims": [
+  {
+   "claim": "the highest airport with scheduled flights outside China",
+   "verdict": "softened",
+   "inAfter": "The highest airport with scheduled flights outside China",
+   "note": "Was 'the highest international airport in the world ... and the seventh highest commercial airport anywhere' (both cut below). OurAirports' data, read in full: of every airport it marks as having scheduled service, only five stand higher than El Alto, and all five are in China (Daocheng Yading, Qamdo Bangda, Shigatse Tingri, Kangding, Ngari Gunsa). Wikipedia says the same in its own words ('the highest commercial airport outside of China'). OurAirports does not say which airports have international flights, so 'international' is not kept.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-08",
+     "quote": "the highest commercial airport outside of China"
+    },
+    {
+     "file": "ourairports-highest",
+     "org": "OurAirports (airports.csv, every airport with scheduled service)",
+     "quote": [
+      "Row: 327348,\"ZUDC\",\"medium_airport\",\"Daocheng Yading Airport\",29.31632,100.060317,14472,\"AS\",\"CN\"",
+      "Row: 30788,\"ZUBD\",\"medium_airport\",\"Qamdo Bangda Airport\",30.553600311279297,97.1082992553711,14219,\"AS\",\"CN\"",
+      "Row: 350882,\"CN-0236\",\"medium_airport\",\"Shigatse Tingri Airport\",28.604567,86.798,14108,\"AS\",\"CN\"",
+      "Row: 327350,\"ZUKD\",\"medium_airport\",\"Kangding Airport\",30.142464,101.73872,14042,\"AS\",\"CN\"",
+      "Row: 300545,\"ZUAL\",\"medium_airport\",\"Ngari Gunsa Airport\",32.09794,80.053971,14022,\"AS\",\"CN\"",
+      "Row: 6184,\"SLLP\",\"large_airport\",\"El Alto International Airport\",-16.510272,-68.189416,13355,\"SA\",\"BO\",\"BO-L\",\"La Paz / El Alto\",\"yes\""
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "more than 4,000 metres above sea level",
+   "verdict": "softened",
+   "inAfter": "at more than 4,000 metres above sea level",
+   "note": "Was 'at 4,061 metres'. Wikipedia gives 4,061.5 m (and 4,062 m further down), OurAirports 13,355 ft (4,071 m); the DGAC's AIP site could not be reached (upstream connection failure). 'More than 4,000 metres' is what both support.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-08",
+     "quote": "At an elevation of 4,061.5 metres (13,325 ft)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Airport: El Alto International Airport (OurAirports SLLP, IATA LPB) at -16.5103, -68.1894, elevation 13,355 ft (4,071 m)"
+    }
+   ]
+  },
+  {
+   "claim": "in the city of El Alto, west of La Paz",
+   "verdict": "softened",
+   "inAfter": "It is in the city of El Alto, west of La Paz",
+   "note": "Was '13 km west of La Paz'. The distance fails the coordinates check: 4.4 km in a straight line from the GeoNames city point (ratio 2.99), and no written second source for 13 km could be read, so it is cut below. West holds (bearing 255 degrees).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-08",
+     "quote": "It is located in the city of El Alto, 13 kilometres (8 mi) west of La Paz."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: La Paz / El Alto",
+      "Bearing from the city centre: 255 degrees, which is west"
+     ]
+    },
+    {
+     "file": "naabol-elalto",
+     "org": "NAABOL (Navegación Aérea y Aeropuertos Bolivianos, the operator, naabol.gob.bo)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "AEROPUERTO INTERNACIONAL EL ALTO",
+      "El Alto, BO"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in use since the first half of the twentieth century",
+   "verdict": "confirmed",
+   "inAfter": "It has been in use since the first half of the twentieth century",
+   "note": "The operator dates the airport's history to 1913, when a field was prepared at Nuevo Potosí.",
+   "sources": [
+    {
+     "file": "naabol-elalto",
+     "org": "NAABOL (Navegación Aérea y Aeropuertos Bolivianos, the operator, naabol.gob.bo)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "El Aeropuerto Internacional El Alto es uno de los más antiguos y relevantes de Bolivia. Su historia comienza en 1913"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-08",
+     "quote": "The airport has been in service since the first half of the 20th century"
+    }
+   ]
+  },
+  {
+   "claim": "officially opened in 1965",
+   "verdict": "softened",
+   "inAfter": "was officially opened in 1965",
+   "note": "Was 'rebuilt in the late 1960s, with a lengthened runway and a new terminal opened in 1965' (cut below). The operator: officially inaugurated in 1965, under the name 'Aeropuerto John F. Kennedy', which was never used in practice; El Alto since 1999.",
+   "sources": [
+    {
+     "file": "naabol-elalto",
+     "org": "NAABOL (Navegación Aérea y Aeropuertos Bolivianos, the operator, naabol.gob.bo)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "En 1965 fue oficialmente inaugurado con el nombre de"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-08",
+     "quote": "The new airport was inaugurated in 1965."
+    }
+   ]
+  },
+  {
+   "claim": "terminal modernised in the 2000s",
+   "verdict": "corrected",
+   "inAfter": "Its terminal was modernised in the 2000s.",
+   "note": "Replaces the old text's 'new terminal' of the 1960s with the terminal's latest rebuild. The operator dates the modernisation of the boarding and baggage areas to 2008; Wikipedia has SABSA reconstructing the main terminal in 2006. The two years differ, so only the decade is given.",
+   "sources": [
+    {
+     "file": "naabol-elalto",
+     "org": "NAABOL (Navegación Aérea y Aeropuertos Bolivianos, the operator, naabol.gob.bo)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "en 2008 se modernizó para mejorar las áreas de embarque y recogida de equipaje"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-08",
+     "quote": "In 2006, SABSA (Spanish: Servicios Aeroportuarios Bolivianos S.A.) invested nearly 2.3 million dollars in the reconstruction of the main terminal."
+    }
+   ]
+  },
+  {
+   "claim": "Boliviana de Aviación flies from here",
+   "verdict": "softened",
+   "inAfter": "Boliviana de Aviación flies from here.",
+   "note": "Was 'now a focus city for Boliviana de Aviación, the state carrier' (cut below). El Día (16 April 2026) reports a BoA flight on the La Paz to Cobija route, citing Bolivia's DGAC. BoA's own site (boa.bo) answers with Imperva's 'Pardon Our Interruption' bot check, so its network could not be read.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-08",
+     "quote": "It serves also as a focus city for Boliviana de Aviación"
+    },
+    {
+     "file": "eldia-boa-2026",
+     "org": "El Día (Santa Cruz daily newspaper, eldia.com.bo)",
+     "dated": "2026-04-16",
+     "quote": [
+      "2026-04-16 15:27:16",
+      "Un avión de Boliviana de Aviación (BoA), que cubría la ruta La Paz–Cobija"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the highest international airport in the world",
+   "verdict": "cut",
+   "wasBefore": "The highest international airport in the world",
+   "why": "'International' rests on Wikipedia alone: OurAirports ranks the airports but does not say which have international flights, and no other readable source makes the claim (Airbus's high-altitude test pages are behind an Imperva bot check; AP is blocked by the egress policy). Softened to what both support (above)."
+  },
+  {
+   "claim": "at 4,061 metres",
+   "verdict": "cut",
+   "wasBefore": "at 4,061 metres above sea level",
+   "why": "Softened to 'more than 4,000 metres' (above): Wikipedia 4,061.5 m, OurAirports 4,071 m."
+  },
+  {
+   "claim": "seventh highest commercial airport",
+   "verdict": "cut",
+   "wasBefore": "and the seventh highest commercial airport anywhere",
+   "why": "The rank is disputed: Wikipedia says seventh, while OurAirports' data put it sixth among airports with scheduled service. The claim that nothing outside China is higher is kept (above)."
+  },
+  {
+   "claim": "13 km west of La Paz and a good deal higher than it",
+   "verdict": "cut",
+   "wasBefore": "13 km west of La Paz and a good deal higher than it",
+   "why": "13 km fails the coordinates check (4.4 km in a straight line, ratio 2.99) and no written second source was found (the AIP site did not connect). 'A good deal higher' needs La Paz's own altitude from a second source; none was saved. The direction and the altitude advice are kept."
+  },
+  {
+   "claim": "terminal shops, bookshops, duty free, cafes and restaurants",
+   "verdict": "cut",
+   "wasBefore": "The terminal has shops selling Bolivian handicrafts, bookshops, duty free and cafes and restaurants in the main lobby and in both the domestic and international departure areas.",
+   "why": "Wikipedia alone, and written about the 2006 rebuild; the operator's page lists free Wi-Fi, parking and taxi fares but no shops."
+  },
+  {
+   "claim": "rebuilt in the late 1960s with a lengthened runway",
+   "verdict": "cut",
+   "wasBefore": "and was rebuilt in the late 1960s, with a lengthened runway and a new terminal opened in 1965",
+   "why": "Wikipedia alone, and it contradicts itself (a late-1960s rebuild, a 1965 opening and a 1974 reconstruction). The 1965 opening is kept (above) and the terminal's latest modernisation replaces the 'new terminal'."
+  },
+  {
+   "claim": "main hub for Lloyd Aéreo Boliviano until 2007",
+   "verdict": "cut",
+   "wasBefore": "It was the main hub for Lloyd Aereo Boliviano until the airline stopped flying in 2007",
+   "why": "Wikipedia alone. Bolivia's DGAC history confirms LAB's founding in 1925 but not its hub or its end."
+  },
+  {
+   "claim": "focus city for BoA, the state carrier",
+   "verdict": "cut",
+   "wasBefore": "is now a focus city for Boliviana de Aviacion, the state carrier",
+   "why": "Softened to 'flies from here' (above). 'Focus city' and 'the state carrier' rest on Wikipedia alone; BoA's site is behind a bot check and El Diario's report answered with a JavaScript challenge."
+  },
+  {
+   "claim": "FCDO: State of Emergency; blockades can close roads to airports",
+   "verdict": "cut",
+   "why": "Held back, recommended for Andy: the FCDO (updated 22 September 2026) says a State of Emergency declared on 21 June gives police and the armed forces powers to remove roadblocks and disrupt protests, that protests may bring widespread road blockades including on roads to and from airports, and not to try to cross them. It also says altitude sickness is a risk in La Paz, which is the basis of the kept 'gentle first day' advice. Nothing in the old text to replace.",
+   "sources": [
+    {
+     "file": "fcdo-bolivia-warnings",
+     "org": "UK FCDO",
+     "dated": "2026-09-22",
+     "quote": [
+      "22 September 2026",
+      "A State of Emergency has been declared in Bolivia, giving police and armed forces powers to remove roadblocks, disrupt protests and detain those not complying with the new measures for up to 8 hours without charge."
+     ]
+    },
+    {
+     "file": "fcdo-bolivia-safety",
+     "org": "UK FCDO",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "A State of Emergency was declared in Bolivia on 21 June to restrict protests and blockades.",
+      "Protests or demonstrations may result in widespread road blockades, including on roads to and from airports."
+     ]
+    },
+    {
+     "file": "fcdo-bolivia-health",
+     "org": "UK FCDO",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Altitude sickness is a risk in parts of Bolivia, including in La Paz and the Salar de Uyuni salt flats."
+    }
+   ]
+  },
+  {
+   "claim": "Air Force C-130 overran the runway on 27 February 2026",
+   "verdict": "cut",
+   "why": "Held back, one source only: Wikipedia says a Bolivian Air Force C-130 Hercules overshot the runway on landing on 27 February 2026 and hit vehicles, killing at least 22 people. Its AP source is blocked by the egress policy and no Bolivian report was read. For Andy: probably not one for the Overview, but worth knowing.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-08",
+     "quote": "On 27 February 2026, a C-130 Hercules aircraft of the Bolivian Air Force overshot the airport's runway during landing and collided with several vehicles, killing at least 22 people and injuring 29 others."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so clients arrive at altitude before they have done anything at all",
+   "why": "Follows from the verified altitude (more than 4,000 metres); kept from the old text."
+  },
+  {
+   "text": "Build a gentle first day into any itinerary.",
+   "why": "Advice kept from the old text. It rests on the verified altitude and on the FCDO's statement that altitude sickness is a risk in La Paz (held back entry above)."
+  }
+ ],
+ "tracerOk": {}
+}
