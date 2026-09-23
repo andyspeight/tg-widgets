@@ -1,0 +1,230 @@
+{
+ "iata": "BKI",
+ "id": "recGB7efbwx9rq09p",
+ "name": "Kota Kinabalu International Airport",
+ "country": "Malaysia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Kota_Kinabalu_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Sabah's airport and the primary gateway to East Malaysia, about 8 km south west of Kota Kinabalu. It is the second busiest in the country after Kuala Lumpur, handling more than 7.95 million passengers in 2024, and third for cargo.\n\nIt is the main hub for MASwings, AirAsia Malaysia's second largest base after KLIA2, and a secondary hub for Firefly and Malaysia Airlines, so connections onward into Borneo are good.\n\nTerminal 1 is the main building and it is a generous one: 64 check in counters, 36 immigration positions, six baggage carousels, twelve air bridges and 1,400 parking spaces, rated for nine million passengers a year across five floors.\n\nIt is also one of the better looking terminals in the region. The column heads in the departure hall take their shape from the wakid, the Sabahan carrying basket that traditionally stands for setting out on a journey that matters, and the floor tiles carry Rungus and Bajau patterns.",
+ "after": "Sabah's main airport, about 8 km south west of Kota Kinabalu. It is the second busiest in Malaysia after Kuala Lumpur, and the transport ministry's quarterly figures add up to about 8.9 million passengers in 2025.",
+ "claims": [
+  {
+   "claim": "Sabah's main airport",
+   "verdict": "corrected",
+   "inAfter": "Sabah's main airport",
+   "note": "Was 'Sabah's airport and the primary gateway to East Malaysia'. The ministry's fourth-quarter 2025 table puts Kota Kinabalu at 2,151,556 of the 3,208,618 passengers through Sabah's airports that quarter, far ahead of Tawau and Sandakan; Wikipedia calls it the airport of Sabah's state capital. 'Primary gateway to East Malaysia' is Wikipedia's alone.",
+   "sources": [
+    {
+     "file": "mot-q4-2025-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 4 of 2025",
+     "quote": [
+      "KOTA KINABALU 852,760 829,309 1,682,069 223,141 246,346 469,487 1,075,901 1,075,655 2,151,556",
+      "SABAH 1,363,316 1,350,371 2,713,688 235,660 259,270 494,930 1,598,976 1,609,641 3,208,618",
+      "TAWAU 276,128 281,707 557,835"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "is an international airport in Kota Kinabalu, the state capital of Sabah, Malaysia"
+    }
+   ]
+  },
+  {
+   "claim": "about 8 km south west of Kota Kinabalu",
+   "verdict": "confirmed",
+   "inAfter": "about 8 km south west of Kota Kinabalu.",
+   "note": "Coordinates: 5.3 km in a straight line from the GeoNames centre at 209 degrees (south west); 8 km as a road distance gives a ratio of 1.50, inside the check.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 5.3 km (3.3 miles)",
+      "Bearing from the city centre: 209 degrees, which is south west"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "approximately 8 km (5.0 mi) southwest of the city centre"
+    }
+   ]
+  },
+  {
+   "claim": "the second busiest in Malaysia after Kuala Lumpur",
+   "verdict": "confirmed",
+   "inAfter": "It is the second busiest in Malaysia after Kuala Lumpur",
+   "note": "The ministry's tables list Kuala Lumpur's two terminals (KLIA and KLIA2) first; next come Kota Kinabalu and Penang. Adding the four 2025 quarters gives Kota Kinabalu 8,881,019 against Penang's 8,269,978 (and 7,954,338 against 7,641,625 in 2024). Wikipedia says the same for 2024.",
+   "sources": [
+    {
+     "file": "mot-q1-2025-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 1 of 2025",
+     "quote": [
+      "KOTA KINABALU 780,126 772,318 1,552,444 313,389 329,336 642,725 1,093,515 1,101,654 2,195,169",
+      "PULAU PINANG 452,214 454,048 906,262 529,802 553,177 1,082,979 982,016 1,007,225 1,989,241"
+     ]
+    },
+    {
+     "file": "mot-q2-2025-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 2 of 2025",
+     "quote": [
+      "KOTA KINABALU 864,015 876,418 1,740,433 232,195 238,014 470,209 1,096,210 1,114,432 2,210,642",
+      "PULAU PINANG 505,053 513,900 1,018,953 523,147 514,274 1,037,421 1,028,200 1,028,174 2,056,374"
+     ]
+    },
+    {
+     "file": "mot-q3-2025-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 3 of 2025",
+     "quote": [
+      "KOTA KINABALU 897,435 891,215 1,788,650 261,431 273,571 535,002 1,158,866 1,164,786 2,323,652",
+      "PULAU PINANG 513,404 531,542 1,044,946 514,891 529,687 1,044,578 1,028,295 1,061,229 2,089,524"
+     ]
+    },
+    {
+     "file": "mot-q4-2025-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 4 of 2025",
+     "quote": [
+      "KLIA 1,081,187",
+      "KLIA2 1,277,881",
+      "PULAU PINANG 504,370 515,100 1,019,470 547,620 567,749 1,115,369 1,051,990 1,082,849 2,134,839",
+      "Table 4.5: Total Passengers Handled by Airports, Malaysia, Fourth Quarter, 2025"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "making it the second busiest airport in Malaysia after Kuala Lumpur International Airport in terms of both passenger and aircraft movements"
+    }
+   ]
+  },
+  {
+   "claim": "the transport ministry's quarterly figures add up to about 8.9 million passengers in 2025",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "ministry",
+   "inAfter": "and the transport ministry's quarterly figures add up to about 8.9 million passengers in 2025.",
+   "note": "Replaces 'more than 7.95 million passengers in 2024': a passenger total replaces a passenger total. The ministry's four 2025 tables give 2,195,169, 2,210,642, 2,323,652 and 2,151,556, which add up to 8,881,019 (the table credits Malaysia Airports as its source). The same sum for 2024 gives 7,954,338, exactly Wikipedia's infobox figure, which ties the tables to independent reporting; the 2025 total is the ministry's, attributed.",
+   "sources": [
+    {
+     "file": "mot-q1-2025-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 1 of 2025",
+     "quote": "KOTA KINABALU 780,126 772,318 1,552,444 313,389 329,336 642,725 1,093,515 1,101,654 2,195,169"
+    },
+    {
+     "file": "mot-q2-2025-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 2 of 2025",
+     "quote": "KOTA KINABALU 864,015 876,418 1,740,433 232,195 238,014 470,209 1,096,210 1,114,432 2,210,642"
+    },
+    {
+     "file": "mot-q3-2025-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 3 of 2025",
+     "quote": "KOTA KINABALU 897,435 891,215 1,788,650 261,431 273,571 535,002 1,158,866 1,164,786 2,323,652"
+    },
+    {
+     "file": "mot-q4-2025-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 4 of 2025",
+     "quote": [
+      "KOTA KINABALU 852,760 829,309 1,682,069 223,141 246,346 469,487 1,075,901 1,075,655 2,151,556",
+      "SUMBER/ Source : MALAYSIA AIRPORTS HOLDINGS BERHAD (MAHB)"
+     ]
+    },
+    {
+     "file": "mot-q1-2024-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 1 of 2024",
+     "quote": "KOTA KINABALU 681,046 690,545 1,371,591 267,992 270,898 538,890 949,038 961,443 1,910,481"
+    },
+    {
+     "file": "mot-q2-2024-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 2 of 2024",
+     "quote": "KOTA KINABALU 726,500 725,611 1,452,111 223,269 224,547 447,816 949,769 950,158 1,899,927"
+    },
+    {
+     "file": "mot-q3-2024-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 3 of 2024",
+     "quote": "KOTA KINABALU 788,825 785,036 1,573,861 297,937 305,180 603,117 1,086,762 1,090,216 2,176,978"
+    },
+    {
+     "file": "mot-q4-2024-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 4 of 2024",
+     "quote": "KOTA KINABALU 735,199 713,596 1,448,795 255,555 262,602 518,157 990,754 976,198 1,966,952"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "infobox, revision of 2026-09-10",
+     "quote": [
+      "stat1_data = 7,954,338",
+      "stat_year = 2024"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the primary gateway to East Malaysia",
+   "verdict": "cut",
+   "wasBefore": "Sabah's airport and the primary gateway to East Malaysia",
+   "why": "Wikipedia alone. Reworded to Sabah's main airport, which the ministry's figures show (see above)."
+  },
+  {
+   "claim": "more than 7.95 million passengers in 2024; third for cargo",
+   "verdict": "cut",
+   "wasBefore": "It is the second busiest in the country after Kuala Lumpur, handling more than 7.95 million passengers in 2024, and third for cargo.",
+   "why": "The 2024 total is confirmed (the ministry's quarters add up to 7,954,338) but superseded by 2025 (see above). 'Third for cargo' needs a full-year cargo table, and only the ministry's fourth-quarter 2025 cargo table was saved."
+  },
+  {
+   "claim": "main hub for MASwings; AirAsia Malaysia's second largest base; secondary hub for Firefly and Malaysia Airlines",
+   "verdict": "cut",
+   "wasBefore": "It is the main hub for MASwings, AirAsia Malaysia's second largest base after KLIA2, and a secondary hub for Firefly and Malaysia Airlines, so connections onward into Borneo are good.",
+   "why": "Wikipedia alone. The operator's airport page is built by script and its saved copy showed another airport's page; no airline page naming its bases was read. Worth restoring with the airlines' own pages (MASwings' ownership has been changing, so it needs a current source)."
+  },
+  {
+   "claim": "Terminal 1's counters, immigration, carousels, air bridges, parking and 9 million capacity",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 is the main building and it is a generous one: 64 check in counters, 36 immigration positions, six baggage carousels, twelve air bridges and 1,400 parking spaces, rated for nine million passengers a year across five floors.",
+   "why": "Wikipedia alone (see above). Its 2025 traffic, 8.9 million, is already close to the nine million the old text gave as the terminal's rating."
+  },
+  {
+   "claim": "the wakid column heads and Rungus and Bajau floor patterns",
+   "verdict": "cut",
+   "wasBefore": "It is also one of the better looking terminals in the region. The column heads in the departure hall take their shape from the wakid, the Sabahan carrying basket that traditionally stands for setting out on a journey that matters, and the floor tiles carry Rungus and Bajau patterns.",
+   "why": "Wikipedia alone; nothing else read describes the terminal."
+  },
+  {
+   "claim": "route suspensions in 2026",
+   "verdict": "cut",
+   "why": "Held back: the Sabah Tourism Board (11 May 2026) reports AirAsia suspending Singapore to Kota Kinabalu from 13 May to 30 November 2026, Jakarta from 16 April to 21 May and Ho Chi Minh City from 1 July, and Batik Air suspending Seoul from 28 April, amid rising costs and airline capacity changes. New and time-bound, from one source.",
+   "sources": [
+    {
+     "file": "stb-aviation-2026",
+     "org": "Sabah Tourism Board (corporate.sabahtourism.travel)",
+     "dated": "11 May 2026",
+     "quote": [
+      "Among the affected routes are AirAsia’s temporary suspension of the Singapore–Kota Kinabalu route from May 13 to Nov 30",
+      "Batik Air has also suspended its Seoul–Kota Kinabalu route effective April 28"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "Sabah's main": "A possessive opener; Sabah is in the ministry table and Wikipedia."
+ }
+}
