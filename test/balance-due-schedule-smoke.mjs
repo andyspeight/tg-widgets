@@ -111,8 +111,11 @@ console.log('The My Booking widget runs the SAME schedule logic (a verbatim copy
   ok('widget carries the shared core', /\/\/ >>> order-money core[\s\S]*?\/\/ <<< order-money core/.test(w));
   ok('the schedule reads depositOption.initialAmount as a due-now entry',
     /toMinor\(sched\.initialAmount, digits\)[\s\S]*?isInitial: true/.test(w));
+  // Since 22 Sep 2026 (ET122406) the voucher credit the plan has already
+  // taken off is held back, so the pool that settles the schedule is payments
+  // plus only the rest of the credit. The earliest-first loop is unchanged.
   ok('payments (and voucher credit) settle the earliest entries first',
-    /let left = paidM \+ creditM;[\s\S]*?const settle = Math\.min\(e\.amountM, left\);[\s\S]*?const unpaidM = e\.amountM - settle;/.test(w));
+    /let left = paidM \+ \(creditM - creditInScheduleM\);[\s\S]*?const settle = Math\.min\(e\.amountM, left\);[\s\S]*?const unpaidM = e\.amountM - settle;/.test(w));
   ok('everything due on or before today is aggregated as due now',
     /e\.isInitial \|\| \(!!e\.dueDate && e\.dueDate\.slice\(0, 10\) <= today\)/.test(w));
   ok('the schedule display shows the initial payment as a "Due now" row',
