@@ -1,0 +1,410 @@
+{
+ "iata": "ISB",
+ "id": "reccgwtewaCFXWg9q",
+ "name": "Islamabad International Airport",
+ "country": "Pakistan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Islamabad_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Pakistan's largest and now busiest airport, 25 km south west of Islamabad and serving Rawalpindi as well. It took over as the country's busiest in the 2024-25 financial year, passing Karachi.\n\nIt is new. Full operations began on 6 May 2018, replacing Benazir Bhutto International, and the 180,000 square metre terminal is built for 9 million passengers and 80,000 tonnes of cargo a year, with room to grow to 25 million. There are 15 gates plus ten remote stands, 42 immigration counters, duty free and a food court.\n\nIt was the first airport in Pakistan with double airbridges able to handle an A380.\n\nRoad access is good in every direction. The Srinagar Highway connects to Islamabad and on to the M-1 for Peshawar, the GT Road runs to Rawalpindi, and a separate four lane highway was built for freight.\n\nA third runway is planned, with the civil aviation authority acquiring 2,833 acres for it. The airport is a hub for Pakistan International Airlines and SereneAir.",
+ "after": "Islamabad International is one of Pakistan's two busiest airports, with Karachi. It lies 25 km south west of Islamabad and serves Rawalpindi as well.\n\nCommercial flights began on 3 May 2018, when it replaced Benazir Bhutto International. The 180,000 square metre terminal was built for 9 million passengers a year, with room to grow to 25 million. It opened with 15 gates, airbridges able to take the Airbus A380, duty-free shops and a food court.\n\nThe airport is well served by main roads.\n\nPakistan International Airlines (PIA) and SereneAir both fly from here.",
+ "claims": [
+  {
+   "claim": "one of Pakistan's two busiest airports, with Karachi",
+   "verdict": "softened",
+   "inAfter": "Islamabad International is one of Pakistan's two busiest airports, with Karachi.",
+   "note": "Was 'now busiest'. Good sources disagree on the order. Wikipedia, on Pakistan Civil Aviation Authority figures for July 2024 to June 2025, puts Islamabad first (6,804,439 in its infobox) ahead of Karachi. ProPakistani (16 Feb 2026), on Pakistan Airports Authority figures for calendar 2025, puts Karachi first (8.5 million) and Islamabad second (7.87 million). Both agree the two are the busiest, so the text says only that. No figure is quoted: only one publisher of the 2025 numbers could be saved.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It became the busiest airport in Pakistan in terms of total passenger traffic in the fiscal year 2024-2025, surpassing Jinnah International Airport, Karachi."
+    },
+    {
+     "file": "propakistani-busiest-feb2026",
+     "org": "ProPakistani (Pakistan Airports Authority data)",
+     "quote": [
+      "Karachi’s Jinnah International Airport handled the largest share, with 8.5 million travelers",
+      "Islamabad International Airport recorded 7.87 million passengers",
+      "Lahore’s Allama Iqbal International Airport served 6.86 million passengers"
+     ],
+     "dated": "2026-02-16"
+    }
+   ]
+  },
+  {
+   "claim": "25 km from Islamabad",
+   "verdict": "confirmed",
+   "inAfter": "It lies 25 km south west of Islamabad",
+   "note": "Coordinates put it 27.8 km in a straight line from the GeoNames centre of Islamabad (ratio 0.90, inside the tolerance). airport-technology.com says 20 km, which the coordinates rule out (ratio 0.72), so 25 is kept.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is located 25 km (16 mi) south-west of Islamabad"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Islamabad (GeoNames 1176615): 27.8 km (17.3 miles), bearing 226 degrees, which is south west"
+    }
+   ]
+  },
+  {
+   "claim": "south west of Islamabad",
+   "verdict": "confirmed",
+   "inAfter": "south west of Islamabad",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "south-west of Islamabad"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "bearing 226 degrees, which is south west"
+    }
+   ]
+  },
+  {
+   "claim": "serves Rawalpindi as well",
+   "verdict": "confirmed",
+   "inAfter": "serves Rawalpindi as well",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport serving Islamabad, the capital city of Pakistan, and Rawalpindi"
+    },
+    {
+     "file": "gulfnews-opening-2018",
+     "org": "Gulf News (AFP)",
+     "quote": "is connected to both Rawalpindi and Islamabad",
+     "dated": "2018-05-01"
+    },
+    {
+     "file": "airporttech-isb",
+     "org": "airport-technology.com",
+     "quote": "Located 20km from the centre of Islamabad and 23km from Rawalpindi",
+     "dated": "2018-06-15"
+    }
+   ]
+  },
+  {
+   "claim": "commercial flights began 3 May 2018",
+   "verdict": "corrected",
+   "inAfter": "Commercial flights began on 3 May 2018",
+   "note": "Was 'Full operations began on 6 May 2018'. Wikipedia contradicts itself: its lead says 6 May, its history section says full commercial flight operations began on 3 May 2018 after the 1 May inauguration. Two independent reports of the day give 3 May (both carry AFP copy).",
+   "sources": [
+    {
+     "file": "gulfnews-opening-2018",
+     "org": "Gulf News (AFP)",
+     "quote": [
+      "inaugurated the new Islamabad International Airport (IIA) on Tuesday, May 1.",
+      "Commercial flight services from the much-anticipated addition to the city will begin on Thursday, May 3."
+     ],
+     "dated": "2018-05-01"
+    },
+    {
+     "file": "nation-opening-may2018",
+     "org": "The Nation (AFP)",
+     "quote": [
+      "May 03, 2018",
+      "The new Islamabad International Airport became fully operational from today with the departure and arrival of several domestic and international flights"
+     ],
+     "dated": "2018-05-03"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "commencing full commercial flight operations on 3 May 2018"
+    }
+   ]
+  },
+  {
+   "claim": "replaced Benazir Bhutto International",
+   "verdict": "confirmed",
+   "inAfter": "when it replaced Benazir Bhutto International",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "replacing the Benazir Bhutto International Airport"
+    },
+    {
+     "file": "gulfnews-opening-2018",
+     "org": "Gulf News (AFP)",
+     "quote": "a move for all commercial and VIP flights from the hereto used Benazir Bhutto International Airport to IIA’s runways",
+     "dated": "2018-05-01"
+    },
+    {
+     "file": "nation-opening-may2018",
+     "org": "The Nation (AFP)",
+     "quote": "The capital's previous Benazir Bhutto International Airport",
+     "dated": "2018-05-03"
+    }
+   ]
+  },
+  {
+   "claim": "180,000 square metre terminal",
+   "verdict": "confirmed",
+   "inAfter": "The 180,000 square metre terminal",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Islamabad International Airport has a 180,000 m2 (1,900,000 sq ft) modular terminal building"
+    },
+    {
+     "file": "airporttech-isb",
+     "org": "airport-technology.com",
+     "quote": "The international airport has an 180,000m² modular terminal building",
+     "dated": "2018-06-15"
+    }
+   ],
+   "note": "A design figure from the 2018 opening, put in the past tense ('was built for'); no expansion of the terminal has been reported since."
+  },
+  {
+   "claim": "built for 9 million passengers a year",
+   "verdict": "confirmed",
+   "inAfter": "was built for 9 million passengers a year",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "capable of handling 9 million passengers"
+    },
+    {
+     "file": "gulfnews-opening-2018",
+     "org": "Gulf News (AFP)",
+     "quote": "The new airport is capable of serving nine million passengers",
+     "dated": "2018-05-01"
+    },
+    {
+     "file": "airporttech-isb",
+     "org": "airport-technology.com",
+     "quote": "which will initially be able to handle nine million passengers each year",
+     "dated": "2018-06-15"
+    }
+   ],
+   "note": "A design figure from the 2018 opening, put in the past tense ('was built for'); no expansion of the terminal has been reported since."
+  },
+  {
+   "claim": "room to grow to 25 million",
+   "verdict": "confirmed",
+   "inAfter": "with room to grow to 25 million",
+   "note": "A design allowance, not a promise: the 2018 plans gave target years (2024, 2025) that have passed, so no date is given.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Further expansions in the future will allow it to serve up to 25 million passengers annually."
+    },
+    {
+     "file": "gulfnews-opening-2018",
+     "org": "Gulf News (AFP)",
+     "quote": "expansion plans target servicing about 25 million passengers by 2025",
+     "dated": "2018-05-01"
+    },
+    {
+     "file": "airporttech-isb",
+     "org": "airport-technology.com",
+     "quote": "increase to 25 million by 2024",
+     "dated": "2018-06-15"
+    }
+   ]
+  },
+  {
+   "claim": "opened with 15 gates",
+   "verdict": "confirmed",
+   "inAfter": "It opened with 15 gates",
+   "note": "Put as the terminal at opening ('It opened with'), since the second sources date from 2018; no change to the gates has been reported since.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The terminal includes 15 gates"
+    },
+    {
+     "file": "airporttech-isb",
+     "org": "airport-technology.com",
+     "quote": "a 15-gate terminal",
+     "dated": "2018-06-15"
+    },
+    {
+     "file": "gulfnews-opening-2018",
+     "org": "Gulf News (AFP)",
+     "quote": "15 air-conditioned jetties (passenger boarding bridges)",
+     "dated": "2018-05-01"
+    }
+   ]
+  },
+  {
+   "claim": "airbridges able to take the A380",
+   "verdict": "softened",
+   "inAfter": "airbridges able to take the Airbus A380",
+   "note": "Was 'the first airport in Pakistan with double airbridges able to handle an A380'. The A380 airbridges are confirmed twice; 'first in Pakistan' rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the first airport in Pakistan that has double airbridges capable of handling the Airbus A380."
+    },
+    {
+     "file": "gulfnews-opening-2018",
+     "org": "Gulf News (AFP)",
+     "quote": "2 jetties for Airbus A380",
+     "dated": "2018-05-01"
+    }
+   ]
+  },
+  {
+   "claim": "duty-free shops and a food court",
+   "verdict": "confirmed",
+   "inAfter": "duty-free shops and a food court",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "duty-free shops, a food court"
+    },
+    {
+     "file": "airporttech-isb",
+     "org": "airport-technology.com",
+     "quote": "duty-free shops, air side mall, business centre, food court",
+     "dated": "2018-06-15"
+    },
+    {
+     "file": "gulfnews-opening-2018",
+     "org": "Gulf News (AFP)",
+     "quote": [
+      "Duty-free shops",
+      "Food court"
+     ],
+     "dated": "2018-05-01"
+    }
+   ]
+  },
+  {
+   "claim": "well served by main roads",
+   "verdict": "softened",
+   "inAfter": "The airport is well served by main roads.",
+   "note": "Was 'Road access is good in every direction' plus named roads. The named roads (Srinagar Highway, M-1, GT Road, the freight highway) rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is directly connected to the Lahore and Peshawar motorways as well to the capital city Islamabad via Srinagar Highway"
+    },
+    {
+     "file": "airporttech-isb",
+     "org": "airport-technology.com",
+     "quote": "the airport is well served by an extensive highway infrastructure",
+     "dated": "2018-06-15"
+    }
+   ]
+  },
+  {
+   "claim": "PIA flies from here",
+   "verdict": "softened",
+   "inAfter": "Pakistan International Airlines (PIA) and SereneAir both fly from here.",
+   "note": "Was 'a hub for Pakistan International Airlines and SereneAir'. No second source uses the word hub; both airlines are confirmed as flying from Islamabad.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is a hub for Pakistan International Airlines and SereneAir."
+    },
+    {
+     "file": "nation-pia-man-oct2025",
+     "org": "The Nation",
+     "quote": "The first flight from Islamabad to Manchester departed on Saturday",
+     "dated": "2025-10-25"
+    }
+   ]
+  },
+  {
+   "claim": "SereneAir flies from here",
+   "verdict": "softened",
+   "inAfter": "and SereneAir both fly from here",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is a hub for Pakistan International Airlines and SereneAir."
+    },
+    {
+     "file": "sereneair-schedule",
+     "org": "SereneAir",
+     "quote": [
+      "--- From ---",
+      "Islamabad"
+     ],
+     "dated": "2026-09-23 (live schedule page)"
+    }
+   ]
+  },
+  {
+   "claim": "largest airport in Pakistan",
+   "verdict": "cut",
+   "wasBefore": "Pakistan's largest and now busiest airport",
+   "why": "'Largest' rests on Wikipedia alone; 'now busiest' is contradicted by the Pakistan Airports Authority's 2025 figures and is replaced by 'one of Pakistan's two busiest airports'."
+  },
+  {
+   "claim": "took over as busiest in 2024-25, passing Karachi",
+   "verdict": "cut",
+   "wasBefore": "It took over as the country's busiest in the 2024-25 financial year, passing Karachi.",
+   "why": "Only Wikipedia gives the 2024-25 financial-year figures (the Civil Aviation Authority's own file sits on a server the fetcher cannot verify, and the archive copy is blocked). The Airports Authority's calendar 2025 figures put Karachi ahead again, so the claim would mislead without both."
+  },
+  {
+   "claim": "it is new",
+   "verdict": "cut",
+   "wasBefore": "It is new.",
+   "why": "Opinion; the opening date now carries it."
+  },
+  {
+   "claim": "full operations began 6 May 2018",
+   "verdict": "cut",
+   "wasBefore": "Full operations began on 6 May 2018",
+   "why": "Wrong date. Corrected to 3 May 2018."
+  },
+  {
+   "claim": "80,000 tonnes of cargo a year",
+   "verdict": "cut",
+   "wasBefore": "80,000 tonnes of cargo a year",
+   "why": "Good sources disagree: Wikipedia and airport-technology.com say 80,000 tonnes, Gulf News 50,000. Not split, cut."
+  },
+  {
+   "claim": "ten remote stands",
+   "verdict": "cut",
+   "wasBefore": "There are 15 gates plus ten remote stands, 42 immigration counters, duty free and a food court.",
+   "why": "Rewritten. Remote stands: Wikipedia and airport-technology.com say ten, Gulf News lists 15 remote bays, so the count is cut. The 42 immigration counters are a 2018 plan figure with no recent source, so cut too. Gates, duty-free and food court are kept."
+  },
+  {
+   "claim": "first in Pakistan with A380 double airbridges",
+   "verdict": "cut",
+   "wasBefore": "It was the first airport in Pakistan with double airbridges able to handle an A380.",
+   "why": "'First in Pakistan' rests on Wikipedia alone. The A380 airbridges are kept."
+  },
+  {
+   "claim": "good road access in every direction; named roads",
+   "verdict": "cut",
+   "wasBefore": "Road access is good in every direction. The Srinagar Highway connects to Islamabad and on to the M-1 for Peshawar, the GT Road runs to Rawalpindi, and a separate four lane highway was built for freight.",
+   "why": "The named roads rest on Wikipedia alone (the cited Express Tribune and Business Recorder reports refuse the fetcher). Softened to 'well served by main roads'."
+  },
+  {
+   "claim": "third runway planned, 2,833 acres",
+   "verdict": "cut",
+   "wasBefore": "A third runway is planned, with the civil aviation authority acquiring 2,833 acres for it.",
+   "why": "Only Wikipedia; the cited Dawn report refuses the fetcher and no other report of the land purchase was found."
+  },
+  {
+   "claim": "hub for PIA and SereneAir",
+   "verdict": "cut",
+   "wasBefore": "The airport is a hub for Pakistan International Airlines and SereneAir.",
+   "why": "Softened to 'both fly from here'."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

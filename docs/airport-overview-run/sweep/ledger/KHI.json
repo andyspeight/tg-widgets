@@ -1,0 +1,199 @@
+{
+ "iata": "KHI",
+ "id": "rec98X5ZWysDDKidz",
+ "name": "Jinnah International Airport",
+ "country": "Pakistan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Jinnah_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Pakistan's second busiest airport by passenger numbers, after Islamabad, serving Karachi, the country's largest city and commercial capital. It is a hub for Pakistan International Airlines and airblue alongside a long list of private carriers.\n\nGetting in and out is straightforward. The airport is reached along Shahrah-e-Faisal, near Gulistan-e-Jauhar and Malir, with buses, minibuses and taxis serving the terminal and auto rickshaws for short hops. There is a seven sided car park holding more than 3,000 vehicles. Karachi Cantonment is the nearest mainline railway station.\n\nThe airport carries serious engineering capability, including the Ispahani Hangar for wide body overhaul work, which is unusual outside a major hub.\n\nIt is named after Muhammad Ali Jinnah, the founder of Pakistan, and was previously Drigh Road Airport and then Karachi International, so all three names turn up in older material.",
+ "after": "Jinnah International serves Karachi and, with Islamabad, is one of Pakistan's two busiest airports. Pakistan International Airlines (PIA), Fly Jinnah and AirSial all fly from here.\n\nPIA's Ispahani Hangar, where its aircraft engineers work, is also at the airport.",
+ "claims": [
+  {
+   "claim": "serves Karachi",
+   "verdict": "confirmed",
+   "inAfter": "Jinnah International serves Karachi",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the international airport serving Karachi"
+    },
+    {
+     "file": "aljazeera-oct2024",
+     "org": "Al Jazeera",
+     "quote": "the explosion near Jinnah International Airport in Karachi on October 6, 2024",
+     "dated": "2024-10-06"
+    }
+   ]
+  },
+  {
+   "claim": "one of Pakistan's two busiest airports, with Islamabad",
+   "verdict": "softened",
+   "inAfter": "with Islamabad, is one of Pakistan's two busiest airports",
+   "note": "Was 'second busiest after Islamabad'. Good sources disagree on the order. Wikipedia, on Pakistan Civil Aviation Authority figures for July 2024 to June 2025, puts Islamabad first and Karachi second. ProPakistani (16 Feb 2026), on Pakistan Airports Authority figures for calendar 2025, puts Karachi first (8.5 million) and Islamabad second (7.87 million), with Lahore third (6.86 million). Both agree the two are the busiest, so the text says only that. ProPakistani's own split for Karachi (4.037 million international plus 4.013 million domestic) adds to 8.05 million, not 8.5; the 8.5 figure is the one that fits its 26.815 million total. No figure is quoted in the text: only one publisher of the 2025 numbers could be saved (the Express Tribune report of 15 Feb 2026 sits behind a challenge the fetcher cannot pass).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is Pakistan's second busiest airport in terms of total passengers, after Islamabad International Airport."
+    },
+    {
+     "file": "propakistani-busiest-feb2026",
+     "org": "ProPakistani (Pakistan Airports Authority data)",
+     "quote": [
+      "Karachi’s Jinnah International Airport handled the largest share, with 8.5 million travelers",
+      "Islamabad International Airport recorded 7.87 million passengers",
+      "Lahore’s Allama Iqbal International Airport served 6.86 million passengers"
+     ],
+     "dated": "2026-02-16"
+    }
+   ]
+  },
+  {
+   "claim": "PIA flies from here",
+   "verdict": "softened",
+   "inAfter": "Pakistan International Airlines (PIA), Fly Jinnah and AirSial all fly from here",
+   "note": "Was 'a hub for Pakistan International Airlines'. Wikipedia contradicts itself (a hub in the lead, a focus city whose primary hub has moved to Islamabad in the body), so the text says only that PIA flies from here.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "serves as a hub for the national flag carrier, Pakistan International Airlines (PIA)"
+    },
+    {
+     "file": "app-pia-lyp-khi-jan2026",
+     "org": "APP (Associated Press of Pakistan)",
+     "quote": "Pakistan International Airlines’ (PIA) decision to launch a third weekly flight on Faisalabad-Karachi route from February 08",
+     "dated": "2026-01-30"
+    }
+   ]
+  },
+  {
+   "claim": "Fly Jinnah flies from here",
+   "verdict": "corrected",
+   "inAfter": "Fly Jinnah",
+   "note": "Replaces 'a long list of private carriers' with the named airlines two sources confirm.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "All major Pakistani airlines use Jinnah International Airport as a hub, including airblue, SereneAir, Fly Jinnah, and AirSial"
+    },
+    {
+     "file": "nation-flyjinnah-apr2026",
+     "org": "The Nation",
+     "quote": "bringing its total to 105 weekly departures from Karachi International Airport",
+     "dated": "2026-04-13"
+    }
+   ]
+  },
+  {
+   "claim": "AirSial flies from here",
+   "verdict": "corrected",
+   "inAfter": "and AirSial all fly from here",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "All major Pakistani airlines use Jinnah International Airport as a hub, including airblue, SereneAir, Fly Jinnah, and AirSial"
+    },
+    {
+     "file": "ary-airsial-may2026",
+     "org": "ARY News",
+     "quote": "AirSial flight PF-125 travelling from Karachi to Islamabad",
+     "dated": "2026-05-11"
+    }
+   ]
+  },
+  {
+   "claim": "PIA's Ispahani Hangar is at the airport, used by its engineers",
+   "verdict": "softened",
+   "inAfter": "PIA's Ispahani Hangar, where its aircraft engineers work, is also at the airport.",
+   "note": "Was 'serious engineering capability, including the Ispahani Hangar for wide body overhaul work, which is unusual outside a major hub'. The hangar and PIA's engineers are confirmed twice; wide-body overhaul rests on Wikipedia alone and 'unusual outside a major hub' is opinion.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The Ispahani Hangar is PIA's wide-body aircraft maintenance hangar at Jinnah International Airport"
+    },
+    {
+     "file": "ary-ispahani-hangar",
+     "org": "ARY News",
+     "quote": [
+      "The parking area of the Pakistan International Airlines’ (PIA) Ispahani Hangar at Karachi airport has been sealed",
+      "Pakistan International Airlines (PIA) aircraft engineers and staff have been barred from entering the hangar premises"
+     ],
+     "dated": "2025-09-30"
+    }
+   ]
+  },
+  {
+   "claim": "second busiest after Islamabad",
+   "verdict": "cut",
+   "wasBefore": "Pakistan's second busiest airport by passenger numbers, after Islamabad",
+   "why": "Sources disagree on the order (see the softened claim). Replaced by 'one of Pakistan's two busiest airports, with Islamabad', which both support."
+  },
+  {
+   "claim": "Karachi is the country's largest city and commercial capital",
+   "verdict": "cut",
+   "wasBefore": "the country's largest city and commercial capital",
+   "why": "No second source could be saved. Al Jazeera calls Karachi a port city; the BBC, Britannica and Library of Congress pages refused the fetcher. SereneAir's destination page says it, but in words copied from Wikipedia, so it does not count."
+  },
+  {
+   "claim": "hub for PIA and airblue alongside a long list of private carriers",
+   "verdict": "cut",
+   "wasBefore": "It is a hub for Pakistan International Airlines and airblue alongside a long list of private carriers.",
+   "why": "Rewritten as the airlines two sources confirm fly from here. airblue is left out: the only reports found of it flying to or from Karachi (found by headline and date in the publishers' sitemaps, ARY 16 Aug 2025 and Profit 4 May 2025) are older than twelve months, and its own site refused the fetcher."
+  },
+  {
+   "claim": "getting in and out is straightforward",
+   "verdict": "cut",
+   "wasBefore": "Getting in and out is straightforward.",
+   "why": "Opinion lead-in to a paragraph that could not be confirmed."
+  },
+  {
+   "claim": "reached along Shahrah-e-Faisal, near Gulistan-e-Jauhar and Malir",
+   "verdict": "cut",
+   "wasBefore": "The airport is reached along Shahrah-e-Faisal, near Gulistan-e-Jauhar and Malir",
+   "why": "No second source ties the airport to these roads and districts. The operator's own site could not be read (its content server sends an incomplete certificate chain)."
+  },
+  {
+   "claim": "buses, minibuses, taxis and auto rickshaws",
+   "verdict": "cut",
+   "wasBefore": "with buses, minibuses and taxis serving the terminal and auto rickshaws for short hops",
+   "why": "Only Wikipedia."
+  },
+  {
+   "claim": "seven sided car park for more than 3,000 vehicles",
+   "verdict": "cut",
+   "wasBefore": "There is a seven sided car park holding more than 3,000 vehicles.",
+   "why": "Only Wikipedia."
+  },
+  {
+   "claim": "Karachi Cantonment nearest mainline station",
+   "verdict": "cut",
+   "wasBefore": "Karachi Cantonment is the nearest mainline railway station.",
+   "why": "Only Wikipedia."
+  },
+  {
+   "claim": "engineering capability unusual outside a major hub; wide-body overhaul",
+   "verdict": "cut",
+   "wasBefore": "The airport carries serious engineering capability, including the Ispahani Hangar for wide body overhaul work, which is unusual outside a major hub.",
+   "why": "Softened to the hangar and PIA's engineers, which two sources confirm."
+  },
+  {
+   "claim": "named after Muhammad Ali Jinnah, the founder of Pakistan",
+   "verdict": "cut",
+   "wasBefore": "It is named after Muhammad Ali Jinnah, the founder of Pakistan",
+   "why": "No second source could be saved: Dawn, Britannica, the Library of Congress and the Aviation Safety Network refused the fetcher and the cited travel guide page is gone. Not in doubt, but unconfirmed here."
+  },
+  {
+   "claim": "previously Drigh Road Airport and then Karachi International",
+   "verdict": "cut",
+   "wasBefore": "was previously Drigh Road Airport and then Karachi International, so all three names turn up in older material",
+   "why": "Only Wikipedia, which also gives a fourth name (Quaid-i-Azam International Airport after 1992), so 'all three names' is doubtful as well."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

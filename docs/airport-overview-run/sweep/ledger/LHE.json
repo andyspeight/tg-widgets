@@ -1,0 +1,236 @@
+{
+ "iata": "LHE",
+ "id": "recoyvJo66immJAbY",
+ "name": "Allama Iqbal International Airport",
+ "country": "Pakistan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Allama_Iqbal_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Lahore's airport, about 15 km from the city centre, and third largest in Pakistan after Karachi and Islamabad. It also draws passengers from the wider Punjab province.\n\nThere are three terminals: the main Allama Iqbal terminal, a dedicated Hajj terminal and a cargo terminal, so check which building applies before sending a client.\n\nThe airport is well equipped for weather. The primary runway is 3,360 metres, long enough for an A380, and carries an ILS Category IIIB approach, with a second runway of 2,743 metres. Seven air bridges and 23 remote stands serve the terminals, and there is a mosque outside the terminal building.\n\nIt was originally Lahore International and was renamed after Allama Muhammad Iqbal, the philosopher and poet, one of the figures behind the creation of Pakistan.",
+ "after": "Allama Iqbal International is Lahore's airport and the third busiest in Pakistan, after Karachi and Islamabad. It also draws passengers from the wider Punjab province.\n\nThere are two runways and fog landing systems, but dense winter fog still delays flights here.\n\nIt was originally Lahore International Airport and was renamed after Allama Muhammad Iqbal, Pakistan's national poet.",
+ "claims": [
+  {
+   "claim": "Lahore's airport",
+   "verdict": "confirmed",
+   "inAfter": "Allama Iqbal International is Lahore's airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the international airport serving Lahore"
+    },
+    {
+     "file": "propakistani-busiest-feb2026",
+     "org": "ProPakistani (Pakistan Airports Authority data)",
+     "quote": "Lahore’s Allama Iqbal International Airport served 6.86 million passengers",
+     "dated": "2026-02-16"
+    }
+   ]
+  },
+  {
+   "claim": "third busiest in Pakistan, after Karachi and Islamabad",
+   "verdict": "corrected",
+   "inAfter": "the third busiest in Pakistan, after Karachi and Islamabad",
+   "note": "Was 'third largest'. airport-technology.com calls it the second largest and third busiest, so 'largest' is ambiguous; all three sources agree on third busiest. Third in both the Civil Aviation Authority's July 2024 to June 2025 figures (Wikipedia infobox: 6,048,541) and the Airports Authority's calendar 2025 figures (6.86 million, behind Karachi's 8.5 million and Islamabad's 7.87 million).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the third largest commercial airport by traffic in Pakistan, after Jinnah International Airport in Karachi and Islamabad International Airport."
+    },
+    {
+     "file": "propakistani-busiest-feb2026",
+     "org": "ProPakistani (Pakistan Airports Authority data)",
+     "quote": [
+      "Karachi’s Jinnah International Airport handled the largest share, with 8.5 million travelers",
+      "Islamabad International Airport recorded 7.87 million passengers",
+      "Lahore’s Allama Iqbal International Airport served 6.86 million passengers"
+     ],
+     "dated": "2026-02-16"
+    },
+    {
+     "file": "airporttech-lhe",
+     "org": "airport-technology.com",
+     "quote": "is the second largest, and third busiest airport in Pakistan",
+     "dated": "2021-04-01"
+    }
+   ]
+  },
+  {
+   "claim": "draws passengers from the wider Punjab province",
+   "verdict": "confirmed",
+   "inAfter": "It also draws passengers from the wider Punjab province.",
+   "note": "APP's report is about Hajj pilgrims: bringing the Route to Makkah checks to Lahore helps pilgrims 'especially those from Punjab'. Taken as a second source for a soft claim.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It also serves a large number of travellers from the other nearby regions of Punjab province."
+    },
+    {
+     "file": "app-road-to-makkah-apr2026",
+     "org": "APP (Associated Press of Pakistan)",
+     "quote": "This move will provide great convenience to thousands of Hajj pilgrims, especially those from Punjab.",
+     "dated": "2026-04-10"
+    }
+   ]
+  },
+  {
+   "claim": "two runways",
+   "verdict": "confirmed",
+   "inAfter": "There are two runways",
+   "note": "Lengths dropped: Wikipedia and OurAirports give 3,360 m and 2,743 m, airport-technology.com (April 2021) gives 3,310 m and 2,900 m.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Two parallel runways: one concrete, the other asphalt"
+    },
+    {
+     "file": "propakistani-runways-jul2026",
+     "org": "ProPakistani (Pakistan Airports Authority NOTAM)",
+     "quote": "Lahore airport’s runways 36R/18L and 36L/18R will remain closed from July 5 until September 15",
+     "dated": "2026-07-02"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "Runways listed: 2"
+    }
+   ]
+  },
+  {
+   "claim": "fog landing systems",
+   "verdict": "softened",
+   "inAfter": "and fog landing systems",
+   "note": "Was 'an ILS Category IIIB approach'. The Nation confirms fog landing systems but not the category, which rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Instrument Landing System Category-II and ILS CAT-IIIB on RWY 36R."
+    },
+    {
+     "file": "nation-fog-jan2026",
+     "org": "The Nation",
+     "quote": "Despite the airport being equipped with fog landing systems, several airlines opted not to operate under the conditions.",
+     "dated": "2026-01-10"
+    }
+   ]
+  },
+  {
+   "claim": "dense winter fog still delays flights",
+   "verdict": "corrected",
+   "inAfter": "but dense winter fog still delays flights here",
+   "note": "Replaces 'The airport is well equipped for weather', which the winter of 2025-26 contradicts: 22 flights delayed by two to five hours on 10 January 2026 (The Nation), delays of ten to eleven hours on 29 December 2025 (ARY), PIA schedules revised at Lahore on 16 December 2025 (Profit).",
+   "sources": [
+    {
+     "file": "nation-fog-jan2026",
+     "org": "The Nation",
+     "quote": [
+      "Flight operations at Allama Iqbal International Airport were severely disrupted, with thick fog causing major delays.",
+      "Airport officials confirmed that at least 22 domestic and international flights were impacted."
+     ],
+     "dated": "2026-01-10"
+    },
+    {
+     "file": "ary-fog-dec2025",
+     "org": "ARY News",
+     "quote": "flight operations at Lahore airport have been disrupted due to dense fog, resulting in delays to several international departures.",
+     "dated": "2025-12-29"
+    },
+    {
+     "file": "profit-fog-dec2025",
+     "org": "Profit (Pakistan Today)",
+     "quote": "According to PIA, operations at Lahore, Multan, Sialkot and Faisalabad were impacted due to sharply reduced visibility",
+     "dated": "2025-12-16"
+    }
+   ]
+  },
+  {
+   "claim": "originally Lahore International Airport",
+   "verdict": "confirmed",
+   "inAfter": "It was originally Lahore International Airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Originally known as Lahore International Airport"
+    },
+    {
+     "file": "airporttech-lhe",
+     "org": "airport-technology.com",
+     "quote": "(formerly known as Lahore International Airport)",
+     "dated": "2021-04-01"
+    }
+   ]
+  },
+  {
+   "claim": "renamed after Allama Muhammad Iqbal, Pakistan's national poet",
+   "verdict": "softened",
+   "inAfter": "was renamed after Allama Muhammad Iqbal, Pakistan's national poet.",
+   "note": "Was 'the philosopher and poet, one of the figures behind the creation of Pakistan'. Both sources call him the national poet; the rest rests on Wikipedia alone. The renaming is history (the new terminal opened in March 2003), not a recent change.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "it was renamed after the Islamic philosopher and poet Allama Muhammad Iqbal"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "named after the national poet of Pakistan"
+    },
+    {
+     "file": "airporttech-lhe",
+     "org": "airport-technology.com",
+     "quote": "The airport was renamed Allama Iqbal International Airport after the national poet of Pakistan Mohammed Iqbal",
+     "dated": "2021-04-01"
+    }
+   ]
+  },
+  {
+   "claim": "about 15 km from the city centre",
+   "verdict": "cut",
+   "wasBefore": "about 15 km from the city centre",
+   "why": "Fails the coordinates check: 6.4 km in a straight line from the GeoNames centre (ratio 2.3). No second written source gives a distance."
+  },
+  {
+   "claim": "third largest",
+   "verdict": "cut",
+   "wasBefore": "third largest in Pakistan after Karachi and Islamabad",
+   "why": "Reworded to third busiest, above."
+  },
+  {
+   "claim": "three terminals: Allama Iqbal, Hajj, cargo",
+   "verdict": "cut",
+   "wasBefore": "There are three terminals: the main Allama Iqbal terminal, a dedicated Hajj terminal and a cargo terminal, so check which building applies before sending a client.",
+   "why": "Two sources agree (Wikipedia and airport-technology.com), but the newest is dated April 2021 and terminal claims need a source from the last twelve months. Three attempts to find one (The Nation, APP and ProPakistani on the April 2026 Hajj departures) do not mention the Hajj terminal. The main terminal is also being expanded (The Nation, 22 June 2026; Profit, 10 August 2026). Flagged for the owner: reinstate if a current source is found."
+  },
+  {
+   "claim": "well equipped for weather",
+   "verdict": "cut",
+   "wasBefore": "The airport is well equipped for weather.",
+   "why": "Contradicted by the fog delays of December 2025 and January 2026; corrected above."
+  },
+  {
+   "claim": "primary runway 3,360 m, A380, ILS CAT IIIB; second runway 2,743 m",
+   "verdict": "cut",
+   "wasBefore": "The primary runway is 3,360 metres, long enough for an A380, and carries an ILS Category IIIB approach, with a second runway of 2,743 metres.",
+   "why": "Two runways and fog landing systems kept. Lengths: sources disagree (Wikipedia and OurAirports 3,360 m and 2,743 m, airport-technology.com 3,310 m and 2,900 m). A380 and the ILS category rest on Wikipedia alone."
+  },
+  {
+   "claim": "seven air bridges, 23 remote stands, mosque",
+   "verdict": "cut",
+   "wasBefore": "Seven air bridges and 23 remote stands serve the terminals, and there is a mosque outside the terminal building.",
+   "why": "Seven air bridges: Wikipedia (as of September 2020) and airport-technology.com (April 2021) only, with the terminal now being expanded, so no current source. Remote stands and the mosque rest on Wikipedia alone."
+  },
+  {
+   "claim": "philosopher, one of the figures behind the creation of Pakistan",
+   "verdict": "cut",
+   "wasBefore": "the philosopher and poet, one of the figures behind the creation of Pakistan",
+   "why": "Softened to 'Pakistan's national poet', which both sources give."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

@@ -1,0 +1,182 @@
+{
+ "iata": "PEW",
+ "id": "reciUOWcCyBufK2AP",
+ "name": "Bacha Khan International Airport",
+ "country": "Pakistan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Bacha_Khan_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Pakistan's fourth busiest airport, at the south western end of Peshawar, and unusual in that around 75 per cent of its flights are international. It serves the north west of the country and the adjoining areas of Afghanistan.\n\nThe runway has a genuine curiosity attached to it. One of the main runways is crossed by a railway line, the Khyber train safari, which runs up to Landi Kotal in the Khyber Pass for tourists. It is one of very few runways in the world crossed by a railway, though the line is rarely operational.\n\nThe runway itself is 9,000 feet and rated ICAO category 4E, taking aircraft up to a 777-300ER, with nose-in parking for four wide bodies at a time and two air bridges added in 2018.\n\nIslamabad is about 180 km away, roughly two hours on the M-1 motorway.\n\nThe airport was extensively reconstructed between 2016 and 2018 and renamed in January 2012 after Abdul Ghaffar Khan, known as Bacha Khan, the Pashtun nationalist leader.",
+ "after": "Bacha Khan International is Peshawar's airport, at the south western end of the city. The FCDO advises against all travel to Peshawar, including the city of Peshawar, and warns that travelling against its advice could invalidate travel insurance.\n\nTraffic here is mostly international, and the airport serves Khyber Pakhtunkhwa province in the north west of the country. Its single runway is about 2,700 metres long.",
+ "claims": [
+  {
+   "claim": "Peshawar's airport",
+   "verdict": "confirmed",
+   "inAfter": "Bacha Khan International is Peshawar's airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport located in Peshawar, Khyber Pakhtunkhwa, Pakistan"
+    },
+    {
+     "file": "nation-kp-minister-aug2026",
+     "org": "The Nation",
+     "quote": "visited Bacha Khan International Airport Peshawar",
+     "dated": "2026-08-29"
+    }
+   ]
+  },
+  {
+   "claim": "south western end of the city",
+   "verdict": "confirmed",
+   "inAfter": "at the south western end of the city",
+   "note": "Coordinates put it 6.1 km from the GeoNames centre of Peshawar at 255 degrees, which is west on an 8-point rose and one point from south west, inside the stated tolerance.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Located on the southwestern end of the city of Peshawar"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 6.1 km (3.8 miles)",
+      "Bearing from the city centre: 255 degrees, which is west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FCDO advises against all travel to Peshawar, including the city; travel insurance could be invalidated",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "The FCDO advises against all travel to Peshawar, including the city of Peshawar, and warns that travelling against its advice could invalidate travel insurance.",
+   "note": "Attributed statement, checked against the FCDO page itself (updated 22 September 2026, still current 23 September 2026). Missing from the old text. The airport is in Peshawar (claims 1 and 2), so the advice covers it. The comma before 'and warns' closes the 'including' phrase; it is not a serial comma (the gate's Oxford comma look line).",
+   "sources": [
+    {
+     "file": "fcdo-pakistan",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "FCDO advises against all travel to these areas in Khyber Pakhtunkhwa Province:",
+      "Peshawar, including the city of Peshawar",
+      "Your travel insurance could be invalidated if you travel against advice from the Foreign, Commonwealth & Development Office (FCDO).",
+      "Still current at:",
+      "23 September 2026",
+      "Updated:",
+      "22 September 2026"
+     ],
+     "dated": "2026-09-22"
+    }
+   ]
+  },
+  {
+   "claim": "traffic mostly international",
+   "verdict": "softened",
+   "inAfter": "Traffic here is mostly international",
+   "note": "Was 'unusual in that around 75 per cent of its flights are international'. Wikipedia gives 75 per cent of flights; the Airports Authority's 2025 figures give 1.06 million of 1.29 million passengers (about 82 per cent). Both support 'mostly international'; neither percentage is quoted because the two measure different things. 'Unusual' is opinion.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Peshawar is a major passenger hub with 75% flights internationally bound."
+    },
+    {
+     "file": "propakistani-busiest-feb2026",
+     "org": "ProPakistani (Pakistan Airports Authority data)",
+     "quote": "At Peshawar Airport, 1.29 million passengers traveled, including 1.06 million on international routes.",
+     "dated": "2026-02-16"
+    }
+   ]
+  },
+  {
+   "claim": "serves Khyber Pakhtunkhwa province in the north west",
+   "verdict": "softened",
+   "inAfter": "the airport serves Khyber Pakhtunkhwa province in the north west of the country",
+   "note": "Was 'the north west of the country and the adjoining areas of Afghanistan'. APP's report of the provincial assembly's January 2026 resolution treats it as the province's own international airport.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Since Peshawar is the capital of the Khyber Pakhtunkhwa province, it provides world connections for the majority of the northwest region of the country"
+    },
+    {
+     "file": "app-kp-hajj-jan2026",
+     "org": "APP (Associated Press of Pakistan)",
+     "quote": [
+      "despite the presence of an international airport in Peshawar, pilgrims from Khyber Pakhtunkhwa are forced to depart from other cities",
+      "so that pilgrims from the province can travel directly from their own province"
+     ],
+     "dated": "2026-01-27"
+    }
+   ]
+  },
+  {
+   "claim": "single runway, about 2,700 m",
+   "verdict": "confirmed",
+   "inAfter": "Its single runway is about 2,700 metres long.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The runway is 9,000 feet (2,700 m) long"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": [
+      "Runway 17/35: 2,743 m (9,000 ft), ASP",
+      "Runways listed: 1"
+     ],
+     "dated": "2026-09-23 (OurAirports data as fetched)"
+    }
+   ],
+   "note": "Length and count from OurAirports data fetched 23 Sep 2026; Wikipedia's lead speaks of 'one of the main runways', but its infobox and structure section list one runway, as OurAirports does. Given in metres in review (23 Sep), house style; OurAirports gives 2,743 m."
+  },
+  {
+   "claim": "Pakistan's fourth busiest airport",
+   "verdict": "cut",
+   "wasBefore": "Pakistan's fourth busiest airport",
+   "why": "Good sources disagree. Wikipedia says fourth busiest. The Airports Authority's 2025 figures (ProPakistani, 16 Feb 2026) put Multan (1.365 million international plus 80,000 domestic) ahead of Peshawar (1.29 million), which makes it fifth. Not split, cut."
+  },
+  {
+   "claim": "unusual, around 75 per cent of flights international",
+   "verdict": "cut",
+   "wasBefore": "and unusual in that around 75 per cent of its flights are international",
+   "why": "Softened to 'mostly international', above."
+  },
+  {
+   "claim": "serves adjoining areas of Afghanistan",
+   "verdict": "cut",
+   "wasBefore": "It serves the north west of the country and the adjoining areas of Afghanistan.",
+   "why": "The Afghanistan part rests on Wikipedia alone; the FCDO now advises against all travel within 10 miles of the Afghan border. The north west is kept, above."
+  },
+  {
+   "claim": "runway crossed by the Khyber train safari railway",
+   "verdict": "cut",
+   "wasBefore": "The runway has a genuine curiosity attached to it. One of the main runways is crossed by a railway line, the Khyber train safari, which runs up to Landi Kotal in the Khyber Pass for tourists. It is one of very few runways in the world crossed by a railway, though the line is rarely operational.",
+   "why": "Only Wikipedia; no second source could be saved (The Nation's 2025 Landi Kotal feature mentions the Khyber Pass Railway but not the airport). The FCDO also advises against all travel to Khyber district, where Landi Kotal is, so the tourist line is not one to suggest."
+  },
+  {
+   "claim": "ICAO 4E, 777-300ER, parking for four wide bodies, two air bridges in 2018",
+   "verdict": "cut",
+   "wasBefore": "The runway itself is 9,000 feet and rated ICAO category 4E, taking aircraft up to a 777-300ER, with nose-in parking for four wide bodies at a time and two air bridges added in 2018.",
+   "why": "The runway length is kept with OurAirports as the second source; the rest rests on Wikipedia alone."
+  },
+  {
+   "claim": "Islamabad about 180 km, two hours on the M-1",
+   "verdict": "cut",
+   "wasBefore": "Islamabad is about 180 km away, roughly two hours on the M-1 motorway.",
+   "why": "Only Wikipedia."
+  },
+  {
+   "claim": "reconstructed 2016 to 2018; renamed January 2012 after Abdul Ghaffar Khan (Bacha Khan)",
+   "verdict": "cut",
+   "wasBefore": "The airport was extensively reconstructed between 2016 and 2018 and renamed in January 2012 after Abdul Ghaffar Khan, known as Bacha Khan, the Pashtun nationalist leader.",
+   "why": "Only Wikipedia. The cited Daily Times report refuses the fetcher; The Nation's sitemaps for 27 to 29 January 2012 and Pakistan Today's archive have no report of the renaming."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
