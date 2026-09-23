@@ -1,0 +1,96 @@
+{
+ "iata": "TSN",
+ "id": "recFnBuxkb71kg9Jp",
+ "name": "Tianjin Binhai International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Tianjin_Binhai_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Tianjin's airport, and one of China's major air cargo centres. It handled 19,862,196 passengers in 2025, twenty sixth in the country, and is the hub for Tianjin Airlines and Okay Airways with Air China treating it as a focus city.\n\nThe metro makes the transfer easy and cheap. Binhai International Airport station on Line 2 has served the terminal since August 2014 and the fare downtown is three yuan.\n\nThe terminal is a good deal bigger than it was. The current building went up in 2006 and was expanded around 2010 to 116,000 square metres, more than three times the size of the one before it, with 47 jet bridges.\n\nThis is also where Airbus builds. The A320 final assembly line opened here in 2008 and the A330 completion and delivery centre was finished at the end of 2017.\n\nFor the 2025 winter and spring season the airport planned 120 routes serving 97 cities.",
+ "after": "Tianjin's airport, the 26th busiest in China with 19.9 million passengers in 2025. Tianjin Airlines and Okay Airways both have their home base here.",
+ "claims": [
+  {
+   "claim": "Tianjin's airport, 26th in China, 19.9 million passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "Tianjin's airport, the 26th busiest in China with 19.9 million passengers in 2025.",
+   "note": "Rounded from 19,862,196, down 1 per cent on 2024.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "Civil Aviation Administration of China",
+     "dated": "2026-02-26",
+     "quote": "passenger rank 26 in China; passengers 2025: 19,862,196"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2025, Tianjin Binhai International Airport handled 19,862,196 passengers, a drop of 1.0% over 2024, making it the 26th busiest airport in China."
+    }
+   ]
+  },
+  {
+   "claim": "home base of Tianjin Airlines and Okay Airways",
+   "verdict": "softened",
+   "inAfter": "Tianjin Airlines and Okay Airways both have their home base here.",
+   "note": "Was 'the hub for Tianjin Airlines and Okay Airways'. Tianjin Airlines' own profile says it is rooted in Tianjin with an overnight base there; Okay Airways gives its address in the airport economic zone of the Tianjin free trade zone.",
+   "sources": [
+    {
+     "file": "gs-about",
+     "org": "Tianjin Airlines",
+     "dated": "2026-09-23 (live page)",
+     "quote": "扎根环渤海地区经济中心的天津市"
+    },
+    {
+     "file": "okay-home",
+     "org": "Okay Airways",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "奥凯航空有限公司",
+      "地址：天津自贸试验区（空港经济区）"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "It is the hub airport for Tianjin Airlines, established in 2004, and privately owned Okay Airways",
+      "Tianjin Airlines is headquartered in the terminal."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "one of China's major air cargo centres; exact figure; Air China focus city",
+   "verdict": "cut",
+   "wasBefore": "Tianjin's airport, and one of China's major air cargo centres. It handled 19,862,196 passengers in 2025, twenty sixth in the country, and is the hub for Tianjin Airlines and Okay Airways with Air China treating it as a focus city.",
+   "why": "CAAC's 2025 table puts Tianjin 30th in China for cargo (133,023 tonnes), which does not support 'major cargo centre'; Wikipedia says 26th for cargo, so the sources disagree anyway. Air China's focus city rests on Wikipedia alone."
+  },
+  {
+   "claim": "metro Line 2 since August 2014; three yuan downtown",
+   "verdict": "cut",
+   "wasBefore": "The metro makes the transfer easy and cheap. Binhai International Airport station on Line 2 has served the terminal since August 2014 and the fare downtown is three yuan.",
+   "why": "Wikipedia alone. Tianjin Metro's own site could not be read (tjgdjt.com answered 502 and 405; tjdt.cn is not the metro's site) and a fare needs a source from the last 12 months."
+  },
+  {
+   "claim": "2006 terminal expanded around 2010 to 116,000 m2, 47 jet bridges",
+   "verdict": "cut",
+   "wasBefore": "The terminal is a good deal bigger than it was. The current building went up in 2006 and was expanded around 2010 to 116,000 square metres, more than three times the size of the one before it, with 47 jet bridges.",
+   "why": "Describes the building before Terminal 2, which came into use on 28 August 2014 (Wikipedia); single source throughout."
+  },
+  {
+   "claim": "Airbus A320 final assembly line 2008; A330 completion centre end of 2017",
+   "verdict": "cut",
+   "wasBefore": "This is also where Airbus builds. The A320 final assembly line opened here in 2008 and the A330 completion and delivery centre was finished at the end of 2017.",
+   "why": "Wikipedia alone in the saved sources. airbus.com answers with an Imperva bot check, which the sweep does not try to get round."
+  },
+  {
+   "claim": "2025 winter and spring season: 120 routes, 97 cities",
+   "verdict": "cut",
+   "wasBefore": "For the 2025 winter and spring season the airport planned 120 routes serving 97 cities.",
+   "why": "Confirmed by Sina Finance (19 Oct 2025) and Wikipedia, but that season ended on 28 March 2026."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "19.9": "19,862,196 rounded (CAAC, Wikipedia)"
+ }
+}
