@@ -1,0 +1,635 @@
+{
+ "iata": "SJO",
+ "id": "recXv2flsFNQMeSW2",
+ "name": "Juan Santamaría International Airport",
+ "country": "Costa Rica",
+ "wikipedia": "https://en.wikipedia.org/wiki/Juan_Santamar%C3%ADa_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Costa Rica's main airport and second busiest in Central America after Panama, 20 km north west of downtown San José in Alajuela Province. It handled 5 million passengers in 2022.\n\nTerminals are simple but worth checking. International flights use the Main Terminal and domestic flights the Domestic Terminal, so a client connecting from a long haul arrival onto a Sansa flight has to change buildings.\n\nThe route map is broader than Liberia's, the country's other international airport. Both reach North and Central America and Europe, but San José also serves South America and the Caribbean. Avianca is the largest international operator, followed by Copa. jetBlue and United run the most year round United States destinations, and Iberia is the only European airline flying daily all year.\n\nThe single runway takes wide bodies, with A330s, A350s, 777s and 787s all operating scheduled services. A Concorde landed here for an airshow in 1999.\n\nIt is named after Juan Santamaría, the drummer boy who died in 1856 defending Costa Rica against William Walker's forces.",
+ "after": "Costa Rica's main airport, in Alajuela, 20 km north west of downtown San José. It handled more than 6.5 million passengers in 2025.\n\nSansa, the largest domestic airline, recommends allowing at least five hours to connect from an international flight to one of its own.\n\nThe route map is broader than that of Liberia, the country's other main international airport. Both reach North America and Europe, but San José also serves South America and the Caribbean. The civil aviation authority's 2024 figures put Copa, American, United and Avianca among the largest international airlines here. European airlines include British Airways, Iberia, Air France, KLM, Lufthansa and Edelweiss. British Airways flies from London Gatwick, and says the service moves to Heathrow from 25 October 2026, five times a week.\n\nThe single runway takes wide-bodied jets.\n\nIt is named after Juan Santamaría, Costa Rica's national hero.",
+ "claims": [
+  {
+   "claim": "Costa Rica's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Costa Rica's main airport",
+   "note": "The Tourism Board's live page calls it the country's main airport; Panrotas, reporting Motiva's 2025 results, calls it the largest in Costa Rica; DGAC's 2024 yearbook gives it 6,508,042 passengers against 1,921,345 at Daniel Oduber Quirós (Liberia) and fewer than 30,000 at each of the other two international airports. The operator's own site (sjoairport.com, which OurAirports and Wikipedia both give) answered the link lister with a Cloudflare block page (HTTP 403), so it was left alone and nothing here rests on it.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the biggest and busiest airport in Costa Rica"
+    },
+    {
+     "file": "ict-airlines",
+     "org": "Costa Rica Tourism Board (Instituto Costarricense de Turismo, visitcostarica.com)",
+     "dated": "live page, © 2026, read 2026-09-23",
+     "quote": [
+      "Juan Santamaría International Airport (Code: SJO) is the country's main airport, located in Alajuela.",
+      "© 2026 Costa Rica Tourism Board"
+     ]
+    },
+    {
+     "file": "dgac-anuario-2024",
+     "org": "Dirección General de Aviación Civil (DGAC, Costa Rica's civil aviation authority)",
+     "dated": "2024 yearbook; DGAC's index lists it as posted 09/10/2025",
+     "quote": [
+      "MROC: Aeropuerto Internacional Juan Santamaría.",
+      "TIPO DE SERVICIO MROC MRPV MRLB MRLM",
+      "TOTAL, GENERAL 6 508 042 29 157 1 921 345 15 085 8 473 629"
+     ]
+    },
+    {
+     "file": "panrotas-motiva-2025",
+     "org": "Panrotas (Brazilian travel trade press)",
+     "dated": "page shows 02/02/2026",
+     "quote": "O Aeroporto Juan Santamaria, o maior da Costa Rica, cresceu 3,2%"
+    }
+   ]
+  },
+  {
+   "claim": "in Alajuela",
+   "verdict": "softened",
+   "inAfter": "in Alajuela",
+   "note": "Was 'in Alajuela Province'. The Tourism Board says 'located in Alajuela', which could mean the city, the canton or the province, so the text now says only 'in Alajuela', which is true on every reading. OurAirports gives the municipality as San José (Alajuela).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is located in Alajuela Province"
+    },
+    {
+     "file": "ict-airlines",
+     "org": "Costa Rica Tourism Board (Instituto Costarricense de Turismo, visitcostarica.com)",
+     "dated": "live page, © 2026, read 2026-09-23",
+     "quote": "is the country's main airport, located in Alajuela."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: San José (Alajuela)"
+    }
+   ]
+  },
+  {
+   "claim": "20 km north west of downtown San José",
+   "verdict": "confirmed",
+   "inAfter": "20 km north west of downtown San José",
+   "note": "The straight line from the GeoNames centre of San José is 15.1 km at 296 degrees (north west); 20 km gives a ratio of 1.32, inside the check for a road distance.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "20 kilometres (12 mi; 11 nmi) northwest of downtown San José"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 15.1 km (9.4 miles)",
+      "Bearing from the city centre: 296 degrees, which is north west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "more than 6.5 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled more than 6.5 million passengers in 2025.",
+   "note": "Was '5 million passengers in 2022'. A passenger total replaces a passenger total. Motiva, which owned the concession holder Aeris until 1 September 2026, reports 6,554 thousand total passengers for Aeris in 2025, up 3.2 per cent on 6,349 thousand; Panrotas reports the same 3.2 per cent growth for Juan Santamaría, and DGAC's yearbook names Aeris as the source of its Juan Santamaría figures, which ties the Aeris row to this airport. Wikipedia's infobox gives 6,707,096 for 2025 (footnoted to the Costa Rican AIP and DGAC). The two differ by about 2 per cent (DGAC's 2024 total of 6,508,042 is likewise above Motiva's 6,349 thousand, so the two counts are defined differently); both are above 6.5 million, hence 'more than 6.5 million'.",
+   "sources": [
+    {
+     "file": "motiva-mov-dez2025",
+     "org": "Motiva (parent of the concession holder Aeris until September 2026)",
+     "dated": "2026-01-12",
+     "quote": [
+      "São Paulo/SP, 12 de janeiro de 2026.",
+      "Total de Passageiros (em milhares) dez/24 dez/25 Var. % jan - dez/24 jan - dez/25 Var. %",
+      "Aeris 620 687 10,8% 6.349 6.554 3,2%"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": [
+      "operator = Aeris Holdings Costa Rica under CCR S.A.",
+      "stat_year = 2025",
+      "stat1_data = 6,707,096"
+     ]
+    },
+    {
+     "file": "dgac-anuario-2024",
+     "org": "Dirección General de Aviación Civil (DGAC, Costa Rica's civil aviation authority)",
+     "dated": "2024 yearbook; DGAC's index lists it as posted 09/10/2025",
+     "quote": [
+      "Reporte de operaciones remitido por AERIS, para el MROC (AIJS)",
+      "AERIS: Aeris Holding Costa Rica."
+     ]
+    },
+    {
+     "file": "panrotas-motiva-2025",
+     "org": "Panrotas (Brazilian travel trade press)",
+     "dated": "page shows 02/02/2026",
+     "quote": "O Aeroporto Juan Santamaria, o maior da Costa Rica, cresceu 3,2%"
+    }
+   ]
+  },
+  {
+   "claim": "Sansa is the largest domestic airline",
+   "verdict": "confirmed",
+   "inAfter": "Sansa, the largest domestic airline",
+   "note": "DGAC's 2024 table of domestic passengers by airline (departures from every aerodrome) has Sansa with 119,452 of 160,857; the next is Costa Rica Green Airways with 24,868.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Domestically, the largest airline is Sansa Airlines"
+    },
+    {
+     "file": "dgac-anuario-2024",
+     "org": "Dirección General de Aviación Civil (DGAC, Costa Rica's civil aviation authority)",
+     "dated": "2024 yearbook; DGAC's index lists it as posted 09/10/2025",
+     "quote": [
+      "TOTAL 89 330 64 461 4 632 2 434 160 857",
+      "SANSA 77 811 39 032 2609 0 119 452",
+      "CR GREEN AIRWAYS 4 652 20 208 8 0 24 868"
+     ]
+    },
+    {
+     "file": "sansa-home",
+     "org": "Sansa Airlines (SANSA, flysansa.com)",
+     "dated": "live page, read 2026-09-23",
+     "quote": "Costa Rica domestic airline. Scheduled and charter flights"
+    }
+   ]
+  },
+  {
+   "claim": "Sansa recommends at least five hours to connect from an international flight",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Sansa",
+   "inAfter": "Sansa, the largest domestic airline, recommends allowing at least five hours to connect from an international flight to one of its own.",
+   "note": "Replaces 'so a client connecting from a long haul arrival onto a Sansa flight has to change buildings', which rests on the terminal split (Wikipedia alone, cut below). Sansa's own check-in page gives its recommended connection time from an international flight, so the practical warning now comes from the airline itself, attributed. The same page recommends one hour between two Sansa flights.",
+   "sources": [
+    {
+     "file": "sansa-faq-checkin",
+     "org": "Sansa Airlines (SANSA, flysansa.com)",
+     "dated": "undated live page, read 2026-09-23",
+     "quote": [
+      "When a passenger is connecting from an international flight to a flight operated by SANSA Airlines",
+      "a minimum connection time of five (5) hours between itineraries is recommended"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Liberia is the country's other main international airport",
+   "verdict": "corrected",
+   "inAfter": "Liberia, the country's other main international airport",
+   "note": "Was 'the country's other international airport'. DGAC's yearbook covers four international airports: Juan Santamaría, Tobías Bolaños, Daniel Oduber Quirós (Liberia) and Limón, the last two handling 29,157 and 15,085 passengers in 2024 against Liberia's 1,921,345. The Tourism Board names SJO and LIR as the two main international airports, so 'main' is added. OurAirports also lists Limón and Tobías Bolaños as international airports.",
+   "sources": [
+    {
+     "file": "ict-airlines",
+     "org": "Costa Rica Tourism Board (Instituto Costarricense de Turismo, visitcostarica.com)",
+     "dated": "live page, © 2026, read 2026-09-23",
+     "quote": [
+      "Its two main international airports receive hundreds of flights per month",
+      "LIR – Daniel Oduber Quirós International Airport (in Liberia, gateway to Guanacaste)"
+     ]
+    },
+    {
+     "file": "dgac-anuario-2024",
+     "org": "Dirección General de Aviación Civil (DGAC, Costa Rica's civil aviation authority)",
+     "dated": "2024 yearbook; DGAC's index lists it as posted 09/10/2025",
+     "quote": [
+      "MRLB: Aeropuerto Internacional Daniel Oduber Quirós.",
+      "MRLM: Aeropuerto Internacional de Limón.",
+      "MRPV: Aeropuerto Internacional Tobías Bolaños Palma.",
+      "TOTAL, GENERAL 6 508 042 29 157 1 921 345 15 085 8 473 629"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It was the country's only international gateway for many years, before the opening of the international airport in Liberia, Guanacaste"
+    }
+   ]
+  },
+  {
+   "claim": "the route map is broader than Liberia's",
+   "verdict": "confirmed",
+   "inAfter": "The route map is broader than that of Liberia",
+   "note": "DGAC's 2024 table of international passengers by region and country: Juan Santamaría has large numbers from North, Central and South America, the Caribbean and Europe; Liberia's are almost all from the United States and Canada (915,126 of 926,157 arriving).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Both airports have direct flights to North and Central America and Europe, but Juan Santamaría International Airport also serves cities in South America and the Caribbean"
+    },
+    {
+     "file": "dgac-anuario-2024",
+     "org": "Dirección General de Aviación Civil (DGAC, Costa Rica's civil aviation authority)",
+     "dated": "2024 yearbook; DGAC's index lists it as posted 09/10/2025",
+     "quote": [
+      "MERCADO PAÍS MROC MRPV MRLB MRLM TOTAL",
+      "TOTAL, PAX ENTRANDO 3 100 127 2 401 926 157 41 4 028 726",
+      "TOTAL, CENTROAMÉRICA 771 452 1 733 2 634 26 775 845",
+      "TOTAL, AMÉRICA DEL SUR 300 464 108 203 0 300 775",
+      "TOTAL, AMÉRICA DEL NORTE 1 658 035 461 915 126 15 2 573 637"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "both airports reach North America and Europe",
+   "verdict": "softened",
+   "inAfter": "Both reach North America and Europe",
+   "note": "Was 'Both reach North and Central America and Europe'. DGAC's 2024 table has Liberia with 915,126 arriving passengers from North America and 7,904 from Europe (Switzerland and England), and the UK CAA counts 7,251 charter passengers between Gatwick and Liberia in 2025. Central America is dropped: DGAC counts only 2,634 arriving passengers from Central America at Liberia in 2024 and no Central American airline in its Liberia airline table, while Wikipedia says both airports reach it, so the sources do not agree.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Both airports have direct flights to North and Central America and Europe"
+    },
+    {
+     "file": "dgac-anuario-2024",
+     "org": "Dirección General de Aviación Civil (DGAC, Costa Rica's civil aviation authority)",
+     "dated": "2024 yearbook; DGAC's index lists it as posted 09/10/2025",
+     "quote": [
+      "TOTAL, EUROPA 347 636 10 7 904 0 355 550",
+      "TOTAL, AMÉRICA DEL NORTE 1 658 035 461 915 126 15 2 573 637"
+     ]
+    },
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2026-02-25 (run date on each row; 2025 data)",
+     "quote": [
+      "uk_apt,foreign_apt,ty_t_pax,ty_s_pax,ty_c_pax",
+      "GATWICK,LIBERIA,7251,0,7251",
+      "GATWICK,SAN JOSE COST RICA,34701,34701,0"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "San José also serves South America and the Caribbean",
+   "verdict": "confirmed",
+   "inAfter": "but San José also serves South America and the Caribbean",
+   "note": "DGAC 2024, arriving passengers: South America 300,464 at Juan Santamaría (Colombia 226,879) against 203 at Liberia; the Caribbean 22,531 (almost all the Dominican Republic) against 140.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "but Juan Santamaría International Airport also serves cities in South America and the Caribbean"
+    },
+    {
+     "file": "dgac-anuario-2024",
+     "org": "Dirección General de Aviación Civil (DGAC, Costa Rica's civil aviation authority)",
+     "dated": "2024 yearbook; DGAC's index lists it as posted 09/10/2025",
+     "quote": [
+      "TOTAL, AMÉRICA DEL SUR 300 464 108 203 0 300 775",
+      "Colombia 226 879 75 50 0 227 004",
+      "TOTAL, CARIBE 22 531 80 140 0 22 751",
+      "República Dominicana 22 323 15 40 0 22 378"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "DGAC's 2024 figures put Copa, American, United and Avianca among the largest international airlines",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "civil aviation authority",
+   "inAfter": "The civil aviation authority's 2024 figures put Copa, American, United and Avianca among the largest international airlines here.",
+   "note": "Replaces 'Avianca is the largest international operator, followed by Copa'. DGAC's 2024 table of international passengers at Juan Santamaría, airline by airline, runs Copa 836,136, American 647,468, United 612,682, Aerovías del Continente Americano 600,612 and Avianca Costa Rica 441,976. Wikipedia's order holds only when 'Avianca and all their branches' are counted together, so no order is given and the statement is the authority's, attributed. The yearbook is dated within 12 months (posted 9 October 2025).",
+   "sources": [
+    {
+     "file": "dgac-anuario-2024",
+     "org": "Dirección General de Aviación Civil (DGAC, Costa Rica's civil aviation authority)",
+     "dated": "2024 yearbook; DGAC's index lists it as posted 09/10/2025",
+     "quote": [
+      "DIRECCIÓN GENERAL DE AVIACIÓN CIVIL",
+      "ANUARIO OPERACIÓN ESTADÍSTICA",
+      "COPA AIRLINES 418068 418068 836136 13,49%",
+      "AMERICAN AIRLINES 323734 323734 647468 10,45%",
+      "UNITED AIRLINES INC 306341 306341 612682 9,89%",
+      "AVIANCA COSTA RICA 220988 220988 441976 7,13%"
+     ]
+    },
+    {
+     "file": "dgac-anuarios-index",
+     "org": "Dirección General de Aviación Civil (DGAC, Costa Rica's civil aviation authority)",
+     "dated": "live index page, read 2026-09-23",
+     "quote": "ANUARIO 2024 09/10/2025"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Internationally, the largest operator in the airport is Avianca and all their branches, followed by Copa Airlines"
+    }
+   ]
+  },
+  {
+   "claim": "European airlines include British Airways, Iberia, Air France, KLM, Lufthansa and Edelweiss",
+   "verdict": "corrected",
+   "inAfter": "European airlines include British Airways, Iberia, Air France, KLM, Lufthansa and Edelweiss.",
+   "note": "Replaces 'Iberia is the only European airline flying daily all year', which no second source supports: DGAC's 2024 table has six European scheduled airlines here plus Evelop (Iberojet), with Air France (191,238 passengers) slightly ahead of Iberia (185,418); no frequencies are given anywhere readable. The Tourism Board's current list of airlines flying to Costa Rica names all six.",
+   "sources": [
+    {
+     "file": "dgac-anuario-2024",
+     "org": "Dirección General de Aviación Civil (DGAC, Costa Rica's civil aviation authority)",
+     "dated": "2024 yearbook; DGAC's index lists it as posted 09/10/2025",
+     "quote": [
+      "AIR FRANCE 95619 95619 191238 3,09%",
+      "IBERIA 92709 92709 185418 2,99%",
+      "LUFTHANSA 38683 38683 77366 1,25%",
+      "EDELWEISS 32173 32173 64346 1,04%",
+      "KLM 22361 22361 44722 0,72%",
+      "BRITISH 18725 18725 37450 0,60%"
+     ]
+    },
+    {
+     "file": "ict-airlines",
+     "org": "Costa Rica Tourism Board (Instituto Costarricense de Turismo, visitcostarica.com)",
+     "dated": "live page, © 2026, read 2026-09-23",
+     "quote": [
+      "Airlines flying to Costa Rica",
+      "Air France",
+      "British Airways",
+      "Lufthansa",
+      "Edelweiss Air",
+      "Iberia",
+      "KLM"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "British Airways flies from London Gatwick",
+   "verdict": "corrected",
+   "inAfter": "British Airways flies from London Gatwick",
+   "note": "New, as the UK-relevant part of the replacement for the Iberia sentence. No single page names the airline and the London airport in one line, but together they leave no other reading: the UK CAA's 2025 table has Gatwick as the only UK airport with scheduled passengers to San José, Costa Rica (34,701 in 2025, 39,217 in 2024); DGAC's 2024 table shows British Airways as the only UK airline here (37,450 passengers); and British Airways' own release says the route 'moves to London Heathrow' for winter 2026. ba.com's San José page answered with a 'high demand' holding page, treated as a bot check and not retried.",
+   "sources": [
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2026-02-25 (run date on each row; 2025 data)",
+     "quote": [
+      "uk_apt,foreign_apt,ty_t_pax,ty_s_pax,ty_c_pax",
+      "GATWICK,SAN JOSE COST RICA,34701,34701,0"
+     ]
+    },
+    {
+     "file": "dgac-anuario-2024",
+     "org": "Dirección General de Aviación Civil (DGAC, Costa Rica's civil aviation authority)",
+     "dated": "2024 yearbook; DGAC's index lists it as posted 09/10/2025",
+     "quote": [
+      "BRITISH 18725 18725 37450 0,60%",
+      "Reino Unido 18 745 0 417 0 19 162"
+     ]
+    },
+    {
+     "file": "ba-winter2026",
+     "org": "British Airways",
+     "dated": "2026-03-16",
+     "quote": [
+      "16 Mar 2026",
+      "in Costa Rica increases to five per week, and moves to London Heathrow"
+     ]
+    },
+    {
+     "file": "ict-airlines",
+     "org": "Costa Rica Tourism Board (Instituto Costarricense de Turismo, visitcostarica.com)",
+     "dated": "live page, © 2026, read 2026-09-23",
+     "quote": "British Airways"
+    }
+   ]
+  },
+  {
+   "claim": "British Airways says the service moves to Heathrow from 25 October 2026, five times a week",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "British Airways",
+   "inAfter": "British Airways flies from London Gatwick, and says the service moves to Heathrow from 25 October 2026, five times a week.",
+   "note": "British Airways' release of 16 March 2026 on its winter 2026 schedule: London Heathrow to San José five a week on a Boeing 787 from 25 October, up from three a week. A plan, six months old, so it is attributed to the airline; worth re-checking after 25 October 2026.",
+   "sources": [
+    {
+     "file": "ba-winter2026",
+     "org": "British Airways",
+     "dated": "2026-03-16",
+     "quote": [
+      "British Airways announces major winter 2026 expansion",
+      "16 Mar 2026",
+      "in Costa Rica increases to five per week, and moves to London Heathrow",
+      "LHR-SJO-LHR 5 per week 787 Increase from 3 per week 25 Oct"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the single runway takes wide-bodied jets",
+   "verdict": "softened",
+   "inAfter": "The single runway takes wide-bodied jets.",
+   "note": "Was 'The single runway takes wide bodies, with A330s, A350s, 777s and 787s all operating scheduled services'. The list of types rests on Wikipedia alone; British Airways' winter 2026 schedule puts a Boeing 787 on its Heathrow route, so wide bodies are kept without the list. OurAirports lists one runway of 3,012 m.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport's sole runway allows operations of wide-body aircraft"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 07/25: 3,012 m (9,882 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "ba-winter2026",
+     "org": "British Airways",
+     "dated": "2026-03-16",
+     "quote": "LHR-SJO-LHR 5 per week 787"
+    }
+   ]
+  },
+  {
+   "claim": "named after Juan Santamaría, Costa Rica's national hero",
+   "verdict": "softened",
+   "inAfter": "It is named after Juan Santamaría, Costa Rica's national hero.",
+   "note": "Was 'named after Juan Santamaría, the drummer boy who died in 1856 defending Costa Rica against William Walker's forces'. The Juan Santamaría Historical and Cultural Museum in Alajuela (a state museum, .go.cr) names him the national hero and is devoted to the national campaign of 1856 to 1857 against the filibuster invasion; its own biography of him is a scanned PDF with no readable text, so the drummer boy, the year of his death and William Walker rest on Wikipedia alone (cut below).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is named after Costa Rica's national hero, Juan Santamaría"
+    },
+    {
+     "file": "museo-js-home",
+     "org": "Museo Histórico Cultural Juan Santamaría (Costa Rican state museum)",
+     "dated": "live page, © 2025, read 2026-09-23",
+     "quote": [
+      "El Museo lleva el nombre de \"Juan Santamaría\" en honor al Héroe Nacional Costarricense",
+      "la Campaña Nacional de 1856-1857 contra la invasión filibustera"
+     ]
+    },
+    {
+     "file": "ict-airlines",
+     "org": "Costa Rica Tourism Board (Instituto Costarricense de Turismo, visitcostarica.com)",
+     "dated": "live page, © 2026, read 2026-09-23",
+     "quote": "Juan Santamaría International Airport (Code: SJO)"
+    }
+   ]
+  },
+  {
+   "claim": "second busiest in Central America after Panama",
+   "verdict": "cut",
+   "wasBefore": "and second busiest in Central America after Panama",
+   "why": "Wikipedia alone. The operator's site (sjoairport.com) answered with a Cloudflare block page and was left alone, and no regional table could be read (the FRACS data bulletin page Wikipedia cites carries no figures in its text). The 2025 passenger total and 'main airport' are kept."
+  },
+  {
+   "claim": "in Alajuela Province",
+   "verdict": "cut",
+   "wasBefore": "in Alajuela Province",
+   "why": "The second source says only 'located in Alajuela'. Softened to 'in Alajuela' (see above)."
+  },
+  {
+   "claim": "5 million passengers in 2022",
+   "verdict": "cut",
+   "wasBefore": "It handled 5 million passengers in 2022.",
+   "why": "Superseded by the 2025 total. Corrected (see above)."
+  },
+  {
+   "claim": "terminals simple but worth checking",
+   "verdict": "cut",
+   "wasBefore": "Terminals are simple but worth checking.",
+   "why": "The old text's judgement introduced the terminal split, which is cut (below)."
+  },
+  {
+   "claim": "international flights in the Main Terminal, domestic in the Domestic Terminal",
+   "verdict": "cut",
+   "wasBefore": "International flights use the Main Terminal and domestic flights the Domestic Terminal",
+   "why": "Wikipedia alone. The operator's site is behind Cloudflare; Sansa's pages (home, San José, check-in FAQ, travel recommendations) name no terminal; the Tico Times article Wikipedia cites on Sansa answered with a JavaScript gate ('Please enable javascript before you are allowed to see this page'), treated as a bot check and not retried; the aerodrome page guessed on COCESNA's eAIP server was a 404. Worth restoring when the operator's site can be read."
+  },
+  {
+   "claim": "a client connecting onto Sansa has to change buildings",
+   "verdict": "cut",
+   "wasBefore": "so a client connecting from a long haul arrival onto a Sansa flight has to change buildings",
+   "why": "Rests on the terminal split (cut above). Replaced by Sansa's own connection advice (see above)."
+  },
+  {
+   "claim": "Liberia, the country's other international airport",
+   "verdict": "cut",
+   "wasBefore": "The route map is broader than Liberia's, the country's other international airport.",
+   "why": "DGAC lists four international airports (Juan Santamaría, Tobías Bolaños, Daniel Oduber Quirós and Limón). Corrected to 'the country's other main international airport' (see above)."
+  },
+  {
+   "claim": "both reach North and Central America and Europe",
+   "verdict": "cut",
+   "wasBefore": "Both reach North and Central America and Europe",
+   "why": "Central America at Liberia is not borne out by DGAC's 2024 figures (2,634 arriving passengers, no Central American airline), against Wikipedia. Softened to North America and Europe (see above)."
+  },
+  {
+   "claim": "Avianca the largest international operator, followed by Copa",
+   "verdict": "cut",
+   "wasBefore": "Avianca is the largest international operator, followed by Copa.",
+   "why": "True only when Avianca's companies are counted together; DGAC's 2024 table, airline by airline, puts Copa first. Replaced by the authority's own figures, attributed (see above)."
+  },
+  {
+   "claim": "jetBlue and United run the most year-round US destinations",
+   "verdict": "cut",
+   "wasBefore": "jetBlue and United run the most year round United States destinations",
+   "why": "Wikipedia alone; no readable source counts year-round destinations by airline. DGAC's 2024 table has American and United ahead of jetBlue by passengers."
+  },
+  {
+   "claim": "Iberia the only European airline flying daily all year",
+   "verdict": "cut",
+   "wasBefore": "and Iberia is the only European airline flying daily all year",
+   "why": "Wikipedia alone; no schedule source could be read. DGAC's 2024 table has six European scheduled airlines, Air France slightly ahead of Iberia. Replaced by the European airlines and British Airways' route (see above)."
+  },
+  {
+   "claim": "A330s, A350s, 777s and 787s on scheduled services",
+   "verdict": "cut",
+   "wasBefore": "with A330s, A350s, 777s and 787s all operating scheduled services",
+   "why": "The list of types rests on Wikipedia alone. Kept as 'wide-bodied jets' (see above)."
+  },
+  {
+   "claim": "a Concorde landed for an airshow in 1999",
+   "verdict": "cut",
+   "wasBefore": "A Concorde landed here for an airshow in 1999.",
+   "why": "Wikipedia alone. Its source, a 1999 La Nación page, failed to connect (503, one try), and the web archive copy is blocked by the network policy."
+  },
+  {
+   "claim": "the drummer boy who died in 1856 defending Costa Rica against William Walker's forces",
+   "verdict": "cut",
+   "wasBefore": "the drummer boy who died in 1856 defending Costa Rica against William Walker's forces",
+   "why": "Wikipedia alone: the Juan Santamaría museum's biography of him is a scanned PDF with no text layer, and its home page names him the national hero without these details. The name and 'national hero' are kept (see above)."
+  },
+  {
+   "claim": "ASUR now controls the concession holder",
+   "verdict": "cut",
+   "why": "Held back: ASUR completed its purchase of Motiva's airport business on 1 September 2026, taking control of the concession holders for the San José and Curaçao international airports (ASUR's release; Motiva's own news page). Wikipedia's infobox still names CCR. A change of owner that replaces nothing in the old text.",
+   "sources": [
+    {
+     "file": "asur-closing-2026",
+     "org": "ASUR (Grupo Aeroportuario del Sureste)",
+     "dated": "2026-09-01",
+     "quote": [
+      "Mexico City, September 1, 2026",
+      "BRAZIL, ECUADOR, COSTA RICA AND CURAÇAO"
+     ]
+    },
+    {
+     "file": "motiva-asur-consolida",
+     "org": "Motiva Aeroportos",
+     "dated": "2026-09-01 (01/09/2026 on the page)",
+     "quote": [
+      "01/09/2026",
+      "Costa Rica e Curaçao: controle das concessionárias responsáveis pelos aeroportos internacionais de San José e Curaçao"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "official airport taxis are orange",
+   "verdict": "cut",
+   "why": "Held back: the FCDO says official taxis are red, or orange at the airport, with a triangular sticker, and to avoid unofficial ones; Wikipedia describes the licensed orange airport taxis too. Useful, but nothing in the old text to replace.",
+   "sources": [
+    {
+     "file": "fcdo-cr-safety",
+     "org": "UK FCDO",
+     "dated": "undated on the saved page, read 2026-09-23",
+     "quote": [
+      "Avoid using unofficial taxis",
+      "Official taxis are red (or orange at the airport) with a triangular sticker"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "there is a special airport taxi service that is licensed and employs orange taxis"
+    }
+   ]
+  },
+  {
+   "claim": "departure tax usually in the ticket, otherwise US$29",
+   "verdict": "cut",
+   "why": "Held back: the Tourism Board says the departure tax has been included in most airline tickets since 2016, and where a ticket says it is not, it is $29 a person. One organisation, and nothing in the old text to replace.",
+   "sources": [
+    {
+     "file": "ict-airlines",
+     "org": "Costa Rica Tourism Board (Instituto Costarricense de Turismo, visitcostarica.com)",
+     "dated": "live page, © 2026, read 2026-09-23",
+     "quote": [
+      "Since 2016, the country's departure tax is included in most of the airline tickets.",
+      "you must pay $29 per person"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

@@ -1,0 +1,391 @@
+{
+ "iata": "LIR",
+ "id": "rec1yDGaJOM5cdyLB",
+ "name": null,
+ "country": "Costa Rica",
+ "wikipedia": "https://en.wikipedia.org/wiki/Guanacaste_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Guanacaste and the Pacific coast, 11 km west of Liberia, and the tourism gateway for the west of Costa Rica. It is one of four international airports in the country, and the one that puts clients nearest the Pacific beaches.\n\nThe terminal is modern. A new 23,000 square metre building opened in January 2012 under a twenty year concession, replacing the older facility on the same site.\n\nThe runway is 2,750 metres and takes wide body aircraft up to a 747, which is what allows large aircraft to come in directly rather than feeding through a connection.\n\nThe site covers 243 hectares.",
+ "after": "The airport for Guanacaste and the tourism gateway for the north west of Costa Rica, about 11 km west of Liberia. It is one of four international airports in the country. According to the Costa Rica Tourism Board, it connects with beaches in one of the country's largest tourist areas and mainly receives flights for tourists visiting Guanacaste, Monteverde and La Fortuna.\n\nThe terminal is modern. A new 23,000 square metre building opened in January 2012 under a twenty year concession.\n\nThe runway is 2,750 metres and takes wide body aircraft up to a 747, which is what allows large aircraft to come in directly rather than feeding through a connection.\n\nIts site covers 243 hectares.",
+ "claims": [
+  {
+   "claim": "the airport for Guanacaste",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Guanacaste",
+   "note": "No archived copy exists for this airport, so source 1 is the article as it reads today (revised 23 September 2026). The Tourism Board lists it as Liberia's airport for Guanacaste and the FCDO places it in Guanacaste. The official website in Wikipedia's infobox (guanacastecrairport.com) answers with a Wix 'domain not connected' page on both hosts, and liberiacrairport.com, which Wikipedia also cites, is a tours, hotels and shuttles site, not the operator, so neither is used.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": [
+      "also known as Guanacaste Airport and Liberia International Airport",
+      "west-southwest of the city of Liberia in Guanacaste Province"
+     ]
+    },
+    {
+     "file": "ict-airlines",
+     "org": "Costa Rica Tourism Board (Instituto Costarricense de Turismo, visitcostarica.com)",
+     "dated": "live page, © 2026, read 2026-09-23",
+     "quote": [
+      "LIR – Daniel Oduber Quirós International Airport (in Liberia, gateway to Guanacaste)",
+      "© 2026 Costa Rica Tourism Board"
+     ]
+    },
+    {
+     "file": "fcdo-cr-safety",
+     "org": "UK FCDO",
+     "dated": "the country page says still current at 23 September 2026",
+     "quote": "Services at the Liberia Airport (LIR – Daniel Oduber International) in Guanacaste"
+    }
+   ]
+  },
+  {
+   "claim": "about 11 km west of Liberia",
+   "verdict": "confirmed",
+   "inAfter": "11 km west of Liberia",
+   "note": "The straight line from the GeoNames centre of Liberia is 12.5 km at 248 degrees (west); 11 km gives a ratio of 0.88, inside the check, so it is kept with 'about' added. Wikipedia says west-southwest, the adjacent point.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "It sits 11 kilometres (7 mi; 6 nmi) west-southwest of the city of Liberia"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 12.5 km (7.8 miles)",
+      "Bearing from the city centre: 248 degrees, which is west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the tourism gateway for the north west of Costa Rica",
+   "verdict": "softened",
+   "inAfter": "the tourism gateway for the north west of Costa Rica",
+   "note": "Was 'the west of Costa Rica'. Airport Technology says it serves the tourism market in the north-west of the country, Wikipedia says western Costa Rica, and the Tourism Board says it mainly receives flights for tourists visiting Guanacaste, Monteverde and La Fortuna; 'north west' is the reading the second sources share. Airport Technology's article is from May 2012; the Tourism Board's page is current.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "serves as a tourism hub for those who visit the Pacific coast and western Costa Rica"
+    },
+    {
+     "file": "airporttech-lir",
+     "org": "Airport Technology (Verdict Media trade press)",
+     "dated": "2012-05-15",
+     "quote": [
+      "May 15 2012",
+      "The airport serves the growing tourism market in the north-west of Costa Rica."
+     ]
+    },
+    {
+     "file": "ict-airlines",
+     "org": "Costa Rica Tourism Board (Instituto Costarricense de Turismo, visitcostarica.com)",
+     "dated": "live page, © 2026, read 2026-09-23",
+     "quote": "mainly receives specific flights for tourists visiting Guanacaste, Monteverde and La Fortuna"
+    }
+   ]
+  },
+  {
+   "claim": "one of four international airports in the country",
+   "verdict": "confirmed",
+   "inAfter": "It is one of four international airports in the country.",
+   "note": "DGAC's 2024 yearbook reports four international airports: Juan Santamaría, Daniel Oduber Quirós, Limón and Tobías Bolaños Palma.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "is one of four international airports in Costa Rica"
+    },
+    {
+     "file": "dgac-anuario-2024",
+     "org": "Dirección General de Aviación Civil (DGAC, Costa Rica's civil aviation authority)",
+     "dated": "2024 yearbook; DGAC's index lists it as posted 09/10/2025",
+     "quote": [
+      "MROC: Aeropuerto Internacional Juan Santamaría.",
+      "MRLB: Aeropuerto Internacional Daniel Oduber Quirós.",
+      "MRLM: Aeropuerto Internacional de Limón.",
+      "MRPV: Aeropuerto Internacional Tobías Bolaños Palma.",
+      "TIPO DE SERVICIO MROC MRPV MRLB MRLM"
+     ]
+    },
+    {
+     "file": "dgac-anuarios-index",
+     "org": "Dirección General de Aviación Civil (DGAC, Costa Rica's civil aviation authority)",
+     "dated": "live index page, read 2026-09-23",
+     "quote": "ANUARIO 2024 09/10/2025"
+    }
+   ]
+  },
+  {
+   "claim": "the Tourism Board: mainly flights for tourists visiting Guanacaste, Monteverde and La Fortuna, connecting with beaches",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Tourism Board",
+   "inAfter": "According to the Costa Rica Tourism Board, it connects with beaches in one of the country's largest tourist areas and mainly receives flights for tourists visiting Guanacaste, Monteverde and La Fortuna.",
+   "note": "Replaces 'and the one that puts clients nearest the Pacific beaches', a comparison with the other international airports that no second source makes. The Tourism Board's own description of the airport's role, attributed.",
+   "sources": [
+    {
+     "file": "ict-airlines",
+     "org": "Costa Rica Tourism Board (Instituto Costarricense de Turismo, visitcostarica.com)",
+     "dated": "live page, © 2026, read 2026-09-23",
+     "quote": [
+      "The modern Daniel Oduber International Airport in Liberia (Code: LIR) mainly receives specific flights for tourists visiting Guanacaste, Monteverde and La Fortuna.",
+      "This comfortable airport connects with beautiful beaches in one of the largest and most important tourist areas in the country.",
+      "© 2026 Costa Rica Tourism Board"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the terminal is modern",
+   "verdict": "confirmed",
+   "inAfter": "The terminal is modern.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "terminal building has a contemporary design that is larger and more efficient than the old one"
+    },
+    {
+     "file": "ict-airlines",
+     "org": "Costa Rica Tourism Board (Instituto Costarricense de Turismo, visitcostarica.com)",
+     "dated": "live page, © 2026, read 2026-09-23",
+     "quote": "The modern Daniel Oduber International Airport in Liberia (Code: LIR)"
+    }
+   ]
+  },
+  {
+   "claim": "a new 23,000 square metre building opened in January 2012",
+   "verdict": "confirmed",
+   "inAfter": "A new 23,000 square metre building opened in January 2012",
+   "note": "Airport Technology's body text gives 23,000 square metres (one of its photo captions says square feet, a slip). Its construction dates (April 2010 to October 2011) and its 2008 award of the concession differ from Wikipedia's, so it is an independent account, not a copy. A later expansion in 2017 (Wikipedia) is not in the text.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": [
+      "The new 23,000 m2 (250,000 sq ft) terminal building",
+      "the terminal opened on 12 January 2012"
+     ]
+    },
+    {
+     "file": "airporttech-lir",
+     "org": "Airport Technology (Verdict Media trade press)",
+     "dated": "2012-05-15",
+     "quote": [
+      "May 15 2012",
+      "Construction of the new 23,000 square metre international terminal was undertaken between April 2010 and October 2011. It was opened in January 2012."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "under a twenty year concession",
+   "verdict": "confirmed",
+   "inAfter": "under a twenty year concession",
+   "note": "Both name Coriport as the concession holder; Wikipedia's infobox still gives Coriport S.A. as operator.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "awarded CORIPORT, S.A., a 20-year concession to design, finance, construct and operate a new terminal building"
+    },
+    {
+     "file": "airporttech-lir",
+     "org": "Airport Technology (Verdict Media trade press)",
+     "dated": "2012-05-15",
+     "quote": "In October 2008, a 20-year concessionaire contract was awarded to Coriport consortium for operating the Liberia airport and building a new terminal and associated facilities."
+    }
+   ]
+  },
+  {
+   "claim": "the runway is 2,750 metres",
+   "verdict": "confirmed",
+   "inAfter": "The runway is 2,750 metres",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "has a single 2,750-metre (9,022 ft) runway"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 07/25: 2,750 m (9,022 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "airporttech-lir",
+     "org": "Airport Technology (Verdict Media trade press)",
+     "dated": "2012-05-15",
+     "quote": "Its 07/25 2,750m x 45m asphalt runway"
+    }
+   ]
+  },
+  {
+   "claim": "takes wide body aircraft up to a 747",
+   "verdict": "confirmed",
+   "inAfter": "takes wide body aircraft up to a 747",
+   "note": "Airport Technology names the Boeing 747-400 and Airbus A340-600 among the aircraft the runway can handle; a capability of the runway, not a claim about current flights.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "runway that can handle wide-body aircraft, including the Boeing 747"
+    },
+    {
+     "file": "airporttech-lir",
+     "org": "Airport Technology (Verdict Media trade press)",
+     "dated": "2012-05-15",
+     "quote": "can handle flights and aircraft the size of Boeing 747-400, 737-800, 757-200 and Airbus A340-600"
+    }
+   ]
+  },
+  {
+   "claim": "the site covers 243 hectares",
+   "verdict": "confirmed",
+   "inAfter": "Its site covers 243 hectares.",
+   "note": "Reworded from 'The site covers' so that two sentences in a row do not start with 'The'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "The facility covers 243 hectares (600 acres) of land"
+    },
+    {
+     "file": "airporttech-lir",
+     "org": "Airport Technology (Verdict Media trade press)",
+     "dated": "2012-05-15",
+     "quote": "Daniel Oduber International Airport has a surface area of 243ha."
+    }
+   ]
+  },
+  {
+   "claim": "the airport for the Pacific coast",
+   "verdict": "cut",
+   "wasBefore": "and the Pacific coast",
+   "why": "Wikipedia alone. The Tourism Board and the FCDO place the airport in Guanacaste without naming the Pacific; Airport Technology calls it 'a hub for Western Costa Rica and Pacific coast travellers', but that wording is so close to Wikipedia's that it may not be independent, so it is not counted. Guanacaste is kept."
+  },
+  {
+   "claim": "the tourism gateway for the west of Costa Rica",
+   "verdict": "cut",
+   "wasBefore": "the tourism gateway for the west of Costa Rica",
+   "why": "The second source says north-west. Softened to 'the north west of Costa Rica' (see above)."
+  },
+  {
+   "claim": "the one that puts clients nearest the Pacific beaches",
+   "verdict": "cut",
+   "wasBefore": "and the one that puts clients nearest the Pacific beaches",
+   "why": "No second source compares the four international airports' distances to the beaches. Replaced by the Tourism Board's own description of the airport's role, attributed (see above)."
+  },
+  {
+   "claim": "replacing the older facility on the same site",
+   "verdict": "cut",
+   "wasBefore": "replacing the older facility on the same site",
+   "why": "Wikipedia alone. Airport Technology says the concession also required Coriport to improve the existing terminal, so 'replacing' is not borne out."
+  },
+  {
+   "claim": "FCDO: services at Liberia airport have been subject to interruptions",
+   "verdict": "cut",
+   "why": "Held back: the FCDO's Costa Rica page (still current at 23 September 2026, last updated 19 May 2026) says services at Liberia airport have been subject to interruptions and that travellers should carefully monitor information from their travel provider when travelling to and from it. It replaces nothing in the old text, and no second source says what the interruptions were (DGAC's notices list shows nothing on the airport). Recommended for Andy: it is the one current warning specific to this airport, and could go in as an attributed sentence.",
+   "sources": [
+    {
+     "file": "fcdo-cr-safety",
+     "org": "UK FCDO",
+     "dated": "the country page says still current at 23 September 2026",
+     "quote": [
+      "Airport disruptions",
+      "Services at the Liberia Airport (LIR – Daniel Oduber International) in Guanacaste have been subject to interruptions.",
+      "You should monitor carefully information from your travel provider when travelling to and from this airport."
+     ]
+    },
+    {
+     "file": "fcdo-cr-main",
+     "org": "UK FCDO",
+     "dated": "2026-09-23 (still current); updated 2026-05-19",
+     "quote": [
+      "Still current at: 23 September 2026",
+      "Updated: 19 May 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "1.92 million passengers in 2024",
+   "verdict": "cut",
+   "why": "Held back: DGAC's 2024 yearbook gives 1,921,345 passengers at Daniel Oduber Quirós in 2024 (Juan Santamaría 6,508,042), and Wikipedia's infobox repeats the figure with a rise of 16.1 per cent on 2023. The old text has no passenger figure to replace; no 2025 figure was found.",
+   "sources": [
+    {
+     "file": "dgac-anuario-2024",
+     "org": "Dirección General de Aviación Civil (DGAC, Costa Rica's civil aviation authority)",
+     "dated": "2024 yearbook; DGAC's index lists it as posted 09/10/2025",
+     "quote": [
+      "TIPO DE SERVICIO MROC MRPV MRLB MRLM",
+      "TOTAL, GENERAL 6 508 042 29 157 1 921 345 15 085 8 473 629"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": [
+      "stat1_data = 1,921,345",
+      "stat2_data = 16.1%",
+      "stat_year = 2024"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "flights mostly North American; TUI charters from Gatwick",
+   "verdict": "cut",
+   "why": "Held back: DGAC's 2024 airline table for the airport is led by United (430,231 international passengers) and American (421,492), then Delta, Alaska, Southwest, WestJet, JetBlue and Air Canada, with TUI Airways (12,288) and Edelweiss (10,702) the only European airlines; 915,126 of 926,157 arriving international passengers came from North America. The UK CAA counts only charter passengers between the UK and Liberia, all at Gatwick: 7,251 in 2025, down from 12,223 in 2024. New facts that replace nothing; recommended for Andy, since the UK link is what an agent needs.",
+   "sources": [
+    {
+     "file": "dgac-anuario-2024",
+     "org": "Dirección General de Aviación Civil (DGAC, Costa Rica's civil aviation authority)",
+     "dated": "2024 yearbook; DGAC's index lists it as posted 09/10/2025",
+     "quote": [
+      "UNITED AIR LINES INC 212457 217774 430231 23,08%",
+      "AMERICAN AIR LINES 206057 215435 421492 22,61%",
+      "TUI AIRWAYS LIMITADA 6159 6129 12288 0,66%",
+      "EDELWEISS 3539 7163 10702 0,57%",
+      "TOTAL, PAX ENTRANDO 3 100 127 2 401 926 157 41 4 028 726",
+      "TOTAL, AMÉRICA DEL NORTE 1 658 035 461 915 126 15 2 573 637"
+     ]
+    },
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2026-02-25 (run date on each row; 2025 data)",
+     "quote": [
+      "uk_apt,foreign_apt,ty_t_pax,ty_s_pax,ty_c_pax,ly_t_pax,ly_s_pax,ly_c_pax",
+      "GATWICK,LIBERIA,7251,0,7251,12223,0,12223"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which is what allows large aircraft to come in directly rather than feeding through a connection",
+   "why": "The old text's judgement, kept; it follows from the verified runway length and wide-body capability."
+  }
+ ],
+ "tracerOk": {}
+}

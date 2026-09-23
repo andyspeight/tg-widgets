@@ -1,0 +1,441 @@
+{
+ "iata": "PTY",
+ "id": "rec1DI9zHqllqTKMU",
+ "name": "Tocumen International Airport",
+ "country": "Panama",
+ "wikipedia": "https://en.wikipedia.org/wiki/Tocumen_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Panama City's main gateway is built around connections rather than arrivals. Copa Airlines runs its hub here, and the route map fans out across the Caribbean, North, Central and South America, with a handful of European cities and cargo flights as far as Qatar. That makes Tocumen one of the more useful places in the region to change planes, and many passengers pass through without ever leaving the terminal.\n\nTwenty-eight boarding gates serve the main terminal, which was expanded in 2006 along with twenty-two new boarding bridges. For lounge access, the Copa Club is run jointly by Copa and United and takes Star Alliance members, and The Lounge Panama is operated by Global Lounge Network. The American Airlines Admirals Club closed in 2012, so do not send clients looking for it.\n\nIt is a working connecting airport rather than a destination in itself, and anyone on a long layover should expect to spend it airside.",
+ "after": "The main gateway for Panama City is built around connections rather than arrivals. Copa Airlines runs its hub here, and the route map fans out across the Caribbean and North, Central and South America, with some flights to Europe. That makes Tocumen one of the more useful places in the region to change planes, and the airport counted 74 per cent of its August 2026 passengers as transfers.\n\nThere are two terminals, and the airport's departures board shows Copa flights leaving from both, so check which one a connection uses. A free shuttle bus links them in a few minutes, the airport says. Lounges include the Copa Club and The Lounge Panama, run by Global Lounge Network.\n\nLine 2 of the Panama Metro runs from a station at the airport into the city.",
+ "claims": [
+  {
+   "claim": "Panama City's main gateway",
+   "verdict": "confirmed",
+   "inAfter": "The main gateway for Panama City",
+   "note": "Reworded from 'Panama City's main gateway' (same claim). No archived copy exists for this airport, so source 1 is the article as it reads today (revised 20 September 2026). The operator's old domain in OurAirports and Wikipedia (tocumenpanama.aero) now links to tocumenaero.com, whose pages carry Tocumen S.A.'s copyright; every operator page here is from that site.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "is the primary international airport serving Panama City, the capital of Panama"
+    },
+    {
+     "file": "op-trafico-ago2026",
+     "org": "Tocumen S.A. (the airport operator, tocumenaero.com)",
+     "dated": "2026-09-16",
+     "quote": [
+      "Panamá, 16 de septiembre de 2026.",
+      "la principal terminal aérea de Panamá",
+      "principal puerta de entrada y salida de Panamá"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "built around connections rather than arrivals",
+   "verdict": "confirmed",
+   "inAfter": "is built around connections rather than arrivals",
+   "note": "The operator counts 74 per cent of August 2026 passengers as transfers (1,587,692) and stresses the airport's connecting character.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "The airport serves as the hub for Copa Airlines and is a regional hub"
+    },
+    {
+     "file": "op-trafico-ago2026",
+     "org": "Tocumen S.A. (the airport operator, tocumenaero.com)",
+     "dated": "2026-09-16",
+     "quote": [
+      "el marcado carácter internacional y de conexión de Tocumen",
+      "En agosto, el 74 % de los pasajeros correspondió a viajeros en transferencia, equivalentes a 1,587,692 viajeros"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Copa Airlines runs its hub here",
+   "verdict": "confirmed",
+   "inAfter": "Copa Airlines runs its hub here",
+   "note": "Panrotas (28 July 2026) reports Copa enlarging its 'Hub das Américas' in Panama City from six to eight connection banks from March 2027; the airport's own departures board on 23 September 2026 showed nine Copa (CM) departures among the next ten. Copa's own site (copaair.com) answered with DataDome's 'Please enable JS and disable any ad blocker' check and was left alone; Star Alliance's site refused the link lister (403); Aviación al Día answered 429, one try.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "The airport serves as the hub for Copa Airlines"
+    },
+    {
+     "file": "panrotas-copa-bancos-2026",
+     "org": "Panrotas (Brazilian travel trade press)",
+     "dated": "2026-07-28",
+     "quote": [
+      "28/07/2026 18:04",
+      "sua estrutura de atendimento no Hub das Am&eacute;ricas, na Cidade do Panam&aacute;"
+     ]
+    },
+    {
+     "file": "op-vuelos",
+     "org": "Tocumen S.A. (the airport operator, tocumenaero.com)",
+     "dated": "live departures board, read 2026-09-23",
+     "quote": [
+      "Today, Wednesday, September 23",
+      "SAN JOSE (SJO) CM460 1 121",
+      "ORLANDO (MCO) CM434 2 201"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the route map fans out across the Caribbean and North, Central and South America",
+   "verdict": "confirmed",
+   "inAfter": "the route map fans out across the Caribbean and North, Central and South America",
+   "note": "Reworded slightly ('the Caribbean and North, Central and South America') so the list reads cleanly. The operator counts links to 93 international destinations and one domestic in August 2026; its busiest markets from January to August 2026 were Bogotá, Miami, Punta Cana, San José and Medellín.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "is a regional hub to and from the Caribbean, South, North and Central America"
+    },
+    {
+     "file": "op-trafico-ago2026",
+     "org": "Tocumen S.A. (the airport operator, tocumenaero.com)",
+     "dated": "2026-09-16",
+     "quote": [
+      "puente entre Centroamérica, Suramérica, Norteamérica y Europa, y como puerta de entrada a Latinoamérica y el Caribe",
+      "mantuvo durante agosto enlaces con 93 destinos internacionales y un destino doméstico"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "with some flights to Europe",
+   "verdict": "softened",
+   "inAfter": "with some flights to Europe",
+   "note": "Was 'with a handful of European cities'. The operator places Europe among the regions the airport links, and Wikipedia says some European cities; no current source lists the European destinations (the airport's board shows only the next ten departures, and copaair.com is behind a bot check), so no number or names are given.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "additionally features routes to some European cities"
+    },
+    {
+     "file": "op-trafico-ago2026",
+     "org": "Tocumen S.A. (the airport operator, tocumenaero.com)",
+     "dated": "2026-09-16",
+     "quote": "puente entre Centroamérica, Suramérica, Norteamérica y Europa"
+    }
+   ]
+  },
+  {
+   "claim": "the airport counted 74 per cent of its August 2026 passengers as transfers",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "and the airport counted 74 per cent of its August 2026 passengers as transfers.",
+   "note": "Replaces 'and many passengers pass through without ever leaving the terminal'. The operator's own figure for August 2026 (1,587,692 transfer passengers of 2,136,052), attributed.",
+   "sources": [
+    {
+     "file": "op-trafico-ago2026",
+     "org": "Tocumen S.A. (the airport operator, tocumenaero.com)",
+     "dated": "2026-09-16",
+     "quote": [
+      "Panamá, 16 de septiembre de 2026.",
+      "Solo durante agosto, Tocumen registró 2,136,052 movimientos de viajeros",
+      "En agosto, el 74 % de los pasajeros correspondió a viajeros en transferencia, equivalentes a 1,587,692 viajeros"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "there are two terminals",
+   "verdict": "corrected",
+   "inAfter": "There are two terminals",
+   "note": "Replaces 'Twenty-eight boarding gates serve the main terminal, which was expanded in 2006 along with twenty-two new boarding bridges', a picture from before Terminal 2. Wikipedia says the new terminal started operations on 22 June 2022; the operator's live pages and Priority Pass both place facilities in Terminal 1 and Terminal 2. The opening date rests on Wikipedia alone, so it is not given.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "The new terminal was officially inaugurated on 29 April 2019 and started operations on 22 June 2022."
+    },
+    {
+     "file": "op-shuttlebus",
+     "org": "Tocumen S.A. (the airport operator, tocumenaero.com)",
+     "dated": "live page, read 2026-09-23",
+     "quote": "We offer a free shuttle bus service that conveniently connects Terminal 1 with Terminal 2 and vice versa."
+    },
+    {
+     "file": "prioritypass-thelounge",
+     "org": "Priority Pass (Collinson)",
+     "dated": "live page, read 2026-09-23",
+     "quote": [
+      "Panama Tocumen International, Terminal 1",
+      "Copa Club Terminal 2"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the airport's departures board shows Copa flights leaving from both terminals",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "There are two terminals, and the airport's departures board shows Copa flights leaving from both",
+   "note": "New, as part of replacing the one-terminal picture. On the operator's live board on 23 September 2026, Copa's San José flight left from Terminal 1 (gate 121) and its Orlando and Montreal flights from Terminal 2 (gates 201 and 211); the operator also lists Copa Club lounges in both terminals. The operator's own board, attributed. 'So check which one a connection uses' is advice (see opinion).",
+   "sources": [
+    {
+     "file": "op-vuelos",
+     "org": "Tocumen S.A. (the airport operator, tocumenaero.com)",
+     "dated": "live departures board, read 2026-09-23",
+     "quote": [
+      "Today, Wednesday, September 23",
+      "Time Destination Airline Terminal Gate Status",
+      "SAN JOSE (SJO) CM460 1 121",
+      "ORLANDO (MCO) CM434 2 201",
+      "MONTREAL (YUL) CM422 2 211"
+     ]
+    },
+    {
+     "file": "op-salasvip",
+     "org": "Tocumen S.A. (the airport operator, tocumenaero.com)",
+     "dated": "live page, © 2026, read 2026-09-23",
+     "quote": [
+      "T2 Copa Club Level 300, between gates 204-207",
+      "T1 Copa Club Level 300, near gate 130"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a free shuttle bus links the terminals in a few minutes, the airport says",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "A free shuttle bus links them in a few minutes, the airport says.",
+   "note": "New, as part of replacing the one-terminal picture. The operator runs an internal shuttle from the gate areas (Terminal 1 between gates 104 and 105, Terminal 2 by gate 209) and an external one from the landside exits; attributed.",
+   "sources": [
+    {
+     "file": "op-shuttlebus",
+     "org": "Tocumen S.A. (the airport operator, tocumenaero.com)",
+     "dated": "live page, read 2026-09-23",
+     "quote": [
+      "Internal Shuttle",
+      "The transfer takes just a few minutes and is designed to make passenger movement between terminals fast, safe and efficient.",
+      "Terminal 1 : Between gates 104 and 105",
+      "Terminal 2 : Down the stairs in front of gate 209"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "lounges include the Copa Club and The Lounge Panama, run by Global Lounge Network",
+   "verdict": "softened",
+   "inAfter": "Lounges include the Copa Club and The Lounge Panama, run by Global Lounge Network.",
+   "note": "Was 'the Copa Club is run jointly by Copa and United and takes Star Alliance members, and The Lounge Panama is operated by Global Lounge Network'. The joint running and the Star Alliance access rest on Wikipedia alone (cut below). The operator's list has Copa Clubs in both terminals, The Lounge in Terminal 1, a Global Lounge in Terminal 2 and the Tocumen Royal Saloon; Priority Pass names The Lounge Panama by Global Lounge Network in Terminal 1.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": [
+      "The airport also has a VIP lounge, Copa Club",
+      "The Lounge Panama, a VIP airport lounge operated by Global Lounge Network"
+     ]
+    },
+    {
+     "file": "prioritypass-thelounge",
+     "org": "Priority Pass (Collinson)",
+     "dated": "live page, read 2026-09-23",
+     "quote": [
+      "Panama Tocumen International The Lounge Panama by Global Lounge Network",
+      "Copa Club Terminal 2"
+     ]
+    },
+    {
+     "file": "op-salasvip",
+     "org": "Tocumen S.A. (the airport operator, tocumenaero.com)",
+     "dated": "live page, © 2026, read 2026-09-23",
+     "quote": [
+      "T1 The Lounge Opposite gate 128, towards the north pier",
+      "T1 Copa Club Level 300, near gate 130",
+      "© 2026 Tocumen S.A. All rights reserved."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Line 2 of the Panama Metro runs from a station at the airport into the city",
+   "verdict": "corrected",
+   "inAfter": "Line 2 of the Panama Metro runs from a station at the airport into the city.",
+   "note": "Replaces 'anyone on a long layover should expect to spend it airside', advice with no source that the metro link undercuts (and the FCDO says British visitors can enter Panama without a visa for up to three months; held back below). The station opened on 16 March 2023 (Wikipedia alone, so no date is given).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "On 16 March 2023, the Aeropuerto metro station of the Panama Metro opened at the airport."
+    },
+    {
+     "file": "op-transporte",
+     "org": "Tocumen S.A. (the airport operator, tocumenaero.com)",
+     "dated": "live page, read 2026-09-23",
+     "quote": [
+      "Panama Metro",
+      "Fast connection to the city via Line 2 from the airport station."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a handful of European cities",
+   "verdict": "cut",
+   "wasBefore": "with a handful of European cities",
+   "why": "No current source lists the European destinations. Softened to 'some flights to Europe' (see above)."
+  },
+  {
+   "claim": "cargo flights as far as Qatar",
+   "verdict": "cut",
+   "wasBefore": "and cargo flights as far as Qatar",
+   "why": "Wikipedia alone, and not borne out by the operator: its cargo page lists direct cargo flights to five regions (North, Central and South America, the Caribbean and Europe), none in the Middle East.",
+   "sources": [
+    {
+     "file": "op-carga",
+     "org": "Tocumen S.A. (the airport operator, tocumenaero.com)",
+     "dated": "live page, read 2026-09-23",
+     "quote": [
+      "We connect Panama with the main regions of the world through direct cargo flights",
+      "Central Hub Panama North America Central America Caribbean South America Europe Direct cargo flights to 5 regions of the world"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "many passengers pass through without ever leaving the terminal",
+   "verdict": "cut",
+   "wasBefore": "and many passengers pass through without ever leaving the terminal",
+   "why": "Replaced by the airport's own transfer share, attributed (see above). 'Without ever leaving the terminal' no longer fits an airport of two terminals joined by a shuttle bus."
+  },
+  {
+   "claim": "28 gates in the main terminal, expanded in 2006 with 22 new boarding bridges",
+   "verdict": "cut",
+   "wasBefore": "Twenty-eight boarding gates serve the main terminal, which was expanded in 2006 along with twenty-two new boarding bridges.",
+   "why": "Out of date: Terminal 2 has been in service since 2022 (Wikipedia; the operator's pages show both terminals in use, with Terminal 1 gates numbered to at least 130 and Terminal 2 gates from 201 to 220), so 28 gates in the main terminal no longer describes the airport. The 2006 figures rest on Wikipedia alone. Replaced by the two terminals (see above)."
+  },
+  {
+   "claim": "Copa Club run jointly by Copa and United, taking Star Alliance members",
+   "verdict": "cut",
+   "wasBefore": "the Copa Club is run jointly by Copa and United and takes Star Alliance members",
+   "why": "Wikipedia alone: copaair.com is behind a bot check and Star Alliance's site refused, and neither the operator nor Priority Pass says who runs the Copa Club or who may use it. The Copa Club itself is kept (see above)."
+  },
+  {
+   "claim": "the Admirals Club closed in 2012",
+   "verdict": "cut",
+   "wasBefore": "The American Airlines Admirals Club closed in 2012, so do not send clients looking for it.",
+   "why": "The 2012 date rests on Wikipedia alone. The operator's current list of lounges (two Copa Clubs, The Lounge, a Global Lounge and the Tocumen Royal Saloon) and Priority Pass's list name no Admirals Club, and the lounge sentence now says what is there."
+  },
+  {
+   "claim": "a working connecting airport rather than a destination in itself",
+   "verdict": "cut",
+   "wasBefore": "It is a working connecting airport rather than a destination in itself",
+   "why": "Repeats the opening judgement ('built around connections rather than arrivals'), which is kept."
+  },
+  {
+   "claim": "a long layover should be spent airside",
+   "verdict": "cut",
+   "wasBefore": "and anyone on a long layover should expect to spend it airside.",
+   "why": "Advice with no source, undercut by the metro line into the city (the airport, Wikipedia) and the FCDO's visa-free entry for British visitors. Replaced by the metro line (see above)."
+  },
+  {
+   "claim": "traffic up 15 per cent in 2026",
+   "verdict": "cut",
+   "why": "Held back: the operator counted 15,855,759 passengers from January to August 2026, up 15 per cent on the same months of 2025 (Wikipedia's infobox gives 19,250,384 for 2024). The old text has no passenger figure to replace.",
+   "sources": [
+    {
+     "file": "op-trafico-ago2026",
+     "org": "Tocumen S.A. (the airport operator, tocumenaero.com)",
+     "dated": "2026-09-16",
+     "quote": "El Aeropuerto Internacional de Tocumen cerró los primeros ocho meses de 2026 con un total de 15,855,759 pasajeros, cifra que representa un crecimiento del 15 % respecto al mismo periodo de 2025"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": [
+      "stat_year = 2024",
+      "stat1_data = 19,250,384"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "works planned at both terminals",
+   "verdict": "cut",
+   "why": "Held back: the operator is tendering a B/.22.2 million modernisation of Terminal 1 (24 months, the terminal to stay open around the clock; Terminal 1 opened in 1978) and a 10-gate extension of Terminal 2, the South Pier (proposals due 28 September 2026, 30 months' work). Works that replace nothing in the old text; one organisation.",
+   "sources": [
+    {
+     "file": "op-t1-licitacion",
+     "org": "Tocumen S.A. (the airport operator, tocumenaero.com)",
+     "dated": "2026-09-08",
+     "quote": [
+      "Panamá, 8 de septiembre de 2026.",
+      "modernización integral de su Terminal 1, con un precio de referencia de B/.22,2 millones",
+      "La terminal continuará operando 24/7 mientras avanzamos progresivamente con los trabajos."
+     ]
+    },
+    {
+     "file": "op-muelle-sur",
+     "org": "Tocumen S.A. (the airport operator, tocumenaero.com)",
+     "dated": "2026-09-04",
+     "quote": [
+      "Panamá, 4 de septiembre de 2026",
+      "La ampliación de la Terminal 2, con 10 nuevas puertas de embarque"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: entry and departure charge",
+   "verdict": "cut",
+   "why": "Held back: the FCDO (page still current at 23 September 2026, updated 10 December 2025) says British visitors arriving by air can stay up to three months without a visa, may be asked for an onward ticket and proof of funds, and that a departure charge of 40 US dollars is usually included in the ticket. Nothing in the old text to replace; recorded because the layover sentence it undercuts has gone.",
+   "sources": [
+    {
+     "file": "fcdo-pa-entry",
+     "org": "UK FCDO",
+     "dated": "the country page says still current at 23 September 2026",
+     "quote": [
+      "You can visit Panama for up to 3 months without a visa if you arrive by land or air.",
+      "There is a charge of 40 US dollars on departure. This is usually included in the price of your ticket.",
+      "This information is for people travelling on a full",
+      "show a return or onward ticket",
+      "prove you have at least 1000 US dollars (or the same amount in other currencies) or a credit card"
+     ]
+    },
+    {
+     "file": "fcdo-pa-main",
+     "org": "UK FCDO",
+     "dated": "2026-09-23 (still current); updated 2025-12-10",
+     "quote": [
+      "Still current at: 23 September 2026",
+      "Updated: 10 December 2025"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "That makes Tocumen one of the more useful places in the region to change planes",
+   "why": "The old text's judgement, kept; it follows from Copa's hub, the route map and the operator's 74 per cent transfer share (all sourced)."
+  },
+  {
+   "text": "so check which one a connection uses",
+   "why": "Practical advice following from the verified two terminals and Copa's use of both."
+  }
+ ],
+ "tracerOk": {}
+}
