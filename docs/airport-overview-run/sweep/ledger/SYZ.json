@@ -6,7 +6,7 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Shiraz_Shahid_Dastgheib_International_Airport",
  "audited": "2026-09-23",
  "before": "The main international airport for Fars province and the largest in the south of Iran, at Shiraz. After renovation in 2005 it was rated the second most reliable and modern airport in the country after Tehran Imam Khomeini, on flight safety and navigation systems.\n\nThere are two connected passenger terminals. Terminal 1 is the older and larger and handles domestic flights only. Terminal 2 takes all scheduled and charter international services.\n\nThat will change. A new international terminal is under construction and was due to be completed by 2024. Once it opens, the current international terminal is to be given over to Hajj flights. Confirm which building applies rather than assuming, because this is still in transition.",
- "after": "The largest airport in the south of Iran, serving Shiraz.\n\nIran closed its airspace after the United States and Israel struck the country on 28 February 2026. Shiraz was operating again by the end of April, but Iranian airspace can still close at short notice. European regulators tell their airlines not to fly in it at any altitude.\n\nThe FCDO advises against all travel to Iran, and the US government tells its citizens not to travel there for any reason.",
+ "after": "The largest airport in the south of Iran, serving Shiraz.\n\nIran closed its airspace after the United States and Israel struck the country on 28 February 2026. Shiraz was operating again by the end of April, but Iranian airspace can still close at short notice. European regulators tell their airlines not to fly in it at any altitude.\n\nNew US sanctions from 23 September 2026 are aimed at shutting Iranian airlines out of international flying, and Turkish Airlines has suspended its Iran flights until at least March 2027.\n\nThe FCDO advises against all travel to Iran, and the US government tells its citizens not to travel there for any reason.",
  "claims": [
   {
    "claim": "largest airport in the south of Iran",
@@ -157,6 +157,33 @@
    ]
   },
   {
+   "claim": "US sanctions from 23 September 2026 aim to shut Iranian airlines out of international flying; Turkish Airlines suspended until at least March 2027",
+   "verdict": "corrected",
+   "inAfter": "New US sanctions from 23 September 2026 are aimed at shutting Iranian airlines out of international flying, and Turkish Airlines has suspended its Iran flights until at least March 2027.",
+   "note": "Both reports are from the week of this audit and the situation is moving: Iran International (23 September, citing Bloomberg) says Iranian airlines were still flying abroad on the deadline day, and reports conflict on whether Iraq has stopped Iranian flights, so neither point is stated. The i24NEWS piece is undated on the page; it says the Turkish changes take effect Monday (21 September) and Iraq's suspension starts Tuesday. Re-check within weeks.",
+   "sources": [
+    {
+     "file": "iranintl-0922",
+     "org": "Iran International",
+     "quote": [
+      "US Treasury Secretary Scott Bessent said Monday that Iranian airlines would effectively be shut out of international operations from September 23",
+      "told Iran International on Monday that it had suspended all of its flights to Iran until at least March 2027"
+     ],
+     "dated": "2026-09-22"
+    },
+    {
+     "file": "i24-turkish",
+     "org": "i24NEWS",
+     "quote": [
+      "These actions come as US sanctions take effect.",
+      "US Treasury Secretary Scott Bessent told CNBC in an interview that all Iranian airlines would be shut down worldwide starting September 23.",
+      "The Turkish Airlines and AJet websites show no flights to Iran until March 2027"
+     ],
+     "dated": "2026-09-21"
+    }
+   ]
+  },
+  {
    "claim": "UK and US governments advise against all travel to Iran",
    "verdict": "corrected",
    "inAfter": "The FCDO advises against all travel to Iran, and the US government tells its citizens not to travel there for any reason",
@@ -238,5 +265,11 @@
   }
  ],
  "opinion": [],
- "tracerOk": {}
+ "tracerOk": {},
+ "revised": [
+  {
+   "date": "2026-09-23",
+   "what": "Added the US sanctions of 23 September 2026 and Turkish Airlines' suspension to March 2027, the same sentence as IKA and MHD, from reports dated 21 to 22 September."
+  }
+ ]
 }

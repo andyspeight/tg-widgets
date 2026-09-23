@@ -1,0 +1,227 @@
+{
+ "iata": "MHD",
+ "id": "recgwvUHpDwGL4GQg",
+ "name": "Mashhad International Airport",
+ "country": "Iran",
+ "wikipedia": "https://en.wikipedia.org/wiki/Mashhad_Shahid_Hasheminejad_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Iran's second busiest airport after Tehran Mehrabad, serving Mashhad in Razavi Khorasan province. It handled more than 10 million passengers in 2016, a record at the time, along with 86,681 tonnes of cargo.\n\nThere are three terminals and the split is unusual. Terminal 1 is domestic, Terminal 2 international and Terminal 3 is dedicated to Hajj flights, so check which building a client needs.\n\nThe route map reaches 57 destinations: 30 Iranian cities plus 27 across Central Asia, the Middle East, East Asia and Europe.\n\nIt is a joint civilian airport and military airbase, so parts of the site are not public.",
+ "after": "Mashhad's international airport.\n\nIran closed its airspace after the United States and Israel struck the country on 28 February 2026. Mashhad reopened in mid-April, but Iranian airspace can still close at short notice, and European regulators tell their airlines not to fly in it at any altitude.\n\nNew US sanctions from 23 September 2026 are aimed at shutting Iranian airlines out of international flying, and Turkish Airlines has suspended its Iran flights until at least March 2027.\n\nThe FCDO advises against all travel to Iran, and the US government tells its citizens not to travel there for any reason.",
+ "claims": [
+  {
+   "claim": "Mashhad's international airport",
+   "verdict": "confirmed",
+   "inAfter": "Mashhad's international airport.",
+   "note": "Coordinates put it 7.8 km south east of the GeoNames centre of Mashhad.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is an international airport located in Mashhad, Razavi Khorasan province, Iran"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Airport: Mashhad International Airport (OurAirports OIMM, IATA MHD)",
+      "OurAirports municipality: Mashhad"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Iran closed its airspace after US and Israeli strikes on 28 February 2026",
+   "verdict": "corrected",
+   "inAfter": "Iran closed its airspace after the United States and Israel struck the country on 28 February 2026.",
+   "sources": [
+    {
+     "file": "easa-czib-iran",
+     "org": "EASA (EU Aviation Safety Agency)",
+     "quote": "On 28 February 2026, the United States and Israel conducted military strikes targeting sites within Iranian territory.",
+     "dated": "2026-08-31"
+    },
+    {
+     "file": "intellinews-six",
+     "org": "bne IntelliNews",
+     "quote": "Iranian airspace was largely shut down at the start of the US-Israeli war on February 28",
+     "dated": "2026-04-18"
+    },
+    {
+     "file": "safeairspace-iran",
+     "org": "Safe Airspace (OPSGROUP)",
+     "quote": "OIIX/Tehran FIR closed following large-scale US and Israeli strikes"
+    }
+   ]
+  },
+  {
+   "claim": "Mashhad reopened in mid-April 2026",
+   "verdict": "corrected",
+   "inAfter": "Mashhad reopened in mid-April",
+   "note": "IranWire reported Mashhad's flights suspended again in June; that is covered by the warning that airspace can still close.",
+   "sources": [
+    {
+     "file": "intellinews-six",
+     "org": "bne IntelliNews",
+     "quote": [
+      "April 18, 2026",
+      "six airports had been reopened including Mehrabad, Imam Khomeini International, Mashhad, Birjand, Gorgan and Zahedan"
+     ],
+     "dated": "2026-04-18"
+    },
+    {
+     "file": "8am-six",
+     "org": "Hasht-e Subh Daily (8am.media), citing Tasnim",
+     "quote": [
+      "18 April 2026",
+      "as well as the international airports of Mashhad, Birjand, Gorgan, and Zahedan"
+     ],
+     "dated": "2026-04-18"
+    },
+    {
+     "file": "mee-six-airports",
+     "org": "Middle East Eye",
+     "quote": "six airports are now operational – Mehrabad, Mashhad, Shiraz, Zahedan, Gorgan and Urmia",
+     "dated": "2026-04-28"
+    }
+   ]
+  },
+  {
+   "claim": "Iranian airspace can still close at short notice",
+   "verdict": "corrected",
+   "inAfter": "but Iranian airspace can still close at short notice",
+   "sources": [
+    {
+     "file": "fcdo-iran",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": [
+      "Iranian airspace may close at short notice.",
+      "23 September 2026"
+     ],
+     "dated": "2026-08-13"
+    },
+    {
+     "file": "easa-czib-iran",
+     "org": "EASA (EU Aviation Safety Agency)",
+     "quote": "implementing temporary airspace closures and restrictions",
+     "dated": "2026-08-31"
+    },
+    {
+     "file": "iranwire-shiraz-cancel",
+     "org": "IranWire",
+     "quote": "Iranian government officials reported the suspension of all flights at the international airports of Mashhad and Tehran until further notice",
+     "dated": "2026-06-08"
+    }
+   ]
+  },
+  {
+   "claim": "European regulators tell airlines not to fly in Iranian airspace at any altitude",
+   "verdict": "corrected",
+   "inAfter": "and European regulators tell their airlines not to fly in it at any altitude",
+   "note": "EASA's bulletin runs to 30 September 2026 unless reviewed earlier; re-check after that date.",
+   "sources": [
+    {
+     "file": "easa-czib-iran",
+     "org": "EASA (EU Aviation Safety Agency)",
+     "quote": [
+      "Not operate within the airspace of Iran, FIR Tehran (OIIX), at all altitudes and flight levels",
+      "30/09/2026, unless reviewed earlier."
+     ],
+     "dated": "2026-08-31"
+    },
+    {
+     "file": "safeairspace-iran",
+     "org": "Safe Airspace (OPSGROUP)",
+     "quote": [
+      "German operators should not enter the airspace of Iran",
+      "French operators should not enter the airspace of Iran"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "US sanctions from 23 September 2026 aim to shut Iranian airlines out of international flying; Turkish Airlines suspended until at least March 2027",
+   "verdict": "corrected",
+   "inAfter": "New US sanctions from 23 September 2026 are aimed at shutting Iranian airlines out of international flying, and Turkish Airlines has suspended its Iran flights until at least March 2027.",
+   "note": "Both reports are from the week of this audit and the situation is moving: Iran International (23 September, citing Bloomberg) says Iranian airlines were still flying abroad on the deadline day, and reports conflict on whether Iraq has stopped Iranian flights, so neither point is stated. The i24NEWS piece is undated on the page; it says the Turkish changes take effect Monday (21 September) and Iraq's suspension starts Tuesday. Re-check within weeks.",
+   "sources": [
+    {
+     "file": "iranintl-0922",
+     "org": "Iran International",
+     "quote": [
+      "US Treasury Secretary Scott Bessent said Monday that Iranian airlines would effectively be shut out of international operations from September 23",
+      "told Iran International on Monday that it had suspended all of its flights to Iran until at least March 2027"
+     ],
+     "dated": "2026-09-22"
+    },
+    {
+     "file": "i24-turkish",
+     "org": "i24NEWS",
+     "quote": [
+      "These actions come as US sanctions take effect.",
+      "US Treasury Secretary Scott Bessent told CNBC in an interview that all Iranian airlines would be shut down worldwide starting September 23.",
+      "The Turkish Airlines and AJet websites show no flights to Iran until March 2027"
+     ],
+     "dated": "2026-09-21"
+    }
+   ]
+  },
+  {
+   "claim": "UK and US governments advise against all travel to Iran",
+   "verdict": "corrected",
+   "inAfter": "The FCDO advises against all travel to Iran, and the US government tells its citizens not to travel there for any reason.",
+   "note": "Each government is quoted from its own page: the FCDO (still current 23 September 2026) and the US Virtual Embassy Iran (alert of 19 September 2026).",
+   "sources": [
+    {
+     "file": "fcdo-iran",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": [
+      "FCDO advises against all travel to Iran.",
+      "13 August 2026"
+     ],
+     "dated": "2026-08-13"
+    },
+    {
+     "file": "usembassy-alert",
+     "org": "US Department of State (Virtual Embassy Iran)",
+     "quote": [
+      "Do not travel to Iran for any reason.",
+      "SEPTEMBER 19, 2026"
+     ],
+     "dated": "2026-09-19"
+    }
+   ]
+  },
+  {
+   "claim": "second busiest after Mehrabad, Razavi Khorasan",
+   "verdict": "cut",
+   "wasBefore": "Iran's second busiest airport after Tehran Mehrabad, serving Mashhad in Razavi Khorasan province.",
+   "why": "The ranking and the province rest on Wikipedia alone; the Iranian airports company's statistics site and the airport's own site time out. Kept as Mashhad's international airport."
+  },
+  {
+   "claim": "over 10 million passengers in 2016, record, 86,681 tonnes cargo",
+   "verdict": "cut",
+   "wasBefore": "It handled more than 10 million passengers in 2016, a record at the time, along with 86,681 tonnes of cargo.",
+   "why": "Ten years stale and single-source."
+  },
+  {
+   "claim": "three terminals: T1 domestic, T2 international, T3 Hajj",
+   "verdict": "cut",
+   "wasBefore": "There are three terminals and the split is unusual. Terminal 1 is domestic, Terminal 2 international and Terminal 3 is dedicated to Hajj flights, so check which building a client needs.",
+   "why": "Only Wikipedia; the operator's site (mashhad.airport.ir) times out and the web archive is blocked by the proxy."
+  },
+  {
+   "claim": "57 destinations: 30 Iranian, 27 abroad",
+   "verdict": "cut",
+   "wasBefore": "The route map reaches 57 destinations: 30 Iranian cities plus 27 across Central Asia, the Middle East, East Asia and Europe.",
+   "why": "Undated in the source and overtaken by the 2026 war and sanctions."
+  },
+  {
+   "claim": "joint civilian airport and military airbase",
+   "verdict": "cut",
+   "wasBefore": "It is a joint civilian airport and military airbase, so parts of the site are not public.",
+   "why": "Wikipedia's sentence is taken almost word for word from GlobalSecurity, which it cites, so the two are one source, and GlobalSecurity's account runs only to 2008. 'Parts of the site are not public' had no source at all."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

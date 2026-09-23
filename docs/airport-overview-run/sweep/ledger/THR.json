@@ -1,0 +1,264 @@
+{
+ "iata": "THR",
+ "id": "reclEoqH2xe6hHtRZ",
+ "name": "Mehrabad International Airport",
+ "country": "Iran",
+ "wikipedia": "https://en.wikipedia.org/wiki/Mehrabad_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Iran's busiest airport by passengers and aircraft movements, in Tehran, though the name can mislead. Since Imam Khomeini International opened in 2007 and took the international flights, Mehrabad has handled mostly domestic traffic. A client flying into Tehran from abroad will almost certainly not land here.\n\nIt carried 17,464,216 passengers in 2017 and serves 60 non-stop destinations through 23 airlines, with Iran Air the largest operator.\n\nThere are four active terminals and the airline allocation matters. Terminal 2, from 1977, is the busiest and handles Iran Air among others. Terminal 4, from 2007, takes Caspian, Iran Aseman and FlyPersia.\n\nTerminal 1 is worth a look. Opened in 1955, it was the first advanced airport terminal in the Middle East and is now registered as a national historical monument in Iran, both for its architecture and for its place in the country's development.\n\nThe airport opened in 1938 and is also used by the Iranian government and air force.",
+ "after": "Tehran's domestic airport, in the west of the city. International flights use Imam Khomeini instead.\n\nIran closed its airspace after the United States and Israel struck the country on 28 February 2026. Mehrabad reopened in mid-April, but Iranian airspace can still close at short notice, and European regulators tell their airlines not to fly in it at any altitude.\n\nThe FCDO advises against all travel to Iran, and the US government tells its citizens not to travel there for any reason.",
+ "claims": [
+  {
+   "claim": "Tehran's domestic airport",
+   "verdict": "softened",
+   "inAfter": "Tehran's domestic airport",
+   "note": "Was: Iran's busiest airport by passengers and movements. The ranking has one saveable source (the Financial Tribune and the Iranian airports company's statistics site timed out), so the text says what the airport is rather than how it ranks.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "is an airport located in the city of Tehran, the capital of Iran",
+      "it now primarily handles domestic traffic"
+     ]
+    },
+    {
+     "file": "intellinews-six",
+     "org": "bne IntelliNews",
+     "dated": "2026-04-18",
+     "quote": "Mehrabad airport was handling domestic traffic"
+    }
+   ]
+  },
+  {
+   "claim": "in the west of the city",
+   "verdict": "confirmed",
+   "inAfter": "in the west of the city",
+   "note": "Coordinates put it 9.7 km west (267 degrees) of the GeoNames centre of Tehran; Wikipedia places it by Azadi Tower and the Western Tehran bus terminal.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Mehrabad Airport is located near Azadi Tower and the Western Tehran Passenger Bus Terminal."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Tehran",
+      "Bearing from the city centre: 267 degrees, which is west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "international flights use Imam Khomeini",
+   "verdict": "confirmed",
+   "inAfter": "International flights use Imam Khomeini instead.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "following the opening of Imam Khomeini International Airport for international flights"
+    },
+    {
+     "file": "intellinews-six",
+     "org": "bne IntelliNews",
+     "dated": "2026-04-18",
+     "quote": "resumed scheduled international flights from Tehran's Imam Khomeini International (IKA)"
+    }
+   ]
+  },
+  {
+   "claim": "Iran closed its airspace after US and Israeli strikes on 28 February 2026",
+   "verdict": "corrected",
+   "inAfter": "Iran closed its airspace after the United States and Israel struck the country on 28 February 2026.",
+   "sources": [
+    {
+     "file": "easa-czib-iran",
+     "org": "EASA (EU Aviation Safety Agency)",
+     "quote": "On 28 February 2026, the United States and Israel conducted military strikes targeting sites within Iranian territory.",
+     "dated": "2026-08-31"
+    },
+    {
+     "file": "intellinews-six",
+     "org": "bne IntelliNews",
+     "dated": "2026-04-18",
+     "quote": "Iranian airspace was largely shut down at the start of the US-Israeli war on February 28"
+    },
+    {
+     "file": "safeairspace-iran",
+     "org": "Safe Airspace (OPSGROUP)",
+     "quote": "OIIX/Tehran FIR closed following large-scale US and Israeli strikes"
+    }
+   ]
+  },
+  {
+   "claim": "Mehrabad reopened in mid-April 2026",
+   "verdict": "corrected",
+   "inAfter": "Mehrabad reopened in mid-April",
+   "note": "Wikipedia also says Mehrabad was hit in an Israeli air strike on 3 March 2026; the only other source found (Times of Israel) refused the fetcher, so the strike is not stated.",
+   "sources": [
+    {
+     "file": "intellinews-six",
+     "org": "bne IntelliNews",
+     "dated": "2026-04-18",
+     "quote": [
+      "April 18, 2026",
+      "six airports had been reopened including Mehrabad"
+     ]
+    },
+    {
+     "file": "8am-six",
+     "org": "Hasht-e Subh Daily (8am.media), citing Tasnim",
+     "quote": [
+      "18 April 2026",
+      "the newly reopened airports include Imam Khomeini International Airport and Mehrabad Airport in Tehran"
+     ],
+     "dated": "2026-04-18"
+    },
+    {
+     "file": "mee-six-airports",
+     "org": "Middle East Eye",
+     "quote": "six airports are now operational – Mehrabad, Mashhad, Shiraz, Zahedan, Gorgan and Urmia",
+     "dated": "2026-04-28"
+    }
+   ]
+  },
+  {
+   "claim": "Iranian airspace can still close at short notice",
+   "verdict": "corrected",
+   "inAfter": "but Iranian airspace can still close at short notice",
+   "sources": [
+    {
+     "file": "fcdo-iran",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": [
+      "Iranian airspace may close at short notice.",
+      "23 September 2026"
+     ],
+     "dated": "2026-08-13"
+    },
+    {
+     "file": "easa-czib-iran",
+     "org": "EASA (EU Aviation Safety Agency)",
+     "quote": "implementing temporary airspace closures and restrictions",
+     "dated": "2026-08-31"
+    },
+    {
+     "file": "iranwire-shiraz-cancel",
+     "org": "IranWire",
+     "quote": "Iranian government officials reported the suspension of all flights at the international airports of Mashhad and Tehran until further notice",
+     "dated": "2026-06-08"
+    }
+   ]
+  },
+  {
+   "claim": "European regulators tell airlines not to fly in Iranian airspace at any altitude",
+   "verdict": "corrected",
+   "inAfter": "and European regulators tell their airlines not to fly in it at any altitude",
+   "note": "EASA's bulletin runs to 30 September 2026 unless reviewed earlier; re-check after that date.",
+   "sources": [
+    {
+     "file": "easa-czib-iran",
+     "org": "EASA (EU Aviation Safety Agency)",
+     "quote": [
+      "Not operate within the airspace of Iran, FIR Tehran (OIIX), at all altitudes and flight levels",
+      "30/09/2026, unless reviewed earlier."
+     ],
+     "dated": "2026-08-31"
+    },
+    {
+     "file": "safeairspace-iran",
+     "org": "Safe Airspace (OPSGROUP)",
+     "quote": [
+      "German operators should not enter the airspace of Iran",
+      "French operators should not enter the airspace of Iran"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "UK and US governments advise against all travel to Iran",
+   "verdict": "corrected",
+   "inAfter": "The FCDO advises against all travel to Iran, and the US government tells its citizens not to travel there for any reason.",
+   "note": "Each government is quoted from its own page: the FCDO (still current 23 September 2026) and the US Virtual Embassy Iran (alert of 19 September 2026).",
+   "sources": [
+    {
+     "file": "fcdo-iran",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": [
+      "FCDO advises against all travel to Iran.",
+      "13 August 2026"
+     ],
+     "dated": "2026-08-13"
+    },
+    {
+     "file": "usembassy-alert",
+     "org": "US Department of State (Virtual Embassy Iran)",
+     "quote": [
+      "Do not travel to Iran for any reason.",
+      "SEPTEMBER 19, 2026"
+     ],
+     "dated": "2026-09-19"
+    }
+   ]
+  },
+  {
+   "claim": "busiest airport in Iran, name can mislead",
+   "verdict": "cut",
+   "wasBefore": "Iran's busiest airport by passengers and aircraft movements, in Tehran, though the name can mislead.",
+   "why": "The ranking has one saveable source; reworded to Tehran's domestic airport."
+  },
+  {
+   "claim": "IKA opened in 2007 and took the international flights",
+   "verdict": "cut",
+   "wasBefore": "Since Imam Khomeini International opened in 2007 and took the international flights, Mehrabad has handled mostly domestic traffic.",
+   "why": "Wrong year: Imam Khomeini first operated in May 2004 (Reuters, in ledger/IKA.json) and Wikipedia says the international move finished by March 2008. Kept as the current split, which two sources give."
+  },
+  {
+   "claim": "a client from abroad will almost certainly not land here",
+   "verdict": "cut",
+   "wasBefore": "A client flying into Tehran from abroad will almost certainly not land here.",
+   "why": "Follows from the split already stated; not repeated."
+  },
+  {
+   "claim": "17,464,216 passengers in 2017, 60 destinations, 23 airlines, Iran Air largest",
+   "verdict": "cut",
+   "wasBefore": "It carried 17,464,216 passengers in 2017 and serves 60 non-stop destinations through 23 airlines, with Iran Air the largest operator.",
+   "why": "2017 figure is stale and single-source (Wikipedia's own later figure is 12.3 million for 2022 to 2023); the destination and airline counts have one source."
+  },
+  {
+   "claim": "four active terminals and airline allocation",
+   "verdict": "cut",
+   "wasBefore": "There are four active terminals and the airline allocation matters.",
+   "why": "Only Wikipedia; the operator's site (mehrabad.airport.ir) and Safarmarket timed out, and the web archive is blocked by the proxy."
+  },
+  {
+   "claim": "T2 1977 busiest with Iran Air; T4 2007 Caspian, Iran Aseman, FlyPersia",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2, from 1977, is the busiest and handles Iran Air among others. Terminal 4, from 2007, takes Caspian, Iran Aseman and FlyPersia.",
+   "why": "Only Wikipedia; terminal allocations are time-sensitive."
+  },
+  {
+   "claim": "T1 worth a look",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 is worth a look.",
+   "why": "Opinion tied to the cut monument claim."
+  },
+  {
+   "claim": "T1 1955, first advanced terminal in the Middle East, national monument",
+   "verdict": "cut",
+   "wasBefore": "Opened in 1955, it was the first advanced airport terminal in the Middle East and is now registered as a national historical monument in Iran, both for its architecture and for its place in the country's development.",
+   "why": "Only Wikipedia."
+  },
+  {
+   "claim": "opened 1938, used by government and air force",
+   "verdict": "cut",
+   "wasBefore": "The airport opened in 1938 and is also used by the Iranian government and air force.",
+   "why": "Only Wikipedia. The Jerusalem Post (June 2025) reports missiles striking near the airport but not its air force use."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

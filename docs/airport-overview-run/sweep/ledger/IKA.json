@@ -1,0 +1,306 @@
+{
+ "iata": "IKA",
+ "id": "rec1K9oZJsnCezlg1",
+ "name": "Imam Khomeini International Airport",
+ "country": "Iran",
+ "wikipedia": "https://en.wikipedia.org/wiki/Imam_Khomeini_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The thing to get right when booking Tehran is that the city has two airports and they do not overlap. Every international flight uses Imam Khomeini, 35 km south west of the city, and every domestic flight uses Mehrabad. A client connecting from an international arrival onto an internal Iranian flight has to cross Tehran by road between the two.\n\nThe airport covers 13,400 hectares with two terminals and two runways, and it is a hub for several carriers. By the financial year ending March 2019 it ranked third in Iran for passenger traffic.\n\nIts opening was not straightforward. It was planned before the 1979 revolution, when Mehrabad was already congested, and was due to open in May 2004 under a Turkish and Austrian consortium. The Islamic Revolutionary Guard Corps shut it down days after the first landing, citing security fears about foreigners running the airport. It reopened in April 2005 with four Iranian airlines.",
+ "after": "Tehran's international airport, about 35 km south west of the city. Domestic flights use Mehrabad instead. On its first day of operations, in May 2004, the military blocked the runway and closed it.\n\nIran closed its airspace after the United States and Israel struck the country on 28 February 2026. International flights resumed here in April, but Iranian airspace can still close at short notice, and European regulators tell their airlines not to fly in it at any altitude.\n\nNew US sanctions from 23 September 2026 are aimed at shutting Iranian airlines out of international flying, and Turkish Airlines has suspended its Iran flights until at least March 2027.\n\nThe FCDO advises against all travel to Iran, and the US government tells its citizens not to travel there for any reason.",
+ "claims": [
+  {
+   "claim": "Tehran's international airport, about 35 km south west of the city",
+   "verdict": "confirmed",
+   "inAfter": "Tehran's international airport, about 35 km south west of the city",
+   "note": "Coordinates give 39.4 km in a straight line at 218 degrees (south west) from the GeoNames centre of Tehran; ratio 0.89.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "is the international airport of Tehran, the capital of Iran",
+      "35 kilometres (22 miles) southwest of Tehran"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Tehran",
+      "Straight-line distance from the city centre: 39.4 km (24.5 miles)",
+      "Bearing from the city centre: 218 degrees, which is south west"
+     ]
+    },
+    {
+     "file": "intellinews-six",
+     "org": "bne IntelliNews",
+     "quote": "resumed scheduled international flights from Tehran's Imam Khomeini International (IKA)",
+     "dated": "2026-04-18"
+    }
+   ]
+  },
+  {
+   "claim": "domestic flights use Mehrabad",
+   "verdict": "softened",
+   "inAfter": "Domestic flights use Mehrabad instead.",
+   "note": "Was: every international flight uses Imam Khomeini and every domestic flight Mehrabad. Wikipedia itself says Hajj and Umrah flights stayed at Mehrabad in 2008, so the absolute is dropped.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "all domestic flights land at Mehrabad Airport"
+    },
+    {
+     "file": "intellinews-six",
+     "org": "bne IntelliNews",
+     "quote": "Mehrabad airport was handling domestic traffic",
+     "dated": "2026-04-18"
+    }
+   ]
+  },
+  {
+   "claim": "first day of operations May 2004: military blocked the runway and closed it",
+   "verdict": "corrected",
+   "inAfter": "On its first day of operations, in May 2004, the military blocked the runway and closed it.",
+   "note": "Was: the Revolutionary Guard shut it down days after the first landing. Both sources put the closure on the first day of operations (Wikipedia: hours after the first landing, on 8 May 2004). Reuters says the military, Wikipedia the Revolutionary Guard, so the text says the military.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The following day, an Emirates flight from Dubai became the first to land.",
+      "Hours later, however, the Islamic Revolutionary Guard Corps closed the airport by driving tanks onto the runway."
+     ]
+    },
+    {
+     "file": "haaretz-2004",
+     "org": "Reuters (published by Haaretz)",
+     "quote": [
+      "May 11, 2004",
+      "Iran's military, which blocked the runway at Tehran's new international airport on its first day of operations on Saturday, has given its go-ahead for the terminal to re-open"
+     ],
+     "dated": "2004-05-11"
+    }
+   ]
+  },
+  {
+   "claim": "Iran closed its airspace after US and Israeli strikes on 28 February 2026",
+   "verdict": "corrected",
+   "inAfter": "Iran closed its airspace after the United States and Israel struck the country on 28 February 2026.",
+   "sources": [
+    {
+     "file": "easa-czib-iran",
+     "org": "EASA (EU Aviation Safety Agency)",
+     "quote": "On 28 February 2026, the United States and Israel conducted military strikes targeting sites within Iranian territory.",
+     "dated": "2026-08-31"
+    },
+    {
+     "file": "intellinews-six",
+     "org": "bne IntelliNews",
+     "quote": "Iranian airspace was largely shut down at the start of the US-Israeli war on February 28",
+     "dated": "2026-04-18"
+    },
+    {
+     "file": "safeairspace-iran",
+     "org": "Safe Airspace (OPSGROUP)",
+     "quote": "OIIX/Tehran FIR closed following large-scale US and Israeli strikes"
+    }
+   ]
+  },
+  {
+   "claim": "international flights resumed at Imam Khomeini in April 2026",
+   "verdict": "corrected",
+   "inAfter": "International flights resumed here in April",
+   "note": "Both reports are dated 18 April 2026. A later list (Middle East Eye, 28 April, from Iran's airports company) names six operational airports without Imam Khomeini; it does not say the airport had closed again, so the April restart stands, and the next clause warns that airspace can still close. IranWire reported flights at Tehran's international airport suspended again in June; one source only, so it is not stated.",
+   "sources": [
+    {
+     "file": "intellinews-six",
+     "org": "bne IntelliNews",
+     "quote": [
+      "April 18, 2026",
+      "resumed scheduled international flights from Tehran's Imam Khomeini International (IKA)",
+      "Flight tracking data from Imam Khomeini International showed Mahan Air operating the bulk of international services from April 18"
+     ],
+     "dated": "2026-04-18"
+    },
+    {
+     "file": "8am-six",
+     "org": "Hasht-e Subh Daily (8am.media), citing Tasnim",
+     "quote": [
+      "18 April 2026",
+      "the newly reopened airports include Imam Khomeini International Airport and Mehrabad Airport in Tehran"
+     ],
+     "dated": "2026-04-18"
+    }
+   ]
+  },
+  {
+   "claim": "Iranian airspace can still close at short notice",
+   "verdict": "corrected",
+   "inAfter": "but Iranian airspace can still close at short notice",
+   "sources": [
+    {
+     "file": "fcdo-iran",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": [
+      "Iranian airspace may close at short notice.",
+      "23 September 2026"
+     ],
+     "dated": "2026-08-13"
+    },
+    {
+     "file": "easa-czib-iran",
+     "org": "EASA (EU Aviation Safety Agency)",
+     "quote": "implementing temporary airspace closures and restrictions",
+     "dated": "2026-08-31"
+    },
+    {
+     "file": "iranwire-shiraz-cancel",
+     "org": "IranWire",
+     "quote": "Iranian government officials reported the suspension of all flights at the international airports of Mashhad and Tehran until further notice",
+     "dated": "2026-06-08"
+    }
+   ]
+  },
+  {
+   "claim": "European regulators tell airlines not to fly in Iranian airspace at any altitude",
+   "verdict": "corrected",
+   "inAfter": "and European regulators tell their airlines not to fly in it at any altitude",
+   "note": "EASA's bulletin runs to 30 September 2026 unless reviewed earlier; re-check after that date.",
+   "sources": [
+    {
+     "file": "easa-czib-iran",
+     "org": "EASA (EU Aviation Safety Agency)",
+     "quote": [
+      "Not operate within the airspace of Iran, FIR Tehran (OIIX), at all altitudes and flight levels",
+      "30/09/2026, unless reviewed earlier."
+     ],
+     "dated": "2026-08-31"
+    },
+    {
+     "file": "safeairspace-iran",
+     "org": "Safe Airspace (OPSGROUP)",
+     "quote": [
+      "German operators should not enter the airspace of Iran",
+      "French operators should not enter the airspace of Iran"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "US sanctions from 23 September 2026 aim to shut Iranian airlines out of international flying; Turkish Airlines suspended until at least March 2027",
+   "verdict": "corrected",
+   "inAfter": "New US sanctions from 23 September 2026 are aimed at shutting Iranian airlines out of international flying, and Turkish Airlines has suspended its Iran flights until at least March 2027.",
+   "note": "Both reports are from the week of this audit and the situation is moving: Iran International (23 September, citing Bloomberg) says Iranian airlines were still flying abroad on the deadline day, and reports conflict on whether Iraq has stopped Iranian flights, so neither point is stated. The i24NEWS piece is undated on the page; it says the Turkish changes take effect Monday (21 September) and Iraq's suspension starts Tuesday. Re-check within weeks.",
+   "sources": [
+    {
+     "file": "iranintl-0922",
+     "org": "Iran International",
+     "quote": [
+      "US Treasury Secretary Scott Bessent said Monday that Iranian airlines would effectively be shut out of international operations from September 23",
+      "told Iran International on Monday that it had suspended all of its flights to Iran until at least March 2027"
+     ],
+     "dated": "2026-09-22"
+    },
+    {
+     "file": "i24-turkish",
+     "org": "i24NEWS",
+     "quote": [
+      "These actions come as US sanctions take effect.",
+      "US Treasury Secretary Scott Bessent told CNBC in an interview that all Iranian airlines would be shut down worldwide starting September 23.",
+      "The Turkish Airlines and AJet websites show no flights to Iran until March 2027"
+     ],
+     "dated": "2026-09-21"
+    }
+   ]
+  },
+  {
+   "claim": "UK and US governments advise against all travel to Iran",
+   "verdict": "corrected",
+   "inAfter": "The FCDO advises against all travel to Iran, and the US government tells its citizens not to travel there for any reason.",
+   "note": "Each government is quoted from its own page: the FCDO (still current 23 September 2026) and the US Virtual Embassy Iran (alert of 19 September 2026).",
+   "sources": [
+    {
+     "file": "fcdo-iran",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": [
+      "FCDO advises against all travel to Iran.",
+      "13 August 2026"
+     ],
+     "dated": "2026-08-13"
+    },
+    {
+     "file": "usembassy-alert",
+     "org": "US Department of State (Virtual Embassy Iran)",
+     "quote": [
+      "Do not travel to Iran for any reason.",
+      "SEPTEMBER 19, 2026"
+     ],
+     "dated": "2026-09-19"
+    }
+   ]
+  },
+  {
+   "claim": "two airports that do not overlap",
+   "verdict": "cut",
+   "wasBefore": "The thing to get right when booking Tehran is that the city has two airports and they do not overlap.",
+   "why": "Framing sentence; reworded to the two-source facts that follow."
+  },
+  {
+   "claim": "every international flight uses IKA, every domestic flight Mehrabad",
+   "verdict": "cut",
+   "wasBefore": "Every international flight uses Imam Khomeini, 35 km south west of the city, and every domestic flight uses Mehrabad.",
+   "why": "Absolute dropped: Wikipedia says Hajj and Umrah flights stayed at Mehrabad. Kept as Tehran's international airport, domestic flights at Mehrabad."
+  },
+  {
+   "claim": "connecting passengers cross Tehran by road",
+   "verdict": "cut",
+   "wasBefore": "A client connecting from an international arrival onto an internal Iranian flight has to cross Tehran by road between the two.",
+   "why": "An inference with no source of its own, and not strictly true: Wikipedia says Metro Line 1 serves the airport. Moot while the FCDO advises against all travel."
+  },
+  {
+   "claim": "13,400 hectares, two terminals, two runways, hub for several carriers",
+   "verdict": "cut",
+   "wasBefore": "The airport covers 13,400 hectares with two terminals and two runways, and it is a hub for several carriers.",
+   "why": "Area, terminals and hubs rest on Wikipedia alone: the operator's site (ikac.ir), Mehr News and the Financial Tribune all timed out, and the web archive is blocked by the proxy. Two runways is confirmed by OurAirports but was not worth a sentence alone."
+  },
+  {
+   "claim": "third in Iran, year to March 2019",
+   "verdict": "cut",
+   "wasBefore": "By the financial year ending March 2019 it ranked third in Iran for passenger traffic.",
+   "why": "Seven years stale and single-source; 2026 traffic is dominated by the war."
+  },
+  {
+   "claim": "planned before 1979 when Mehrabad was congested",
+   "verdict": "cut",
+   "wasBefore": "It was planned before the 1979 revolution, when Mehrabad was already congested",
+   "why": "Only Wikipedia. VOA (February 2004) says construction began about 30 years earlier, which is not the same claim."
+  },
+  {
+   "claim": "due to open May 2004 under a Turkish and Austrian consortium",
+   "verdict": "cut",
+   "wasBefore": "was due to open in May 2004 under a Turkish and Austrian consortium",
+   "why": "The consortium has one saveable source (Arabian Business and the Washington Post refused the fetcher). The May 2004 first day is kept with Reuters."
+  },
+  {
+   "claim": "IRGC shut it days after first landing, citing security fears about foreigners",
+   "verdict": "cut",
+   "wasBefore": "The Islamic Revolutionary Guard Corps shut it down days after the first landing, citing security fears about foreigners running the airport.",
+   "why": "Wrong on timing: both sources put it on the first day. The stated reason has one source. Replaced by the corrected sentence."
+  },
+  {
+   "claim": "reopened April 2005 with four Iranian airlines",
+   "verdict": "cut",
+   "wasBefore": "It reopened in April 2005 with four Iranian airlines.",
+   "why": "Only Wikipedia."
+  },
+  {
+   "claim": "opening not straightforward",
+   "verdict": "cut",
+   "wasBefore": "Its opening was not straightforward.",
+   "why": "Framing sentence."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
