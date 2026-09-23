@@ -1,0 +1,222 @@
+{
+ "iata": "VCP",
+ "id": "recznKmlbPWK9gV5g",
+ "name": "Viracopos International Airport",
+ "country": "Brazil",
+ "wikipedia": "https://en.wikipedia.org/wiki/Viracopos_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Campinas's airport, 20 km south west of downtown Campinas but 82 km north west of São Paulo itself, beside the Bandeirantes-Anhanguera highway.\n\nThe booking code is the thing to understand, and it catches people out. Viracopos has two codes that behave differently in reservation systems. VCP is part of the São Paulo multiple airport system alongside Congonhas and Guarulhos, so a flight filed as VCP appears when someone searches for São Paulo. CPQ is the city code for Campinas, and a flight filed that way appears as Campinas instead. The same airport, two different search behaviours. It works much like New York, where JFK, LaGuardia and Newark all answer to NYC even though Newark is in another state.\n\nSo a client who books what a system called São Paulo may land 82 km away from the city. Quote the transfer explicitly.\n\nThe airport is operated by Aeroportos Brasil, and its name was officially settled in its present form on 6 January 1987.",
+ "after": "Campinas's airport, 20 km south west of downtown Campinas but 82 km north west of São Paulo itself. For a client bound for São Paulo, quote the road transfer explicitly.\n\nThe airport is operated by Aeroportos Brasil. Its official name, Viracopos-Campinas International Airport, was set by law on 6 January 1987.",
+ "claims": [
+  {
+   "claim": "Campinas's airport",
+   "verdict": "confirmed",
+   "inAfter": "Campinas's airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was written from",
+     "quote": "is an international airport serving the municipality of Campinas, in the state of São Paulo"
+    },
+    {
+     "file": "aisweb-sbkp",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Viracopos (SBKP) Campinas/SP"
+    },
+    {
+     "file": "planalto-lei-7585",
+     "org": "Presidency of Brazil (Planalto law archive)",
+     "dated": "1987-01-06",
+     "quote": [
+      "aeroporto internacional de Campinas.",
+      "passa a"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "20 km south west of downtown Campinas",
+   "verdict": "confirmed",
+   "inAfter": "20 km south west of downtown Campinas",
+   "note": "Coordinates: 13.6 km in a straight line at 214 degrees, south west (ratio 1.47, inside the tolerance for a road distance). DECEA's aerodrome entry places it 14 km south south west of the city.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was written from",
+     "quote": "20 km (12 mi) southwest of downtown Campinas"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from Campinas (GeoNames 3467865): 13.6 km (8.5 miles), bearing 214 degrees, which is south west"
+     ]
+    },
+    {
+     "file": "aisweb-sbkp",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "CAMPINAS ,",
+      "14SSW"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "82 km north west of São Paulo",
+   "verdict": "confirmed",
+   "inAfter": "but 82 km north west of São Paulo itself",
+   "note": "Coordinates: 78.7 km in a straight line at 320 degrees, north west (ratio 1.04).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was written from",
+     "quote": "The airport is located 82 km (51 mi) northwest of the state capital city of São Paulo"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from São Paulo (GeoNames 3448439): 78.7 km (48.9 miles), bearing 320 degrees, which is north west"
+    }
+   ]
+  },
+  {
+   "claim": "operated by Aeroportos Brasil",
+   "verdict": "confirmed",
+   "inAfter": "The airport is operated by Aeroportos Brasil.",
+   "note": "Checked for a 2025 or 2026 change of operator: none found. Infraero's 2025 report (it looks ahead to 2026) still lists Viracopos Aeroportos Brasil as the company running the airport, with Infraero holding 49 per cent; it adds that the re-bidding (relicitação) of the concession was closed and that ANAC set up a negotiating commission with the Ministry of Ports and Airports and the Attorney General's office, still under way. Worth re-checking in 2027. The operator's own site (viracopos.com) could not be reached all evening: the proxy reported 'remote connection failure' three times and the browser tool got 502.",
+   "sources": [
+    {
+     "file": "infraero-relatorio-2025",
+     "org": "Infraero (2025 annual report)",
+     "dated": "2025 annual report (it looks ahead to 2026)",
+     "quote": [
+      "INFRAERO | RELATÓRIO ANUAL INTEGRADO 2025",
+      "(VCP) - Viracopos Aeroportos Brasil – o processo",
+      "encerrado. Diante desse cenário, a Anac instituiu",
+      "uma comissão de autocomposição para negociação"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was written from",
+     "quote": "It is operated by Aeroportos Brasil."
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "Aeroportos Brasil (2012–present)"
+    }
+   ]
+  },
+  {
+   "claim": "official name Viracopos-Campinas International Airport set by law on 6 January 1987",
+   "verdict": "confirmed",
+   "inAfter": "Its official name, Viracopos-Campinas International Airport, was set by law on 6 January 1987.",
+   "note": "Was 'its name was officially settled in its present form on 6 January 1987'; the law gives the form: 'Aeroporto Internacional de Viracopos - Campinas' (Law 7,585 of 6 January 1987).",
+   "sources": [
+    {
+     "file": "planalto-lei-7585",
+     "org": "Presidency of Brazil (Planalto law archive)",
+     "dated": "1987-01-06",
+     "quote": [
+      "6 DE JANEIRO DE 1987.",
+      "denominar-se \"Aeroporto Internacional de Viracopos - Campinas\"."
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was written from",
+     "quote": [
+      "The Viracopos/Campinas International Airport (IATA: VCP, ICAO: SBKP)",
+      "On 6 January 1987, the airport name was officially normalised to its present form."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "beside the Bandeirantes-Anhanguera highway",
+   "verdict": "cut",
+   "wasBefore": "beside the Bandeirantes-Anhanguera highway",
+   "why": "Wikipedia alone. The operator's own site, the obvious second source for access roads, could not be reached (see the operator claim)."
+  },
+  {
+   "claim": "the booking code is the thing to understand",
+   "verdict": "cut",
+   "wasBefore": "The booking code is the thing to understand, and it catches people out.",
+   "why": "Introduces the code paragraph, which is cut (below)."
+  },
+  {
+   "claim": "two codes that behave differently",
+   "verdict": "cut",
+   "wasBefore": "Viracopos has two codes that behave differently in reservation systems.",
+   "why": "Wikipedia alone (below)."
+  },
+  {
+   "claim": "VCP is in the São Paulo multiple airport system with Congonhas and Guarulhos",
+   "verdict": "cut",
+   "wasBefore": "VCP is part of the São Paulo multiple airport system alongside Congonhas and Guarulhos, so a flight filed as VCP appears when someone searches for São Paulo.",
+   "why": "Wikipedia alone. IATA's location-code directory can only be read through its own site search, which the sweep does not use, and no airline, operator or regulator page read tonight says how VCP is grouped. Worth checking by hand in a GDS: if VCP does sit under SAO, this is the most useful thing an agent can know about the airport."
+  },
+  {
+   "claim": "CPQ is the city code for Campinas",
+   "verdict": "cut",
+   "wasBefore": "CPQ is the city code for Campinas, and a flight filed that way appears as Campinas instead.",
+   "why": "Wikipedia alone, and OurAirports casts doubt on it: it attaches CPQ to Campinas's small Campo dos Amarais airfield (SDAM), not to Viracopos. The sources disagree, so it goes.",
+   "sources": [
+    {
+     "file": "ourairports-campinas",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "SBKP | IATA VCP | Viracopos International Airport",
+      "SDAM | IATA (none) | Estadual de Campos dos Amarais - Prefeito Francisco Amaral Airport | small_airport | scheduled service no | keywords CPQ"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was written from",
+     "quote": "The IATA airport code of Viracopos is VCP and the specific city code of Campinas is CPQ."
+    }
+   ]
+  },
+  {
+   "claim": "the same airport, two search behaviours",
+   "verdict": "cut",
+   "wasBefore": "The same airport, two different search behaviours.",
+   "why": "Follows from the cut code claims."
+  },
+  {
+   "claim": "like New York: JFK, LaGuardia and Newark under NYC",
+   "verdict": "cut",
+   "wasBefore": "It works much like New York, where JFK, LaGuardia and Newark all answer to NYC even though Newark is in another state.",
+   "why": "An analogy that rests on the cut code claims (Wikipedia alone)."
+  },
+  {
+   "claim": "a client booked to 'São Paulo' may land 82 km away",
+   "verdict": "cut",
+   "wasBefore": "So a client who books what a system called São Paulo may land 82 km away from the city.",
+   "why": "Depends on the unconfirmed SAO grouping. The practical advice is kept, tied to the confirmed distance (see opinion)."
+  },
+  {
+   "claim": "quote the transfer explicitly",
+   "verdict": "cut",
+   "wasBefore": "Quote the transfer explicitly.",
+   "why": "Reworded as advice for clients bound for São Paulo (see opinion)."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "For a client bound for São Paulo, quote the road transfer explicitly.",
+   "why": "Advice kept from the old text; it follows from the confirmed 82 km between the airport and São Paulo. The booking-code mechanics that led to it are cut as unconfirmed."
+  }
+ ],
+ "tracerOk": {}
+}

@@ -1,0 +1,430 @@
+{
+ "iata": "CAN",
+ "id": "recgvitz39vbBZfp6",
+ "name": "Guangzhou Baiyun International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Guangzhou_Baiyun_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The CAN code gives away its history: it comes from Canton, the old romanisation of Guangzhou, and the airport still carries it. Baiyun sits north of the city in Guangdong province and handles more passengers than any other airport in mainland China, with 63.1 million through its doors in 2023, putting it twelfth in the world that year. For a strange stretch in 2020, when much of global aviation stopped, it was briefly the busiest airport anywhere.\n\nMost travellers passing through are connecting. It is the main hub for China Southern Airlines and also a base for Hainan Airlines, Shenzhen Airlines, 9 Air and FedEx Express, so freight moves through in serious volume alongside the passenger traffic. Cargo numbers put it second in China.\n\nTerminal 2 has a five-star rating from Skytrax, with the airport as a whole rated four-star, which tells you the newer facilities are a step up. Five commercial runways operate here, a first in China, and the airport was also the country's first certified to 4F standard, meaning it takes the largest aircraft flying.",
+ "after": "Baiyun sits north of Guangzhou, in Guangdong province. It handled 83.6 million passengers in 2025, second in mainland China only to Shanghai Pudong and ninth in the world. For a strange stretch in 2020, when much of global aviation stopped, it was briefly the busiest airport anywhere.\n\nIt is a hub for China Southern Airlines, and freight moves through in serious volume alongside the passenger traffic. Cargo numbers put it second in mainland China.\n\nTerminal 2 has a five-star rating from Skytrax, with the airport as a whole rated four-star. Five commercial runways operate here.",
+ "claims": [
+  {
+   "claim": "north of Guangzhou, in Guangdong province",
+   "verdict": "confirmed",
+   "inAfter": "Baiyun sits north of Guangzhou, in Guangdong province.",
+   "note": "Coordinates: 31.1 km in a straight line at 9 degrees (north). Wikipedia gives 28 km north of downtown Guangzhou, and China Southern about 28 km from Haizhu Square.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": [
+      "is an international airport serving Guangzhou, Guangdong, China",
+      "the new airport is 28 kilometres (17 mi) north of downtown Guangzhou"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 31.1 km (19.3 miles)",
+      "Bearing from the city centre: 9 degrees, which is north"
+     ]
+    },
+    {
+     "file": "csair-can-info",
+     "org": "China Southern Airlines (csair.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Located in the north of Guangzhou and at the junction of Renhe Town, Baiyun District and Huadong Town, Huadu District"
+    },
+    {
+     "file": "xinhua-t3-20251030",
+     "org": "Xinhua",
+     "dated": "2025-10-30",
+     "quote": [
+      "2025-10-30 22:20:30",
+      "The Baiyun airport in Guangzhou, capital of south China's Guangdong Province"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "83.6 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled 83.6 million passengers in 2025",
+   "note": "Was '63.1 million through its doors in 2023'. CAAC and ACI World both give 83,582,952 for 2025, up 9.5 per cent.",
+   "sources": [
+    {
+     "file": "caac-2025-top",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row: 广州/白云 | 2 | 83582952 | 76364767 | 9.5"
+    },
+    {
+     "file": "aci-20260715",
+     "org": "ACI World (Airports Council International)",
+     "dated": "2026-07-15",
+     "quote": [
+      "Montreal, 15 July 2026",
+      "Guangzhou, CN (CAN)",
+      "83,582,952"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": [
+      "stat1_data = 83,582,952 9.5%",
+      "stat_year = 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "second in mainland China in 2025, after Shanghai Pudong",
+   "verdict": "corrected",
+   "inAfter": "second in mainland China only to Shanghai Pudong",
+   "note": "Was 'handles more passengers than any other airport in mainland China', true from 2020 to 2023 but not for 2024 or 2025, when Pudong was ahead (CAAC: 84,994,548 against 83,582,952 in 2025). ACI's top 20 has no other mainland airport between Pudong (5th) and Guangzhou (9th). Wikipedia notes Guangzhou was ahead of Pudong again in the first quarter of 2026, so this may change for 2026; the text gives the last full year.",
+   "sources": [
+    {
+     "file": "caac-2025-top",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "Row: 上海/浦东 | 1 | 84994548 | 76787039 | 10.7",
+      "Row: 广州/白云 | 2 | 83582952"
+     ]
+    },
+    {
+     "file": "aci-20260715",
+     "org": "ACI World (Airports Council International)",
+     "dated": "2026-07-15",
+     "quote": [
+      "Shanghai Pudong International Airport (PVG) posted the second largest jump, climbing five places from 10th to 5th.",
+      "Shanghai, CN (PVG)",
+      "84,994,548"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "ninth in the world in 2025",
+   "verdict": "corrected",
+   "inAfter": "and ninth in the world",
+   "note": "Was 'twelfth in the world' in 2023.",
+   "sources": [
+    {
+     "file": "aci-20260715",
+     "org": "ACI World (Airports Council International)",
+     "dated": "2026-07-15",
+     "quote": "the airport fell to 57th place in 2022 before returning to 9th in 2025"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": [
+      "stat2_header = Rank (world)",
+      "stat2_data = 9th",
+      "stat_year = 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "busiest airport in the world in 2020, when the pandemic stopped much of world aviation",
+   "verdict": "confirmed",
+   "inAfter": "For a strange stretch in 2020, when much of global aviation stopped, it was briefly the busiest airport anywhere.",
+   "note": "'A strange stretch' is the old text's framing of the pandemic year, kept.",
+   "sources": [
+    {
+     "file": "aci-20210422",
+     "org": "ACI World (Airports Council International)",
+     "dated": "2021-04-22",
+     "quote": [
+      "Guangzhou Bai Yun International Airport in China recorded the most passenger traffic in 2020",
+      "pandemic brought aviation to a virtual standstill in 2020"
+     ]
+    },
+    {
+     "file": "aci-20260715",
+     "org": "ACI World (Airports Council International)",
+     "dated": "2026-07-15",
+     "quote": "Having topped the global table in 2020"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "In 2020, due to the impact of the COVID-19 pandemic on aviation in other countries, it was temporarily the world's busiest airport by passenger traffic, handling 43.8 million passengers."
+    }
+   ]
+  },
+  {
+   "claim": "a hub for China Southern Airlines",
+   "verdict": "softened",
+   "inAfter": "It is a hub for China Southern Airlines",
+   "note": "Was 'the main hub'. China Southern's own Guangzhou airport page calls the airport an airline hub and puts its check-in in Terminal 2; Wikipedia names it a China Southern hub. Neither readable source says 'main' (China Southern's hub pages answered 404, and its site is a JavaScript app), so the word goes.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": [
+      "Baiyun Airport serves as a hub for China Southern Airlines",
+      "Terminal 2 is currently the main hub of China Southern Airlines"
+     ]
+    },
+    {
+     "file": "csair-can-info",
+     "org": "China Southern Airlines (csair.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "It is China's first super-large airline hub developed and designed following international airline hub standards.",
+      "CSAIR domestic premium check-in counters are located in the J area of Terminal 2"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "freight in serious volume",
+   "verdict": "confirmed",
+   "inAfter": "and freight moves through in serious volume alongside the passenger traffic",
+   "note": "ACI ranks it tenth in the world for cargo in 2025 (2,439,248 tonnes); CAAC gives 2,439,247.5 tonnes of cargo and mail.",
+   "sources": [
+    {
+     "file": "aci-20260715",
+     "org": "ACI World (Airports Council International)",
+     "dated": "2026-07-15",
+     "quote": [
+      "Top 20 busiest airports by global cargo volumes 2025*",
+      "2,439,248"
+     ]
+    },
+    {
+     "file": "caac-2025-top",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row: 广州/白云 | 2 | 83582952 | 76364767 | 9.5 | 2 | 2439247.5070000002"
+    }
+   ]
+  },
+  {
+   "claim": "second in mainland China for cargo",
+   "verdict": "corrected",
+   "inAfter": "Cargo numbers put it second in mainland China.",
+   "note": "Was 'second in China'. CAAC's table covers the mainland, where only Shanghai Pudong handled more (4,091,941 tonnes); Hong Kong, which ACI ranks first in the world (5.07 million tonnes), handled more too, so 'mainland' is needed.",
+   "sources": [
+    {
+     "file": "caac-2025-top",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "Row: 上海/浦东 | 1 | 84994548 | 76787039 | 10.7 | 1 | 4091940.932",
+      "Row: 广州/白云 | 2 | 83582952 | 76364767 | 9.5 | 2 | 2439247.5070000002"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "As for cargo traffic, the airport was China's second-busiest"
+    },
+    {
+     "file": "aci-20260715",
+     "org": "ACI World (Airports Council International)",
+     "dated": "2026-07-15",
+     "quote": "Hong Kong International Airport (HKG) retained the top cargo ranking with 5.1 million metric tonnes (+2.7%), followed by Shanghai Pudong (PVG, 4.1 million metric tonnes, +8.3%)"
+    }
+   ]
+  },
+  {
+   "claim": "Skytrax: Terminal 2 five-star, the airport four-star",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 2 has a five-star rating from Skytrax, with the airport as a whole rated four-star.",
+   "note": "Skytrax's live page. Its commentary quotes 2019 traffic and names only Terminals 1 and 2, so the audit predates Terminal 3 (opened 30 October 2025) and Terminal 1's closure for renovation (7 May 2026); the ratings are given as Skytrax shows them today.",
+   "sources": [
+    {
+     "file": "skytrax-can",
+     "org": "Skytrax",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "is certified as a 4-Star airport, including Terminal 2 which is classified as a 5-Star Airport Terminal"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "Baiyun Airport is certified as a 4-Star airport, while Terminal 2 is classified as a 5-Star Airport Terminal by Skytrax."
+    }
+   ]
+  },
+  {
+   "claim": "five runways",
+   "verdict": "confirmed",
+   "inAfter": "Five commercial runways operate here.",
+   "note": "The fifth runway opened with Terminal 3 on 30 October 2025 (Xinhua, China Daily, South).",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 03/21: 3,600 m (11,811 ft), CON",
+      "Runways listed: 5"
+     ]
+    },
+    {
+     "file": "xinhua-t3-20251030",
+     "org": "Xinhua",
+     "dated": "2025-10-30",
+     "quote": "on Thursday officially put into operation its Terminal 3 and fifth runway"
+    },
+    {
+     "file": "bygov-t3-20251031",
+     "org": "China Daily (on the Baiyun District government site)",
+     "dated": "2025-10-31",
+     "quote": [
+      "Updated : October 31, 2025",
+      "The additions bring the airport's totals to three terminals and five runways"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": [
+      "Guangzhou Baiyun International Airport now has five runways.",
+      "The fifth runway 03/21 opened on 30 October 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the CAN code comes from Canton",
+   "verdict": "cut",
+   "wasBefore": "The CAN code gives away its history: it comes from Canton, the old romanisation of Guangzhou, and the airport still carries it.",
+   "why": "Wikipedia alone. No second source found: the operator's site is a JavaScript app with no readable history page, its English site answered 502, and the Guangdong airport group's site answered 468 (a bot check, not retried)."
+  },
+  {
+   "claim": "more passengers than any other mainland airport",
+   "verdict": "cut",
+   "wasBefore": "handles more passengers than any other airport in mainland China",
+   "why": "Out of date: Shanghai Pudong was busier in 2024 and 2025 (CAAC, ACI). Corrected to second in mainland China in 2025 (see above)."
+  },
+  {
+   "claim": "63.1 million in 2023, twelfth in the world",
+   "verdict": "cut",
+   "wasBefore": "with 63.1 million through its doors in 2023, putting it twelfth in the world that year",
+   "why": "Two years old. Replaced by 2025: 83.6 million, ninth in the world (CAAC, ACI, Wikipedia)."
+  },
+  {
+   "claim": "most travellers are connecting",
+   "verdict": "cut",
+   "wasBefore": "Most travellers passing through are connecting.",
+   "why": "No source says so, and the Wikipedia article does not say it either."
+  },
+  {
+   "claim": "the main hub for China Southern",
+   "verdict": "cut",
+   "wasBefore": "It is the main hub for China Southern Airlines",
+   "why": "Softened to 'a hub' (see above): no readable source outside Wikipedia says 'main'."
+  },
+  {
+   "claim": "a base for Hainan Airlines, Shenzhen Airlines, 9 Air and FedEx Express",
+   "verdict": "cut",
+   "wasBefore": "and also a base for Hainan Airlines, Shenzhen Airlines, 9 Air and FedEx Express",
+   "why": "Wikipedia alone for 'base'. South (1 May 2026) shows Hainan Airlines and Shenzhen Airlines flying from the airport, and the airport's own headline shows 9 Air flying Guangzhou to Jakarta, but none says base; 9 Air's site shows no text to a reader, FedEx's Asia newsroom index lists nothing on a Guangzhou hub, STAT Times (November 2024) reports FedEx flights from Guangzhou without calling it a hub, and Aviation Week's page failed to connect."
+  },
+  {
+   "claim": "second in China for cargo",
+   "verdict": "cut",
+   "wasBefore": "Cargo numbers put it second in China.",
+   "why": "Corrected to 'second in mainland China' (see above): Hong Kong handles more."
+  },
+  {
+   "claim": "the newer facilities are a step up",
+   "verdict": "cut",
+   "wasBefore": "which tells you the newer facilities are a step up",
+   "why": "No longer reads right: Terminal 2 is not the newest terminal since Terminal 3 opened on 30 October 2025, and the older Terminal 1 has been closed for renovation since 7 May 2026. See the held-back terminal update."
+  },
+  {
+   "claim": "five runways a first in China",
+   "verdict": "cut",
+   "wasBefore": "a first in China",
+   "why": "Wikipedia contradicts itself: its lead says the first 4F airport in China with five runways, its runway section 'the second airport to have a five-runway system in China'. No second source settles it."
+  },
+  {
+   "claim": "first in China certified to 4F, takes the largest aircraft",
+   "verdict": "cut",
+   "wasBefore": "and the airport was also the country's first certified to 4F standard, meaning it takes the largest aircraft flying",
+   "why": "Wikipedia alone; no second source found."
+  },
+  {
+   "claim": "Terminal 3 opened on 30 October 2025; Terminal 1 closed for renovation on 7 May 2026, its airlines moved to Terminal 3",
+   "verdict": "cut",
+   "sources": [
+    {
+     "file": "newsgd-a298",
+     "org": "South (Newsgd, Guangdong's English news portal)",
+     "dated": "2026-05-01",
+     "quote": [
+      "2026-05-01",
+      "All 11 airlines currently operating from Terminal 1 at Guangzhou Baiyun International Airport will be relocated to Terminal 3 starting at 2:00 a.m. on May 7, as part of a major airport-wide operational adjustment.",
+      "Terminal 1 will no longer serve any of them.",
+      "From May 7, the \"Airport South (T1 Terminal)\" metro station and the \"Baiyun Airport South Station (T1)\" intercity rail station will become non-stopping stations."
+     ]
+    },
+    {
+     "file": "qq-20260507",
+     "org": "Yangcheng Evening News (Jinyang, on Tencent News)",
+     "dated": "2026-05-07",
+     "quote": [
+      "2026-05-07 21:41 发布于 广东 金羊网官方账号",
+      "5月7日起，广州白云国际机场T1航站楼11家国内航司整体转场至T3航站楼运营",
+      "投入运行近22年的T1航站楼，也由此按下“暂停键”，进入升级改造阶段。",
+      "旅客购买机票后，可以通过航空公司官网、APP等确认航班所在航站楼，避免走错。"
+     ]
+    },
+    {
+     "file": "qq-20260508",
+     "org": "Communist Youth League Guangzhou Committee (on Tencent News)",
+     "dated": "2026-05-08",
+     "quote": [
+      "2026-05-08 16:21 发布于 广东 中国共产主义青年团广州市委员会官方账号",
+      "投入运行近22年的T1航站楼关闭"
+     ]
+    },
+    {
+     "file": "xinhua-t3-20251030",
+     "org": "Xinhua",
+     "dated": "2025-10-30",
+     "quote": "on Thursday officially put into operation its Terminal 3 and fifth runway"
+    },
+    {
+     "file": "eguangzhou-39620",
+     "org": "Guangzhou Municipal Government (eGuangzhou)",
+     "dated": "2025-10-31",
+     "quote": [
+      "Guangzhou Baiyun International Airport's Terminal 3 (T3) officially opens on October 30, 2025",
+      "Those opting for public transport can take Metro Line 3 to Gaozeng Station, then transfer to the T3 shuttle bus, which runs every 15 minutes."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": [
+      "From 2:00 am on 7 May 2026, Terminal 1 is temporarily closed for renovation, and flights departing from Terminal 1 are moved to Terminal 2 or 3.",
+      "Terminal 3 opened on 30 October 2025",
+      "For now, there is no metro line serving Terminal 3"
+     ]
+    }
+   ],
+   "why": "Held back: the old text says nothing about which terminals are in use, so under the like-for-like rule this replaces nothing, though it is the change most likely to catch a traveller out. Terminal 3 and the fifth runway opened on 30 October 2025 (Xinhua, Guangzhou government, China Daily, South, Wikipedia). All eleven airlines left in Terminal 1 (Air China, Shenzhen Airlines, Hainan Airlines and eight more) moved to Terminal 3 from 2am on 7 May 2026, and Terminal 1 closed for renovation (South, Yangcheng Evening News, the Guangzhou Youth League, Wikipedia, which says its flights went to Terminal 2 or 3). The metro stops at Terminals 1 and 2 only, and the Terminal 1 station is now passed without stopping; for Terminal 3 the city's advice is Metro Line 3 to Gaozeng and a shuttle bus. The airport's own staff tell passengers to check their terminal with the airline. Was to read: \"Terminal 3 opened on 30 October 2025, and since 7 May 2026 Terminal 1 has been closed for renovation, its airlines moved to Terminal 3, so check which terminal a flight uses.\""
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "83.6": "83,582,952 rounded (CAAC, ACI World, Wikipedia infobox)"
+ }
+}

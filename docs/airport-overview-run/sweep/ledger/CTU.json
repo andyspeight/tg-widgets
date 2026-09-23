@@ -1,0 +1,368 @@
+{
+ "iata": "CTU",
+ "id": "reczvek7XWHfVTdvh",
+ "name": "Chengdu Shuangliu International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Chengdu_Shuangliu_International_Airport",
+ "audited": "2026-09-23",
+ "before": "One of two international airports serving Chengdu, 16 km south west of downtown, and a major aviation hub for western China. The other is Chengdu Tianfu, so always confirm which one an itinerary means.\n\nThe airline weight here is considerable. Shuangliu is one of Air China's two core hubs, the other being Beijing Capital, and it is the principal hub and headquarters for both Sichuan Airlines and Chengdu Airlines. China Eastern, China Southern, Shenzhen Airlines, Lucky Air and Tibet Airlines all have bases here too.\n\nGetting into the city is easy. Airport Bus 1 runs to the city centre near the Jinjiang Hotel metro station, Bus 2 to Chengdu railway station and Bus 3 to Chengdu East. There is also a CRH high speed train from Shuangliu Airport railway station.\n\nIt is one of the oldest airports in China. Its predecessor, Chengdu Shuangguisi Airport, was built in 1938, and the site has been expanded eight times since. It became an international port of entry in 1993 and took its current name on 30 November 1995.",
+ "after": "One of two international airports serving Chengdu and a major aviation hub for western China. It sits 16 km south west of downtown. The other airport is Chengdu Tianfu, so always confirm which one an itinerary means.\n\nSichuan Airlines has its headquarters at the airport, and Air China and Tibet Airlines also fly from here.\n\nGetting into the city is easy. Metro Line 10 stops at both terminals and runs to downtown Chengdu, and there is also a CRH high speed train from Shuangliu Airport railway station.\n\nIts predecessor, Chengdu Shuangguisi Airport, was built in 1938. It became an international port of entry in 1993 and took its current name on 30 November 1995.",
+ "claims": [
+  {
+   "claim": "one of two international airports serving Chengdu; the other is Tianfu",
+   "verdict": "confirmed",
+   "inAfter": "One of two international airports serving Chengdu",
+   "note": "CAAC's 2025 table has two Chengdu airports: Tianfu (56,686,738 passengers, fifth) and Shuangliu (33,518,945, twelfth).",
+   "sources": [
+    {
+     "file": "caac-2025-chengdu",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "Row: 成都/天府 | 5 | 56686738",
+      "Row: 成都/双流 | 12 | 33518945"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "is one of two international airports serving Chengdu, the capital of Sichuan province in Southwestern China, with the other being Chengdu Tianfu International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "16 km south west of downtown",
+   "verdict": "confirmed",
+   "inAfter": "It sits 16 km south west of downtown.",
+   "note": "Coordinates: 16.7 km in a straight line at 224 degrees (south west); ratio 0.96.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Chengdu Shuangliu International Airport Co. / Sichuan Airport Group (the operator, cdairport.com)",
+     "dated": "undated page, copyright 2022 (figures to 31 December 2021)",
+     "quote": "成都双流国际机场位于四川省成都市西南，距离市中心约16公里"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 16.7 km (10.4 miles)",
+      "Bearing from the city centre: 224 degrees, which is south west"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "Located about 16 kilometers (10 mi) southwest of downtown Chengdu"
+    }
+   ]
+  },
+  {
+   "claim": "a major aviation hub for western China",
+   "verdict": "confirmed",
+   "inAfter": "and a major aviation hub for western China",
+   "note": "The operator's own description (a regional hub for inland China, and since Tianfu opened a 'regional aviation hub' concentrating on domestic business routes and Hong Kong, Macau and Taiwan) matches Wikipedia's; CAAC shows it still carried 33.5 million passengers in 2025, twelfth in China, and eighth for cargo. The operator's page carries a 2022 copyright and figures to the end of 2021, so CAAC's 2025 table is the current source for scale.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Chengdu Shuangliu International Airport Co. / Sichuan Airport Group (the operator, cdairport.com)",
+     "dated": "undated page, copyright 2022 (figures to 31 December 2021)",
+     "quote": [
+      "为4F级国际航空枢纽，是中国八大区域性枢纽机场之一 ，中国内陆地区的航空枢纽和客货集散地",
+      "按照近期区域航空枢纽的定位，双流机场将加快推进国内商务航线和地区航线实现“快线化、精品化”运营"
+     ]
+    },
+    {
+     "file": "caac-2025-chengdu",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row: 成都/双流 | 12 | 33518945 | 32430354 | 3.4 | 8 | 735575.73199999996"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "Chengdu Shuangliu Airport is an important aviation hub for Western China"
+    }
+   ]
+  },
+  {
+   "claim": "the other is Chengdu Tianfu: always confirm which one",
+   "verdict": "confirmed",
+   "inAfter": "The other airport is Chengdu Tianfu, so always confirm which one an itinerary means.",
+   "note": "The airport group gives the same warning in its notice of 15 July 2026: from 30 July both airports run Hong Kong, Macau and Taiwan flights, so passengers must check their departure and arrival airport. Chengdu Daily's headline says the same.",
+   "sources": [
+    {
+     "file": "op-notice-6393",
+     "org": "Chengdu Shuangliu International Airport Co. / Sichuan Airport Group (the operator, cdairport.com)",
+     "dated": "2026-07-15",
+     "quote": [
+      "发布时间：2026年07月15日",
+      "自2026年7月30日6时起，现在成都天府国际机场1号航站楼运营的部分港澳台地区客运航班，将分批转至成都双流国际机场1号航站楼运营。",
+      "请各位旅客出行前，务必提前确认出发及到达机场信息，避免走错机场。"
+     ]
+    },
+    {
+     "file": "qq-20260727A0897W00",
+     "org": "Chengdu Daily (Jinguan News, on Tencent News)",
+     "dated": "2026-07-27",
+     "quote": [
+      "2026-07-27 15:32 发布于 四川 成都日报《锦观新闻》官方账号",
+      "重要出行提醒！7月30日起成都飞港澳台，请确认机场，别跑错"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "with the other being Chengdu Tianfu International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "Sichuan Airlines has its headquarters at the airport",
+   "verdict": "softened",
+   "inAfter": "Sichuan Airlines has its headquarters at the airport",
+   "note": "Was 'the principal hub and headquarters for both Sichuan Airlines and Chengdu Airlines'. Sichuan Airlines gives its registered address as the Aviation Building at Chengdu Shuangliu International Airport and its headquarters as Chengdu; it now flies from both Chengdu airports (Chengdu Daily, July 2026), so 'principal hub' goes. Chengdu Airlines rests on Wikipedia alone (its site answered 503).",
+   "sources": [
+    {
+     "file": "sichuanair-intro",
+     "org": "Sichuan Airlines",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "川航以成都为总部",
+      "公司注册地址：成都市双流国际机场航空大厦"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "The airport is also the principal hub and headquarters for Sichuan Airlines and Chengdu Airlines."
+    }
+   ]
+  },
+  {
+   "claim": "Air China and Tibet Airlines also fly from here",
+   "verdict": "corrected",
+   "inAfter": "and Air China and Tibet Airlines also fly from here",
+   "note": "Replaces the list of hubs and bases (see the cuts). Chengdu Daily (July 2026) has Air China flying Hong Kong and Taipei from Shuangliu and Tibet Airlines flying Shuangliu to Xichang and to Shigatse; the operator lists both among its airlines. Sichuan Airlines runs its express routes to Beijing, Shenzhen and Guangzhou from Shuangliu (operator, 22 September 2026).",
+   "sources": [
+    {
+     "file": "qq-20260727A0897W00",
+     "org": "Chengdu Daily (Jinguan News, on Tencent News)",
+     "dated": "2026-07-27",
+     "quote": [
+      "转场后，在成都双流国际机场运营地区客运航线的航司共有7家，分别为国航、川航、香港航空、澳门航空、国泰航空、长荣航空、中华航空。",
+      "其中，在成都双流国际机场运营有直飞香港、台北桃园2条航线"
+     ]
+    },
+    {
+     "file": "qq-20260709A07HUB00",
+     "org": "Chengdu Daily (Jinguan News, on Tencent News)",
+     "dated": "2026-07-09",
+     "quote": [
+      "2026-07-09 16:12 发布于 四川 成都日报《锦观新闻》官方账号",
+      "该航班由西藏航空执飞，航班号为TV9717/8，去程计划于20：15从成都双流机场起飞"
+     ]
+    },
+    {
+     "file": "op-about",
+     "org": "Chengdu Shuangliu International Airport Co. / Sichuan Airport Group (the operator, cdairport.com)",
+     "dated": "undated page, copyright 2022 (figures to 31 December 2021)",
+     "quote": "现有中国国际航空、中国东方航空、四川航空、西藏航空、成都航空等航空公司在此运营"
+    },
+    {
+     "file": "op-notice-6465",
+     "org": "Chengdu Shuangliu International Airport Co. / Sichuan Airport Group (the operator, cdairport.com)",
+     "dated": "2026-09-22",
+     "quote": [
+      "发布时间：2026年09月22日",
+      "9月23日起，成都双流国际机场联合四川航空，在“蓉深快线”“蓉穗快线”启用“从蓉行”服务"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "China Eastern Airlines, China Southern Airlines, Shenzhen Airlines, Lucky Air, and Tibet Airlines also have bases at Chengdu Shuangliu Airport."
+    }
+   ]
+  },
+  {
+   "claim": "Metro Line 10 from both terminals to downtown",
+   "verdict": "corrected",
+   "inAfter": "Metro Line 10 stops at both terminals and runs to downtown Chengdu",
+   "note": "Replaces the three day-time airport buses, which the operator no longer lists (see the cuts). The operator's metro page gives Line 10 stops at Terminals 1 and 2, running to Wuhouci, with trains from about 6am to 11.30pm; Lines 19 and 30 also call at Terminal 2 East.",
+   "sources": [
+    {
+     "file": "op-metro",
+     "org": "Chengdu Shuangliu International Airport Co. / Sichuan Airport Group (the operator, cdairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "1.地铁10号线乘车点",
+      "T1：到达层（1F）04号出口外、T1停车场内",
+      "武侯祠—高升桥—红牌楼—太平园—簇锦—华兴—金花—双流机场1航站楼—双流机场2航站楼"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": [
+      "Two stations on Line 10 of the Chengdu Metro links Chengdu Shuangliu International Airport with Taipingyuan station.",
+      "It is linked to downtown Chengdu by the Airport Expressway, the Chengdu–Mianyang–Leshan intercity railway and the newly built Chengdu Metro line 10 which has stations in both terminals."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "CRH high speed train from Shuangliu Airport station",
+   "verdict": "confirmed",
+   "inAfter": "and there is also a CRH high speed train from Shuangliu Airport railway station.",
+   "note": "The operator lists Shuangliu Airport station on the Chengdu to Mianyang and Leshan intercity line and the Chengdu to Guiyang high-speed line.",
+   "sources": [
+    {
+     "file": "op-rail",
+     "org": "Chengdu Shuangliu International Airport Co. / Sichuan Airport Group (the operator, cdairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "成绵乐城际铁路",
+      "双流机场站（机场、地铁、火车换乘站）",
+      "成贵高铁"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "Passengers can take the CRH train at Shuangliu Airport railway station to Chengdu South railway station and Chengdu East railway station."
+    }
+   ]
+  },
+  {
+   "claim": "predecessor Chengdu Shuangguisi Airport, built 1938",
+   "verdict": "confirmed",
+   "inAfter": "Its predecessor, Chengdu Shuangguisi Airport, was built in 1938.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Chengdu Shuangliu International Airport Co. / Sichuan Airport Group (the operator, cdairport.com)",
+     "dated": "undated page, copyright 2022 (figures to 31 December 2021)",
+     "quote": "前身为始建于1938年的成都双桂寺机场"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "Its predecessor was Chengdu Shuangguisi Airport (成都双桂寺机场), built in 1938."
+    }
+   ]
+  },
+  {
+   "claim": "international port of entry 1993; current name 30 November 1995",
+   "verdict": "confirmed",
+   "inAfter": "It became an international port of entry in 1993 and took its current name on 30 November 1995.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Chengdu Shuangliu International Airport Co. / Sichuan Airport Group (the operator, cdairport.com)",
+     "dated": "undated page, copyright 2022 (figures to 31 December 2021)",
+     "quote": "1993年被国家批准为国际口岸机场，于1995年11月30日更名“成都双流国际机场”"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": [
+      "was officially renamed \"Chengdu Shuangliu International Airport\" (成都双流国际机场) on November 30, 1995.",
+      "This renaming took place after it was approved as an international port-of-entry airport in 1993."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the airline weight here is considerable",
+   "verdict": "cut",
+   "wasBefore": "The airline weight here is considerable.",
+   "why": "The old text's judgement on a hub and base list that no longer stands (see below); dropped with it."
+  },
+  {
+   "claim": "one of Air China's two core hubs, the other Beijing Capital",
+   "verdict": "cut",
+   "wasBefore": "Shuangliu is one of Air China's two core hubs, the other being Beijing Capital",
+   "why": "Wikipedia alone, and doubtful since Tianfu opened in 2021: Air China now flies from both Chengdu airports (Chengdu Daily, July 2026). Air China is kept as an airline flying from Shuangliu (see above)."
+  },
+  {
+   "claim": "principal hub and headquarters for Sichuan Airlines and Chengdu Airlines",
+   "verdict": "cut",
+   "wasBefore": "and it is the principal hub and headquarters for both Sichuan Airlines and Chengdu Airlines",
+   "why": "Softened to Sichuan Airlines' headquarters (see above). 'Principal hub' is not supported now that Sichuan Airlines flies from both airports; Chengdu Airlines rests on Wikipedia alone (its site answered 503)."
+  },
+  {
+   "claim": "bases for China Eastern, China Southern, Shenzhen Airlines, Lucky Air and Tibet Airlines",
+   "verdict": "cut",
+   "wasBefore": "China Eastern, China Southern, Shenzhen Airlines, Lucky Air and Tibet Airlines all have bases here too.",
+   "why": "Wikipedia alone for 'bases', and partly out of date: Chengdu Daily (July 2026) has China Eastern, Shenzhen Airlines and Lucky Air on Tianfu routes. Tibet Airlines is kept as flying from Shuangliu (see above)."
+  },
+  {
+   "claim": "Airport Buses 1, 2 and 3",
+   "verdict": "cut",
+   "wasBefore": "Airport Bus 1 runs to the city centre near the Jinjiang Hotel metro station, Bus 2 to Chengdu railway station and Bus 3 to Chengdu East.",
+   "why": "Out of date: the operator's live bus page lists only a night bus to Chunxi Road (via the Jinjiang Hotel, 9pm to 4.30am) and a night bus to Tianfu, not the three day-time lines, which rest on Wikipedia alone. Replaced by metro Line 10 (see above)."
+  },
+  {
+   "claim": "one of the oldest airports in China",
+   "verdict": "cut",
+   "wasBefore": "It is one of the oldest airports in China.",
+   "why": "Wikipedia alone; the operator gives the 1938 date but makes no comparison."
+  },
+  {
+   "claim": "expanded eight times",
+   "verdict": "cut",
+   "wasBefore": "and the site has been expanded eight times since",
+   "why": "Wikipedia alone; the operator's history does not count the expansions."
+  },
+  {
+   "claim": "Hong Kong, Macau and Taiwan flights split between the two airports from 30 July 2026",
+   "verdict": "cut",
+   "sources": [
+    {
+     "file": "op-notice-6393",
+     "org": "Chengdu Shuangliu International Airport Co. / Sichuan Airport Group (the operator, cdairport.com)",
+     "dated": "2026-07-15",
+     "quote": [
+      "自2026年7月30日6时起，现在成都天府国际机场1号航站楼运营的部分港澳台地区客运航班，将分批转至成都双流国际机场1号航站楼运营。",
+      "1.转场后， 成都双流国际机场、 成都天府国际机场将同时运营港澳台地区客运航班。"
+     ]
+    },
+    {
+     "file": "qq-20260727A0897W00",
+     "org": "Chengdu Daily (Jinguan News, on Tencent News)",
+     "dated": "2026-07-27",
+     "quote": [
+      "7家航司运营的22个进出港航班将转场至双流机场起降",
+      "转场后，在成都双流国际机场运营地区客运航线的航司共有7家，分别为国航、川航、香港航空、澳门航空、国泰航空、长荣航空、中华航空。",
+      "继续留在成都天府国际机场运营地区客运航线的航司有4家，即：国航、东航、深圳航空、西藏航空"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "However, on July 30, 2026, most Hong Kong/Macau/Taiwan flights were relocated back to Shuangliu Airport following renovations."
+    }
+   ],
+   "why": "Held back: the old text does not say where any flights go, so this replaces nothing, though it is the reason behind its 'always confirm' advice. From 30 July 2026, 22 Hong Kong, Macau and Taiwan flights by seven airlines (Air China, Sichuan Airlines, Hong Kong Airlines, Air Macau, Cathay Pacific, EVA Air, China Airlines) moved from Tianfu Terminal 1 to Shuangliu Terminal 1, while Air China, China Eastern, Shenzhen Airlines and Tibet Airlines keep such routes at Tianfu (the airport group's notice, Chengdu Daily, Wikipedia). Was to read: \"Since 30 July 2026 flights to Hong Kong, Macau and Taiwan have used both airports, seven airlines flying them from Shuangliu.\" Also found but with one source only, so not held: Wikipedia says every other international passenger flight moved to Tianfu when it opened in 2021; none of the operator's or Chengdu Daily's pages read here says so."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Getting into the city is easy.",
+   "why": "The old text's judgement, kept: metro Line 10 stops at both terminals and runs to downtown Chengdu, and the airport has its own railway station (operator, Wikipedia)."
+  }
+ ],
+ "tracerOk": {}
+}

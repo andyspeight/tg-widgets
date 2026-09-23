@@ -1,0 +1,306 @@
+{
+ "iata": "NGO",
+ "id": "recB85Co99WfRobu7",
+ "name": "Chubu Centrair International Airport",
+ "country": "Japan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Chubu_Centrair_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Nagoya's international airport, built on an artificial island in Ise Bay about 35 km south of the city. It covers 470 hectares and works from a single 3,500 metre runway. The name Centrair is a contraction of Central Japan International Airport.\n\nTerminal 1 splits neatly: domestic on the north side, international on the south, each with its own check in, security and baggage claim. Arrivals are on the second floor and departures on the third. Terminal 2 handles the budget airlines, domestic and international both, and opened in September 2019 with a shuttle bus linking the two.\n\nWhat makes this one worth arriving early for is the fourth floor. Sky Town is open to anyone, not just passengers, with 61 shops and restaurants along two streets. One of them, Chochin-yokocho, is themed shop by shop to look like an old Japanese lane.\n\nNext door, Flight of Dreams opened in 2018 around the first Boeing 787 Dreamliner prototype.",
+ "after": "Nagoya's international airport, built on an artificial island in Ise Bay about 35 km south of the city. It covers about 470 hectares and works from a single 3,500 metre runway.\n\nTerminal 1 holds both domestic and international flights, with arrivals on the second floor and departures on the third.\n\nWhat makes this one worth arriving early for is the fourth floor. Sky Town is open to anyone, not just passengers, with shops and restaurants in two streets, one of which recreates an old Japanese town.\n\nClose by, Flight of Dreams is built around the first Boeing 787 Dreamliner.",
+ "claims": [
+  {
+   "claim": "Nagoya's international airport",
+   "verdict": "confirmed",
+   "inAfter": "Nagoya's international airport",
+   "sources": [
+    {
+     "file": "aichinow-centrair",
+     "org": "Aichi Prefecture (Aichi Now, its official travel guide, aichinow.pref.aichi.jp)",
+     "dated": "undated page (it mentions a 2020 award and covid-era hours), read 2026-09-23",
+     "quote": [
+      "Chubu Centrair International Airport, Nagoya",
+      "The Chubu Centrair International Airport, Nagoya, known simply as Centrair, is the world's gateway to Aichi."
+     ]
+    },
+    {
+     "file": "mlit-airport-list",
+     "org": "MLIT Civil Aviation Bureau (mlit.go.jp)",
+     "dated": "list as of 2026-09-01",
+     "quote": [
+      "(令和8年9月1日現在)",
+      "＜会社管理空港（４）＞",
+      "成田国際 中部国際 関西国際 大阪国際"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "Centrair serves the third largest metropolitan area in Japan, centered around the city of Nagoya."
+    }
+   ]
+  },
+  {
+   "claim": "on an artificial island in Ise Bay about 35 km south of the city",
+   "verdict": "confirmed",
+   "inAfter": "built on an artificial island in Ise Bay about 35 km south of the city",
+   "note": "Aichi Now is Aichi Prefecture's official travel guide on the prefecture's own domain (pref.aichi.jp), a government source, though show.mjs flags any 'guide' as low tier. The coordinates check could not test the distance: it measures from Tokoname, the record's City Served, not Nagoya. Aichi Prefecture's travel guide gives 35 km (28 minutes by train) south of Nagoya, as does Wikipedia; MLIT's page says the airport is on an island reached by bridge.",
+   "sources": [
+    {
+     "file": "aichinow-centrair",
+     "org": "Aichi Prefecture (Aichi Now, its official travel guide, aichinow.pref.aichi.jp)",
+     "dated": "undated page (it mentions a 2020 award and covid-era hours), read 2026-09-23",
+     "quote": "Located just 35km, or 28 minutes by train south of Nagoya City, Chubu Centrair International Airport Nagoya is a First Class international airport built on an artificial island off the coast of Tokoname in Ise Bay"
+    },
+    {
+     "file": "mlit-15hf34",
+     "org": "MLIT Civil Aviation Bureau (mlit.go.jp)",
+     "dated": "undated English page; its traffic figures are for the year to March 2013",
+     "quote": "The Centrair is on an island with the access bridge and can be reached by car or train."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "is an international airport on an artificial island in Ise Bay, 35 km (22 mi) south of Nagoya"
+    }
+   ]
+  },
+  {
+   "claim": "covers about 470 hectares",
+   "verdict": "confirmed",
+   "inAfter": "It covers about 470 hectares",
+   "sources": [
+    {
+     "file": "mlit-15hf34",
+     "org": "MLIT Civil Aviation Bureau (mlit.go.jp)",
+     "dated": "undated English page; its traffic figures are for the year to March 2013",
+     "quote": "Airport area Approx. 470 ha"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "The airport covers about 470 hectares (1,161 acres) of land"
+    }
+   ]
+  },
+  {
+   "claim": "a single 3,500 metre runway",
+   "verdict": "confirmed",
+   "inAfter": "works from a single 3,500 metre runway",
+   "note": "Still one runway today. Wikipedia reports a second, parallel runway of 3,290 m due for completion in 2027; that rests on Wikipedia alone and is not in the text.",
+   "sources": [
+    {
+     "file": "mlit-15hf34",
+     "org": "MLIT Civil Aviation Bureau (mlit.go.jp)",
+     "dated": "undated English page; its traffic figures are for the year to March 2013",
+     "quote": "Runway length 3,500 m×1"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 18/36: 3,500 m (11,483 ft), PEM",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "has one 3,500 m (11,500 ft) runway"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 1 holds both domestic and international flights",
+   "verdict": "softened",
+   "inAfter": "Terminal 1 holds both domestic and international flights",
+   "note": "Was 'Terminal 1 splits neatly: domestic on the north side, international on the south, each with its own check in, security and baggage claim'. MLIT's page confirms that domestic and international share one building; the north and south sides and the separate facilities rest on Wikipedia alone, because the operator's site (centrair.jp) answers with a Cloudflare bot check. Dating: the only source here dated within twelve months is Wikipedia's current revision; MLIT's page is years old and the operator's own pages could not be read.",
+   "sources": [
+    {
+     "file": "mlit-15hf34",
+     "org": "MLIT Civil Aviation Bureau (mlit.go.jp)",
+     "dated": "undated English page; its traffic figures are for the year to March 2013",
+     "quote": "At Centrair, domestic and international terminals are located in the same building, which allowed passengers to reach easy access to both terminals."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "The northern side of the terminal holds domestic flights, while the southern side holds international flights"
+    }
+   ]
+  },
+  {
+   "claim": "arrivals on the second floor and departures on the third",
+   "verdict": "confirmed",
+   "inAfter": "with arrivals on the second floor and departures on the third",
+   "note": "Both sources give the same layout; MLIT's page dates from the airport's early years. Dating: the only source here dated within twelve months is Wikipedia's current revision; MLIT's page is years old and the operator's own pages could not be read.",
+   "sources": [
+    {
+     "file": "mlit-15hf34",
+     "org": "MLIT Civil Aviation Bureau (mlit.go.jp)",
+     "dated": "undated English page; its traffic figures are for the year to March 2013",
+     "quote": "The departure lobby is on the 3rd floor and the arrival on the 2nd floor."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "Arrivals are processed on the second floor, and departures on the third."
+    }
+   ]
+  },
+  {
+   "claim": "Sky Town on the fourth floor is open to anyone, not just passengers",
+   "verdict": "confirmed",
+   "inAfter": "Sky Town is open to anyone, not just passengers",
+   "note": "Dating: the only source here dated within twelve months is Wikipedia's current revision; MLIT's page is years old and the operator's own pages could not be read.",
+   "sources": [
+    {
+     "file": "mlit-15hf34",
+     "org": "MLIT Civil Aviation Bureau (mlit.go.jp)",
+     "dated": "undated English page; its traffic figures are for the year to March 2013",
+     "quote": [
+      "On the 4 th floor of the terminal, there are many famous restaurants and popular shops.",
+      "Centrair welcomes not only passengers but also visitors who just come and enjoy the day at the airport."
+     ]
+    },
+    {
+     "file": "aichinow-centrair",
+     "org": "Aichi Prefecture (Aichi Now, its official travel guide, aichinow.pref.aichi.jp)",
+     "dated": "undated page (it mentions a 2020 award and covid-era hours), read 2026-09-23",
+     "quote": "Various events and entertainments are often staged in the 4th floor Event Plaza between the two Sky Town shopping areas"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "Sky Town Shopping Center is on the fourth floor, accessible to the general public"
+    }
+   ]
+  },
+  {
+   "claim": "shops and restaurants in two streets, one recreating an old Japanese town",
+   "verdict": "softened",
+   "inAfter": "with shops and restaurants in two streets, one of which recreates an old Japanese town",
+   "note": "Was '61 shops and restaurants along two streets' and 'Chochin-yokocho, themed shop by shop to look like an old Japanese lane'. The count would need the airport's own current figure, and its site is behind a bot check; the street's name and the shop-by-shop theming rest on Wikipedia alone. Aichi's guide confirms two Sky Town areas, one recreating an old Japanese town.",
+   "sources": [
+    {
+     "file": "aichinow-centrair",
+     "org": "Aichi Prefecture (Aichi Now, its official travel guide, aichinow.pref.aichi.jp)",
+     "dated": "undated page (it mentions a 2020 award and covid-era hours), read 2026-09-23",
+     "quote": "the two Sky Town shopping areas, one of which is designed to invoke images of shopping and restaurants in a European village, while the other recreates an old Japanese town."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": [
+      "organized into two \"streets\", Renga-dori and Chochin-yokocho",
+      "The Chochin-yokocho shops are individually themed to have an authentic Japanese look."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Flight of Dreams, close by, built around the first Boeing 787",
+   "verdict": "softened",
+   "inAfter": "Close by, Flight of Dreams is built around the first Boeing 787 Dreamliner.",
+   "note": "Was 'Next door, Flight of Dreams opened in 2018 around the first Boeing 787 Dreamliner prototype'. Aichi's guide lists it among the spots around the airport and describes it as built around the first 787; Wikipedia puts it through the car park passage from the access plaza. The 2018 opening rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "aichinow-centrair",
+     "org": "Aichi Prefecture (Aichi Now, its official travel guide, aichinow.pref.aichi.jp)",
+     "dated": "undated page (it mentions a 2020 award and covid-era hours), read 2026-09-23",
+     "quote": [
+      "FLIGHT OF DREAMS is an airplane theme park centered around an exhibition of the first ever Boeing 787.",
+      "OTHER SPOTS IN THE SURROUNDING AREA"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": [
+      "with the first-ever prototype Boeing 787 Dreamliner as a display centerpiece",
+      "provides access through the P1 parking lot passage to the Flight of Dreams and Terminal 2"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Centrair is a contraction of Central Japan International Airport",
+   "verdict": "cut",
+   "wasBefore": "The name Centrair is a contraction of Central Japan International Airport.",
+   "why": "Wikipedia alone. MLIT's page gives the operator's name (Central Japan International Airport Co.) and the short name Centrair side by side but does not explain one by the other, and the operator's own site could not be read (Cloudflare bot check)."
+  },
+  {
+   "claim": "Terminal 1 north and south sides, each with its own check-in, security and baggage claim",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 splits neatly: domestic on the north side, international on the south, each with its own check in, security and baggage claim.",
+   "why": "Softened to both kinds of flight in one terminal (see above); the north and south split and the separate facilities rest on Wikipedia alone."
+  },
+  {
+   "claim": "arrivals second floor, departures third (old wording)",
+   "verdict": "cut",
+   "wasBefore": "Arrivals are on the second floor and departures on the third.",
+   "why": "Kept, reworded into the Terminal 1 sentence (see above)."
+  },
+  {
+   "claim": "Terminal 2 for budget airlines, opened September 2019, shuttle bus",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 handles the budget airlines, domestic and international both, and opened in September 2019 with a shuttle bus linking the two.",
+   "why": "Its current use could not be confirmed. The operator's site (centrair.jp) answers with Cloudflare's 'Just a moment...' bot check, so it was not tried further; Peach's and Jetstar's sites answered 502. Aichi's travel guide still lists Terminal 2 opening hours and says it may close when no flights are scheduled, but the page is undated and years old (it cites a 2020 award and covid-era hours). Owner to decide once the operator's site can be read."
+  },
+  {
+   "claim": "61 shops and restaurants",
+   "verdict": "cut",
+   "wasBefore": "with 61 shops and restaurants along two streets",
+   "why": "A count needs the airport's own current figure, and its site is behind a bot check. The two streets are kept (see above)."
+  },
+  {
+   "claim": "Chochin-yokocho themed shop by shop",
+   "verdict": "cut",
+   "wasBefore": "One of them, Chochin-yokocho, is themed shop by shop to look like an old Japanese lane.",
+   "why": "Softened to 'one of which recreates an old Japanese town' (Aichi's guide); the name and the shop-by-shop theming rest on Wikipedia alone."
+  },
+  {
+   "claim": "Flight of Dreams opened in 2018, next door",
+   "verdict": "cut",
+   "wasBefore": "Next door, Flight of Dreams opened in 2018 around the first Boeing 787 Dreamliner prototype.",
+   "why": "The 2018 opening rests on Wikipedia alone: the Seattle Times answered with a 'verify that you're not a robot' page, Asahi was 'Blocked by egress policy', and the operator's site is behind a bot check. Kept, softened (see above)."
+  },
+  {
+   "claim": "Skytrax: World's Best Regional Airport for the twelfth year running, 12th in the world for 2026",
+   "verdict": "cut",
+   "why": "Held back: verified but replaces nothing in the old text (the old text did not mention Skytrax). Skytrax named Centrair the World's Best Regional Airport for 2026, the twelfth year in a row, and ranked it 12th in the world (17th in 2025). It would go in as Skytrax's own statement.",
+   "sources": [
+    {
+     "file": "skytrax-regional-2026",
+     "org": "Skytrax (World Airport Awards)",
+     "dated": "2026",
+     "quote": "Chubu Centrair International Airport in Nagoya, Japan is named the World's Best Regional Airport for the twelfth consecutive year"
+    },
+    {
+     "file": "skytrax-top100-2026",
+     "org": "Skytrax (World Airport Awards)",
+     "dated": "2026 (the 2025/2026 World Airport Survey)",
+     "quote": [
+      "World’s Top 100 Airports 2026",
+      "12 Centrair Nagoya 17 2025"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "What makes this one worth arriving early for is the fourth floor.",
+   "why": "Judgement carried over from the old text; the fourth-floor shops and restaurants and their opening to non-passengers are confirmed (MLIT, Aichi, Wikipedia)."
+  }
+ ],
+ "tracerOk": {}
+}

@@ -1,0 +1,403 @@
+{
+ "iata": "HGH",
+ "id": "reckR0Q7NKQyAjOYB",
+ "name": "Hangzhou Xiaoshan International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Hangzhou_Xiaoshan_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The main gateway to Hangzhou, capital of Zhejiang province and one of the big names in the Yangtze River Delta. The airport sits on the southern shore of the Qiantang River in Xiaoshan District, around 27km east of the city centre, which means a straightforward run into town by metro, direct airport bus or the elevated expressway built above the existing highway.\n\nIt is a genuinely large operation. In 2025 it handled just over 50 million passengers, making it the seventh busiest in China, and it moved close to 800,000 tonnes of cargo. Air China, China Eastern, China Southern, Hainan Airlines and Xiamen Airlines all treat it as a focus city, so domestic connections across China are plentiful.\n\nThere are four terminals. Terminals 1 and 3 handle domestic flights only, Terminal 2 takes international and regional services, and Terminal 4, which opened in September 2022, handles a mix of both. The buildings were designed by architecture firm Aedas.\n\nInternational routes lean heavily towards East and Southeast Asia, with further connections to Europe, South Asia, Africa and Oceania.",
+ "after": "The main airport for Hangzhou, capital of Zhejiang province and one of the big names in the Yangtze River Delta. From its site around 27km east of the city centre, it is a straightforward run into town by metro or airport bus.\n\nIt is a genuinely large operation. In 2025 it handled just over 50 million passengers, making it the seventh busiest in China. It also moved close to 800,000 tonnes of cargo. Air China, China Eastern, China Southern, Hainan Airlines and Xiamen Airlines all fly from here, so domestic connections across China are plentiful.\n\nTerminal 4, which opened in September 2022, takes international and regional flights and some domestic ones, while Terminals 1 and 3 handle domestic flights only. Check which terminal a domestic flight uses.",
+ "claims": [
+  {
+   "claim": "the main airport for Hangzhou",
+   "verdict": "corrected",
+   "inAfter": "The main airport for Hangzhou",
+   "note": "Was 'The main gateway to Hangzhou', a banned phrase. CAAC's 2025 table has no other Hangzhou airport; the operator calls it Zhejiang's first air gateway.",
+   "sources": [
+    {
+     "file": "caac-2025-zhejiang",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "Row: 杭州/萧山 | 7 | 50459018",
+      "Row: 宁波/栎社 | 30 | 16125459"
+     ]
+    },
+    {
+     "file": "op-survey",
+     "org": "Hangzhou Xiaoshan International Airport Co. (the operator, hzairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "是浙江省第一空中门户"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "is an international airport serving Hangzhou"
+    }
+   ]
+  },
+  {
+   "claim": "Hangzhou, capital of Zhejiang province",
+   "verdict": "confirmed",
+   "inAfter": "capital of Zhejiang province",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "the capital of East China's Zhejiang province"
+    },
+    {
+     "file": "people-20231031",
+     "org": "Xinhua (on People's Daily Online)",
+     "dated": "2023-10-30",
+     "quote": "HANGZHOU, Oct. 30 (Xinhua) -- A new all-cargo air route was launched Sunday between Hangzhou, the capital of east China's Zhejiang Province, and Mexico City."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "GeoNames class PPLA, the capital of a first-order division (state, province or region)"
+    }
+   ]
+  },
+  {
+   "claim": "one of the big names in the Yangtze River Delta",
+   "verdict": "confirmed",
+   "inAfter": "one of the big names in the Yangtze River Delta",
+   "note": "The old text's words for 'a major city in the Yangtze River Delta' (Wikipedia) and 'a leading tourist destination and business hub' there (Singapore Airlines, March 2026).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "a major city in the Yangtze River Delta region"
+    },
+    {
+     "file": "sia-hgh-2026",
+     "org": "Singapore Airlines",
+     "dated": "2026-03-23",
+     "quote": [
+      "23 March 2026",
+      "Located in China's Yangtze River Delta, Hangzhou is a leading tourist destination and business hub."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "around 27km east of the city centre",
+   "verdict": "confirmed",
+   "inAfter": "around 27km east of the city centre",
+   "note": "Coordinates: 26.5 km in a straight line at 104 degrees (east); ratio 1.02.",
+   "sources": [
+    {
+     "file": "op-survey",
+     "org": "Hangzhou Xiaoshan International Airport Co. (the operator, hzairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "杭州萧山国际机场位于浙江省杭州市东部,距市中心27公里"
+    },
+    {
+     "file": "op-en-survey",
+     "org": "Hangzhou Xiaoshan International Airport Co. (the operator, hzairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Located in the east of Hangzhou City, Zhejiang Province, and 27 kilometers from the downtown area"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 26.5 km (16.4 miles)",
+      "Bearing from the city centre: 104 degrees, which is east"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "is 27 km (17 mi) east of downtown Hangzhou"
+    }
+   ]
+  },
+  {
+   "claim": "into town by metro or airport bus",
+   "verdict": "softened",
+   "inAfter": "it is a straightforward run into town by metro or airport bus",
+   "note": "Was 'by metro, direct airport bus or the elevated expressway built above the existing highway'. The operator lists metro Lines 1, 7 and 19 and a bus to Wulinmen, the old airline ticket office in the city (about 60 minutes); that bus makes stops on the way, so 'direct' goes. The expressway rests on Wikipedia alone. 'Straightforward' is the old text's judgement, kept.",
+   "sources": [
+    {
+     "file": "op-subway",
+     "org": "Hangzhou Xiaoshan International Airport Co. (the operator, hzairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "目前机场开通的地铁线有1号线、7号线与19号线。"
+    },
+    {
+     "file": "op-en-metro",
+     "org": "Hangzhou Xiaoshan International Airport Co. (the operator, hzairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Hangzhou Metro Lines 1 , 7 and 19 are open now at Hangzhou Xiaoshan International Airport."
+    },
+    {
+     "file": "op-guide",
+     "org": "Hangzhou Xiaoshan International Airport Co. (the operator, hzairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "机场 —— 武林门",
+      "机场-武林门（经停浙医二院公交站，平海路）",
+      "站点位置：原武林门民航售票处；道路和天气正常情况下全程行驶约60分钟。"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": [
+      "Xiaoshan International Airport station of the Hangzhou Metro allows passengers to transfer to Line 1, Line 7 and Line 19 which connect the airport with the city downtown.",
+      "Bus services to/from downtown Hangzhou originate/terminate at the Ticketing Office on Tiyuchang Road with intermediate stops in between."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "just over 50 million passengers in 2025, seventh busiest in China",
+   "verdict": "confirmed",
+   "inAfter": "In 2025 it handled just over 50 million passengers, making it the seventh busiest in China",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 杭州/萧山: passenger rank 7 in China; passengers 2025: 50,459,018"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "In 2025, Hangzhou airport handled 50,459,018 passengers, ranking as the 7th busiest airport in China."
+    },
+    {
+     "file": "capa-50m",
+     "org": "CAPA (Centre for Aviation)",
+     "dated": "2025-12-30",
+     "quote": [
+      "30-Dec-2025",
+      "Hangzhou Xiaoshan International Airport exceeds 50m pax for 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "close to 800,000 tonnes of cargo",
+   "verdict": "confirmed",
+   "inAfter": "It also moved close to 800,000 tonnes of cargo.",
+   "note": "CAAC: 792,710 tonnes of cargo and mail in 2025, seventh in China.",
+   "sources": [
+    {
+     "file": "caac-2025-zhejiang",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row: 杭州/萧山 | 7 | 50459018 | 48053915 | 5 | 7 | 792710.13100000005"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "the airport ranked seventh busiest in terms of cargo with 792,710.1 tonnes"
+    }
+   ]
+  },
+  {
+   "claim": "Air China, China Eastern, China Southern, Hainan Airlines and Xiamen Airlines fly from here; plenty of domestic connections",
+   "verdict": "softened",
+   "inAfter": "Air China, China Eastern, China Southern, Hainan Airlines and Xiamen Airlines all fly from here, so domestic connections across China are plentiful",
+   "note": "Was 'all treat it as a focus city', which rests on Wikipedia alone. The operator's airline list names all five (the list is undated), and its current domestic departures page gives bag-drop arrangements for Air China, Xiamen Airlines, China Eastern and China Southern; Hainan Airlines rests on the undated list and Wikipedia's current revision. The operator counted 127 destinations in mainland China at the end of 2024.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "The airport also serves as a focus city for Air China, China Eastern Airlines, China Southern Airlines, Hainan Airlines and Xiamen Airlines."
+    },
+    {
+     "file": "op-airlines",
+     "org": "Hangzhou Xiaoshan International Airport Co. (the operator, hzairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "中国国际航空公司",
+      "中国南方航空公司",
+      "中国东方航空公司",
+      "厦门航空公司",
+      "海南航空公司"
+     ]
+    },
+    {
+     "file": "op-domestic",
+     "org": "Hangzhou Xiaoshan International Airport Co. (the operator, hzairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "乘坐国航、厦航、东航、南航、川航、长龙等航司国内航班出港的旅客"
+    },
+    {
+     "file": "op-survey",
+     "org": "Hangzhou Xiaoshan International Airport Co. (the operator, hzairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "通航点180个，其中内地127个、地区3个、国际50个。"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 4 opened in September 2022",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 4, which opened in September 2022",
+   "note": "Wikipedia: trial operation from 8 September, official opening of the phase three project on 22 September; the operator dates phase three stage one, which includes Terminal 4, to 22 September 2022.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "On 8 September 2022, Terminal 4 of Hangzhou Airport opened."
+    },
+    {
+     "file": "op-survey",
+     "org": "Hangzhou Xiaoshan International Airport Co. (the operator, hzairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "2022年9月22日，杭州机场三期项目一阶段正式投运",
+      "机场三期项目主要包括新建设计年旅客吞吐量5000万人次的T4航站楼"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 4 takes international and regional flights and some domestic ones",
+   "verdict": "corrected",
+   "inAfter": "takes international and regional flights and some domestic ones",
+   "note": "Was 'handles a mix of both', with Terminal 2 taking the international flights. The operator moved all international and regional flights from Terminal 2 to Terminal 4 on 7 April 2023. Its current transfer guide (connection times from 1 December 2025) calls Terminal 4's floor mixed-flow and sends Air China, China Southern and Sichuan Airlines domestic passengers there, other airlines' domestic flights to Terminal 3.",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "Hangzhou Xiaoshan International Airport Co. (the operator, hzairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "2023年4月7日",
+      "杭州机场国际地区进港航班正式从T2转场T4保障，标志着杭州机场国际地区航班整体转场至T4运行。"
+     ]
+    },
+    {
+     "file": "op-transfer",
+     "org": "Hangzhou Xiaoshan International Airport Co. (the operator, hzairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "五、MCT时间(自2025年12月1日起)",
+      "T4混流层",
+      "跨楼转乘 （中国国航CA、南方航空CZ、四川航空3U的航班)：通过“跨楼通道”前往4号航站楼登机。"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "A newly built Terminal 4 handles both international/regional flights and selected domestic flights."
+    }
+   ]
+  },
+  {
+   "claim": "Terminals 1 and 3 domestic only",
+   "verdict": "confirmed",
+   "inAfter": "while Terminals 1 and 3 handle domestic flights only",
+   "note": "The operator rebuilt Terminal 1 in 2017 and 2018 so that it and Terminal 3 form one building; its current transfer guide handles domestic arrivals at Terminal 3, and all international flights have been at Terminal 4 since April 2023.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "the larger Terminal 1 and 3 solely handles domestic traffic"
+    },
+    {
+     "file": "op-history",
+     "org": "Hangzhou Xiaoshan International Airport Co. (the operator, hzairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "2018年7月27日",
+      "改造后的T1与T3航站楼形成了一座外观整体协调、建筑结构统一的航站楼综合体。",
+      "标志着杭州机场国际地区航班整体转场至T4运行。"
+     ]
+    },
+    {
+     "file": "op-transfer",
+     "org": "Hangzhou Xiaoshan International Airport Co. (the operator, hzairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "1、3号航站楼到达旅客：前往3号航站楼到达层中转柜台办理中转手续。",
+      "跨楼转乘 （除中国国航CA、南方航空CZ、四川航空3U以外的其他航司航班)：通过“跨楼通道”前往3号航站楼出发层登机。"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "The main gateway to Hangzhou",
+   "verdict": "cut",
+   "wasBefore": "The main gateway to Hangzhou",
+   "why": "'Gateway to' is a banned phrase; reworded to 'the main airport for Hangzhou' (see above)."
+  },
+  {
+   "claim": "on the southern shore of the Qiantang River in Xiaoshan District",
+   "verdict": "cut",
+   "wasBefore": "on the southern shore of the Qiantang River in Xiaoshan District",
+   "why": "Wikipedia alone. The operator says only that it is in the east of Hangzhou, 27 km from the centre, and OurAirports places it in Hangzhou without a district."
+  },
+  {
+   "claim": "direct airport bus; the elevated expressway built above the highway",
+   "verdict": "cut",
+   "wasBefore": "by metro, direct airport bus or the elevated expressway built above the existing highway",
+   "why": "The expressway rests on Wikipedia alone, and the city bus makes stops on the way (operator, Wikipedia), so 'direct' goes. Metro and airport bus are kept (see above)."
+  },
+  {
+   "claim": "all treat it as a focus city",
+   "verdict": "cut",
+   "wasBefore": "all treat it as a focus city",
+   "why": "Wikipedia alone for 'focus city'; softened to the airlines flying from here (see above)."
+  },
+  {
+   "claim": "There are four terminals",
+   "verdict": "cut",
+   "wasBefore": "There are four terminals.",
+   "why": "The count is not settled for today: the operator's capability page counts three domestic terminals and one international, but what Terminal 2 does since the international flights left it in April 2023 is not stated anywhere readable, and the operator's transfer guide names only Terminals 3 and 4. The text names the terminals in use instead."
+  },
+  {
+   "claim": "Terminal 2 takes international and regional services",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 takes international and regional services",
+   "why": "Out of date since 7 April 2023, when the operator moved all international and regional flights from Terminal 2 to Terminal 4 (the operator's own timeline). Wikipedia's sentence is stale."
+  },
+  {
+   "claim": "Terminal 4 handles a mix of both",
+   "verdict": "cut",
+   "wasBefore": "handles a mix of both",
+   "why": "Made specific: Terminal 4 takes all the international and regional flights and some domestic ones (see above)."
+  },
+  {
+   "claim": "the buildings were designed by Aedas",
+   "verdict": "cut",
+   "wasBefore": "The buildings were designed by architecture firm Aedas.",
+   "why": "Wikipedia alone: Aedas's old project page (www1.aedas.com) did not connect, the page at its current site answered 404, and the archived copy Wikipedia cites is in the web archive, which the network policy blocks. 'The buildings' would also take in Terminal 4, whose designer no source here names."
+  },
+  {
+   "claim": "international routes lean towards East and Southeast Asia, with further links to Europe, South Asia, Africa and Oceania",
+   "verdict": "cut",
+   "wasBefore": "International routes lean heavily towards East and Southeast Asia, with further connections to Europe, South Asia, Africa and Oceania.",
+   "why": "Wikipedia alone. The operator gives only counts (53 international and regional destinations at the end of 2024), its new-routes page is mostly 2008 to 2016, and its September 2026 summer report names only Asian routes (a new Busan service, more flights to Ho Chi Minh City and Kuala Lumpur). Nothing current describes the whole international network."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "It is a genuinely large operation.",
+   "why": "The old text's judgement, kept: seventh busiest in China with just over 50 million passengers in 2025 (CAAC)."
+  },
+  {
+   "text": "Check which terminal a domestic flight uses.",
+   "why": "Advice on the confirmed split: the operator's transfer guide sends Air China, China Southern and Sichuan Airlines domestic flights to Terminal 4 and other airlines' to Terminal 3."
+  }
+ ],
+ "tracerOk": {
+  "800,000": "792,710 tonnes rounded up ('close to 800,000'; CAAC, Wikipedia)"
+ }
+}

@@ -1,0 +1,394 @@
+{
+ "iata": "SSA",
+ "id": "recIBL8179VLKcjIq",
+ "name": "Deputado Luiz Eduardo Magalhães International Airport",
+ "country": "Brazil",
+ "wikipedia": "https://en.wikipedia.org/wiki/Salvador_Bahia_Airport",
+ "audited": "2026-09-23",
+ "before": "Salvador's airport, 28 km north of the city and the gateway to Bahia. It is run by Vinci and shares some of its facilities with the Salvador Air Force Base.\n\nGetting in is easy and free. A shuttle bus runs every fifteen minutes from 5am to 1am to Aeroporto station on the Salvador metro, which connects to the centre at Lapa.\n\nThe terminal opened in 1998 and was finished by the end of 2000. It covers 69,400 square metres with eleven jetways, includes a shopping mall and is rated for six million passengers a year.\n\nThe setting is unusual. The site runs to more than six million square metres between sand dunes and native vegetation, and the bamboo covered road up to the airport is itself one of the sights of Salvador da Bahia.\n\nA naming note for supplier systems. Locals still call it Dois de Julho, after Bahia Independence Day. It was officially renamed in 1998 after the politician Luís Eduardo Magalhães, which remains contested, and the operator trades as Salvador Bahia Airport.",
+ "after": "Salvador's airport, 28 km from the city centre. It is run by Vinci Airports and is also used by the military.\n\nA free shuttle bus links the terminal with Aeroporto station on the Salvador metro. From there Line 2 runs to Acesso Norte, where Line 1 continues to Lapa in the city centre.\n\nVinci says it has enlarged and modernised the terminal, which can now handle up to 15 million passengers a year.\n\nA naming note for supplier systems. From 1955 it was called Dois de Julho, until a 1998 law renamed it after the politician Luís Eduardo Magalhães. The operator trades as Salvador Bahia Airport.",
+ "claims": [
+  {
+   "claim": "Salvador's airport",
+   "verdict": "confirmed",
+   "inAfter": "Salvador's airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "is the airport serving Salvador, Brazil"
+    },
+    {
+     "file": "op-sobre",
+     "org": "Vinci Airports (operator, salvador-airport.com.br)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Localizado na cidade de Salvador, capital da Bahia e primeira capital do Brasil, o Salvador Bahia Airport"
+    },
+    {
+     "file": "aisweb-sbsv",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Deputado Luís Eduardo Magalhães (SBSV) Salvador/BA"
+    }
+   ]
+  },
+  {
+   "claim": "28 km from the city centre",
+   "verdict": "confirmed",
+   "inAfter": "28 km from the city centre",
+   "note": "The operator and Wikipedia both give 28 km. The coordinates give 19.7 km in a straight line (ratio 1.42, inside the tolerance for a road distance). The direction is dropped: see the cut below.",
+   "sources": [
+    {
+     "file": "op-sobre",
+     "org": "Vinci Airports (operator, salvador-airport.com.br)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Estamos estrategicamente localizados a apenas 28 km do centro da cidade de Salvador"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "The airport is located 28 km (17 mi) north from downtown Salvador da Bahia."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 19.7 km (12.3 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "run by Vinci Airports",
+   "verdict": "confirmed",
+   "inAfter": "It is run by Vinci Airports",
+   "note": "Checked for a 2025 or 2026 change of operator: none. The operator's live about page and its release of 17 June 2026 still describe the airport as part of the VINCI Airports network, which took it over on 2 January 2018; DECEA's live entry names the concession company (Concessionária do Aeroporto de Salvador). The operator's domain (salvador-airport.com.br) is the one in the Wikipedia infobox; OurAirports still carries an old Infraero link.",
+   "sources": [
+    {
+     "file": "op-sobre",
+     "org": "Vinci Airports (operator, salvador-airport.com.br)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "o Salvador Bahia Airport faz parte da rede VINCI Airports desde 2 de janeiro de 2018"
+    },
+    {
+     "file": "op-pontes-jun2026",
+     "org": "Vinci Airports (operator, salvador-airport.com.br)",
+     "dated": "2026-06-17",
+     "quote": [
+      "17 de Junho de 2026",
+      "O Salvador Bahia Airport, integrante da rede VINCI Airports"
+     ]
+    },
+    {
+     "file": "aisweb-sbsv",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "CONCESSIONÁRIA DO AEROPORTO DE SALVADOR S.A"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "It is operated by Vinci SA."
+    }
+   ]
+  },
+  {
+   "claim": "also used by the military",
+   "verdict": "softened",
+   "inAfter": "is also used by the military",
+   "note": "Was 'shares some of its facilities with the Salvador Air Force Base'. DECEA classes the aerodrome as public and military (PUB/MIL), which Wikipedia's infobox also gives; the base itself is named only by Wikipedia, because the Air Force's own page for it (www2.fab.mil.br/basv/) answered with Cloudflare's bot check, so the attempt stopped there.",
+   "sources": [
+    {
+     "file": "aisweb-sbsv",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "INTL",
+      "PUB/MIL"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "Some of its facilities are shared with the Salvador Air Force Base of the Brazilian Air Force."
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "type = Public/Military"
+    }
+   ]
+  },
+  {
+   "claim": "a free shuttle bus links the terminal with Aeroporto station on the metro",
+   "verdict": "softened",
+   "inAfter": "A free shuttle bus links the terminal with Aeroporto station on the Salvador metro.",
+   "note": "The operator and the metro operator (Metrô Bahia, now part of Motiva) both describe the free shuttle; the operator puts the station about 2 km from the terminal. The frequency and hours rest on Wikipedia alone and are cut (below).",
+   "sources": [
+    {
+     "file": "op-como-chegar",
+     "org": "Vinci Airports (operator, salvador-airport.com.br)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "A estação mais próxima é a Estação Aeroporto, que fica a cerca de 2 km do terminal de passageiros.",
+      "O metrô também oferece um serviço de shuttle gratuito que leva os passageiros da estação até o nosso terminal."
+     ]
+    },
+    {
+     "file": "metro-linha-2",
+     "org": "Metrô Bahia (metro operator, Motiva)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "conectando o centro de Salvador ao Aeroporto Internacional de Salvador com transfer exclusivo e gratuito"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "A free shuttle bus runs every 15 minutes from 5am to 1am to Aeroporto station of Salvador subway"
+    }
+   ]
+  },
+  {
+   "claim": "Line 2 to Acesso Norte, change to Line 1 for Lapa in the centre",
+   "verdict": "corrected",
+   "inAfter": "From there Line 2 runs to Acesso Norte, where Line 1 continues to Lapa in the city centre.",
+   "note": "Was 'Aeroporto station on the Salvador metro, which connects to the centre at Lapa', which reads as a through service. The metro's own pages: Line 2 runs Acesso Norte to Aeroporto, Line 1 runs from Lapa, in the centre of Salvador, to Aguas Claras, and passengers change between the two at Acesso Norte (no second fare).",
+   "sources": [
+    {
+     "file": "metro-faq",
+     "org": "Metrô Bahia (metro operator, Motiva)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Como faço baldeação entre a Linha 1 - Vermelha Lapa - Águas Claras e a Linha 2 - Azul Acesso Norte - Aeroporto do metrô?",
+      "Para fazer a transferência (baldeação) entre as Linhas 1 e 2, é necessário desembarcar na Estação Acesso Norte"
+     ]
+    },
+    {
+     "file": "metro-linha-1",
+     "org": "Metrô Bahia (metro operator, Motiva)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "ligando o bairro da Lapa, no centro de Salvador, até Águas Claras"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "which connects to downtown Salvador at Lapa"
+    }
+   ]
+  },
+  {
+   "claim": "Vinci says the enlarged terminal can handle up to 15 million passengers a year",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Vinci",
+   "inAfter": "Vinci says it has enlarged and modernised the terminal, which can now handle up to 15 million passengers a year.",
+   "note": "Replaces 'rated for six million passengers a year', Wikipedia's figure for the terminal of 1998 to 2000, before Vinci's works. The operator's own figure, repeated in its releases of May and June 2026, so it is attributed to Vinci. For scale, the operator reports 8.1 million passengers in 2025 (held back below).",
+   "sources": [
+    {
+     "file": "op-pontes-jun2026",
+     "org": "Vinci Airports (operator, salvador-airport.com.br)",
+     "dated": "2026-06-17",
+     "quote": [
+      "17 de Junho de 2026",
+      "Com um investimento de R$ 700 milhões em obras de modernização e ampliação do terminal, aumentou sua capacidade em 50%, atendendo até 15 milhões de passageiros por ano."
+     ]
+    },
+    {
+     "file": "op-jornada-mai2026",
+     "org": "Vinci Airports (operator, salvador-airport.com.br)",
+     "dated": "2026-05-18",
+     "quote": [
+      "18 de Maio de 2026",
+      "já recebeu mais de R$ 700 milhões em investimentos e ampliou em 50% sua capacidade operacional, podendo atender até 15 milhões de passageiros por ano."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "called Dois de Julho from 1955",
+   "verdict": "confirmed",
+   "inAfter": "From 1955 it was called Dois de Julho",
+   "note": "Law 2,689 of 20 December 1955 named the Ipitanga aerodrome 'Dois de Julho'; Law 9,661 of 1998 revoked it.",
+   "sources": [
+    {
+     "file": "planalto-lei-2689",
+     "org": "Presidency of Brazil (Planalto law archive)",
+     "dated": "1955-12-20",
+     "quote": [
+      "20 DE DEZEMBRO DE 1955.",
+      "Denomina Dois de Julho o"
+     ]
+    },
+    {
+     "file": "camara-lei-9661",
+     "org": "Chamber of Deputies of Brazil (federal law archive)",
+     "dated": "1998-06-16",
+     "quote": "Art. 3º Revoga-se a Lei nº 2.689, de 20 de dezembro de 1955."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "On 20 December 1955, the airport had its name changed for the first time: it became known as Dois de Julho International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "renamed by a 1998 law after the politician Luís Eduardo Magalhães",
+   "verdict": "confirmed",
+   "inAfter": "until a 1998 law renamed it after the politician Luís Eduardo Magalhães",
+   "note": "Law 9,661 of 16 June 1998 names it 'Aeroporto Internacional de Salvador - Deputado Luís Eduardo Magalhães'; 'Deputado' (a member of the Chamber of Deputies) supports 'politician'. DECEA uses the same name. The record's own name spells it 'Luiz' (with a z); the law, DECEA and Wikipedia spell it 'Luís'.",
+   "sources": [
+    {
+     "file": "camara-lei-9661",
+     "org": "Chamber of Deputies of Brazil (federal law archive)",
+     "dated": "1998-06-16",
+     "quote": [
+      "LEI Nº 9.661, DE 16 DE JUNHO DE 1998",
+      "Art. 1º É denominado \"Aeroporto Internacional de Salvador - Deputado Luís Eduardo Magalhães\" o aeroporto localizado na cidade de Salvador, Estado da Bahia."
+     ]
+    },
+    {
+     "file": "planalto-lei-9661",
+     "org": "Presidency of Brazil (Planalto law archive)",
+     "dated": "1998-06-16",
+     "quote": [
+      "DE 16 DE JUNHO DE 1998.",
+      "Aeroporto Internacional de Salvador -"
+     ]
+    },
+    {
+     "file": "aisweb-sbsv",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Deputado Luís Eduardo Magalhães (SBSV)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "Since 16 June 1998, by Federal Law, the airport is named after Luís Eduardo Magalhães (1955–1998), an influential politician of the state of Bahia."
+    }
+   ]
+  },
+  {
+   "claim": "the operator trades as Salvador Bahia Airport",
+   "verdict": "confirmed",
+   "inAfter": "The operator trades as Salvador Bahia Airport.",
+   "sources": [
+    {
+     "file": "op-sobre",
+     "org": "Vinci Airports (operator, salvador-airport.com.br)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Sobre nós | Salvador Bahia Airport",
+      "o Salvador Bahia Airport faz parte da rede VINCI Airports"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": [
+      "known by the trade name Salvador Bahia Airport",
+      "Since 2017 the concessionary has been using the Trade name Salvador Bahia Airport."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "north of the city",
+   "verdict": "cut",
+   "wasBefore": "28 km north of the city",
+   "why": "Fails the coordinates check: the airport is 68 degrees from the GeoNames centre, which is east (north is 68 degrees off, beyond the 45-degree tolerance). The operator gives only the distance, which is kept."
+  },
+  {
+   "claim": "the gateway to Bahia",
+   "verdict": "cut",
+   "wasBefore": "the gateway to Bahia",
+   "why": "A banned phrase, and no source ranks it for the state. The operator calls itself the 'porta de entrada para o Nordeste', a slogan, not a fact."
+  },
+  {
+   "claim": "the Salvador Air Force Base by name",
+   "verdict": "cut",
+   "wasBefore": "shares some of its facilities with the Salvador Air Force Base",
+   "why": "Softened to military use (DECEA, Wikipedia). The Air Force's page for the base (www2.fab.mil.br/basv/) answered Cloudflare's 'Just a moment...' bot check, so the attempt stopped there and nothing else names the base."
+  },
+  {
+   "claim": "getting in is easy and free",
+   "verdict": "cut",
+   "wasBefore": "Getting in is easy and free.",
+   "why": "Misleading: only the shuttle is free. The metro charges a fare (its own FAQ describes the fare and free travel only for passengers aged 65 and over). The free shuttle is kept."
+  },
+  {
+   "claim": "shuttle every fifteen minutes from 5am to 1am",
+   "verdict": "cut",
+   "wasBefore": "A shuttle bus runs every fifteen minutes from 5am to 1am",
+   "why": "Wikipedia alone; neither the airport nor the metro gives the shuttle's frequency or hours. The metro itself runs from 5am to midnight every day (its FAQ), so a 1am finish is doubtful."
+  },
+  {
+   "claim": "terminal opened in 1998, finished by the end of 2000",
+   "verdict": "cut",
+   "wasBefore": "The terminal opened in 1998 and was finished by the end of 2000.",
+   "why": "Wikipedia alone. The Structurae entry cited for the terminal answered Cloudflare's bot check, so the attempt stopped there. The terminal has since been enlarged by Vinci (kept above, attributed)."
+  },
+  {
+   "claim": "69,400 square metres, eleven jetways, a shopping mall, six million a year",
+   "verdict": "cut",
+   "wasBefore": "It covers 69,400 square metres with eleven jetways, includes a shopping mall and is rated for six million passengers a year.",
+   "why": "Wikipedia's description of the 1998 to 2000 terminal, with no second source and out of date since Vinci's enlargement. The capacity is replaced by the operator's current figure (up to 15 million, attributed). The operator lists shops and restaurants but does not call them a mall."
+  },
+  {
+   "claim": "the setting: six million square metres, dunes and native vegetation, the bamboo road",
+   "verdict": "cut",
+   "wasBefore": "The setting is unusual. The site runs to more than six million square metres between sand dunes and native vegetation, and the bamboo covered road up to the airport is itself one of the sights of Salvador da Bahia.",
+   "why": "Wikipedia alone. DECEA's obstacle list does record dunes and vegetation beside the runways, but nothing read gives the site's area or mentions the bamboo-covered road (the operator's about, environment, tourist-access and passenger-experience pages were checked)."
+  },
+  {
+   "claim": "locals still call it Dois de Julho, after Bahia Independence Day",
+   "verdict": "cut",
+   "wasBefore": "Locals still call it Dois de Julho, after Bahia Independence Day.",
+   "why": "Wikipedia alone for today's local usage and for the holiday. The 1955 name itself is kept, from the law."
+  },
+  {
+   "claim": "the renaming remains contested",
+   "verdict": "cut",
+   "wasBefore": "which remains contested",
+   "why": "Wikipedia alone. Its only citation, a Chamber of Deputies bill at camara.gov.br/sileg/integras/17932.pdf, now answers 404, and the archived copy is on the blocked web archive."
+  },
+  {
+   "claim": "8.1 million passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: the old text gives no traffic figure, so this replaces nothing. The operator reports 8.1 million passengers in 2025, up 6.3 per cent (22 January 2026). Good sources disagree: Wikipedia's infobox, citing Vinci, gives 7,186,760 (up 5 per cent). Settle which count to use before adding a figure.",
+   "sources": [
+    {
+     "file": "op-2025-trafego",
+     "org": "Vinci Airports (operator, salvador-airport.com.br)",
+     "dated": "2026-01-22",
+     "quote": [
+      "22 de Janeiro de 2026",
+      "registrou um total de 8,1 milhões de passageiros em 2025, marcando um aumento de 6,3% na comparação com o ano anterior"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 7,186,760 5%"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "A naming note for supplier systems.",
+   "why": "A signpost kept from the old text; the names that follow are each sourced."
+  }
+ ],
+ "tracerOk": {}
+}

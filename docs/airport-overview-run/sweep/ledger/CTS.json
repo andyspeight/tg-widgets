@@ -1,0 +1,439 @@
+{
+ "iata": "CTS",
+ "id": "recuPcuXpxwY1dENo",
+ "name": "New Chitose Airport",
+ "country": "Japan",
+ "wikipedia": "https://en.wikipedia.org/wiki/New_Chitose_Airport",
+ "audited": "2026-09-23",
+ "before": "The main airport for Sapporo and the largest in Hokkaido, about 5 km south south east of Chitose. It carried 23.7 million passengers in 2018 and was fifth busiest in Japan.\n\nThe train is quick and very busy. New Chitose Airport Station reaches Sapporo in 37 minutes on the Rapid Airport service and Otaru in 73. Trains to Sapporo are described as seriously crowded because of rising passenger numbers, so a client with heavy luggage may prefer the bus.\n\nThe Sapporo to Tokyo Haneda route is the second busiest air route in the world, carrying 12.1 million passengers in 2025.\n\nIt is one of six 24-hour airports in Japan and the only inland one, though the terminal itself has daily opening hours, so a late arrival does not mean the building is open all night.\n\nWinter is the operational risk. The adjacent Chitose Air Base has its own runways connected by taxiways, and those are occasionally used to relieve closures here caused by winter weather.\n\nSkytrax ranked it 49th in the world in 2024, up from 102nd, and named it the world's most improved airport that year.",
+ "after": "The main airport for Sapporo and Hokkaido, about 5 km south south east of Chitose. It handled 26.0 million passengers in the year to March 2026.\n\nNew Chitose Airport Station reaches Sapporo in about half an hour and Otaru in 73 minutes at best. JR Hokkaido warns that unreserved seats may be full, so a client with heavy luggage may prefer the direct bus into Sapporo.\n\nOn OAG's count of seats, Sapporo to Tokyo Haneda is the second busiest air route in the world, with 12.1 million seats in 2025.\n\nIt is a 24-hour airport, but the terminals close at night. The airport opens them at 5am, closes them at 11.30pm (domestic) or 9pm (international) and says no one may sleep inside after closing, except in its hotels.\n\nSkytrax ranked it 35th in the world for 2026 (42nd in 2025) and named it the world's most improved airport in 2024.",
+ "claims": [
+  {
+   "claim": "the main airport for Sapporo",
+   "verdict": "confirmed",
+   "inAfter": "The main airport for Sapporo",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "serving the Sapporo metropolitan area"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Sapporo"
+    }
+   ]
+  },
+  {
+   "claim": "the main airport for Hokkaido",
+   "verdict": "softened",
+   "inAfter": "The main airport for Sapporo and Hokkaido",
+   "note": "Was 'the largest in Hokkaido'. Two bodies other than Wikipedia call it Hokkaido's air gateway (MLIT's Hokkaido bureau: the gateway that represents Hokkaido; the Mayor of Chitose: Hokkaido's air gateway), but neither ranks the island's airports, and the operator's monthly tables cover only the seven airports it runs, so 'largest' is softened to 'main'.",
+   "sources": [
+    {
+     "file": "hkd-mlit-history",
+     "org": "MLIT Hokkaido Regional Development Bureau (hkd.mlit.go.jp)",
+     "quote": "北海道を代表する空の玄関口・新千歳空港"
+    },
+    {
+     "file": "chitose-100th",
+     "org": "Chitose City (the mayor's message on the city's airport centenary site)",
+     "quote": [
+      "千歳市長",
+      "北海道の空の玄関口である新千歳空港"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "By both traffic and land area, it is the largest airport in Hokkaidō."
+    }
+   ]
+  },
+  {
+   "claim": "about 5 km south south east of Chitose",
+   "verdict": "confirmed",
+   "inAfter": "about 5 km south south east of Chitose",
+   "note": "Coordinates: 5.9 km in a straight line at 148 degrees (south east, one point from south south east), ratio 0.85, inside the tolerance.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "2.7 nautical miles (5.0 km; 3.1 mi) south-southeast of Chitose"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Chitose (GeoNames 2130452): 5.9 km (3.6 miles), bearing 148 degrees, which is south east"
+    }
+   ]
+  },
+  {
+   "claim": "26.0 million passengers in the year to March 2026",
+   "verdict": "corrected",
+   "inAfter": "It handled 26.0 million passengers in the year to March 2026.",
+   "note": "Was '23.7 million passengers in 2018'. For the 2025 financial year (April 2025 to March 2026) the operator's preliminary count is 26,015,370 and MLIT's sheet has 26,023,467; both give 21,487,467 domestic passengers, which ties MLIT's row to New Chitose. The operator's calendar-year table (from MLIT's airport management reports) has 23,968,186 for 2024, as does Wikipedia's infobox, and 23,313,311 for 2018, so the old figure was also off.",
+   "sources": [
+    {
+     "file": "hap-260501",
+     "org": "Hokkaido Airports (the airport operator, hokkaido-airports.com)",
+     "dated": "2026-05-01 (preliminary figures to March 2026)",
+     "quote": [
+      "北海道内7空港 2026 年3月運用状況(速報値)",
+      "北海道エアポート運営７空港運用状況（2025年度累計:速報値）",
+      "国内 21,487,467 102.56%",
+      "計 26,015,370 104.79%"
+     ]
+    },
+    {
+     "file": "mlit-kuni-kanri",
+     "org": "MLIT Civil Aviation Bureau (national airports sheets, mlit.go.jp)",
+     "dated": "figures for the years to March 2022 to March 2026 (undated PDF read 2026-09-23)",
+     "quote": [
+      "・位置 ： 北海道千歳市",
+      "新千歳空港",
+      "令和3年度 令和4年度 令和5年度 令和6年度 令和7年度",
+      "22,933,723 24,838,597 26,023,467",
+      "9,229,169 16,946,826 20,031,290 20,950,956 21,487,467"
+     ]
+    },
+    {
+     "file": "hap-since-opening",
+     "org": "Hokkaido Airports (the airport operator, hokkaido-airports.com)",
+     "dated": "read 2026-09-23 (live page; latest year 2024)",
+     "quote": [
+      "2018 19,587,471 3,725,840 23,313,311",
+      "2024 20,436,124 3,532,062 23,968,186"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Sapporo in about half an hour on the fastest trains",
+   "verdict": "corrected",
+   "inAfter": "New Chitose Airport Station reaches Sapporo in about half an hour",
+   "note": "Was '37 minutes on the Rapid Airport service'. The Rapid still takes 37 at best, but JR Hokkaido now runs a Special Rapid that takes 33; the airport says about 30 minutes.",
+   "sources": [
+    {
+     "file": "jrh-airport",
+     "org": "JR Hokkaido (Hokkaido Railway Company, the train operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "33 mins to Sapporo / 73 mins to Otaru (fastest)",
+      "1 Special Rapid train (fastest: 33 mins), 3 Rapid trains (fastest: 37 mins),"
+     ]
+    },
+    {
+     "file": "hap-jr",
+     "org": "Hokkaido Airports (the airport operator, hokkaido-airports.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "To Sapporo, it takes about 30 minutes without transfers."
+    }
+   ]
+  },
+  {
+   "claim": "Otaru in 73 minutes on the fastest trains",
+   "verdict": "confirmed",
+   "inAfter": "and Otaru in 73 minutes at best",
+   "sources": [
+    {
+     "file": "jrh-airport",
+     "org": "JR Hokkaido (Hokkaido Railway Company, the train operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "33 mins to Sapporo / 73 mins to Otaru (fastest)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the fastest time to Otaru Station is 73 minutes"
+    }
+   ]
+  },
+  {
+   "claim": "trains can be crowded: JR Hokkaido warns unreserved seats may be full",
+   "verdict": "softened",
+   "inAfter": "JR Hokkaido warns that unreserved seats may be full",
+   "note": "Was 'described as seriously crowded because of rising passenger numbers'. The cause rests on Wikipedia alone; the railway's own page warns that unreserved seats may be full.",
+   "sources": [
+    {
+     "file": "jrh-airport",
+     "org": "JR Hokkaido (Hokkaido Railway Company, the train operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Non-reserved seats are available in cars 1–3 and 5–6.",
+      "Seats may be full"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "trains to Sapporo Station are becoming seriously crowded"
+    }
+   ]
+  },
+  {
+   "claim": "a direct bus to central Sapporo",
+   "verdict": "confirmed",
+   "inAfter": "the direct bus into Sapporo",
+   "sources": [
+    {
+     "file": "hap-bus",
+     "org": "Hokkaido Airports (the airport operator, hokkaido-airports.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Direct to Sapporo City Center (last stop: Nakajima Park)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Hokkaidō Chūō Bus/Hokuto Kotsu joint service (Sapporo 4 trips/h"
+    }
+   ]
+  },
+  {
+   "claim": "Sapporo to Tokyo Haneda is the second busiest air route in the world",
+   "verdict": "confirmed",
+   "inAfter": "Sapporo to Tokyo Haneda is the second busiest air route in the world",
+   "note": "Second for 2025 as a whole and still second in OAG's September 2026 ranking (1,069,504 seats), 15,400 seats behind Jeju to Seoul Gimpo.",
+   "sources": [
+    {
+     "file": "oag-2025",
+     "org": "OAG",
+     "dated": "2025 (January to December 2025)",
+     "quote": "Sapporo New Chitose (CTS) to Tokyo Haneda (HND) is in second place with a staggering 12.1 million seats in 2025"
+    },
+    {
+     "file": "oag-now",
+     "org": "OAG",
+     "dated": "September 2026",
+     "quote": "Sapporo New Chitose to Tokyo Haneda (CTS-HND) is second with 1,069,504 seats (+6%)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Sapporo–Tokyo Haneda route is the second busiest air route in the world"
+    }
+   ]
+  },
+  {
+   "claim": "12.1 million seats in 2025, on OAG's count",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "OAG",
+   "inAfter": "On OAG's count of seats, Sapporo to Tokyo Haneda is the second busiest air route in the world, with 12.1 million seats in 2025.",
+   "note": "Was '12.1 million passengers'. Wikipedia cites OAG's 2025 report, but OAG counts scheduled seats, not passengers carried, so the figure is now given as seats and attributed to OAG.",
+   "sources": [
+    {
+     "file": "oag-2025",
+     "org": "OAG",
+     "dated": "2025 (January to December 2025)",
+     "quote": [
+      "using seat capacity data from January to December 2025",
+      "Sapporo New Chitose (CTS) to Tokyo Haneda (HND) is in second place with a staggering 12.1 million seats in 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a 24-hour airport",
+   "verdict": "confirmed",
+   "inAfter": "It is a 24-hour airport",
+   "sources": [
+    {
+     "file": "hap-airports-operated",
+     "org": "Hokkaido Airports (the airport operator, hokkaido-airports.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "New Chitose Airport",
+      "Runway (A) 3,000m x 60m (B) 3,000m x 60m Operating hours 24 hours"
+     ]
+    },
+    {
+     "file": "hkd-mlit-history",
+     "org": "MLIT Hokkaido Regional Development Bureau (hkd.mlit.go.jp)",
+     "quote": "平成6年には日本初の24時間運用が開始され"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "New Chitose Airport is one of six 24-hour airports in Japan"
+    }
+   ]
+  },
+  {
+   "claim": "the terminals close at night",
+   "verdict": "confirmed",
+   "inAfter": "but the terminals close at night",
+   "sources": [
+    {
+     "file": "hap-service-ja",
+     "org": "Hokkaido Airports (the airport operator, hokkaido-airports.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "新千歳空港ターミナルビル 開館時間・閉館時間",
+      "閉館後、空港内ではお休みになれませんのでご了承ください。（宿泊施設を除く）"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "this airport has daily opening hours limit unlike other 24-hour operational airport terminals"
+    }
+   ]
+  },
+  {
+   "claim": "terminal hours 5am to 11.30pm (domestic) or 9pm (international); no sleeping inside after closing except in the hotels",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport opens them at 5am, closes them at 11.30pm (domestic) or 9pm (international) and says no one may sleep inside after closing, except in its hotels.",
+   "note": "Replaces 'a late arrival does not mean the building is open all night' with the operator's own hours and rule, so attributed to the airport. The operator adds that the hours may change with schedule changes and delays, and that part of the domestic building stays open later on nights with late domestic flights.",
+   "sources": [
+    {
+     "file": "hap-service-ja",
+     "org": "Hokkaido Airports (the airport operator, hokkaido-airports.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "国内線 開館 5時／閉館 23時30分",
+      "国際線 開館 5時／閉館 21時",
+      "閉館後、空港内ではお休みになれませんのでご了承ください。（宿泊施設を除く）",
+      "フライトスケジュール変更及び遅延便の発生等により開館時間及び閉館時間が変わる場合があります。"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Skytrax ranked it 35th in the world for 2026, 42nd in 2025",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Skytrax",
+   "inAfter": "Skytrax ranked it 35th in the world for 2026 (42nd in 2025)",
+   "note": "Was '49th in the world in 2024, up from 102nd', two rankings out of date. Skytrax's 2026 table lists each airport's rank, name and 2025 rank in that order (Singapore Changi 1 and 1, Tokyo Haneda 3 and 3).",
+   "sources": [
+    {
+     "file": "skytrax-top100-2026",
+     "org": "Skytrax (World Airport Awards)",
+     "dated": "2026 (the 2025/2026 World Airport Survey)",
+     "quote": [
+      "World’s Top 100 Airports 2026",
+      "voted by air travellers around the world in the 2025/2026 World Airport Survey",
+      "35 New Chitose 42 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named the world's most improved airport in 2024",
+   "verdict": "confirmed",
+   "inAfter": "named it the world's most improved airport in 2024",
+   "sources": [
+    {
+     "file": "hap-260319",
+     "org": "Hokkaido Airports (the airport operator, hokkaido-airports.com)",
+     "dated": "2026-03-19",
+     "quote": [
+      "2026 年3 月19 日( 木)",
+      "2024年に受賞した「World Most Improved Airport」"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the airport was awarded Skytrax's World's Most Improved Airport for 2024"
+    }
+   ]
+  },
+  {
+   "claim": "the largest in Hokkaido",
+   "verdict": "cut",
+   "wasBefore": "and the largest in Hokkaido",
+   "why": "Softened to 'main airport ... for Hokkaido' (see above): the second sources call it Hokkaido's air gateway but do not rank the island's airports."
+  },
+  {
+   "claim": "23.7 million passengers in 2018",
+   "verdict": "cut",
+   "wasBefore": "It carried 23.7 million passengers in 2018",
+   "why": "Eight years old, and the operator's own table has 23,313,311 for 2018. Replaced by the figure for the year to March 2026 (see above)."
+  },
+  {
+   "claim": "fifth busiest in Japan",
+   "verdict": "cut",
+   "wasBefore": "and was fifth busiest in Japan",
+   "why": "A 2018 ranking. MLIT's national ranking tables are Excel files the sweep's tools cannot save, and its readable sheets leave out the company-run airports (Narita, Kansai, Itami, Chubu), so no current rank could be confirmed."
+  },
+  {
+   "claim": "the train is quick and very busy",
+   "verdict": "cut",
+   "wasBefore": "The train is quick and very busy.",
+   "why": "Folded into the journey times and JR Hokkaido's warning that unreserved seats may be full (see above)."
+  },
+  {
+   "claim": "37 minutes on the Rapid Airport service",
+   "verdict": "cut",
+   "wasBefore": "reaches Sapporo in 37 minutes on the Rapid Airport service",
+   "why": "No longer the fastest: the Special Rapid takes 33 minutes (JR Hokkaido). Corrected to about half an hour (see above)."
+  },
+  {
+   "claim": "seriously crowded because of rising passenger numbers",
+   "verdict": "cut",
+   "wasBefore": "Trains to Sapporo are described as seriously crowded because of rising passenger numbers",
+   "why": "The cause rests on Wikipedia alone; softened to JR Hokkaido's own warning (see above)."
+  },
+  {
+   "claim": "12.1 million passengers",
+   "verdict": "cut",
+   "wasBefore": "carrying 12.1 million passengers in 2025",
+   "why": "OAG's 12.1 million is scheduled seats, not passengers. Corrected (see above)."
+  },
+  {
+   "claim": "one of six 24-hour airports in Japan and the only inland one",
+   "verdict": "cut",
+   "wasBefore": "It is one of six 24-hour airports in Japan and the only inland one",
+   "why": "The count and 'only inland' rest on Wikipedia alone. The 24-hour operation itself is confirmed and kept (see above)."
+  },
+  {
+   "claim": "terminal opening hours, general",
+   "verdict": "cut",
+   "wasBefore": "though the terminal itself has daily opening hours, so a late arrival does not mean the building is open all night",
+   "why": "Replaced by the operator's actual hours and its no-sleeping rule (see above)."
+  },
+  {
+   "claim": "winter risk; Chitose Air Base runways joined by taxiways and used when winter weather closes New Chitose",
+   "verdict": "cut",
+   "wasBefore": "Winter is the operational risk. The adjacent Chitose Air Base has its own runways connected by taxiways, and those are occasionally used to relieve closures here caused by winter weather.",
+   "why": "The taxiway link and the winter use rest on Wikipedia alone. MLIT's Hokkaido bureau confirms only that the civil airport shared the air force's runways until New Chitose was built. The Air Self-Defense Force's site (mod.go.jp) answered with a Cloudflare 'Just a moment...' bot check, so it was not tried further."
+  },
+  {
+   "claim": "Skytrax 49th in 2024, up from 102nd",
+   "verdict": "cut",
+   "wasBefore": "Skytrax ranked it 49th in the world in 2024, up from 102nd",
+   "why": "Replaced by the 2026 ranking (see above). Skytrax's 2024 page address now serves its 2026 list."
+  },
+  {
+   "claim": "Skytrax World's Cleanest Airport 2026, up to 30 million passengers",
+   "verdict": "cut",
+   "why": "Held back: verified but replaces nothing in the old text. Skytrax named New Chitose the World's Cleanest Airport 2026 for airports handling up to 30 million passengers, its first win in that category (the operator's release of 19 March 2026).",
+   "sources": [
+    {
+     "file": "skytrax-cleanest-2026",
+     "org": "Skytrax (World Airport Awards)",
+     "dated": "2026",
+     "quote": "New Chitose Airport is named the World's Cleanest Airport 2026 for airports handling up to 30 million passengers"
+    },
+    {
+     "file": "hap-260319",
+     "org": "Hokkaido Airports (the airport operator, hokkaido-airports.com)",
+     "dated": "2026-03-19",
+     "quote": "部門で初めて世界第1位を受賞したことをお知らせいたします。"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so a client with heavy luggage may prefer the direct bus into Sapporo",
+   "why": "Advice carried over from the old text, resting on the confirmed bus and JR Hokkaido's warning about full seats."
+  }
+ ],
+ "tracerOk": {}
+}

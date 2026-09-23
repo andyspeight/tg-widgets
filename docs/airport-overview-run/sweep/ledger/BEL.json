@@ -1,0 +1,311 @@
+{
+ "iata": "BEL",
+ "id": "recw9DMavFKNqdhXh",
+ "name": null,
+ "country": "Brazil",
+ "wikipedia": "https://en.wikipedia.org/wiki/Bel%C3%A9m/Val-de-Cans_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The main airport for Belém, 12 km from downtown, and the gateway to the mouth of the Amazon. It is named after Júlio Cezar Ribeiro de Souza, a nineteenth century balloon researcher, a name it took in April 2010.\n\nIt has been run by the Consortium Novo Norte since it left Infraero in 2023.\n\nIts history is transatlantic. Val de Cans began in the 1930s as a 1,200 metre earth strip. When the Second World War broke out, airports on the Brazilian coast became critical for moving aircraft, people and equipment across the South Atlantic to West Africa, and after negotiations between Brazil and the United States, proper concrete and asphalt runways were built here for the Air Transport Command. Thousands of aircraft built in Canada and the United States passed through on their way to North Africa and Europe.\n\nSome facilities are shared with a Brazilian Air Force base.",
+ "after": "The main airport for Belém, 12 km from the city centre. Since April 2010 its official name has been Belém/Val-de-Cans/Júlio Cezar Ribeiro International Airport.\n\nIt has been run by the Novo Norte consortium, trading as NOA (Norte da Amazônia Airports), since it left Infraero in 2023. The military also uses the airfield.\n\nVal de Cans began in the 1930s as a 1,200 metre earth strip. In the Second World War it became a stop on the route for new military aircraft flown from factories in Canada and the United States, and two concrete and asphalt runways were built for military flying.",
+ "claims": [
+  {
+   "claim": "the main airport for Belém",
+   "verdict": "confirmed",
+   "inAfter": "The main airport for Belém",
+   "note": "Belém has a second, smaller airport (renamed Brigadeiro Protásio de Oliveira by the same 2010 law); Val de Cans is the international one, and the operator calls it the largest airport terminal in the North region.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was written from",
+     "quote": "is the main airport serving Belém, Brazil"
+    },
+    {
+     "file": "noa-dfs-2025",
+     "org": "NOA (Norte da Amazônia Airports, operator; 2025 management report)",
+     "dated": "2025 annual report (published March 2026)",
+     "quote": [
+      "em sua história a marca dos 4 milhões de passageiros",
+      "como o maior terminal aeroportuário do Norte e um dos maiores do"
+     ]
+    },
+    {
+     "file": "aisweb-sbbe",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Val de Cans - Júlio Cezar Ribeiro (SBBE) Belém/PA",
+      "INTL"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "12 km from the city centre",
+   "verdict": "confirmed",
+   "inAfter": "12 km from the city centre",
+   "note": "The coordinates give 9.1 km in a straight line (ratio 1.32, inside the tolerance for a road distance).",
+   "sources": [
+    {
+     "file": "op-aeroporto",
+     "org": "NOA (Norte da Amazônia Airports, operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Localizado a 12 km do centro da capital"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was written from",
+     "quote": "located 12 km (7 mi) from downtown"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 9.1 km (5.6 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "official name since April 2010: Belém/Val-de-Cans/Júlio Cezar Ribeiro International Airport",
+   "verdict": "corrected",
+   "inAfter": "Since April 2010 its official name has been Belém/Val-de-Cans/Júlio Cezar Ribeiro International Airport.",
+   "note": "Was 'named after Júlio Cezar Ribeiro de Souza ... a name it took in April 2010'. Law 12,228 of 13 April 2010 gives the full name, 'Aeroporto Internacional de Belém/Val-de-Cans/Júlio Cezar Ribeiro', which also explains the Val de Cans used below; the record has no Airport Name. DECEA uses 'Val de Cans - Júlio Cezar Ribeiro' and the operator 'Aeroporto Júlio Cezar Ribeiro (Val-de-Cans)'.",
+   "sources": [
+    {
+     "file": "planalto-lei-12228",
+     "org": "Presidency of Brazil (Planalto law archive)",
+     "dated": "2010-04-13",
+     "quote": [
+      "12.228, DE 13 DE",
+      "ABRIL DE 2010.",
+      "Denomina Aeroporto Internacional de Bel",
+      "Val-de-Cans/J",
+      "Cezar Ribeiro o"
+     ]
+    },
+    {
+     "file": "aisweb-sbbe",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Val de Cans - Júlio Cezar Ribeiro (SBBE)"
+    },
+    {
+     "file": "op-aeroporto",
+     "org": "NOA (Norte da Amazônia Airports, operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Aeroporto Júlio Cezar Ribeiro (Val-de-Cans)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was written from",
+     "quote": [
+      "Val-de-Cans/Júlio Cezar Ribeiro International Airport (IATA: BEL, ICAO: SBBE)",
+      "On 13 April 2010, the airport was named after Júlio Cezar Ribeiro de Souza (1837–1887), a researcher of balloons."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "run by the Novo Norte consortium, trading as NOA, since it left Infraero in 2023",
+   "verdict": "confirmed",
+   "inAfter": "It has been run by the Novo Norte consortium, trading as NOA (Norte da Amazônia Airports), since it left Infraero in 2023.",
+   "note": "Checked for a 2025 or 2026 change of operator: none. The consortium (Socicam and Dix) won the Bloco Norte II concession in August 2022; its company, SPE Novo Norte, trades as NOA and began operating in 2023 (Wikipedia: Infraero's figures run to August 2023, NOA's from September 2023). NOA's 2025 report (March 2026) still names Socicam and Dix as its owners, and DECEA's live entry names NOA. Wikipedia's infobox says NOA from 2022, which is the auction year.",
+   "sources": [
+    {
+     "file": "noa-dfs-2025",
+     "org": "NOA (Norte da Amazônia Airports, operator; 2025 management report)",
+     "dated": "2025 annual report (published March 2026)",
+     "quote": [
+      "Iniciando suas atividades em 2023, a Norte da Amazônia Airports - NOA nasce",
+      "A NOA – Norte da Amazônia Airports, é constituída pelas empresas Socicam e"
+     ]
+    },
+    {
+     "file": "noa-sobre",
+     "org": "NOA (Norte da Amazônia Airports, operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "A empresa é decorrente do Consórcio Novo Norte, que arrematou o Bloco Norte II"
+    },
+    {
+     "file": "aisweb-sbbe",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Norte da Amazônia Airports (NOA)."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was written from",
+     "quote": [
+      "The airport is operated by Consortium Novo Norte (NOA).",
+      "according to Infraero (2007-August 2023) and NOA (September 2023-2025) reports"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the military also uses the airfield",
+   "verdict": "softened",
+   "inAfter": "The military also uses the airfield.",
+   "note": "Was 'Some facilities are shared with a Brazilian Air Force base'. DECEA classes the aerodrome as public and military (PUB/MIL), as does Wikipedia's infobox; only Wikipedia names Belém Air Force Base. The Air Force's own site (fab.mil.br) answered a Cloudflare bot check earlier tonight (at Salvador), so it was not tried.",
+   "sources": [
+    {
+     "file": "aisweb-sbbe",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "INTL",
+      "PUB/MIL"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was written from",
+     "quote": "Some of its facilities are shared with Belém Air Force Base of the Brazilian Air Force."
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "type = Public/Military"
+    }
+   ]
+  },
+  {
+   "claim": "began in the 1930s as a 1,200 metre earth strip",
+   "verdict": "confirmed",
+   "inAfter": "Val de Cans began in the 1930s as a 1,200 metre earth strip.",
+   "note": "The operator dates the start of operations to 1934. The operator's account (a NOA article from 2023, when the handover from Infraero was under way) is its own, in Portuguese and with details Wikipedia lacks, not a copy of Wikipedia.",
+   "sources": [
+    {
+     "file": "op-segunda-guerra",
+     "org": "NOA (Norte da Amazônia Airports, operator)",
+     "quote": [
+      "Suas operações tiveram início em 1934",
+      "Inicialmente, o aeródromo consistia em uma modesta pista de terra com 1.200 metros de comprimento"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was written from",
+     "quote": [
+      "In 1934, General Eurico Gaspar Dutra",
+      "Val de Cans began its history as a land track running along the east–west axis with 1,200m."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a Second World War stop for new military aircraft from Canadian and US factories",
+   "verdict": "softened",
+   "inAfter": "In the Second World War it became a stop on the route for new military aircraft flown from factories in Canada and the United States",
+   "note": "Was 'Thousands of aircraft built in Canada and the United States passed through on their way to North Africa and Europe'. The operator confirms the route for new military aircraft from Canadian and US factories; the number and the destinations rest on Wikipedia alone. The operator's account (a NOA article from 2023, when the handover from Infraero was under way) is its own, in Portuguese and with details Wikipedia lacks, not a copy of Wikipedia.",
+   "sources": [
+    {
+     "file": "op-segunda-guerra",
+     "org": "NOA (Norte da Amazônia Airports, operator)",
+     "quote": "que se tornou uma rota vital para o transporte de novos aviões militares que saíam das fábricas do Canadá e dos Estados Unidos."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was written from",
+     "quote": "These facilities provided the necessary logistical support for the thousands of planes that, manufactured in Canada and the United States, were moved to North Africa and Europe."
+    }
+   ]
+  },
+  {
+   "claim": "two concrete and asphalt runways built for military flying",
+   "verdict": "confirmed",
+   "inAfter": "two concrete and asphalt runways were built for military flying",
+   "note": "Both give two runways of 1,500 by 45 metres on a concrete and asphalt base. The operator's account (a NOA article from 2023, when the handover from Infraero was under way) is its own, in Portuguese and with details Wikipedia lacks, not a copy of Wikipedia.",
+   "sources": [
+    {
+     "file": "op-segunda-guerra",
+     "org": "NOA (Norte da Amazônia Airports, operator)",
+     "quote": "Para atender às necessidades da aviação militar, foram construídas duas pistas com 1.500 metros de comprimento e 45 metros de largura com base de concreto e asfalto."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was written from",
+     "quote": "airstrips were built at Belém for the Air Transport Command with two runways measuring 1,500 x 45 meters on a basis of concrete and asphalt"
+    }
+   ]
+  },
+  {
+   "claim": "the gateway to the mouth of the Amazon",
+   "verdict": "cut",
+   "wasBefore": "and the gateway to the mouth of the Amazon",
+   "why": "A banned phrase, and a description rather than a fact."
+  },
+  {
+   "claim": "Júlio Cezar Ribeiro de Souza, a nineteenth century balloon researcher",
+   "verdict": "cut",
+   "wasBefore": "Júlio Cezar Ribeiro de Souza, a nineteenth century balloon researcher",
+   "why": "Who he was rests on Wikipedia alone: the law and the operator give only the name. The Chamber of Deputies' law index refused the link lister (405) and the Air Force site is behind a bot check. The name and the 2010 date are kept."
+  },
+  {
+   "claim": "'Its history is transatlantic'; Brazilian coast airports critical for the South Atlantic crossing to West Africa",
+   "verdict": "cut",
+   "wasBefore": "Its history is transatlantic.",
+   "why": "The South Atlantic crossing to West Africa rests on Wikipedia alone. The operator's own account has the bombers going on via Natal to attack Dakar, which does not match Wikipedia and was not used. The route for new aircraft from Canada and the United States is kept."
+  },
+  {
+   "claim": "the wartime role of coastal airports across the South Atlantic",
+   "verdict": "cut",
+   "wasBefore": "When the Second World War broke out, airports on the Brazilian coast became critical for moving aircraft, people and equipment across the South Atlantic to West Africa",
+   "why": "Wikipedia alone (see above)."
+  },
+  {
+   "claim": "after Brazil and US negotiations, runways for the Air Transport Command",
+   "verdict": "cut",
+   "wasBefore": "after negotiations between Brazil and the United States, proper concrete and asphalt runways were built here for the Air Transport Command",
+   "why": "The negotiations and the Air Transport Command rest on Wikipedia alone; the operator says only that the runways were built for military aviation, which is kept."
+  },
+  {
+   "claim": "thousands of aircraft on their way to North Africa and Europe",
+   "verdict": "cut",
+   "wasBefore": "Thousands of aircraft built in Canada and the United States passed through on their way to North Africa and Europe.",
+   "why": "The number and the destinations rest on Wikipedia alone. Softened to the route for new aircraft from Canadian and US factories (operator, Wikipedia)."
+  },
+  {
+   "claim": "shared with a Brazilian Air Force base",
+   "verdict": "cut",
+   "wasBefore": "Some facilities are shared with a Brazilian Air Force base.",
+   "why": "Softened to military use of the airfield (DECEA PUB/MIL, Wikipedia); only Wikipedia names the base."
+  },
+  {
+   "claim": "just over 4 million passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: the old text gives no traffic figure, so this replaces nothing. The operator's 2025 report says Belém passed 4 million passengers for the second time in its history (2024 and 2025), the largest airport terminal in the North region; Wikipedia's infobox gives 4,008,723 for 2025. The same report says works finished for COP30 in November 2025 raised capacity from 7.7 million to about 13 million a year, though the operator's own airport page still gives 7.7 million.",
+   "sources": [
+    {
+     "file": "noa-dfs-2025",
+     "org": "NOA (Norte da Amazônia Airports, operator; 2025 management report)",
+     "dated": "2025 annual report (published March 2026)",
+     "quote": [
+      "Assim como em 2024, o SBBE ultrapassou em 2025 pela segunda vez",
+      "em sua história a marca dos 4 milhões de passageiros",
+      "aeroporto passa de 7,7 para cerca de 13 milhões de passageiros por ano."
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 4,008,723 20%"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "Since April": "The tracer reads the sentence's opening word with the month; the date is in the law ('ABRIL DE 2010') and in Wikipedia ('On 13 April 2010'). See the naming claim.",
+  "Second World War": "UK English for the operator's 'Segunda Guerra Mundial' and Wikipedia's 'World War II'. See the wartime claims."
+ }
+}

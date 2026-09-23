@@ -1,0 +1,266 @@
+{
+ "iata": "KMG",
+ "id": "recxn1FnV6Em0MeR8",
+ "name": "Kunming Changshui International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Kunming_Changshui_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The gateway to south west China and on to Southeast and South Asia, 24.5 km north east of Kunming. It handled 49.7 million passengers in 2025, tenth busiest in China.\n\nThe altitude is worth knowing. The airport sits in graded mountainous ground about 2,100 metres above sea level, which affects aircraft performance and can make arrivals feel different to a sea level airport.\n\nThe scale inside is considerable. The main terminal covers 548,300 square metres and is the second largest terminal building in China, with 66 jet bridge gates out of 88 gates in total. Trams nicknamed Green Dolphin move passengers along a 1.88 km line inside.\n\nIt is a hub for China Eastern, Kunming Airlines, Lucky Air, Sichuan Airlines and Ruili Airlines, with two runways of 4.5 km and 4 km.\n\nPunctuality is better than most: the airport was the first in China to adopt collaborative decision making with airlines, and on-time performance reached 85.3 per cent in 2017.\n\nIt opened on 28 June 2012, replacing the old Wujiaba airport, which was demolished.",
+ "after": "A hub for south west China and for flights on to Southeast and South Asia, 24.5 km north east of Kunming. It handled 49.7 million passengers in 2025, tenth busiest in China.\n\nThe altitude is worth knowing: the airport sits about 2,100 metres above sea level.\n\nChina Eastern, Kunming Airlines, Lucky Air, Sichuan Airlines and Ruili Airlines all have bases here, and there are two runways of 4.5 km and 4 km.\n\nIt opened on 28 June 2012, replacing the old Wujiaba airport.",
+ "claims": [
+  {
+   "claim": "a hub for south west China and for flights on to Southeast and South Asia",
+   "verdict": "corrected",
+   "inAfter": "A hub for south west China and for flights on to Southeast and South Asia",
+   "note": "Was 'The gateway to south west China and on to Southeast and South Asia'; 'gateway to' is a banned phrase. The operator calls it one of China's eight regional hub airports and its international hub for South and Southeast Asia; Yunnan.cn (December 2025) describes a network covering South, Southeast and East Asia and reaching the Middle East.",
+   "sources": [
+    {
+     "file": "op-general",
+     "org": "Yunnan Airport Group (the operator, km.ynairport.com)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": [
+      "是中国八大区域枢纽机场之一、是我国辐射南亚、东南亚的国际航空枢纽，西南对外开放的现代综合交通枢纽"
+     ]
+    },
+    {
+     "file": "yunnancn-20251220",
+     "org": "Yunnan.cn (Yunnan Daily group)",
+     "dated": "2025-12-20",
+     "quote": [
+      "发布时间： 2025年12月20日 15:22:38 来源： 云南网",
+      "进一步强化昆明作为面向南亚东南亚辐射中心的航空枢纽功能",
+      "昆明长水国际机场已构建起覆盖南亚、东南亚、东亚，并延伸至中东地区的客货运航线网络"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "As a gateway to Southeast and South Asia, Changshui Airport is a hub for"
+    }
+   ]
+  },
+  {
+   "claim": "24.5 km north east of Kunming",
+   "verdict": "confirmed",
+   "inAfter": "24.5 km north east of Kunming",
+   "note": "The operator gives 24.5 km in a straight line to the north east of the city; the coordinates give 23.4 km at 70 degrees (east, with north east the adjacent point, 25 degrees off); ratio 1.05.",
+   "sources": [
+    {
+     "file": "op-general",
+     "org": "Yunnan Airport Group (the operator, km.ynairport.com)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": "场址位于昆明市东北方向，距市区直线距离约24.5千米"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 23.4 km (14.5 miles)",
+      "Bearing from the city centre: 70 degrees, which is east"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "The airport is located 24.5 km (15.2 mi) northeast of the city center"
+    }
+   ]
+  },
+  {
+   "claim": "49.7 million passengers in 2025, tenth busiest in China",
+   "verdict": "confirmed",
+   "inAfter": "It handled 49.7 million passengers in 2025, tenth busiest in China.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 昆明/长水: passenger rank 10 in China; passengers 2025: 49,705,725"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "In 2025, the airport's passenger throughput reached 49.7057 million, ranking tenth among airports in China."
+    }
+   ]
+  },
+  {
+   "claim": "about 2,100 metres above sea level",
+   "verdict": "confirmed",
+   "inAfter": "the airport sits about 2,100 metres above sea level",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": "elevation 6,903 ft (2,104 m)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "in a graded mountainous area about 2,100 m (6,900 ft) above sea level"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "elevation_m = 2,103"
+    }
+   ]
+  },
+  {
+   "claim": "bases for China Eastern, Kunming Airlines, Lucky Air, Sichuan Airlines and Ruili Airlines",
+   "verdict": "softened",
+   "inAfter": "China Eastern, Kunming Airlines, Lucky Air, Sichuan Airlines and Ruili Airlines all have bases here",
+   "note": "Was 'a hub for'. The operator lists six base airlines: China Eastern's Yunnan company, Lucky Air, Kunming Airlines, Sichuan Airlines' Yunnan branch, China Southern's Yunnan branch and Sunan Ruili Airlines (苏南瑞丽航空, which Kunming's bus operator calls Ruili Airlines); China Southern, which the old text left out, is not added. Kunming's bus operator named stops at the Kunming Airlines and Lucky Air, Ruili Airlines, Sichuan Airlines and China Eastern premises on the airport site in November 2025.",
+   "sources": [
+    {
+     "file": "op-general",
+     "org": "Yunnan Airport Group (the operator, km.ynairport.com)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": "现基地航空公司有东航云南公司、祥鹏航空公司、昆明航空公司、川航云南分公司、南航云南分公司、苏南瑞丽航空公司等6家"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "Changshui Airport is a hub for China Eastern Airlines, Kunming Airlines, Lucky Air, Sichuan Airlines and Ruili Airlines."
+    },
+    {
+     "file": "kunmingcn-20251128",
+     "org": "Kunming Information Port (kunming.cn)",
+     "dated": "2025-11-28",
+     "quote": [
+      "2025-11-28 17:40:52 来源：昆明信息港",
+      "机场南路（昆航·祥鹏）",
+      "机场东二路（瑞丽航空）",
+      "机场西路（四川航空）",
+      "机场西路（东航宿舍）"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "two runways of 4.5 km and 4 km",
+   "verdict": "confirmed",
+   "inAfter": "and there are two runways of 4.5 km and 4 km",
+   "note": "Wikipedia's infobox also lists a third runway, 04R/22L, as under construction; no other source read here mentions it.",
+   "sources": [
+    {
+     "file": "op-general",
+     "org": "Yunnan Airport Group (the operator, km.ynairport.com)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": "已建成2条长度为4000米、4500米的独立运行跑道"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 03/21: 4,000 m (13,123 ft), CON",
+      "Runway 04/22: 4,500 m (14,764 ft), ASP",
+      "Runways listed: 2"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "The east runway is 4.5 kilometers (14,763 ft 9 in) long while the west runway is 4 kilometers (13,123 ft 4 in) long."
+    }
+   ]
+  },
+  {
+   "claim": "opened 28 June 2012, replacing the old Wujiaba airport",
+   "verdict": "confirmed",
+   "inAfter": "It opened on 28 June 2012, replacing the old Wujiaba airport.",
+   "note": "The operator dates the move of operations to 28 June 2012 without naming the old airport; Airport Technology (October 2012) names Wujiaba.",
+   "sources": [
+    {
+     "file": "op-general",
+     "org": "Yunnan Airport Group (the operator, km.ynairport.com)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": "于2012年6月28日正式转场运营"
+    },
+    {
+     "file": "airporttech",
+     "org": "Airport Technology",
+     "dated": "2012-10-11",
+     "quote": [
+      "October 11 2012",
+      "it opened in June 2012 to replace the old Kunming Wujiaba International Airport, which is set to be dismantled"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "The airport opened at 08:00 (UTC+8) on 28 June 2012, replacing the old Kunming Wujiaba International Airport, which was later demolished."
+    }
+   ]
+  },
+  {
+   "claim": "The gateway to south west China",
+   "verdict": "cut",
+   "wasBefore": "The gateway to south west China and on to Southeast and South Asia",
+   "why": "'Gateway to' is a banned phrase; reworded as a hub (see above)."
+  },
+  {
+   "claim": "graded mountainous ground; the altitude affects aircraft performance and arrivals",
+   "verdict": "cut",
+   "wasBefore": "The airport sits in graded mountainous ground about 2,100 metres above sea level, which affects aircraft performance and can make arrivals feel different to a sea level airport.",
+   "why": "The elevation is kept (OurAirports, Wikipedia). 'Graded mountainous ground' rests on Wikipedia alone, and no source read here says how the altitude affects aircraft or arrivals."
+  },
+  {
+   "claim": "terminal 548,300 square metres, second largest in China",
+   "verdict": "cut",
+   "wasBefore": "The main terminal covers 548,300 square metres and is the second largest terminal building in China",
+   "why": "Sources disagree: Wikipedia gives 548,300 m2, Airport Technology (2012) 423,500 m2 and 'the biggest terminal in Greater China' at the time. The ranking is stale either way: Guangzhou's Terminal 2 (over 808,700 m2, opened 2018, Wikipedia) and Hangzhou's Terminal 4 (720,000 m2, opened 2022, its operator), both saved in this sweep, are larger than either figure."
+  },
+  {
+   "claim": "66 jet bridge gates of 88",
+   "verdict": "cut",
+   "wasBefore": "with 66 jet bridge gates out of 88 gates in total",
+   "why": "Sources disagree: Wikipedia gives 66 gates with jet bridges, Airport Technology says ThyssenKrupp supplied 77 boarding bridges."
+  },
+  {
+   "claim": "the scale inside is considerable",
+   "verdict": "cut",
+   "wasBefore": "The scale inside is considerable.",
+   "why": "The old text's lead-in to the terminal figures, which are cut."
+  },
+  {
+   "claim": "Green Dolphin trams on a 1.88 km line",
+   "verdict": "cut",
+   "wasBefore": "Trams nicknamed Green Dolphin move passengers along a 1.88 km line inside.",
+   "why": "Wikipedia alone; the operator's pages read here do not mention the people mover."
+  },
+  {
+   "claim": "It is a hub for",
+   "verdict": "cut",
+   "wasBefore": "It is a hub for China Eastern, Kunming Airlines, Lucky Air, Sichuan Airlines and Ruili Airlines",
+   "why": "Reworded to 'all have bases here', the operator's own term (see above)."
+  },
+  {
+   "claim": "punctuality: first in China with collaborative decision making; 85.3 per cent on time in 2017",
+   "verdict": "cut",
+   "wasBefore": "Punctuality is better than most: the airport was the first in China to adopt collaborative decision making with airlines, and on-time performance reached 85.3 per cent in 2017.",
+   "why": "Wikipedia alone, and the punctuality figure is nine years old, so 'better than most' has nothing current behind it."
+  },
+  {
+   "claim": "Wujiaba was demolished",
+   "verdict": "cut",
+   "wasBefore": "which was demolished",
+   "why": "Wikipedia says it was later demolished; Airport Technology (2012) says only that it was set to be dismantled. No second source for the demolition itself."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The altitude is worth knowing",
+   "why": "The old text's advice, kept on the confirmed elevation of about 2,100 m (OurAirports 2,104 m)."
+  }
+ ],
+ "tracerOk": {}
+}

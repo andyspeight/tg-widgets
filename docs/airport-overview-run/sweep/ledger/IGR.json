@@ -1,0 +1,227 @@
+{
+ "iata": "IGR",
+ "id": "rec3ccgSjBzM3QrYE",
+ "name": "Cataratas Del Iguazú International Airport",
+ "country": "Argentina",
+ "wikipedia": "https://en.wikipedia.org/wiki/Cataratas_del_Iguaz%C3%BA_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Iguazu Falls, and closer to them than to the town it nominally serves. It sits in forest 6 km south of the falls and 16 km south east of Puerto Iguazu, so a client can be at the waterfalls a short drive after clearing arrivals.\n\nIt is the easternmost airport in Argentina served by scheduled flights.\n\nThe site runs to some 1,800 hectares, most of it woodland, and it is operated by Aeropuertos Argentina 2000. The airport is also listed as Mayor Carlos Eduardo Krause, so both names turn up on schedules and in supplier systems.",
+ "after": "The airport for Iguazú Falls, 16 km south east of Puerto Iguazú, the town it serves. Argentina's national parks service lists taxis, remises (private hire cars), transfer firms and public transport from the airport to the national park.\n\nAeropuertos Argentina runs it, and it is also listed as Mayor Carlos Eduardo Krause, so either name may turn up in supplier systems.",
+ "claims": [
+  {
+   "claim": "the airport for Iguazú Falls",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Iguazú Falls",
+   "note": "Not to be confused with Foz do Iguaçu (IGU), the Brazilian airport on the other side of the falls.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "serving the city of Puerto Iguazú and providing access to the nearby Iguazú Falls"
+    },
+    {
+     "file": "apn-como-llegar",
+     "org": "Administración de Parques Nacionales (Argentina's national parks service, argentina.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Avión",
+      "El Aeropuerto Internacional de Puerto Iguazú o Cataratas del Iguazú Mayor D. Carlos Eduardo Krause recibe vuelos semanales desde la ciudad de Buenos Aires.",
+      "Desde ahí existen diferentes opciones para llegar al Parque Nacional"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "16 km south east of Puerto Iguazú",
+   "verdict": "confirmed",
+   "inAfter": "16 km south east of Puerto Iguazú",
+   "note": "Coordinates: 18.4 km in a straight line at 147 degrees, south east (ratio 0.87). geo.mjs also flagged '6 km south', but that figure was the distance to the falls, not to the town; it is cut below.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "16 kilometres (10 mi) southeast of Puerto Iguazú"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 18.4 km (11.4 miles)",
+      "Bearing from the city centre: 147 degrees, which is south east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the town it serves",
+   "verdict": "confirmed",
+   "inAfter": "the town it serves",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "serving the city of Puerto Iguazú"
+    },
+    {
+     "file": "apn-como-llegar",
+     "org": "Administración de Parques Nacionales (Argentina's national parks service, argentina.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "El Aeropuerto Internacional de Puerto Iguazú"
+    },
+    {
+     "file": "ourairports-ar-east",
+     "org": "OurAirports (computed)",
+     "quote": "municipality Puerto Iguazu"
+    }
+   ]
+  },
+  {
+   "claim": "the national parks service lists taxis, remises, transfer firms and public transport from the airport to the park",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "national parks service",
+   "inAfter": "Argentina's national parks service lists taxis, remises (private hire cars), transfer firms and public transport from the airport to the national park.",
+   "note": "Replaces 'so a client can be at the waterfalls a short drive after clearing arrivals', which leaned on the 6 km to the falls (Wikipedia alone, cut below). The park authority's own access page, so it is attributed. The airport's own page lists taxis and remises and public transport among the ways to reach it.",
+   "sources": [
+    {
+     "file": "apn-como-llegar",
+     "org": "Administración de Parques Nacionales (Argentina's national parks service, argentina.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Desde ahí existen diferentes opciones para llegar al Parque Nacional como taxis, remises, agencias de traslados, agencias de turismo y transporte público."
+    },
+    {
+     "file": "op-como-llego",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Camino Anexo Ruta Provincial 101, N3370, Misiones",
+      "Taxi y remises",
+      "Transporte público"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "run by Aeropuertos Argentina",
+   "verdict": "corrected",
+   "inAfter": "Aeropuertos Argentina runs it",
+   "note": "Was 'Aeropuertos Argentina 2000', the name Wikipedia still uses; the operator's own site now trades and signs as Aeropuertos Argentina (Aeropuertos Argentina S.A.) and lists Iguazú, IGR, among its airports. Checked for a 2025 or 2026 change: none found. OurAirports' home link (aa2000.com.ar/iguazu) now redirects to the operator's aeropuertosargentina.com pages, read here.",
+   "sources": [
+    {
+     "file": "op-sobre-nosotros",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Nuestros aeropuertos",
+      "General Pico GPO Iguazú IGR Jujuy JUJ",
+      "©2017 - 2026 Aeropuertos Argentina S.A."
+     ]
+    },
+    {
+     "file": "op-aa2000-iguazu",
+     "org": "Aeropuertos Argentina (operator, aeropuertosargentina.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Iguazú",
+      "Sobre el aeropuerto",
+      "©2017 - 2026 Aeropuertos Argentina S.A."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "is operated by Aeropuertos Argentina 2000"
+    }
+   ]
+  },
+  {
+   "claim": "also listed as Mayor Carlos Eduardo Krause",
+   "verdict": "confirmed",
+   "inAfter": "it is also listed as Mayor Carlos Eduardo Krause",
+   "note": "The national parks service writes 'Cataratas del Iguazú Mayor D. Carlos Eduardo Krause' and also 'Aeropuerto Internacional de Puerto Iguazú'; OurAirports carries Mayor Carlos Eduardo Krause Airport as an alternative name. 'Either name may turn up in supplier systems' is advice that follows from the two listings.",
+   "sources": [
+    {
+     "file": "apn-como-llegar",
+     "org": "Administración de Parques Nacionales (Argentina's national parks service, argentina.gob.ar)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Cataratas del Iguazú Mayor D. Carlos Eduardo Krause"
+    },
+    {
+     "file": "ourairports-ar-east",
+     "org": "OurAirports (computed)",
+     "quote": "keywords Iguaçu, Mayor Carlos Eduardo Krause Airport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "also known as Mayor Carlos Eduardo Krause Airport"
+    }
+   ]
+  },
+  {
+   "claim": "closer to the falls than to the town",
+   "verdict": "cut",
+   "wasBefore": "and closer to them than to the town it nominally serves",
+   "why": "Rests on the 6 km to the falls, which has no second source (below)."
+  },
+  {
+   "claim": "in forest, 6 km south of the falls",
+   "verdict": "cut",
+   "wasBefore": "It sits in forest 6 km south of the falls",
+   "why": "Wikipedia alone. No saved source gives the airport's distance from the falls or describes its setting: the national parks service gives only the town's distance from the park (18 km), and the park concession's and Visit Iguazú's pages give none. geo.mjs checks distances from towns only, and its '6 km south' flag measured from Puerto Iguazú, which is not what the old text meant."
+  },
+  {
+   "claim": "a short drive to the waterfalls after arrivals",
+   "verdict": "cut",
+   "wasBefore": "so a client can be at the waterfalls a short drive after clearing arrivals",
+   "why": "Replaced by the national parks service's list of ways from the airport to the park (attributed, above)."
+  },
+  {
+   "claim": "the easternmost airport in Argentina served by scheduled flights",
+   "verdict": "cut",
+   "wasBefore": "It is the easternmost airport in Argentina served by scheduled flights.",
+   "why": "Not confirmed. Wikipedia says so, but OurAirports' list of Argentine airports with scheduled service has one further east, Aeroestación Yabotí at El Soberbio, Misiones (longitude -54.11 against Iguazú's -54.47). Whether that aerodrome really has scheduled flights is unknown, so the sources disagree and the superlative goes.",
+   "sources": [
+    {
+     "file": "ourairports-ar-east",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "1. AR-0767  Aeroestación Yabotí (El Soberbio, AR-N) longitude -54.1074",
+      "2. SARI IGR Cataratas Del Iguazú International Airport (Puerto Iguazu, AR-N) longitude -54.4734"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "It is the easternmost Argentine airport served by scheduled flights."
+    }
+   ]
+  },
+  {
+   "claim": "some 1,800 hectares, most of it woodland",
+   "verdict": "cut",
+   "wasBefore": "The site runs to some 1,800 hectares, most of it woodland",
+   "why": "Wikipedia alone gives 1,804 ha, and nothing says most of it is woodland. The regulator ORSNA's site answered 503 and the Argentine AIP's aerodrome pages could not be listed (the browser got 502)."
+  },
+  {
+   "claim": "operated by Aeropuertos Argentina 2000",
+   "verdict": "cut",
+   "wasBefore": "operated by Aeropuertos Argentina 2000",
+   "why": "The operator now calls itself Aeropuertos Argentina (Aeropuertos Argentina S.A.). Corrected above."
+  },
+  {
+   "claim": "both names turn up on schedules",
+   "verdict": "cut",
+   "wasBefore": "so both names turn up on schedules and in supplier systems",
+   "why": "Nothing read shows airline schedules using the Krause name; softened to advice that either name may turn up in supplier systems."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

@@ -1,0 +1,484 @@
+{
+ "iata": "FUK",
+ "id": "recns4a4wDx2FB309",
+ "name": "Fukuoka Airport",
+ "country": "Japan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Fukuoka_Airport",
+ "audited": "2026-09-23",
+ "before": "Kyushu's principal airport, only 3 km east of Hakata Station, and fourth busiest in Japan with 25 million passengers in 2018. The subway from the domestic terminal reaches the business district in about ten minutes, which makes this one of the most convenient airports in the country.\n\nThere is a catch, and it is a big one. The international terminal is on the far side of the runway from the domestic terminal and is only reachable by road. A connecting passenger has to take the inter-terminal bus, so allow real time for it. Buses also run from the international terminal to Hakata Station and Tenjin.\n\nTwo other constraints follow from the airport being inside the city. There is a mandatory curfew from ten at night until seven in the morning at the request of local residents, and the airport has been designated congested since March 2016, with slot restrictions. A second runway opened in March 2025 to ease that.\n\nSkytrax ranked it 26th in the world for 2024 and second among regional airports.",
+ "after": "Kyushu's principal airport, close to the heart of Fukuoka. The subway from the domestic terminal reaches the business district in about ten minutes, which makes this one of the most convenient airports in the country. It handled 28.8 million passengers in the year to March 2026.\n\nThere is a catch. The international terminal is across the runway and the subway serves only the domestic side, so connecting passengers must take the free shuttle bus. Allow time: the airport warns that it is extremely crowded from 8.30 to 9.30am. Buses also run from the international terminal to Hakata Station and Tenjin.\n\nBeing so close to the city brings a curfew from 10pm to 7am and, since March 2016, designation as a congested airport. A second runway opened in March 2025 to ease that.\n\nSkytrax ranked it 18th in the world for 2026 (23rd in 2025) and second among regional airports.",
+ "claims": [
+  {
+   "claim": "Kyushu's principal airport",
+   "verdict": "confirmed",
+   "inAfter": "Kyushu's principal airport",
+   "note": "MLIT's sheets for the seven national airports on Kyushu island give Fukuoka 28,837,292 passengers in the year to March 2026, against 5,926,530 for Kagoshima, the next busiest (Kumamoto 3.85 million, Miyazaki 3.40 million, Nagasaki 3.27 million, Oita 1.97 million, Kitakyushu 1.27 million).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Fukuoka Airport is the principal airport on the island of Kyushu"
+    },
+    {
+     "file": "mlit-kuni-kanri",
+     "org": "MLIT Civil Aviation Bureau (national airports sheets, mlit.go.jp)",
+     "dated": "figures for the years to March 2022 to March 2026 (undated PDF read 2026-09-23)",
+     "quote": [
+      "福岡空港",
+      "24,937,755 27,120,491 28,837,292",
+      "鹿児島空港",
+      "5,549,839 5,730,841 5,926,530",
+      "熊本空港",
+      "3,335,452 3,694,421 3,851,661"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "close to the heart of Fukuoka",
+   "verdict": "softened",
+   "inAfter": "close to the heart of Fukuoka",
+   "note": "Was 'only 3 km east of Hakata Station'. The coordinates check measures from the city centre (3.5 km, south east), not from the station, so the station distance rests on Wikipedia alone; the city's own guide says the airport is close to the heart of the city.",
+   "sources": [
+    {
+     "file": "gofukuoka-directions",
+     "org": "Fukuoka City (its Official Tourist Guide, gofukuoka.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The airport is an urban airport located close to the heart of the city"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 3.5 km (2.2 miles)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "1.6 nautical miles (3.0 km; 1.8 mi) east of Hakata Station"
+    }
+   ]
+  },
+  {
+   "claim": "the subway from the domestic terminal reaches the business district in about ten minutes",
+   "verdict": "confirmed",
+   "inAfter": "The subway from the domestic terminal reaches the business district in about ten minutes",
+   "note": "The city's guide gives 5 minutes to Hakata Station and 10 to Tenjin. gofukuoka.jp is Fukuoka City's own tourism site (its footer: Copyright Fukuoka City), a government source, though show.mjs flags any 'guide' as low tier.",
+   "sources": [
+    {
+     "file": "gofukuoka-directions",
+     "org": "Fukuoka City (its Official Tourist Guide, gofukuoka.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "The domestic terminal connects directly to the subway",
+      "downtown areas by subway: To Hakata Station 5 minutes To Tenjin Station 10 minutes",
+      "Copyright &copy; Fukuoka City. All Rights Reserved."
+     ]
+    },
+    {
+     "file": "fiac-en-subway",
+     "org": "Fukuoka International Airport Co. (the airport operator, fukuoka-airport.jp and fukuoka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The Domestic Terminal Building is directly connected to the Fukuoka City Subway, making access more convenient."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "a subway from the airport to the business district takes about ten minutes"
+    }
+   ]
+  },
+  {
+   "claim": "one of the most convenient airports in the country",
+   "verdict": "confirmed",
+   "inAfter": "which makes this one of the most convenient airports in the country",
+   "note": "A judgement, but one both sources make in the same words; the city's is its own promotional tourism site (gofukuoka.jp, Copyright Fukuoka City).",
+   "sources": [
+    {
+     "file": "gofukuoka-directions",
+     "org": "Fukuoka City (its Official Tourist Guide, gofukuoka.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "It's one of the most convenient airports in Japan"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Fukuoka is known as one of the most convenient airports in Japan"
+    }
+   ]
+  },
+  {
+   "claim": "28.8 million passengers in the year to March 2026",
+   "verdict": "corrected",
+   "inAfter": "It handled 28.8 million passengers in the year to March 2026.",
+   "note": "Was '25 million passengers in 2018'. The operator's results for the 2025 financial year (April 2025 to March 2026) give 28,837 thousand and MLIT's sheet 28,837,292. MLIT's Osaka bureau has a preliminary calendar-2025 total of 28,384,582 (ocab-riyou-fy2025, the row that matches the operator's domestic count of 19,442 thousand).",
+   "sources": [
+    {
+     "file": "fiac-kessan2025",
+     "org": "Fukuoka International Airport Co. (the airport operator, fukuoka-airport.jp and fukuoka-airport.co.jp)",
+     "dated": "results for the year to March 2026 (published June 2026)",
+     "quote": [
+      "2025年度実績",
+      "旅客 28,837 千人",
+      "国内 19,442 千人"
+     ]
+    },
+    {
+     "file": "mlit-kuni-kanri",
+     "org": "MLIT Civil Aviation Bureau (national airports sheets, mlit.go.jp)",
+     "dated": "figures for the years to March 2022 to March 2026 (undated PDF read 2026-09-23)",
+     "quote": [
+      "令和3年度 令和4年度 令和5年度 令和6年度 令和7年度",
+      "福岡空港",
+      "24,937,755 27,120,491 28,837,292"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the international terminal is on the far side of the runway",
+   "verdict": "confirmed",
+   "inAfter": "The international terminal is across the runway",
+   "sources": [
+    {
+     "file": "fiac-about",
+     "org": "Fukuoka International Airport Co. (the airport operator, fukuoka-airport.jp and fukuoka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "国際線旅客ターミナルビルが滑走路西側に新設されたことによって、東側のビルは国内線専用施設となり、滑走路を挟んで旅客ターミナルビルは東西に分かれることとなりました。"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the international terminal is located on the other side of the runway"
+    }
+   ]
+  },
+  {
+   "claim": "the subway serves only the domestic side",
+   "verdict": "softened",
+   "inAfter": "the subway serves only the domestic side",
+   "note": "Was 'only reachable by road'. The operator's subway page connects the station to the domestic building and sends international passengers on to the free shuttle bus.",
+   "sources": [
+    {
+     "file": "fiac-en-subway",
+     "org": "Fukuoka International Airport Co. (the airport operator, fukuoka-airport.jp and fukuoka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "The Domestic Terminal Building is directly connected to the Fukuoka City Subway",
+      "Getting to the International Terminal Building",
+      "③ From bus stop no. 1, take a free shuttle bus."
+     ]
+    },
+    {
+     "file": "gofukuoka-directions",
+     "org": "Fukuoka City (its Official Tourist Guide, gofukuoka.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "You can also use the free shuttle bus to get from the international terminal to the domestic terminal in just about 10 minutes."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The international terminal is only accessible by road"
+    }
+   ]
+  },
+  {
+   "claim": "connecting passengers must take the free shuttle bus",
+   "verdict": "confirmed",
+   "inAfter": "so connecting passengers must take the free shuttle bus",
+   "sources": [
+    {
+     "file": "fiac-en-bus2",
+     "org": "Fukuoka International Airport Co. (the airport operator, fukuoka-airport.jp and fukuoka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Please use a free shuttle bus to move between the Domestic and International Terminal Buildings."
+    },
+    {
+     "file": "gofukuoka-directions",
+     "org": "Fukuoka City (its Official Tourist Guide, gofukuoka.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "free shuttle bus to get from the international terminal to the domestic terminal"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "there is scheduled inter-terminal airport bus to the domestic terminal and the subway station"
+    }
+   ]
+  },
+  {
+   "claim": "the airport warns the shuttle is extremely crowded between 8.30 and 9.30am",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "the airport warns that it is extremely crowded from 8.30 to 9.30am",
+   "note": "The operator's own warning, which carries the old advice to allow real time for the transfer. It is also posted as a standing notice on the operator's Japanese home page. The shuttle runs every five to seven minutes on the operator's timetable.",
+   "sources": [
+    {
+     "file": "fiac-en-bus2",
+     "org": "Fukuoka International Airport Co. (the airport operator, fukuoka-airport.jp and fukuoka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The domestic and international shuttle buses are extremely crowded between 8:30 and 9:30 AM. Please arrive early."
+    },
+    {
+     "file": "fiac-bus2",
+     "org": "Fukuoka International Airport Co. (the airport operator, fukuoka-airport.jp and fukuoka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "国内線・国際線連絡バスは、8：30～9：30頃は大変混雑いたします。お早めにお越しください。",
+      "6～7分間隔"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "buses from the international terminal to Hakata Station and Tenjin",
+   "verdict": "confirmed",
+   "inAfter": "Buses also run from the international terminal to Hakata Station and Tenjin.",
+   "sources": [
+    {
+     "file": "fiac-en-bus",
+     "org": "Fukuoka International Airport Co. (the airport operator, fukuoka-airport.jp and fukuoka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "International Passenger Terminal Building Bus Timetable",
+      "6 & 7 Hakata Station (Operated by Nishi-Nippon Railroad)",
+      "8 Tenjin (Operated by Nishi-Nippon Railroad and Nishitetsu Bus Kitakyushu)"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "scheduled bus service to Hakata Station and the Tenjin area"
+    }
+   ]
+  },
+  {
+   "claim": "curfew from ten at night until seven in the morning",
+   "verdict": "confirmed",
+   "inAfter": "a curfew from 10pm to 7am",
+   "note": "MLIT gives the airport's operating hours as 24 hours but its hours of use as 7:00 to 22:00.",
+   "sources": [
+    {
+     "file": "mlit-kuni-kanri",
+     "org": "MLIT Civil Aviation Bureau (national airports sheets, mlit.go.jp)",
+     "dated": "undated PDF read 2026-09-23",
+     "quote": [
+      "・位置 ： 福岡県福岡市",
+      "・運用時間（利用時間） ： 24時間（7:00～22:00）"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "mandatory late night curfew from 22:00 every night to 07:00 the following morning"
+    }
+   ]
+  },
+  {
+   "claim": "designated a congested airport since March 2016",
+   "verdict": "confirmed",
+   "inAfter": "since March 2016, designation as a congested airport",
+   "sources": [
+    {
+     "file": "fiac-about",
+     "org": "Fukuoka International Airport Co. (the airport operator, fukuoka-airport.jp and fukuoka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "2016年（平成28年）3月には航空法上の「混雑空港」に指定されることとなりました。"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Fukuoka will be designated as a \"congested airport\" (IATA Level 3) from late March 2016"
+    }
+   ]
+  },
+  {
+   "claim": "a second runway opened in March 2025",
+   "verdict": "confirmed",
+   "inAfter": "A second runway opened in March 2025",
+   "sources": [
+    {
+     "file": "fiac-about",
+     "org": "Fukuoka International Airport Co. (the airport operator, fukuoka-airport.jp and fukuoka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "2025年（令和7年）3月、増設滑走路（B滑走路）の運用が開始されました。"
+    },
+    {
+     "file": "mlit-kuni-kanri",
+     "org": "MLIT Civil Aviation Bureau (national airports sheets, mlit.go.jp)",
+     "dated": "undated PDF read 2026-09-23",
+     "quote": "令和 7年 B滑走路供用開始（2,500m）"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The second runway officially opened on March 20, 2025."
+    }
+   ]
+  },
+  {
+   "claim": "to ease congestion",
+   "verdict": "confirmed",
+   "inAfter": "to ease that",
+   "sources": [
+    {
+     "file": "fiac-plan2025",
+     "org": "Fukuoka International Airport Co. (the airport operator, fukuoka-airport.jp and fukuoka-airport.co.jp)",
+     "dated": "business plan for the year to March 2026 (published 5 March 2025)",
+     "quote": [
+      "２０２５年度は、増設滑走路の供用開始を起点に、大きく変革する年度となります。",
+      "航空機の発着回数も拡大し"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "built a second runway and expanding two terminals in an effort to ease congestion"
+    }
+   ]
+  },
+  {
+   "claim": "Skytrax 18th in the world for 2026 (23rd in 2025), second among regional airports",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Skytrax",
+   "inAfter": "Skytrax ranked it 18th in the world for 2026 (23rd in 2025) and second among regional airports.",
+   "note": "Was '26th in the world for 2024 and second among regional airports'. Skytrax's 2026 table lists rank, airport and 2025 rank in that order; its regional list puts Nagoya's Centrair first and Fukuoka second.",
+   "sources": [
+    {
+     "file": "skytrax-top100-2026",
+     "org": "Skytrax (World Airport Awards)",
+     "dated": "2026 (the 2025/2026 World Airport Survey)",
+     "quote": [
+      "World’s Top 100 Airports 2026",
+      "18 Fukuoka 23 2025"
+     ]
+    },
+    {
+     "file": "skytrax-regional-2026",
+     "org": "Skytrax (World Airport Awards)",
+     "dated": "2026",
+     "quote": [
+      "Chubu Centrair International Airport in Nagoya, Japan is named the World's Best Regional Airport for the twelfth consecutive year, ahead of Fukuoka Airport and Haikou Meilan International Airport",
+      "1 Centrair Nagoya 2 Fukuoka"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "only 3 km east of Hakata Station",
+   "verdict": "cut",
+   "wasBefore": "only 3 km east of Hakata Station",
+   "why": "Softened to 'close to the heart of Fukuoka' (see above): the station distance rests on Wikipedia alone, and the coordinates check measures from the city centre."
+  },
+  {
+   "claim": "fourth busiest in Japan",
+   "verdict": "cut",
+   "wasBefore": "and fourth busiest in Japan",
+   "why": "A 2018 ranking. MLIT's national ranking tables are Excel files the sweep's tools cannot save, and its readable sheets leave out the company-run airports (Narita, Kansai, Itami, Chubu), so no current rank could be confirmed."
+  },
+  {
+   "claim": "25 million passengers in 2018",
+   "verdict": "cut",
+   "wasBefore": "with 25 million passengers in 2018",
+   "why": "Eight years old. Replaced by the year to March 2026 (see above)."
+  },
+  {
+   "claim": "the catch is a big one",
+   "verdict": "cut",
+   "wasBefore": "There is a catch, and it is a big one.",
+   "why": "'A big one' is an opinion; the catch stays, with the operator's own warning about the shuttle at the morning peak."
+  },
+  {
+   "claim": "only reachable by road",
+   "verdict": "cut",
+   "wasBefore": "and is only reachable by road",
+   "why": "Reworded to what the operator and the city say: the subway serves only the domestic terminal (see above)."
+  },
+  {
+   "claim": "has to take the inter-terminal bus, so allow real time",
+   "verdict": "cut",
+   "wasBefore": "A connecting passenger has to take the inter-terminal bus, so allow real time for it.",
+   "why": "Reworded, not dropped: the free shuttle is confirmed and the advice now rests on the operator's warning (see above)."
+  },
+  {
+   "claim": "two constraints from the city site",
+   "verdict": "cut",
+   "wasBefore": "Two other constraints follow from the airport being inside the city.",
+   "why": "Reworded as framing (see opinion)."
+  },
+  {
+   "claim": "curfew at the request of local residents",
+   "verdict": "cut",
+   "wasBefore": "There is a mandatory curfew from ten at night until seven in the morning at the request of local residents",
+   "why": "The hours are confirmed and kept (see above); the reason rests on Wikipedia alone."
+  },
+  {
+   "claim": "slot restrictions",
+   "verdict": "cut",
+   "wasBefore": "with slot restrictions",
+   "why": "The congested-airport designation is confirmed (operator); what it entails rests on Wikipedia alone."
+  },
+  {
+   "claim": "Skytrax 26th for 2024",
+   "verdict": "cut",
+   "wasBefore": "Skytrax ranked it 26th in the world for 2024",
+   "why": "Replaced by the 2026 ranking (see above)."
+  },
+  {
+   "claim": "Skytrax World's Most Improved Airports 2026: second",
+   "verdict": "cut",
+   "why": "Held back: verified but replaces nothing in the old text. Skytrax placed Fukuoka second in its World's Most Improved Airports for 2026, behind Riyadh.",
+   "sources": [
+    {
+     "file": "skytrax-improved-2026",
+     "org": "Skytrax (World Airport Awards)",
+     "dated": "2026",
+     "quote": "King Khalid International Airport, Riyadh, is named the World's Most Improved Airport in 2026, with Fukuoka Airport ranked 2nd and Taiwan Taoyuan International Airport in 3rd position"
+    }
+   ]
+  },
+  {
+   "claim": "the enlarged international terminal, about twice the size, opened in March 2025; works finished December 2025",
+   "verdict": "cut",
+   "why": "Held back: verified but replaces nothing in the old text. The operator's history page has the enlarged international terminal's grand opening in March 2025 and the works complete in December 2025; its 2025 plan calls the new building about twice the size.",
+   "sources": [
+    {
+     "file": "fiac-about",
+     "org": "Fukuoka International Airport Co. (the airport operator, fukuoka-airport.jp and fukuoka-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "また、増改築工事が行われていた国際線旅客ターミナルビルがグランドオープンしました。",
+      "2025年（令和7年）12月、国際線旅客ターミナルビルの既存エリア内部改修を終え、2022年（令和4年）5月から行ってきた増改築工事が完了しました。"
+     ]
+    },
+    {
+     "file": "fiac-plan2025",
+     "org": "Fukuoka International Airport Co. (the airport operator, fukuoka-airport.jp and fukuoka-airport.co.jp)",
+     "dated": "published 5 March 2025",
+     "quote": "約２倍の規模となる国際線ターミナルビルを供用開始します。"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Fukuoka Airport aggressively built a second runway and expanding two terminals"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "There is a catch.",
+   "why": "Framing carried over from the old text; the split terminals and the shuttle are confirmed."
+  },
+  {
+   "text": "Allow time",
+   "why": "Advice carried over from the old text, now resting on the operator's own warning that the shuttle is extremely crowded at the morning peak."
+  },
+  {
+   "text": "Being so close to the city brings",
+   "why": "Framing carried over from the old text ('two other constraints follow from the airport being inside the city'); the curfew and the congestion designation are confirmed, and the city calls it an urban airport close to the heart of the city."
+  }
+ ],
+ "tracerOk": {}
+}

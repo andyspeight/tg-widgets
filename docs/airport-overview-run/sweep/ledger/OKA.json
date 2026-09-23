@@ -1,0 +1,425 @@
+{
+ "iata": "OKA",
+ "id": "rec7vIIiYkZHUuEBa",
+ "name": "Naha International Airport",
+ "country": "Japan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Naha_Airport",
+ "audited": "2026-09-23",
+ "before": "Okinawa's main airport, 4 km west of Naha city hall, and Japan's sixth busiest. It carried 21.5 million passengers in 2018 and runs 24 hours a day.\n\nIt is the hub for two airlines that matter for island hopping. Japan Transocean Air connects Okinawa to the rest of Japan, and Ryukyu Air Commuter links the main island to the surrounding islands, so most onward travel in the prefecture starts here.\n\nInternational flights reach Taiwan, Hong Kong, South Korea, Thailand, Malaysia, Singapore and mainland China.\n\nThe terminals were built in stages and are worth identifying before travel. The domestic terminal dates from 1999, a low cost carrier terminal was added as a north annex in 2012 for Peach services, and a new international terminal opened in 2014. The old domestic terminal became the cargo terminal in 2009.\n\nSkytrax ranked it 91st in the world in 2024, up from 199th the year before, making it the most improved airport in the world that year.\n\nThe airport is also home to a Japan Air Self-Defense Force base.",
+ "after": "Okinawa's main airport, about 4 km west of central Naha. It handled about 23.5 million passengers in the year to March 2026 and runs 24 hours a day.\n\nRyukyu Air Commuter is based here and links the main island to the surrounding islands, so most onward travel in the prefecture starts here.\n\nThe terminal operator lists international flights to Taiwan, Hong Kong, South Korea, Thailand, Singapore and mainland China.\n\nIts terminals were built in stages: the domestic terminal opened in 1999 and a new international terminal in 2014, and since 2019 a connecting building has joined the two.\n\nSkytrax ranked it 61st in the world for 2026 (78th in 2025).",
+ "claims": [
+  {
+   "claim": "Okinawa's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Okinawa's main airport",
+   "note": "MLIT's airport list (as of 1 September 2026) names Naha as Okinawa's only hub airport; the prefecture's twelve other airports are all regional.",
+   "sources": [
+    {
+     "file": "mlit-airport-list",
+     "org": "MLIT Civil Aviation Bureau (mlit.go.jp)",
+     "dated": "list as of 2026-09-01",
+     "quote": [
+      "(令和8年9月1日現在)",
+      "Ａ．拠点空港（２８）",
+      "福岡 北九州 長崎 熊本 大分 宮崎 鹿児島 那覇",
+      "Ｂ． 地方管理空港 （５４）",
+      "（九州地方（沖縄県のみ））",
+      "粟国 久米島 慶良間 南大東 北大東 伊江島 宮古 下地島 多良間 石垣 波照間 与那国"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the primary air terminal for passengers and cargo traveling to and from Okinawa Prefecture"
+    }
+   ]
+  },
+  {
+   "claim": "about 4 km west of central Naha",
+   "verdict": "confirmed",
+   "inAfter": "about 4 km west of central Naha",
+   "note": "Was 'west of Naha city hall'; the coordinates check measures from the GeoNames centre of Naha: 4.5 km in a straight line at 239 degrees (south west, one point from west), ratio 0.89, inside the tolerance.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "located 4 km (2.5 mi) west of the city hall in Naha"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 4.5 km (2.8 miles)",
+      "Bearing from the city centre: 239 degrees, which is south west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 23.5 million passengers in the year to March 2026",
+   "verdict": "corrected",
+   "inAfter": "It handled about 23.5 million passengers in the year to March 2026",
+   "note": "Was '21.5 million passengers in 2018'. The terminal operator's report for its year to 31 March 2026 gives 23.46 million (domestic 19.32 million and international 4.13 million, both records); MLIT's sheet has 23,524,878. Wikipedia's infobox figure of 21,705,234, labelled 2024, is MLIT's figure for the year to March 2025.",
+   "sources": [
+    {
+     "file": "naha-r7",
+     "org": "Naha Airport Building Co. (the terminal operator, naha-airport.co.jp)",
+     "dated": "business report for 1 April 2025 to 31 March 2026",
+     "quote": [
+      "自 令和７年４月１日",
+      "至 令和８年３月31日",
+      "国内線 ・ 国際線合わせた乗降客数は2， 346万人"
+     ]
+    },
+    {
+     "file": "mlit-kuni-kanri",
+     "org": "MLIT Civil Aviation Bureau (mlit.go.jp)",
+     "dated": "figures for the years to March 2022 to March 2026 (undated PDF read 2026-09-23)",
+     "quote": [
+      "那覇空港",
+      "令和3年度 令和4年度 令和5年度 令和6年度 令和7年度",
+      "19,523,961 21,705,234 23,524,878"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "runs 24 hours a day",
+   "verdict": "confirmed",
+   "inAfter": "and runs 24 hours a day",
+   "sources": [
+    {
+     "file": "mlit-kuni-kanri",
+     "org": "MLIT Civil Aviation Bureau (mlit.go.jp)",
+     "dated": "undated PDF read 2026-09-23",
+     "quote": "・位置 ： 沖縄県那覇市 ・面積 ： 494ha ・滑走路（長さ×幅） ： （Ａ）3,000m×45m ： （Ｂ）2,700m×60m ・運用時間（利用時間） ： 24時間（24時間）"
+    },
+    {
+     "file": "naha-kyoyo-kitei",
+     "org": "MLIT Osaka Civil Aviation Bureau (cab.mlit.go.jp)",
+     "dated": "operating rules as of 1 April 2026 (R8.4.1 on the linking page)",
+     "quote": "那覇空港の運用時間 ２４時間"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Naha Airport operates at 24/7"
+    }
+   ]
+  },
+  {
+   "claim": "Ryukyu Air Commuter is based here",
+   "verdict": "softened",
+   "inAfter": "Ryukyu Air Commuter is based here",
+   "note": "Was 'the hub for two airlines'. MLIT's commuter statistics for the year to March 2026 list ten Ryukyu Air Commuter routes, seven of them from Naha; Japan Transocean Air is cut (see below).",
+   "sources": [
+    {
+     "file": "ocab-commuter-fy2025",
+     "org": "MLIT Osaka Civil Aviation Bureau (cab.mlit.go.jp)",
+     "dated": "year to March 2026 (published August 2026)",
+     "quote": [
+      "西日本におけるコミューター航空旅客輸送実績（令和７年度累計）",
+      "琉球ｴｱｰｺﾐｭｰﾀｰ㈱ 宮古～多良間",
+      "那覇～北大東",
+      "那覇～南大東",
+      "那覇～久米島",
+      "那覇～与那国",
+      "那覇～宮古",
+      "令和８年８月発行"
+     ]
+    },
+    {
+     "file": "naha-airlines",
+     "org": "Naha Airport Building Co. (the terminal operator, naha-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Domestic flights",
+      "RAC NU/RAC"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Naha Airport is the hub for Japan Transocean Air, which connects Okinawa Prefecture with other prefectures of Japan, and Ryukyu Air Commuter"
+    }
+   ]
+  },
+  {
+   "claim": "links the main island to the surrounding islands",
+   "verdict": "confirmed",
+   "inAfter": "links the main island to the surrounding islands",
+   "sources": [
+    {
+     "file": "ocab-commuter-fy2025",
+     "org": "MLIT Osaka Civil Aviation Bureau (cab.mlit.go.jp)",
+     "dated": "year to March 2026 (published August 2026)",
+     "quote": [
+      "那覇～北大東",
+      "那覇～南大東",
+      "那覇～久米島",
+      "那覇～与那国"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Ryukyu Air Commuter, which connects Okinawa main island with surrounding islands"
+    }
+   ]
+  },
+  {
+   "claim": "international flights to Taiwan, Hong Kong, South Korea, Thailand, Singapore and mainland China",
+   "verdict": "corrected",
+   "inAfter": "The terminal operator lists international flights to Taiwan, Hong Kong, South Korea, Thailand, Singapore and mainland China",
+   "note": "Was the same list plus Malaysia. The terminal operator's list of cities served names no Malaysian city (its airline list does name Batik Air Malaysia, so the two pages disagree), and Malaysia is left out.",
+   "sources": [
+    {
+     "file": "naha-city-list",
+     "org": "Naha Airport Building Co. (the terminal operator, naha-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "(Overseas 14 cities 14 routes, domestic 29 cities 32 routes)",
+      "Korea Seoul China Beijing, Tianjin, Nanjing, Shanghai, Hangzhou, Qingdao Taiwan Taipei, Taichung, Kaohsiung Hong Kong Hong Kong Singapore Singapore Thailand Bangkok"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It handles scheduled international traffic to Taiwan, Hong Kong, South Korea, Thailand, Malaysia, Singapore and mainland China."
+    }
+   ]
+  },
+  {
+   "claim": "terminals built in stages",
+   "verdict": "confirmed",
+   "inAfter": "Its terminals were built in stages",
+   "sources": [
+    {
+     "file": "naha-history",
+     "org": "Naha Airport Building Co. (the terminal operator, naha-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "那覇空港国内線旅客ターミナルビル第一次増築工事竣工",
+      "那覇空港国内線旅客ターミナルビル第四次増築工事竣工"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "extended to include LCCT, other extensions works to conclude in 2016"
+    }
+   ]
+  },
+  {
+   "claim": "domestic terminal opened in 1999",
+   "verdict": "confirmed",
+   "inAfter": "the domestic terminal opened in 1999",
+   "note": "Heisei 11 is 1999.",
+   "sources": [
+    {
+     "file": "naha-history",
+     "org": "Naha Airport Building Co. (the terminal operator, naha-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "平成11年5月26日 那覇空港国内線新旅客ターミナルビル供用開始"
+    },
+    {
+     "file": "mlit-kuni-kanri",
+     "org": "MLIT Civil Aviation Bureau (mlit.go.jp)",
+     "dated": "undated PDF read 2026-09-23",
+     "quote": "平成１１年 新国内線旅客ターミナルビル供用開始"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Domestic Terminal (1999)"
+    }
+   ]
+  },
+  {
+   "claim": "new international terminal in 2014",
+   "verdict": "confirmed",
+   "inAfter": "a new international terminal in 2014",
+   "note": "Heisei 26 is 2014.",
+   "sources": [
+    {
+     "file": "naha-history",
+     "org": "Naha Airport Building Co. (the terminal operator, naha-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "平成26年2月17日 那覇空港新国際線旅客ターミナルビル供用開始"
+    },
+    {
+     "file": "mlit-kuni-kanri",
+     "org": "MLIT Civil Aviation Bureau (mlit.go.jp)",
+     "dated": "undated PDF read 2026-09-23",
+     "quote": "平成２６年 新国際線旅客ターミナルビル供用開始"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "New International Terminal (2014)"
+    }
+   ]
+  },
+  {
+   "claim": "since 2019 a connecting building has joined the domestic and international terminals",
+   "verdict": "corrected",
+   "inAfter": "since 2019 a connecting building has joined the two",
+   "note": "The old paragraph described separate terminals 'worth identifying before travel'; the connecting building opened on 18 March 2019 (Heisei 31).",
+   "sources": [
+    {
+     "file": "naha-history",
+     "org": "Naha Airport Building Co. (the terminal operator, naha-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "平成31年3月18日 那覇空港際内連結ターミナル施設 供用開始"
+    },
+    {
+     "file": "mlit-kuni-kanri",
+     "org": "MLIT Civil Aviation Bureau (mlit.go.jp)",
+     "dated": "undated PDF read 2026-09-23",
+     "quote": "平成３１年 際内連結ターミナルビル供用開始"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "New Integrated Terminal (2019) - The building connecting the domestic and international terminals was completed and began integrated operation"
+    }
+   ]
+  },
+  {
+   "claim": "Skytrax 61st in the world for 2026 (78th in 2025)",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Skytrax",
+   "inAfter": "Skytrax ranked it 61st in the world for 2026 (78th in 2025).",
+   "note": "Was '91st in 2024, up from 199th'. Skytrax lists Naha as Okinawa; its 2026 table gives rank, airport and 2025 rank in that order.",
+   "sources": [
+    {
+     "file": "skytrax-top100-2026",
+     "org": "Skytrax (World Airport Awards)",
+     "dated": "2026 (the 2025/2026 World Airport Survey)",
+     "quote": [
+      "World’s Top 100 Airports 2026",
+      "61 Okinawa 78 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Japan's sixth busiest",
+   "verdict": "cut",
+   "wasBefore": "and Japan's sixth busiest",
+   "why": "A 2018 ranking. MLIT's national ranking tables are Excel files the sweep's tools cannot save, and its readable sheets leave out the company-run airports (Narita, Kansai, Itami, Chubu), so no current rank could be confirmed."
+  },
+  {
+   "claim": "21.5 million passengers in 2018",
+   "verdict": "cut",
+   "wasBefore": "It carried 21.5 million passengers in 2018",
+   "why": "Eight years old. Replaced by the year to March 2026 (see above)."
+  },
+  {
+   "claim": "hub for two airlines that matter for island hopping",
+   "verdict": "cut",
+   "wasBefore": "It is the hub for two airlines that matter for island hopping.",
+   "why": "Reworded around Ryukyu Air Commuter alone (see above and below)."
+  },
+  {
+   "claim": "Japan Transocean Air connects Okinawa to the rest of Japan",
+   "verdict": "cut",
+   "wasBefore": "Japan Transocean Air connects Okinawa to the rest of Japan",
+   "why": "Rests on Wikipedia alone. The terminal operator's airline list shows only that JTA flies here. JTA's site (jal.co.jp) answers plain requests with 403; its home page loaded in the browser but says nothing about bases or routes, and two guessed company-page addresses returned 404, so no further tries."
+  },
+  {
+   "claim": "Malaysia among international markets",
+   "verdict": "cut",
+   "wasBefore": "Thailand, Malaysia, Singapore",
+   "why": "Not on the terminal operator's list of cities served (see above)."
+  },
+  {
+   "claim": "terminals worth identifying before travel",
+   "verdict": "cut",
+   "wasBefore": "The terminals were built in stages and are worth identifying before travel.",
+   "why": "Overtaken: a connecting building has joined the domestic and international terminals since 2019 (see above). 'Built in stages' is kept."
+  },
+  {
+   "claim": "low cost carrier terminal, north annex, 2012, for Peach",
+   "verdict": "cut",
+   "wasBefore": "a low cost carrier terminal was added as a north annex in 2012 for Peach services",
+   "why": "Wikipedia alone; neither the terminal operator's history nor MLIT's sheet mentions it."
+  },
+  {
+   "claim": "old domestic terminal became the cargo terminal in 2009",
+   "verdict": "cut",
+   "wasBefore": "The old domestic terminal became the cargo terminal in 2009.",
+   "why": "Sources disagree: MLIT's sheet has a new cargo terminal building opening in 2009 (平成２１年 新貨物ターミナルビル供用開始), not a converted passenger terminal, and the terminal operator's history does not mention it."
+  },
+  {
+   "claim": "Skytrax 91st in 2024, up from 199th",
+   "verdict": "cut",
+   "wasBefore": "Skytrax ranked it 91st in the world in 2024, up from 199th the year before",
+   "why": "Replaced by the 2026 ranking (see above)."
+  },
+  {
+   "claim": "the most improved airport in the world in 2024",
+   "verdict": "cut",
+   "wasBefore": "making it the most improved airport in the world that year",
+   "why": "Wrong. Skytrax's World's Most Improved Airport for 2024 was New Chitose (Hokkaido Airports' release of 19 March 2026 and Wikipedia's New Chitose article, both saved for CTS). Wikipedia's Naha article draws the conclusion itself from the jump in rank."
+  },
+  {
+   "claim": "home to a Japan Air Self-Defense Force base",
+   "verdict": "cut",
+   "wasBefore": "The airport is also home to a Japan Air Self-Defense Force base.",
+   "why": "Wikipedia alone. MLIT's pages on Naha do not mention it, and the defence ministry's site (mod.go.jp) answered a Cloudflare 'Just a moment...' bot check when tried for New Chitose, so it was not tried again."
+  },
+  {
+   "claim": "second runway (2,700 m) since March 2020",
+   "verdict": "cut",
+   "why": "Held back: verified but replaces nothing in the old text. A second runway of 2,700 m opened in March 2020 (Reiwa 2).",
+   "sources": [
+    {
+     "file": "naha-history",
+     "org": "Naha Airport Building Co. (the terminal operator, naha-airport.co.jp)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "令和2年3月 那覇空港第二滑走路 供用開始"
+    },
+    {
+     "file": "mlit-kuni-kanri",
+     "org": "MLIT Civil Aviation Bureau (mlit.go.jp)",
+     "dated": "undated PDF read 2026-09-23",
+     "quote": "令和 2年 Ｂ滑走路供用開始（2,700m）"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": [
+      "r2_number = 18R/36L",
+      "r2_length_m = 2,700"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "China routes cut back sharply since December 2025",
+   "verdict": "cut",
+   "why": "Held back: one source only. The terminal operator's report for the year to March 2026 says China routes have been sharply reduced since December 2025 because relations between Japan and China worsened, while new and extra Taiwan and Korea flights took international passengers to a record 4.13 million. It could go in as the operator's own statement ('the terminal operator reports...'), but the cause is a fact about Japan-China relations with no second saved source, so it is left for Andy.",
+   "sources": [
+    {
+     "file": "naha-r7",
+     "org": "Naha Airport Building Co. (the terminal operator, naha-airport.co.jp)",
+     "dated": "business report for 1 April 2025 to 31 March 2026",
+     "quote": [
+      "日中関係の悪化によって令和７年12月から中国路 線の大幅な減便が続いたものの",
+      "台湾・韓国路線の新規就航や増便等によって、過去最高の413"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so most onward travel in the prefecture starts here",
+   "why": "Judgement carried over from the old text: the terminal operator lists flights from Naha to seven other Okinawa islands (Ishigaki, Miyako, Shimojishima, Kumejima, Kitadaito, Minami Daito and Yonaguni), and Ryukyu Air Commuter's island network is centred here."
+  }
+ ],
+ "tracerOk": {}
+}
