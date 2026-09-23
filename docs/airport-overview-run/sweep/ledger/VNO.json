@@ -1,0 +1,496 @@
+{
+ "iata": "VNO",
+ "id": "recqGAfhAfeU0AUJd",
+ "name": "Vilnius International Airport",
+ "country": "Lithuania",
+ "wikipedia": "https://en.wikipedia.org/wiki/Vilnius_Airport",
+ "audited": "2026-09-23",
+ "before": "Lithuania's largest airport, 5.9 km south of central Vilnius, carrying around 5 million passengers a year on a single runway. It is second busiest in the Baltic states after Riga, and a base for airBaltic, Ryanair and Wizz Air.\n\nThe name changed recently and only for a while. From 1 January 2025 to 31 December 2029 it is officially Vilnius Čiurlionis International Airport, in honour of the composer and painter Mikalojus Konstantinas Čiurlionis. That is a fixed-term renaming, so both names will be in circulation and the old one returns at the end of the decade.\n\nThe terminal is worth a look on arrival. The current building was built between 1949 and 1954 in standard Soviet airport style, decorated outside with sculptures of soldiers, workers and aviators, and inside with wreaths, bay leaves and stars. Until the early 1990s it carried the hammer and sickle too. A new departures terminal was added in 1993 and the old building now handles arrivals only.",
+ "after": "Lithuania's largest airport, 5.9 km south of central Vilnius, with a single runway and more than 5.1 million passengers in 2025, second only to Riga among Baltic airports. Ryanair and Wizz Air have bases here, and airBaltic also flies from Vilnius.\n\nIn 2025 it was given the symbolic name Vilnius Čiurlionis Airport, after the composer and painter Mikalojus Konstantinas Čiurlionis. Its code is still VNO.\n\nA new departure terminal opened in February 2025. The older terminals are being rebuilt, and a new arrivals terminal is due by late 2028.\n\nSince late 2025, smuggling balloons from Belarus have repeatedly forced the airport to halt flights, sometimes overnight. Some flights have been diverted to Kaunas.",
+ "claims": [
+  {
+   "claim": "Lithuania's largest airport",
+   "verdict": "confirmed",
+   "inAfter": "Lithuania's largest airport",
+   "note": "Lithuanian Airports' 2025 results (reported by Delfi, 7 January 2026): Vilnius over 5.11 million, Kaunas about 1.6 million, Palanga about 448,000.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the largest of the three commercial airports in Lithuania by passenger traffic"
+    },
+    {
+     "file": "delfi-2025-record",
+     "org": "Delfi (Lithuanian Airports release)",
+     "quote": [
+      "Skelbiama, kad didžiausias keleivių srautas pernai fiksuotas Vilniaus oro uoste",
+      "Tuo metu Kauno oro uostas per metus aptarnavo apie 1,6 mln. asmenų"
+     ],
+     "dated": "2026-01-07"
+    },
+    {
+     "file": "govilnius-terminal",
+     "org": "Go Vilnius (City of Vilnius tourism and business agency)",
+     "quote": "Lithuania's main air gateway",
+     "dated": "2025-02-04"
+    }
+   ]
+  },
+  {
+   "claim": "5.9 km south of central Vilnius",
+   "verdict": "confirmed",
+   "inAfter": "5.9 km south of central Vilnius",
+   "note": "Coordinates: 6.1 km in a straight line at 176 degrees, which is south; ratio 0.96.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is located 5.9 km (3.7 mi) south of the city center."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 6.1 km",
+      "Bearing from the city centre: 176 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a single runway",
+   "verdict": "confirmed",
+   "inAfter": "with a single runway",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "with one runway"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 01/19: 2,515 m",
+      "Runways listed: 1"
+     ],
+     "dated": "2026-09-23"
+    }
+   ],
+   "note": "OurAirports' runway table, downloaded on 23 September 2026, lists one runway (01/19, 2,515 m)."
+  },
+  {
+   "claim": "more than 5.1 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "more than 5.1 million passengers in 2025",
+   "note": "Was \"around 5 million passengers a year\", Wikipedia's figure from 2019. Lithuanian Airports gives over 5.11 million for 2025 (up 6.4 per cent), Eurostat 5,103,156; \"more than 5.1 million\" is true of both. The operator's own sites (ltou.lt, vilnius-airport.lt) answer with a Cloudflare bot check, so its figure is taken from its release as reported by Delfi.",
+   "sources": [
+    {
+     "file": "delfi-2025-record",
+     "org": "Delfi (Lithuanian Airports release)",
+     "quote": "per 5,11 mln. keleivių, o tai yra 6,4 proc. daugiau nei 2024 m.",
+     "dated": "2026-01-07"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": "passengers carried in 2025: 5,103,156"
+    }
+   ]
+  },
+  {
+   "claim": "second only to Riga among Baltic airports (2025)",
+   "verdict": "confirmed",
+   "inAfter": "second only to Riga among Baltic airports",
+   "note": "Dated to 2025 in the text. Eurostat 2025: Riga 7,098,121, Vilnius 5,103,156, Tallinn 3,472,035; the other Baltic airports are far smaller (Kaunas about 1.6 million). One thing for the owner: Delfi (4 June 2026) reports that in May 2026, leaving out transfer passengers, Vilnius handled more passengers than Riga for the first time (about 535,000 against 499,000), so the annual order may change.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the second busiest airport in the Baltic states, after Riga International Airport"
+    },
+    {
+     "file": "eurostat-baltic",
+     "org": "Eurostat",
+     "quote": [
+      "Eurostat LV_EVRA Riga International Airport: passengers carried in 2025: 7,098,121",
+      "Eurostat EE_EETN Lennart Meri Tallinn Airport: passengers carried in 2025: 3,472,035"
+     ]
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": "passengers carried in 2025: 5,103,156"
+    },
+    {
+     "file": "delfi-2025-record",
+     "org": "Delfi (Lithuanian Airports release)",
+     "quote": "aplenkė Rygos oro uostą, kurį 2025 m. rinkosi kiek daugiau nei 7,11 mln. keleivių",
+     "dated": "2026-01-07"
+    }
+   ]
+  },
+  {
+   "claim": "Ryanair has a base here",
+   "verdict": "confirmed",
+   "inAfter": "Ryanair and Wizz Air have bases here",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Vilnius International Airport serves as a base for airBaltic, Ryanair, and Wizz Air."
+    },
+    {
+     "file": "ryanair-api-vno",
+     "org": "Ryanair",
+     "quote": [
+      "\"iataCode\":\"VNO\",\"name\":\"Vilnius\"",
+      "\"base\":true"
+     ],
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "Wizz Air has a base here",
+   "verdict": "confirmed",
+   "inAfter": "Ryanair and Wizz Air have bases here",
+   "note": "Delfi, 1 December 2025: Wizz Air is placing a third Airbus A321neo \"at its Vilnius base\" for winter 2025.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "serves as a base for airBaltic, Ryanair, and Wizz Air"
+    },
+    {
+     "file": "delfi-wizz-120181285",
+     "org": "Delfi",
+     "quote": [
+      "dislokuos trečiąjį",
+      "orlaivį savo Vilniaus bazėje"
+     ],
+     "dated": "2025-12-01"
+    },
+    {
+     "file": "delfi-wizz-2026",
+     "org": "Delfi",
+     "quote": "basing an additional aircraft at Vilnius Airport",
+     "dated": "2025-09-12"
+    }
+   ]
+  },
+  {
+   "claim": "airBaltic also flies from Vilnius",
+   "verdict": "softened",
+   "inAfter": "airBaltic also flies from Vilnius",
+   "note": "Was \"a base for airBaltic\". No source within 12 months calls Vilnius an airBaltic base. airBaltic's summer 2027 schedule (Delfi, 1 September 2026) cuts its direct routes from Vilnius to eight, from more than 20 in 2026, and on 16 September 2026 the airline announced court approval of its Chapter 11 first-day motions (its own newsroom), saying flights continue as normal. Flag for the owner.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "serves as a base for airBaltic"
+    },
+    {
+     "file": "delfi-airbaltic-cuts",
+     "org": "Delfi",
+     "quote": "pristatė 2027 m. vasaros sezono skrydžių tvarkaraštį, kuriame Lietuvos keleiviams siūlomi aštuoni tiesioginiai skrydžiai iš Vilniaus",
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "airbaltic-court",
+     "org": "airBaltic",
+     "quote": "operate its flight schedule and wider business without interruption",
+     "dated": "2026-09-16"
+    }
+   ]
+  },
+  {
+   "claim": "given a symbolic name, Vilnius Čiurlionis Airport, in 2025",
+   "verdict": "corrected",
+   "inAfter": "In 2025 it was given the symbolic name Vilnius Čiurlionis Airport",
+   "note": "Was \"From 1 January 2025 to 31 December 2029 it is officially Vilnius Čiurlionis International Airport\". The Lithuanian Government Office, which ran the Čiurlionis 150 programme, calls it a symbolic naming made as part of the 2025 anniversary programme, and gives no end date. Wikipedia says \"renamed\" and gives 1 January 2025 to 31 December 2029; the Lithuanian Wikipedia cites a Government news item for it (lrv.lt, headline \"Vilniaus oro uostas 2025 metus pasitinka su simboliniu vardu\", that is, greets 2025 with a symbolic name), but lrv.lt and the operator's sites answer with a Cloudflare bot check. So the text uses the Government's word, symbolic, and drops \"officially\" and the dates. The same release appears on Delfi (23 February 2026).",
+   "sources": [
+    {
+     "file": "ciurlioniui150-results-en",
+     "org": "Office of the Government of Lithuania (Čiurlionis 150 programme)",
+     "quote": [
+      "23 February 2026",
+      "the symbolic naming of Lithuania",
+      "after M. K. Čiurlionis, accompanied by artistic installations within the airport and the visual concert",
+      "Night at Vilnius Čiurlionis Airport",
+      "61% of respondents reported having heard about the airport’s symbolic name"
+     ],
+     "dated": "2026-02-23"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the airport was renamed to Vilnius Čiurlionis International Airport (Lithuanian: Tarptautinis Vilniaus Čiurlionio oro uostas) from 1 January 2025"
+    }
+   ]
+  },
+  {
+   "claim": "after the composer and painter Mikalojus Konstantinas Čiurlionis",
+   "verdict": "confirmed",
+   "inAfter": "after the composer and painter Mikalojus Konstantinas Čiurlionis",
+   "note": "The Government page calls him the artist and refers to the composer's letters; Delfi's own caption shows him with his painting Rex and its headline on the first recording of Lithuanian symphonic music names his work.",
+   "sources": [
+    {
+     "file": "ciurlioniui150-results-en",
+     "org": "Office of the Government of Lithuania (Čiurlionis 150 programme)",
+     "quote": [
+      "they expanded their knowledge of the artist and his work",
+      "based on ideas preserved in the composer’s letters"
+     ]
+    },
+    {
+     "file": "delfi-ciurlionis150",
+     "org": "Delfi",
+     "quote": [
+      "Mikalojus Konstantinas Čiurlionis ir jo paveikslas",
+      "Perleistas pirmasis lietuviškos simfoninės muzikos įrašas – Čiurlionio"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In honor of Mikalojus Konstantinas Čiurlionis"
+    }
+   ]
+  },
+  {
+   "claim": "code still VNO",
+   "verdict": "confirmed",
+   "inAfter": "Its code is still VNO.",
+   "note": "Ryanair's live airport data still lists the airport as Vilnius, VNO.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Vilnius Čiurlionis International Airport (IATA: VNO, ICAO: EYVI)"
+    },
+    {
+     "file": "ryanair-api-vno",
+     "org": "Ryanair",
+     "quote": "\"iataCode\":\"VNO\",\"name\":\"Vilnius\"",
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "new departure terminal opened in February 2025",
+   "verdict": "corrected",
+   "inAfter": "A new departure terminal opened in February 2025.",
+   "note": "Replaces the 1993 departures terminal line (see the cut). Opened on 4 February 2025.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The terminal was opened on 4 February 2025."
+    },
+    {
+     "file": "govilnius-terminal",
+     "org": "Go Vilnius (City of Vilnius tourism and business agency)",
+     "quote": [
+      "February 4, 2025",
+      "On Tuesday morning, the new passenger departure terminal at Vilnius Airport was officially opened"
+     ],
+     "dated": "2025-02-04"
+    },
+    {
+     "file": "delfi-old-terminals",
+     "org": "Delfi (ELTA)",
+     "quote": "the new departures terminal at Vilnius Airport began operating in February 2025",
+     "dated": "2025-05-30"
+    }
+   ]
+  },
+  {
+   "claim": "older terminals being rebuilt",
+   "verdict": "corrected",
+   "inAfter": "The older terminals are being rebuilt",
+   "note": "The 1993 and 2007 terminals are being rebuilt from summer 2025 to the end of 2026. The first stage, the former departures hall, reopened on 16 June 2026 as a shopping and dining area, VNO Plaza (Delfi only, so not in the text), and works are moving on to the non-Schengen areas.",
+   "sources": [
+    {
+     "file": "delfi-old-terminals",
+     "org": "Delfi (ELTA)",
+     "quote": [
+      "The project includes the renovation of two terminals (T2 and T3), built in 1993 and 2007 respectively.",
+      "The work is scheduled to take a year and a half – from the summer of 2025 to the end of 2026."
+     ],
+     "dated": "2025-05-30"
+    },
+    {
+     "file": "govilnius-terminal",
+     "org": "Go Vilnius (City of Vilnius tourism and business agency)",
+     "quote": [
+      "the conversion of old terminals is set to begin in the summer",
+      "This conversion is expected to be completed by the end of 2026."
+     ],
+     "dated": "2025-02-04"
+    },
+    {
+     "file": "delfi-vno-plaza",
+     "org": "Delfi",
+     "quote": "This is not the final end of the entire reconstruction, but an important intermediate step: further works will move to non-Schengen areas.",
+     "dated": "2026-06-17"
+    }
+   ]
+  },
+  {
+   "claim": "new arrivals terminal due by late 2028",
+   "verdict": "corrected",
+   "inAfter": "a new arrivals terminal is due by late 2028",
+   "note": "Forward-looking. Lithuanian Airports signed Zaha Hadid Architects to design it on 4 November 2025; construction contractor to be chosen in the first half of 2027.",
+   "sources": [
+    {
+     "file": "delfi-zaha-arrivals",
+     "org": "Delfi",
+     "quote": "Lithuanian Airports (LTOU) has signed a contract with Zaha Hadid Architects to design the new arrivals terminal at Vilnius Airport, marking a key milestone in the project expected to open to passengers by late 2028.",
+     "dated": "2025-11-04"
+    },
+    {
+     "file": "govilnius-terminal",
+     "org": "Go Vilnius (City of Vilnius tourism and business agency)",
+     "quote": "Simultaneously, the planning and construction of a new arrival terminal will be underway, with its completion anticipated by the end of 2028.",
+     "dated": "2025-02-04"
+    }
+   ]
+  },
+  {
+   "claim": "since late 2025 smuggling balloons from Belarus have repeatedly halted flights",
+   "verdict": "corrected",
+   "inAfter": "Since late 2025, smuggling balloons from Belarus have repeatedly forced the airport to halt flights",
+   "note": "Added because it will catch a traveller out and the September text missed it (current Wikipedia has it for 2025). Lithuanian Airports counts more than 300 flights and about 47,000 passengers disrupted in 2025 and nearly 60 hours of closures (LRT, 13 May 2026); LRT counts about ten disruptions in 2026 so far, the latest overnight on 21 to 22 September 2026. The Government declared a national emergency at the end of 2025. Flag for the owner, as a new fact rather than a replacement.",
+   "sources": [
+    {
+     "file": "delfi-overnight",
+     "org": "Delfi",
+     "quote": "The Government declared a nationwide emergency at the end of 2025 after Vilnius Airport had to suspend operations numerous times last October, November and December due to weather balloons carrying illegal cigarettes from Belarus to Lithuania.",
+     "dated": "2026-06-08"
+    },
+    {
+     "file": "lrt-balloons-2026",
+     "org": "LRT (Lithuanian public broadcaster)",
+     "quote": [
+      "Vilnius International Airport temporarily imposed airspace restrictions due to the threat of smuggling balloons from Belarus, the airport reported on Tuesday.",
+      "This year, operations at the capital’s airport have been disrupted about ten times due to the threat of smuggling balloons."
+     ],
+     "dated": "2026-09-22"
+    },
+    {
+     "file": "lrt-balloons-first",
+     "org": "LRT (Lithuanian public broadcaster)",
+     "quote": "According to Lithuanian Airports, balloon-related incidents disrupted more than 300 flights last year, affecting around 47,000 passengers and causing nearly 60 hours of airport closures.",
+     "dated": "2026-05-13"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2025, the airport was closed on several occasions due to helium-filled weather balloons flying near the airport from Belarus"
+    }
+   ]
+  },
+  {
+   "claim": "sometimes overnight",
+   "verdict": "corrected",
+   "inAfter": "sometimes overnight",
+   "sources": [
+    {
+     "file": "lrt-balloons-2026",
+     "org": "LRT (Lithuanian public broadcaster)",
+     "quote": "The restrictions were in effect from 23:25 local time on Monday until 02:40 on Tuesday.",
+     "dated": "2026-09-22"
+    },
+    {
+     "file": "lrt-balloons-again",
+     "org": "LRT (Lithuanian public broadcaster)",
+     "quote": "Flights were temporarily restricted at Vilnius Airport overnight from Sunday into Monday after suspected smuggling balloons were detected.",
+     "dated": "2026-06-08"
+    },
+    {
+     "file": "delfi-overnight",
+     "org": "Delfi",
+     "quote": "Vilnius Airport was closed for two-and-a-half hours overnight",
+     "dated": "2026-06-08"
+    }
+   ]
+  },
+  {
+   "claim": "some flights diverted to Kaunas",
+   "verdict": "corrected",
+   "inAfter": "Some flights have been diverted to Kaunas.",
+   "note": "On 21 to 22 September 2026, 12 aircraft were diverted: seven to Kaunas, four to Riga and one to Warsaw.",
+   "sources": [
+    {
+     "file": "lrt-balloons-again",
+     "org": "LRT (Lithuanian public broadcaster)",
+     "quote": "Four aircraft were diverted to other airports, including two to Kaunas, while one flight was cancelled.",
+     "dated": "2026-06-08"
+    },
+    {
+     "file": "delfi-sep2026-restrict",
+     "org": "Delfi (ELTA)",
+     "quote": "Keturi iš jų – į Rygą, vienas – į Varšuvą, septyni – į Kauną",
+     "dated": "2026-09-22"
+    }
+   ]
+  },
+  {
+   "claim": "around 5 million passengers a year",
+   "verdict": "cut",
+   "wasBefore": "carrying around 5 million passengers a year",
+   "why": "Wikipedia's 2019 figure; replaced by 2025's (Lithuanian Airports and Eurostat)."
+  },
+  {
+   "claim": "a base for airBaltic",
+   "verdict": "cut",
+   "wasBefore": "a base for airBaltic, Ryanair and Wizz Air",
+   "why": "Ryanair and Wizz Air bases are confirmed within 12 months; an airBaltic base is not, and airBaltic is cutting its Vilnius routes for 2027. Softened to \"airBaltic also flies from Vilnius\"."
+  },
+  {
+   "claim": "the name changed recently and only for a while",
+   "verdict": "cut",
+   "wasBefore": "The name changed recently and only for a while.",
+   "why": "Rests on the fixed term, which no source in reach beyond Wikipedia confirms."
+  },
+  {
+   "claim": "officially renamed, 1 January 2025 to 31 December 2029",
+   "verdict": "cut",
+   "wasBefore": "From 1 January 2025 to 31 December 2029 it is officially Vilnius Čiurlionis International Airport",
+   "why": "Sources disagree: Wikipedia says renamed for 1 January 2025 to 31 December 2029; the Government Office's own programme page calls it a symbolic naming for the 2025 anniversary and gives no end date. The Government news item the Lithuanian Wikipedia cites (lrv.lt) and the operator's sites (ltou.lt, vilnius-airport.lt) are behind a Cloudflare bot check. Corrected to the Government's wording, without the dates."
+  },
+  {
+   "claim": "fixed-term renaming, both names in circulation, old one returns at the end of the decade",
+   "verdict": "cut",
+   "wasBefore": "That is a fixed-term renaming, so both names will be in circulation and the old one returns at the end of the decade.",
+   "why": "Depends on the 2029 end date, which could not be confirmed. The code, VNO, is kept instead."
+  },
+  {
+   "claim": "the terminal is worth a look",
+   "verdict": "cut",
+   "wasBefore": "The terminal is worth a look on arrival.",
+   "why": "A judgement that goes with the decoration details below, which are cut."
+  },
+  {
+   "claim": "1949 to 1954 building, Soviet style, sculptures, wreaths, bay leaves and stars",
+   "verdict": "cut",
+   "wasBefore": "The current building was built between 1949 and 1954 in standard Soviet airport style, decorated outside with sculptures of soldiers, workers and aviators, and inside with wreaths, bay leaves and stars.",
+   "why": "Only Wikipedia. Its source is the operator's history page (vilnius-airport.lt), which answers with a Cloudflare bot check, and the archived copy is on web.archive.org, which the network blocks. Kauno diena's airport tour did not give the detail."
+  },
+  {
+   "claim": "hammer and sickle until the early 1990s",
+   "verdict": "cut",
+   "wasBefore": "Until the early 1990s it carried the hammer and sickle too.",
+   "why": "Only Wikipedia; same reason as the building details."
+  },
+  {
+   "claim": "1993 departures terminal; old building arrivals only",
+   "verdict": "cut",
+   "wasBefore": "A new departures terminal was added in 1993 and the old building now handles arrivals only.",
+   "why": "Out of date. A new departure terminal opened on 4 February 2025, the 1993 departures hall has been rebuilt (reopened as a shopping area on 16 June 2026), and a new arrivals terminal is due by late 2028. The 1993 date itself is confirmed (Delfi/ELTA), but not what each building handles now."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

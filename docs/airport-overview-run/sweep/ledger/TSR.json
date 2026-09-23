@@ -1,0 +1,353 @@
+{
+ "iata": "TSR",
+ "id": "recxDiBPQGupmNLIn",
+ "name": "Timișoara Traian Vuia International Airport",
+ "country": "Romania",
+ "wikipedia": "https://en.wikipedia.org/wiki/Timi%C8%99oara_Traian_Vuia_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Romania's fourth busiest airport and the main hub for the west of the country and the Danube-Criș-Mureș-Tisa Euroregion, serving Timișoara in the Banat region.\n\nIts runway is one of only four in Romania longer than 3 km, alongside the two Bucharest airports and Constanța. That capability, plus its position, means it acts as a backup airport for Belgrade, Bucharest and Budapest when those close.\n\nIt is an operating base for Wizz Air.\n\nThere are two passenger terminals. Terminal A, built in 1964 and modernised in 2002, doubled in size at the end of 2010 and was dedicated to non-Schengen destinations and domestic flights, handling 500 passengers an hour across three gates. Terminal B, from 1980 and modernised in 2004, is the larger, handling 800 passengers an hour across nine gates. Romania's Schengen position has changed since those designations were set, so confirm which building a client needs.\n\nThe airport is named after Traian Vuia, the Romanian flight pioneer, who was from Timiș County.",
+ "after": "Romania's fourth busiest airport and the main airport for the west of the country, 12 km north east of central Timișoara. It handled nearly 1.46 million passengers in 2025.\n\nIts 3,500 m runway is one of only four in Romania longer than 3 km, alongside the two Bucharest airports and Constanța.\n\nWizz Air flies from here to more than 20 destinations, most of them in Italy and Germany, as well as to London Luton.\n\nA new arrivals terminal for international flights opened in July 2021, followed by a departures terminal for Schengen flights in March 2024. The airport's departures board now puts the London Luton flights at Terminal 1, while most other flights use Terminal 2.\n\nIt is named after Traian Vuia, the Romanian flight pioneer.",
+ "claims": [
+  {
+   "claim": "Romania's fourth busiest airport (2025)",
+   "verdict": "confirmed",
+   "inAfter": "Romania's fourth busiest airport",
+   "note": "Eurostat 2025, all Romanian airports that report: Bucharest Otopeni 17.0 million, Cluj 3.55 million, Iași 2.24 million, Timișoara 1.46 million, then Suceava 0.77 million. Brașov and Constanța do not report to Eurostat; the Romanian Airports Association's 2025 chart (a picture on its 3 February 2026 release, so not quotable here) gives them 337,353 and 119,426 and shows the same top four, with Timișoara on 1,458,098. Eurostat's dataset was last updated on 17 September 2026.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the fourth-busiest Romanian airport in terms of air traffic"
+    },
+    {
+     "file": "eurostat-ro-2025",
+     "org": "Eurostat",
+     "quote": [
+      "Eurostat RO_LROP BUCURESTI/HENRI COANDA airport: passengers carried in 2025: 16,998,844",
+      "Eurostat RO_LRCL CLUJ NAPOCA/AVRAM IANCU airport: passengers carried in 2025: 3,547,053",
+      "Eurostat RO_LRIA IASI airport: passengers carried in 2025: 2,242,921",
+      "Eurostat RO_LRTR TIMISOARA/TRAIAN VUIA airport: passengers carried in 2025: 1,458,022",
+      "Eurostat RO_LRSV SUCEAVA/STEFAN CEL MARE airport: passengers carried in 2025: 769,248"
+     ],
+     "dated": "2026-09-17"
+    }
+   ]
+  },
+  {
+   "claim": "the main airport for the west of the country",
+   "verdict": "confirmed",
+   "inAfter": "the main airport for the west of the country",
+   "note": "Was \"the main hub for the west of the country\"; \"hub\" dropped as the operator's own wording is gateway (poarta de acces).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the main air transportation hub for the western part of Romania"
+    },
+    {
+     "file": "aerotim-en-localizare",
+     "org": "Timișoara Airport (operator)",
+     "quote": "Traian Vuia International Airport, Timisoara, gateway from the west of the country.",
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "aerotim-despre",
+     "org": "Timișoara Airport (operator)",
+     "quote": "Aeroportul international Traian Vuia, Timisoara, poarta de acces din vestul tarii."
+    }
+   ]
+  },
+  {
+   "claim": "12 km north east of central Timișoara",
+   "verdict": "corrected",
+   "inAfter": "12 km north east of central Timișoara",
+   "note": "Replaces \"serving Timișoara in the Banat region\" (see the cut). Coordinates: 10.7 km in a straight line at 54 degrees, which is north east; 12 km is a ratio of 1.12.",
+   "sources": [
+    {
+     "file": "aerotim-en-localizare",
+     "org": "Timișoara Airport (operator)",
+     "quote": "The airport is located 12 km away, in the N-E part of Timişoara.",
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is located 12 km northeast of the center of Timișoara"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 10.7 km",
+      "Bearing from the city centre: 54 degrees, which is north east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "nearly 1.46 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled nearly 1.46 million passengers in 2025.",
+   "note": "The old text gave no figure. Eurostat 1,458,022; Wikipedia's infobox 1,458,098, sourced to the Romanian Airports Association, which is also the figure on the association's own 2025 chart. \"Nearly 1.46 million\" is true of both. Eurostat's dataset was last updated on 17 September 2026.",
+   "sources": [
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": "passengers carried in 2025: 1,458,022",
+     "dated": "2026-09-17"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat1_data = 1,458,098",
+      "stat_year = 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "3,500 m runway, one of only four in Romania longer than 3 km",
+   "verdict": "confirmed",
+   "inAfter": "Its 3,500 m runway is one of only four in Romania longer than 3 km, alongside the two Bucharest airports and Constanța.",
+   "note": "OurAirports' runway table (downloaded 23 September 2026) lists runways over 3,000 m only at Bucharest Otopeni, Bucharest Băneasa, Constanța (Mihail Kogălniceanu) and Timișoara; Cluj is listed at 2,040 m. Length added from the same sources.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Timișoara Airport is one of the four airports in Romania that has a runway longer than 3 km (the other three are Henri Coandă Intl. and Aurel Vlaicu Intl. in Bucharest and Mihail Kogălniceanu Intl. in Constanța)"
+    },
+    {
+     "file": "ourairports-ro-runways",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 11/29 at Timișoara Traian Vuia International Airport (LRTR, IATA TSR): 3,500 m",
+      "Romanian airports with a runway longer than 3,000 m: 4 (BBU, CND, OTP, TSR)"
+     ],
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "r1_length_m = 3500"
+    }
+   ]
+  },
+  {
+   "claim": "Wizz Air flies to more than 20 destinations, most in Italy and Germany",
+   "verdict": "corrected",
+   "inAfter": "Wizz Air flies from here to more than 20 destinations, most of them in Italy and Germany",
+   "note": "Replaces \"It is an operating base for Wizz Air\" (see the cut). Wikipedia's route table lists 22 Wizz Air destinations, 12 of them in Italy and Germany; boardingpass.ro (22 January 2026) counts 20 plus three new routes for 2026 and says most go to Italy and Germany. On the operator's board as read on 23 September 2026 (the next three days), Wizz Air has 16 of the 44 departures listed, more than any other airline (Animawings is next with 9).",
+   "sources": [
+    {
+     "file": "wikipedia-airlines",
+     "org": "Wikimedia",
+     "quote": [
+      "[[Wizz Air]]",
+      "[[Bari Karol Wojtyła Airport|Bari]]",
+      "[[Orio al Serio International Airport|Bergamo]]",
+      "[[Berlin Brandenburg Airport|Berlin]]",
+      "[[Dortmund Airport|Dortmund]]",
+      "[[Memmingen Airport|Memmingen]]",
+      "[[Naples International Airport|Naples]]",
+      "[[Treviso Airport|Treviso]]"
+     ]
+    },
+    {
+     "file": "boardingpass-wizz-tsr",
+     "org": "BoardingPass.ro (Romanian aviation news)",
+     "quote": [
+      "22 ianuarie 2026",
+      "De la Timișoara, Wizz Air mai operează zboruri spre alte 20 de destinații din nouă țări europene, însă majoritatea sunt rute spre Italia și Germania."
+     ],
+     "dated": "2026-01-22"
+    },
+    {
+     "file": "aerotim-en-departures",
+     "org": "Timișoara Airport (operator)",
+     "quote": [
+      "W43553 Rome 20:15 T2 Scheduled",
+      "W43557 Treviso 12:45 T2 Scheduled",
+      "W43539 Memmingen 06:00 T2 Scheduled",
+      "W43531 Dortmund 07:00 T2 Scheduled"
+     ],
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "Wizz Air flies to London Luton",
+   "verdict": "corrected",
+   "inAfter": "as well as to London Luton",
+   "sources": [
+    {
+     "file": "wikipedia-airlines",
+     "org": "Wikimedia",
+     "quote": "[[Luton Airport|London–Luton]]"
+    },
+    {
+     "file": "aerotim-en-departures",
+     "org": "Timișoara Airport (operator)",
+     "quote": "W43501 London Luton 06:35 T1 Scheduled",
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "new international arrivals terminal opened in July 2021",
+   "verdict": "corrected",
+   "inAfter": "A new arrivals terminal for international flights opened in July 2021",
+   "note": "Replaces the Terminal A and B description (see the cuts). Opened on 29 July 2021. Historical date, so the age of the sources does not matter.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "On 29 July 2021, a new external arrivals terminal was inaugurated."
+    },
+    {
+     "file": "tion-arrivals-2021",
+     "org": "Tion (Timiș news site)",
+     "quote": [
+      "29 July 2021 17:20",
+      "a deschis, joi, în sfârșit, noul Terminal de Sosiri Externe"
+     ],
+     "dated": "2021-07-29"
+    }
+   ]
+  },
+  {
+   "claim": "Schengen departures terminal opened in March 2024",
+   "verdict": "corrected",
+   "inAfter": "followed by a departures terminal for Schengen flights in March 2024",
+   "note": "Inaugurated on 29 March 2024 and open to passengers from 31 March 2024, the day Romania's air borders joined Schengen. The operator names it the Schengen Departures Terminal (Terminal Plecări Schengen). Historical date, so the age of the sources does not matter; its current use is in the next claim.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "A new 12,000 m2 departures terminal (dedicated to Schengen flights) was inaugurated in March 2024."
+    },
+    {
+     "file": "aerotim-terminal-plecari",
+     "org": "Timișoara Airport (operator)",
+     "quote": [
+      "Data: 31.03.2024",
+      "Terminalul de Plecări Curse Externe va purta denumirea de Terminal Plecări Schengen"
+     ],
+     "dated": "2024-03-31"
+    },
+    {
+     "file": "tion-schengen-terminal",
+     "org": "Tion (Timiș news site)",
+     "quote": [
+      "Vineri, 29 martie, este inaugurat un nou terminal de plecări Schengen al Aeroportului Internațional Timișoara",
+      "va primi primii pasageri începând din 31 martie"
+     ],
+     "dated": "2024-03-29"
+    }
+   ]
+  },
+  {
+   "claim": "the airport's departures board: London Luton at Terminal 1, most other flights at Terminal 2",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport's departures board now puts the London Luton flights at Terminal 1, while most other flights use Terminal 2.",
+   "note": "Attributed to the operator and checked against its own live board, 23 September 2026. That board, read on 23 September 2026, lists 44 departures over the next three days: the 9 at Terminal 1 all go outside the Schengen area (London Luton, Istanbul, Antalya, Monastir, Hurghada, Larnaca), and the 35 at Terminal 2 go to Schengen countries or Bucharest. No second, independent source for the terminal split was found (Wizz Air's site answered 405), so the text states only what the airport's board shows and does not name the old Terminal A and B.",
+   "sources": [
+    {
+     "file": "aerotim-en-departures",
+     "org": "Timișoara Airport (operator)",
+     "quote": [
+      "W43501 London Luton 06:35 T1 Scheduled",
+      "TK1016 Istanbul 22:00 T1 Scheduled",
+      "RO0602 Bucharest 09:05 T2 Scheduled",
+      "VL1661 Munich 05:55 T2 Scheduled",
+      "W43553 Rome 20:15 T2 Scheduled"
+     ],
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "named after Traian Vuia, the Romanian flight pioneer",
+   "verdict": "confirmed",
+   "inAfter": "It is named after Traian Vuia, the Romanian flight pioneer.",
+   "note": "The operator's history brochure (a 2015 article it republishes) dates the name to 2002; Wikipedia gives 6 February 2003. The year is not in the text.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the airport is named in honor of Traian Vuia, a Romanian flight pioneer"
+    },
+    {
+     "file": "aerotim-istoric-brosura",
+     "org": "Timișoara Airport (operator)",
+     "quote": "portul a preluat numele pionierului aviației, Traian Vuia"
+    },
+    {
+     "file": "tion-schengen-terminal",
+     "org": "Tion (Timiș news site)",
+     "quote": "primul aparat de zbor autopropulsat din lume, realizat de Traian Vuia"
+    }
+   ]
+  },
+  {
+   "claim": "hub for the Danube-Criș-Mureș-Tisa Euroregion",
+   "verdict": "cut",
+   "wasBefore": "and the Danube-Criș-Mureș-Tisa Euroregion",
+   "why": "Only Wikipedia; the operator speaks only of the west of the country."
+  },
+  {
+   "claim": "serving Timișoara in the Banat region",
+   "verdict": "cut",
+   "wasBefore": "serving Timișoara in the Banat region",
+   "why": "Banat has only Wikipedia. Replaced by the airport's position, 12 km north east of central Timișoara (operator, Wikipedia, coordinates)."
+  },
+  {
+   "claim": "backup airport for Belgrade, Bucharest and Budapest",
+   "verdict": "cut",
+   "wasBefore": "That capability, plus its position, means it acts as a backup airport for Belgrade, Bucharest and Budapest when those close.",
+   "why": "Only Wikipedia, unreferenced. The operator's current pages, its history brochure and Tion's history of the airport do not say it; the operator's old history page (aerotim.ro/istoric) now returns 404."
+  },
+  {
+   "claim": "an operating base for Wizz Air",
+   "verdict": "cut",
+   "wasBefore": "It is an operating base for Wizz Air.",
+   "why": "No source within 12 months uses the word base (Wizz Air's own site answered 405). Replaced by Wizz Air's network from here, which Wikipedia, BoardingPass.ro and the operator's board support."
+  },
+  {
+   "claim": "two passenger terminals",
+   "verdict": "cut",
+   "wasBefore": "There are two passenger terminals.",
+   "why": "Goes with the Terminal A and B description, which is out of date: an international arrivals terminal opened in July 2021 and a Schengen departures terminal in March 2024."
+  },
+  {
+   "claim": "Terminal A: 1964, non-Schengen and domestic, 500 an hour, three gates",
+   "verdict": "cut",
+   "wasBefore": "Terminal A, built in 1964 and modernised in 2002, doubled in size at the end of 2010 and was dedicated to non-Schengen destinations and domestic flights, handling 500 passengers an hour across three gates.",
+   "why": "Out of date. Wikipedia itself describes this in the past tense; domestic flights now leave from Terminal 2 with the Schengen flights, on the operator's own board."
+  },
+  {
+   "claim": "Terminal B: 1980, the larger, 800 an hour, nine gates",
+   "verdict": "cut",
+   "wasBefore": "Terminal B, from 1980 and modernised in 2004, is the larger, handling 800 passengers an hour across nine gates.",
+   "why": "Out of date; superseded by the 2024 departures terminal (eight gates on its own, Tion)."
+  },
+  {
+   "claim": "confirm which building a client needs",
+   "verdict": "cut",
+   "wasBefore": "Romania's Schengen position has changed since those designations were set, so confirm which building a client needs.",
+   "why": "Replaced by what the operator's live board shows: London Luton at Terminal 1, most other flights at Terminal 2."
+  },
+  {
+   "claim": "Traian Vuia was from Timiș County",
+   "verdict": "cut",
+   "wasBefore": "who was from Timiș County",
+   "why": "Only Wikipedia; the operator's brochure on the airport's history (the Traian Vuia brochure it once published now returns 404) and Tion do not say where he was born."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "1.46": "Rounded from Eurostat 1,458,022 and Wikipedia's infobox 1,458,098 and stated as nearly; see the passengers claim."
+ }
+}

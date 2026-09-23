@@ -1,0 +1,301 @@
+{
+ "iata": "REU",
+ "id": "recrg84a6hNDK3Pwu",
+ "name": "Reus Airport",
+ "country": "Spain",
+ "wikipedia": "https://en.wikipedia.org/wiki/Reus_Airport",
+ "audited": "2026-09-23",
+ "before": "A small Costa Daurada airport between Constantí and Reus, about 8 km from the centre of Tarragona. It handles a lot of holiday traffic for Salou and Cambrils, and PortAventura World is close by.\n\nThe name is a trap. The airport is also marketed as Barcelona-Reus, but Barcelona is about 103 km away to the north east. A client who books it expecting a Barcelona city arrival will face a long transfer, so be explicit about the distance when quoting.\n\nThe terminal is small and the gate arrangement reflects that. There are 9 gates: 1 to 3 for Schengen flights and 4 to 9 for non-Schengen, with passport control before the second lounge. Three gates were removed in 2023 because the terminal was too small to run passport checks at the gate efficiently.\n\nTraffic has swung a lot over the years, peaking at 1.7 million in 2009, falling to 705,067 by 2015, then recovering past a million again in 2017.",
+ "after": "A small Costa Daurada airport between Reus and Tarragona. It handles a lot of holiday traffic for Salou and Cambrils, and PortAventura World is close by.\n\nIts name is a trap. The airport is also marketed as Barcelona-Reus, but Barcelona is about 100 km away to the north east. A client who books it expecting a Barcelona city arrival will face a long transfer, so be explicit about the distance when quoting.\n\nIt handled more than 1.3 million passengers in 2025, up 13 per cent on 2024.",
+ "claims": [
+  {
+   "claim": "a small airport",
+   "verdict": "confirmed",
+   "inAfter": "A small",
+   "note": "Aena's ACI awards put Reus in the smallest European size band (under 2 million passengers a year); it handled about 1.3 million in 2025.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "due to the small size of the terminal"
+    },
+    {
+     "file": "aena-presentation",
+     "org": "Aena (operator)",
+     "quote": "Best Airport in Europe with less than 2 million passengers in 2024.",
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "a Costa Daurada airport",
+   "verdict": "confirmed",
+   "inAfter": "Costa Daurada airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is located near the beaches of the Costa Daurada"
+    },
+    {
+     "file": "catalannews-uk-routes",
+     "org": "Catalan News (ACN)",
+     "quote": "The new Liverpool route was inaugurated on Wednesday with a welcome event on the Costa Daurada for passengers arriving from the British city.",
+     "dated": "2025-05-21"
+    },
+    {
+     "file": "ryanair-api-reu",
+     "org": "Ryanair",
+     "quote": "\"regionCode\":\"COSTA_DORADA\"",
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "between Reus and Tarragona",
+   "verdict": "softened",
+   "inAfter": "between Reus and Tarragona",
+   "note": "Replaces \"between Constantí and Reus, about 8 km from the centre of Tarragona\" (see the two cuts). The coordinates put the airport 5.2 km east of Reus and 7.2 km north west of Tarragona, almost on the straight line between them, and its address is on the Tarragona to Reus road. Aena's own wording is that it is about 10 km east of Reus and from the centre of Tarragona.",
+   "sources": [
+    {
+     "file": "visitsalou-getting",
+     "org": "Salou tourism board (visitsalou.eu)",
+     "quote": [
+      "REUS AIRPORT",
+      "Tarragona-Reus motorway, n/n"
+     ],
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "geo-other-cities",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from Reus: 5.2 km",
+      "Bearing from Reus to the airport: 101 degrees, which is east",
+      "Straight-line distance from Tarragona: 7.2 km",
+      "Bearing from the airport to Tarragona: 116 degrees, which is south east"
+     ]
+    },
+    {
+     "file": "aena-presentation",
+     "org": "Aena (operator)",
+     "quote": "Reus Airport is located 10 kilometres to the east of the city and also from the urban centre of the city of Tarragona.",
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "equidistant in relation to the town of Constantí and the city of Reus and approximately 8 km (5.0 mi) from the city centre of Tarragona"
+    }
+   ]
+  },
+  {
+   "claim": "a lot of holiday traffic for Salou and Cambrils",
+   "verdict": "confirmed",
+   "inAfter": "It handles a lot of holiday traffic for Salou and Cambrils",
+   "note": "Aena runs a bus from the terminal to PortAventura, Salou and Cambrils timed to flight arrivals. Aena's 2022 passenger survey, as reported by Diari de Tarragona, found 93 per cent of passengers travelling on holiday.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport receives a large amount of tourist traffic from passengers destined for the beach resorts of Salou and Cambrils"
+    },
+    {
+     "file": "catalannews-uk-routes",
+     "org": "Catalan News (ACN)",
+     "quote": "The Catalan airport, popular for its location near beach destinations like Salou",
+     "dated": "2025-05-21"
+    },
+    {
+     "file": "aena-bus",
+     "org": "Aena (operator)",
+     "quote": [
+      "Airport - Port Aventura - Salou - Cambrils",
+      "Bus departure times depend on flight schedules, and are usually timed to coincide with flight arrivals."
+     ],
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "ddt-perfil",
+     "org": "Diari de Tarragona",
+     "quote": "el 93% de quienes emplean el aeródromo de la capital del Baix Camp vuelan por vacaciones"
+    }
+   ]
+  },
+  {
+   "claim": "PortAventura World is close by",
+   "verdict": "confirmed",
+   "inAfter": "PortAventura World is close by",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is also close to one of Europe's largest theme resorts, PortAventura World"
+    },
+    {
+     "file": "portaventura-getting",
+     "org": "PortAventura World",
+     "quote": "You can get to PortAventura World in 1 hour from any terminal at El Prat Airport (Barcelona) or in just 15 minutes from Reus Airport.",
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "also marketed as Barcelona-Reus",
+   "verdict": "confirmed",
+   "inAfter": "The airport is also marketed as Barcelona-Reus",
+   "note": "Ryanair, the airline that carried half the airport's passengers in 2022 (Diari de Tarragona), names the airport Barcelona Reus in its own airport data and files it under its Barcelona city code. Aena itself calls it Reus Airport.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "(also known as Barcelona-Reus)"
+    },
+    {
+     "file": "ryanair-api-reu",
+     "org": "Ryanair",
+     "quote": [
+      "\"iataCode\":\"REU\",\"name\":\"Barcelona Reus\"",
+      "\"macCityCode\":\"BARCELONA\""
+     ],
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "Barcelona is about 100 km away to the north east",
+   "verdict": "softened",
+   "inAfter": "Barcelona is about 100 km away to the north east",
+   "note": "Was \"about 103 km\". The coordinates give 87.0 km in a straight line from the centre of Barcelona (100 km is a ratio of 1.15, inside the 0.8 to 1.6 allowed for a road distance; 103 km is 1.18), and put Barcelona at 72 degrees from the airport, which is east on the 8-point rose and one point from north east, inside the tolerance. No written source other than Wikipedia gave a figure: tried Salou's and Barcelona's tourism boards, Monbus (which runs the airport to Barcelona coach), Catalan News, El País and the Diputació de Tarragona; the Costa Daurada tourism board (costadaurada.info) refused the connection. So the figure is rounded to what both sources support rather than kept at Wikipedia's 103.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the centre of Barcelona, which is approximately 103 km (64 mi) to the northeast"
+    },
+    {
+     "file": "geo-other-cities",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from Barcelona: 87.0 km",
+      "Bearing from the airport to Barcelona: 72 degrees, which is east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "more than 1.3 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled more than 1.3 million passengers in 2025",
+   "note": "Replaces the 2009 to 2017 history (see the cut). Aena 1,336,826 and Eurostat 1,323,472, 1 per cent apart; \"more than 1.3 million\" is true of both.",
+   "sources": [
+    {
+     "file": "aena-annual-2025",
+     "org": "Aena (operator)",
+     "quote": [
+      "AÑO 2025",
+      "REUS 1.336.826 13,1%"
+     ],
+     "dated": "2026"
+    },
+    {
+     "file": "aena-presentation",
+     "org": "Aena (operator)",
+     "quote": [
+      "1,336,826",
+      "Passengers in 2025"
+     ],
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": "passengers carried in 2025: 1,323,472"
+    }
+   ]
+  },
+  {
+   "claim": "up 13 per cent on 2024",
+   "verdict": "corrected",
+   "inAfter": "up 13 per cent on 2024",
+   "note": "Aena gives 13.1 per cent; Eurostat's figures give 13.2 per cent (1,168,899 to 1,323,472). Catalan News reported 13.2 per cent for January to November from Aena data.",
+   "sources": [
+    {
+     "file": "aena-annual-2025",
+     "org": "Aena (operator)",
+     "quote": "REUS 1.336.826 13,1%",
+     "dated": "2026"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": [
+      "passengers carried in 2024: 1,168,899",
+      "passengers carried in 2025: 1,323,472"
+     ]
+    },
+    {
+     "file": "catalannews-gatwick",
+     "org": "Catalan News (ACN)",
+     "quote": "The airport in Reus registered a 13.2% increase between January and November, compared to 2024",
+     "dated": "2025-12-18"
+    }
+   ]
+  },
+  {
+   "claim": "between Constantí and Reus",
+   "verdict": "cut",
+   "wasBefore": "between Constantí and Reus",
+   "why": "Constantí has only Wikipedia; it is too small for the GeoNames check and neither Aena nor the tourism boards mention it. The airport's place between Reus and Tarragona is kept."
+  },
+  {
+   "claim": "about 8 km from the centre of Tarragona",
+   "verdict": "cut",
+   "wasBefore": "about 8 km from the centre of Tarragona",
+   "why": "Sources disagree: Wikipedia says about 8 km, Aena about 10 km (the coordinates give 7.2 km in a straight line, so either could be a road distance). Softened to \"between Reus and Tarragona\" rather than picking a figure."
+  },
+  {
+   "claim": "Barcelona about 103 km away",
+   "verdict": "cut",
+   "wasBefore": "about 103 km away",
+   "why": "Approximate in its only written source (Wikipedia) and 87 km in a straight line; rounded to about 100 km, which both support."
+  },
+  {
+   "claim": "the terminal is small and the gate arrangement reflects that",
+   "verdict": "cut",
+   "wasBefore": "The terminal is small and the gate arrangement reflects that.",
+   "why": "Goes with the gate details below, which are cut."
+  },
+  {
+   "claim": "9 gates, 1 to 3 Schengen, 4 to 9 non-Schengen, passport control before the second lounge",
+   "verdict": "cut",
+   "wasBefore": "There are 9 gates: 1 to 3 for Schengen flights and 4 to 9 for non-Schengen, with passport control before the second lounge.",
+   "why": "Only Wikipedia, in an unreferenced paragraph. Aena's presentation, history and map pages do not describe the gates, and no current second source was found."
+  },
+  {
+   "claim": "three gates removed in 2023",
+   "verdict": "cut",
+   "wasBefore": "Three gates were removed in 2023 because the terminal was too small to run passport checks at the gate efficiently.",
+   "why": "Only Wikipedia, unreferenced. No second source found."
+  },
+  {
+   "claim": "traffic history: 1.7 million peak in 2009, 705,067 in 2015, a million again in 2017",
+   "verdict": "cut",
+   "wasBefore": "Traffic has swung a lot over the years, peaking at 1.7 million in 2009, falling to 705,067 by 2015, then recovering past a million again in 2017.",
+   "why": "History superseded by the 2025 figure. Aena's 2009 annual report was saved, but its PDF text comes out with the columns scrambled, so no figure in it can be tied to Reus; the 2015 and 2017 figures have only Wikipedia."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Its name is a trap.",
+   "why": "Framing kept from the original. The facts behind it, the Barcelona-Reus name and the distance to Barcelona, are in the next sentence with two sources each."
+  },
+  {
+   "text": "A client who books it expecting a Barcelona city arrival will face a long transfer, so be explicit about the distance when quoting.",
+   "why": "Advice to the agent kept from the original, drawn from the distance to Barcelona; not a separate fact."
+  }
+ ],
+ "tracerOk": {
+  "100": "Wikipedia's approximately 103 km, rounded; the coordinates give 87.0 km in a straight line. See the Barcelona claim."
+ }
+}

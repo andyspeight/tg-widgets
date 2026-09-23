@@ -1,0 +1,420 @@
+{
+ "iata": "NRN",
+ "id": "recyovxrpUP80br8g",
+ "name": "Weeze (Niederrhein) Airport",
+ "country": "Germany",
+ "wikipedia": "https://en.wikipedia.org/wiki/Weeze_Airport",
+ "audited": "2026-09-23",
+ "before": "A small Ryanair airport in the Lower Rhine region of Germany, 3.7 km south west of the town of Weeze.\n\nThe marketing name is a trap. It is sometimes sold as Düsseldorf-Weeze, but Düsseldorf is a long way off: the airport is 48 km north west of Duisburg and 33 km south east of Nijmegen in the Netherlands. Direct buses to Düsseldorf main station run up to seven times a day and take an hour and a quarter. Quote that transfer explicitly, because a client booking Düsseldorf will not expect it.\n\nThere is no rail station at the airport. Shuttle buses run to Weeze, Kevelaer and Goch stations, and local buses serve Kleve, Emmerich, Goch, Geldern and Nijmegen.\n\nOne terminal with nine stands for aircraft up to a 737-800. There are no jet bridges, because the apron is to the west of the terminal rather than in front of it, so six stands are bus-boarded and only three can be walked to.",
+ "after": "A small Ryanair airport in the Lower Rhine region of Germany, just south west of the town of Weeze. It handled more than 2.2 million passengers in 2025, up 14 per cent on 2024.\n\nThe marketing name is a trap. Ryanair sells it as Düsseldorf Weeze, but the airport is more than 60 km from Düsseldorf: it is 48 km north west of Duisburg and 33 km south east of Nijmegen in the Netherlands. Direct coaches to Düsseldorf's central bus station, by the main station, take an hour and a quarter and run several times a day. Quote that transfer explicitly, because a client booking Düsseldorf will not expect it.\n\nThere is no railway station at the airport. Buses link it with the stations at Weeze, Kevelaer and Goch. One line runs on to Nijmegen.",
+ "claims": [
+  {
+   "claim": "a small airport",
+   "verdict": "confirmed",
+   "inAfter": "A small",
+   "note": "About 2.2 million passengers in 2025, out of 219.8 million at German airports (ADV).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is a minor international airport in the Lower Rhine region of Germany"
+    },
+    {
+     "file": "adv-12-2025",
+     "org": "ADV (German Airports Association)",
+     "quote": [
+      "Kumuliertes Gesamtaufkommen in Deutschland: Passagiere (an+ab) | Januar bis Dezember 2025",
+      "Weeze 2.245.473 +14,0 %",
+      "GESAMT 219.791.791 +3,6 %"
+     ],
+     "dated": "2026"
+    }
+   ]
+  },
+  {
+   "claim": "a Ryanair airport",
+   "verdict": "confirmed",
+   "inAfter": "Ryanair airport",
+   "note": "Ryanair's own data marks Weeze as a base. The only other airline in view, SunExpress, returns only on 23 April 2027 (airport, 26 August 2026).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is used by Ryanair."
+    },
+    {
+     "file": "ryanair-api-nrn",
+     "org": "Ryanair",
+     "quote": [
+      "\"iataCode\":\"NRN\",\"name\":\"Dusseldorf Weeze\"",
+      "\"base\":true"
+     ],
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "weeze-sunexpress-2027",
+     "org": "Airport Weeze (operator)",
+     "quote": "SunExpress nimmt den Airport Weeze zum 23. April 2027 wieder in ihr Streckennetz auf",
+     "dated": "2026-08-26"
+    }
+   ]
+  },
+  {
+   "claim": "in the Lower Rhine region of Germany",
+   "verdict": "confirmed",
+   "inAfter": "in the Lower Rhine region of Germany",
+   "note": "Niederrhein is German for the Lower Rhine; the operating company is Flughafen Niederrhein GmbH.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "a minor international airport in the Lower Rhine region of Germany"
+    },
+    {
+     "file": "weeze-sunexpress-2027",
+     "org": "Airport Weeze (operator)",
+     "quote": "verbindet den Flughafen am Niederrhein siebenmal pro Woche nonstop mit Antalya"
+    }
+   ]
+  },
+  {
+   "claim": "just south west of the town of Weeze",
+   "verdict": "softened",
+   "inAfter": "just south west of the town of Weeze",
+   "note": "Was \"3.7 km south west\". The municipality of Weeze puts the airfield site 2 km south west of the village centre and Wikipedia puts the airport 3.7 km south west, so the direction is agreed but the figure is not; Weeze is too small for the GeoNames check. The operator puts Weeze station 5 minutes away by car.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is situated 3.7 km (2.3 mi) southwest of the municipality of Weeze"
+    },
+    {
+     "file": "weeze-gemeinde-airport",
+     "org": "Gemeinde Weeze (municipality)",
+     "quote": "Das insgesamt 615 Hektar große Areal liegt zwei Kilometer südwestlich vom Ortskern Weeze entfernt.",
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "weeze-train",
+     "org": "Airport Weeze (operator)",
+     "quote": "The distance from the airport to the train station of Weeze is only 5 minutes by car",
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "more than 2.2 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled more than 2.2 million passengers in 2025",
+   "note": "The old text gave no figure; added as the current measure behind \"small\". ADV 2,245,473 and Eurostat 2,245,090; the airport marked its 2 millionth passenger of 2025 in December 2025 and expects about 2.25 million in 2026.",
+   "sources": [
+    {
+     "file": "adv-12-2025",
+     "org": "ADV (German Airports Association)",
+     "quote": "Weeze 2.245.473 +14,0 %",
+     "dated": "2026"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": "passengers carried in 2025: 2,245,090"
+    }
+   ]
+  },
+  {
+   "claim": "up 14 per cent on 2024",
+   "verdict": "corrected",
+   "inAfter": "up 14 per cent on 2024",
+   "note": "ADV gives 14.0 per cent; Eurostat's figures give 14.0 per cent (1,970,158 to 2,245,090).",
+   "sources": [
+    {
+     "file": "adv-12-2025",
+     "org": "ADV (German Airports Association)",
+     "quote": "Weeze 2.245.473 +14,0 %",
+     "dated": "2026"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": [
+      "passengers carried in 2024: 1,970,158",
+      "passengers carried in 2025: 2,245,090"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Ryanair sells it as Düsseldorf Weeze",
+   "verdict": "confirmed",
+   "inAfter": "Ryanair sells it as Düsseldorf Weeze",
+   "note": "Was \"It is sometimes sold as Düsseldorf-Weeze\". Ryanair's own airport data names it Dusseldorf Weeze and files it under its Düsseldorf city code. Current Wikipedia adds that a court blocked the Düsseldorf name in 2016 as likely to mislead; not in the text, as it has only one source here.",
+   "sources": [
+    {
+     "file": "ryanair-api-nrn",
+     "org": "Ryanair",
+     "quote": [
+      "\"iataCode\":\"NRN\",\"name\":\"Dusseldorf Weeze\"",
+      "\"cityCode\":\"DUSSELDORF\""
+     ],
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "However, Ryanair still refers to it as \"Düsseldorf-Weeze\"."
+    }
+   ]
+  },
+  {
+   "claim": "more than 60 km from Düsseldorf",
+   "verdict": "corrected",
+   "inAfter": "the airport is more than 60 km from Düsseldorf",
+   "note": "Replaces \"Düsseldorf is a long way off\" with a figure both sources support: the coordinates give 61.0 km in a straight line from the centre of Düsseldorf, and Wikipedia gives 83 km, presumably by road (a ratio of 1.36, inside the 0.8 to 1.6 allowed). The operator itself places Düsseldorf within an 80 km radius.",
+   "sources": [
+    {
+     "file": "geo-other-cities",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from Düsseldorf: 61.0 km",
+      "Bearing from the airport to Düsseldorf: 133 degrees, which is south east"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "but the significant distance of 83 km (52 mi) to that city"
+    }
+   ]
+  },
+  {
+   "claim": "48 km north west of Duisburg",
+   "verdict": "confirmed",
+   "inAfter": "48 km north west of Duisburg",
+   "note": "Coordinates: 47.1 km in a straight line at 294 degrees (north west); ratio 1.02.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "48 km (30 mi) northwest of the German city of Duisburg"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Duisburg (GeoNames 2934691): 47.1 km (29.3 miles), bearing 294 degrees, which is north west"
+    }
+   ]
+  },
+  {
+   "claim": "33 km south east of Nijmegen in the Netherlands",
+   "verdict": "confirmed",
+   "inAfter": "33 km south east of Nijmegen in the Netherlands",
+   "note": "Coordinates: 33.4 km in a straight line at 143 degrees (south east); ratio 0.99. The municipality's directions route visitors \"from the Netherlands\" via Nijmegen.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "about 33 km (21 mi) southeast of the Dutch city of Nijmegen"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Nijmegen (GeoNames 2750053): 33.4 km (20.7 miles), bearing 143 degrees, which is south east"
+    },
+    {
+     "file": "weeze-gemeinde-anreise",
+     "org": "Gemeinde Weeze (municipality)",
+     "quote": "Anfahrt aus den Niederlanden Eindhoven über A67 nach Venlo bis A73 Richtung Nijmegen (Nimwegen)"
+    }
+   ]
+  },
+  {
+   "claim": "direct coaches to Düsseldorf's central bus station by the main station, an hour and a quarter",
+   "verdict": "corrected",
+   "inAfter": "Direct coaches to Düsseldorf's central bus station, by the main station, take an hour and a quarter",
+   "note": "Was \"Direct buses to Düsseldorf main station\". The coach stops at the central bus station (ZOB) beside the main station, Worringer Straße. Timetable valid 29 March to 24 October 2026, run by Verhuven Touristik & Logistik; €24 a seat.",
+   "sources": [
+    {
+     "file": "weeze-dus-schedule-2026",
+     "org": "Airport Weeze (operator)",
+     "quote": [
+      "Gültig ab / from 29.03.2026 bis / until 24.10.2026",
+      "Central bus station (ZOB) at Düsseldorf main station",
+      "Düsseldorf Zentraler Omnibusbahnhof, Haltestelle Nr. 8 ab/from 03:15 04:45 07:45 10:45 14:15 17:45",
+      "Weeze Airport, Haltestelle Nr. 1 an/to 04:30 06:00 09:00 12:00 15:30 19:00"
+     ],
+     "dated": "2026-06"
+    },
+    {
+     "file": "shuttle-route-dus",
+     "org": "Airport Weeze Shuttle (coach operator)",
+     "quote": [
+      "Bus Düsseldorf - Weeze Airport",
+      "1 hr 15 min",
+      "No stops between the airport and city center.",
+      "Düsseldorf Bus Station"
+     ],
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Direct buses serve Düsseldorf Main Station up to 7 times a day",
+      "The journey takes 1h 15min."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "run several times a day",
+   "verdict": "softened",
+   "inAfter": "run several times a day",
+   "note": "Was \"up to seven times a day\". Sources disagree on the most: Wikipedia says up to 7; the 2026 summer timetable has four to six a day each way depending on the day. \"Several\" is true of both, rather than picking one.",
+   "sources": [
+    {
+     "file": "shuttle-timetable-2026",
+     "org": "Airport Weeze Shuttle (coach operator)",
+     "quote": [
+      "Gültig ab / from 29.03.2026 bis / until 24.10.2026",
+      "Beförderer: Verhuven Touristik & Logistik GmbH",
+      "Düsseldorf Zentraler Omnibusbahnhof, Haltestelle Nr. 8 ab/from 03:15 04:45 07:45 10:45 14:15 17:45"
+     ],
+     "dated": "2026"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Direct buses serve Düsseldorf Main Station up to 7 times a day"
+    }
+   ]
+  },
+  {
+   "claim": "no railway station at the airport",
+   "verdict": "confirmed",
+   "inAfter": "There is no railway station at the airport.",
+   "note": "The nearest stations are Weeze and Kevelaer, 5 and 10 minutes away by car (operator).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Travellers for Düsseldorf Main Station will need to catch a bus or taxi to either Weeze or Kevelaer railway stations."
+    },
+    {
+     "file": "weeze-train",
+     "org": "Airport Weeze (operator)",
+     "quote": "The distance from the airport to the train station of Weeze is only 5 minutes by car, the distance to the train station of Kevelaer is only 10 minutes by car.",
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "shuttle-route-dus",
+     "org": "Airport Weeze Shuttle (coach operator)",
+     "quote": "While you have to change trains, our airport bus will take you directly to the city center without any stops."
+    }
+   ]
+  },
+  {
+   "claim": "buses to Weeze, Kevelaer and Goch stations",
+   "verdict": "confirmed",
+   "inAfter": "Buses link it with the stations at Weeze, Kevelaer and Goch",
+   "note": "Line SB46 (timetable from 6 April 2025, still posted on the operator's bus page on 23 September 2026) runs Kevelaer station, the airport, Weeze station, Goch station and on to Nijmegen.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Bus shuttles serve the railway stations of Weeze, Kevelaer and Goch on a frequent basis."
+    },
+    {
+     "file": "sb46-nijmegen",
+     "org": "Airport Weeze (operator; SB46 timetable)",
+     "quote": [
+      "Weeze Airport Terminal 1",
+      "Weeze Bahnhof",
+      "Goch Bahnhof",
+      "Richtung: Kevelaer Bahnhof"
+     ],
+     "dated": "2025-04-06"
+    },
+    {
+     "file": "weeze-train",
+     "org": "Airport Weeze (operator)",
+     "quote": "In short intervals shuttle busses connect these two railway stations with the airport.",
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "one line runs on to Nijmegen",
+   "verdict": "confirmed",
+   "inAfter": "one line runs on to Nijmegen",
+   "sources": [
+    {
+     "file": "sb46-nijmegen",
+     "org": "Airport Weeze (operator; SB46 timetable)",
+     "quote": [
+      "SB46",
+      "Richtung: Nijmegen Centraal Station"
+     ],
+     "dated": "2025-04-06"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Weeze airport is served by local buses connecting it to most towns in the Lower Rhine region (Kleve, Emmerich, Goch, Geldern) and to Nijmegen in the Netherlands."
+    }
+   ]
+  },
+  {
+   "claim": "3.7 km south west of Weeze",
+   "verdict": "cut",
+   "wasBefore": "3.7 km south west of the town of Weeze",
+   "why": "Sources disagree on the figure (Wikipedia 3.7 km, the municipality 2 km from the village centre) and Weeze is too small for the GeoNames check. Softened to \"just south west\"."
+  },
+  {
+   "claim": "Düsseldorf is a long way off",
+   "verdict": "cut",
+   "wasBefore": "but Düsseldorf is a long way off",
+   "why": "Replaced by the distance both sources support: more than 60 km."
+  },
+  {
+   "claim": "up to seven times a day",
+   "verdict": "cut",
+   "wasBefore": "run up to seven times a day",
+   "why": "The 2026 timetable has at most six a day each way; Wikipedia says seven. Softened to several times a day."
+  },
+  {
+   "claim": "direct buses to Düsseldorf main station",
+   "verdict": "cut",
+   "wasBefore": "Direct buses to Düsseldorf main station",
+   "why": "The coach stops at the central bus station beside the main station; corrected in the text."
+  },
+  {
+   "claim": "local buses to Kleve, Emmerich and Geldern",
+   "verdict": "cut",
+   "wasBefore": "local buses serve Kleve, Emmerich, Goch, Geldern and Nijmegen",
+   "why": "Only Wikipedia names Kleve, Emmerich and Geldern; the operator's bus page lists SB46 (Kevelaer, Weeze, Goch, Nijmegen) and its timetables do not reach those towns. Goch and Nijmegen are kept."
+  },
+  {
+   "claim": "one terminal with nine stands for aircraft up to a 737-800",
+   "verdict": "cut",
+   "wasBefore": "One terminal with nine stands for aircraft up to a 737-800.",
+   "why": "Only Wikipedia. The operator's facts page does not give it and the German AIP shows stands only as chart images. The operator broke ground on 14 August 2026 on a new arrivals terminal, due in mid-2027 with separate Schengen and non-Schengen halls, but that has only the operator's own page (the builder's site, goldbeck.de, answered 429), so it is not in the text either."
+  },
+  {
+   "claim": "no jet bridges; six stands bus-boarded, three walked to",
+   "verdict": "cut",
+   "wasBefore": "There are no jet bridges, because the apron is to the west of the terminal rather than in front of it, so six stands are bus-boarded and only three can be walked to.",
+   "why": "Only Wikipedia; no second source found."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The marketing name is a trap.",
+   "why": "Framing kept from the original. The facts behind it, the Düsseldorf Weeze name and the distance, follow with two sources each."
+  },
+  {
+   "text": "Quote that transfer explicitly, because a client booking Düsseldorf will not expect it.",
+   "why": "Advice to the agent kept from the original, drawn from the distance and the coach time; not a separate fact."
+  }
+ ],
+ "tracerOk": {}
+}
