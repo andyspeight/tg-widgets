@@ -1,0 +1,465 @@
+{
+ "iata": "BOG",
+ "id": "recpHXyD8K27zEez4",
+ "name": "El Dorado International Airport",
+ "country": "Colombia",
+ "wikipedia": "https://en.wikipedia.org/wiki/El_Dorado_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The second busiest airport in Latin America and by far the most important in Colombia, handling just under half of the country's air traffic. It sits mostly in the Fontibón district of Bogotá.\n\nIts real strength is connections. El Dorado is the most connected airport in Latin America and twentieth most connected in the world as of 2024, with direct flights to North, Central and South America, the Caribbean, Europe and the Middle East. It is nicknamed the Hub of the Americas and is the main base for Avianca. For building a multi-country South America itinerary this is usually the cleanest routing point.\n\nIt is also Iberoamerica's most important cargo hub, with 760,000 tonnes passing through.\n\nThe quality is well regarded rather than merely adequate. Skytrax and the World Airport Awards have ranked it among the best in the world since 2016, best in South America, and 35th in the world's top 100 airports.\n\nTwo runways of 3,800 metres serve a 1,700 acre site. It is operated by OPAIN, a consortium including the company that runs Zurich Airport.",
+ "after": "El Dorado, in Bogotá, is Colombia's main airport and one of the busiest in Latin America.\n\nIts real strength is connections. In OAG's 2024 ranking it was the most internationally connected airport in Latin America and 20th in the world. There are direct flights to Europe as well as across the Americas, and it is Avianca's main base.\n\nFor air cargo it leads Latin America.\n\nSkytrax's 2026 awards, voted by travellers, named it the best airport in South America and 37th in the world.\n\nIt has two runways, each 3,800 metres long, and is run by OPAIN.",
+ "claims": [
+  {
+   "claim": "El Dorado is in Bogotá",
+   "verdict": "confirmed",
+   "inAfter": "El Dorado, in Bogotá,",
+   "note": "The location is kept at city level: the Fontibón district rests on Wikipedia alone (cut below). The coordinates put the airport 12.5 km north west of the city centre.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "is an international airport serving Bogotá, the capital of Colombia"
+    },
+    {
+     "file": "aerocivil-ene-jul-2026",
+     "org": "Aerocivil (Colombia's civil aviation authority, aerocivil.gov.co)",
+     "dated": "2026-08-27",
+     "quote": [
+      "Pasajeros y viajeros en el área de check-in del Aeropuerto Internacional El Dorado de Bogotá.",
+      "27/08/2026"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 12.5 km (7.8 miles)",
+      "Bearing from the city centre: 325 degrees, which is north west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Colombia's main airport",
+   "verdict": "confirmed",
+   "inAfter": "is Colombia's main airport",
+   "note": "Aerocivil, the civil aviation authority, calls El Dorado 'the country's main airport' in its release of 10 December 2025. Reworded from 'by far the most important in Colombia'.",
+   "sources": [
+    {
+     "file": "aerocivil-certificacion-eldorado",
+     "org": "Aerocivil (Colombia's civil aviation authority, aerocivil.gov.co)",
+     "dated": "2025-12-10",
+     "quote": [
+      "Esta certificaci&oacute;n confirma que El Dorado, el principal aeropuerto del pa&iacute;s y uno de los m&aacute;s relevantes en Am&eacute;rica Latina",
+      "10/12/2025"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "El Dorado is also by far the busiest and most important airport in Colombia"
+    }
+   ]
+  },
+  {
+   "claim": "one of the busiest in Latin America",
+   "verdict": "softened",
+   "inAfter": "one of the busiest in Latin America",
+   "note": "Softened from 'the second busiest airport in Latin America' (cut below). Wikipedia says second after Guarulhos; a former head of Aerocivil told a Semana forum (21 May 2025) that El Dorado had been third in the region four years earlier and in 2024 passed Mexico City by 500,000 passengers; Aerocivil (10 December 2025) calls it one of the most important airports in Latin America. No 2025 regional ranking could be read: the operator's site (eldorado.aero) answers with a Radware CAPTCHA, and Aerocivil's traffic releases give national totals only.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "It is the second busiest airport in Latin America, after São Paulo - Guarulhos International Airport"
+    },
+    {
+     "file": "semana-hub-americas",
+     "org": "Semana (Colombian news magazine, semana.com)",
+     "dated": "2025-05-21",
+     "quote": [
+      "21 de mayo de 2025",
+      "hace cuatro años éramos el tercer aeropuerto de la región en cantidad de pasajeros. El año pasado superamos al aeropuerto Benito Juárez (Ciudad de México) por 500.000 pasajeros"
+     ]
+    },
+    {
+     "file": "aerocivil-certificacion-eldorado",
+     "org": "Aerocivil (Colombia's civil aviation authority, aerocivil.gov.co)",
+     "dated": "2025-12-10",
+     "quote": "uno de los m&aacute;s relevantes en Am&eacute;rica Latina"
+    }
+   ]
+  },
+  {
+   "claim": "OAG's 2024 ranking: most internationally connected airport in Latin America and 20th in the world",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "OAG",
+   "inAfter": "In OAG's 2024 ranking it was the most internationally connected airport in Latin America and 20th in the world.",
+   "note": "Was 'the most connected airport in Latin America and twentieth most connected in the world as of 2024', unattributed. The ranking is OAG's Megahubs 2024 (international connectivity), which Wikipedia also cites, so it is named as OAG's and kept with its year. OAG's 2025 edition exists (page saved as oag-megahubs-2025) but its tables are a download behind a form, so the 2025 placing could not be read.",
+   "sources": [
+    {
+     "file": "oag-megahubs-2024",
+     "org": "OAG (flight data company, oag.com)",
+     "dated": "2024 (OAG Megahubs 2024 report)",
+     "quote": [
+      "OAG Megahubs 2024 reveals the most",
+      "Bogota (BOG) is the most connected airport in Latin America this year and is in 20th place globally",
+      "20 BOG Colombia 29 Avianca 56%"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "it is the most well-connected airport in Latin America, and is the 20th most connected in the world as of 2024"
+    }
+   ]
+  },
+  {
+   "claim": "direct flights to Europe as well as across the Americas",
+   "verdict": "softened",
+   "inAfter": "There are direct flights to Europe as well as across the Americas",
+   "note": "Shortened from 'North, Central and South America, the Caribbean, Europe and the Middle East'; the Middle East is cut (below). Europe: the UK CAA counted 177,739 scheduled passengers between Heathrow and Bogotá in 2025. The Americas: OAG places Bogotá first for international connections among Latin American airports, and Wikipedia lists the regions.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "El Dorado has direct international flights to North America, South America, Central America, the Caribbean, Europe, and the Middle East"
+    },
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2025 (table run 25/02/2026)",
+     "quote": "25/02/2026 16:41,2025,90,SOUTH AMERICA,COLOMBIA,1,HEATHROW,BOGOTA,177739,177739,0,177540,177540,0,0.11209"
+    },
+    {
+     "file": "oag-megahubs-2024",
+     "org": "OAG (flight data company, oag.com)",
+     "dated": "2024 (OAG Megahubs 2024 report)",
+     "quote": [
+      "Rank Airport Country Dominant Carrier Share of Flights",
+      "1 BOG Colombia Avianca 56%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Avianca's main base",
+   "verdict": "confirmed",
+   "inAfter": "it is Avianca's main base",
+   "note": "OAG (2024) names Avianca as the dominant airline at Bogotá with 56 per cent of flights. Avianca's own site, asked for its hubs page, served its fares page instead, which offers flights from Bogotá by default to eleven Colombian cities (read 23 September 2026).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "It is the most important hub for the Colombian flag carrier Avianca"
+    },
+    {
+     "file": "oag-megahubs-2024",
+     "org": "OAG (flight data company, oag.com)",
+     "dated": "2024 (OAG Megahubs 2024 report)",
+     "quote": "20 BOG Colombia 29 Avianca 56%"
+    },
+    {
+     "file": "avianca-hubs",
+     "org": "Avianca (airline, avianca.com)",
+     "dated": "read 2026-09-23 (live page, copyright 2026)",
+     "quote": [
+      "Ofertas desde",
+      "Select option Bogotá Ordenar por",
+      "Copyright @ Avianca 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "leads Latin America for air cargo",
+   "verdict": "softened",
+   "inAfter": "For air cargo it leads Latin America.",
+   "note": "Was 'Iberoamerica's most important cargo hub, with 760,000 tonnes passing through'. Aviacionline (23 September 2026) says El Dorado leads cargo traffic in Latin America, carried mainly by flower and coffee exports; the former Aerocivil head quoted by Semana (May 2025) put it a third ahead of Guarulhos, the second. The tonnage is cut (below).",
+   "sources": [
+    {
+     "file": "avl-iata-cargo-day",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-09-23",
+     "quote": [
+      "miércoles 23 de septiembre de 2026",
+      "El Aeropuerto Internacional El Dorado de Bogotá lidera el tráfico de carga en América Latina"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "it is also Iberoamerica's most important cargo hub"
+    },
+    {
+     "file": "semana-hub-americas",
+     "org": "Semana (Colombian news magazine, semana.com)",
+     "dated": "2025-05-21",
+     "quote": "En materia de carga, superamos por un tercio la cantidad de carga que lleva el segundo aeropuerto regional más relevante, que es Guarulhos (São Paulo)"
+    }
+   ]
+  },
+  {
+   "claim": "Skytrax 2026: best airport in South America",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Skytrax",
+   "inAfter": "Skytrax's 2026 awards, voted by travellers, named it the best airport in South America",
+   "note": "Was 'Skytrax and the World Airport Awards have ranked it ... best in South America', with no year. The World Airport Awards are Skytrax's own awards, not a second body. Skytrax's 2026 table of best airports in South America puts Bogotá first (Quito second, Lima fourth), and Aviacionline (22 September 2026) reports the title as current.",
+   "sources": [
+    {
+     "file": "skytrax-region-2026",
+     "org": "Skytrax (World Airport Awards, worldairportawards.com)",
+     "dated": "2026 awards",
+     "quote": "Best Airports in South America 2026 1 Bogota 2 Quito"
+    },
+    {
+     "file": "skytrax-top100-2026",
+     "org": "Skytrax (World Airport Awards, worldairportawards.com)",
+     "dated": "2026 awards",
+     "quote": "voted by air travellers around the world in the 2025/2026 World Airport Survey"
+    },
+    {
+     "file": "avl-eldorado-clima",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-09-22",
+     "quote": [
+      "martes 22 de septiembre de 2026",
+      "El Dorado mantiene distinciones internacionales como la de Mejor Aeropuerto de Sudamérica por la auditora Skytrax"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Skytrax 2026: 37th in the world",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Skytrax",
+   "inAfter": "Skytrax's 2026 awards, voted by travellers, named it the best airport in South America and 37th in the world.",
+   "note": "Was '35th in the world's top 100 airports', Skytrax's 2023 placing (per Wikipedia). Skytrax's World's Top 100 Airports 2026 puts Bogotá 37th, up from 40th in 2025. The page was saved by the CTS helper and copied here with a NOTE line. Attributed to Skytrax, whose own table it is.",
+   "sources": [
+    {
+     "file": "skytrax-top100-2026",
+     "org": "Skytrax (World Airport Awards, worldairportawards.com)",
+     "dated": "2026 awards",
+     "quote": [
+      "World's Top 100 Airports 2026",
+      "37 Bogota 40 2025 38 New York LGA"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "two runways of 3,800 metres",
+   "verdict": "confirmed",
+   "inAfter": "It has two runways, each 3,800 metres long",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "contains two 3,800-metre (12,500 ft) long runways"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 14L/32R: 3,800 m (12,467 ft), ASP",
+      "Runway 14R/32L: 3,800 m (12,467 ft), ASP",
+      "Runways listed: 2"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "run by OPAIN",
+   "verdict": "confirmed",
+   "inAfter": "is run by OPAIN",
+   "note": "Aviacionline (22 September 2026) calls Opain the concession holder at El Dorado; Aerocivil's release of 10 December 2025 speaks for OPAIN S.A. on the airport's operations.",
+   "sources": [
+    {
+     "file": "avl-eldorado-clima",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-09-22",
+     "quote": [
+      "martes 22 de septiembre de 2026",
+      "El plan de descarbonización de la concesionaria Opain en El Dorado"
+     ]
+    },
+    {
+     "file": "aerocivil-certificacion-eldorado",
+     "org": "Aerocivil (Colombia's civil aviation authority, aerocivil.gov.co)",
+     "dated": "2025-12-10",
+     "quote": [
+      "Por su parte, OPAIN S.A. destac&oacute; que este logro refuerza la solidez operativa del aeropuerto",
+      "10/12/2025"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "operated by Operadora Aeroportuaria Internacional (OPAIN)"
+    }
+   ]
+  },
+  {
+   "claim": "second busiest airport in Latin America",
+   "verdict": "cut",
+   "wasBefore": "The second busiest airport in Latin America",
+   "why": "Softened to 'one of the busiest in Latin America' (above). The exact rank rests on Wikipedia and on 2024 figures quoted by a former Aerocivil head in May 2025; no 2025 ranking or 2025 passenger total for El Dorado could be read (operator's site behind a Radware CAPTCHA; Aerocivil's releases give national totals only)."
+  },
+  {
+   "claim": "by far the most important in Colombia",
+   "verdict": "cut",
+   "wasBefore": "by far the most important in Colombia",
+   "why": "Reworded to Aerocivil's own phrase, 'Colombia's main airport' (above)."
+  },
+  {
+   "claim": "handles just under half of the country's air traffic",
+   "verdict": "cut",
+   "wasBefore": "handling just under half of the country's air traffic",
+   "why": "Wikipedia alone (49 per cent, no year given). Aerocivil's releases give only national totals counted by origin and destination (57,520,767 passengers in 2025, each journey once), which cannot be set against an airport's own count, and its airport-level statistics page could not be found on its new site (the old address answers with Aerocivil's 404 page). The operator's site is behind a CAPTCHA.",
+   "sources": [
+    {
+     "file": "aerocivil-211-millones",
+     "org": "Aerocivil (Colombia's civil aviation authority, aerocivil.gov.co)",
+     "dated": "2026-02-04",
+     "quote": [
+      "04/02/2026",
+      "2025 57.520.767 Datos Origen - Destino, cifras provisionales"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "sits mostly in the Fontibón district",
+   "verdict": "cut",
+   "wasBefore": "It sits mostly in the Fontibón district of Bogotá.",
+   "why": "Wikipedia alone. The Fontibón local mayor's site (fontibon.gov.co) gave a remote connection failure, Bogotá's tourism site (bogotadc.travel) answered 403 and the operator's site is behind a CAPTCHA; none was tried again. The city is kept."
+  },
+  {
+   "claim": "most connected in Latin America and twentieth in the world as of 2024 (unattributed)",
+   "verdict": "cut",
+   "wasBefore": "El Dorado is the most connected airport in Latin America and twentieth most connected in the world as of 2024",
+   "why": "Kept, but named as OAG's 2024 ranking (above), since OAG's 2025 placing could not be read."
+  },
+  {
+   "claim": "direct flights to the Middle East (and the full list of regions)",
+   "verdict": "cut",
+   "wasBefore": "with direct flights to North, Central and South America, the Caribbean, Europe and the Middle East",
+   "why": "Shortened to Europe and the Americas (above). No second source for a current Middle East flight was found, and Wikipedia's own route notes put the Istanbul flight via Panama City and the Doha flight in the future ('will make a stop in Caracas').",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": [
+      "Turkish Airlines' flight from Bogotá to Istanbul makes a stop in Panama City.",
+      "Qatar Airways' flight from Bogotá to Doha will make a stop in Caracas."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "nicknamed the Hub of the Americas",
+   "verdict": "cut",
+   "wasBefore": "It is nicknamed the Hub of the Americas",
+   "why": "Only Wikipedia calls it a nickname. Semana's May 2025 forum used the phrase as a question ('ready to be the hub of the Americas?'), a slogan rather than an established name."
+  },
+  {
+   "claim": "the cleanest routing point for a multi-country South America itinerary",
+   "verdict": "cut",
+   "wasBefore": "For building a multi-country South America itinerary this is usually the cleanest routing point.",
+   "why": "An opinion no source makes. The OAG connectivity ranking it drew on is kept (above)."
+  },
+  {
+   "claim": "760,000 tonnes of cargo",
+   "verdict": "cut",
+   "wasBefore": "Iberoamerica's most important cargo hub, with 760,000 tonnes passing through",
+   "why": "The tonnage has no year in Wikipedia's text and disagrees with Wikipedia's own infobox (809,021 tonnes in 2024) and with the former Aerocivil head quoted by Semana ('more than 810,000 tonnes a year'), so no figure is given. The ranking is kept as 'leads Latin America' (above), Aviacionline's wording.",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2024",
+      "stat3_data = 809,021 TM"
+     ]
+    },
+    {
+     "file": "semana-hub-americas",
+     "org": "Semana (Colombian news magazine, semana.com)",
+     "dated": "2025-05-21",
+     "quote": "Llevamos más de 810.000 toneladas año"
+    }
+   ]
+  },
+  {
+   "claim": "quality well regarded rather than merely adequate",
+   "verdict": "cut",
+   "wasBefore": "The quality is well regarded rather than merely adequate.",
+   "why": "Framing; the Skytrax results themselves are kept (above)."
+  },
+  {
+   "claim": "ranked among the best since 2016, best in South America, 35th in the world",
+   "verdict": "cut",
+   "wasBefore": "Skytrax and the World Airport Awards have ranked it among the best in the world since 2016, best in South America, and 35th in the world's top 100 airports.",
+   "why": "Replaced by Skytrax's 2026 results (above): best in South America and 37th in the world. '35th' was the 2023 placing; 'since 2016' would need each year's table and is dropped; the World Airport Awards are Skytrax's own, not a second body."
+  },
+  {
+   "claim": "a 1,700 acre site",
+   "verdict": "cut",
+   "wasBefore": "Two runways of 3,800 metres serve a 1,700 acre site.",
+   "why": "The site area rests on Wikipedia alone (the operator's site is behind a CAPTCHA). The runways are kept, reworded (above)."
+  },
+  {
+   "claim": "OPAIN is a consortium including the company that runs Zurich Airport",
+   "verdict": "cut",
+   "wasBefore": "It is operated by OPAIN, a consortium including the company that runs Zurich Airport.",
+   "why": "OPAIN is kept (above), but Flughafen Zürich's part could not be confirmed as current: flughafen-zuerich.ch answers with an Azure web application firewall page asking for JavaScript (a bot check, not tried again) and OPAIN's own site is behind a Radware CAPTCHA."
+  },
+  {
+   "claim": "FCDO: only authorised taxis may pick up at El Dorado",
+   "verdict": "cut",
+   "why": "Held back: the FCDO says Bogotá's El Dorado only allows authorised taxis (yellow, white plates, numbers on doors and roof) to pick up passengers at its terminals, and warns of express kidnappings and robberies in unlicensed taxis. Useful to an agent, but nothing in the old text to replace. For Andy to decide.",
+   "sources": [
+    {
+     "file": "fcdo-colombia-safety",
+     "org": "UK FCDO",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Bogotá’s El Dorado International Airport only allows authorised taxis to pick up passengers at its terminals.",
+      "There have been reports of express kidnappings, assaults and robberies in unlicensed taxis."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "direct flights from London Heathrow",
+   "verdict": "cut",
+   "why": "Held back: the UK CAA counted 177,739 passengers between Heathrow and Bogotá in 2025 (177,540 in 2024), all on scheduled flights, the only UK route to Colombia in its table. The airline is not named by the table, and neither the operator's airline list (CAPTCHA) nor an airline page was read, so no carrier is given. The old text names no UK flight. For Andy to decide.",
+   "sources": [
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2025 (table run 25/02/2026)",
+     "quote": "25/02/2026 16:41,2025,90,SOUTH AMERICA,COLOMBIA,1,HEATHROW,BOGOTA,177739,177739,0,177540,177540,0,0.11209"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Its real strength is connections.",
+   "why": "A signpost kept from the old text; it introduces OAG's connectivity ranking, which follows and is sourced."
+  }
+ ],
+ "tracerOk": {}
+}

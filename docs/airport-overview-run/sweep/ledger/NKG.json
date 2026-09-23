@@ -1,0 +1,264 @@
+{
+ "iata": "NKG",
+ "id": "recPAv61Tq2H4fBD4",
+ "name": "Nanjing Lukou International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Nanjing_Lukou_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Nanjing's airport and one of the main gateways to the Yangtze River Delta, in Jiangning District over 35 km south of the city centre. It handled 31.38 million passengers in 2025 across 235,200 movements.\n\nThat distance is the thing to plan for. Line S1 of the Nanjing Metro runs from Lukou Airport station to Nanjing South railway station from 6am until 10.40 at night, and a shuttle bus covers the same route every twenty minutes, taking about forty minutes. The bus from Nanjing Railway Station on the other side of the city takes eighty minutes.\n\nThe airline mix is broad. It is a hub for the Jiangsu arms of China Eastern, Shenzhen Airlines and Juneyao Air, with China Southern flying a good deal too, and Beijing Capital Airlines and Air Travel both based here.\n\nIt is also the main base for China Postal Airlines, which runs pure cargo services to every major Chinese city for China Post.",
+ "after": "Nanjing's airport and one of the main airports of the Yangtze River Delta, over 35 km south of the city centre. It handled 31.38 million passengers in 2025 across 235,200 movements.\n\nThat distance is the thing to plan for. The metro and shuttle buses both serve the airport.\n\nChina Eastern and Juneyao Air are among the airlines flying from here.",
+ "claims": [
+  {
+   "claim": "Nanjing's airport",
+   "verdict": "confirmed",
+   "inAfter": "Nanjing's airport",
+   "note": "CAAC's 2025 table has one Nanjing entry, Lukou, and it is the busiest in Jiangsu (31.4 million passengers; Wuxi next with 11.0 million).",
+   "sources": [
+    {
+     "file": "caac-2025-jiangsu",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "Row: 南京/禄口 | 13 | 31378166",
+      "Row: 无锡/硕放 | 40 | 10967778"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "is an international airport serving Nanjing"
+    }
+   ]
+  },
+  {
+   "claim": "one of the main airports of the Yangtze River Delta",
+   "verdict": "corrected",
+   "inAfter": "one of the main airports of the Yangtze River Delta",
+   "note": "Was 'one of the main gateways to the Yangtze River Delta' (house style bars 'gateway to'). The Nanjinger's August 2026 round-up of the Delta's airports puts Lukou fourth in June 2026 (2,321,701 passengers), after Pudong, Hongqiao and Hangzhou, and says Shanghai, Hangzhou and Nanjing do the heavy lifting.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "a major airport serving the Yangtze River Delta area"
+    },
+    {
+     "file": "nanjinger-yrd2026",
+     "org": "The Nanjinger (Nanjing English-language city magazine)",
+     "dated": "2026-08-05 (updated 2026-08-19)",
+     "quote": [
+      "5th August 2026",
+      "Hangzhou Xiaoshan came next with 3,961,185 passengers, then Nanjing Lukou with 2,321,701.",
+      "Shanghai and Hangzhou and Nanjing do the heavy lifting"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "over 35 km south of the city centre",
+   "verdict": "confirmed",
+   "inAfter": "over 35 km south of the city centre",
+   "note": "Coordinates: 37.3 km in a straight line at 167 degrees (south); ratio 0.94.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "over 35 km (22 mi) south of the city center"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 37.3 km (23.2 miles)",
+      "Bearing from the city centre: 167 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "31.38 million passengers and 235,200 movements in 2025",
+   "verdict": "confirmed",
+   "inAfter": "It handled 31.38 million passengers in 2025 across 235,200 movements.",
+   "note": "CAAC: 31,378,166 passengers (13th in China, up 0.6 per cent) and 235,200 movements (down 1.1 per cent).",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 南京/禄口: passenger rank 13 in China; passengers 2025: 31,378,166; passengers 2024: 31,179,654; change 0.6%; aircraft movements rank 12; movements 2025: 235,200"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "In 2025, the airport recorded 235,200 flight take-offs and landings, and 31.38 million passenger movements"
+    }
+   ]
+  },
+  {
+   "claim": "the metro and shuttle buses serve the airport",
+   "verdict": "softened",
+   "inAfter": "The metro and shuttle buses both serve the airport.",
+   "note": "Was the S1 line to Nanjing South railway station with its hours, the shuttle every twenty minutes taking forty, and eighty minutes from Nanjing Railway Station (all cut below). The Nanjinger's guide (live page; its timetable is an image uploaded in April 2023) confirms the metro from the airport and 'an extensive array' of airport shuttle buses; Wikipedia's current revision names Line S1 and the shuttle routes.",
+   "sources": [
+    {
+     "file": "nanjinger-bus",
+     "org": "The Nanjinger (Nanjing English-language city magazine)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": [
+      "Taking the metro from Nanjing's airport to Xianlin, for example, is a time consuming affair",
+      "Nanjing has an extensive array of shuttle bus services serving Nanjing Lukou International Airport"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": [
+      "The Lukou Airport Station on Line S1 of the Nanjing Metro links the airport with Nanjing South Railway Station.",
+      "From Nanjing South Railway Station: 6:00–21:00, every 20 minutes, duration 40 minutes"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "China Eastern and Juneyao Air fly from here",
+   "verdict": "softened",
+   "inAfter": "China Eastern and Juneyao Air are among the airlines flying from here.",
+   "note": "Was 'a hub for the Jiangsu arms of China Eastern, Shenzhen Airlines and Juneyao Air'. Current flights: China Eastern restarted Nanjing to Busan on 20 July 2026 (Modern Express) and was to resume Nanjing to Singapore from June 2026 (CAPA); Juneyao flies Osaka Kansai to Nanjing (Traicy, November 2025) and opened Nanjing to Urumqi on 15 May 2026 (a local listings site, low tier). 'Hub' and 'Jiangsu arms' rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "qq-20260720",
+     "org": "Modern Express (Jiangsu newspaper, official account on Tencent News)",
+     "dated": "2026-07-20",
+     "quote": [
+      "2026-07-20 19:04 发布于 江苏 江苏现代快报传媒有限公司官方账号",
+      "东方航空MU2791次航班满载旅客从南京禄口国际机场平稳升空"
+     ]
+    },
+    {
+     "file": "capa-mu-sin",
+     "org": "CAPA (Centre for Aviation)",
+     "dated": "2026-04-23",
+     "quote": [
+      "23-Apr-2026 2:38 PM",
+      "China Eastern Airlines to resume Nanjing-Singapore service from Jun-2026"
+     ]
+    },
+    {
+     "file": "traicy-202511",
+     "org": "Traicy (Japanese aviation news)",
+     "dated": "2025-11-21",
+     "quote": [
+      "Friday, November 21, 2025",
+      "flights HO1626/1625 on the Osaka/Kansai–Beijing/Daxing route and HO1614/1613 on the Osaka/Kansai–Nanjing route will be reduced to one round trip per day each"
+     ]
+    },
+    {
+     "file": "qq-20260513",
+     "org": "Urumqi Bendibao (local listings site on Tencent News; low tier)",
+     "dated": "2026-05-13",
+     "quote": [
+      "2026-05-13 22:02 发布于 广东",
+      "5月15日，吉祥航空开通南京至乌鲁木齐航线（每日一班）"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "Nanjing is the hub for China Eastern Airlines' Jiangsu Company, Shenzhen Airlines' Jiangsu branch and Juneyao Air's Jiangsu branch."
+    }
+   ]
+  },
+  {
+   "claim": "one of the main gateways to the Yangtze River Delta",
+   "verdict": "cut",
+   "wasBefore": "one of the main gateways to the Yangtze River Delta",
+   "why": "House style bars 'gateway to'; reworded to 'one of the main airports of the Yangtze River Delta' (see above)."
+  },
+  {
+   "claim": "in Jiangning District",
+   "verdict": "cut",
+   "wasBefore": "in Jiangning District",
+   "why": "Wikipedia alone. The operator's sites (njairport.cn and the older njiairport.com) answered with a firewall block page (HTTP 503, 'protection module 10004'), and OurAirports gives only Nanjing."
+  },
+  {
+   "claim": "S1 metro from Lukou Airport station to Nanjing South railway station, 6am to 10.40pm",
+   "verdict": "cut",
+   "wasBefore": "Line S1 of the Nanjing Metro runs from Lukou Airport station to Nanjing South railway station from 6am until 10.40 at night",
+   "why": "Wikipedia alone for the line, its end at Nanjing South and its hours. Nanjing Metro's site answered 502 to the browser and timed out upstream to a plain fetch, the operator's site is behind a firewall block page, and the Nanjing city government's site answered 502. The metro itself is kept (see above)."
+  },
+  {
+   "claim": "shuttle bus every twenty minutes, about forty minutes",
+   "verdict": "cut",
+   "wasBefore": "a shuttle bus covers the same route every twenty minutes, taking about forty minutes",
+   "why": "Wikipedia alone: The Nanjinger's only timetable is an image uploaded in April 2023, and the operator is unreachable. The shuttle buses themselves are kept (see above)."
+  },
+  {
+   "claim": "eighty minutes from Nanjing Railway Station",
+   "verdict": "cut",
+   "wasBefore": "The bus from Nanjing Railway Station on the other side of the city takes eighty minutes.",
+   "why": "Wikipedia alone, for the same reasons."
+  },
+  {
+   "claim": "the airline mix is broad",
+   "verdict": "cut",
+   "wasBefore": "The airline mix is broad.",
+   "why": "The old text's summary of an airline list that is now cut to the two airlines a second source confirms, so the judgement no longer rests on anything checked."
+  },
+  {
+   "claim": "hub for the Jiangsu arms of China Eastern, Shenzhen Airlines and Juneyao Air",
+   "verdict": "cut",
+   "wasBefore": "It is a hub for the Jiangsu arms of China Eastern, Shenzhen Airlines and Juneyao Air",
+   "why": "'Hub' and the Jiangsu branches rest on Wikipedia alone; China Eastern and Juneyao are kept as flying from here (see above). Shenzhen Airlines: its profile page is built by script, and the browser try answered 502, so nothing current was saved."
+  },
+  {
+   "claim": "China Southern flies a good deal",
+   "verdict": "cut",
+   "wasBefore": "with China Southern flying a good deal too",
+   "why": "Wikipedia alone; no saved source mentions China Southern at Nanjing."
+  },
+  {
+   "claim": "Beijing Capital Airlines and Air Travel based here",
+   "verdict": "cut",
+   "wasBefore": "and Beijing Capital Airlines and Air Travel both based here",
+   "why": "Wikipedia alone; no saved source mentions either airline at Nanjing."
+  },
+  {
+   "claim": "main base for China Postal Airlines",
+   "verdict": "cut",
+   "wasBefore": "It is also the main base for China Postal Airlines, which runs pure cargo services to every major Chinese city for China Post.",
+   "why": "Wikipedia alone. China Post's EMS history page answered 412 with an empty page (treated as a bot check, not retried) and China Postal Airlines' own site could not be reached through the proxy (tunnel refused, not retried)."
+  },
+  {
+   "claim": "cargo tenth in China in 2025",
+   "verdict": "cut",
+   "note": "CAAC: 476,683 tonnes of cargo and mail in 2025, up 15 per cent, tenth in China; Wikipedia's infobox gives 476,682.5 tonnes.",
+   "sources": [
+    {
+     "file": "caac-2025-jiangsu",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row: 南京/禄口 | 13 | 31378166 | 31179654 | 0.6 | 10 | 476682.52899999998"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "stat2_data = 476,682.5 15.0"
+    }
+   ],
+   "why": "Held back: verified with two sources, but a cargo tonnage does not replace a cargo airline's base like for like. Andy could use it in place of the China Postal Airlines line: \"It is a busy cargo airport too, tenth in China in 2025.\""
+  }
+ ],
+ "opinion": [
+  {
+   "text": "That distance is the thing to plan for.",
+   "why": "The old text's advice, kept on the confirmed distance (over 35 km; 37.3 km in a straight line)."
+  }
+ ],
+ "tracerOk": {}
+}

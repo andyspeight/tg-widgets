@@ -1,0 +1,344 @@
+{
+ "iata": "WUX",
+ "id": "recNamCzkagmFT15g",
+ "name": "Sunan Shuofang International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Wuxi_Shuofang_Airport",
+ "audited": "2026-09-23",
+ "before": "Wuxi's airport, second largest in Jiangsu after Nanjing, and the only one of the province's nine airports outside Nanjing that makes money. It has been called Wuxi Suzhou Airport since March 2023, which is worth knowing because it serves both cities.\n\nIt passed 10 million passengers for the first time in December 2024, the second airport in the province to do so.\n\nAt the moment there are two terminals with 23 gates and a single 3,200 metre runway. Expansion started in May 2023 with a cargo hub and the first works on a second runway, and the approved plan adds a Terminal 3, a longer first runway and a combined transport interchange. The target is 21.5 million passengers by 2035.\n\nLine 3 of the Wuxi Metro serves the airport directly.\n\nIt was built as a military field in 1955 and only took commercial flights from 2004, after nearby Suzhou Guangfu closed to commercial traffic.",
+ "after": "Wuxi's airport, second largest in Jiangsu after Nanjing. It serves Suzhou too. In March 2023 some airline systems began showing it as Wuxi Suzhou, though the airport kept its Shuofang name, which is worth knowing when booking.\n\nIt passed 10 million passengers for the first time in 2024, the second airport in Jiangsu to do so. In 2025 it handled almost 11 million.\n\nThe airport has a single 3,200 metre runway.\n\nLine 3 of the Wuxi Metro serves the airport directly.",
+ "claims": [
+  {
+   "claim": "Wuxi's airport",
+   "verdict": "confirmed",
+   "inAfter": "Wuxi's airport",
+   "note": "CAAC's 2025 table has one Wuxi entry, Shuofang.",
+   "sources": [
+    {
+     "file": "caac-2025-jiangsu",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row: 无锡/硕放 | 40 | 10967778"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "is an airport in the city of Wuxi, Jiangsu, China"
+    }
+   ]
+  },
+  {
+   "claim": "second largest in Jiangsu after Nanjing",
+   "verdict": "confirmed",
+   "inAfter": "second largest in Jiangsu after Nanjing",
+   "note": "CAAC 2025: Nanjing 31.4 million, Wuxi 11.0 million, Changzhou next with 5.1 million; the same order in 2024.",
+   "sources": [
+    {
+     "file": "caac-2025-jiangsu",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "Row: 南京/禄口 | 13 | 31378166 | 31179654",
+      "Row: 无锡/硕放 | 40 | 10967778 | 10504277",
+      "Row: 常州/奔牛 | 51 | 5139214 | 4562418"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "The Airport is the second largest airport in Jiangsu Province (after Nanjing Lukou International Airport)"
+    },
+    {
+     "file": "cctv-20230317",
+     "org": "CCTV (cctv.com, carrying a Yicai report)",
+     "dated": "2023-03-17",
+     "quote": "苏南硕放机场是江苏第二大机场，位于无锡境内，不过距离苏州市中心只有20多公里。"
+    }
+   ]
+  },
+  {
+   "claim": "it serves Suzhou too",
+   "verdict": "confirmed",
+   "inAfter": "It serves Suzhou too.",
+   "note": "Was 'which is worth knowing because it serves both cities'. CCTV (carrying Yicai, March 2023): Suzhou has never had its own airport, its people fly from Wuxi's Shuofang or Shanghai Hongqiao, and Shuofang is 20-odd km from central Suzhou. CAAC's 2025 table still lists no Suzhou airport among Jiangsu's nine. Wikipedia implies the same without saying it outright (the 'Wuxi Suzhou' name, and commercial flights beginning after Suzhou Guangfu closed). The ticket site is a low-tier tie-breaker. In review (23 Sep) the CAAC quote was taken out: it was the helper's own summary line added to its extract, not CAAC's text. The fact itself was re-checked against the saved CAAC 2025 spreadsheet (scratchpad/xlsx-row.cjs): no row names Suzhou (苏州), and the only near match is Yangzhou-Taizhou. CCTV and Wikipedia remain as the two sources.",
+   "sources": [
+    {
+     "file": "cctv-20230317",
+     "org": "CCTV (cctv.com, carrying a Yicai report)",
+     "dated": "2023-03-17",
+     "quote": [
+      "2023年03月17日 05:30:06",
+      "在长三角地区，苏州的经济规模虽然位居前列，但却一直没有自己的机场。",
+      "苏州人民要乘坐飞机出行，要么去无锡的硕放机场，要么去上海的虹桥机场"
+     ]
+    },
+    {
+     "file": "icaac",
+     "org": "iCAAC ticket-booking site (icaac.com.cn; low tier)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": "苏州市民乘大巴去无锡硕放机场只需20元"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": [
+      "Wuxi Shuofang Airport (called Wuxi Suzhou Airport from 17 March 2023)",
+      "commercial flights only started in 2004 less than 2 years after the nearby Suzhou Guangfu Airport closed traffic to commercial flights"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in March 2023 some airline systems began showing it as Wuxi Suzhou",
+   "verdict": "corrected",
+   "inAfter": "In March 2023 some airline systems began showing it as Wuxi Suzhou",
+   "note": "Was 'It has been called Wuxi Suzhou Airport since March 2023'. CCTV (carrying Yicai, 17 March 2023): two airlines' departure systems changed 苏南硕放 (Sunan Shuofang) to 无锡苏州 (Wuxi Suzhou) and boarding passes for Wuxi flights would show it, but the airport's customer service knew of no renaming, and its registered name and accounts were unchanged. Wikipedia gives 17 March 2023.",
+   "sources": [
+    {
+     "file": "cctv-20230317",
+     "org": "CCTV (cctv.com, carrying a Yicai report)",
+     "dated": "2023-03-17",
+     "quote": [
+      "航司离港系统里的\"苏南硕放\"已改为\"无锡苏州\"，相关无锡航线的电子登机牌会显示\"无锡苏州\"",
+      "不过，记者拨打苏南硕放机场的官方客服电话，对方称目前还未收到更名通知。"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "Wuxi Shuofang Airport (called Wuxi Suzhou Airport from 17 March 2023)"
+    }
+   ]
+  },
+  {
+   "claim": "the airport kept its Shuofang name",
+   "verdict": "corrected",
+   "inAfter": "though the airport kept its Shuofang name",
+   "note": "CCTV (March 2023): the airport's registered name and social media accounts were not renamed. Since then the operator itself has used the Shuofang name: 无锡硕放机场 in its January 2025 report on the Jiangsu state-assets site, and 苏南硕放国际机场集团 as the credited source in Jiangnan Evening News (January 2026); CAAC's 2025 table lists 无锡/硕放 and HK Express (2026) flies to 'Wuxi Shuofang Airport (WUX)'.",
+   "sources": [
+    {
+     "file": "cctv-20230317",
+     "org": "CCTV (cctv.com, carrying a Yicai report)",
+     "dated": "2023-03-17",
+     "quote": "截至目前，机场官方的工商信息及社交媒体等账号也都未更名。"
+    },
+    {
+     "file": "jsgzw-20250102",
+     "org": "Jiangsu Provincial SASAC (jsgzw.jiangsu.gov.cn), from Wuxi Sunan International Airport Group (the operator)",
+     "dated": "2025-01-02",
+     "quote": [
+      "发布日期：2025-01-02 09:11",
+      "来源： 无锡苏南国际机场集团有限公司",
+      "无锡硕放机场已开通往返日本大阪"
+     ]
+    },
+    {
+     "file": "netease",
+     "org": "Jiangnan Evening News (Wuxi newspaper, on NetEase)",
+     "dated": "2026-01-29",
+     "quote": [
+      "2026-01-29 20:21:37",
+      "来源: 江南晚报",
+      "来源：苏南硕放国际机场集团"
+     ]
+    },
+    {
+     "file": "hkexpress",
+     "org": "HK Express (the airline's own release)",
+     "dated": "2026 (the page's own offer runs 2 to 5 April 2026)",
+     "quote": "daily direct flights between Hong Kong and Wuxi Shuofang Airport (WUX) starting 17 July 2026"
+    },
+    {
+     "file": "caac-2025-jiangsu",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row: 无锡/硕放 | 40 | 10967778"
+    }
+   ]
+  },
+  {
+   "claim": "passed 10 million passengers for the first time in 2024, the second in Jiangsu to do so",
+   "verdict": "softened",
+   "inAfter": "It passed 10 million passengers for the first time in 2024, the second airport in Jiangsu to do so",
+   "note": "Was '... in December 2024'. CAAC: 10,504,277 in 2024, with Nanjing the only other Jiangsu airport above 10 million; the operator's January 2025 report says annual traffic broke through the 10 million mark; in March 2023 Yicai listed Nanjing Lukou as the Delta's only 10-million airport in Jiangsu. The day (14 December, Wikipedia) rests on Wikipedia alone, so only the year is kept.",
+   "sources": [
+    {
+     "file": "caac-2025-jiangsu",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "Row: 南京/禄口 | 13 | 31378166 | 31179654",
+      "Row: 无锡/硕放 | 40 | 10967778 | 10504277",
+      "Row: 常州/奔牛 | 51 | 5139214 | 4562418"
+     ]
+    },
+    {
+     "file": "jsgzw-20250102",
+     "org": "Jiangsu Provincial SASAC (jsgzw.jiangsu.gov.cn), from Wuxi Sunan International Airport Group (the operator)",
+     "dated": "2025-01-02",
+     "quote": "在年旅客吞吐量突破千万人次大关基础上"
+    },
+    {
+     "file": "cctv-20230317",
+     "org": "CCTV (cctv.com, carrying a Yicai report)",
+     "dated": "2023-03-17",
+     "quote": "目前，长三角地区已有7个千万级机场，分别为上海浦东、上海虹桥、杭州萧山、南京禄口、宁波栎社、温州龙湾和合肥新桥"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "As of December 14, 2024, the airport served 10 million passengers annually for the first time, making it the second airport in Jiangsu Province with the annual passenger traffic of more than 10 million."
+    }
+   ]
+  },
+  {
+   "claim": "almost 11 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "In 2025 it handled almost 11 million.",
+   "note": "The 2025 total brings the traffic figure up to date (a passenger figure for a passenger figure): CAAC 10,967,778, up 4.4 per cent, 40th in China. The Nanjinger has 920,397 in June 2026 alone. Reworded in review (23 Sep) to clear a serial-comma flag; the facts are unchanged.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 无锡/硕放: passenger rank 40 in China; passengers 2025: 10,967,778; passengers 2024: 10,504,277; change 4.4%"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "stat1_data = 10,967,778"
+    },
+    {
+     "file": "nanjinger-yrd2026",
+     "org": "The Nanjinger (Nanjing English-language city magazine)",
+     "dated": "2026-08-05",
+     "quote": [
+      "5th August 2026",
+      "Sunan Shuofang handled 920,397 passengers, almost level with Hefei"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a single 3,200 metre runway",
+   "verdict": "confirmed",
+   "inAfter": "The airport has a single 3,200 metre runway.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 03/21: 3,200 m (10,499 ft), ASPH",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "The airport has one runway designated 03/21 which measures 3,200 by 50 metres"
+    }
+   ]
+  },
+  {
+   "claim": "Line 3 of the Wuxi Metro serves the airport",
+   "verdict": "confirmed",
+   "inAfter": "Line 3 of the Wuxi Metro serves the airport directly.",
+   "note": "Railway Gazette: Line 3 opened on 28 October 2020, running to the airport in the south east of the city.",
+   "sources": [
+    {
+     "file": "railgazette-2020",
+     "org": "Railway Gazette International (Metro Report International)",
+     "dated": "2020-10-29",
+     "quote": [
+      "October 29 2020",
+      "The first phase of Wuxi's third metro line opened on October 28",
+      "from Sumiao in the west of the city to Sunan Shuofang International Airport in the southeast."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "The airport is served by Line 3 of the Wuxi Metro."
+    }
+   ]
+  },
+  {
+   "claim": "the only profitable one of Jiangsu's nine airports outside Nanjing",
+   "verdict": "cut",
+   "wasBefore": "and the only one of the province's nine airports outside Nanjing that makes money",
+   "why": "Wikipedia alone for the profits. CAAC's 2025 table and Yicai (2023) do confirm nine Jiangsu airports, but no saved source gives any airport's accounts."
+  },
+  {
+   "claim": "called Wuxi Suzhou Airport since March 2023",
+   "verdict": "cut",
+   "wasBefore": "It has been called Wuxi Suzhou Airport since March 2023",
+   "why": "Overstated: in March 2023 some airline systems switched to 'Wuxi Suzhou', but the airport itself was not renamed and still uses the Shuofang name (CCTV/Yicai 2023, the operator in 2025 and 2026, CAAC, HK Express). Corrected above."
+  },
+  {
+   "claim": "in December 2024",
+   "verdict": "cut",
+   "wasBefore": "for the first time in December 2024",
+   "why": "The month rests on Wikipedia alone (14 December 2024); the year is confirmed and kept (see above)."
+  },
+  {
+   "claim": "two terminals with 23 gates",
+   "verdict": "cut",
+   "wasBefore": "two terminals with 23 gates",
+   "why": "Wikipedia alone. The operator's site answered with a firewall block page ('your request has been intercepted by the security guard'); the operator's January 2025 report mentions an international terminal but gives no count of terminals or gates."
+  },
+  {
+   "claim": "expansion started May 2023 with a cargo hub and second-runway works",
+   "verdict": "cut",
+   "wasBefore": "Expansion started in May 2023 with a cargo hub and the first works on a second runway",
+   "why": "Wikipedia alone. The Jiangsu government page it cites now answers 404 (its archive copy is in the blocked web archive), Wuxi Daily answered with a security-system block page (403), and the Wuxi New District page answers 404."
+  },
+  {
+   "claim": "approved plan: Terminal 3, longer first runway, transport interchange",
+   "verdict": "cut",
+   "wasBefore": "and the approved plan adds a Terminal 3, a longer first runway and a combined transport interchange",
+   "why": "Wikipedia alone, for the same reasons."
+  },
+  {
+   "claim": "21.5 million passengers by 2035",
+   "verdict": "cut",
+   "wasBefore": "The target is 21.5 million passengers by 2035.",
+   "why": "Wikipedia alone, for the same reasons."
+  },
+  {
+   "claim": "built as a military field in 1955",
+   "verdict": "cut",
+   "wasBefore": "It was built as a military field in 1955",
+   "why": "Wikipedia alone: the operator's own chronology page is behind the same firewall block."
+  },
+  {
+   "claim": "commercial flights only from 2004",
+   "verdict": "cut",
+   "wasBefore": "and only took commercial flights from 2004",
+   "why": "The only second source is a ticket-booking site's stale airport profile (icaac.com.cn, 'opened to civil flights on 18 February 2004'), a low-tier source; as at Jinan, a date whose only second source is a guide is cut."
+  },
+  {
+   "claim": "after Suzhou Guangfu closed to commercial traffic",
+   "verdict": "cut",
+   "wasBefore": "after nearby Suzhou Guangfu closed to commercial traffic",
+   "why": "Wikipedia alone."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which is worth knowing when booking",
+   "why": "Advice on the confirmed name muddle: a booking may say Wuxi Suzhou while the airport and CAAC say Shuofang."
+  }
+ ],
+ "tracerOk": {
+  "In March": "A sentence opening and a month, not a name; March 2023 is in CCTV's report (17 March 2023) and Wikipedia.",
+  "In 2025": "A sentence opening and a year, not a name; the 2025 total is in CAAC's table."
+ }
+}

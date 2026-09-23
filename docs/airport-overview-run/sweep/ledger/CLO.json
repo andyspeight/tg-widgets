@@ -1,0 +1,260 @@
+{
+ "iata": "CLO",
+ "id": "receiMoQlnnDYwQRG",
+ "name": "Alfonso Bonilla Aragon International Airport",
+ "country": "Colombia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Alfonso_Bonilla_Arag%C3%B3n_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Alfonso Bonilla Aragón International Airport, which appears as CLO on tickets and baggage tags,",
+ "after": "Alfonso Bonilla Aragón International Airport, which appears as CLO on tickets and baggage tags, serves Cali.",
+ "claims": [
+  {
+   "claim": "the airport's name",
+   "verdict": "confirmed",
+   "inAfter": "Alfonso Bonilla Aragón International Airport",
+   "note": "start.mjs found no archived copy of the article, so wikipedia-now (revision of 2026-09-10) is source 1 throughout this ledger. Wikipedia adds that it was formerly Palmaseca International Airport.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "Alfonso Bonilla Aragón International Airport (IATA: CLO, ICAO: SKCL), formerly known as Palmaseca International Airport"
+    },
+    {
+     "file": "aerocivil-inversiones-cali",
+     "org": "Aerocivil (Colombia's civil aviation authority and, since 1 September 2025, the airport's operator, aerocivil.gov.co)",
+     "dated": "2026-03-30",
+     "quote": [
+      "Aeropuerto Internacional Alfonso Bonilla Arag&oacute;n",
+      "30/03/2026"
+     ]
+    },
+    {
+     "file": "avl-cali-terremoto",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-08-11",
+     "quote": [
+      "martes 11 de agosto de 2026",
+      "El Aeropuerto Internacional Alfonso Bonilla Aragón de Cali"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "its code is CLO",
+   "verdict": "confirmed",
+   "inAfter": "which appears as CLO on tickets and baggage tags",
+   "note": "What appears on tickets and bag tags is the IATA code, which both sources give as CLO.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "(IATA: CLO, ICAO: SKCL)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Airport: Alfonso Bonilla Aragon International Airport (OurAirports SKCL, IATA CLO)"
+    }
+   ]
+  },
+  {
+   "claim": "serves Cali",
+   "verdict": "corrected",
+   "inAfter": "serves Cali.",
+   "note": "The record's Overview is not a text but a fragment: one clause ending in a comma, exactly as it stands in the 23 September snapshot (it was cut off when it was written). 'Serves Cali' completes the sentence with the record's own City Served, which Aerocivil, Aviacionline, Wikipedia and OurAirports all give; it adds nothing else. Everything a fuller Overview would need is held back below with its sources, for Andy to decide whether to push this one line or have the Overview written up.",
+   "sources": [
+    {
+     "file": "aerocivil-inversiones-cali",
+     "org": "Aerocivil (Colombia's civil aviation authority and, since 1 September 2025, the airport's operator, aerocivil.gov.co)",
+     "dated": "2026-03-30",
+     "quote": "que sirve a la ciudad de Cali"
+    },
+    {
+     "file": "avl-ataque-radar",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-09-16",
+     "quote": [
+      "miércoles 16 de septiembre de 2026",
+      "que sirve a Cali y se encuentra en jurisdicción de Palmira"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "is an international airport located between Palmira and Cali"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Cali"
+    }
+   ]
+  },
+  {
+   "claim": "run by Aerocivil since 1 September 2025",
+   "verdict": "cut",
+   "why": "Held back: the most important recent change. Aerocivil, the civil aviation authority, took back the running of the airport on 1 September 2025 and runs it directly; Wikipedia's infobox gives Aeronáutica Civil as operator. OurAirports' home link still points to aerocali.com.co, the former concessionaire's site, while the record's own website field and Wikipedia give aeropuertocali.aerocivil.gov.co. Nothing in the truncated old text to replace. For Andy.",
+   "sources": [
+    {
+     "file": "aerocivil-inversiones-cali",
+     "org": "Aerocivil (Colombia's civil aviation authority and, since 1 September 2025, the airport's operator, aerocivil.gov.co)",
+     "dated": "2026-03-30",
+     "quote": [
+      "que sirve a la ciudad de Cali, destacando que desde la retoma de su administraci&oacute;n el pasado 1 de septiembre de 2025",
+      "30/03/2026"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "owner = Aeronáutica Civil",
+      "operator = Aeronáutica Civil",
+      "website = {{URL|https://aeropuertocali.aerocivil.gov.co/}}"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in Palmira, about 20 km north east of Cali's centre",
+   "verdict": "cut",
+   "why": "Held back: where it is. The airport lies in Palmira municipality (Aviacionline; Wikipedia: between Palmira and Cali, on land bought from Hacienda Palmaseca in Palmira), 19.8 km in a straight line north east of Cali's centre (coordinates). Nothing in the old text to replace.",
+   "sources": [
+    {
+     "file": "avl-ataque-radar",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-09-16",
+     "quote": "que sirve a Cali y se encuentra en jurisdicción de Palmira"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "is an international airport located between Palmira and Cali"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 19.8 km (12.3 miles)",
+      "Bearing from the city centre: 51 degrees, which is north east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "attack on the air traffic radar at Candelaria, 16 September 2026",
+   "verdict": "cut",
+   "why": "Held back: at about 07:00 on 16 September 2026 drones carrying explosives attacked Aerocivil's 3D air traffic radar at El Carmelo, Candelaria, Valle del Cauca, a radar tied to the airport's operations. No one was hurt; Aerocivil activated contingency procedures to keep air navigation services running in the south west. Bogotá preliminarily blamed the FARC. Sources consulted by El País, cited by Aviacionline, spoke of minor damage without interruption of operations, not confirmed by Aerocivil. No flight disruption at Cali is reported. For Andy to decide.",
+   "sources": [
+    {
+     "file": "aerocivil-ataque-radar",
+     "org": "Aerocivil (Colombia's civil aviation authority and, since 1 September 2025, the airport's operator, aerocivil.gov.co)",
+     "dated": "2026-09-16",
+     "quote": [
+      "16/09/2026",
+      "ubicada en el corregimiento de El Carmelo, jurisdicci&oacute;n del municipio de Candelaria, Valle del Cauca",
+      "hasta el momento no se registran personas lesionadas ni v&iacute;ctimas mortales"
+     ]
+    },
+    {
+     "file": "avl-ataque-radar",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-09-16",
+     "quote": [
+      "Un radar 3D de la Aerocivil fue atacado con drones cargados con explosivos la mañana del miércoles 16 de septiembre en El Carmelo, Candelaria, Valle del Cauca.",
+      "El radar también está vinculado con la operación aérea del aeropuerto internacional Alfonso Bonilla Aragón",
+      "el sistema habría sufrido daños menores sin interrupción de operaciones, información aún no confirmada públicamente por Aerocivil"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "earthquake of 10 August 2026: brief closure, normal service from that night",
+   "verdict": "cut",
+   "why": "Held back, for the record: the magnitude 7.4 earthquake of 10 August 2026 (epicentre in Chocó) cut the terminal's power; operations resumed normally that night and Aerocivil reported no damage to the infrastructure or movement areas. Over, so not for the Overview.",
+   "sources": [
+    {
+     "file": "avl-cali-terremoto",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-08-11",
+     "quote": [
+      "martes 11 de agosto de 2026",
+      "El Aeropuerto Internacional Alfonso Bonilla Aragón de Cali restableció en la noche del lunes sus operaciones con normalidad tras recuperar el suministro eléctrico afectado por el terremoto de magnitud 7,4"
+     ]
+    },
+    {
+     "file": "aerocivil-sismo-reapertura",
+     "org": "Aerocivil (Colombia's civil aviation authority and, since 1 September 2025, the airport's operator, aerocivil.gov.co)",
+     "dated": "2026-08-11",
+     "quote": [
+      "11/08/2026",
+      "Aeropuerto Alfonso Bonilla Arag&oacute;n de Cali: Reanuda operaciones comerciales con total normalidad"
+     ]
+    },
+    {
+     "file": "fcdo-colombia-warnings",
+     "org": "UK FCDO",
+     "dated": "2026-09-23",
+     "quote": "On the morning of Monday 10 August, Colombia suffered a magnitude 7.4 earthquake, affecting large parts of the country."
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: against all but essential travel to Jamundí and western Valle del Cauca",
+   "verdict": "cut",
+   "why": "Held back: the FCDO (updated 23 September 2026) advises against all but essential travel to the municipality of Jamundí and the western part of Valle del Cauca including Buenaventura. Cali and Palmira, where the airport is, are not on its list. For Andy to decide whether an agent should be told.",
+   "sources": [
+    {
+     "file": "fcdo-colombia-warnings",
+     "org": "UK FCDO",
+     "dated": "2026-09-23",
+     "quote": [
+      "Updated: 23 September 2026",
+      "the western part of Valle del Cauca Department, including Buenaventura",
+      "the municipality of Jamundí, Valle del Cauca"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "modernisation projects from 2026 to 2030",
+   "verdict": "cut",
+   "why": "Held back: Aerocivil is preparing 215,657 million pesos of modernisation (a new electrical substation and baggage system among them), to be carried out between 2026 and 2030, after 13,399 million pesos of maintenance since the takeover. One organisation only.",
+   "sources": [
+    {
+     "file": "aerocivil-inversiones-cali",
+     "org": "Aerocivil (Colombia's civil aviation authority and, since 1 September 2025, the airport's operator, aerocivil.gov.co)",
+     "dated": "2026-03-30",
+     "quote": "ejecutados entre 2026 y 2030"
+    }
+   ]
+  },
+  {
+   "claim": "fourth busiest in Colombia, 5.6 million passengers (2016)",
+   "verdict": "cut",
+   "why": "Held back as a warning for whoever writes the full Overview: Wikipedia's only traffic figures are for 2016 (5.6 million, 'fourth-busiest') and 2019 (5,686,212 in its infobox). No current figure was found (Aerocivil publishes national totals only), so neither should be used.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "It is Colombia's fourth-busiest airport in passenger volume, with 5,600,000 people using the airport in 2016"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2019",
+      "stat2_data = 5,686,212"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

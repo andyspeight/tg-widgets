@@ -1,0 +1,389 @@
+{
+ "iata": "CGQ",
+ "id": "recPTcjefcLxOfSJ0",
+ "name": "Changchun Longjia International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Changchun_Longjia_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for both Changchun and Jilin City, 31 km north east of one and 76 km north west of the other, with the two cities sharing responsibility for running it. It is a regional hub for China Southern.\n\nThe rail connection is unusually neat. Longjia railway station sits in the basement of the terminal, on the Changchun to Jilin intercity line, so a passenger can walk from arrivals onto a train. Coaches also run into both cities, and a metro line is planned.\n\nThe airport opened in August 2005, replacing the joint civil and military field at Dafangshen, and was expanded between 2009 and 2011 with two more international gates and a bigger apron. That work made it possible to take wide bodies as large as a 747.\n\nInternational routes reach Bangkok, Seoul, Singapore, Tokyo, Osaka and Hong Kong, and Air China opened a direct link to Frankfurt in 2021, which makes this one of the main international gateways for north east China.",
+ "after": "The airport for both Changchun and Jilin City, 31 km north east of Changchun and run by Jilin's provincial airport group, part of Capital Airport Holding. China Southern has a base here.\n\nThe rail connection is unusually neat. Longjia railway station, on the Changchun to Jilin intercity line, is underground at the airport, so a passenger can walk from arrivals onto a train. Airport buses also run into Changchun, and a metro line is planned.\n\nIt opened in August 2005, replacing the joint civil and military field at Dafangshen. Expansion in phases since 2009 has added a second terminal.\n\nThe airport counts eight international and regional destinations, among them Bangkok, Hong Kong and Vladivostok.",
+ "claims": [
+  {
+   "claim": "the airport for both Changchun and Jilin City",
+   "verdict": "confirmed",
+   "inAfter": "The airport for both Changchun and Jilin City",
+   "note": "CAAC's 2025 table has no Jilin City airport, and Longjia is far ahead of every other Jilin province airport (17.8 million passengers; Yanji next with 1.4 million). The operator's page gives direct trains from the airport's own station to Jilin station, 20 a day, taking 30 minutes.",
+   "sources": [
+    {
+     "file": "caac-2025-jilin",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "Row: 长春/龙嘉 | 28 | 17759299",
+      "The table has no Jilin City (吉林市) airport: the only row containing 吉林 is 阿拉善右旗/巴丹吉林, in Inner Mongolia."
+     ]
+    },
+    {
+     "file": "op-rail",
+     "org": "Jilin Province Civil Aviation Airport Group (the airport's operator, jlairports.com)",
+     "dated": "2024-08-05 (read 2026-09-23)",
+     "quote": [
+      "龙嘉站可乘高铁直达长春火车站、长春西站以及吉林站。",
+      "吉林站至龙嘉站每天20车次，历时30分钟"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "The airport is 31.2 km (19.4 mi) northeast of the provincial capital Changchun and 76 km (47 mi) northwest of Jilin City"
+    }
+   ]
+  },
+  {
+   "claim": "31 km north east of Changchun",
+   "verdict": "confirmed",
+   "inAfter": "31 km north east of Changchun",
+   "note": "Coordinates: 31.8 km in a straight line at 66 degrees (north east); ratio 0.98.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "The airport is 31.2 km (19.4 mi) northeast of the provincial capital Changchun"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 31.8 km (19.7 miles)",
+      "Bearing from the city centre: 66 degrees, which is north east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "run by Jilin's provincial airport group, part of Capital Airport Holding",
+   "verdict": "corrected",
+   "inAfter": "run by Jilin's provincial airport group, part of Capital Airport Holding",
+   "note": "Replaces 'with the two cities sharing responsibility for running it' (cut below). The operator: Jilin Province Civil Aviation Airport Group, founded 28 November 2003, reorganised with Capital Airports Holding on 24 July 2005 and wholly owned by it, runs Changchun Longjia and four other Jilin airports. Wikipedia's infobox agrees on owner and operator.",
+   "sources": [
+    {
+     "file": "op-intro",
+     "org": "Jilin Province Civil Aviation Airport Group (the airport's operator, jlairports.com)",
+     "dated": "2025-11-20",
+     "quote": [
+      "2025-11-20",
+      "吉林省民航机场集团有限公司（以下简称吉林机场集团），于2003年11月28日成立，2005年7月24日与首都机场集团公司联合重组，为首都机场集团公司全资子公司。下辖长春龙嘉国际机场（4E级）"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": [
+      "owner = Jilin Province Civil Aviation Group",
+      "operator = Capital Airport Holding"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "China Southern has a base here",
+   "verdict": "softened",
+   "inAfter": "China Southern has a base here.",
+   "note": "Was 'It is a regional hub for China Southern'. The operator names China Southern as its one base airline (page dated August 2024); Wikipedia's current revision calls it a regional hub for China Southern.",
+   "sources": [
+    {
+     "file": "op-ops",
+     "org": "Jilin Province Civil Aviation Airport Group (the airport's operator, jlairports.com)",
+     "dated": "2024-08-05 (read 2026-09-23)",
+     "quote": "长春龙嘉国际机场有中国南方航空一家基地航空公司"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "Changchun Airport is a regional hub for China Southern Airlines."
+    }
+   ]
+  },
+  {
+   "claim": "Longjia railway station on the Changchun to Jilin intercity line, underground at the airport, walk from arrivals onto a train",
+   "verdict": "corrected",
+   "inAfter": "Longjia railway station, on the Changchun to Jilin intercity line, is underground at the airport, so a passenger can walk from arrivals onto a train",
+   "note": "Was 'sits in the basement of the terminal'. The operator places the underground station just south of Terminal 1, reached on foot through an underground passage, with an underground corridor to Terminal 2; Wikipedia puts it at the basement of the terminal. Both agree it is underground and walkable, so the text says that. The operator calls the line China's first intercity railway with zero transfer to an airport, which bears out 'unusually neat'. Trains take 14 minutes to Changchun station and 30 to Jilin (operator; not added).",
+   "sources": [
+    {
+     "file": "op-rail",
+     "org": "Jilin Province Civil Aviation Airport Group (the airport's operator, jlairports.com)",
+     "dated": "2024-08-05 (read 2026-09-23)",
+     "quote": [
+      "长珲城际铁路龙嘉高铁站位于长春龙嘉国际机场T1航站楼正南方向，与机场南侧公路并行，站房形式为地下车站。",
+      "长珲城铁成为国内第一条实现铁路和空港间零换乘的城际铁路。",
+      "从城铁下来的乘客可以通过地下通道直接步行抵达航站楼。",
+      "长春-吉林城际高速铁路列车票价"
+     ]
+    },
+    {
+     "file": "op-train-cc-jl",
+     "org": "Jilin Province Civil Aviation Airport Group (the airport's operator, jlairports.com)",
+     "dated": "2024-08-05 (read 2026-09-23)",
+     "quote": [
+      "长春 - 龙嘉 - 吉林",
+      "1 C1201 长春西 6:49 7:16 7:17 27分钟"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "Changchun Longjia is serviced by the Longjia railway station, a railway station of the Changchun–Jilin intercity railway located at the basement of the terminal."
+    }
+   ]
+  },
+  {
+   "claim": "airport buses run into Changchun",
+   "verdict": "softened",
+   "inAfter": "Airport buses also run into Changchun",
+   "note": "Was 'Coaches also run into both cities'. The operator's bus page (2 December 2025) lists three lines, all into Changchun (People's Square, Changchun station, Weixing Square).",
+   "sources": [
+    {
+     "file": "op-bus",
+     "org": "Jilin Province Civil Aviation Airport Group (the airport's operator, jlairports.com)",
+     "dated": "2025-12-02",
+     "quote": [
+      "2025-12-02",
+      "1、3号线：长春龙嘉国际机场→东方广场",
+      "2号线：长春龙嘉国际机场→世纪广场(首地首城)→会展中心→临河街(职业技术学院)→卫星广场(高速客运站)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "The airport is also serviced by coaches, which ferry passengers to and from Quan'an Square (also known as Nanguan Urban Terminal), Renmin Square, and Weixing Square in Changchun"
+    }
+   ]
+  },
+  {
+   "claim": "a metro line is planned",
+   "verdict": "confirmed",
+   "inAfter": "and a metro line is planned",
+   "sources": [
+    {
+     "file": "op-plan",
+     "org": "Jilin Province Civil Aviation Airport Group (the airport's operator, jlairports.com)",
+     "dated": "2024-08-05 (read 2026-09-23)",
+     "quote": "按照规划，一期南区将与地铁线、九台隧道同步建设，包括龙嘉高铁站东扩站房、地铁站、长途客运站、综合换乘大厅。"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "The planned Line 9 of Changchun Rail Transit will also stop here."
+    }
+   ]
+  },
+  {
+   "claim": "opened in August 2005, replacing the joint civil and military field at Dafangshen",
+   "verdict": "confirmed",
+   "inAfter": "It opened in August 2005, replacing the joint civil and military field at Dafangshen.",
+   "note": "Operator: in use from midnight on 27 August 2005, when Dafangshen's civil side went back to the air force; the new airport was approved in May 1998 because the dual-use field was so inconvenient.",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "Jilin Province Civil Aviation Airport Group (the airport's operator, jlairports.com)",
+     "dated": "2024-08-05 (read 2026-09-23)",
+     "quote": [
+      "2005年8月27日零时，长春龙嘉国际机场正式投入使用，结束了吉林省省会城市没有民航专用机场的历史，大房身机场民航部分归还空军。",
+      "军民两用严重不便"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": [
+      "the airport began its operations on 27 August 2005",
+      "It replaced the dual-use civil and military Changchun Dafangshen Airport, which reverted to sole military use."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "expansion in phases since 2009 has added a second terminal",
+   "verdict": "corrected",
+   "inAfter": "Expansion in phases since 2009 has added a second terminal.",
+   "note": "Replaces 'was expanded between 2009 and 2011 with two more international gates and a bigger apron' (cut below). The operator dates phase one from 24 June 2009, phase two from April 2016 and Terminal 2 to 2018 (28 October on its history page, June on its plans page, so no date is given); its December 2025 notice about Terminal 2's entrances, on every page of its site, shows the terminal in use. Wikipedia dates the expansion from 2009 and illustrates Terminal 2.",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "Jilin Province Civil Aviation Airport Group (the airport's operator, jlairports.com)",
+     "dated": "2024-08-05 (read 2026-09-23)",
+     "quote": [
+      "2009年6月24日，长春龙嘉国际机场开始实施一期扩建。",
+      "2016年4月，长春龙嘉国际机场二期扩建工程启动建设。",
+      "2018年10月28日，长春龙嘉国际机场T2号航站楼正式启用。"
+     ]
+    },
+    {
+     "file": "op-bus",
+     "org": "Jilin Province Civil Aviation Airport Group (the airport's operator, jlairports.com)",
+     "dated": "2025-12-15 (the notice)",
+     "quote": [
+      "关于长春龙嘉国际机场2号航站楼 出入门调整的通告",
+      "2025-12-15"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "The airport was later expanded, beginning in 2009"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "image = Changchun Longjia Airport T2 20220815.jpg"
+    }
+   ]
+  },
+  {
+   "claim": "the airport counts eight international and regional destinations",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "The airport",
+   "inAfter": "The airport counts eight international and regional destinations",
+   "note": "Replaces the old destination list (cut below) with the airport's own current count, attributed: 34 airlines, 210 routes, 73 domestic and 8 international and regional cities (operator, 20 November 2025).",
+   "sources": [
+    {
+     "file": "op-intro",
+     "org": "Jilin Province Civil Aviation Airport Group (the airport's operator, jlairports.com)",
+     "dated": "2025-11-20",
+     "quote": [
+      "2025-11-20",
+      "其中，长春机场携手34家航司累计执行210条航线、通航73个国内城市和8个国际及地区城市"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "among them Bangkok, Hong Kong and Vladivostok",
+   "verdict": "corrected",
+   "inAfter": "among them Bangkok, Hong Kong and Vladivostok",
+   "note": "The operator (November 2025) lists Vladivostok, Bangkok and Kuala Lumpur among the international routes restored, plus Hong Kong; CAAC reports the Changchun to Vladivostok route (Chengdu Airlines, twice a week) launched on 29 June 2026; Wikipedia lists Bangkok and Hong Kong. Kuala Lumpur rests on the operator alone and is left out.",
+   "sources": [
+    {
+     "file": "op-intro",
+     "org": "Jilin Province Civil Aviation Airport Group (the airport's operator, jlairports.com)",
+     "dated": "2025-11-20",
+     "quote": "恢复俄罗斯符拉迪沃斯托克、泰国曼谷、马来西亚吉隆坡等国际航线及香港地区航线"
+    },
+    {
+     "file": "caac-en-202607",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-07-03",
+     "quote": [
+      "03/07/2026",
+      "On June 29, Changchun Longjia International Airport, in partnership with Chengdu Airlines, officially launched the international passenger route linking Changchun and Vladivostok."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "with scheduled international flights to Bangkok, Seoul, Singapore, Tokyo, Osaka, Hong Kong, and so on"
+    }
+   ]
+  },
+  {
+   "claim": "76 km north west of Jilin City",
+   "verdict": "cut",
+   "wasBefore": "and 76 km north west of the other",
+   "why": "Wikipedia alone. The coordinates check measures from Changchun only, and the sweep has no independent position for Jilin City's centre; the operator gives train times (30 minutes), not distances."
+  },
+  {
+   "claim": "the two cities share responsibility for running it",
+   "verdict": "cut",
+   "wasBefore": "with the two cities sharing responsibility for running it",
+   "why": "Contradicted: the operator says it is run by the Jilin Province Civil Aviation Airport Group, a wholly owned subsidiary of Capital Airports Holding since July 2005, and Wikipedia's own infobox agrees. Corrected above."
+  },
+  {
+   "claim": "regional hub for China Southern",
+   "verdict": "cut",
+   "wasBefore": "It is a regional hub for China Southern.",
+   "why": "'Regional hub' rests on Wikipedia alone; the operator calls China Southern its base airline. Softened above."
+  },
+  {
+   "claim": "station in the basement of the terminal",
+   "verdict": "cut",
+   "wasBefore": "sits in the basement of the terminal",
+   "why": "Imprecise: the operator puts the underground station just south of Terminal 1, reached through an underground passage, with a corridor to Terminal 2. Corrected above to 'underground at the airport'."
+  },
+  {
+   "claim": "coaches run into both cities",
+   "verdict": "cut",
+   "wasBefore": "Coaches also run into both cities",
+   "why": "The operator's current bus page (2 December 2025) lists only Changchun lines; the Jilin coach to Jiangcheng Square rests on Wikipedia alone. Changchun buses kept above."
+  },
+  {
+   "claim": "expanded 2009 to 2011 with two more international gates and a bigger apron",
+   "verdict": "cut",
+   "wasBefore": "and was expanded between 2009 and 2011 with two more international gates and a bigger apron",
+   "why": "The 2011 end date, the two gates and the apron rest on Wikipedia alone; the operator confirms the June 2009 start and a later phase that added Terminal 2 (see above)."
+  },
+  {
+   "claim": "able to take wide bodies as large as a 747",
+   "verdict": "cut",
+   "wasBefore": "That work made it possible to take wide bodies as large as a 747.",
+   "why": "Wikipedia alone. The operator's intro gives the airfield class (4E) but no aircraft type."
+  },
+  {
+   "claim": "international routes to Bangkok, Seoul, Singapore, Tokyo, Osaka and Hong Kong",
+   "verdict": "cut",
+   "wasBefore": "International routes reach Bangkok, Seoul, Singapore, Tokyo, Osaka and Hong Kong",
+   "why": "Replaced by the airport's own count and the destinations two sources name now (see above). Seoul, Singapore, Tokyo and Osaka rest on Wikipedia alone: the operator's current list of restored routes does not name them."
+  },
+  {
+   "claim": "Air China to Frankfurt since 2021",
+   "verdict": "cut",
+   "wasBefore": "and Air China opened a direct link to Frankfurt in 2021",
+   "why": "Wikipedia alone, and not among the international routes the operator names in November 2025."
+  },
+  {
+   "claim": "one of the main international gateways for north east China",
+   "verdict": "cut",
+   "wasBefore": "which makes this one of the main international gateways for north east China",
+   "why": "Wikipedia alone, and 'gateway' phrasing is barred by house style. CAAC's 2025 table puts Shenyang (24.9 million), Harbin (24.7 million) and Dalian (19.8 million) ahead of Changchun (17.8 million) in the north east."
+  },
+  {
+   "claim": "17.8 million passengers in 2025",
+   "verdict": "cut",
+   "note": "CAAC: 17,759,299 passengers in 2025, up 0.9 per cent, 28th in China; Wikipedia's infobox gives the same figure.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 长春/龙嘉: passenger rank 28 in China; passengers 2025: 17,759,299"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "stat1_data = 17,759,299"
+    }
+   ],
+   "why": "Held back: verified with two sources, but the old text had no traffic figure, so it replaces nothing. Andy may want it, as the text now has no measure of size: \"It handled almost 18 million passengers in 2025.\""
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The rail connection is unusually neat.",
+   "why": "The old text's judgement, kept: the operator calls the line China's first intercity railway with zero transfer between rail and airport."
+  }
+ ],
+ "tracerOk": {}
+}

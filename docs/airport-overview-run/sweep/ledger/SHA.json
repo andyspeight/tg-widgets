@@ -1,0 +1,411 @@
+{
+ "iata": "SHA",
+ "id": "recPvsWfAVBTzzNL2",
+ "name": "Shanghai Hongqiao International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Shanghai_Hongqiao_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Shanghai's closer airport, 13 km west of downtown, and the one to choose when a client wants to be in the city quickly. It handled 50,151,025 passengers in 2025, eighth busiest in China, and holds a Skytrax five star rating.\n\nThe real advantage is the railway. Terminal 2 sits directly beside Shanghai Hongqiao railway station, which is served by the Beijing to Shanghai, Shanghai to Hangzhou and Shanghai to Nanjing high speed lines, so a flight here connects straight onto high speed rail without a road transfer. Three metro stations serve the airport and the station between them.\n\nNote that Terminal 1 is on the far side of the airfield from Terminal 2, with its own metro station on Line 10, so check which terminal a flight uses.\n\nSince December 2024 the Airport Link Line has provided a direct rail connection to Pudong, which makes a two airport itinerary far easier than it used to be.\n\nHongqiao was Shanghai's main airport until Pudong opened in October 1999. It is the headquarters of China Eastern Airlines and a hub for Shanghai Airlines, Juneyao Air and Spring Airlines.",
+ "after": "Shanghai's closer airport is 13 km west of downtown and the one to choose when a client wants to be in the city quickly. Its 50,151,025 passengers in 2025 made it the eighth busiest in China, and it holds a Skytrax five star rating.\n\nThe real advantage is the railway. Hongqiao Airport sits at the centre of a transport hub with a high speed railway station, Shanghai Hongqiao, so a flight here connects onto high speed rail. Metro Lines 2 and 10 serve Terminal 2.\n\nNote that Terminal 1 has its own metro station on Line 10, which links it with Terminal 2, so check which terminal a flight uses.\n\nSince December 2024 the Airport Link Line has provided a direct rail connection to Pudong, which makes a two airport itinerary far easier than it used to be.\n\nChina Eastern Airlines, Shanghai Airlines and Spring Airlines all fly from here.",
+ "claims": [
+  {
+   "claim": "Shanghai's closer airport (of its two)",
+   "verdict": "confirmed",
+   "inAfter": "Shanghai's closer airport",
+   "note": "CAAC's 2025 table lists two Shanghai airports, Pudong and Hongqiao. The Shanghai government's airport guide (from the Shanghai Airport Authority, updated 4 June 2026) puts Hongqiao 13 km from the city centre and Pudong about 30 km.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "is closer to the city center than Shanghai–Pudong"
+    },
+    {
+     "file": "shgov-airplane",
+     "org": "Shanghai Municipal People's Government (english.shanghai.gov.cn), from the Shanghai Airport Authority",
+     "dated": "2026-06-04 (updated)",
+     "quote": [
+      "Updated June 4, 2026",
+      "It is located about 30 kilometers from downtown Shanghai and 40 km from Hongqiao airport.",
+      "Located in western Shanghai, Hongqiao airport is just 13 km from the city center.",
+      "Source: Shanghai Airport Authority"
+     ]
+    },
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 上海/虹桥: passenger rank 8 in China"
+    }
+   ]
+  },
+  {
+   "claim": "13 km west of downtown",
+   "verdict": "confirmed",
+   "inAfter": "13 km west of downtown",
+   "note": "Coordinates: 12.1 km in a straight line at 257 degrees (west); ratio 1.08. Reworded in review (23 Sep) to clear a serial-comma flag; the facts are unchanged.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "13 kilometres (8.1 mi) west of downtown"
+    },
+    {
+     "file": "shgov-airplane",
+     "org": "Shanghai Municipal People's Government (english.shanghai.gov.cn), from the Shanghai Airport Authority",
+     "dated": "2026-06-04 (updated)",
+     "quote": "Located in western Shanghai, Hongqiao airport is just 13 km from the city center."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 12.1 km (7.5 miles)",
+      "Bearing from the city centre: 257 degrees, which is west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "50,151,025 passengers in 2025, eighth busiest in China",
+   "verdict": "confirmed",
+   "inAfter": "Its 50,151,025 passengers in 2025 made it the eighth busiest in China",
+   "note": "CAAC: 50,151,025 in 2025 against 47,944,067 in 2024 (up 4.6 per cent), eighth in China. Reworded in review (23 Sep) to clear a serial-comma flag; the facts are unchanged.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 上海/虹桥: passenger rank 8 in China; passengers 2025: 50,151,025; passengers 2024: 47,944,067; change 4.6%"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "In 2025, Hongqiao Airport handled 50,151,025 passengers, making it the 8th busiest airport in China"
+    }
+   ]
+  },
+  {
+   "claim": "Skytrax five star rating",
+   "verdict": "confirmed",
+   "inAfter": "it holds a Skytrax five star rating",
+   "note": "Skytrax's live certification page (read 23 Sep 2026) says it 'is Certified as a 5-Star Airport'; Wikipedia dates the certification to 2025.",
+   "sources": [
+    {
+     "file": "skytrax",
+     "org": "Skytrax (the rating body, skytraxratings.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Shanghai Hongqiao International Airport 上海虹桥国际机场 is Certified as a 5-Star Airport for facilities, terminal comfort and cleanliness, shopping, food & beverages and staff service."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "Shanghai Hongqiao Airport was also certified with the Skytrax 5-Star Airport Rating"
+    }
+   ]
+  },
+  {
+   "claim": "the airport is at the centre of a transport hub with a high speed railway station, Shanghai Hongqiao",
+   "verdict": "softened",
+   "inAfter": "Hongqiao Airport sits at the centre of a transport hub with a high speed railway station, Shanghai Hongqiao, so a flight here connects onto high speed rail",
+   "note": "Was 'Terminal 2 sits directly beside Shanghai Hongqiao railway station ... so a flight here connects straight onto high speed rail without a road transfer'. Sixth Tone (a Shanghai news outlet, March 2021, for the airport's centenary) calls the airport the centre of a transport hub built with a high-speed rail station; the Shanghai government's May 2026 visitor routes start from 'Hongqiao International Airport/Hongqiao Railway Station' as one place, and its train guide names Shanghai Hongqiao Railway Station. That Terminal 2 in particular is 'directly beside' the station, 'without a road transfer', rests on Wikipedia alone, so it is softened to the hub.",
+   "sources": [
+    {
+     "file": "sixthtone",
+     "org": "Sixth Tone (Shanghai news outlet)",
+     "dated": "2021-03-12",
+     "quote": [
+      "Mar 12, 2021",
+      "Shanghai Hongqiao Airport is now the center of a bustling transport hub",
+      "establishing Hongqiao as a \"comprehensive transportation hub\" complete with a state-of-the-art high-speed rail station"
+     ]
+    },
+    {
+     "file": "shgov-20routes",
+     "org": "Shanghai Municipal People's Government (english.shanghai.gov.cn)",
+     "dated": "2026-05-22",
+     "quote": [
+      "May 22, 2026",
+      "Starting from Hongqiao International Airport/Hongqiao Railway Station"
+     ]
+    },
+    {
+     "file": "shgov-train",
+     "org": "Shanghai Municipal People's Government (english.shanghai.gov.cn)",
+     "dated": "2026-06-11 (updated)",
+     "quote": [
+      "Passengers board a train at Shanghai Hongqiao Railway Station.",
+      "Updated June 11, 2026"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "Terminal 2 of the Hongqiao Airport is immediately adjacent to Shanghai Hongqiao railway station, a major train hub served by the Beijing–Shanghai High-Speed Railway"
+    }
+   ]
+  },
+  {
+   "claim": "Metro Lines 2 and 10 serve Terminal 2",
+   "verdict": "softened",
+   "inAfter": "Metro Lines 2 and 10 serve Terminal 2.",
+   "note": "Was 'Three metro stations serve the airport and the station between them'. The operator and the Shanghai government name the two terminal stations only; the third, Hongqiao Railway Station on Lines 2, 10 and 17, rests on Wikipedia alone. The operator's Hongqiao metro entries were last updated in April 2024; the government's copy was updated on 4 June 2026. On the operator's site: OurAirports and Wikipedia link shairport.com, which answered with a script challenge (HTTP 521); shanghaiairport.com is the Authority's current site, since its disclosure page (op-cn-jbxx) gives the company's English name as 'Shanghai Airport Authority', its pages give @shairport.com contact addresses, and the Shanghai government's airport guide cites it as the Authority's page. After about ten requests it began serving the same 521 challenge, and it was not tried again.",
+   "sources": [
+    {
+     "file": "op-metro",
+     "org": "Shanghai Airport Authority (the operator, shanghaiairport.com)",
+     "dated": "read 2026-09-23 (entry last updated 2024-04-13)",
+     "quote": "Terminal 2 is served by two metro lines: Metro Line 10 and Metro Line 2."
+    },
+    {
+     "file": "shgov-airplane",
+     "org": "Shanghai Municipal People's Government (english.shanghai.gov.cn), from the Shanghai Airport Authority",
+     "dated": "2026-06-04 (updated)",
+     "quote": "Terminal 2 is served by Metro Lines 10 and 2."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "Hongqiao Airport Terminal 2 station: Line 2, Line 10, Airport Link Line"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 1 has its own metro station on Line 10, which links it with Terminal 2",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 1 has its own metro station on Line 10, which links it with Terminal 2",
+   "note": "The old text's 'with its own metro station on Line 10' is confirmed; 'which links it with Terminal 2' is the operator's and the government's own description of Line 10 and replaces 'on the far side of the airfield' (cut below).",
+   "sources": [
+    {
+     "file": "op-metro",
+     "org": "Shanghai Airport Authority (the operator, shanghaiairport.com)",
+     "dated": "read 2026-09-23 (entry last updated 2024-04-13)",
+     "quote": [
+      "Terminal 1 is served by one metro line: Metro Line 10.",
+      "Metro Line 10 connects Hongqiao Airport Terminal 1 and Terminal 2."
+     ]
+    },
+    {
+     "file": "shgov-airplane",
+     "org": "Shanghai Municipal People's Government (english.shanghai.gov.cn), from the Shanghai Airport Authority",
+     "dated": "2026-06-04 (updated)",
+     "quote": "Terminal 1 is served by Metro Line 10, which connects Terminal 1 and Terminal 2."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "Hongqiao Airport Terminal 1 station: Line 10"
+    }
+   ]
+  },
+  {
+   "claim": "Airport Link Line to Pudong since December 2024",
+   "verdict": "confirmed",
+   "inAfter": "Since December 2024 the Airport Link Line has provided a direct rail connection to Pudong",
+   "note": "The operator dates the opening to 27 December 2024 and runs trains from Hongqiao Airport Terminal 2 Station to Pudong Airport Terminal 1&2 Station; the Shanghai government (June 2026) gives about 40 minutes between the airports (not added).",
+   "sources": [
+    {
+     "file": "op-enhq",
+     "org": "Shanghai Airport Authority (the operator, shanghaiairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "The Airport Link Line of the Shanghai Suburban Railway opened on Dec 27, 2024.",
+      "The entrance to the Hongqiao Airport Terminal 2 Station of the Airport Link Line is located near Gates 11 and 12 on the departing floor"
+     ]
+    },
+    {
+     "file": "op-link",
+     "org": "Shanghai Airport Authority (the operator, shanghaiairport.com)",
+     "dated": "2026-06-22 (last updated)",
+     "quote": [
+      "The first train from Pudong Airport Terminal 1&2 Station departs at 6:00 am and the last train departs at 10:00 pm each day.",
+      "The first train from Hongqiao Airport Terminal 2 Station departs at 6:00 am and the last train departs at 10:00 pm each day.",
+      "Current information was last updated on：2026-06-22 15:58"
+     ]
+    },
+    {
+     "file": "shgov-metro",
+     "org": "Shanghai Municipal People's Government (english.shanghai.gov.cn)",
+     "dated": "2026-06-29 (updated)",
+     "quote": [
+      "It connects Hongqiao and Pudong airports in about 40 minutes.",
+      "Updated June 29, 2026"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "a direct connection to Shanghai Pudong Airport was established in December 2024 with the Airport Link Line"
+    }
+   ]
+  },
+  {
+   "claim": "China Eastern Airlines, Shanghai Airlines and Spring Airlines fly from here",
+   "verdict": "softened",
+   "inAfter": "China Eastern Airlines, Shanghai Airlines and Spring Airlines all fly from here.",
+   "note": "Was 'It is the headquarters of China Eastern Airlines and a hub for Shanghai Airlines, Juneyao Air and Spring Airlines'. The Shanghai government's check-in story (28 Oct 2025, from the Shanghai Airport Group) lists China Eastern and Shanghai Airlines among Hongqiao's international and regional carriers and says Spring Airlines operates from Terminal 1; Yining's city media centre (July 2026) names China Eastern's Hongqiao to Yining flights; Spring Airlines' own page puts its head office in Shanghai and speaks of its punctuality at Hongqiao. None calls Hongqiao a hub or headquarters, so those words rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "shgov-cutoff",
+     "org": "Shanghai Municipal People's Government (english.shanghai.gov.cn), from the Shanghai Airport Group",
+     "dated": "2025-10-28",
+     "quote": [
+      "October 28, 2025",
+      "Spring Airlines, which operates from Terminal 1",
+      "Updated cutoff times at Hongqiao airport",
+      "Cathay Pacific, Air Macau, China Airlines, Korean Air, Asiana Airlines, Hong Kong Airlines, China Eastern, Shanghai Airlines: 40 minutes before departure",
+      "Source: Shanghai Airport Group"
+     ]
+    },
+    {
+     "file": "qq-20260719",
+     "org": "Yining City Media Centre (official account on Tencent News)",
+     "dated": "2026-07-19",
+     "quote": [
+      "2026-07-19 18:33 发布于 新疆 伊宁市融媒体中心官方账号",
+      "串联起上海虹桥—伊宁"
+     ]
+    },
+    {
+     "file": "spring-about",
+     "org": "Spring Airlines (ch.com)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": [
+      "春秋航空总部设在上海",
+      "春秋航空在虹桥机场的航班准点率连续第一"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "Hongqiao Airport is the corporate headquarters and a major hub for China Eastern Airlines, Shanghai Airlines, and Juneyao Air, as well as a major hub for Spring Airlines."
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2 directly beside Shanghai Hongqiao railway station",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 sits directly beside Shanghai Hongqiao railway station",
+   "why": "Wikipedia alone for Terminal 2 in particular. Softened to the airport being at the centre of a hub with the high speed railway station (Sixth Tone, the Shanghai government; see above). The operator's own site (shanghaiairport.com) began answering with a script challenge (HTTP 521) before its arrivals and hub pages could be read, the older shairport.com gave the same challenge from the first request, the Hongqiao business district's English site answered 502 and its 2025 report (a PDF) timed out."
+  },
+  {
+   "claim": "served by the Beijing to Shanghai, Shanghai to Hangzhou and Shanghai to Nanjing high speed lines",
+   "verdict": "cut",
+   "wasBefore": "which is served by the Beijing to Shanghai, Shanghai to Hangzhou and Shanghai to Nanjing high speed lines",
+   "why": "Wikipedia alone: no saved source names the lines. China Railway's English site has only a general FAQ, and Shanghai Metro's site answered 502."
+  },
+  {
+   "claim": "connects straight onto high speed rail without a road transfer",
+   "verdict": "cut",
+   "wasBefore": "so a flight here connects straight onto high speed rail without a road transfer",
+   "why": "'Straight' and 'without a road transfer' depend on Terminal 2 being beside the station, which rests on Wikipedia alone. Softened to 'connects onto high speed rail' through the shared hub (see above)."
+  },
+  {
+   "claim": "three metro stations serve the airport and the railway station",
+   "verdict": "cut",
+   "wasBefore": "Three metro stations serve the airport and the station between them.",
+   "why": "The operator and the Shanghai government name only the two terminal stations; the railway station's metro stop rests on Wikipedia alone (shmetro.com answered 502). Softened to the lines at Terminal 2 (see above)."
+  },
+  {
+   "claim": "Terminal 1 on the far side of the airfield",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 is on the far side of the airfield from Terminal 2",
+   "why": "Wikipedia alone ('across the airfield'). What the operator and the government do say, that metro Line 10 links Terminal 1 with Terminal 2, now carries the point (see above)."
+  },
+  {
+   "claim": "Hongqiao was Shanghai's main airport until Pudong opened in October 1999",
+   "verdict": "cut",
+   "wasBefore": "Hongqiao was Shanghai's main airport until Pudong opened in October 1999.",
+   "why": "Wikipedia alone. Four tries found no second source: the operator's heritage page came back empty and then 502 in the browser, the transport commission's September 2026 Pudong article, The Paper's 2020 history piece and Sixth Tone's centenary report give no Pudong opening date, and the Shanghai government portals have no airport history page that could be found without a search."
+  },
+  {
+   "claim": "headquarters of China Eastern Airlines",
+   "verdict": "cut",
+   "wasBefore": "It is the headquarters of China Eastern Airlines",
+   "why": "Wikipedia alone. China Eastern's own site (ceair.com) builds its pages by script and showed no links to the browser; the operator's airlines page answered with the same script challenge (521). China Eastern flying from Hongqiao is kept (see above)."
+  },
+  {
+   "claim": "a hub for Shanghai Airlines, Juneyao Air and Spring Airlines",
+   "verdict": "cut",
+   "wasBefore": "a hub for Shanghai Airlines, Juneyao Air and Spring Airlines",
+   "why": "'Hub' rests on Wikipedia alone (Spring Airlines' own page lists bases in other cities and its head office in Shanghai, not a Hongqiao hub). Juneyao Air rests on Wikipedia alone: its site gave a bare script shell to a plain fetch (368 bytes) and the browser try was refused by the session's proxy, which does not carry plain-http requests, so it had its two tries. Shanghai Airlines and Spring Airlines are kept as flying from here (see above)."
+  },
+  {
+   "claim": "Hongqiao mainly handles domestic flights plus regional flights within East Asia",
+   "verdict": "cut",
+   "note": "Found while checking the airport's role: the Shanghai government's airport guide (from the Airport Authority, June 2026) says Hongqiao 'primarily serves domestic flights and regional flights within East Asia', while Pudong handles both international and domestic flights; Wikipedia names five international routes (Haneda, Gimpo, Songshan, Hong Kong, Macau); Skytrax calls it 'the best, large domestic airport in China'. This matters to a UK agent: no flight from the UK lands here, so a UK client reaches Hongqiao on a domestic or regional connection.",
+   "sources": [
+    {
+     "file": "shgov-airplane",
+     "org": "Shanghai Municipal People's Government (english.shanghai.gov.cn), from the Shanghai Airport Authority",
+     "dated": "2026-06-04 (updated)",
+     "quote": [
+      "It primarily serves domestic flights and regional flights within East Asia.",
+      "Pudong airport handles both international and domestic flights."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "The airport presently offers mainly domestic flights"
+    },
+    {
+     "file": "skytrax",
+     "org": "Skytrax (the rating body, skytraxratings.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "This is the best, large domestic airport in China"
+    }
+   ],
+   "why": "Held back: verified with two sources, but a new fact that replaces nothing in the old text, so the sweep's rule keeps it out. Recommended for Andy, since it tells a UK agent that clients arrive at Pudong. Would read: \"It mainly handles domestic flights, with regional flights within East Asia; flights from the UK use Pudong.\" (the last clause would need its own check)."
+  },
+  {
+   "claim": "Spring Airlines operates from Terminal 1",
+   "verdict": "cut",
+   "sources": [
+    {
+     "file": "shgov-cutoff",
+     "org": "Shanghai Municipal People's Government (english.shanghai.gov.cn), from the Shanghai Airport Group",
+     "dated": "2025-10-28",
+     "quote": "Spring Airlines, which operates from Terminal 1"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "Terminal 1 is now used only for international flights, Spring Airlines, Hebei Airlines and XiamenAir"
+    }
+   ],
+   "why": "Held back: verified with two sources, but a new fact that replaces nothing (the old text says only to check the terminal). It would sharpen the Terminal 1 advice if Andy wants it."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and the one to choose when a client wants to be in the city quickly",
+   "why": "The old text's advice, kept on the confirmed distances: Hongqiao 13 km from the centre, Pudong about 30 km (Shanghai government)."
+  },
+  {
+   "text": "The real advantage is the railway.",
+   "why": "The old text's judgement, kept on the confirmed hub with a high speed railway station and the Airport Link Line."
+  },
+  {
+   "text": "so check which terminal a flight uses",
+   "why": "Advice on the confirmed two terminals, a metro ride apart on Line 10."
+  },
+  {
+   "text": "which makes a two airport itinerary far easier than it used to be",
+   "why": "The old text's judgement on the confirmed Airport Link Line (about 40 minutes between the airports, Shanghai government)."
+  }
+ ],
+ "tracerOk": {
+  "Since December": "A sentence opening and a month, not a name; December 2024 is on the operator's page (opened on Dec 27, 2024) and Wikipedia."
+ }
+}

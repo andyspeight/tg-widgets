@@ -1,0 +1,498 @@
+{
+ "iata": "CTG",
+ "id": "recVVj8JUfDyLMmX8",
+ "name": "Rafael Nuñez International Airport",
+ "country": "Colombia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Rafael_N%C3%BA%C3%B1ez_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Cartagena's airport, and the largest in Colombia's northern Caribbean region by passenger numbers. It sits in the Crespo neighbourhood in the north of the city, between the Caribbean coast and the Ciénaga de la Virgen marsh, which makes for an unusually short run into town.\n\nThe route map is wide for a regional airport. American, JetBlue, Avianca, Copa, LATAM, Wingo, EasyFly, Air Panama and Air Transat have flown international services to North, Central and South America, and KLM and Edelweiss serve Amsterdam and Zurich by way of Bogotá, though neither airline can carry a passenger only between Cartagena and Bogotá.\n\nThe runway is 2,600 metres by 60 at sea level, which is enough for modern transatlantic aircraft, and there is parking for eleven aircraft.\n\nOINAC has held a ten year contract to run and expand the airport since March 2024.\n\nIt is named after Rafael Núñez, a Cartagena native who was president of Colombia and wrote the words to the national anthem.",
+ "after": "Cartagena's airport sits beside the Crespo neighbourhood in the north of the city, a short run from the centre. It handled more than 7.7 million passengers in 2025, a record, according to its operator, OINAC.\n\nThe route map is wide for a regional airport. International flights reach North, Central and South America, among them American Airlines from Miami. KLM flies to Amsterdam on a route that also calls at Bogotá, and Edelweiss runs a seasonal Zurich service the same way.\n\nThe runway is 2,600 metres long and at sea level, which is enough for modern transatlantic aircraft.\n\nOINAC took over the airport in early 2024 under a concession to expand it, and modernisation works, which include a new international terminal, are under way.\n\nIt is named after Rafael Núñez.",
+ "claims": [
+  {
+   "claim": "Cartagena's airport",
+   "verdict": "confirmed",
+   "inAfter": "Cartagena's airport",
+   "note": "start.mjs found no archived copy of the article the Overview was drafted from, so wikipedia-now (revision of 2026-09-19) is source 1 throughout this ledger.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "is an international airport serving the Caribbean port city of Cartagena, Colombia"
+    },
+    {
+     "file": "op-who-we-are",
+     "org": "OINAC (the operator, aeropuertocartagena.com.co)",
+     "dated": "read 2026-09-23 (live page, 2026 © OINAC)",
+     "quote": "the Rafael Núñez International Airport in the city of Cartagena de Indias"
+    }
+   ]
+  },
+  {
+   "claim": "beside the Crespo neighbourhood in the north of the city",
+   "verdict": "softened",
+   "inAfter": "beside the Crespo neighbourhood in the north of the city",
+   "note": "Was 'in the Crespo neighbourhood'. Wikipedia puts the airport in the centre of Crespo; the operator's FAQ describes Crespo as the neighbourhood near the airport, so 'beside' is what both support. The coordinates put the airport 5.4 km from the centre at 336 degrees, north west, which passes 'north of the city' (adjacent compass point).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "in the center of Crespo, a neighborhood in northern Cartagena"
+    },
+    {
+     "file": "op-faq",
+     "org": "OINAC (the operator, aeropuertocartagena.com.co)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The Integrated Mass Transportation System of Cartagena Transcaribe has routes that travel through the Crespo neighborhood near the Airport"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 5.4 km (3.3 miles)",
+      "Bearing from the city centre: 336 degrees, which is north west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "more than 7.7 million passengers in 2025, a record (operator)",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "OINAC",
+   "inAfter": "It handled more than 7.7 million passengers in 2025, a record, according to its operator, OINAC.",
+   "note": "Replaces 'the largest in Colombia's northern Caribbean region by passenger numbers' (cut below), the same measure made current: Wikipedia's ranking rests on 2018 figures (5,463,873 in its infobox) and no regional ranking could be read. The operator counted 7,756,298 passengers in 2025, up 3.27 per cent on 2024 and a record (release of 7 January 2026). Only the operator gives the figure (Aerocivil publishes national totals only), so it is named as the operator's.",
+   "sources": [
+    {
+     "file": "op-2025-traffic",
+     "org": "OINAC (the operator, aeropuertocartagena.com.co)",
+     "dated": "2026-01-07",
+     "quote": [
+      "surpassed 7.7 million passengers handled in 2025",
+      "Cartagena, January 7, 2026",
+      "closed 2025 with a total of 7.756.298 passengers, exceeding the 2024 figure by 3,27% and setting a new annual passenger record"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "international flights reach North, Central and South America",
+   "verdict": "confirmed",
+   "inAfter": "International flights reach North, Central and South America",
+   "note": "Wikipedia's list is of airlines that 'have or had' such flights. The operator's live departures board on the evening of 23 September 2026 listed flights to Toronto, Panama and Lima alongside domestic ones, and Aviacionline (21 September 2026) reports American's daily Miami flight.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "have or had international flights from this airport to various cities in North, Central and South America"
+    },
+    {
+     "file": "op-direct-flights",
+     "org": "OINAC (the operator, aeropuertocartagena.com.co)",
+     "dated": "live departures board read 2026-09-23",
+     "quote": [
+      "AMSTERDAM BOGOTA BUCARAMANG CALI Cartagena LIMA PANAMAINTL PEREIRA RIONEGRO Cartagena",
+      "2026-09-23 18:00 159 Toronto Cartagena",
+      "2026-09-23 17:25 2391 LIMA Cartagena"
+     ]
+    },
+    {
+     "file": "avl-american",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-09-21",
+     "quote": [
+      "lunes 21 de septiembre de 2026",
+      "American Airlines opera de manera regular entre el Aeropuerto Internacional de Miami (MIA) y el Aeropuerto Internacional Rafael Núñez (CTG) con vuelos diarios operados en aeronaves Boeing 737-800"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "American Airlines' daily flight from Miami",
+   "verdict": "corrected",
+   "inAfter": "among them American Airlines from Miami",
+   "note": "Replaces the list of nine airlines that 'have flown' international services (cut below) with an airline and route confirmed as current. In review (23 Sep) 'daily' was taken out: the frequency rests on Aviacionline alone (Wikipedia lists American among the airlines without a frequency).",
+   "sources": [
+    {
+     "file": "avl-american",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-09-21",
+     "quote": [
+      "lunes 21 de septiembre de 2026",
+      "American Airlines opera de manera regular entre el Aeropuerto Internacional de Miami (MIA) y el Aeropuerto Internacional Rafael Núñez (CTG) con vuelos diarios operados en aeronaves Boeing 737-800"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "Airlines including Air Panama, Air Transat, American Airlines, Avianca"
+    }
+   ]
+  },
+  {
+   "claim": "KLM flies to Amsterdam on a route that also calls at Bogotá",
+   "verdict": "corrected",
+   "inAfter": "KLM flies to Amsterdam on a route that also calls at Bogotá",
+   "note": "Was 'KLM ... serve[s] Amsterdam ... by way of Bogotá'. The route is a triangle, Amsterdam, Bogotá, Cartagena, Amsterdam (Volavi, July 2023, when it went daily), so the flight home to Amsterdam leaves Cartagena direct; 'by way of Bogotá' is true only of the flight in. The operator's departures board shows the Amsterdam flight leaving Cartagena on 23 September 2026 (flight 741 at 18:00; KL is among the airline codes listed).",
+   "sources": [
+    {
+     "file": "volavi-klm",
+     "org": "Volavi (Colombian aviation news, volavi.co)",
+     "dated": "2023-07-24",
+     "quote": [
+      "julio 24, 2023",
+      "Luego de haber aumentado frecuencias en su ruta Ámsterdam - Bogotá - Cartagena - Ámsterdam, hasta alcanzar el vuelo diario"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "KLM's flight is from Bogotá to Amsterdam via Cartagena."
+    },
+    {
+     "file": "op-direct-flights",
+     "org": "OINAC (the operator, aeropuertocartagena.com.co)",
+     "dated": "live departures board read 2026-09-23",
+     "quote": [
+      "AV LA JA KL P5 TS CM",
+      "2026-09-23 18:00 741 AMSTERDAM Cartagena"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Edelweiss runs a seasonal Zurich service on the same kind of route",
+   "verdict": "corrected",
+   "inAfter": "and Edelweiss runs a seasonal Zurich service the same way",
+   "note": "Was 'Edelweiss serve[s] Zurich by way of Bogotá', as if all year. Aviacionline (21 September 2026): the Zurich, Bogotá, Cartagena, Zurich triangle is seasonal, twice a week with Airbus A350-900s from 25 October 2026 to the end of March 2027, the airline's fourth winter season in Colombia. So in September there is no Edelweiss flight.",
+   "sources": [
+    {
+     "file": "avl-edelweiss",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-09-21",
+     "quote": [
+      "lunes 21 de septiembre de 2026",
+      "Edelweiss reanudará sus vuelos estacionales entre Zúrich y Bogotá/Cartagena a partir del 25 de octubre",
+      "La ruta triangular Zúrich-Bogotá-Cartagena-Zúrich estará activa hasta finales de marzo de 2027"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "Edelweiss Air's flight is from Bogotá to Zurich via Cartagena."
+    }
+   ]
+  },
+  {
+   "claim": "runway 2,600 metres long, at sea level",
+   "verdict": "confirmed",
+   "inAfter": "The runway is 2,600 metres long and at sea level",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 01/19: 2,600 m (8,530 ft), ASP",
+      "Runways listed: 1",
+      "elevation 4 ft (1 m)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "2,600 m long at 0 meters above sea level"
+    }
+   ]
+  },
+  {
+   "claim": "enough for modern transatlantic aircraft",
+   "verdict": "confirmed",
+   "inAfter": "which is enough for modern transatlantic aircraft",
+   "note": "Borne out by what flies here: KLM put Boeing 787-10s on the Cartagena route (Volavi, 2023) and Edelweiss flies Airbus A350-900s (Aviacionline, 2026).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "provides sufficient capacity for modern transatlantic aircraft operations without problems"
+    },
+    {
+     "file": "avl-edelweiss",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-09-21",
+     "quote": "La operación será dos veces por semana, los miércoles y domingos, con Airbus A350-900."
+    },
+    {
+     "file": "volavi-klm",
+     "org": "Volavi (Colombian aviation news, volavi.co)",
+     "dated": "2023-07-24",
+     "quote": "KLM, la aerolínea de Países Bajos, anunció que volará en Boeing 787-10 en sus rutas a Colombia."
+    }
+   ]
+  },
+  {
+   "claim": "OINAC took over the airport in early 2024",
+   "verdict": "corrected",
+   "inAfter": "OINAC took over the airport in early 2024",
+   "note": "ANI, the national infrastructure agency, and OINAC signed the start of the new concession on 29 February 2024, when SACSA, which had run the airport since 1996, handed it back (ANI's release, as published on the operator's site); Wikipedia says 1 March 2024. 'Early 2024' is what both support. Aviacionline (19 August 2026) confirms OINAC as the current concession holder.",
+   "sources": [
+    {
+     "file": "op-ani-new-concession",
+     "org": "ANI (Colombia's National Infrastructure Agency), release of 29 February 2024 as published on the operator's site",
+     "dated": "2024-02-29",
+     "quote": [
+      "Cartagena, February 29, 2024 (@ANI_Colombia).",
+      "We received the infrastructure of the Rafael Núñez airport from the previous concessionaire and began the new concession contract",
+      "For its part, Sociedad Aeroportuaria de la Costa SA (Sacsa), a concessionaire that has been in charge of the airport operation since 1996, delivered the areas, goods, works and improvements carried out."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "OINAC S.A. has a 10 years contract to administer and expand the airport since March 1st 2024"
+    },
+    {
+     "file": "avl-ctg-internacional",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-08-19",
+     "quote": [
+      "miércoles 19 de agosto de 2026",
+      "La concesión Operadora Internacional Aeropuerto de Cartagena ( OINAC ) confirmó"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "under a concession to expand it",
+   "verdict": "confirmed",
+   "inAfter": "under a concession to expand it",
+   "sources": [
+    {
+     "file": "op-ani-new-concession",
+     "org": "ANI (Colombia's National Infrastructure Agency), release of 29 February 2024 as published on the operator's site",
+     "dated": "2024-02-29",
+     "quote": "signed the contract initiation document that will allow the expansion, remodeling, operation and maintenance of this air terminal"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "to administer and expand the airport"
+    },
+    {
+     "file": "avl-ctg-internacional",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-08-19",
+     "quote": "la concesionaria avanza con el plan de modernización bajo el esquema de Asociación Público-Privada (APP)"
+    }
+   ]
+  },
+  {
+   "claim": "modernisation works, including a new international terminal, are under way",
+   "verdict": "corrected",
+   "inAfter": "and modernisation works, which include a new international terminal, are under way",
+   "note": "What the old 'contract to run and expand' now means for a traveller: building work at the airport. ANI's release sets out a new 17,360 square metre international terminal and a remodelled existing one; the operator's project page lists the new international building and says the project is under way; Aviacionline (19 August 2026) reports the airport handling its traffic in the middle of the works.",
+   "sources": [
+    {
+     "file": "op-modernization",
+     "org": "OINAC (the operator, aeropuertocartagena.com.co)",
+     "dated": "read 2026-09-23 (live page, 2026 © OINAC)",
+     "quote": [
+      "New environmentally sustainable international building",
+      "an ambitious modernization project underway"
+     ]
+    },
+    {
+     "file": "avl-ctg-internacional",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-08-19",
+     "quote": [
+      "OINAC atendió 4.482 vuelos durante el último mes en medio de las obras de modernización.",
+      "Las obras apuntan a ampliar la capacidad operativa de la terminal"
+     ]
+    },
+    {
+     "file": "op-ani-new-concession",
+     "org": "ANI (Colombia's National Infrastructure Agency), release of 29 February 2024 as published on the operator's site",
+     "dated": "2024-02-29",
+     "quote": "will allow for a new international terminal of 17.360 m 2 and the remodeling of 2.814 m 2 of the existing terminal"
+    }
+   ]
+  },
+  {
+   "claim": "named after Rafael Núñez",
+   "verdict": "confirmed",
+   "inAfter": "It is named after Rafael Núñez.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "It is named after Cartagena native Rafael Núñez (1825–1894)"
+    },
+    {
+     "file": "op-who-we-are",
+     "org": "OINAC (the operator, aeropuertocartagena.com.co)",
+     "dated": "read 2026-09-23 (live page, 2026 © OINAC)",
+     "quote": "the Rafael Núñez International Airport in the city of Cartagena de Indias"
+    }
+   ]
+  },
+  {
+   "claim": "the largest in Colombia's northern Caribbean region by passenger numbers",
+   "verdict": "cut",
+   "wasBefore": "and the largest in Colombia's northern Caribbean region by passenger numbers",
+   "why": "Wikipedia alone, on 2018 figures; no regional ranking or figures for the other Caribbean airports could be read (Aerocivil's releases give national totals only). Replaced by the operator's own 2025 total, attributed (above).",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2018",
+      "stat1_data = 5,463,873"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in the Crespo neighbourhood",
+   "verdict": "cut",
+   "wasBefore": "It sits in the Crespo neighbourhood in the north of the city",
+   "why": "Reworded to 'beside the Crespo neighbourhood' (above), which Wikipedia and the operator's FAQ both support."
+  },
+  {
+   "claim": "between the Caribbean coast and the Ciénaga de la Virgen marsh",
+   "verdict": "cut",
+   "wasBefore": "between the Caribbean coast and the Ciénaga de la Virgen marsh",
+   "why": "Wikipedia alone; the operator's pages read (about us, FAQ, transport, destination, contact) do not describe the setting."
+  },
+  {
+   "claim": "an unusually short run into town",
+   "verdict": "cut",
+   "wasBefore": "which makes for an unusually short run into town",
+   "why": "'Unusually' is a comparison no source makes. Kept as 'a short run from the centre', listed as opinion, resting on the coordinates (5.4 km in a straight line)."
+  },
+  {
+   "claim": "nine named airlines have flown international services",
+   "verdict": "cut",
+   "wasBefore": "American, JetBlue, Avianca, Copa, LATAM, Wingo, EasyFly, Air Panama and Air Transat have flown international services to North, Central and South America",
+   "why": "Wikipedia's list is of airlines that 'have or had' international flights. Only American is confirmed as flying an international route now by a dated source (Aviacionline, Miami daily), and it is kept. The operator's airline page shows logos, naming in text only Avianca, LATAM and JetBlue, which have desks in the main hall; its live board lists the codes AV, LA, JA, KL, P5, TS and CM, but a code is not a name on the page. EasyFly and Air Panama appear in no current source read. The regions are kept (above)."
+  },
+  {
+   "claim": "KLM and Edelweiss serve Amsterdam and Zurich by way of Bogotá",
+   "verdict": "cut",
+   "wasBefore": "and KLM and Edelweiss serve Amsterdam and Zurich by way of Bogotá",
+   "why": "Made precise (above): both are triangular routes, the flight in calls at Bogotá and the flight home leaves Cartagena direct; Edelweiss flies only from late October to the end of March."
+  },
+  {
+   "claim": "neither airline can carry a passenger only between Cartagena and Bogotá",
+   "verdict": "cut",
+   "wasBefore": "though neither airline can carry a passenger only between Cartagena and Bogotá",
+   "why": "Wikipedia alone; neither Volavi nor Aviacionline mentions traffic rights on the Bogotá to Cartagena leg."
+  },
+  {
+   "claim": "runway 60 metres wide",
+   "verdict": "cut",
+   "wasBefore": "The runway is 2,600 metres by 60 at sea level",
+   "why": "The width is disputed: Wikipedia gives 60 m, OurAirports' runway table 148 ft (45 m). Length and elevation are kept (above)."
+  },
+  {
+   "claim": "parking for eleven aircraft",
+   "verdict": "cut",
+   "wasBefore": "and there is parking for eleven aircraft",
+   "why": "Wikipedia alone; the operator's modernisation page gives its figures as animated counters that read 0 in the saved text."
+  },
+  {
+   "claim": "a ten year contract since March 2024",
+   "verdict": "cut",
+   "wasBefore": "OINAC has held a ten year contract to run and expand the airport since March 2024.",
+   "why": "The length is wrong. ANI's release of 29 February 2024 (as published on the operator's site) gives the concession as 8.5 years: one of pre-construction, two and a half of construction and five of operation and maintenance, for more than 920,000 million pesos. Only that release gives the length, so it is not in the text; the start and the purpose are kept (above). For Andy: the 8.5 years could go in, attributed to ANI.",
+   "sources": [
+    {
+     "file": "op-ani-new-concession",
+     "org": "ANI (Colombia's National Infrastructure Agency), release of 29 February 2024 as published on the operator's site",
+     "dated": "2024-02-29",
+     "quote": [
+      "There will be 8,5 years of concession: 1 year of pre-construction, 2,5 years of construction and 5 years of operation and maintenance.",
+      "over the next 8,5 years, with an investment of more than $920.000 million"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "OINAC S.A. has a 10 years contract"
+    }
+   ]
+  },
+  {
+   "claim": "Núñez was a Cartagena native, president and author of the anthem's words",
+   "verdict": "cut",
+   "wasBefore": "a Cartagena native who was president of Colombia and wrote the words to the national anthem",
+   "why": "Wikipedia alone. The Banco de la República's encyclopedia answers with a Radware CAPTCHA (bot check, not tried again), Encyclopedia.com answered 500 for the entry address and the Foreign Ministry's national symbols page is a 404. The name itself is kept (above)."
+  },
+  {
+   "claim": "use the airport's authorised taxi stations",
+   "verdict": "cut",
+   "why": "Held back: the operator has two authorised taxi stations, at the domestic and international exits, and recommends passengers always use them; the FCDO says there are authorised taxi booths at most Colombian airports and warns of robberies in unlicensed taxis. The operator's FAQ adds that Transcaribe's trunk route T102 (Portal to Crespo) runs past the airport. Useful, but nothing in the old text to replace. For Andy to decide.",
+   "sources": [
+    {
+     "file": "op-transport",
+     "org": "OINAC (the operator, aeropuertocartagena.com.co)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "We have two authorized taxi stations, located at the national and international exits. We recommend our passengers always use these stations for transfers to other areas of the city since they are operated by reliable drivers."
+    },
+    {
+     "file": "fcdo-colombia-safety",
+     "org": "UK FCDO",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "There are authorised taxi booths at most airports in Colombia.",
+      "There have been reports of express kidnappings, assaults and robberies in unlicensed taxis."
+     ]
+    },
+    {
+     "file": "op-faq",
+     "org": "OINAC (the operator, aeropuertocartagena.com.co)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "the trunk route T102 Portal – Crespo operates from Monday to Friday 5:00 – 21:00"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO areas: Cartagena not among them",
+   "verdict": "cut",
+   "why": "Held back, for the record: the FCDO's list (updated 23 September 2026) advises against all but essential travel to the southern part of Bolívar Department, not to Cartagena, in the north (the 'Cartagena del Chairá' on the list is a town in Caquetá). Its current headline concern on the coast is Santa Marta, under heightened security measures. Nothing to add to the Overview.",
+   "sources": [
+    {
+     "file": "fcdo-colombia-warnings",
+     "org": "UK FCDO",
+     "dated": "2026-09-23",
+     "quote": [
+      "Updated: 23 September 2026",
+      "the southern part of Bolívar Department",
+      "Santa Marta remains under heightened security measures following a major operation against armed groups in the area."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "a short run from the centre",
+   "why": "Follows from the verified location: 5.4 km in a straight line from the city centre (OurAirports and GeoNames), in the city's north (Wikipedia). Kept from the old text without its 'unusually'."
+  },
+  {
+   "text": "The route map is wide for a regional airport.",
+   "why": "A signpost kept from the old text; the sourced routes follow (North, Central and South America, Amsterdam, Zurich)."
+  }
+ ],
+ "tracerOk": {}
+}
