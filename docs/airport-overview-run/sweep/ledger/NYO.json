@@ -1,0 +1,350 @@
+{
+ "iata": "NYO",
+ "id": "recT05EObux9naxuR",
+ "name": "Stockholm Skavsta Airport",
+ "country": "Sweden",
+ "wikipedia": "https://en.wikipedia.org/wiki/Stockholm_Skavsta_Airport",
+ "audited": "2026-09-23",
+ "before": "Sold as a Stockholm airport and 100 km from it, which is the first thing to tell a client. Skavsta is in Nyköping Municipality, 5 km from Nyköping itself, and although it carries the Stockholm STO code it is well outside Stockholm County. Arlanda is the city's main airport.\n\nThe transfer is the whole question. Flygbussarna coaches run directly to Cityterminalen in central Stockholm, timed to the flights, and take about ninety minutes. There are also airport buses to Södertälje, Linköping and Norrköping, and local buses into Nyköping and to its railway station 7 km away, from which Mälartåg regional trains run on the Norrköping to Stockholm line.\n\nThat should change. The Ostlänken high speed line is planned to include a station at the airport, due by 2035, which would cut the journey from Stockholm Central to 52 minutes.\n\nThe airport is Sweden's seventh busiest with 364,603 passengers in 2024, mostly low cost carriers and freight, and was designated an official contingency airport in 2023.",
+ "after": "Sold as a Stockholm airport and about 100 km from it, which is the first thing to tell a client. Skavsta is in Nyköping Municipality, about 7 km from Nyköping itself, and it lies well outside Stockholm County. Arlanda is the city's main airport.\n\nThe transfer is the whole question. Flygbussarna coaches run to Cityterminalen in central Stockholm, and others to Norrköping and Linköping. Local buses run into Nyköping by way of its railway station, 7 km away.\n\nThat should change. The Ostlänken rail line, due to be finished in 2035, is planned to include a station beside the terminal.\n\nOn Eurostat's figures it was Sweden's sixth busiest airport in 2025, with about 340,000 passengers, mostly on low-cost airlines. The government made it an official contingency airport from 2023.",
+ "claims": [
+  {
+   "claim": "sold as a Stockholm airport and about 100 km from it",
+   "verdict": "confirmed",
+   "inAfter": "Sold as a Stockholm airport and about 100 km from it",
+   "note": "The airport's own name is Stockholm Skavsta Airport. Straight line to Stockholm 89.3 km (ratio 1.12 for 100 km).",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Stockholm Skavsta Airport (the airport operator, skavsta.se)",
+     "dated": "read 2026-09-23 (the airport's About page)",
+     "quote": "The airport is a owned by the Swedish real-estate company, Arlandastad Group"
+    },
+    {
+     "file": "op-bus-train",
+     "org": "Stockholm Skavsta Airport (the airport operator, skavsta.se)",
+     "dated": "read 2026-09-23 (the airport's bus, train and taxi page)",
+     "quote": "It is easy to get to and from Stockholm Skavsta Airport with bus, train or taxi."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "approximately 100 km (62 mi) southwest of Stockholm"
+    },
+    {
+     "file": "geo-stockholm",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the airport to Stockholm: 89.3 km"
+    }
+   ]
+  },
+  {
+   "claim": "in Nyköping Municipality",
+   "verdict": "confirmed",
+   "inAfter": "Skavsta is in Nyköping Municipality",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Stockholm Skavsta Airport (the airport operator, skavsta.se)",
+     "dated": "read 2026-09-23 (the airport's About page)",
+     "quote": "to operate airport activity at Skavsta Airport in Nyköping Municipality"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "is an international airport in Nyköping Municipality, Sweden"
+    }
+   ]
+  },
+  {
+   "claim": "about 7 km from Nyköping",
+   "verdict": "corrected",
+   "inAfter": "about 7 km from Nyköping itself",
+   "note": "Was '5 km', Wikipedia's figure, which fails the coordinates check (6.9 km in a straight line from the GeoNames centre, a ratio of 0.72). The airport puts Nyköping's railway station 7 km away.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 6.9 km (4.3 miles)"
+    },
+    {
+     "file": "op-bus-train",
+     "org": "Stockholm Skavsta Airport (the airport operator, skavsta.se)",
+     "dated": "read 2026-09-23 (the airport's bus, train and taxi page)",
+     "quote": "The local train station in Nyköping is 7 km away from the airport."
+    }
+   ]
+  },
+  {
+   "claim": "well outside Stockholm County",
+   "verdict": "confirmed",
+   "inAfter": "and it lies well outside Stockholm County.",
+   "note": "GeoNames puts Nyköping, the capital of Södermanland, in a different first-order division from Stockholm; the airport names the Regional Council of Sörmland among its partners.",
+   "sources": [
+    {
+     "file": "geo-stockholm",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Nyköping (GeoNames 2687700): class PPLA, admin1 SE.18 Södermanland",
+      "Stockholm admin1: SE.26 Stockholm (Stockholm County)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "The airport is located far outside Stockholm Municipality and Stockholm County"
+    },
+    {
+     "file": "op-about",
+     "org": "Stockholm Skavsta Airport (the airport operator, skavsta.se)",
+     "dated": "read 2026-09-23 (the airport's About page)",
+     "quote": "Regional Council of Sörmland"
+    }
+   ]
+  },
+  {
+   "claim": "Arlanda is Stockholm's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Arlanda is the city's main airport.",
+   "sources": [
+    {
+     "file": "eurostat-se",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat SE_ESSA STOCKHOLM/ARLANDA airport: passengers carried in 2025: 24,309,609",
+      "Eurostat SE_ESKN STOCKHOLM/SKAVSTA airport: passengers carried in 2025: 341,571"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "Stockholm's main international airport is Stockholm Arlanda Airport."
+    }
+   ]
+  },
+  {
+   "claim": "Flygbussarna to Cityterminalen; others to Norrköping and Linköping",
+   "verdict": "corrected",
+   "inAfter": "Flygbussarna coaches run to Cityterminalen in central Stockholm, and others to Norrköping and Linköping.",
+   "note": "Was 'timed to the flights, and take about ninety minutes', with buses to Södertälje too. The airport's own list has Cityterminalen and Norrköping to Linköping only; the timing and the ninety minutes rest on Wikipedia alone (Flygbussarna's site showed a DataDome check, so it was not read).",
+   "sources": [
+    {
+     "file": "op-bus-train",
+     "org": "Stockholm Skavsta Airport (the airport operator, skavsta.se)",
+     "dated": "read 2026-09-23 (the airport's bus, train and taxi page)",
+     "quote": [
+      "Flygbussarna Airport coaches operates to and from Stockholm Skavsta Airport on these routes:",
+      "Skavsta - Stockholm Cityterminalen",
+      "Skavsta - Norrköping - Linköping"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "Flygbussarna operate coaches directly between Stockholm Skavsta Airport and Cityterminalen Bus Terminal in Central Stockholm."
+    }
+   ]
+  },
+  {
+   "claim": "local buses into Nyköping by way of its railway station, 7 km away",
+   "verdict": "confirmed",
+   "inAfter": "Local buses run into Nyköping by way of its railway station, 7 km away.",
+   "sources": [
+    {
+     "file": "op-bus-train",
+     "org": "Stockholm Skavsta Airport (the airport operator, skavsta.se)",
+     "dated": "read 2026-09-23 (the airport's bus, train and taxi page)",
+     "quote": [
+      "Sörmlandstrafiken´s bus no. 515 will take you to and from Nyköping city center via the train- and bus stations",
+      "The local train station in Nyköping is 7 km away from the airport."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": [
+      "The railway station in Nyköping is 7 kilometres (4 mi) away.",
+      "Local buses and taxis provide connections to the airport."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Ostlänken, due to be finished in 2035, is planned to include a station beside the terminal",
+   "verdict": "confirmed",
+   "inAfter": "The Ostlänken rail line, due to be finished in 2035, is planned to include a station beside the terminal.",
+   "note": "Trafikverket plans a travel centre at the airport with the railway as close to the terminal as possible, and says Ostlänken is finished in 2035; the airport says the same of the station. The 52 minutes from Stockholm Central rests on Wikipedia alone and is cut.",
+   "sources": [
+    {
+     "file": "trafikverket-nykoping",
+     "org": "Trafikverket (the Swedish Transport Administration)",
+     "dated": "read 2026-09-23 (its Ostlänken page for Nyköping)",
+     "quote": [
+      "Vid Skavsta flygplats planeras ett framtida resecentrum d&auml;r du kan byta mellan t&aring;g, buss och flyg.",
+      "Ostl&#xE4;nken &#xE4;r klar 2035"
+     ]
+    },
+    {
+     "file": "op-about",
+     "org": "Stockholm Skavsta Airport (the airport operator, skavsta.se)",
+     "dated": "read 2026-09-23 (the airport's About page)",
+     "quote": "A new rail link, The East Link/ Ostlänken, will incorporate a station within the airport area, close to the terminal."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "The East Link (Ostlänken) high-speed rail project is planned to include a station at Skavsta Airport, to be opened by 2035."
+    }
+   ]
+  },
+  {
+   "claim": "on Eurostat's figures, sixth busiest in Sweden in 2025 with about 340,000 passengers",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Eurostat",
+   "inAfter": "On Eurostat's figures it was Sweden's sixth busiest airport in 2025, with about 340,000 passengers",
+   "note": "Was 'seventh busiest with 364,603 passengers in 2024'. Eurostat: 341,571 in 2025, behind Arlanda, Landvetter, Luleå, Malmö and Umeå; Swedavia's own table has Bromma at 25,191. The total rests on Eurostat alone, so the sentence names it.",
+   "sources": [
+    {
+     "file": "eurostat-se",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat SE_ESNU UMEA airport: passengers carried in 2025: 721,284",
+      "Eurostat SE_ESKN STOCKHOLM/SKAVSTA airport: passengers carried in 2025: 341,571"
+     ]
+    },
+    {
+     "file": "swedavia-bromma",
+     "org": "Swedavia (2025 annual report)",
+     "dated": "annual and sustainability report 2025",
+     "quote": [
+      "Stockholm Airport",
+      "1,668 2,886 25,191 0 international"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "mostly on low-cost airlines",
+   "verdict": "confirmed",
+   "inAfter": "mostly on low-cost airlines.",
+   "note": "The airport names Wizz Air (since 2004) and Norwegian (since 2023); Ryanair's base closed in November 2021.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "It is served primarily by low-cost airlines and cargo operators."
+    },
+    {
+     "file": "op-about",
+     "org": "Stockholm Skavsta Airport (the airport operator, skavsta.se)",
+     "dated": "read 2026-09-23 (the airport's About page)",
+     "quote": [
+      "In 2004, Wizz Air established traffic at Stockholm Skavsta and still flies to several destinations in Eastern Europe today.",
+      "From April 2023 Norwegian operate the airport"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "an official contingency airport from 2023",
+   "verdict": "confirmed",
+   "inAfter": "The government made it an official contingency airport from 2023.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Stockholm Skavsta Airport (the airport operator, skavsta.se)",
+     "dated": "read 2026-09-23 (the airport's About page)",
+     "quote": "The government has chosen Skavsta to be an official contingency airport from 2023."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "In 2023 Stockholm Skavsta Airport was designated as an official contingency airport (Beredskapsflygplats) by the Swedish government."
+    }
+   ]
+  },
+  {
+   "claim": "5 km from Nyköping",
+   "verdict": "cut",
+   "wasBefore": "5 km from Nyköping itself",
+   "why": "Fails the coordinates check. Corrected (see above)."
+  },
+  {
+   "claim": "carries the Stockholm STO code",
+   "verdict": "cut",
+   "wasBefore": "although it carries the Stockholm STO code",
+   "why": "Wikipedia alone: IATA's code directory is reachable only through its site search."
+  },
+  {
+   "claim": "coaches timed to the flights, about ninety minutes; buses to Södertälje",
+   "verdict": "cut",
+   "wasBefore": "Flygbussarna coaches run directly to Cityterminalen in central Stockholm, timed to the flights, and take about ninety minutes. There are also airport buses to Södertälje, Linköping and Norrköping",
+   "why": "The timing and the journey time rest on Wikipedia alone (Flygbussarna's site showed a DataDome check); the airport's own route list has no Södertälje coach."
+  },
+  {
+   "claim": "Mälartåg trains on the Norrköping to Stockholm line",
+   "verdict": "cut",
+   "wasBefore": "from which Mälartåg regional trains run on the Norrköping to Stockholm line.",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "a high speed station cutting Stockholm Central to 52 minutes",
+   "verdict": "cut",
+   "wasBefore": "The Ostlänken high speed line is planned to include a station at the airport, due by 2035, which would cut the journey from Stockholm Central to 52 minutes.",
+   "why": "The 52 minutes rests on Wikipedia alone; Trafikverket says the Skavsta station is planned for the regional trains on the Nyköping branch."
+  },
+  {
+   "claim": "seventh busiest, 364,603 in 2024; freight",
+   "verdict": "cut",
+   "wasBefore": "The airport is Sweden's seventh busiest with 364,603 passengers in 2024, mostly low cost carriers and freight",
+   "why": "Superseded by the 2025 figures (see above); the freight rests on Wikipedia alone."
+  },
+  {
+   "claim": "Ryanair left in 2021; CAT IIIB landing system from August 2025",
+   "verdict": "cut",
+   "why": "Held back: new facts that replace nothing. The airport says Ryanair's Scandinavian base ran from April 2003 to November 2021, and that its landing system was upgraded to CAT IIIB, for landings in fog, in August 2025.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Stockholm Skavsta Airport (the airport operator, skavsta.se)",
+     "dated": "read 2026-09-23 (the airport's About page)",
+     "quote": [
+      "Between April 2003 and November 2021, Ryanair chose the airport as its Scandinavian base.",
+      "Completed in August 2025."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which is the first thing to tell a client.",
+   "why": "The old text's advice, kept."
+  },
+  {
+   "text": "The transfer is the whole question.",
+   "why": "The old text's framing, kept; the coaches and buses that follow are sourced."
+  },
+  {
+   "text": "That should change.",
+   "why": "The old text's framing, kept; the planned station is sourced."
+  }
+ ],
+ "tracerOk": {
+  "340,000": "Rounded from Eurostat 341,571.",
+  "The Ostlänken": "The tracer reads the opening word with the name; Ostlänken is in Trafikverket's and the airport's pages.",
+  "On Eurostat's": "The tracer reads the opening word with the name; Eurostat is the source's own org."
+ }
+}
