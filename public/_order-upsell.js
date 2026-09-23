@@ -43,21 +43,31 @@ import { listStays, bookingMoment } from './_order-stays.js';
  * document. So "it is not in the spec" says the document is old, not that the
  * search type does not exist.
  *
- * Which leaves `proved`. A tile is only shown once its link has been opened
- * against the live service and landed on a real search:
+ * Which leaves `status`, and it is settled rather than guessed at. Both of the
+ * two Andy asked for were BUILT, and their links opened against the live
+ * service on 23 Sep 2026, and the deep linker refused both by name:
  *
- *   - TicketsAttractions and CarRental are built from the document's own worked
- *     examples, parameter for parameter.
- *   - Transfers and AirportExtras are read across from Car Rental, which is the
- *     nearest product the document does describe. That is a reasoned shape, not
- *     a verified one, and the difference matters on a customer's booking: a
- *     search type the service does not know gives them a button that 400s.
- *     `npm run test:order-upsell` prints the exact URL each one would produce,
- *     so opening it in a browser settles it; when it lands on a search, this
- *     flag goes true and the tile ships.
+ *     {"success":false,"error":"Search type Transfers is not currently
+ *      supported by deep linker"}
  *
- * The same rule the Event Tickets deeplink works to, and for the same reason: a
- * missing button is honest and a dead one is not.
+ * So the service validates the search type, the answer is no today, and it is
+ * a Travelify-side gap rather than a shape we got wrong. Andy has raised it
+ * with Darren. The anchors stay built and tested: when the deep linker learns
+ * the types, each tile is one word in this list away from shipping, with its
+ * icon, its copy and its dates already right.
+ *
+ *   'live'     opened against the service and lands on a real search.
+ *              TicketsAttractions and CarRental, built from the document's own
+ *              worked examples parameter for parameter.
+ *   'refused'  asked, and told no in those words. The reason is kept verbatim
+ *              so nobody spends an afternoon rediscovering it.
+ *   'unproved' built and never opened. `npm run test:order-upsell` prints the
+ *              exact URL, so one click settles it.
+ *
+ * Only 'live' reaches a customer. A refused search type answers
+ * {"success":false,...} rather than a search, so shipping one is a button that
+ * fails in front of the person who paid. The same rule the Event Tickets
+ * deeplink works to: a missing button is honest and a dead one is not.
  *
  * Deliberately absent whatever happens: Flights, Accommodation and Packages are
  * the booking itself rather than an addition, and Extras is a bag of supplier
@@ -65,30 +75,46 @@ import { listStays, bookingMoment } from './_order-stays.js';
  */
 export const UPSELL_CATALOGUE = Object.freeze([
   Object.freeze({
-    product: 'TicketsAttractions', st: 'TicketsAttractions', proved: true,
+    product: 'TicketsAttractions', st: 'TicketsAttractions', status: 'live',
     label: 'Things to do', hint: 'Tours, attractions and days out while you are there.',
   }),
   Object.freeze({
-    product: 'CarRental', st: 'CarRental', proved: true,
+    product: 'CarRental', st: 'CarRental', status: 'live',
     label: 'Car hire', hint: 'A car for your trip, picked up when you land.',
   }),
   Object.freeze({
-    product: 'Transfers', st: 'Transfers', proved: false,
+    // Asked and answered, 23 Sep 2026. Andy opened the link built below on a
+    // real application and the deep linker replied, verbatim:
+    //   {"success":false,"error":"Search type Transfers is not currently
+    //    supported by deep linker"}
+    // So the service validates the search type and names the one it refused.
+    // The anchor stays built: if Travelify add the type, this is one word.
+    product: 'Transfers', st: 'Transfers', status: 'refused',
+    reason: 'Travelify\'s deep linker replied "Search type Transfers is not currently supported by deep linker" (23 Sep 2026).',
     label: 'Airport transfers', hint: 'A ride from the airport to where you are staying, and back.',
   }),
   Object.freeze({
-    product: 'AirportExtras', st: 'AirportExtras', proved: false,
+    // Asked and answered the same way, 23 Sep 2026:
+    //   {"success":false,"error":"Search type AirportExtras is not currently
+    //    supported by deep linker"}
+    product: 'AirportExtras', st: 'AirportExtras', status: 'refused',
+    reason: 'Travelify\'s deep linker replied "Search type AirportExtras is not currently supported by deep linker" (23 Sep 2026).',
     label: 'Airport extras', hint: 'Parking, lounges and fast track at the airport you fly from.',
   }),
 ]);
 
 /** The tiles a customer can actually be shown, in order. */
 export const UPSELL_PRODUCTS = Object.freeze(
-  UPSELL_CATALOGUE.filter((t) => t.proved).map((t) => t.product));
+  UPSELL_CATALOGUE.filter((t) => t.status === 'live').map((t) => t.product));
 
 /** Built, and waiting on one click against the live service. See above. */
 export const AWAITING_PROOF = Object.freeze(
-  UPSELL_CATALOGUE.filter((t) => !t.proved).map((t) => t.product));
+  UPSELL_CATALOGUE.filter((t) => t.status === 'unproved').map((t) => t.product));
+
+/** Asked for, built, and refused by the service. Product to the reason why. */
+export const REFUSED = Object.freeze(UPSELL_CATALOGUE
+  .filter((t) => t.status === 'refused')
+  .reduce((acc, t) => { acc[t.product] = t.reason; return acc; }, {}));
 
 /** Search type by product, for every tile in the catalogue. */
 export const SEARCH_TYPE = Object.freeze(
@@ -364,9 +390,9 @@ export function partySize(order) {
 export function upsellTiles(order, opts = {}) {
   if (!order) return [];
   const enabled = (opts && opts.enabled) || {};
-  // `include` is for the test and the staff probe: it builds a tile for a
-  // product that is in the catalogue but not yet proved, so its real URL can be
-  // read off and opened. It is never passed by the API.
+  // `include` is for the test: it builds a tile for a product that is in the
+  // catalogue but not live, so its real URL can be read off and opened against
+  // the service. It is never passed by the API, so it cannot reach a customer.
   const include = (opts && Array.isArray(opts.include)) ? opts.include : [];
   const booked = bookedProducts(order);
   const trip = tripShape(order);
@@ -378,7 +404,8 @@ export function upsellTiles(order, opts = {}) {
   const toDate = trip.checkOut || trip.inboundDate || fromDate;
 
   const tiles = [];
-  const wanted = include.length ? UPSELL_CATALOGUE.filter((t) => t.proved || include.includes(t.product)).map((t) => t.product)
+  const wanted = include.length
+    ? UPSELL_CATALOGUE.filter((t) => t.status === 'live' || include.includes(t.product)).map((t) => t.product)
     : UPSELL_PRODUCTS;
   for (const product of wanted) {
     if (booked.has(product)) continue;

@@ -22,7 +22,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { upsellTiles, upsellUrl, bookedProducts, tripShape, partySize, travellerList,
-  UPSELL_PRODUCTS, UPSELL_CATALOGUE, AWAITING_PROOF, CHILD_AGE_WHEN_UNKNOWN } from '../public/_order-upsell.js';
+  UPSELL_PRODUCTS, UPSELL_CATALOGUE, AWAITING_PROOF, REFUSED, CHILD_AGE_WHEN_UNKNOWN } from '../public/_order-upsell.js';
 
 let passed = 0, failed = 0;
 const ok = (label, cond, detail) => {
@@ -61,8 +61,8 @@ console.log("Andy's example, a flight and hotel to Paris");
   ok('the two linkable additions are offered', tiles.length === 2, tiles.map((t) => t.product).join(', '));
   ok('and neither the flight nor the hotel is offered again',
     !find(tiles, 'Flights') && !find(tiles, 'Accommodation'));
-  ok('transfers and airport extras are built and waiting on proof, not forgotten',
-    AWAITING_PROOF.join(',') === 'Transfers,AirportExtras');
+  ok('transfers and airport extras are built and refused, not forgotten',
+    !!REFUSED.Transfers && !!REFUSED.AirportExtras);
   ok('and neither is offered as a tile',
     !find(tiles, 'Transfers') && !find(tiles, 'AirportExtras'));
 
@@ -231,23 +231,29 @@ console.log('\nthe deep link, against Travelify\'s own examples');
   ok('no tile means no link', upsellUrl(null, '474') === '');
 }
 
-// ── The two that are built but not yet proved ────────────────────────────────
-// Travelify's deep linking document is from 2022 and is NOT the whole list: our
-// own Event Tickets widgets book through TicketAccommodation and
-// TicketAccommodationFlight, neither of which appears in it. So transfers and
-// airport extras may well work; they are read across from Car Rental, the
-// nearest product the document does describe, and that is a reasoned shape
-// rather than a verified one.
+// ── The two Travelify will not take yet ──────────────────────────────────────
+// Andy asked for both. Both were built, both links were opened against the live
+// service on 23 Sep 2026, and the deep linker refused each by name:
 //
-// This prints the exact URL each tile would produce on application 474. Open
-// one: if it lands on a search, set `proved: true` in UPSELL_CATALOGUE and the
-// tile ships. If it 400s, the shape or the search type is wrong and the tile
-// stays off, because a missing button is honest and a dead one is not.
-console.log('\nbuilt, and waiting on one click against the live service');
+//     {"success":false,"error":"Search type Transfers is not currently
+//      supported by deep linker"}
+//
+// A Travelify-side gap, not a shape we got wrong, and Andy has raised it with
+// Darren. So the anchors stay built and stay tested: when the deep linker
+// learns the types, each tile is one word in UPSELL_CATALOGUE away from
+// shipping and this suite already says its dates and places are right.
+//
+// The URLs print so the same click re-checks it in a second.
+console.log('\nbuilt, and refused by the deep linker for now');
 {
-  const pending = upsellTiles(PARIS, { include: AWAITING_PROOF });
+  const pending = upsellTiles(PARIS, { include: ['Transfers', 'AirportExtras'] });
   const transfer = find(pending, 'Transfers');
   const extras = find(pending, 'AirportExtras');
+
+  ok('the refusal is recorded in the service\'s own words, not paraphrased',
+    /not currently supported by deep linker/.test(REFUSED.Transfers)
+    && /not currently supported by deep linker/.test(REFUSED.AirportExtras));
+  ok('and nothing is left merely untried', AWAITING_PROOF.length === 0);
 
   ok('a transfer runs from the airport they land at',
     transfer && transfer.pup === 'CDG' && transfer.pupt === 'Airport', JSON.stringify(transfer));
@@ -263,17 +269,18 @@ console.log('\nbuilt, and waiting on one click against the live service');
   ok('and last from leaving to getting back, not the stay',
     extras && extras.fr === '2027-04-10T07:00' && extras.to === '2027-04-17T18:20');
 
-  ok('neither is offered to a customer until it is proved',
+  ok('neither reaches a customer while the service refuses it',
     !find(upsellTiles(PARIS), 'Transfers') && !find(upsellTiles(PARIS), 'AirportExtras'));
 
-  console.log('\n    Transfers     ' + upsellUrl(transfer, '474'));
+  console.log('\n    Re-check when Travelify add them:');
+  console.log('    Transfers     ' + upsellUrl(transfer, '474'));
   console.log('    AirportExtras ' + upsellUrl(extras, '474') + '\n');
 }
 
 // ── The shape of the list itself ─────────────────────────────────────────────
 console.log('the list');
 {
-  ok('two of the four products are proved and shown', UPSELL_PRODUCTS.length === 2);
+  ok('two of the four products are live and shown', UPSELL_PRODUCTS.length === 2);
   ok('all four are in the catalogue, so none is quietly dropped', UPSELL_CATALOGUE.length === 4);
   ok('every one of them carries a search type, a label and a hint',
     UPSELL_CATALOGUE.every((t) => t.st && t.label && t.hint));
@@ -307,7 +314,7 @@ console.log('\nthe section on the booking page');
     /tgm-action-icon/.test(widget) && /tgm-action-title/.test(widget)
     && /tgm-action-sub/.test(widget) && /svg\(IC\.arrow\)/.test(widget));
   ok('each product has its own icon', /TicketsAttractions: IC\.ticket/.test(widget) && /CarRental: IC\.car/.test(widget));
-  ok('including the two not yet proved, so they arrive drawn',
+  ok('including the two Travelify refuses, so they arrive drawn',
     /Transfers: IC\.van/.test(widget) && /AirportExtras: IC\.lounge/.test(widget));
   ok('an unknown product still gets an icon rather than a gap',
     /UPSELL_IC\[t\.product\] \|\| IC\.search/.test(widget));
