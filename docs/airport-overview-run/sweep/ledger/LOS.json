@@ -1,0 +1,200 @@
+{
+ "iata": "LOS",
+ "id": "recnyykLJI19yl7X8",
+ "name": "Murtala Muhammed International Airport",
+ "country": "Nigeria",
+ "wikipedia": "https://en.wikipedia.org/wiki/Murtala_Muhammed_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Nigeria's main international gateway, in Ikeja, Lagos State, and the base for Air Peace, the country's largest airline.\n\nThe layout is the thing to plan around. There is an international terminal and a domestic terminal about one kilometre apart, sharing the same runways. A client connecting between an international arrival and a domestic onward flight has to move between two separate buildings, so build proper time into the itinerary.\n\nThe international terminal was modelled on Amsterdam Schiphol and opened on 15 March 1979, built as part of a master plan meant to carry the airport through to the year 2000.\n\nThe airport was built during the Second World War and was originally called Lagos Airport. It was renamed in 1976 after Murtala Muhammed, the fourth head of state of Nigeria, following his assassination in a failed coup.",
+ "after": "Murtala Muhammed International is Lagos's international airport and the base for Air Peace.\n\nInternational flights use the new terminal commissioned in March 2022: all airlines were moved into it by October 2023 so that the old terminal could be rebuilt. That reconstruction began in 2025 and is due to take 22 months, and a fire in the old terminal in February 2026 injured six people and briefly closed the airspace over Lagos.\n\nDomestic flights use separate terminals, including MMA2, a privately run terminal opened in 2007, so allow time to change buildings on a connection between international and domestic flights.",
+ "claims": [
+  {
+   "claim": "Lagos's international airport",
+   "verdict": "confirmed",
+   "inAfter": "Murtala Muhammed International is Lagos's international airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is an international airport located in Ikeja, Lagos State, Nigeria, and is the major airport serving the entire state"
+    },
+    {
+     "file": "africanews-fire",
+     "org": "Africanews",
+     "dated": "2026-02-24",
+     "quote": [
+      "Six people injured after fire breaks out at Lagos international airport",
+      "Murtala Muhammed International Airport"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "base for Air Peace",
+   "verdict": "softened",
+   "inAfter": "and the base for Air Peace",
+   "note": "Was 'the base for Air Peace, the country's largest airline'. Air Peace's own site uses 'largest' only as an aim in its mission statement, so the ranking goes.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is the main base for Nigeria's largest airline, Air Peace"
+    },
+    {
+     "file": "airpeace-about",
+     "org": "Air Peace",
+     "quote": "at our base in Lagos, Nigeria"
+    }
+   ]
+  },
+  {
+   "claim": "international flights use the new terminal commissioned in March 2022",
+   "verdict": "corrected",
+   "inAfter": "International flights use the new terminal commissioned in March 2022",
+   "note": "Replaces the old two-terminal layout description built around the 1979 terminal.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the new international terminal was commissioned by President Muhammadu Buhari on 22 March 2022"
+    },
+    {
+     "file": "pmnews-2022",
+     "org": "P.M. News (Nigeria)",
+     "dated": "2022-03-22",
+     "quote": [
+      "22nd March, 2022",
+      "President Muhammadu Buhari has inaugurated the new Terminal Building of the Murtala Muhammed International Airport, Lagos."
+     ]
+    },
+    {
+     "file": "thecable-relocation",
+     "org": "TheCable (Nigeria)",
+     "dated": "2023-09-07",
+     "quote": "flight operations have been moved from the old terminal of the Murtala Muhammed International Airport in Lagos, to the new one"
+    }
+   ]
+  },
+  {
+   "claim": "all airlines moved in by October 2023 so the old terminal could be rebuilt",
+   "verdict": "corrected",
+   "inAfter": "all airlines were moved into it by October 2023 so that the old terminal could be rebuilt",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "successfully ordered all airlines to shift to the new terminal by October 2023, stating that the move was necessary to renovate the old terminal"
+    },
+    {
+     "file": "thecable-relocation",
+     "org": "TheCable (Nigeria)",
+     "dated": "2023-09-07",
+     "quote": [
+      "directed all airlines to vacate the old terminal from October 1, 2023",
+      "Keyamo said the relocation was necessary to give room for total maintenance work at the airport."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "reconstruction began 2025, 22 months",
+   "verdict": "corrected",
+   "inAfter": "That reconstruction began in 2025 and is due to take 22 months",
+   "note": "Punch gives the cost as N712.25 billion and Wikipedia 'over 700b naira'; the cost is not stated. At 22 months from August or September 2025 the work would run to mid-2027.",
+   "sources": [
+    {
+     "file": "punch-reconstruction",
+     "org": "Punch (Nigeria)",
+     "dated": "2025-09-05",
+     "quote": [
+      "The Federal Airports Authority of Nigeria has announced that reconstruction work has officially begun at the Murtala Muhammed International Airport in Lagos.",
+      "with a projected completion timeline of 22 months"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "A renovation of the old international terminal (Terminal 1) began in August 2025, with a planned cost of over 700b naira over the 22-month construction period."
+    }
+   ]
+  },
+  {
+   "claim": "February 2026 fire in the old terminal: six injured, airspace briefly closed",
+   "verdict": "corrected",
+   "inAfter": "a fire in the old terminal in February 2026 injured six people and briefly closed the airspace over Lagos",
+   "sources": [
+    {
+     "file": "africanews-fire",
+     "org": "Africanews",
+     "dated": "2026-02-24",
+     "quote": [
+      "Airspace over Lagos was temporarily suspended on Monday after a fire broke out at Murtala Muhammed International Airport.",
+      "Six people were injured",
+      "The fire appears to have started at about 3pm in a server room on the first floor of Terminal 1."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On 23 February 2026, a fire broke out at a server room on the first floor of Terminal 1, injuring six people and causing a temporary closure of airspace over the city."
+    }
+   ]
+  },
+  {
+   "claim": "domestic flights use separate terminals including MMA2, privately run, opened 2007",
+   "verdict": "confirmed",
+   "inAfter": "Domestic flights use separate terminals, including MMA2, a privately run terminal opened in 2007",
+   "note": "MMA2's operator says it handles about 75 per cent of Lagos's domestic flights (undated); not stated.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Murtala Muhammed International Airport consists of an international and a domestic terminal, located about one kilometre from each other.",
+      "A new domestic privately funded terminal known as MMA2 has been constructed and was commissioned on 7 April 2007."
+     ]
+    },
+    {
+     "file": "mma2-about",
+     "org": "Bi-Courtney (MMA2 operator)",
+     "quote": [
+      "In 2003, Bi-Courtney Limited was awarded the concession by the Federal Government to develop, finance, manage and operate the Murtala Muhammed Airport Terminal 2",
+      "The terminal was inaugurated on April 7, 2007",
+      "MMA2 handles about 75% of domestic flights in Lagos."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "main international gateway, Ikeja, Air Peace largest airline",
+   "verdict": "cut",
+   "wasBefore": "Nigeria's main international gateway, in Ikeja, Lagos State, and the base for Air Peace, the country's largest airline.",
+   "why": "Reworded: the Air Peace base is kept; 'largest airline' is only an aim on Air Peace's own site; Ikeja and the national ranking rest on Wikipedia alone."
+  },
+  {
+   "claim": "layout: two terminals 1 km apart sharing runways; connections change buildings",
+   "verdict": "cut",
+   "wasBefore": "The layout is the thing to plan around. There is an international terminal and a domestic terminal about one kilometre apart, sharing the same runways. A client connecting between an international arrival and a domestic onward flight has to move between two separate buildings, so build proper time into the itinerary.",
+   "why": "Rewritten around the 2022 terminal, the 2023 move and the reconstruction of the old terminal; the connection advice is kept."
+  },
+  {
+   "claim": "international terminal modelled on Schiphol, opened 15 March 1979, master plan to 2000",
+   "verdict": "cut",
+   "wasBefore": "The international terminal was modelled on Amsterdam Schiphol and opened on 15 March 1979, built as part of a master plan meant to carry the airport through to the year 2000.",
+   "why": "Only Wikipedia; and that terminal is now closed for reconstruction."
+  },
+  {
+   "claim": "built in WWII as Lagos Airport; renamed 1976 after Murtala Muhammed",
+   "verdict": "cut",
+   "wasBefore": "The airport was built during the Second World War and was originally called Lagos Airport. It was renamed in 1976 after Murtala Muhammed, the fourth head of state of Nigeria, following his assassination in a failed coup.",
+   "why": "Only Wikipedia; no second source for the history could be saved (the airports authority's pages copy Wikipedia)."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so allow time to change buildings on a connection between international and domestic flights.",
+   "why": "The old text's connection advice, kept: the two sources place domestic and international flights in separate buildings."
+  }
+ ],
+ "tracerOk": {}
+}
