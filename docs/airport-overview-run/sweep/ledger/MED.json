@@ -1,0 +1,301 @@
+{
+ "iata": "MED",
+ "id": "reciVDfI9JD68k9Yv",
+ "name": "Prince Mohammad Bin Abdulaziz Airport",
+ "country": "Saudi Arabia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Prince_Mohammad_bin_Abdulaziz_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Medina's airport, fourth busiest in Saudi Arabia, handling 10,912,802 passengers in 2024. Along with Jeddah it is one of the two points at which pilgrims enter the kingdom, and it takes charter traffic during the Hajj and Umrah seasons.\n\nThe terminal is worth knowing about for its own sake. It was the first commercial airport terminal anywhere in the Middle East or North Africa to earn LEED Gold certification from the United States Green Building Council.\n\nIt was a first in another way too. The airport was granted international status in 2007 and the 25-year concession signed in October 2011 was Saudi Arabia's first full public private partnership in aviation, built at a cost of 1.2 billion dollars and named Middle East infrastructure deal of the year in 2013.\n\nThe original airport dates from the 1950s and had two runways until 1986, when the second was closed and later turned into an apron.\n\nIt is named after Mohammad bin Abdulaziz, the first governor of Medina Province.",
+ "after": "Medina's airport, which handled 10,912,802 passengers in 2024. Large numbers of Hajj and Umrah pilgrims use it.\n\nThe terminal is worth knowing about for its own sake: it was the first commercial airport terminal anywhere in the Middle East or North Africa to earn LEED Gold certification from the US Green Building Council.\n\nIt was a first in another way too. Under a concession signed in October 2011, it became the first airport in Saudi Arabia to be built and run by the private sector, in a project costing 1.2 billion dollars.\n\nFCDO advice against travel in Saudi Arabia covers only the Yemen border area and the cities of Abha and Khamis Mushait. The FCDO also reports Houthi missile and drone attacks on cities and airports across the kingdom since 13 July 2026, and tells British nationals in the Middle East to be prepared for flight cancellations and periodic airspace closures.",
+ "claims": [
+  {
+   "claim": "Medina's airport",
+   "verdict": "confirmed",
+   "inAfter": "Medina's airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an airport located in Medina, Saudi Arabia"
+    },
+    {
+     "file": "tibah-history",
+     "org": "Tibah Airports (operator)",
+     "quote": "manages and operates Prince Mohammad Bin Abdulaziz International Airport in Madinah"
+    }
+   ]
+  },
+  {
+   "claim": "10,912,802 passengers in 2024",
+   "verdict": "confirmed",
+   "inAfter": "which handled 10,912,802 passengers in 2024",
+   "note": "TAV's table (source: Tibah) matches Wikipedia to the passenger. The same table gives 11,891,855 for 2025, up 9 per cent, but that figure has only this one source (GACA's site did not load), so the text keeps the two-source 2024 figure. The owner may want to swap in 2025 once a second source is found.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "handling 10,912,802 passengers in 2024"
+    },
+    {
+     "file": "tav-1h26-investor",
+     "org": "TAV Airports (operator's parent)",
+     "quote": [
+      "Investor Presentation 1H26",
+      "Jan-Dec",
+      "Madinah 1.111.976 1.287.692 16% 10.912.802 11.891.855 9%"
+     ],
+     "dated": "2026-08-06"
+    }
+   ]
+  },
+  {
+   "claim": "large numbers of Hajj and Umrah pilgrims use it",
+   "verdict": "softened",
+   "inAfter": "Large numbers of Hajj and Umrah pilgrims use it.",
+   "note": "Replaces 'one of the two points at which pilgrims enter the kingdom' and 'charter traffic during the Hajj and Umrah seasons', which rest on Wikipedia alone. Under the owner's rule for statements about who may enter, the entry claim goes. Samarkand Airport's release shows pilgrim flights to Medina for the 2025 Hajj.",
+   "sources": [
+    {
+     "file": "tibah-history",
+     "org": "Tibah Airports (operator)",
+     "quote": [
+      "especially from pilgrims visiting Madinah",
+      "to serve millions of Hajj and Umrah pilgrims"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport accommodates charter international flights during the Hajj and Umrah seasons",
+      "Pilgrims may enter Saudi Arabia through this airport"
+     ]
+    },
+    {
+     "file": "samarkand-hajj",
+     "org": "Samarkand International Airport",
+     "quote": "Международный аэропорт Самарканда обслужил первый паломнический рейс национального авиаперевозчика Uzbekistan Airways в Медину",
+     "dated": "2025-05-26"
+    }
+   ]
+  },
+  {
+   "claim": "first commercial airport terminal in the Middle East or North Africa with LEED Gold",
+   "verdict": "confirmed",
+   "inAfter": "it was the first commercial airport terminal anywhere in the Middle East or North Africa to earn LEED Gold certification",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "making Medina Airport the first commercial airport terminal in the Middle East and North Africa to achieve a LEED Gold rating"
+    },
+    {
+     "file": "tibah-leed",
+     "org": "Tibah Airports (operator)",
+     "quote": "The award makes Madinah Airport home to the first LEED Gold certified commercial airport terminal in MENA region"
+    },
+    {
+     "file": "timesaero-best",
+     "org": "Times Aerospace",
+     "quote": [
+      "Madinah Prince Mohammed Bin Abdulaziz Airport is also the first Leadership in Energy and Environmental Design (LEED) Gold certified airport in the MENA region.",
+      "November 09, 2015"
+     ],
+     "dated": "2015-11-09"
+    }
+   ]
+  },
+  {
+   "claim": "certified by the US Green Building Council",
+   "verdict": "confirmed",
+   "inAfter": "from the US Green Building Council",
+   "note": "Was 'United States Green Building Council'; both sources write 'U.S.'",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Gold certification from the U.S. Green Building Council"
+    },
+    {
+     "file": "tibah-leed",
+     "org": "Tibah Airports (operator)",
+     "quote": "Gold certification for the recent terminal expansion from the U.S. Green Building Council (USGBC)"
+    }
+   ]
+  },
+  {
+   "claim": "concession signed in October 2011",
+   "verdict": "confirmed",
+   "inAfter": "Under a concession signed in October 2011",
+   "note": "'25-year' is dropped. TAV's 2025 accounts say the concession, originally to June 2037, has been extended to 2041 to make up for the pandemic years, because Madinah reached 8.1 million passengers in 2023.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In October 2011, the group signed a 25-year concession agreement"
+    },
+    {
+     "file": "tav-fy2025",
+     "org": "TAV Airports (operator's parent)",
+     "quote": [
+      "A BTO agreement was executed between Tibah Development and GACA on 29 October 2011",
+      "concession period has been extended until"
+     ],
+     "dated": "2026-02-18"
+    }
+   ]
+  },
+  {
+   "claim": "first airport in Saudi Arabia built and run by the private sector",
+   "verdict": "softened",
+   "inAfter": "it became the first airport in Saudi Arabia to be built and run by the private sector",
+   "note": "Was 'Saudi Arabia's first full public private partnership in aviation'. Put in the plainer terms that Arab News and the operator both use.",
+   "sources": [
+    {
+     "file": "arabnews-771426",
+     "org": "Arab News",
+     "quote": [
+      "It is the first airport in the Kingdom constructed and operated entirely by the private sector.",
+      "Updated 5 July 2015"
+     ],
+     "dated": "2015-07-05"
+    },
+    {
+     "file": "tibah-history",
+     "org": "Tibah Airports (operator)",
+     "quote": [
+      "is the first private sector company to manage and operate an airport in Saudi Arabia",
+      "first full public-private partnership in airport development in the region"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "first full public-private partnership (PPP) in the aviation sector"
+    }
+   ]
+  },
+  {
+   "claim": "project cost 1.2 billion dollars",
+   "verdict": "confirmed",
+   "inAfter": "in a project costing 1.2 billion dollars",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The initial construction cost totalled US$1.2 billion"
+    },
+    {
+     "file": "tibah-history",
+     "org": "Tibah Airports (operator)",
+     "quote": "costing $1.2 billion"
+    }
+   ]
+  },
+  {
+   "claim": "fourth busiest in Saudi Arabia",
+   "verdict": "cut",
+   "wasBefore": "fourth busiest in Saudi Arabia",
+   "why": "No second source for the national rank. GACA's site did not load, and TAV's figures cover only its own airports."
+  },
+  {
+   "claim": "one of the two points at which pilgrims enter the kingdom",
+   "verdict": "cut",
+   "wasBefore": "Along with Jeddah it is one of the two points at which pilgrims enter the kingdom",
+   "why": "A statement about who may enter, resting on Wikipedia alone. By the owner's rule it needs two sources or it goes."
+  },
+  {
+   "claim": "charter traffic in the Hajj and Umrah seasons",
+   "verdict": "cut",
+   "wasBefore": "it takes charter traffic during the Hajj and Umrah seasons",
+   "why": "Only Wikipedia says 'charter'. The pilgrim traffic itself is kept, with two sources."
+  },
+  {
+   "claim": "international status in 2007",
+   "verdict": "cut",
+   "wasBefore": "The airport was granted international status in 2007",
+   "why": "Only Wikipedia gives the year. The operator confirms the upgrade to an international airport but gives no date."
+  },
+  {
+   "claim": "25-year concession",
+   "verdict": "cut",
+   "wasBefore": "the 25-year concession",
+   "why": "Out of date: TAV's 2025 accounts say the concession has been extended to 2041."
+  },
+  {
+   "claim": "Middle East infrastructure deal of the year 2013",
+   "verdict": "cut",
+   "wasBefore": "named Middle East infrastructure deal of the year in 2013",
+   "why": "Only Wikipedia. The operator's awards page lists no awards in its text, and its press releases do not mention this one."
+  },
+  {
+   "claim": "1950s airport, two runways until 1986, second turned into an apron",
+   "verdict": "cut",
+   "wasBefore": "The original airport dates from the 1950s and had two runways until 1986, when the second was closed and later turned into an apron.",
+   "why": "Wikipedia's only support is its own reading of Google Earth imagery, and the sentence misleads: OurAirports lists two runways in use today (4,335 m and 3,060 m)."
+  },
+  {
+   "claim": "named after Mohammad bin Abdulaziz, the first governor of Medina Province",
+   "verdict": "cut",
+   "wasBefore": "It is named after Mohammad bin Abdulaziz, the first governor of Medina Province.",
+   "why": "Only Wikipedia says he was the first governor. The name itself is in the record's name field."
+  },
+  {
+   "claim": "FCDO: advice against travel covers only the Yemen border area plus Abha and Khamis Mushait",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "FCDO advice against travel in Saudi Arabia covers only the Yemen border area and the cities of Abha and Khamis Mushait.",
+   "note": "Attributed statement, checked against the FCDO page (updated 20 September 2026, still current 23 September 2026). Added in review (23 Sep), as for Dammam.",
+   "sources": [
+    {
+     "file": "fcdo-saudi",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "Saudi Arabia-Yemen border",
+      "all travel to within 10km of the border with Yemen",
+      "all but essential travel to areas between 10km and 80km from the border with Yemen, and extends to include the cities of Abha and Khamis Mushait in Aseer province",
+      "20 September 2026",
+      "23 September 2026"
+     ],
+     "dated": "2026-09-20"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: Houthi attacks on cities and airports across Saudi Arabia since 13 July 2026; be prepared for cancellations and airspace closures",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "The FCDO also reports Houthi missile and drone attacks on cities and airports across the kingdom since 13 July 2026, and tells British nationals in the Middle East to be prepared for flight cancellations and periodic airspace closures.",
+   "note": "Attributed statement. Added in review (23 Sep), as for Dammam: the attacks the FCDO lists include Yanbu, in Medina Province, and Jeddah. July is 2026: the page was updated 20 September 2026.",
+   "sources": [
+    {
+     "file": "fcdo-saudi",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "Since 13 July, the Houthis (a military group in Yemen) have launched missiles and drones targeting cities, airports, military and energy sites across Saudi Arabia",
+      "British nationals currently in the Middle East should be prepared for possible flight cancellations, periodic airspace closures",
+      "20 September 2026"
+     ],
+     "dated": "2026-09-20"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The terminal is worth knowing about for its own sake",
+   "why": "A lead-in to the sourced LEED Gold first."
+  },
+  {
+   "text": "It was a first in another way too.",
+   "why": "A lead-in to the sourced private-sector first."
+  }
+ ],
+ "tracerOk": {},
+ "reviewed": {
+  "by": "lead auditor",
+  "date": "2026-09-23",
+  "what": "Added the FCDO paragraph used for Dammam: advice areas, Houthi attacks on airports since 13 July 2026, flight disruption."
+ }
+}

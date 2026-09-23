@@ -1,0 +1,358 @@
+{
+ "iata": "LAD",
+ "id": "recRmdtQZnsjWFZRN",
+ "name": "Quatro de Fevereiro International Airport",
+ "country": "Angola",
+ "wikipedia": "https://en.wikipedia.org/wiki/Quatro_de_Fevereiro_Airport",
+ "audited": "2026-09-23",
+ "before": "Read this one before quoting anything into Luanda. The airport closed to all commercial flights on 1 March 2026.\n\nQuatro de Fevereiro was the old international airport for Luanda, in the southern part of the city, handling about 5.6 million passengers in 2018. All airline operations moved in March 2026 to the new Dr. António Agostinho Neto International Airport, 40 km south of Luanda, so any itinerary, transfer time or hotel distance based on the old airport is now wrong.\n\nFor background, the airport was built from 1951 and opened in 1954 as Aeroporto Presidente Craveiro Lopes, after the Portuguese president who inaugurated it. In August, September and October 1975 it was the scene of Operation Air Bridge, when tens of thousands of Portuguese Angolans camped at the airport waiting for evacuation flights to Lisbon in the weeks before independence. It was renamed in 1976 after 4 February, the national holiday marking the start of the armed struggle against Portuguese rule in 1961.",
+ "after": "Read this one before quoting anything into Luanda. Its scheduled passenger flights have moved to the new Dr. António Agostinho Neto International Airport (NBJ), about 40 km from central Luanda, in a transfer completed on 1 March 2026.\n\nQuatro de Fevereiro, in the south of the city, was the old international airport for Luanda. The move away from it began in November 2024, and any itinerary, transfer time or hotel distance based on the old airport is now wrong.\n\nFor background, building began in 1951 and the airport opened in 1954, named after Craveiro Lopes, the Portuguese president who inaugurated it. In 1975, before independence, Portuguese Angolans camped at the airport waiting for evacuation flights to Lisbon. It was renamed in 1976 after 4 February 1961, the start of the armed struggle against Portuguese rule.",
+ "claims": [
+  {
+   "claim": "scheduled passenger flights have moved to the new airport",
+   "verdict": "corrected",
+   "inAfter": "Its scheduled passenger flights have moved",
+   "note": "Was 'closed to all commercial flights'. Both Angolan reports, quoting the new airport's temporary operator (ATO), speak of 'regular' passenger flights ('voos regulares', the Portuguese term for scheduled services). The old airport is not closed: ANGOP (10 Nov 2023) reported the government's plan to keep it for special, executive (presidential), non-commercial and non-scheduled flights, and FlightAware on 23 Sep 2026 still shows daily movements there, with its 'Scheduled' lists empty. So the text says what moved and no more.",
+   "sources": [
+    {
+     "file": "opais-transfer",
+     "org": "O País (Angolan newspaper)",
+     "quote": [
+      "O processo de transferência das operações regulares de passageiros do Aeroporto Internacional 4 de Fevereiro, para o Aeroporto Internacional Dr. António Agostinho Neto, (AIAAN) está oficialmente concluído",
+      "1 de Março, 2026"
+     ],
+     "dated": "2026-03-01"
+    },
+    {
+     "file": "giranoticias-b",
+     "org": "Gira Notícias (Rede Girassol)",
+     "quote": [
+      "O processo de transferência dos voos regulares de passageiros do Aeroporto Internacional 04 de Fevereiro para o António Agostinho Neto, localizado em Icolo e Bengo, ficou concluído",
+      "Publicado às 07h43 02/03/2026"
+     ],
+     "dated": "2026-03-02"
+    },
+    {
+     "file": "airlink-newairport",
+     "org": "Airlink (airline)",
+     "quote": [
+      "Airlink flights currently operate to Luanda's 4 de Fevereiro International Airport. The move is in line with the transfer of international and domestic flights to the newly commissioned airport",
+      "Tuesday, 17 February 2026"
+     ],
+     "dated": "2026-02-17"
+    }
+   ]
+  },
+  {
+   "claim": "the new airport's name and code (NBJ)",
+   "verdict": "confirmed",
+   "inAfter": "the new Dr. António Agostinho Neto International Airport (NBJ)",
+   "note": "Code added in review (23 Sep): an agent booking Luanda now needs NBJ, and IATA's own directory and Airlink both give it. IATA still lists LAD as Luanda, 4 de Fevereiro.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "replaced by Dr. António Agostinho Neto International Airport"
+    },
+    {
+     "file": "angop-hub-marrakech",
+     "org": "ANGOP (Angola Press Agency, state news agency)",
+     "quote": [
+      "supported by the Dr. António Agostinho Neto International Airport, an infrastructure already in operation",
+      "Tuesday, 14 April de 2026"
+     ],
+     "dated": "2026-04-14"
+    },
+    {
+     "file": "iata-code-nbj",
+     "org": "IATA (airport code directory)",
+     "quote": [
+      "Dr Antonio Agostinho Neto",
+      "NBJ"
+     ],
+     "dated": "2026-09-23 (fetched)"
+    },
+    {
+     "file": "airlink-newairport",
+     "org": "Airlink (airline)",
+     "quote": "will move its Luanda flights to the city's new Dr Agostinho Neto International Airport (IATA code: NBJ)",
+     "dated": "2026-02-17"
+    }
+   ]
+  },
+  {
+   "claim": "about 40 km from central Luanda",
+   "verdict": "softened",
+   "inAfter": "about 40 km from central Luanda",
+   "note": "Was '40 km south of Luanda'. The distance has two sources; the direction does not. Airlink puts the new airport 'approximately 45km East' of the city, against Wikipedia's 'south'. As a cross-check only (not a source), OurAirports' position for FNBJ is 37.6 km in a straight line from the GeoNames centre of Luanda at 129 degrees, which is south east, so 'about 40 km' holds and neither written direction does. The direction is cut. Airlink's 45 km is probably the road distance; it is not quoted.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "located 40 km south of Luanda"
+    },
+    {
+     "file": "angop-maintenance",
+     "org": "ANGOP (Angola Press Agency, state news agency)",
+     "quote": [
+      "the Angolan authorities developed studies to build a new airport, in the municipality of Icolo e Bengo, 40 km from the center of Luanda",
+      "Friday, 10 November de 2023"
+     ],
+     "dated": "2023-11-10"
+    }
+   ]
+  },
+  {
+   "claim": "transfer completed on 1 March 2026",
+   "verdict": "corrected",
+   "inAfter": "in a transfer completed on 1 March 2026",
+   "note": "The completion was marked by Airlink, the last airline to move, starting at the new airport on Sunday 1 March 2026. Gira Notícias, published Monday 2 March, says 'este domingo' (this Sunday).",
+   "sources": [
+    {
+     "file": "opais-transfer",
+     "org": "O País (Angolan newspaper)",
+     "quote": "foi assinalada neste domingo, 01 de Março, com o início das operações da Airlink",
+     "dated": "2026-03-01"
+    },
+    {
+     "file": "giranoticias-b",
+     "org": "Gira Notícias (Rede Girassol)",
+     "quote": "ficou concluído, este domingo, com o início das operações da companhia aérea sul-africana Airlink",
+     "dated": "2026-03-02"
+    },
+    {
+     "file": "airlink-newairport",
+     "org": "Airlink (airline)",
+     "quote": "will move its Luanda flights to the city's new Dr Agostinho Neto International Airport (IATA code: NBJ) from Sunday, 01 March 2026.",
+     "dated": "2026-02-17"
+    }
+   ]
+  },
+  {
+   "claim": "in the south of the city",
+   "verdict": "confirmed",
+   "inAfter": "in the south of the city",
+   "note": "The coordinates put it 2.4 km from the GeoNames centre at 188 degrees, which is south.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is located in the southern part of the city"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 2.4 km (1.5 miles)",
+      "Bearing from the city centre: 188 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "was the old international airport for Luanda",
+   "verdict": "confirmed",
+   "inAfter": "was the old international airport for Luanda",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the old international airport of Luanda"
+    },
+    {
+     "file": "angop-maintenance",
+     "org": "ANGOP (Angola Press Agency, state news agency)",
+     "quote": "The 4 de Fevereiro International Airport, located in the urban district of Maianga, Luanda province, may be transformed into an aeronautic Maintenance and Training Centre, after 70 years dedicated to commercial flights.",
+     "dated": "2023-11-10"
+    }
+   ]
+  },
+  {
+   "claim": "the move began in November 2024",
+   "verdict": "corrected",
+   "inAfter": "The move away from it began in November 2024",
+   "note": "Replaces 'All airline operations moved in March 2026'. The move was phased: cargo first, then TAAG's domestic and regional flights, then international flights from October 2025, ending with Airlink on 1 March 2026 (Gira Notícias).",
+   "sources": [
+    {
+     "file": "opais-transfer",
+     "org": "O País (Angolan newspaper)",
+     "quote": "a conclusão do processo, que teve início, a 10 de Novembro de 2024",
+     "dated": "2026-03-01"
+    },
+    {
+     "file": "giranoticias-b",
+     "org": "Gira Notícias (Rede Girassol)",
+     "quote": [
+      "As operações no Aeroporto Internacional Dr. António Agostinho Neto (AIAAN) iniciou-se, a 10 de Novembro de 2024",
+      "O programa de transferência ocorreu em três fases, tendo a primeira contemplado os voos de carga"
+     ],
+     "dated": "2026-03-02"
+    }
+   ]
+  },
+  {
+   "claim": "building began in 1951, opened in 1954",
+   "verdict": "confirmed",
+   "inAfter": "building began in 1951 and the airport opened in 1954",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The construction of the airport began in 1951",
+      "It was inaugurated in 1954"
+     ]
+    },
+    {
+     "file": "angop-maintenance",
+     "org": "ANGOP (Angola Press Agency, state news agency)",
+     "quote": [
+      "the works began in 1951 and ended in 1954",
+      "was inaugurated in 1954"
+     ],
+     "dated": "2023-11-10"
+    }
+   ]
+  },
+  {
+   "claim": "named after Craveiro Lopes, the Portuguese president who inaugurated it",
+   "verdict": "confirmed",
+   "inAfter": "named after Craveiro Lopes, the Portuguese president who inaugurated it",
+   "note": "The exact first name, Aeroporto Presidente Craveiro Lopes, is cut: see below.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It was inaugurated in 1954, by the Portuguese President Craveiro Lopes, which in his honor, the airport was named Aeroporto Presidente Craveiro Lopes"
+    },
+    {
+     "file": "angop-maintenance",
+     "org": "ANGOP (Angola Press Agency, state news agency)",
+     "quote": "was inaugurated in 1954 by the then President of Portugal, General Craveiro Lopes, who gave his first name to the infrastructure.",
+     "dated": "2023-11-10"
+    },
+    {
+     "file": "buala",
+     "org": "Buala (cultural magazine)",
+     "quote": "Primeiro nomeado em homenagem ao então presidente de Portugal, Francisco Craveiro Lopes"
+    }
+   ]
+  },
+  {
+   "claim": "1975: Portuguese Angolans camped at the airport before independence, waiting for evacuation flights to Lisbon",
+   "verdict": "softened",
+   "inAfter": "In 1975, before independence, Portuguese Angolans camped at the airport waiting for evacuation flights to Lisbon.",
+   "note": "Good sources disagree on the scale: Wikipedia says tens of thousands, Buala says half a million ('meio milhão'), so no number is given. Buala calls them Portuguese settlers, most of whom had never been to Portugal, which fits 'Portuguese Angolans'. The months and the name Operation Air Bridge are Wikipedia's alone and are cut. Buala's essay cites Peralta, The Retornados and the Ending of Empire in Angola (Hurst, 2022), not Wikipedia.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "1975 the airport hosted tens of thousands of mostly white Portuguese Angolans fleeing to Lisbon (during Operation Air Bridge) who camped out while awaiting evacuation flights during the weeks before Angola's Independence."
+    },
+    {
+     "file": "buala",
+     "org": "Buala (cultural magazine)",
+     "quote": [
+      "durante as últimas horas do colonialismo português em 1975, quando Angola estava à beira da independência",
+      "Antes da libertação nacional, meio milhão de colonos portugueses brancos acamparam no aeroporto",
+      "entre Lisboa e Luanda foi estabelecida, e os colonos foram evacuados para a Europa"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "renamed in 1976 after 4 February 1961, the start of the armed struggle",
+   "verdict": "confirmed",
+   "inAfter": "It was renamed in 1976 after 4 February 1961, the start of the armed struggle against Portuguese rule.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "in 1976 the airport was renamed Aeroporto Quatro de Fevereiro Internacional",
+      "marking the start of the armed struggle against the Portuguese colonial regime on 4 February 1961"
+     ]
+    },
+    {
+     "file": "angop-maintenance",
+     "org": "ANGOP (Angola Press Agency, state news agency)",
+     "quote": [
+      "It was baptized in 1976 with the name",
+      "as part of the celebrations of February 4, 1961, a date dedicated to the beginning of the armed struggle and national liberation"
+     ],
+     "dated": "2023-11-10"
+    }
+   ]
+  },
+  {
+   "claim": "closed to all commercial flights on 1 March 2026",
+   "verdict": "cut",
+   "wasBefore": "The airport closed to all commercial flights on 1 March 2026.",
+   "why": "Overstated. The two Angolan reports say the transfer of regular (scheduled) passenger flights was completed that day; the 2023 government plan keeps non-scheduled, executive and non-commercial flights at the old airport, and FlightAware still shows movements there on 23 Sep 2026. Replaced by the scheduled passenger flights claim."
+  },
+  {
+   "claim": "about 5.6 million passengers in 2018",
+   "verdict": "cut",
+   "wasBefore": "handling about 5.6 million passengers in 2018",
+   "why": "A 2018 figure for an airport that has since lost its scheduled flights, and no second source."
+  },
+  {
+   "claim": "all airline operations moved in March 2026",
+   "verdict": "cut",
+   "wasBefore": "All airline operations moved in March 2026",
+   "why": "Wrong in two ways: the move ran from November 2024 and only finished on 1 March 2026, and it covered scheduled passenger flights, not every operation. Replaced by the start and completion dates."
+  },
+  {
+   "claim": "the new airport is south of Luanda",
+   "verdict": "cut",
+   "wasBefore": "40 km south of Luanda",
+   "why": "Direction disputed: Wikipedia says south, Airlink says east, and the coordinates put it south east. The distance is kept with two sources."
+  },
+  {
+   "claim": "first named Aeroporto Presidente Craveiro Lopes",
+   "verdict": "cut",
+   "wasBefore": "as Aeroporto Presidente Craveiro Lopes",
+   "why": "The exact name is only in Wikipedia and in a Vida Económica column that borrows from Wikipedia elsewhere; HPIP, the heritage source Wikipedia cites, would not load (502 and 503), and the archived copy is blocked here. ANGOP and Buala confirm only that it was first named after him, which is kept."
+  },
+  {
+   "claim": "August to October 1975, Operation Air Bridge",
+   "verdict": "cut",
+   "wasBefore": "In August, September and October 1975 it was the scene of Operation Air Bridge",
+   "why": "The months and the operation's English name are Wikipedia's alone. The New York Times and The Economist reports it cites are blocked in this session."
+  },
+  {
+   "claim": "tens of thousands camped at the airport",
+   "verdict": "cut",
+   "wasBefore": "when tens of thousands of Portuguese Angolans",
+   "why": "Good sources disagree on the scale (tens of thousands against half a million), so no number is given."
+  },
+  {
+   "claim": "in the weeks before independence",
+   "verdict": "cut",
+   "wasBefore": "in the weeks before independence",
+   "why": "Softened to 'before independence'. Buala puts it on the brink of independence and gives no timescale."
+  },
+  {
+   "claim": "4 February is the national holiday",
+   "verdict": "cut",
+   "wasBefore": "the national holiday marking the start of the armed struggle",
+   "why": "Only Wikipedia calls it a national holiday. ANGOP confirms the date and what it marks, which is kept."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Read this one before quoting anything into Luanda.",
+   "why": "Advice that follows from the sourced move of all scheduled passenger flights to the new airport."
+  },
+  {
+   "text": "any itinerary, transfer time or hotel distance based on the old airport is now wrong",
+   "why": "Advice that follows from the sourced move to an airport about 40 km out of the city, where the old one was 2.4 km from the centre."
+  }
+ ],
+ "tracerOk": {},
+ "reviewed": {
+  "by": "lead auditor",
+  "date": "2026-09-23",
+  "what": "Added the new airport's code, NBJ, from IATA and Airlink."
+ }
+}

@@ -1,0 +1,212 @@
+{
+ "iata": "KHS",
+ "id": "recktY7Oa4QtLXYpe",
+ "name": "Khasab Airport",
+ "country": "Oman",
+ "wikipedia": "https://en.wikipedia.org/wiki/Khasab_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Khasab, the harbour town that is the capital of Oman's Musandam Governorate, on the Strait of Hormuz.\n\nThe setting is the story. The airport sits in a valley between two mountain ridges that come in close on both sides, and a third ridge stands just off the departure end of Runway 19, which carries a 270 metre displaced threshold as a result.",
+ "after": "The airport for Khasab, the coastal capital of the Musandam Governorate in Oman, on the Strait of Hormuz.\n\nIts setting is the story: steep mountains come right down to the sea here, and the airport has a single runway.\n\nThe FCDO reports Iranian strikes and retaliatory attacks in Oman and elsewhere in the region since 8 July 2026 and tells British nationals in the Middle East to be prepared for flight cancellations and periodic airspace closures.",
+ "claims": [
+  {
+   "claim": "the airport for Khasab",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Khasab",
+   "note": "Oman's own aeronautical information publication (eAIP issue of 3 September 2026) lists it as OOKB Khasab, south of Khasab City, administered by RAFO Khasab airbase.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an airport serving Khasab"
+    },
+    {
+     "file": "eaip-ookb",
+     "org": "Oman Civil Aviation Authority (eAIP)",
+     "quote": [
+      "OOKB KHASAB/Khasab",
+      "South of Khasab City"
+     ],
+     "dated": "2026-09-03"
+    },
+    {
+     "file": "omanair-khasab",
+     "org": "Oman Air",
+     "quote": "Khasab (KHS)",
+     "dated": "2026-09-23 (fetched)"
+    }
+   ]
+  },
+  {
+   "claim": "Khasab is on the coast",
+   "verdict": "softened",
+   "inAfter": "the coastal capital",
+   "note": "Was 'the harbour town'. Only Wikipedia says harbour; the tourism ministry's page puts Khasab Castle on the coast of Khasab.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "a harbor city in Oman",
+      "The harbor opens onto the Strait of Hormuz."
+     ]
+    },
+    {
+     "file": "experienceoman-khasabfort",
+     "org": "Experience Oman (Ministry of Heritage and Tourism)",
+     "quote": "The Castle stands on the coast of Khasab city, overlooking the Strait of Hormuz"
+    }
+   ]
+  },
+  {
+   "claim": "capital of the Musandam Governorate in Oman",
+   "verdict": "confirmed",
+   "inAfter": "capital of the Musandam Governorate in Oman",
+   "note": "GeoNames classes Khasab as the capital of a first-order division, and the tourism ministry names Khasab as one of the Musandam governorate's four wilayats, so the division is Musandam.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "capital of the Musandam Governorate"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "GeoNames class PPLA, the capital of a first-order division (state, province or region)"
+    },
+    {
+     "file": "experienceoman-musandam",
+     "org": "Experience Oman (Ministry of Heritage and Tourism)",
+     "quote": "governorate has four main wilayates—Khasab, Bukha, Dibba, and Madha"
+    }
+   ]
+  },
+  {
+   "claim": "on the Strait of Hormuz",
+   "verdict": "confirmed",
+   "inAfter": "on the Strait of Hormuz",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The harbor opens onto the Strait of Hormuz."
+    },
+    {
+     "file": "experienceoman-khasabfort",
+     "org": "Experience Oman (Ministry of Heritage and Tourism)",
+     "quote": "overlooking the Strait of Hormuz and the Arabian Gulf"
+    },
+    {
+     "file": "omanair-khasab",
+     "org": "Oman Air",
+     "quote": "Where Oman's mountains plunge into the Strait of Hormuz lies a spectacular natural secret. Find your flight to Khasab"
+    }
+   ]
+  },
+  {
+   "claim": "steep mountains come right down to the sea here",
+   "verdict": "softened",
+   "inAfter": "steep mountains come right down to the sea here",
+   "note": "Replaces the valley and ridge detail, which only Wikipedia gives. Both sources support the setting in general terms, not the airport's exact terrain.",
+   "sources": [
+    {
+     "file": "omanair-khasab",
+     "org": "Oman Air",
+     "quote": "Where Oman's mountains plunge into the Strait of Hormuz lies a spectacular natural secret. Find your flight to Khasab"
+    },
+    {
+     "file": "experienceoman-musandam",
+     "org": "Experience Oman (Ministry of Heritage and Tourism)",
+     "quote": "The Musandam governorate is famous for its stunning scenery, which combines steep mountains and calm oceans."
+    }
+   ]
+  },
+  {
+   "claim": "a single runway",
+   "verdict": "softened",
+   "inAfter": "the airport has a single runway",
+   "note": "What is left of the Runway 19 sentence. The length is not given because the sources disagree: OurAirports says 2,500 m, Oman's eAIP says 2,778 m.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 01/19: 2,500 m (8,202 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "r1_number = 01/19"
+    },
+    {
+     "file": "eaip-ookb",
+     "org": "Oman Civil Aviation Authority (eAIP)",
+     "quote": [
+      "OOKB AD 2.12 RUNWAY PHYSICAL CHARACTERISTICS",
+      "012° T",
+      "192° T"
+     ],
+     "dated": "2026-09-03"
+    }
+   ]
+  },
+  {
+   "claim": "the harbour town",
+   "verdict": "cut",
+   "wasBefore": "the harbour town",
+   "why": "Only Wikipedia says harbour. Softened to 'coastal', which two sources support."
+  },
+  {
+   "claim": "valley between two mountain ridges that close in on both sides",
+   "verdict": "cut",
+   "wasBefore": "The airport sits in a valley between two mountain ridges that come in close on both sides",
+   "why": "Only Wikipedia, which cites nothing for it. Oman's eAIP lists no aerodrome obstacles and does not describe the terrain."
+  },
+  {
+   "claim": "a third ridge off the departure end of Runway 19",
+   "verdict": "cut",
+   "wasBefore": "a third ridge stands just off the departure end of Runway 19",
+   "why": "Only Wikipedia."
+  },
+  {
+   "claim": "270 metre displaced threshold on Runway 19, as a result of the ridge",
+   "verdict": "cut",
+   "wasBefore": "which carries a 270 metre displaced threshold as a result",
+   "why": "Sources disagree. Wikipedia says 270 m on Runway 19; OurAirports' runway data (not a saved page) gives 820 ft, about 250 m, at both ends; Oman's eAIP gives declared distances but names no displaced threshold. 'As a result' is a causal link no source makes."
+  },
+  {
+   "claim": "FCDO: Iranian strikes across the region including Oman since 8 July 2026; be prepared for flight cancellations and periodic airspace closures",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "The FCDO reports Iranian strikes and retaliatory attacks in Oman and elsewhere in the region since 8 July 2026 and tells British nationals in the Middle East to be prepared for flight cancellations and periodic airspace closures.",
+   "note": "Attributed statement, checked against the FCDO Oman page saved for this airport. Added in review (23 Sep), as for Salalah: Khasab faces Iran across the Strait of Hormuz. The FCDO names no area of Oman it advises against.",
+   "sources": [
+    {
+     "file": "fcdo-oman",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "Since 8 July there have been strikes and retaliatory attacks by Iran in a number of locations across the region, including Oman, against US military and civilian infrastructure.",
+      "British nationals currently in the Middle East should be prepared for possible flight cancellations, periodic airspace closures",
+      "22 July 2026",
+      "23 September 2026"
+     ],
+     "dated": "2026-07-22"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Its setting is the story",
+   "why": "The existing lead-in, carried by the sourced description of the setting."
+  }
+ ],
+ "tracerOk": {},
+ "reviewed": {
+  "by": "lead auditor",
+  "date": "2026-09-23",
+  "what": "Added the FCDO regional sentence used for Salalah."
+ }
+}

@@ -1,0 +1,287 @@
+{
+ "iata": "ADD",
+ "id": "rec2ZD4vRiTs0prJZ",
+ "name": "Addis Ababa Bole International Airport",
+ "country": "Ethiopia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Addis_Ababa_Bole_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Africa's main connecting airport, and the reason so many routes between Europe and southern Africa run through Ethiopia. Ethiopian Airlines has its hub here and flies from it across the continent and on to Asia, Europe, North America and South America. By mid 2018 it was handling close to 380 flights a day.\n\nIt is close in, 6 km south east of the centre of Addis Ababa, so transfers are short.\n\nThe Ethiopian Aviation Academy is based on the site, which is part of why the airline has been able to grow at the rate it has.\n\nOne thing to keep an eye on for itineraries a few years out: a replacement hub is being built at Bishoftu, 65 km south, with completion projected for 2030. The current airport opened at Bole in the early 1960s, after the old field at Lideta proved too short for the airline's first jets.",
+ "after": "The main hub of Ethiopian Airlines, which flies from here across Africa and on to Asia, Europe and the Americas.\n\nIt is close in, about 6 km south east of central Addis Ababa, so transfers are short.\n\nBole is running short of capacity. One thing to keep an eye on for itineraries a few years out: work began in January 2026 on a new hub at Bishoftu, about 40 km south of Addis Ababa. Its first phase is due to open in 2030.",
+ "claims": [
+  {
+   "claim": "main hub of Ethiopian Airlines",
+   "verdict": "confirmed",
+   "inAfter": "The main hub of Ethiopian Airlines",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is the main hub of Ethiopian Airlines"
+    },
+    {
+     "file": "et-airport-page",
+     "org": "Ethiopian Airlines",
+     "quote": [
+      "is the primary hub of Ethiopian Airlines",
+      "as of August 2026"
+     ],
+     "dated": "2026-08"
+    }
+   ]
+  },
+  {
+   "claim": "Ethiopian flies from here across Africa and on to Asia, Europe and the Americas",
+   "verdict": "softened",
+   "inAfter": "which flies from here across Africa and on to Asia, Europe and the Americas",
+   "note": "Was 'North America and South America'. The airline's own pages say 'the Americas', so that is what the text says.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "serves destinations in Ethiopia and throughout the African continent, as well as connections to Asia, Europe, North America and South America"
+    },
+    {
+     "file": "et-airport-page",
+     "org": "Ethiopian Airlines",
+     "quote": "connecting travelers across Africa, Europe, Asia, and the Americas",
+     "dated": "2026-08"
+    },
+    {
+     "file": "et-network-intl",
+     "org": "Ethiopian Airlines",
+     "quote": "connecting you to Africa, Europe, Asia, the Americas, and the Middle East",
+     "dated": "2026-09-23 (fetched)"
+    }
+   ]
+  },
+  {
+   "claim": "about 6 km from central Addis Ababa",
+   "verdict": "softened",
+   "inAfter": "about 6 km south east of central Addis Ababa",
+   "note": "Was '6 km south east of the centre'. The coordinates give 7.8 km in a straight line from the GeoNames centre point, a ratio of 0.77, just outside the tolerance, so the figure rests on two written sources: Wikipedia (6 km from the city centre) and Ethiopian's own airport page (about 6 km from central Addis Ababa's Bole Road area). 'About' and 'central' follow Ethiopian's wording.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "6 km (3.7 mi) southeast of the city centre"
+    },
+    {
+     "file": "et-airport-page",
+     "org": "Ethiopian Airlines",
+     "quote": "Bole sits about 6 km from central Addis Ababa's Bole Road area",
+     "dated": "2026-08"
+    }
+   ]
+  },
+  {
+   "claim": "south east of the centre",
+   "verdict": "confirmed",
+   "inAfter": "south east of central Addis Ababa",
+   "note": "Coordinates put it at 132 degrees from the GeoNames centre, which is south east.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "southeast of the city centre"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 132 degrees, which is south east"
+    }
+   ]
+  },
+  {
+   "claim": "Bole is running short of capacity",
+   "verdict": "corrected",
+   "inAfter": "Bole is running short of capacity.",
+   "note": "Replaces the 2018 figure of close to 380 flights a day as the line on how busy it is. No passenger number is given because good sources disagree: 12.1 million in 2024 (Wikipedia's infobox, citing Business Insider Africa, and InsideFlyer) against 'nearly 20 million' last year (Ethiopian's chief executive, reported by Fana in September 2025). Both the airline's chief executive (Fana) and the Prime Minister (Dezeen) expect Bole to reach its limit within two to three years.",
+   "sources": [
+    {
+     "file": "et-bishoftu-esia",
+     "org": "Ethiopian Airlines",
+     "quote": "The project seeks to address the increasing capacity limitations of Addis Ababa Bole International Airport"
+    },
+    {
+     "file": "fana-bishoftu",
+     "org": "Fana Media Corporation",
+     "quote": [
+      "is expected to reach its maximum capacity of 25 million within the next two to three years",
+      "September 16, 2025"
+     ],
+     "dated": "2025-09-16"
+    },
+    {
+     "file": "dezeen-bishoftu",
+     "org": "Dezeen",
+     "quote": [
+      "which will reach its limits on existing traffic in the next two to three years",
+      "15 January 2026"
+     ],
+     "dated": "2026-01-15"
+    }
+   ]
+  },
+  {
+   "claim": "work began in January 2026 on a new hub at Bishoftu",
+   "verdict": "corrected",
+   "inAfter": "work began in January 2026 on a new hub at Bishoftu",
+   "note": "Was 'a replacement hub is being built'. 'Replacement' is softened to 'new hub': Ethiopian's chief executive said in September 2025 that international flights would start at Bishoftu by 2030 and that Bole would be modernised for domestic flights (ENA), so Bole is not simply being replaced. That split rests on one source and is not in the text.",
+   "sources": [
+    {
+     "file": "et-bishoftu-groundbreaking",
+     "org": "Ethiopian Airlines",
+     "quote": [
+      "Construction has begun today, January 10, 2026, following an official groundbreaking ceremony.",
+      "Addis Ababa, 10 January 2026"
+     ],
+     "dated": "2026-01-10"
+    },
+    {
+     "file": "dezeen-bishoftu",
+     "org": "Dezeen",
+     "quote": [
+      "has begun construction of an airport in the city of Bishoftu, Ethiopia",
+      "is hoped to become Africa's global aviation hub",
+      "15 January 2026"
+     ],
+     "dated": "2026-01-15"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is set to be replaced by a new hub at Bishoftu International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "Bishoftu is about 40 km south of Addis Ababa",
+   "verdict": "corrected",
+   "inAfter": "about 40 km south of Addis Ababa",
+   "note": "Was '65 km south'. The 65 km looks like it came from Wikipedia's 'Bole is 65 km north of Bishoftu' or from the earlier Mojo site ('65 kilometres south of the capital's current airport'); the project sources all say about 40 km.",
+   "sources": [
+    {
+     "file": "et-bishoftu-esia",
+     "org": "Ethiopian Airlines",
+     "quote": "located in Abusera near Bishoftu Town about 40 km south of Addis Ababa"
+    },
+    {
+     "file": "dezeen-bishoftu",
+     "org": "Dezeen",
+     "quote": "the terminal is being built 40 kilometres south of the capital Addis Ababa",
+     "dated": "2026-01-15"
+    },
+    {
+     "file": "fana-bishoftu",
+     "org": "Fana Media Corporation",
+     "quote": "located 40 kilometers south of the capital",
+     "dated": "2025-09-16"
+    }
+   ]
+  },
+  {
+   "claim": "first phase due to open in 2030",
+   "verdict": "corrected",
+   "inAfter": "Its first phase is due to open in 2030",
+   "note": "Was 'completion projected for 2030'. Only the first phase (60 million passengers a year) is due in 2030; the full airport (110 million) comes later.",
+   "sources": [
+    {
+     "file": "et-bishoftu-groundbreaking",
+     "org": "Ethiopian Airlines",
+     "quote": "Phase One of the project is expected to be completed by 2030",
+     "dated": "2026-01-10"
+    },
+    {
+     "file": "dezeen-bishoftu",
+     "org": "Dezeen",
+     "quote": "BIA's first phase is scheduled to open in 2030",
+     "dated": "2026-01-15"
+    },
+    {
+     "file": "ena-bishoftu",
+     "org": "ENA (Ethiopian News Agency)",
+     "quote": [
+      "with the goal of launching international flight services by 2030",
+      "September 11, 2025"
+     ],
+     "dated": "2025-09-11"
+    }
+   ]
+  },
+  {
+   "claim": "Africa's main connecting airport",
+   "verdict": "cut",
+   "wasBefore": "Africa's main connecting airport",
+   "why": "A superlative with no second source. Ethiopian's own page calls Bole the airline's primary hub and 'one of the busiest airports in Africa', which is kept as the hub claim."
+  },
+  {
+   "claim": "the reason routes between Europe and southern Africa run through Ethiopia",
+   "verdict": "cut",
+   "wasBefore": "and the reason so many routes between Europe and southern Africa run through Ethiopia",
+   "why": "A judgement with no source."
+  },
+  {
+   "claim": "North America and South America named separately",
+   "verdict": "cut",
+   "wasBefore": "North America and South America",
+   "why": "Softened to 'the Americas', which is how the airline's own pages put it."
+  },
+  {
+   "claim": "close to 380 flights a day by mid 2018",
+   "verdict": "cut",
+   "wasBefore": "By mid 2018 it was handling close to 380 flights a day.",
+   "why": "Eight years old, sourced to a 2018 FlightStats snapshot, and no second source. Replaced by the capacity line; no current figure is given because the passenger numbers disagree."
+  },
+  {
+   "claim": "Ethiopian Aviation Academy based on the site",
+   "verdict": "cut",
+   "wasBefore": "The Ethiopian Aviation Academy is based on the site",
+   "why": "Out of date: Ethiopian says the Academy became the Ethiopian Aviation University on 6 March 2023. That is one source for the new name, and nothing but Wikipedia places it at the airport, so the sentence goes."
+  },
+  {
+   "claim": "the academy is why the airline has grown",
+   "verdict": "cut",
+   "wasBefore": "which is part of why the airline has been able to grow at the rate it has",
+   "why": "A causal judgement. Only Ethiopian's own managers say it ('the secret behind the success')."
+  },
+  {
+   "claim": "a replacement hub",
+   "verdict": "cut",
+   "wasBefore": "a replacement hub is being built at Bishoftu",
+   "why": "Softened to 'a new hub'. Ethiopian's chief executive has said Bole will be modernised for domestic flights (ENA, September 2025)."
+  },
+  {
+   "claim": "Bishoftu is 65 km south",
+   "verdict": "cut",
+   "wasBefore": "65 km south",
+   "why": "Wrong. Ethiopian's project page, Dezeen and Fana all put it about 40 km south of Addis Ababa."
+  },
+  {
+   "claim": "completion projected for 2030",
+   "verdict": "cut",
+   "wasBefore": "with completion projected for 2030",
+   "why": "Only the first phase is due in 2030. Replaced by the first-phase date."
+  },
+  {
+   "claim": "opened at Bole in the early 1960s after Lideta proved too short for the first jets",
+   "verdict": "cut",
+   "wasBefore": "The current airport opened at Bole in the early 1960s, after the old field at Lideta proved too short for the airline's first jets.",
+   "why": "Only Wikipedia. Four tries for a second source failed: Ethiopian's history page has moved, the 1965 Sports Illustrated piece is gone (404), the Ethiopian Airports site refused (405), and the archived copies are blocked here."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "It is close in",
+   "why": "Follows from the sourced distance of about 6 km."
+  },
+  {
+   "text": "so transfers are short",
+   "why": "As above: advice that follows from the sourced distance."
+  },
+  {
+   "text": "One thing to keep an eye on for itineraries a few years out",
+   "why": "Advice that follows from the sourced Bishoftu timetable."
+  }
+ ],
+ "tracerOk": {}
+}

@@ -1,0 +1,170 @@
+{
+ "iata": "DLA",
+ "id": "recX5cavRiiRSkqJ9",
+ "name": "Douala International Airport",
+ "country": "Cameroon",
+ "wikipedia": "https://en.wikipedia.org/wiki/Douala_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Cameroon's busiest airport, in Douala, the country's largest city. It handles an average of 1.5 million passengers and 50,000 tonnes of freight a year across four terminals.\n\nThere is a single runway of 2,880 metres, and that is the constraint to be aware of. When it closed for three weeks of upgrade work in March 2016, every airline had to move operations to Yaoundé, so there is no fallback on site.\n\nThat work was the first stage of a 20 billion CFA renovation financed by the French Agency of Development, with the terminals and interiors to follow.\n\nThe airport is managed and 34 per cent owned by Aeroport du Cameroon, which runs all thirteen of the country's other airports as well.",
+ "after": "Douala's international airport, about 8 km from the city centre, run by Aéroports du Cameroun (ADC).\n\nThere is a single runway of about 2,850 metres. When it closed for resurfacing from 1 to 21 March 2016, airlines moved their Douala flights to Yaoundé.\n\nThe FCDO advises against all travel to parts of Cameroon, including the North-West and South-West regions, so check its advice for any onward journey.",
+ "claims": [
+  {
+   "claim": "Douala's international airport, about 8 km from the city centre",
+   "verdict": "confirmed",
+   "inAfter": "Douala's international airport, about 8 km from the city centre",
+   "note": "The operator gives 8 km by road; coordinates give 5.0 km in a straight line (ratio 1.6, at the edge of the tolerance).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is an international airport located in Douala"
+    },
+    {
+     "file": "adc-douala",
+     "org": "Aéroports du Cameroun (ADC, operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Statut: Aéroport international",
+      "Distance aéroport - centre-ville: 08 km"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Douala",
+      "Straight-line distance from the city centre: 5.0 km (3.1 miles)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "run by Aéroports du Cameroun (ADC)",
+   "verdict": "confirmed",
+   "inAfter": "run by Aéroports du Cameroun (ADC)",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is managed and partly owned (34%) by the company Aeroport du Cameroon (ADC)"
+    },
+    {
+     "file": "adc-douala",
+     "org": "Aéroports du Cameroun (ADC, operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Les 07 aéroports de la concession",
+      "Aéroport international de Douala"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "single runway of about 2,850 metres",
+   "verdict": "corrected",
+   "inAfter": "There is a single runway of about 2,850 metres.",
+   "note": "Was 2,880 metres (Wikipedia). OurAirports gives 2,850 m and ch-aviation 2,853 m.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": [
+      "Runway 12/30: 2,850 m (9,350 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "chaviation-2016",
+     "org": "ch-aviation",
+     "dated": "2016",
+     "quote": "the 2,853m-long runway 12/30 will be resurfaced"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Douala Airport has a single runway, 12/30"
+    }
+   ]
+  },
+  {
+   "claim": "closed 1 to 21 March 2016 for resurfacing; airlines moved to Yaoundé",
+   "verdict": "confirmed",
+   "inAfter": "When it closed for resurfacing from 1 to 21 March 2016, airlines moved their Douala flights to Yaoundé.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Between 1 and 21 March 2016, the runway was closed for upgrade works; all airlines switched operations to Yaoundé Airport during that period."
+    },
+    {
+     "file": "chaviation-2016",
+     "org": "ch-aviation",
+     "dated": "2016",
+     "quote": [
+      "Douala International Airport will close to all traffic between March 1 and 21, 2016",
+      "have elected to transfer their respective Douala , Cameroon services to Yaoundé Nsimalen for the duration of upgrade runway works"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: against all travel to parts of Cameroon incl. North-West and South-West regions",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "The FCDO advises against all travel to parts of Cameroon, including the North-West and South-West regions",
+   "note": "Attributed statement, checked against the FCDO page (updated 9 February 2026, still current 23 September 2026). Douala, in the Littoral Region, is not on the list. New to the text.",
+   "sources": [
+    {
+     "file": "fcdo-cameroon",
+     "org": "UK Foreign, Commonwealth and Development Office (FCDO)",
+     "quote": [
+      "FCDO advises against all travel to parts of Cameroon.",
+      "FCDO advises against all travel to the North-West Region.",
+      "FCDO advises against all travel to the South-West Region",
+      "23 September 2026",
+      "9 February 2026"
+     ],
+     "dated": "2026-02-09"
+    }
+   ]
+  },
+  {
+   "claim": "busiest airport; largest city; 1.5 million passengers and 50,000 t freight; four terminals",
+   "verdict": "cut",
+   "wasBefore": "Cameroon's busiest airport, in Douala, the country's largest city. It handles an average of 1.5 million passengers and 50,000 tonnes of freight a year across four terminals.",
+   "why": "Wrong: 1.5 million passengers and 50,000 tonnes are the operator's CAPACITY ('Capacité d'accueil'), and it says 31 per cent of that is used; Wikipedia read them as traffic. The ranking, the largest-city claim and the four terminals rest on Wikipedia alone."
+  },
+  {
+   "claim": "runway 2,880 m is the constraint",
+   "verdict": "cut",
+   "wasBefore": "There is a single runway of 2,880 metres, and that is the constraint to be aware of.",
+   "why": "Length corrected to about 2,850 m; 'the constraint to be aware of' is kept only as the 2016 fact that follows."
+  },
+  {
+   "claim": "closed three weeks in March 2016; no fallback on site",
+   "verdict": "cut",
+   "wasBefore": "When it closed for three weeks of upgrade work in March 2016, every airline had to move operations to Yaoundé, so there is no fallback on site.",
+   "why": "Reworded to what both sources say; 'no fallback on site' was an inference."
+  },
+  {
+   "claim": "first stage of a 20 billion CFA renovation by the French development agency",
+   "verdict": "cut",
+   "wasBefore": "That work was the first stage of a 20 billion CFA renovation financed by the French Agency of Development, with the terminals and interiors to follow.",
+   "why": "Only Wikipedia, and ten years old with no word on the second stage."
+  },
+  {
+   "claim": "managed and 34 per cent owned by ADC, which runs all 13 other airports",
+   "verdict": "cut",
+   "wasBefore": "The airport is managed and 34 per cent owned by Aeroport du Cameroon, which runs all thirteen of the country's other airports as well.",
+   "why": "ADC as operator is kept. The 34 per cent has only Wikipedia, and the thirteen airports is contradicted by ADC itself, which lists seven airports in its concession."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so check its advice for any onward journey.",
+   "why": "Advice attached to the attributed FCDO statement."
+  }
+ ],
+ "tracerOk": {}
+}
