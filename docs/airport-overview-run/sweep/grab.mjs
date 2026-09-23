@@ -54,7 +54,17 @@ if (res.status) {
     } catch (e) { text = '[[pdf text extraction failed]]'; }
   } else {
     kind = 'html';
-    text = buf.toString('utf8')
+    // Honour the page's own charset: many Chinese and Russian official sites
+    // still serve GBK, GB2312 or windows-1251, which read as noise if decoded
+    // as UTF-8.
+    const head = buf.subarray(0, 4096).toString('latin1');
+    const cs = ((res.headers.get('content-type') || '').match(/charset=([\w-]+)/i) ||
+      head.match(/<meta[^>]+charset=["']?([\w-]+)/i) || [])[1];
+    let decoded;
+    try { decoded = new TextDecoder(cs && !/utf-?8/i.test(cs) ? cs.toLowerCase() : 'utf-8').decode(buf); }
+    catch { decoded = buf.toString('utf8'); }
+    if (cs && !/utf-?8/i.test(cs)) kind = 'html ' + cs.toLowerCase();
+    text = decoded
       .replace(/<script[\s\S]*?<\/script>/gi, ' ')
       .replace(/<style[\s\S]*?<\/style>/gi, ' ')
       .replace(/<br\s*\/?>/gi, '\n')

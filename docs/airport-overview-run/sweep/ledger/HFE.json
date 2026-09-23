@@ -1,0 +1,214 @@
+{
+ "iata": "HFE",
+ "id": "recZGlKQONjrsANZp",
+ "name": "Hefei Xinqiao International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Hefei_Xinqiao_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Anhui's main airport, in Shushan District 31.8 km from central Hefei. It handled about 12.6 million passengers in 2025 across 97,281 movements.\n\nIt is a relatively new airport. Construction began in December 2008 at a cost of 3.728 billion yuan and it opened on 30 May 2013, replacing Hefei Luogang. The first phase gave it a single 3,400 metre runway and a terminal built for 11 million passengers a year, a figure it has already passed. A second phase is planned to take the airport to 42 million passengers by 2040.\n\nLong haul has been tried and has not stuck. Condor began flying to Frankfurt in December 2022 but dropped the route after a few months.",
+ "after": "The airport for Hefei, the capital of Anhui province, 31.8 km from the city centre in a straight line. It handled about 12.6 million passengers in 2025 across 97,281 aircraft movements.\n\nIt is a relatively new airport. It opened on 30 May 2013, replacing Hefei Luogang. Its single runway is 3,400 metres long, and the first phase was built for 11 million passengers a year, a figure it has already passed.",
+ "claims": [
+  {
+   "claim": "serves Hefei, capital of Anhui",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Hefei, the capital of Anhui province",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "serving Hefei, the capital of East China's Anhui province"
+    },
+    {
+     "file": "geo",
+     "org": "GeoNames",
+     "quote": "GeoNames class PPLA, the capital of a first-order division (state, province or region)"
+    }
+   ]
+  },
+  {
+   "claim": "31.8 km from the centre in a straight line",
+   "verdict": "confirmed",
+   "inAfter": "31.8 km from the city centre in a straight line",
+   "note": "The coordinates reproduce 31.8 km exactly.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "31.8 km (19.8 mi) from the city center"
+    },
+    {
+     "file": "cecn-2013-open",
+     "org": "China Economic Net (Xinhua report)",
+     "quote": "距合肥市中心直线距离３１．８公里",
+     "dated": "2013-05-24"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 31.8 km"
+    }
+   ]
+  },
+  {
+   "claim": "about 12.6 million passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "It handled about 12.6 million passengers in 2025",
+   "note": "Settles the logged source problem: the article body reads 12,645 million; CAAC gives 12,644,989.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "quote": "passengers 2025: 12,644,989",
+     "dated": "2026-02-26"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "stat1_data = 12,644,989"
+    }
+   ]
+  },
+  {
+   "claim": "97,281 aircraft movements",
+   "verdict": "confirmed",
+   "inAfter": "across 97,281 aircraft movements",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "quote": "movements 2025: 97,281"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "stat2_data = 97,281"
+    }
+   ]
+  },
+  {
+   "claim": "opened 30 May 2013",
+   "verdict": "confirmed",
+   "inAfter": "It opened on 30 May 2013",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Opened on 30 May 2013"
+    },
+    {
+     "file": "cecn-2013-open",
+     "org": "China Economic Net (Xinhua report)",
+     "quote": "合肥新桥国际机场５月３０日零点正式启用"
+    }
+   ]
+  },
+  {
+   "claim": "replacing Hefei Luogang",
+   "verdict": "confirmed",
+   "inAfter": "replacing Hefei Luogang",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "it replaced Hefei Luogang Airport as Hefei's main airport"
+    },
+    {
+     "file": "cecn-2013-open",
+     "org": "China Economic Net (Xinhua report)",
+     "quote": "合肥骆岗国际机场永久关闭"
+    }
+   ]
+  },
+  {
+   "claim": "single 3,400 m runway",
+   "verdict": "confirmed",
+   "inAfter": "Its single runway is 3,400 metres long",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": [
+      "Runway 15/33: 3,400 m",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "includes one runway which is 3,400 meters"
+    }
+   ]
+  },
+  {
+   "claim": "first phase built for 11 million a year",
+   "verdict": "confirmed",
+   "inAfter": "the first phase was built for 11 million passengers a year",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "to handle a projected annual volume of 11 million passengers"
+    },
+    {
+     "file": "cecn-2013-open",
+     "org": "China Economic Net (Xinhua report)",
+     "quote": "按照满足２０２０年旅客吞吐量１１００万人次"
+    }
+   ]
+  },
+  {
+   "claim": "already passed",
+   "verdict": "confirmed",
+   "inAfter": "a figure it has already passed",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "quote": "passengers 2025: 12,644,989"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "stat1_data = 12,644,989"
+    }
+   ]
+  },
+  {
+   "claim": "Anhui's main airport",
+   "verdict": "cut",
+   "wasBefore": "Anhui's main airport",
+   "why": "Reworded to what both sources say: the airport for the provincial capital."
+  },
+  {
+   "claim": "in Shushan District",
+   "verdict": "cut",
+   "wasBefore": "in Shushan District",
+   "why": "Sources disagree: Wikipedia says Shushan District, the 2013 report says Gaoliu town in Feixi County."
+  },
+  {
+   "claim": "construction Dec 2008, 3.728 billion yuan",
+   "verdict": "cut",
+   "wasBefore": "Construction began in December 2008 at a cost of 3.728 billion yuan",
+   "why": "Only Wikipedia; the 2013 report says the project started in 2005."
+  },
+  {
+   "claim": "second phase 42 million by 2040",
+   "verdict": "cut",
+   "wasBefore": "A second phase is planned to take the airport to 42 million passengers by 2040.",
+   "why": "Sources disagree (the 2013 report gives 60 million after phases two and three)."
+  },
+  {
+   "claim": "Condor Frankfurt Dec 2022, dropped",
+   "verdict": "cut",
+   "wasBefore": "Long haul has been tried and has not stuck. Condor began flying to Frankfurt in December 2022 but dropped the route after a few months.",
+   "why": "The launch is confirmed but no second source says when or whether it ended."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "It is a relatively new airport.",
+   "why": "Follows from the sourced 2013 opening."
+  }
+ ],
+ "tracerOk": {}
+}

@@ -1,0 +1,245 @@
+{
+ "iata": "LXA",
+ "id": "recYeI0bMjgJtSsfi",
+ "name": "Lhasa Gonggar International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Lhasa_Gonggar_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Tibet's main airport, and one of the highest in the world at over 3,500 metres above sea level. It handled more than 6 million passengers in 2024.\n\nThe distance needs explaining to a client. The airport is in Gonggar County in Shannan, about 62 km south west of Lhasa. A tunnel and the Lhasa Airport Expressway opened in July 2011 and cut 40 minutes off the journey, so the shuttle bus into Lhasa now takes about 40 to 60 minutes.\n\nIt was built where it is because there was no room near Lhasa. The site sits on the southern bank of the Yarlung Tsangpo, the Brahmaputra, where the river is wide and the ground flat enough for runways. Within 30 km in every direction there are mountains between 5,362 and 6,126 metres.\n\nThe airport was first built in 1965, gained a second runway in 1994 and a second terminal in 2004, and its third terminal opened in 2021.\n\nBuild a gentle first day into any Tibet itinerary. Clients arrive at altitude before they have done anything at all.",
+ "after": "Tibet's main airport and one of the highest in the world, at 3,570 metres above sea level. It handled 6.3 million passengers in 2025.\n\nThe distance needs explaining to a client. The airport is in Gonggar County in Shannan, just over 60 km south west of Lhasa. The Lhasa Airport Expressway opened in July 2011, and the shuttle bus or a taxi into the city now takes up to an hour.\n\nIts third terminal, the largest in Tibet, opened in 2021.\n\nBuild a gentle first day into any Tibet itinerary. Clients arrive at altitude before they have done anything at all.",
+ "claims": [
+  {
+   "claim": "Tibet's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Tibet's main airport",
+   "note": "CAAC 2025: Lhasa 6,284,823; the next Tibetan airport, Nyingchi, 967,829.",
+   "sources": [
+    {
+     "file": "caac-tibet",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "quote": [
+      "Row 拉萨/贡嘎: passengers 2025: 6,284,823",
+      "Row 林芝/米林: passengers 2025: 967,829"
+     ],
+     "dated": "2026-02-26"
+    },
+    {
+     "file": "cgtn-t3",
+     "org": "CGTN",
+     "quote": "is Tibet's largest aviation hub",
+     "dated": "2021-08-07"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the airport serving Lhasa, the capital city of the Tibet Autonomous Region"
+    }
+   ]
+  },
+  {
+   "claim": "one of the highest in the world, 3,570 m",
+   "verdict": "corrected",
+   "inAfter": "one of the highest in the world, at 3,570 metres above sea level",
+   "note": "Settles the logged contradiction: the article says 3,600 m in one place and 3,500 m in another. OurAirports, CGTN and the infobox all give 3,570 m.",
+   "sources": [
+    {
+     "file": "cgtn-t3",
+     "org": "CGTN",
+     "quote": "Lhasa Gonggar Airport, at an elevation of 3,570 meters, is Tibet's largest aviation hub and one of the highest airports in the world."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "elevation 11,713 ft (3,570 m)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "elevation_m = 3570"
+    }
+   ]
+  },
+  {
+   "claim": "6.3 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled 6.3 million passengers in 2025.",
+   "note": "Was more than 6 million in 2024; the 2025 figure is out.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "quote": "passengers 2025: 6,284,823",
+     "dated": "2026-02-26"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "stat1_data = 6,284,823"
+    }
+   ]
+  },
+  {
+   "claim": "in Gonggar County in Shannan",
+   "verdict": "confirmed",
+   "inAfter": "The airport is in Gonggar County in Shannan",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Gonggar County of Shannan"
+    },
+    {
+     "file": "cgtn-t3",
+     "org": "CGTN",
+     "quote": "in Gonggar County, Shannan City, Tibet Autonomous Region"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "OurAirports municipality: Shannan (Gonggar)"
+    }
+   ]
+  },
+  {
+   "claim": "just over 60 km south west of Lhasa",
+   "verdict": "softened",
+   "inAfter": "just over 60 km south west of Lhasa",
+   "note": "The article says both 97 km and 62 km. The Tibet travel guide says about 64 km; the straight line is 43 km at 205 degrees, so a road distance in the low sixties fits and 97 does not.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "about 62 kilometres (39 mi) southwest of the city"
+    },
+    {
+     "file": "tibettravel-guide",
+     "org": "Tibet Vista (tibettravel.org, travel agency)",
+     "quote": "around 64 km (around 1 hour drive) from downtown Lhasa"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Lhasa (GeoNames 1280737): 43.2 km (26.8 miles), bearing 205 degrees, which is south west"
+    }
+   ]
+  },
+  {
+   "claim": "Lhasa Airport Expressway opened July 2011",
+   "verdict": "confirmed",
+   "inAfter": "The Lhasa Airport Expressway opened in July 2011",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The tunnel and Lhasa Airport Expressway opened in July 2011."
+    },
+    {
+     "file": "tibettravel-highway",
+     "org": "Tibet Vista (tibettravel.org, travel agency)",
+     "quote": "is put into use from July 17, 2011"
+    }
+   ]
+  },
+  {
+   "claim": "shuttle bus or taxi up to an hour",
+   "verdict": "softened",
+   "inAfter": "the shuttle bus or a taxi into the city now takes up to an hour",
+   "note": "Wikipedia says 40 to 60 minutes; the travel guide says about 59 minutes by taxi or shuttle and about 52 by taxi. Up to an hour fits both.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "time of travel from Lhasa is now about 40–60 minutes by"
+    },
+    {
+     "file": "tibettravel-guide",
+     "org": "Tibet Vista (tibettravel.org, travel agency)",
+     "quote": "Travel time is now shortened to around 59 minutes by taxi or airport shuttle bus via the Lhasa Airport Expressway"
+    }
+   ]
+  },
+  {
+   "claim": "third terminal, largest in Tibet, opened 2021",
+   "verdict": "confirmed",
+   "inAfter": "Its third terminal, the largest in Tibet, opened in 2021.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the third terminal was operational in 2021"
+    },
+    {
+     "file": "cgtn-t3",
+     "org": "CGTN",
+     "quote": [
+      "Terminal 3 at Lhasa Gonggar Airport, the largest of its kind in southwest China's Tibet Autonomous Region, was put into operation on Saturday.",
+      "07-Aug-2021"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "more than 6 million in 2024",
+   "verdict": "cut",
+   "wasBefore": "It handled more than 6 million passengers in 2024.",
+   "why": "Replaced with 2025."
+  },
+  {
+   "claim": "over 3,500 metres",
+   "verdict": "cut",
+   "wasBefore": "at over 3,500 metres above sea level",
+   "why": "Replaced with the exact 3,570 m."
+  },
+  {
+   "claim": "about 62 km",
+   "verdict": "cut",
+   "wasBefore": "about 62 km south west of Lhasa",
+   "why": "Softened to just over 60 km."
+  },
+  {
+   "claim": "cut 40 minutes off; 40 to 60 minute shuttle",
+   "verdict": "cut",
+   "wasBefore": "cut 40 minutes off the journey, so the shuttle bus into Lhasa now takes about 40 to 60 minutes",
+   "why": "The saving has one source; the time is softened."
+  },
+  {
+   "claim": "built there for lack of room near Lhasa",
+   "verdict": "cut",
+   "wasBefore": "It was built where it is because there was no room near Lhasa.",
+   "why": "No second source."
+  },
+  {
+   "claim": "southern bank of the Yarlung Tsangpo",
+   "verdict": "cut",
+   "wasBefore": "The site sits on the southern bank of the Yarlung Tsangpo, the Brahmaputra, where the river is wide and the ground flat enough for runways.",
+   "why": "The only other source repeats Wikipedia word for word, so it does not count."
+  },
+  {
+   "claim": "mountains 5,362 to 6,126 m within 30 km",
+   "verdict": "cut",
+   "wasBefore": "Within 30 km in every direction there are mountains between 5,362 and 6,126 metres.",
+   "why": "As above."
+  },
+  {
+   "claim": "built 1965, second runway 1994, second terminal 2004",
+   "verdict": "cut",
+   "wasBefore": "The airport was first built in 1965, gained a second runway in 1994 and a second terminal in 2004",
+   "why": "Only Wikipedia."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The distance needs explaining to a client.",
+   "why": "A lead-in to the sourced distance and journey time."
+  },
+  {
+   "text": "Build a gentle first day into any Tibet itinerary.",
+   "why": "Advice that follows from the sourced altitude."
+  },
+  {
+   "text": "Clients arrive at altitude before they have done anything at all.",
+   "why": "As above."
+  }
+ ],
+ "tracerOk": {}
+}

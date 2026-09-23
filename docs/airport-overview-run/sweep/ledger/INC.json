@@ -12,7 +12,7 @@
    "claim": "Ningxia's main airport",
    "verdict": "confirmed",
    "inAfter": "Ningxia's main airport",
-   "note": "Wording plainer than 'main aviation gateway'. Ningxia's three airports passed 10 million passengers together in 2025, of which Yinchuan handled 9.86 million; Zhongwei expected about 320,000.",
+   "note": "Wording plainer than 'main aviation gateway'. The regional government calls it Ningxia's only trunk hub airport; the three Ningxia airports passed 10 million passengers together in 2025, of which Yinchuan handled 9.86 million.",
    "sources": [
     {
      "file": "wikipedia-now",
@@ -27,6 +27,12 @@
       "中卫沙坡头机场深挖“航空+旅游”融合潜力"
      ],
      "dated": "2025-12-17"
+    },
+    {
+     "file": "nxdrc-runway-2025",
+     "org": "Ningxia Development and Reform Commission (government)",
+     "quote": "银川河东国际机场（以下简称银川机场）是我区唯一一座干线枢纽机场",
+     "dated": "2025-09-23"
     }
    ]
   },
@@ -74,12 +80,18 @@
    "claim": "about 9.86 million passengers in 2025",
    "verdict": "confirmed",
    "inAfter": "It handled about 9.86 million passengers in 2025",
-   "note": "Rounded from 9,860,514. The CAAC's own 2025 ranking spreadsheet (caac.gov.cn P020260226360830390937.xlsx, published 26 Feb 2026) gives 9,860,514 and rank 42; it was read directly as a cross-check but grab.mjs cannot save an .xlsx as text, so it is not cited.",
+   "note": "Rounded from 9,860,514, the CAAC's official 2025 figure (published 26 Feb 2026). The CAAC row was also checked against the spreadsheet directly.",
    "sources": [
     {
      "file": "wikipedia-now",
      "org": "Wikimedia",
      "quote": "The passenger movements of Yinchuan Hedong International Airport in 2025 were 9,860,514"
+    },
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "quote": "passengers 2025: 9,860,514",
+     "dated": "2026-02-26"
     },
     {
      "file": "stcn-flows",
@@ -99,12 +111,18 @@
    "claim": "42nd busiest airport in China",
    "verdict": "confirmed",
    "inAfter": "making it the 42nd busiest airport in China",
-   "note": "The second source is a NetEase self-media post; the rank matches the CAAC's 2025 spreadsheet (see the passenger claim).",
+   "note": "The CAAC's official 2025 ranking gives 42.",
    "sources": [
     {
      "file": "wikipedia-now",
      "org": "Wikimedia",
      "quote": "making it the 42nd busiest airport in China"
+    },
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "quote": "passenger rank 42 in China",
+     "dated": "2026-02-26"
     },
     {
      "file": "netease-top50",
@@ -250,7 +268,7 @@
    "claim": "runway 3,600 metres",
    "verdict": "confirmed",
    "inAfter": "The runway is 3,600 metres.",
-   "note": "A runway overlay was approved by the Ningxia development and reform commission in September 2025, reported as due to run from May to October 2026. Not added (no second source saved); flagged for the owner.",
+   "note": "The Ningxia Development and Reform Commission approved an asphalt overlay of the northern 3,200 m of the runway in September 2025, planned for May to October 2026, with the airport kept open and flights adjusted around the works. Not added to the Overview (the brief allows no new facts); flagged for the owner.",
    "sources": [
     {
      "file": "wikipedia-now",

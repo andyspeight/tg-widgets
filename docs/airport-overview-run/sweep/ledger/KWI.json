@@ -6,8 +6,464 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Kuwait_International_Airport",
  "audited": "2026-09-23",
  "before": "Kuwait's airport, in Farwaniya Governorate 15.5 km south of central Kuwait City, and the hub for both Kuwait Airways and Jazeera Airways. As of 2025 it is the twelfth busiest in the Middle East.\n\nThe terminal situation needs checking before every booking. The airport is meant to have five numbered terminals in operation by 2026. Terminal 4 opened in August 2018 and is used only by Kuwait Airways. Terminal 2, a large Foster and Partners building with 28 gates and an airside hotel, has slipped repeatedly: it began construction in May 2017, was due in August 2022, was pushed to 2024 by the pandemic and is now targeted at the last quarter of 2026. Its construction site was struck by an Iranian drone, with minor damage reported and no change to that target.\n\nSo confirm the terminal with the airline rather than assuming, because the picture is still moving.\n\nThere are three runways, the longest 3,500 metres. Part of the complex is an air force base.",
- "after": "Kuwait's airport, in Farwaniya Governorate 15.5 km south of central Kuwait City, and the hub for both Kuwait Airways and Jazeera Airways. As of 2025 it is the twelfth busiest in the Middle East.\n\nThe terminal situation needs checking before every booking. The airport is meant to have five numbered terminals in operation by 2026. Terminal 4 opened in August 2018 and is used only by Kuwait Airways. Terminal 2, a large Foster and Partners building with 28 gates and an airside hotel, has slipped repeatedly: it began construction in May 2017, was due in August 2022, was pushed to 2024 by the pandemic and is now targeted at the last quarter of 2026. Its construction site was struck by an Iranian drone, with minor damage reported and no change to that target.\n\nSo confirm the terminal with the airline rather than assuming, because the picture is still moving.\n\nThere are three runways, the longest 3,500 metres. Part of the complex is an air force base.",
- "claims": [],
+ "after": "Kuwait's airport, 15.5 km south of central Kuwait City, and the hub for both Kuwait Airways and Jazeera Airways.\n\nFlights stopped on 28 February 2026, when Kuwait shut its airspace in the Iran war, and the two home airlines only restarted on 26 April. An air strike on 3 June badly damaged Terminal 1. In September it was still closed, and Terminals 4 and 5 were handling all flights on reduced schedules. The civil aviation authority also denied reports that transit flights would start on 1 October.\n\nAirspace can still close at short notice, so check the terminal and the schedule with the airline before every booking.\n\nA new Terminal 2 by Foster and Partners, under construction since May 2017, is due to be finished in late 2026. There are three runways, the longest 4,580 metres, and part of the complex is an air force base.",
+ "claims": [
+  {
+   "claim": "15.5 km south of central Kuwait City",
+   "verdict": "confirmed",
+   "inAfter": "15.5 km south of central Kuwait City",
+   "note": "Coordinates put it 15.9 km from the GeoNames centre at 182 degrees, which is south; ratio 0.98.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "15.5 kilometers (9.6 mi) south of the centre of Kuwait City"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 15.9 km (9.9 miles)",
+      "Bearing from the city centre: 182 degrees, which is south"
+     ]
+    },
+    {
+     "file": "enr-runway",
+     "org": "Engineering News-Record",
+     "quote": "located about 10 miles south of Kuwait City",
+     "dated": "2025-11-03"
+    },
+    {
+     "file": "globalsecurity-airbase",
+     "org": "GlobalSecurity.org",
+     "quote": "Kuwait International Airport is 16km (10mi) south of Kuwait City."
+    }
+   ]
+  },
+  {
+   "claim": "hub for Kuwait Airways and Jazeera Airways",
+   "verdict": "confirmed",
+   "inAfter": "the hub for both Kuwait Airways and Jazeera Airways",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It serves as the primary hub for Kuwait Airways and Jazeera Airways."
+    },
+    {
+     "file": "aerotime-restart",
+     "org": "AeroTime",
+     "quote": [
+      "Kuwait's two national carriers resumed direct operations from Kuwait International Airport (KWI) on April 26, 2026",
+      "Jazeera Airways resumed direct service from its dedicated Terminal 5 (T5)"
+     ],
+     "dated": "2026-04-27"
+    },
+    {
+     "file": "thenational-june3",
+     "org": "The National",
+     "quote": "the country's two national carriers, Kuwait Airways and Jazeera Airways",
+     "dated": "2026-06-04"
+    }
+   ]
+  },
+  {
+   "claim": "flights stopped on 28 February 2026 when Kuwait shut its airspace in the Iran war",
+   "verdict": "corrected",
+   "inAfter": "Flights stopped on 28 February 2026, when Kuwait shut its airspace in the Iran war",
+   "note": "Missing from the old text, which was drafted from a partial copy of the article. Replaces the stale terminal picture.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Since 28 February 2026, all flights to and from Kuwait International Airport were suspended following the closure of the Kuwaiti airspace due to the 2026 Iran war."
+    },
+    {
+     "file": "aerotime-restart",
+     "org": "AeroTime",
+     "quote": "ending a closure that had been in place since February 28, 2026",
+     "dated": "2026-04-27"
+    },
+    {
+     "file": "thenational-june3",
+     "org": "The National",
+     "quote": "after being closed at the start of the Iran war on February 28",
+     "dated": "2026-06-04"
+    }
+   ]
+  },
+  {
+   "claim": "Kuwait Airways and Jazeera Airways restarted on 26 April 2026",
+   "verdict": "corrected",
+   "inAfter": "the two home airlines only restarted on 26 April",
+   "note": "AeroTime adds that the airspace reopened on 23 April and flights restarted three days later.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Kuwait Airways and Jazeera Airways restarted operations from the airport on 26 April"
+    },
+    {
+     "file": "aerotime-restart",
+     "org": "AeroTime",
+     "quote": "Kuwait's two national carriers resumed direct operations from Kuwait International Airport (KWI) on April 26, 2026",
+     "dated": "2026-04-27"
+    }
+   ]
+  },
+  {
+   "claim": "an air strike on 3 June 2026 badly damaged Terminal 1",
+   "verdict": "corrected",
+   "inAfter": "An air strike on 3 June badly damaged Terminal 1",
+   "note": "Kuwait blamed Iranian drones; Iran's Revolutionary Guard denied targeting the airport and blamed a falling US Patriot interceptor (Al Jazeera). So the text says 'an air strike' and does not name who fired. Wikipedia says 'the next day' after the 1 June reopening; the news reports give 3 June.",
+   "sources": [
+    {
+     "file": "thenational-june3",
+     "org": "The National",
+     "quote": [
+      "damaged by an air strike on June 3",
+      "The video appears to show a projectile striking the roof of Terminal 1"
+     ],
+     "dated": "2026-06-04"
+    },
+    {
+     "file": "aljazeera-june3",
+     "org": "Al Jazeera",
+     "quote": "hit by drones and missiles on Wednesday morning, causing severe damage to a number of airport facilities",
+     "dated": "2026-06-03"
+    },
+    {
+     "file": "arabtimes-airarabia",
+     "org": "Arab Times",
+     "quote": "after Terminal 1 sustained significant damage in the recent attack on Kuwait Airport",
+     "dated": "2026-09-08"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 1 still closed in September 2026",
+   "verdict": "corrected",
+   "inAfter": "In September it was still closed",
+   "note": "The FCDO page was updated on 20 August 2026 and was marked still current on 23 September 2026. The Arab Times report of 8 September has foreign airlines working from Terminal 4 because of the damage to Terminal 1. IBTimes AU is a weaker outlet, kept only as a third voice.",
+   "sources": [
+    {
+     "file": "fcdo-kuwait",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": [
+      "while Terminal 1 remains closed",
+      "Still current at: 23 September 2026"
+     ],
+     "dated": "2026-08-20"
+    },
+    {
+     "file": "arabtimes-airarabia",
+     "org": "Arab Times",
+     "quote": "ensuring smooth and efficient operations at Terminal 4 after Terminal 1 sustained significant damage",
+     "dated": "2026-09-08"
+    },
+    {
+     "file": "ibtimes-t1-closed",
+     "org": "IBTimes AU",
+     "quote": "while Terminal 1 remains closed for repairs"
+    }
+   ]
+  },
+  {
+   "claim": "Terminals 4 and 5 handling all flights on reduced schedules",
+   "verdict": "corrected",
+   "inAfter": "Terminals 4 and 5 were handling all flights on reduced schedules",
+   "note": "Replaces 'Terminal 4 ... is used only by Kuwait Airways'. Since June foreign airlines have used it too.",
+   "sources": [
+    {
+     "file": "fcdo-kuwait",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": [
+      "Kuwait International Airport is currently operating through Terminals 4 and 5, serving Kuwait Airways, Jazeera Airways and foreign carriers",
+      "Flight schedules remain reduced"
+     ],
+     "dated": "2026-08-20"
+    },
+    {
+     "file": "arabtimes-airarabia",
+     "org": "Arab Times",
+     "quote": [
+      "operations at Terminal 4",
+      "limited schedules approved by the DGCA"
+     ],
+     "dated": "2026-09-08"
+    },
+    {
+     "file": "ibtimes-t1-closed",
+     "org": "IBTimes AU",
+     "quote": "two active passenger terminals, Terminal 4 and Terminal 5"
+    }
+   ]
+  },
+  {
+   "claim": "civil aviation authority denied transit flights would start on 1 October",
+   "verdict": "corrected",
+   "inAfter": "denied reports that transit flights would start on 1 October",
+   "note": "Both papers carry the same KUNA report of the Public Authority for Civil Aviation spokesman, dated 22 September 2026.",
+   "sources": [
+    {
+     "file": "kuwaittimes-transit",
+     "org": "Kuwait Times (KUNA)",
+     "quote": "denied Tuesday reports that an airline operating at Kuwait International Airport had announced the launch of transit flights starting Oct 1",
+     "dated": "2026-09-22"
+    },
+    {
+     "file": "arabtimes-transit",
+     "org": "Arab Times (KUNA)",
+     "quote": "denied Tuesday reports that an airline operating at Kuwait International Airport had announced the launch of transit flights starting Oct 1",
+     "dated": "2026-09-22"
+    }
+   ]
+  },
+  {
+   "claim": "airspace can still close at short notice",
+   "verdict": "corrected",
+   "inAfter": "Airspace can still close at short notice",
+   "sources": [
+    {
+     "file": "fcdo-kuwait",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": [
+      "periodic airspace closures",
+      "airspace which could close at short notice"
+     ],
+     "dated": "2026-08-20"
+    },
+    {
+     "file": "ibtimes-t1-closed",
+     "org": "IBTimes AU",
+     "quote": "close its airspace and suspend takeoffs and landings on July 18"
+    }
+   ]
+  },
+  {
+   "claim": "check the terminal and schedule with the airline",
+   "verdict": "confirmed",
+   "inAfter": "check the terminal and the schedule with the airline before every booking",
+   "note": "The old text gave the same advice twice; it is kept once, with the FCDO and a Kuwaiti paper behind it.",
+   "sources": [
+    {
+     "file": "fcdo-kuwait",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": "Check details with your airline before travelling",
+     "dated": "2026-08-20"
+    },
+    {
+     "file": "arabtimes-airarabia",
+     "org": "Arab Times",
+     "quote": "the need for passengers to verify their flight details directly with the airline and Kuwait International Airport before travelling",
+     "dated": "2026-09-08"
+    }
+   ]
+  },
+  {
+   "claim": "new Terminal 2 by Foster and Partners",
+   "verdict": "confirmed",
+   "inAfter": "A new Terminal 2 by Foster and Partners",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Terminal 2, designed by Foster and Partners"
+    },
+    {
+     "file": "enr-runway",
+     "org": "Engineering News-Record",
+     "quote": "designed by Foster + Partners and built by Limak",
+     "dated": "2025-11-03"
+    },
+    {
+     "file": "airporttech-t2",
+     "org": "Airport Technology (GlobalData)",
+     "quote": "in association with Foster+Partners (UK)"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2 under construction since May 2017",
+   "verdict": "confirmed",
+   "inAfter": "under construction since May 2017",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It began construction in May 2017"
+    },
+    {
+     "file": "airporttech-t2",
+     "org": "Airport Technology (GlobalData)",
+     "quote": "Construction of T2 started in May 2017"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2 due to be finished in late 2026",
+   "verdict": "softened",
+   "inAfter": "is due to be finished in late 2026",
+   "note": "Was 'now targeted at the last quarter of 2026', as an operating date. The sources give a completion date, not an opening date, so the text says finished. At the Cabinet's meeting in the T2 building on 25 August 2026 the Prime Minister urged faster work to keep to the approved schedule, without restating a date.",
+   "sources": [
+    {
+     "file": "aerotime-restart",
+     "org": "AeroTime",
+     "quote": "Terminal 2 is still under construction, with completion now targeted for late 2026",
+     "dated": "2026-04-27"
+    },
+    {
+     "file": "arabtimes-t2-nov",
+     "org": "Arab Times",
+     "quote": "November 30, 2026, as the final deadline for completing all work on the new passenger terminal (T2)",
+     "dated": "2025-12-05"
+    },
+    {
+     "file": "airporttech-t2",
+     "org": "Airport Technology (GlobalData)",
+     "quote": "expected to be completed in November 2026"
+    },
+    {
+     "file": "kuwaittimes-cabinet-t2",
+     "org": "Kuwait Times (KUNA)",
+     "quote": "ensure completion according to the approved operational schedule",
+     "dated": "2026-08-25"
+    }
+   ]
+  },
+  {
+   "claim": "three runways",
+   "verdict": "confirmed",
+   "inAfter": "There are three runways",
+   "note": "ENR says the central runway is due for rehabilitation now that the third is open, with full three-runway operation by 2027.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It has three runways"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runways listed: 3"
+    },
+    {
+     "file": "enr-runway",
+     "org": "Engineering News-Record",
+     "quote": "The third runway and the new control tower represent a qualitative leap",
+     "dated": "2025-11-03"
+    }
+   ]
+  },
+  {
+   "claim": "longest runway 4,580 metres",
+   "verdict": "corrected",
+   "inAfter": "the longest 4,580 metres",
+   "note": "Was 3,500 metres. The article text lists only the two older runways; its infobox, OurAirports and ENR all have the third runway, commissioned in October 2025. ENR prints '4.58-m', a typo for 4.58 km, so it backs the new runway rather than the exact length.",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "r3_length_m = 4,580"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runway 16/34: 4,580 m (15,026 ft), ASPH"
+    },
+    {
+     "file": "enr-runway",
+     "org": "Engineering News-Record",
+     "quote": "Kuwait has opened a new 4.58-m runway",
+     "dated": "2025-11-03"
+    }
+   ]
+  },
+  {
+   "claim": "part of the complex is an air force base",
+   "verdict": "confirmed",
+   "inAfter": "part of the complex is an air force base",
+   "note": "Janes reports the base is being moved to a new site between the old airport and the third runway, so it stays inside the complex.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "A portion of the airport complex is designated as Abdullah Al-Mubarak Air Base, which contains the headquarters of the Kuwait Air Force"
+    },
+    {
+     "file": "globalsecurity-airbase",
+     "org": "GlobalSecurity.org",
+     "quote": "Al-Mubarak Air Base, which is part of the Kuwait International Airport complex"
+    },
+    {
+     "file": "janes-airbase",
+     "org": "Janes",
+     "quote": "Abdullah al-Mubarak is the airbase at Kuwait International Airport",
+     "dated": "2024-05-29"
+    }
+   ]
+  },
+  {
+   "claim": "in Farwaniya Governorate",
+   "verdict": "cut",
+   "wasBefore": "in Farwaniya Governorate",
+   "why": "Only Wikipedia and sites copying its wording say so."
+  },
+  {
+   "claim": "twelfth busiest in the Middle East in 2025",
+   "verdict": "cut",
+   "wasBefore": "As of 2025 it is the twelfth busiest in the Middle East.",
+   "why": "No second source, and 2026 traffic has been reshaped by the closure. A 2025 passenger total (15.7 million) was found only on a personal data blog, so nothing replaces it."
+  },
+  {
+   "claim": "terminal situation needs checking",
+   "verdict": "cut",
+   "wasBefore": "The terminal situation needs checking before every booking.",
+   "why": "Folded into the single advice sentence, which carries two sources."
+  },
+  {
+   "claim": "five numbered terminals by 2026",
+   "verdict": "cut",
+   "wasBefore": "The airport is meant to have five numbered terminals in operation by 2026.",
+   "why": "Out of date. Terminal 1 is closed after strike damage, Terminal 2 is unfinished and AeroTime reports Terminal 3 was permanently closed before the war."
+  },
+  {
+   "claim": "Terminal 4 opened August 2018, Kuwait Airways only",
+   "verdict": "cut",
+   "wasBefore": "Terminal 4 opened in August 2018 and is used only by Kuwait Airways.",
+   "why": "Out of date: foreign airlines have used Terminal 4 since June 2026 while Terminal 1 is shut. Replaced by the current terminal position."
+  },
+  {
+   "claim": "28 gates and an airside hotel",
+   "verdict": "cut",
+   "wasBefore": "a large Foster and Partners building with 28 gates and an airside hotel",
+   "why": "The gate count is disputed: Airport Technology gives 36 boarding gates in one line and 28 terminal gates in the next. The hotel is detail an agent does not need."
+  },
+  {
+   "claim": "due August 2022, pushed to 2024 by the pandemic",
+   "verdict": "cut",
+   "wasBefore": "was due in August 2022, was pushed to 2024 by the pandemic",
+   "why": "Only Wikipedia gives these dates. Replaced by the construction start and the current target, each with two sources."
+  },
+  {
+   "claim": "drone strike on the Terminal 2 site",
+   "verdict": "cut",
+   "wasBefore": "Its construction site was struck by an Iranian drone, with minor damage reported and no change to that target.",
+   "why": "Undated, and not found in any independent source."
+  },
+  {
+   "claim": "confirm the terminal because the picture is moving",
+   "verdict": "cut",
+   "wasBefore": "So confirm the terminal with the airline rather than assuming, because the picture is still moving.",
+   "why": "Replaced by the same advice in plainer words, with the FCDO and the Arab Times behind it."
+  },
+  {
+   "claim": "longest runway 3,500 metres",
+   "verdict": "cut",
+   "wasBefore": "the longest 3,500 metres",
+   "why": "Out of date: the third runway, 4,580 m, was commissioned in October 2025."
+  }
+ ],
  "opinion": [],
  "tracerOk": {}
 }

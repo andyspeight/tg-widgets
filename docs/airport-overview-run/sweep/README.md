@@ -80,6 +80,7 @@ committed, in the ledgers.
 | `geo.mjs <IATA>` or `--all` | The coordinates check above, plus runway lengths and elevation from OurAirports |
 | `grab.mjs <IATA> <label> <url> [regex]` | Saves one source page as text, with its URL and fetch time, and prints the matching lines |
 | `grabb.mjs <IATA> <label> <url> [regex]` | The same through a real Chromium browser, for the many official and news sites that answer a plain request with 403. Certificate checking stays on: the session's proxy CA was added to Chromium's trust store (`certutil`, 23 Sep), never bypassed |
+| `show.mjs <IATA>` | Prints a ledger for the human reviewer, flagging low-tier sources and undated time-sensitive claims |
 | `check.mjs <IATA>` | The gate. Every quote on its saved page, two organisations per kept claim, every sentence of the new text carried by a checked claim, tracer, bearings, house style |
 
 ## Bulk second sources, fetched once for many airports
@@ -124,3 +125,7 @@ two sources is `Done`, and Done is servable. That is Andy's call, asked on
 | 23 Sep 2026 | TBS Tbilisi | Verified and pushed. 16 claims kept (6 corrected), 8 cut. Caught: the Russian flight ban was lifted in May 2023; traffic and airline counts were a year and a half stale |
 | 23 Sep 2026 | KWE Guiyang | Verified and pushed. 10 kept, 9 cut. Caught: passengers 30.2 million should be 22.7 million; "the runway is 3,200 metres" when there have been two since 2021 |
 | 23 Sep 2026 | BRU Brussels | Verified and pushed. 10 kept, 8 cut. Caught: a 2019 passenger figure where 2025's (24.4 million) exists; TUI fly Belgium's "home base" softened to a base |
+| 23 Sep 2026 | DEN Denver | Verified and pushed. 12 kept, 8 cut. Settled the logged 25 versus 23 miles contradiction (Colorado Newsline: about 25). Six single-source superlatives cut |
+| 23 Sep 2026 | STR Stuttgart | Verified and pushed. 6 kept, 7 cut. Caught: a 2018 figure (11.8 million) where 2025's is 9.6 million, and "sixth busiest in Germany", no longer true |
+| 23 Sep 2026 | LXA Lhasa | Verified and pushed. 8 kept, 8 cut. Settled both logged contradictions: elevation 3,570 m (not 3,500 or 3,600), distance in the low sixties of km (not 97) |
+| 23 Sep 2026 | HFE Hefei | Verified and pushed. 9 kept, 5 cut. Settled the logged "12,645 million" (CAAC: 12,644,989). The district is cut: Wikipedia and the 2013 Xinhua report disagree |

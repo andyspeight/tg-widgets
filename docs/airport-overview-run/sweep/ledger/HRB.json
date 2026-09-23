@@ -1,0 +1,344 @@
+{
+ "iata": "HRB",
+ "id": "recODva3iQ0OJPMOZ",
+ "name": "Harbin Taiping International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Harbin_Taiping_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The largest airport in Heilongjiang and the main hub for north east China, about 37 km south west of Harbin. It handled 24,650,717 passengers in 2025, twenty second in mainland China, across 97 destinations of which 85 are domestic.\n\nThe two terminals are separate buildings about a mile apart, which is the single most important thing to tell a connecting client. Terminal 2, opened in April 2018, takes domestic flights only. All international flights use the older terminal to the north, which is being redeveloped for the purpose. Allow real time to move between them.\n\nA second runway opened in January 2025, giving the airport a 3,200 metre and a 3,600 metre runway side by side.\n\nThe airport was built in 1979 as Yanjiagang, replacing the old Majiagou airfield the Japanese had built in 1931, and took international status in 1984 with flights to Russia.",
+ "after": "The largest airport in Heilongjiang and an important hub for north east China, about 37 km south west of Harbin. It handled 24.65 million passengers in 2025, the 22nd busiest in mainland China. Its summer 2026 schedule serves 95 destinations, 83 of them in mainland China.\n\nAll international flights have used a rebuilt Terminal 1 since July 2024. It is joined to Terminal 2, so international and domestic connections are made under one roof. Terminal 2, opened in April 2018, is for domestic flights.\n\nA second runway opened in January 2025, giving the airport a 3,200 metre and a 3,600 metre runway side by side.\n\nThe airport was built in 1979 as Yanjiagang, replacing the old Majiagou airfield.",
+ "claims": [
+  {
+   "claim": "largest airport in Heilongjiang",
+   "verdict": "confirmed",
+   "inAfter": "The largest airport in Heilongjiang",
+   "note": "Harbin TV reports it was the busiest airport in the whole of north east China in 2022 to 2024, which covers Heilongjiang; it also carries 3,440 of the Heilongjiang Airport Group's 4,339 weekly flights in summer 2026.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the largest airport serving Heilongjiang province"
+    },
+    {
+     "file": "hrbtv-runway-2025",
+     "org": "Harbin Radio and Television (HRB Lanwang)",
+     "quote": "2024年哈机场完成旅客吞吐量2379.8万人次，连续三年位居东北地区首位",
+     "dated": "2025-01-23"
+    },
+    {
+     "file": "gmw-2026-03",
+     "org": "Guangming Daily (Heilongjiang Traffic Radio)",
+     "quote": [
+      "黑龙江机场集团计划每周执行航班总量达4339架次",
+      "每周计划执行航班3440架次"
+     ],
+     "dated": "2026-03-27"
+    }
+   ]
+  },
+  {
+   "claim": "an important hub for north east China",
+   "verdict": "softened",
+   "inAfter": "an important hub for north east China",
+   "note": "Was 'the main hub for north east China'. In 2025 Shenyang Taoxian handled slightly more passengers (21st in China against Harbin's 22nd), so 'the main hub' no longer holds on traffic. Harbin is one of the CAAC's ten designated international hubs.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Today it serves as an important transportation hub for the northeastern region of China"
+    },
+    {
+     "file": "airchina-hrb",
+     "org": "Air China",
+     "quote": "as well as an important air traffic hub in Northeast China and even Northeast Asia"
+    },
+    {
+     "file": "caacnews-2025-12",
+     "org": "CAAC News",
+     "quote": "哈尔滨机场是全国十大国际枢纽机场之一",
+     "dated": "2025-12-24"
+    }
+   ]
+  },
+  {
+   "claim": "about 37 km south west of Harbin",
+   "verdict": "confirmed",
+   "inAfter": "about 37 km south west of Harbin",
+   "note": "Coordinates give 34.1 km in a straight line at 246 degrees (south west); 37 km is a ratio of 1.08, inside the tolerance.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is located about 37 kilometres (23 mi) southwest of the city of Harbin"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 34.1 km (21.2 miles)",
+      "Bearing from the city centre: 246 degrees, which is south west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "24.65 million passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "It handled 24.65 million passengers in 2025",
+   "note": "Rounded from 24,650,717.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport handled 24,650,717 passengers in 2025"
+    },
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "quote": "passengers 2025: 24,650,717",
+     "dated": "2026-02-26"
+    }
+   ]
+  },
+  {
+   "claim": "22nd busiest in mainland China",
+   "verdict": "confirmed",
+   "inAfter": "the 22nd busiest in mainland China",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "making it the 22nd busiest airport in mainland China"
+    },
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "quote": "passenger rank 22 in China",
+     "dated": "2026-02-26"
+    }
+   ]
+  },
+  {
+   "claim": "95 destinations, 83 domestic, summer 2026",
+   "verdict": "corrected",
+   "inAfter": "Its summer 2026 schedule serves 95 destinations, 83 of them in mainland China.",
+   "note": "Was '97 destinations of which 85 are domestic'. The operator's summer 2026 schedule (29 March to 24 October) gives 95: 83 mainland cities and 12 international and regional ones.",
+   "sources": [
+    {
+     "file": "xinhua-2026-03",
+     "org": "Xinhua (Heilongjiang)",
+     "quote": "通航点总数达到95个，覆盖国内83个城市及国际地区12个城市",
+     "dated": "2026-03-27"
+    },
+    {
+     "file": "gmw-2026-03",
+     "org": "Guangming Daily (Heilongjiang Traffic Radio)",
+     "quote": "通航点总数达到95个，覆盖国内83个城市及国际地区12个城市",
+     "dated": "2026-03-27"
+    }
+   ]
+  },
+  {
+   "claim": "international flights in a rebuilt T1 since July 2024",
+   "verdict": "corrected",
+   "inAfter": "All international flights have used a rebuilt Terminal 1 since July 2024.",
+   "note": "Replaces 'All international flights use the older terminal to the north'. From 19:00 on 11 July 2024 every international flight moved from the old international terminal (T0) into the rebuilt T1. The January 2026 guide shows it is still so.",
+   "sources": [
+    {
+     "file": "hlj-gov-2024-07",
+     "org": "Heilongjiang provincial government (from Harbin city government)",
+     "quote": "2024年7月11日19时起，哈尔滨太平国际机场运行的所有进出港国际航班，全部由T0航站楼（原国际航站楼）转场至T1航站楼（贴邻T2航站楼）运营",
+     "dated": "2024-07-11"
+    },
+    {
+     "file": "gmw-2024-07",
+     "org": "Guangming Daily (Harbin Radio)",
+     "quote": [
+      "原哈尔滨机场T0航站楼运行的所有国际客运航班全部转场至T1航站楼运行",
+      "黑龙江机场集团2021年实施T1航站楼改扩建工程"
+     ],
+     "dated": "2024-07-12"
+    },
+    {
+     "file": "eastchinatrip-2026",
+     "org": "East China Trip (travel guide)",
+     "quote": "Terminal 1 (T1) : Serves both international and domestic flights",
+     "dated": "2026-01-02"
+    }
+   ]
+  },
+  {
+   "claim": "T1 joined to T2, connections under one roof",
+   "verdict": "corrected",
+   "inAfter": "It is joined to Terminal 2, so international and domestic connections are made under one roof.",
+   "note": "Replaces 'separate buildings about a mile apart'. The mile was the gap to the old international terminal (T0), which passengers no longer use. International passengers now enter T1 through door 10 on T2's second floor.",
+   "sources": [
+    {
+     "file": "hlj-gov-2024-07",
+     "org": "Heilongjiang provincial government (from Harbin city government)",
+     "quote": [
+      "T1航站楼（贴邻T2航站楼）",
+      "请国际出港旅客在T2航站楼二楼10号门进入航站楼"
+     ],
+     "dated": "2024-07-11"
+    },
+    {
+     "file": "gmw-2024-07",
+     "org": "Guangming Daily (Harbin Radio)",
+     "quote": "改扩建后的T1航站楼与T2航站楼融为一体，国际-国内、国内-国际旅客转机可在同一航站楼内完成，解决了旅客来回奔波的烦恼",
+     "dated": "2024-07-12"
+    },
+    {
+     "file": "eastchinatrip-2026",
+     "org": "East China Trip (travel guide)",
+     "quote": "Walk through Gate 10 on the second floor of T2 to enter T1. The distance is short, and walking is the most convenient option.",
+     "dated": "2026-01-02"
+    }
+   ]
+  },
+  {
+   "claim": "T2 opened April 2018",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 2, opened in April 2018",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the new Terminal 2 opened on 30 April 2018"
+    },
+    {
+     "file": "thepaper-history",
+     "org": "The Paper (government account)",
+     "quote": "当年4月，占地面积13.52万平方米的哈尔滨机场T2航站楼一期工程建成投用"
+    }
+   ]
+  },
+  {
+   "claim": "T2 is for domestic flights",
+   "verdict": "confirmed",
+   "inAfter": "is for domestic flights",
+   "note": "T1 also has a domestic area, reopened in 2023, so T2 is not the only domestic terminal.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "This terminal is for domestic flights only."
+    },
+    {
+     "file": "eastchinatrip-2026",
+     "org": "East China Trip (travel guide)",
+     "quote": "Terminal 2 (T2) : Dedicated to domestic flights.",
+     "dated": "2026-01-02"
+    }
+   ]
+  },
+  {
+   "claim": "second runway opened January 2025; 3,200 m and 3,600 m side by side",
+   "verdict": "confirmed",
+   "inAfter": "A second runway opened in January 2025, giving the airport a 3,200 metre and a 3,600 metre runway side by side.",
+   "note": "The new runway opened on 23 January 2025, 760 m east of the first and parallel to it.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The second runway, 05R/23L, opened on January 23, 2025",
+      "05L/23R is 3,200 meters, and 05R/23L is 3,600 meters"
+     ]
+    },
+    {
+     "file": "hrbtv-runway-2025",
+     "org": "Harbin Radio and Television (HRB Lanwang)",
+     "quote": [
+      "1月23日上午",
+      "新建东二跑道正式投用",
+      "在现东一跑道东侧760米处新建1条长3600米、宽45米的东二跑道"
+     ],
+     "dated": "2025-01-23"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 05L/23R: 3,200 m (10,499 ft), ASP",
+      "Runway 05R/23L: 3,600 m (11,811 ft), CONC"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "built in 1979 as Yanjiagang, replacing Majiagou",
+   "verdict": "confirmed",
+   "inAfter": "The airport was built in 1979 as Yanjiagang, replacing the old Majiagou airfield.",
+   "note": "Yanjiagang opened on 27 December 1979; the old Majiagou airport in the city centre closed on 15 June 1979.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "formerly known as Yanjiagang Airport",
+      "was constructed in 1979",
+      "It replaced the old Harbin Majiagou Airport"
+     ]
+    },
+    {
+     "file": "thepaper-history",
+     "org": "The Paper (government account)",
+     "quote": [
+      "同年12月27日，机场正式投入使用",
+      "原马家沟机场因地处城市中心，净空条件差，不能起降大型民航班机等原因，于1979年6月15日正式关闭"
+     ]
+    },
+    {
+     "file": "ch-hrb-intro",
+     "org": "Spring Airlines",
+     "quote": "原名哈尔滨阎家岗机场，始建于1979年"
+    }
+   ]
+  },
+  {
+   "claim": "the main hub for north east China",
+   "verdict": "cut",
+   "wasBefore": "the main hub for north east China",
+   "why": "Overstated for 2025: Shenyang Taoxian handled slightly more passengers (NetEase list and the CAAC ranking both put Shenyang 21st and Harbin 22nd). Softened to 'an important hub'."
+  },
+  {
+   "claim": "97 destinations, 85 domestic",
+   "verdict": "cut",
+   "wasBefore": "across 97 destinations of which 85 are domestic",
+   "why": "Replaced by the operator's summer 2026 figures (95 and 83)."
+  },
+  {
+   "claim": "two terminals a mile apart",
+   "verdict": "cut",
+   "wasBefore": "The two terminals are separate buildings about a mile apart, which is the single most important thing to tell a connecting client.",
+   "why": "Out of date since 11 July 2024, when international flights left the separate old terminal for the rebuilt T1, which is joined to T2."
+  },
+  {
+   "claim": "international flights in the older terminal to the north, being redeveloped",
+   "verdict": "cut",
+   "wasBefore": "All international flights use the older terminal to the north, which is being redeveloped for the purpose.",
+   "why": "Out of date: the redevelopment finished and international flights moved into T1 in July 2024."
+  },
+  {
+   "claim": "allow real time to move between them",
+   "verdict": "cut",
+   "wasBefore": "Allow real time to move between them.",
+   "why": "No longer applies; connections are made under one roof."
+  },
+  {
+   "claim": "Majiagou built by the Japanese in 1931",
+   "verdict": "cut",
+   "wasBefore": "the Japanese had built in 1931",
+   "why": "No second source. The Paper's history describes Majiagou only from 1950, as a shared military and civil field."
+  },
+  {
+   "claim": "international status in 1984 with flights to Russia",
+   "verdict": "cut",
+   "wasBefore": "and took international status in 1984 with flights to Russia",
+   "why": "Sources disagree on the date: Spring Airlines says scheduled international flights began in 1984 but international status came with the 1998 renaming; The Paper says it opened to foreign traffic on 1 July 1987. 'Russia' would have been the Soviet Union in 1984."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

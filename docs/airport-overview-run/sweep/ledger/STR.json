@@ -1,0 +1,187 @@
+{
+ "iata": "STR",
+ "id": "recyNDSdAzjnKxC39",
+ "name": "Stuttgart Airport",
+ "country": "Germany",
+ "wikipedia": "https://en.wikipedia.org/wiki/Stuttgart_Airport",
+ "audited": "2026-09-23",
+ "before": "Stuttgart's airport, about 13 km south of the city, and sixth busiest in Germany with 11,832,634 passengers in 2018.\n\nThe terminal layout sounds more complicated than it is. There are four passenger terminals with separate check-in areas and entrances, but they are directly connected to each other and share a single airside area, so once a client is through security the building is one space. The catch is boarding: that shared airside has only eight jet bridges against roughly two dozen bus-boarding stands, so expect a bus to the aircraft more often than not.\n\nTerminal 1, with Terminal 1-West, has 50 check-in counters and is mainly Eurowings and Turkish Airlines. Terminal 2 is small, nine counters inside the shopping area.\n\nThe Messe Stuttgart exhibition centre, the ninth largest in Germany, moved to grounds directly next to the airport in 2007, which makes this a genuinely convenient arrival for a trade fair.\n\nIt is named in honour of Manfred Rommel, a former mayor of Stuttgart.",
+ "after": "Stuttgart's airport, about 13 km south of the city. It handled 9.6 million passengers in 2025.\n\nThere are four passenger terminals and a single runway of 3,345 metres.\n\nThe Messe Stuttgart exhibition centre moved to grounds right by the airport in 2007, which makes this a convenient arrival for a trade fair.\n\nIt is named in honour of Manfred Rommel, a former Lord Mayor of Stuttgart.",
+ "claims": [
+  {
+   "claim": "about 13 km south of the city",
+   "verdict": "confirmed",
+   "inAfter": "about 13 km south of the city",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is located approximately 13 km (8.1 mi) (10 km (6.2 mi) in a straight line) south of Stutt"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 10.8 km",
+      "Bearing from the city centre: 162 degrees, which is south"
+     ]
+    }
+   ],
+   "note": "13 km is the road distance; Wikipedia and the coordinates both put the straight line at about 10 to 11 km."
+  },
+  {
+   "claim": "9.6 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled 9.6 million passengers in 2025.",
+   "note": "Was 11,832,634 in 2018, seven years stale. Operator 9,569,617; Eurostat 9,571,997; the Wikipedia infobox 9,585,033 (ADV). All round to 9.6 million.",
+   "sources": [
+    {
+     "file": "str-2025",
+     "org": "Flughafen Stuttgart GmbH (operator)",
+     "quote": [
+      "Flughafen Stuttgart zählt 9,6 Mio. Fluggäste in 2025",
+      "wurden im vergangenen Jahr 9.569.617 Passagiere gezählt"
+     ],
+     "dated": "2026-01"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": "passengers carried in 2025: 9,571,997"
+    }
+   ]
+  },
+  {
+   "claim": "four passenger terminals",
+   "verdict": "confirmed",
+   "inAfter": "There are four passenger terminals",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Stuttgart Airport consists of four passenger terminals"
+    },
+    {
+     "file": "str-facts",
+     "org": "Flughafen Stuttgart GmbH (operator)",
+     "quote": [
+      "Terminal 1: Departures and arrivals",
+      "Terminal 4: Departures and arrivals"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a single runway of 3,345 metres",
+   "verdict": "corrected",
+   "inAfter": "a single runway of 3,345 metres",
+   "note": "New to the text; replaces the jet-bridge and bus-stand counts, which had one source.",
+   "sources": [
+    {
+     "file": "str-facts",
+     "org": "Flughafen Stuttgart GmbH (operator)",
+     "quote": "Runway: 3,345 metres long, 45 metres wide"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "Runway 07/25: 3,345 m"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "r1_length_m = 3,345"
+    }
+   ]
+  },
+  {
+   "claim": "Messe Stuttgart moved next to the airport in 2007",
+   "verdict": "confirmed",
+   "inAfter": "The Messe Stuttgart exhibition centre moved to grounds right by the airport in 2007",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In 2007, the Messe Stuttgart convention center"
+    },
+    {
+     "file": "messe-history",
+     "org": "Messe Stuttgart",
+     "quote": [
+      "Until 2007, national and international trade fairs and exhibitions were held at the former Killesberg exhibition centre",
+      "New Stuttgart Trade Fair Center right by the airport"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named in honour of Manfred Rommel, former Lord Mayor",
+   "verdict": "confirmed",
+   "inAfter": "It is named in honour of Manfred Rommel, a former Lord Mayor of Stuttgart.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is christened in honor of Stuttgart's former mayor, Manfred Rommel"
+    },
+    {
+     "file": "str-rommel",
+     "org": "Flughafen Stuttgart GmbH (operator)",
+     "quote": [
+      "Manfred Rommel Airport",
+      "elected Lord Mayor of Stuttgart in 1974"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "sixth busiest in Germany, 11,832,634 in 2018",
+   "verdict": "cut",
+   "wasBefore": "sixth busiest in Germany with 11,832,634 passengers in 2018",
+   "why": "Seven years stale; on Eurostat 2025 Cologne Bonn is now ahead of Stuttgart. Replaced with the 2025 figure."
+  },
+  {
+   "claim": "layout sounds more complicated than it is",
+   "verdict": "cut",
+   "wasBefore": "The terminal layout sounds more complicated than it is.",
+   "why": "Opinion, goes with the layout detail."
+  },
+  {
+   "claim": "terminals connected, one shared airside",
+   "verdict": "cut",
+   "wasBefore": "they are directly connected to each other and share a single airside area",
+   "why": "Only Wikipedia says so."
+  },
+  {
+   "claim": "eight jet bridges, two dozen bus stands",
+   "verdict": "cut",
+   "wasBefore": "that shared airside has only eight jet bridges against roughly two dozen bus-boarding stands",
+   "why": "No second source; the operator gives gate and stand totals that do not settle it."
+  },
+  {
+   "claim": "T1 with T1-West 50 counters, Eurowings and Turkish",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1, with Terminal 1-West, has 50 check-in counters and is mainly Eurowings and Turkish Airlines",
+   "why": "Only Wikipedia; airline allocations change."
+  },
+  {
+   "claim": "T2 small, nine counters in the shopping area",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 is small, nine counters inside the shopping area",
+   "why": "Only Wikipedia."
+  },
+  {
+   "claim": "Messe ninth largest in Germany",
+   "verdict": "cut",
+   "wasBefore": "the ninth largest in Germany",
+   "why": "Only Wikipedia."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which makes this a convenient arrival for a trade fair",
+   "why": "Plain consequence of the sourced fact that the fair grounds sit by the airport."
+  }
+ ],
+ "tracerOk": {}
+}

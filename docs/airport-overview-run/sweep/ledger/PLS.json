@@ -6,8 +6,416 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Providenciales_International_Airport",
  "audited": "2026-09-23",
  "before": "The main way into the Turks and Caicos, on the island of Providenciales. The territory is a British Overseas Territory, and this is one of two international airports, the other being JAGS McCartney on Grand Turk.\n\nNote the name change. In 2023 the airport was renamed Howard Hamilton International, so both names are still in circulation and a client may see either on a ticket.\n\nIt handles more than 12,000 commercial aircraft movements a year, and the two local carriers, interCaribbean Airways and Caicos Express Airways, both run hubs here, which is how island hopping across the territory works.\n\nThere is one runway, 2,807 metres of asphalt, at an elevation of 15 feet. The runway extension and a terminal renovation were completed by December 2014.",
- "after": "The main way into the Turks and Caicos, on the island of Providenciales. The territory is a British Overseas Territory, and this is one of two international airports, the other being JAGS McCartney on Grand Turk.\n\nNote the name change. In 2023 the airport was renamed Howard Hamilton International, so both names are still in circulation and a client may see either on a ticket.\n\nIt handles more than 12,000 commercial aircraft movements a year, and the two local carriers, interCaribbean Airways and Caicos Express Airways, both run hubs here, which is how island hopping across the territory works.\n\nThere is one runway, 2,807 metres of asphalt, at an elevation of 15 feet. The runway extension and a terminal renovation were completed by December 2014.",
- "claims": [],
- "opinion": [],
+ "after": "The main way into the Turks and Caicos, on the island of Providenciales. Nearly all international flights to this British Overseas Territory land here.\n\nNote the name change. It was officially renamed Howard Hamilton International Airport in May 2024, but both names are in use and the code is still PLS.\n\nThe two local airlines, interCaribbean Airways and Caicos Express Airways, both have hubs here. Caicos Express flies daily to Grand Turk.\n\nThere is one runway, 2,807 metres of asphalt. The terminal was enlarged in 2014 and now runs well beyond the capacity it was designed for, so allow extra time, especially on Saturdays. A new arrivals hall, Terminal B, is being designed, with the building work still to be tendered.",
+ "claims": [
+  {
+   "claim": "main way into the Turks and Caicos",
+   "verdict": "confirmed",
+   "inAfter": "The main way into the Turks and Caicos",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the main international airport serving the Turks and Caicos Islands"
+    },
+    {
+     "file": "tcweekly-vidal",
+     "org": "Turks and Caicos Weekly News",
+     "quote": "the Turks and Caicos Islands' primary gateway",
+     "dated": "2026-07-31"
+    }
+   ]
+  },
+  {
+   "claim": "on the island of Providenciales",
+   "verdict": "confirmed",
+   "inAfter": "on the island of Providenciales",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "on the island of Providenciales in the Caicos Islands"
+    },
+    {
+     "file": "tciaa-pls",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "quote": "Howard Hamilton International Airport [Providenciales]"
+    }
+   ]
+  },
+  {
+   "claim": "nearly all international flights land here",
+   "verdict": "corrected",
+   "inAfter": "Nearly all international flights",
+   "note": "Replaces 'one of two international airports, the other being JAGS McCartney on Grand Turk', which the sources contradict (see the cut below). The operator says all international flights arrive here; Visit TCI says nearly all and names South Caicos as the only other airport with scheduled international flights. 'Nearly all' is what both support.",
+   "sources": [
+    {
+     "file": "tciaa-pls",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "quote": "All international flights to the Turks and Caicos Islands arrive at the Providenciales International Airport"
+    },
+    {
+     "file": "visittci-domestic",
+     "org": "Visit Turks and Caicos Islands (travel guide)",
+     "quote": "only Providenciales and South Caicos welcome scheduled international flights , with Providenciales seeing nearly all of the country's international air arrivals"
+    }
+   ]
+  },
+  {
+   "claim": "a British Overseas Territory",
+   "verdict": "confirmed",
+   "inAfter": "this British Overseas Territory",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "a British Overseas Territory of the United Kingdom"
+    },
+    {
+     "file": "govuk-tci",
+     "org": "UK Foreign, Commonwealth and Development Office (GOV.UK)",
+     "quote": "The Turks and Caicos Islands is a British Overseas Territory"
+    }
+   ]
+  },
+  {
+   "claim": "officially renamed Howard Hamilton International Airport in May 2024",
+   "verdict": "corrected",
+   "inAfter": "It was officially renamed Howard Hamilton International Airport in May 2024",
+   "note": "Was 'in 2023'. The new name was already in use in the TCIAA's August 2023 investor memorandum (file investtci-memo-2023), which is probably where Wikipedia's 2023 comes from, but the official renaming was marked at a ceremony on 21 May 2024. Two independent papers report that date.",
+   "sources": [
+    {
+     "file": "suntci-renamed",
+     "org": "The Sun (Turks and Caicos)",
+     "quote": "celebrated the official renaming of the Providenciales International Airport to Howard Hamilton International Airport on Tuesday, 21st May 2024",
+     "dated": "2024-05-28"
+    },
+    {
+     "file": "tcweekly-renamed",
+     "org": "Turks and Caicos Weekly News",
+     "quote": [
+      "the official renaming of the Providenciales International Airport to the Howard Hamilton International Airport (HHIA)",
+      "May 24, 2024"
+     ],
+     "dated": "2024-05-24"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the airport was nominally renamed the Howard Hamilton International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "both names in use",
+   "verdict": "confirmed",
+   "inAfter": "both names are in use",
+   "note": "The operator's own airport page carries both names; Visit TCI still uses the old one and interCaribbean (December 2025) the new one.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the name Providenciales International Airport remains the dominant name used outside of official government sources"
+    },
+    {
+     "file": "tciaa-pls",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "quote": [
+      "Providenciales International Airport (PLS) | TCIAA",
+      "Howard Hamilton International Airport [Providenciales]"
+     ]
+    },
+    {
+     "file": "visittci-domestic",
+     "org": "Visit Turks and Caicos Islands (travel guide)",
+     "quote": "Providenciales International Airport (PLS)"
+    }
+   ]
+  },
+  {
+   "claim": "the code is still PLS",
+   "verdict": "corrected",
+   "inAfter": "the code is still PLS",
+   "note": "Replaces 'a client may see either on a ticket', which no source addresses. What a client will see is the code.",
+   "sources": [
+    {
+     "file": "tciaa-pls",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "quote": "PLS | MBPV"
+    },
+    {
+     "file": "intercaribbean-barbados",
+     "org": "interCaribbean Airways",
+     "quote": "Providenciales (PLS), Howard Hamilton International Airport",
+     "dated": "2025-12-19"
+    }
+   ]
+  },
+  {
+   "claim": "the two local airlines",
+   "verdict": "confirmed",
+   "inAfter": "The two local airlines, interCaribbean Airways and Caicos Express Airways",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Locally based  air carriers interCaribbean Airways and Caicos Express Airways"
+    },
+    {
+     "file": "visittci-domestic",
+     "org": "Visit Turks and Caicos Islands (travel guide)",
+     "quote": "The Turks and Caicos has two local airlines: interCaribbean and Caicos Express Airways."
+    }
+   ]
+  },
+  {
+   "claim": "both have hubs here",
+   "verdict": "confirmed",
+   "inAfter": "both have hubs here",
+   "note": "interCaribbean names Providenciales as one of its three key hubs. Caicos Express's own home page lists only services out of Providenciales.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "both currently operate respective hubs at the Providenciales International Airport"
+    },
+    {
+     "file": "intercaribbean-barbados",
+     "org": "interCaribbean Airways",
+     "quote": [
+      "with Barbados, Tortola and Providenciales operating as key hubs",
+      "headquartered in the Turks and Caicos Islands"
+     ],
+     "dated": "2025-12-19"
+    },
+    {
+     "file": "caicosexpress-home",
+     "org": "Caicos Express Airways",
+     "quote": "daily scheduled flights between Providenciales and Grand Turk, and eight (8) weekly flights between Providenciales and Salt Cay (In Season)"
+    }
+   ]
+  },
+  {
+   "claim": "Caicos Express flies daily to Grand Turk",
+   "verdict": "corrected",
+   "inAfter": "Caicos Express flies daily to Grand Turk",
+   "note": "Replaces 'which is how island hopping across the territory works', which no second source states and which leaves out the inter-island ferries. The daily Grand Turk flight is the concrete version, from the airline itself.",
+   "sources": [
+    {
+     "file": "caicosexpress-home",
+     "org": "Caicos Express Airways",
+     "quote": "daily scheduled flights between Providenciales and Grand Turk"
+    },
+    {
+     "file": "visittci-domestic",
+     "org": "Visit Turks and Caicos Islands (travel guide)",
+     "quote": "There is daily service between Providenciales and Grand Turk"
+    }
+   ]
+  },
+  {
+   "claim": "one runway",
+   "verdict": "confirmed",
+   "inAfter": "There is one runway",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It has one runway designated 10/28"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runways listed: 1"
+    },
+    {
+     "file": "tciaa-pls",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "quote": "Runway: 10/28"
+    }
+   ]
+  },
+  {
+   "claim": "2,807 metres of asphalt",
+   "verdict": "confirmed",
+   "inAfter": "2,807 metres of asphalt",
+   "note": "OurAirports and a second paragraph on the operator page give 2,804 m (9,200 ft); the operator and Wikipedia both give 2,807 m for the extended runway. The 3 m gap does not matter to an agent.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "an asphalt surface measuring 2,807 m"
+    },
+    {
+     "file": "tciaa-pls",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "quote": [
+      "This expansion extended the runway length to 2,807m",
+      "Asphalt"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runway 10/28: 2,804 m (9,199 ft), ASP"
+    }
+   ]
+  },
+  {
+   "claim": "terminal enlarged in 2014",
+   "verdict": "confirmed",
+   "inAfter": "The terminal was enlarged in 2014",
+   "note": "Kept as history. Not 'last enlarged': the TCIAA's redevelopment page says a smaller 'quick wins' extension was begun later, and its completion is not confirmed.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the renovation was finished by December 2014"
+    },
+    {
+     "file": "tciaa-pls",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "quote": [
+      "the expansion of the terminal building from 51,462ft",
+      "This project was completed by Dolmen Construction in December 2014."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "running well beyond its design capacity",
+   "verdict": "corrected",
+   "inAfter": "now runs well beyond the capacity it was designed for",
+   "note": "Replaces the 2014 works as the current state of the terminal. Both papers carry the TCIAA announcement of July 2026 and the minister's words.",
+   "sources": [
+    {
+     "file": "suntci-terminal-b",
+     "org": "The Sun (Turks and Caicos)",
+     "quote": [
+      "Terminal B is an immediate response to the capacity constraints currently being experienced at HHIA",
+      "an airport operating well beyond the capacity it was designed for"
+     ],
+     "dated": "2026-08-04"
+    },
+    {
+     "file": "tcweekly-vidal",
+     "org": "Turks and Caicos Weekly News",
+     "quote": "HHIA, which has been operating beyond design capacity",
+     "dated": "2026-07-31"
+    }
+   ]
+  },
+  {
+   "claim": "allow extra time, especially on Saturdays",
+   "verdict": "corrected",
+   "inAfter": "so allow extra time, especially on Saturdays",
+   "note": "Practical consequence of the congestion, from the operator's own advice. The operator names Saturday and Sunday; the Weekly News names Saturdays, so the text says 'especially on Saturdays', which both support.",
+   "sources": [
+    {
+     "file": "tciaa-pls",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "quote": "You should give yourself additional time to check in on Saturday and Sunday. There is a high number of flights on these days and this can lead to delays in check-in and security."
+    },
+    {
+     "file": "tcweekly-ppp-scrapped",
+     "org": "Turks and Caicos Weekly News",
+     "quote": "Especially on Saturdays, the congestion at HHIA is described as",
+     "dated": "2026-01-02"
+    }
+   ]
+  },
+  {
+   "claim": "new arrivals hall, Terminal B, being designed",
+   "verdict": "corrected",
+   "inAfter": "A new arrivals hall, Terminal B, is being designed",
+   "note": "The government ended the airport PPP on 29 December 2025 and made the arrivals hall the first phase of the redevelopment. Luis Vidal + Architects began the design at the end of July 2026.",
+   "sources": [
+    {
+     "file": "suntci-terminal-b",
+     "org": "The Sun (Turks and Caicos)",
+     "quote": "consultancy services for the design and development of a new Arrivals Hall – Terminal B – at Howard Hamilton International Airport",
+     "dated": "2026-08-04"
+    },
+    {
+     "file": "tcweekly-vidal",
+     "org": "Turks and Caicos Weekly News",
+     "quote": "to lead the design and development of Terminal B, a sophisticated new Arrivals Hall at Howard Hamilton International Airport",
+     "dated": "2026-07-31"
+    },
+    {
+     "file": "suntci-terminated",
+     "org": "The Sun (Turks and Caicos)",
+     "quote": "the recent tender issued by the TCIAA for the construction of a new Arrivals Hall (originally issued as a contingency plan) now represents the first phase of the overall project delivery"
+    }
+   ]
+  },
+  {
+   "claim": "building work still to be tendered",
+   "verdict": "corrected",
+   "inAfter": "with the building work still to be tendered",
+   "sources": [
+    {
+     "file": "suntci-terminal-b",
+     "org": "The Sun (Turks and Caicos)",
+     "quote": "The construction works for Terminal B will be procured separately in due course",
+     "dated": "2026-08-04"
+    },
+    {
+     "file": "tcweekly-vidal",
+     "org": "Turks and Caicos Weekly News",
+     "quote": "TCIAA noted construction contracts will be awarded through separate procurement rounds",
+     "dated": "2026-07-31"
+    }
+   ]
+  },
+  {
+   "claim": "one of two international airports, the other JAGS McCartney",
+   "verdict": "cut",
+   "wasBefore": "this is one of two international airports, the other being JAGS McCartney on Grand Turk",
+   "why": "Sources disagree on the count: Wikipedia says two, Visit TCI says three (with scheduled international flights only at Providenciales and South Caicos), and the operator lists four airports named International (Providenciales, Grand Turk, South Caicos, North Caicos). Replaced by the point both agree on, that nearly all international flights land here."
+  },
+  {
+   "claim": "renamed in 2023",
+   "verdict": "cut",
+   "wasBefore": "In 2023 the airport was renamed Howard Hamilton International",
+   "why": "The official renaming was on 21 May 2024. Corrected."
+  },
+  {
+   "claim": "a client may see either name on a ticket",
+   "verdict": "cut",
+   "wasBefore": "a client may see either on a ticket",
+   "why": "No source on ticket wording. Replaced by the code, which is unchanged."
+  },
+  {
+   "claim": "more than 12,000 commercial aircraft movements a year",
+   "verdict": "cut",
+   "wasBefore": "It handles more than 12,000 commercial aircraft movements a year",
+   "why": "Only Wikipedia and sites that copy it give the figure, undated. No operator or official traffic figure from the last 12 months was found."
+  },
+  {
+   "claim": "island hopping works through these hubs",
+   "verdict": "cut",
+   "wasBefore": "which is how island hopping across the territory works",
+   "why": "No second source, and ferries also link the islands. Replaced by the daily Caicos Express flight to Grand Turk."
+  },
+  {
+   "claim": "elevation of 15 feet",
+   "verdict": "cut",
+   "wasBefore": "at an elevation of 15 feet",
+   "why": "Sources disagree: Wikipedia and OurAirports say 15 ft, the operator says 28 ft. Of no use to an agent, so cut rather than chosen."
+  },
+  {
+   "claim": "runway extension and terminal renovation completed by December 2014",
+   "verdict": "cut",
+   "wasBefore": "The runway extension and a terminal renovation were completed by December 2014",
+   "why": "True but stale as a description of the airport today. The 2014 enlargement is kept; the rest is replaced by the current state (over capacity, Terminal B in design)."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Note the name change.",
+   "why": "Signpost for the renaming sentence that follows; carries no fact of its own."
+  }
+ ],
  "tracerOk": {}
 }
