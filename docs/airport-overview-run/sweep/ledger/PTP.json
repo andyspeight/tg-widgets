@@ -1,0 +1,413 @@
+{
+ "iata": "PTP",
+ "id": "rec1580NVHY3D0tQe",
+ "name": "Pointe-à-Pitre Pôle Caraïbes",
+ "country": "Guadeloupe",
+ "wikipedia": "https://en.wikipedia.org/wiki/Pointe-%C3%A0-Pitre_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Guadeloupe's main airport, and the second busiest in the Lesser Antilles after Aruba. It handled close to 2.5 million passengers in 2019, ahead of Barbados.\n\nIt sits in Abymes, only 2.4 km from Pointe-a-Pitre, and works from two interconnected terminals. The runway is longer than the island's traffic suggests at 3,125 metres, enough to take an A380 without difficulty. One of the A380 prototypes spent two days here in January 2006.\n\nAir Caraibes uses it as its main hub, and Air France keeps two A320s based on the island for regional flying, so connections around the archipelago are better than at most Caribbean gateways. It is the largest of six airports across Guadeloupe.\n\nThe airport now carries the name of Maryse Conde, though it is still widely listed as Pointe-a-Pitre or Pole Caraibes, so expect to see all three on schedules.",
+ "after": "Guadeloupe's main airport. It handled more than 2.1 million passengers in 2025, still short of the nearly 2.5 million of 2019.\n\nThe airport sits in Abymes, just north of Pointe-à-Pitre, and has two terminals, the smaller T2 serving regional flights. Its runway is about 3,500 metres long, and an A380 made a technical stop here in January 2006.\n\nAir Caraïbes has its main base here, and both it and Air France fly to Paris and around the region. Regional links were hit when Air Antilles stopped flying at the end of 2025, so check onward connections before booking.\n\nIt now carries the name Guadeloupe Maryse Condé, but the older names Pointe-à-Pitre Le Raizet and Pôle Caraïbes are still in use, so expect to see all three.",
+ "claims": [
+  {
+   "claim": "Guadeloupe's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Guadeloupe's main airport.",
+   "note": "UAF ranks it twelfth of all French airports in 2025; Guadeloupe's other airfields (Basse-Terre Baillif, Les Saintes, Marie-Galante) appear in its tables only with a few hundred commercial movements or none.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is the largest of the six airports in the archipelago."
+    },
+    {
+     "file": "uaf-2025",
+     "org": "UAF (Union des Aéroports Français)",
+     "quote": [
+      "Classement par passagers des aéroports français (>100 000 passagers)",
+      "Guadeloupe – Maryse Condé 2 193 878 2,0% -11,8% 12",
+      "Marie Galante Mvts commerciaux 0 221 ///"
+     ],
+     "dated": "2026-03-25"
+    }
+   ]
+  },
+  {
+   "claim": "more than 2.1 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled more than 2.1 million passengers in 2025",
+   "note": "Was 'close to 2.5 million passengers in 2019'. UAF gives 2,193,878 for 2025 including transit, of which 2,146,585 local passengers; Eurostat, which counts passengers carried without transit, gives 2,146,387. Both are above 2.1 million, so the text says that (as for Bergen). The drafting note said Eurostat does not cover the airport; it does (FR_TFFR). The operator's own 2025 total could not be found: its press page lists only four releases (the latest, January and March 2026 traffic, give monthly figures), and its annual activity reports stop at 2024.",
+   "sources": [
+    {
+     "file": "uaf-2025",
+     "org": "UAF (Union des Aéroports Français)",
+     "quote": [
+      "2019 2022 2023 2024 2025 25/24 25/19",
+      "Guadeloupe – Maryse Condé 2 488 782 2 077 233 2 151 369 2 149 887 2 193 878 2.0% -11.8%",
+      "Passagers locaux 2 412 963 2 024 689 2 106 313 2 108 233 2 146 585 1.8% -11.0%"
+     ],
+     "dated": "2026-03-25"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": "passengers carried in 2025: 2,146,387"
+    }
+   ]
+  },
+  {
+   "claim": "still short of the nearly 2.5 million of 2019",
+   "verdict": "corrected",
+   "inAfter": "still short of the nearly 2.5 million of 2019",
+   "note": "Keeps the old 2019 figure as the benchmark: 2,488,782 in both sources, and 11.8 per cent above 2025 on UAF's figures.",
+   "sources": [
+    {
+     "file": "uaf-2025",
+     "org": "UAF (Union des Aéroports Français)",
+     "quote": "Guadeloupe – Maryse Condé 2 488 782 2 077 233 2 151 369 2 149 887 2 193 878 2.0% -11.8%",
+     "dated": "2026-03-25"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2019, the airport handled 2,488,782 passengers"
+    }
+   ]
+  },
+  {
+   "claim": "in Abymes, just north of Pointe-à-Pitre",
+   "verdict": "softened",
+   "inAfter": "The airport sits in Abymes, just north of Pointe-à-Pitre",
+   "note": "Was 'only 2.4 km from Pointe-a-Pitre'. Coordinates give 3.2 km at 3 degrees (north) from the GeoNames centre; 2.4 km is a ratio of 0.75, below the tolerance, and the one written source for it is Wikipedia (the current eAIP page could not be fetched: two URL forms answered 404). The operator's legal notice gives its address as Morne Mamiel, 97139 Abymes.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is located in Abymes, 2.4 km (1.3 NM) north-northeast of Pointe-à-Pitre."
+    },
+    {
+     "file": "op-infos-legales",
+     "org": "SAGPC (operator, guadeloupe.aeroport.fr)",
+     "quote": [
+      "Morne Mamiel",
+      "97139 Abymes - Guadeloupe"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 3.2 km (2.0 miles)",
+      "Bearing from the city centre: 3 degrees, which is north"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "two terminals, the smaller T2 serving regional flights",
+   "verdict": "corrected",
+   "inAfter": "has two terminals, the smaller T2 serving regional flights",
+   "note": "Was 'works from two interconnected terminals'; 'interconnected' rests on Wikipedia alone (the operator's terminal plan is a map). The operator gives T1 28,000 square metres and the regional T2 5,000, in service since 3 September 2014, and sells Caribbean Airlines and LIAT Air tickets at T2.",
+   "sources": [
+    {
+     "file": "op-infrastructure",
+     "org": "SAGPC (operator, guadeloupe.aeroport.fr)",
+     "quote": [
+      "Terminal T1",
+      "Surface : 28 000 m² avec niveaux départ et arrivée séparés",
+      "Le Terminal Régional T2 de plain-pied d'une superficie de 5 000 m² est en service depuis le 03 septembre 2014."
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport has two interconnected terminals, Terminal 1 and Terminal 2. Terminal 1 serves both international and regional flights. Terminal 2 only serves regional flights."
+    }
+   ]
+  },
+  {
+   "claim": "runway about 3,500 metres",
+   "verdict": "corrected",
+   "inAfter": "Its runway is about 3,500 metres long",
+   "note": "Was '3,125 metres'. The operator gives 3,500 m and OurAirports 3,505 m; Wikipedia's text gives 3,125 m and its infobox 3,129 m, citing the AIP. The current eAIP page could not be fetched to settle it, so the text follows the operator and OurAirports, which agree. Flag for the owner. 'Longer than the island's traffic suggests' is dropped as a judgement.",
+   "sources": [
+    {
+     "file": "op-infrastructure",
+     "org": "SAGPC (operator, guadeloupe.aeroport.fr)",
+     "quote": "Piste orientée 12/30, 3 500 m de long",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runway 12/30: 3,505 m (11,499 ft), ASP"
+    }
+   ]
+  },
+  {
+   "claim": "an A380 made a technical stop here in January 2006",
+   "verdict": "softened",
+   "inAfter": "an A380 made a technical stop here in January 2006",
+   "note": "Was 'One of the A380 prototypes spent two days here'. The operator gives technical stops on 14 and 16 January 2006. Historical, so the age of the sources does not matter.",
+   "sources": [
+    {
+     "file": "op-histoire",
+     "org": "SAGPC (operator, guadeloupe.aeroport.fr)",
+     "quote": [
+      "14 et 16 janvier 2006",
+      "Escale technique de l'A380"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport was also one of the first to handle the first A380 prototype in the second week of January 2006, for two days."
+    }
+   ]
+  },
+  {
+   "claim": "Air Caraïbes has its main base here",
+   "verdict": "softened",
+   "inAfter": "Air Caraïbes has its main base here",
+   "note": "Was 'uses it as its main hub'. Air Caraïbes says its head office is in Guadeloupe (registered at Les Abymes) and lists the airport among its own; the operator's airline list gives Air Caraïbes twelve destinations from here, more than any other airline.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is the main hub for Air Caraïbes."
+    },
+    {
+     "file": "aircaraibes-presentation",
+     "org": "Air Caraïbes",
+     "quote": [
+      "un siège social en Guadeloupe",
+      "Aéroport de Guadeloupe Maryse Condé"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-compagnies",
+     "org": "SAGPC (operator, guadeloupe.aeroport.fr)",
+     "quote": "Air Caraïbes (TX) Réservation : 0 820 835 835 / www.aircaraibes.com Destinations : Cayenne ; Fort de France ; La Havane ; Les Saintes ; Marie-Galante ; Panama ; Paris-Orly ; Port-au-Prince; Saint-Barthélemy ; Saint-Domingue; Saint Martin Grand Case ; Sainte-Lucie",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Air Caraïbes and Air France fly to Paris and around the region",
+   "verdict": "corrected",
+   "inAfter": "both it and Air France fly to Paris and around the region",
+   "note": "Replaces 'Air France keeps two A320s based on the island for regional flying', which rests on Wikipedia and a 2014 Air France press kit that is only on web.archive.org (blocked). The operator lists Air France to Paris-Orly, Paris-Charles de Gaulle, Cayenne, Fort-de-France, Belém, Fortaleza, Miami and Montréal; Air France's own Guadeloupe site offers fares from Pointe-à-Pitre to Paris, Fort-de-France, Miami and Panama City.",
+   "sources": [
+    {
+     "file": "op-compagnies",
+     "org": "SAGPC (operator, guadeloupe.aeroport.fr)",
+     "quote": [
+      "Air France (AF) Réservations : www.airfrance.gp Destinations : Cayenne, Fort de France, Paris-Orly, Paris-Charles de Gaulle, Belem, Fortaleza, Miami, Montréal",
+      "Paris-Orly"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "airfrance-gp",
+     "org": "Air France",
+     "quote": [
+      "Pointe à Pitre",
+      "Paris (France)",
+      "Fort de France (Martinique)",
+      "Envolez-vous vers Panama City en vol direct et deux fois par semaine, les lundis et vendredis."
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "aircaraibes-presentation",
+     "org": "Air Caraïbes",
+     "quote": "De l'archipel enchanteur de la Guadeloupe à la ville lumière de Paris, en passant par la splendide île de la Martinique, notre réseau s'étend au cœur des Antilles - Guyane et bien au-delà.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Air France also has two Airbus A320 based in Pointe-à-Pitre for regional flights."
+    }
+   ]
+  },
+  {
+   "claim": "regional links hit when Air Antilles stopped flying at the end of 2025",
+   "verdict": "corrected",
+   "inAfter": "Regional links were hit when Air Antilles stopped flying at the end of 2025",
+   "note": "Replaces 'so connections around the archipelago are better than at most Caribbean gateways', a comparison with no second source that the collapse of Air Antilles has overtaken. The operator's release of 13 February 2026 dates the stop to 8 December (necessarily December 2025) and blames it for traffic to the northern islands falling 14.6 per cent in January 2026; its April release reports a 20.3 per cent fall in March. UAF's 2025 report says the liquidation of Air Antilles has durably affected air service in the area.",
+   "sources": [
+    {
+     "file": "op-cp-janvier-2026",
+     "org": "SAGPC (operator, guadeloupe.aeroport.fr)",
+     "quote": [
+      "COMMUNIQUÉ DE PRESSE Les Abymes, le 13 février 2026",
+      "une offre en recul du fait de l'arrêt des vols d'Air Antilles depuis le 8 décembre",
+      "Le faisceau « Îles du Nord » est en recul de -14,6 % avec 12 189 passagers, contre 14 265 en janvier 2025, en raison essentiellement de la suspension des opérations d'Air Antilles."
+     ],
+     "dated": "2026-02-13"
+    },
+    {
+     "file": "uaf-2025",
+     "org": "UAF (Union des Aéroports Français)",
+     "quote": [
+      "Aux Antilles, le trafic reste en baisse de 7,5 % par rapport à 2019, malgré une légère reprise en 2025 (+3,2 %).",
+      "Cette évolution demeure fortement pénalisée par la liquidation d'Air Antilles et des difficultés des croisières tête"
+     ],
+     "dated": "2026-03-25"
+    },
+    {
+     "file": "op-cp-mars-2026",
+     "org": "SAGPC (operator, guadeloupe.aeroport.fr)",
+     "quote": "Cependant, les faisceaux concernés par l'arrêt des vols d'Air Antilles subissent comme anticipé une baisse de trafic.",
+     "dated": "2026-04-21"
+    }
+   ]
+  },
+  {
+   "claim": "now named Guadeloupe Maryse Condé",
+   "verdict": "confirmed",
+   "inAfter": "It now carries the name Guadeloupe Maryse Condé",
+   "note": "The operator dates the renaming to 26 September 2024 (one source, so no date in the text).",
+   "sources": [
+    {
+     "file": "op-histoire",
+     "org": "SAGPC (operator, guadeloupe.aeroport.fr)",
+     "quote": [
+      "26 septembre 2024",
+      "L'aéroport Pointe-à-pitre Le RAIZET devient l'aéroport Guadeloupe Maryse Condé"
+     ]
+    },
+    {
+     "file": "uaf-2025",
+     "org": "UAF (Union des Aéroports Français)",
+     "quote": "Guadeloupe – Maryse Condé 2 193 878 2,0% -11,8% 12",
+     "dated": "2026-03-25"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Guadeloupe Maryse Condé Airport, otherwise known as Pointe-à-Pitre International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "older names Pointe-à-Pitre Le Raizet and Pôle Caraïbes still in use",
+   "verdict": "confirmed",
+   "inAfter": "but the older names Pointe-à-Pitre Le Raizet and Pôle Caraïbes are still in use",
+   "note": "The operator's own legal notice is still headed 'Aéroport de Pointe-à-Pître Le Raizet', its company is still the Société Aéroportuaire Guadeloupe Pôle Caraïbes (2026 releases) and it calls T1 the 'aérogare Guadeloupe Pôle Caraïbes'; Wikipedia gives both older names. 'Widely listed ... on schedules' softened to 'still in use'.",
+   "sources": [
+    {
+     "file": "op-infos-legales",
+     "org": "SAGPC (operator, guadeloupe.aeroport.fr)",
+     "quote": "Aéroport de Pointe-à-Pître Le Raizet",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-cp-janvier-2026",
+     "org": "SAGPC (operator, guadeloupe.aeroport.fr)",
+     "quote": "La concession de l'aéroport « Guadeloupe Maryse Condé » est portée depuis le 19 décembre 2014 par la Société Aéroportuaire Guadeloupe Pôle",
+     "dated": "2026-02-13"
+    },
+    {
+     "file": "op-compagnies",
+     "org": "SAGPC (operator, guadeloupe.aeroport.fr)",
+     "quote": "Terminal T1 de l'aérogare Guadeloupe Pôle Caraïbes",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "otherwise known as Pointe-à-Pitre International Airport or (French: Aérodrome de Pointe-à-Pitre Le Raizet)"
+    }
+   ]
+  },
+  {
+   "claim": "second busiest in the Lesser Antilles after Aruba",
+   "verdict": "cut",
+   "wasBefore": "and the second busiest in the Lesser Antilles after Aruba",
+   "why": "A 2019 ranking on Wikipedia alone; no current comparison source was found for Aruba or Barbados."
+  },
+  {
+   "claim": "close to 2.5 million passengers in 2019, ahead of Barbados",
+   "verdict": "cut",
+   "wasBefore": "It handled close to 2.5 million passengers in 2019, ahead of Barbados.",
+   "why": "Stale: replaced by 2025 (UAF and Eurostat), with 2019 kept as the benchmark. The Barbados comparison rests on Wikipedia alone."
+  },
+  {
+   "claim": "only 2.4 km from Pointe-à-Pitre",
+   "verdict": "cut",
+   "wasBefore": "only 2.4 km from Pointe-a-Pitre",
+   "why": "Fails the coordinates check (3.2 km, ratio 0.75) and has no second written source; softened to just north."
+  },
+  {
+   "claim": "two interconnected terminals",
+   "verdict": "cut",
+   "wasBefore": "works from two interconnected terminals",
+   "why": "'Interconnected' rests on Wikipedia alone; the two terminals are kept."
+  },
+  {
+   "claim": "runway 3,125 metres, longer than the traffic suggests",
+   "verdict": "cut",
+   "wasBefore": "The runway is longer than the island's traffic suggests at 3,125 metres",
+   "why": "The operator and OurAirports give about 3,500 m; the judgement is dropped."
+  },
+  {
+   "claim": "enough to take an A380 without difficulty",
+   "verdict": "cut",
+   "wasBefore": "enough to take an A380 without difficulty",
+   "why": "Wikipedia's wording; the text now says what happened (an A380 made a technical stop), which two sources confirm."
+  },
+  {
+   "claim": "an A380 prototype spent two days here",
+   "verdict": "cut",
+   "wasBefore": "One of the A380 prototypes spent two days here in January 2006.",
+   "why": "Reworded to the operator's own record (technical stops on 14 and 16 January 2006)."
+  },
+  {
+   "claim": "Air Caraïbes main hub",
+   "verdict": "cut",
+   "wasBefore": "Air Caraibes uses it as its main hub",
+   "why": "Reworded as its main base (see above)."
+  },
+  {
+   "claim": "Air France keeps two A320s based on the island",
+   "verdict": "cut",
+   "wasBefore": "and Air France keeps two A320s based on the island for regional flying",
+   "why": "The aircraft count and basing rest on Wikipedia and a 2014 press kit reachable only through web.archive.org (blocked). The operator lists A320s in Air France's fleet here but not how many are based."
+  },
+  {
+   "claim": "connections better than at most Caribbean gateways",
+   "verdict": "cut",
+   "wasBefore": "so connections around the archipelago are better than at most Caribbean gateways",
+   "why": "No second source, and overtaken: Air Antilles stopped flying in December 2025 and regional traffic has fallen since (operator, UAF)."
+  },
+  {
+   "claim": "largest of six airports across Guadeloupe",
+   "verdict": "cut",
+   "wasBefore": "It is the largest of six airports across Guadeloupe.",
+   "why": "The count of six rests on Wikipedia alone; 'main airport' is kept in the first sentence."
+  },
+  {
+   "claim": "widely listed on schedules under three names",
+   "verdict": "cut",
+   "wasBefore": "The airport now carries the name of Maryse Conde, though it is still widely listed as Pointe-a-Pitre or Pole Caraibes, so expect to see all three on schedules.",
+   "why": "Reworded: the new name and the older names still in use are each confirmed (see above); 'widely listed on schedules' was not."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so check onward connections before booking",
+   "why": "Advice following from the Air Antilles stoppage, sourced above."
+  },
+  {
+   "text": "so expect to see all three",
+   "why": "Advice kept from the old text; the three names are sourced above."
+  }
+ ],
+ "tracerOk": {
+  "3,500": "The operator writes '3 500 m' with French digit spacing ('Piste orientée 12/30, 3 500 m de long', op-infrastructure); OurAirports gives 3,505 m. See the runway claim."
+ }
+}

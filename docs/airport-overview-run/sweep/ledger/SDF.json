@@ -1,0 +1,394 @@
+{
+ "iata": "SDF",
+ "id": "recjJeFjtDtnwwH6z",
+ "name": "Louisville Muhammad Ali International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Louisville_Muhammad_Ali_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Louisville's airport, and one where the name is misleading. Despite being called an international airport it has no regularly scheduled international passenger flights at all. It is a port of entry, and what comes through it is freight.\n\nThat freight is enormous. UPS runs its Worldport hub here, which makes Louisville the third busiest cargo airport in the United States behind Anchorage and Memphis, and sixth in the world. Nearly 6.6 billion pounds of cargo passed through in 2024, against 4.8 million passengers.\n\nThe passenger side is straightforward. The Jerry E. Abramson Terminal has 24 gates across two concourses joined by a rotunda, with ground transport and baggage claim on the first floor and ticketing above.\n\nThe code SDF comes from Standiford Field, the airport's old name. It was renamed in 2019 after Muhammad Ali, a Louisville native, three years after his death.\n\nThe Kentucky Air National Guard flies C-130s from the co-located base.",
+ "after": "Louisville's airport, and one where the name is misleading. Despite being called an international airport, it has no scheduled international passenger flights: every nonstop route on the airport's own list is to a US city.\n\nUPS runs its worldwide air hub, Worldport, at the airport, which makes Louisville one of the busiest cargo airports in the world. In 2025 it was one of the two busiest in the United States, handling nearly 7.5 billion pounds of cargo and mail against about 4.6 million passengers.\n\nOn the passenger side, the Jerry E. Abramson Terminal has two concourses, A and B, joined by a rotunda.\n\nThe airport was called Standiford Field until 1995, and the code SDF did not change when it was renamed in 2019 after Muhammad Ali, a Louisville native.\n\nKentucky Air National Guard C-130s fly from the co-located base.",
+ "claims": [
+  {
+   "claim": "Louisville's airport",
+   "verdict": "confirmed",
+   "inAfter": "Louisville's airport, and one where the name is misleading.",
+   "note": "Coordinates put it 9.5 km (5.9 miles) south of the GeoNames centre; the operator says 10 minutes from downtown. 'The name is misleading' is the old text's framing of the next sentence, which carries the facts.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is a civil-military airport in Louisville, Kentucky"
+    },
+    {
+     "file": "op-sdf",
+     "org": "Louisville Regional Airport Authority (operator, flylouisville.com)",
+     "quote": "Just 10 minutes from downtown, Louisville Muhammad Ali International Airport is a low-fare airport that draws travelers from across the beautiful state of Kentucky and Southern Indiana region.",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "no scheduled international passenger flights; every nonstop route on the operator's list is to a US city",
+   "verdict": "confirmed",
+   "inAfter": "Despite being called an international airport, it has no scheduled international passenger flights: every nonstop route on the airport's own list is to a US city.",
+   "note": "The drafting team asked for the current position from the airport authority. Its destinations page (read 23 Sep 2026) lists 41 nonstop destinations, every one in the United States, and the airline-by-airline tab of the same page (op-destinations-raw) is domestic too, including the Sun Country casino charters to Atlantic City, Gulfport-Biloxi, Laughlin, New Orleans and Reno. The operator's 2025 statistics list only US airlines carrying scheduled passengers (American, Delta, Southwest, United and their regional partners, Allegiant, Spirit, Breeze, Sun Country). 'Regularly' and 'at all' dropped as padding.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Despite being called an international airport, it has no regularly scheduled international passenger flights"
+    },
+    {
+     "file": "op-destinations",
+     "org": "Louisville Regional Airport Authority (operator, flylouisville.com)",
+     "quote": [
+      "With countless nonstop and one-connection services to cities across America",
+      "Nonstop flights by city",
+      "Atlanta: Hartsfield-Jackson Atlanta International Airport (ATL)",
+      "Las Vegas: Harry Reid International Airport (LAS)",
+      "Washington, D.C. - Reagan: Ronald Reagan Washington National Airport (DCA)"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-stats-2025",
+     "org": "Louisville Regional Airport Authority (operator, flylouisville.com)",
+     "quote": [
+      "SCHEDULED PASSENGERS BY MONTH",
+      "FOR CALENDAR YEAR 2025"
+     ],
+     "dated": "2026-01"
+    }
+   ]
+  },
+  {
+   "claim": "UPS runs its worldwide air hub, Worldport, at the airport",
+   "verdict": "confirmed",
+   "inAfter": "UPS runs its worldwide air hub, Worldport, at the airport",
+   "note": "UPS's own site (about.ups.com) answered 403 to both a plain request and the browser, so the airport's own description stands as the second source, as the drafting note allowed.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Worldport is the worldwide air hub for UPS (United Parcel Service) located at Louisville Muhammad Ali International Airport."
+    },
+    {
+     "file": "op-sdf-raw",
+     "org": "Louisville Regional Airport Authority (operator, flylouisville.com)",
+     "quote": [
+      "UPS's all-points international air express hub, Worldport, lies between SDF's parallel runways, and connects Louisville to 220 countries and territories.",
+      "Worldport has remained as a committed home base of UPS's global air network and UPS Airlines"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "one of the busiest cargo airports in the world",
+   "verdict": "softened",
+   "inAfter": "which makes Louisville one of the busiest cargo airports in the world",
+   "note": "Was 'sixth in the world'. Good sources give different world ranks for different years and measures: Wikipedia sixth; the operator fifth for 2024 (ACI's World Airport Traffic Report); the operator's April 2026 release 'top three' for 2025 on ACI's loaded-and-unloaded measure excluding transit, while ACI's own April 2026 release names Anchorage third on its headline cargo ranking. No single rank is supported by two sources, so the text says what all of them support.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is also the world's sixth-busiest airport by cargo traffic"
+    },
+    {
+     "file": "op-history",
+     "org": "Louisville Regional Airport Authority (operator, flylouisville.com)",
+     "quote": "In 2024, the Louisville Muhammad Ali International Airport was ranked as the 3rd busiest cargo airport in North America and 5th busiest in the world according to Airports Council International"
+    },
+    {
+     "file": "op-cargo-no1",
+     "org": "Louisville Regional Airport Authority (operator, flylouisville.com)",
+     "quote": "In 2025, SDF is the no. 1 busiest airport in North America and top three in the world for total loaded and unloaded cargo that excludes transit freight as shown in ACI World's preliminary World Airport Traffic Report.",
+     "dated": "2026-04-21"
+    }
+   ]
+  },
+  {
+   "claim": "in 2025 one of the two busiest cargo airports in the United States",
+   "verdict": "corrected",
+   "inAfter": "In 2025 it was one of the two busiest in the United States",
+   "note": "Was 'the third busiest cargo airport in the United States behind Anchorage and Memphis'. Both 2026 sources put Louisville ahead of Memphis in 2025. The FAA's preliminary CY2025 all-cargo landed-weight table (9 July 2026) ranks it second in the US, behind Anchorage, with Memphis third and down 23.3 per cent; in 2024 Memphis was ahead (21.2 billion lb against 18.0 billion). The operator, citing ACI's preliminary 2025 report, calls it first in North America on loaded and unloaded cargo excluding transit, and says it surpassed Memphis for the first time. First or second depends on the measure (Anchorage's cargo is largely transit), so the text says one of the two busiest.",
+   "sources": [
+    {
+     "file": "faa-cy2025-cargo",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary Calendar Year 2025 All-Cargo Landed Weight",
+      "1 AL AAL AK ANC Ted Stevens Anchorage",
+      "2 SO MEM KY SDF Louisville Muhammad Ali",
+      "Louisville P S 19,673,037,330 17,985,026,483 9.39%",
+      "Memphis P S 16,272,459,740 21,215,155,555 -23.30%"
+     ],
+     "dated": "2026-07-09"
+    },
+    {
+     "file": "op-cargo-no1",
+     "org": "Louisville Regional Airport Authority (operator, flylouisville.com)",
+     "quote": [
+      "In 2025, SDF is the no. 1 busiest airport in North America",
+      "For the first time ever, SDF surpassed Memphis International Airport (MEM) when compared among its North American peer cargo airports"
+     ],
+     "dated": "2026-04-21"
+    }
+   ]
+  },
+  {
+   "claim": "nearly 7.5 billion pounds of cargo and mail in 2025",
+   "verdict": "corrected",
+   "inAfter": "handling nearly 7.5 billion pounds of cargo and mail",
+   "note": "Was 'nearly 6.6 billion pounds of cargo passed through in 2024', which the operator's report confirms for 2024 (6,598,231,796 lb); 2025 is out. The 13 per cent rise is mostly mail (1.78 billion lb against 0.77 billion).",
+   "sources": [
+    {
+     "file": "op-sdf",
+     "org": "Louisville Regional Airport Authority (operator, flylouisville.com)",
+     "quote": "The airport handled nearly 7.5 billion pounds of cargo, freight and mail in 2025.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-stats-2025",
+     "org": "Louisville Regional Airport Authority (operator, flylouisville.com)",
+     "quote": "Total All Cargo (lbs) 723,620,742 727,267,150 -0.50% 3,920,058,672 3,718,624,236 5.42% 7,487,860,762 6,598,231,796 13.48%",
+     "dated": "2026-01"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat3_header = Cargo handled (lbs.)",
+      "stat3_data = 7,487,860,762"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 4.6 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "against about 4.6 million passengers",
+   "note": "Was 4.8 million in 2024 (the operator: 4,816,084). This is TOTAL passengers, arrivals plus departures: the operator's report gives 4,594,949 for 2025, of which 2,305,712 enplaned. The FAA's preliminary CY2025 table counts 2,237,842 revenue enplanements (boardings only, about half of total passengers), consistent with the operator's figure.",
+   "sources": [
+    {
+     "file": "op-stats-2025",
+     "org": "Louisville Regional Airport Authority (operator, flylouisville.com)",
+     "quote": [
+      "Total Enplaned Passengers 173,529 179,674 -3.42% 1,187,505 1,204,915 -1.44% 2,305,712 2,402,517 -4.03%",
+      "Total All Passengers 336,511 353,207 -4.73% 2,366,008 2,416,623 -2.09% 4,594,949 4,816,084 -4.59%"
+     ],
+     "dated": "2026-01"
+    },
+    {
+     "file": "op-sdf",
+     "org": "Louisville Regional Airport Authority (operator, flylouisville.com)",
+     "quote": "In 2025, the airport accommodated approximately 4.6 million total passengers",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat2_data = 4,594,949"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "70 SO KY SDF Louisville",
+      "International P S 2,237,842 2,343,305 -4.50%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "Jerry E. Abramson Terminal with two concourses, A and B, joined by a rotunda",
+   "verdict": "confirmed",
+   "inAfter": "Abramson Terminal has two concourses, A and B, joined by a rotunda",
+   "note": "inAfter starts at 'Abramson' because the gate's sentence splitter breaks after the initial in 'Jerry E.'; the full name is in the text and in both sources. The gate count and the floor layout are cut (see below). The operator notes the rotunda skylight is being replaced from mid-September 2026 to mid-April 2027, with signed detours to both concourses and baggage claim; not added, as it is temporary.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The Jerry E. Abramson Terminal, named after former Lieutenant Governor and five-term Louisville mayor Jerry Abramson, is the airport's main commercial terminal.",
+      "These concourses are connected by a rotunda and connector",
+      "Concourse A contains 12 gates.",
+      "Concourse B contains 12 gates."
+     ]
+    },
+    {
+     "file": "op-sdfnext",
+     "org": "Louisville Regional Airport Authority (operator, flylouisville.com)",
+     "quote": [
+      "more than $1 billion in investment for the Jerry E. Abramson Terminal",
+      "The overhead skylight located in the rotunda, at the entrances to Concourses A and B"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "called Standiford Field until 1995",
+   "verdict": "confirmed",
+   "inAfter": "The airport was called Standiford Field until 1995",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 1995, the airport's name was changed from Standiford Field to Louisville International Airport."
+    },
+    {
+     "file": "op-history",
+     "org": "Louisville Regional Airport Authority (operator, flylouisville.com)",
+     "quote": "drove a name change for Standiford Field in 1995 to Louisville International Airport."
+    }
+   ]
+  },
+  {
+   "claim": "the code SDF did not change at the 2019 renaming",
+   "verdict": "softened",
+   "inAfter": "the code SDF did not change when it was renamed in 2019",
+   "note": "Was 'The code SDF comes from Standiford Field'. Only Wikipedia says so in words; the operator says the airport was Standiford Field until 1995 and that SDF would not change at the 2019 renaming. The two Courier-Journal articles that explain the code are behind a paywall. The text now puts the old name and the unchanged code side by side and lets the reader connect them.",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "Louisville Regional Airport Authority (operator, flylouisville.com)",
+     "quote": "In January 2019, the Louisville Regional Airport Authority Board voted to rename the Louisville International Airport to the Louisville Muhammad Ali International Airport. The three-letter location identified, SDF, would not change."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Louisville Muhammad Ali International Airport (IATA: SDF, ICAO: KSDF, FAA LID: SDF)",
+      "Its IATA airport code, SDF, is based on the airport's former name, Standiford Field."
+     ]
+    },
+    {
+     "file": "cj-code-2019",
+     "org": "Courier-Journal",
+     "quote": "Why can't Louisville airport change its airline code from SDF to ALI?",
+     "dated": "2019-01-16"
+    }
+   ]
+  },
+  {
+   "claim": "renamed in 2019 after Muhammad Ali, a Louisville native",
+   "verdict": "confirmed",
+   "inAfter": "renamed in 2019 after Muhammad Ali, a Louisville native",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport was renamed after boxer and Louisville native Muhammad Ali in 2019"
+    },
+    {
+     "file": "usatoday-logo",
+     "org": "USA Today (Courier-Journal)",
+     "quote": [
+      "The airport's name was officially changed from Louisville International Airport to Muhammad Ali International Airport in January.",
+      "the Louisville native was all about bringing people together"
+     ],
+     "dated": "2019-06-07"
+    },
+    {
+     "file": "op-history",
+     "org": "Louisville Regional Airport Authority (operator, flylouisville.com)",
+     "quote": "In January 2019, the Louisville Regional Airport Authority Board voted to rename the Louisville International Airport to the Louisville Muhammad Ali International Airport."
+    }
+   ]
+  },
+  {
+   "claim": "Kentucky Air National Guard C-130s fly from the co-located base",
+   "verdict": "confirmed",
+   "inAfter": "Kentucky Air National Guard C-130s fly from the co-located base.",
+   "note": "The operator gives eight C-130J aircraft in the 123rd Airlift Wing.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The Kentucky Air National Guard's 123rd Airlift Wing operates Lockheed C-130 Hercules transport aircraft from the co-located Louisville Air National Guard Base."
+    },
+    {
+     "file": "op-sdf-raw",
+     "org": "Louisville Regional Airport Authority (operator, flylouisville.com)",
+     "quote": [
+      "The Kentucky Air National Guard's 123rd Airlift Wing is based at Louisville Muhammad Ali International Airport",
+      "Inside the wing you'll find not one, but eight C-130 J model aircraft."
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "no regularly scheduled international passenger flights at all",
+   "verdict": "cut",
+   "wasBefore": "Despite being called an international airport it has no regularly scheduled international passenger flights at all.",
+   "why": "Reworded and kept (see above), now tied to the operator's own destination list, read 23 Sep 2026."
+  },
+  {
+   "claim": "port of entry; what comes through it is freight",
+   "verdict": "cut",
+   "wasBefore": "It is a port of entry, and what comes through it is freight.",
+   "why": "The port of entry rests on Wikipedia, whose source is a 2012 CBP page; CBP's current port pages could not be found (two URL patterns answered 404 and its port directory is a dynamic search). 'What comes through it is freight' overstates it now that the text gives 4.6 million passengers; the freight point is carried by the Worldport sentence."
+  },
+  {
+   "claim": "that freight is enormous",
+   "verdict": "cut",
+   "wasBefore": "That freight is enormous.",
+   "why": "A lead-in to the cut sentence above; the scale is carried by the figures that follow."
+  },
+  {
+   "claim": "third busiest in the US behind Anchorage and Memphis; sixth in the world",
+   "verdict": "cut",
+   "wasBefore": "the third busiest cargo airport in the United States behind Anchorage and Memphis, and sixth in the world",
+   "why": "Out of date: in 2025 Louisville passed Memphis on both the FAA's landed weight and ACI's measure (operator, 21 April 2026). The world rank differs by source, year and measure (sixth, fifth, top three), so no number is given."
+  },
+  {
+   "claim": "6.6 billion pounds of cargo and 4.8 million passengers in 2024",
+   "verdict": "cut",
+   "wasBefore": "Nearly 6.6 billion pounds of cargo passed through in 2024, against 4.8 million passengers.",
+   "why": "Replaced by the operator's 2025 figures (7.49 billion lb, 4,594,949 passengers)."
+  },
+  {
+   "claim": "24 gates",
+   "verdict": "cut",
+   "wasBefore": "has 24 gates across two concourses",
+   "why": "Sources disagree: Wikipedia 24 (12 on each concourse), the operator's own airport page 25 boarding gates."
+  },
+  {
+   "claim": "ground transport and baggage claim on the first floor, ticketing above",
+   "verdict": "cut",
+   "wasBefore": "with ground transport and baggage claim on the first floor and ticketing above",
+   "why": "The operator confirms a lower-level baggage claim and a ticketing level but its terminal map is an image and says nothing of ground transport; of little use to a UK agent, so cut rather than half-confirmed."
+  },
+  {
+   "claim": "the code SDF comes from Standiford Field",
+   "verdict": "cut",
+   "wasBefore": "The code SDF comes from Standiford Field, the airport's old name.",
+   "why": "Only Wikipedia states the derivation; softened to the old name and the unchanged code, which the operator confirms."
+  },
+  {
+   "claim": "three years after Ali's death",
+   "verdict": "cut",
+   "wasBefore": "three years after his death",
+   "why": "Only Wikipedia; not needed."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "one where the name is misleading",
+   "why": "The old text's framing, kept: the airport is called international but has no scheduled international passenger flights, which the next sentence states and sources."
+  },
+  {
+   "text": "On the passenger side",
+   "why": "A signpost from the old 'The passenger side is straightforward', trimmed to what the sources carry: one named terminal with two concourses."
+  }
+ ],
+ "tracerOk": {}
+}

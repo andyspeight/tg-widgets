@@ -1,0 +1,440 @@
+{
+ "iata": "DTW",
+ "id": "recfy5DZCOgc3Sty4",
+ "name": "Detroit Metropolitan Wayne County Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Detroit_Metropolitan_Airport",
+ "audited": "2026-09-23",
+ "before": "Michigan's busiest airport by a wide margin, about 18 miles south west of Detroit in Romulus, and the second largest hub for Delta Air Lines. It flies to more than 140 destinations, including 30 international ones and 43 states.\n\nIts reach crosses the border. As well as metropolitan Detroit it serves Ann Arbor, the Toledo area about 40 miles south, Windsor and south western Ontario.\n\nThe McNamara Terminal is the big one, with 122 gates across three concourses and used exclusively by Delta, its SkyTeam partners and WestJet. It opened on 24 February 2002 and was the first major airport terminal in the United States to open after the September 11 attacks, replacing the old Davey Terminal as Northwest Airlines' Detroit base.\n\nJ.D. Power has named it the best large airport in the United States for customer satisfaction three times, in 2010, 2019 and 2022, which is worth knowing when a client is choosing a connecting point.\n\nSix runways serve the 4,850 acre site, and the maintenance facilities here can handle aircraft as large as a 747-400.",
+ "after": "Michigan's busiest airport by a wide margin, about 18 miles south west of Detroit in Romulus. As well as metropolitan Detroit it serves Ann Arbor. It is a hub for Delta Air Lines and handled 33.4 million passengers in 2025.\n\nThe McNamara Terminal is the big one, with 122 gates across three concourses. Only four airlines use it: Delta, Aeromexico, Air France and WestJet. It opened on 24 February 2002, the first major airport terminal in the United States to open after the September 11 attacks, and replaced the old Davey Terminal as the Detroit base of Northwest Airlines.\n\nJD Power has ranked the airport first for customer satisfaction among the biggest airports in North America three times, in 2010, 2019 and 2023, which is worth knowing when a client is choosing a connecting point.\n\nSix runways serve the 4,850 acre site.",
+ "claims": [
+  {
+   "claim": "Michigan's busiest airport by a wide margin",
+   "verdict": "confirmed",
+   "inAfter": "Michigan's busiest airport by a wide margin",
+   "note": "The FAA's CY2025 table gives Detroit 16,294,768 enplanements against 2,127,668 at Grand Rapids, the next Michigan airport in the table, nearly eight times as many.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is by far Michigan's busiest airport, with about 8 times as many enplanements and deplanements as the next busiest, Gerald R. Ford International Airport in Grand Rapids"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "18 GL MI DTW Detroit Detroit Metro Wayne County P L 16,294,768 16,110,696 1.14%",
+      "71 GL MI GRR Grand Rapids Gerald R Ford International P S 2,127,668 2,065,053 3.03%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "op-turkish",
+     "org": "Wayne County Airport Authority (operator, metroairport.com)",
+     "quote": "Michigan's largest airport offers approximately 800 flights per day",
+     "dated": "2023-11-06"
+    }
+   ]
+  },
+  {
+   "claim": "about 18 miles south west of Detroit",
+   "verdict": "confirmed",
+   "inAfter": "about 18 miles south west of Detroit",
+   "note": "Coordinates: 17.7 miles in a straight line at 243 degrees (south west); ratio 1.02.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "it is located approximately 18 miles (29 km) southwest of Detroit city center, in Romulus"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 28.5 km (17.7 miles)",
+      "Bearing from the city centre: 243 degrees, which is south west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in Romulus",
+   "verdict": "confirmed",
+   "inAfter": "in Romulus",
+   "note": "The operator's history places the 1930 airport at Middlebelt Road and Wick Road in Romulus; Wikipedia says that corner is the north east boundary of today's airport.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "in Romulus, a suburb of Detroit",
+      "the corner of Middlebelt and Wick roads, the northeastern boundary of today's airport"
+     ]
+    },
+    {
+     "file": "op-history",
+     "org": "Wayne County Airport Authority (operator, metroairport.com)",
+     "quote": "1930: On September 4, 1930, Wayne County Airport opens at the corner of Middlebelt Road and Wick Road in Romulus, Michigan."
+    }
+   ]
+  },
+  {
+   "claim": "serves metropolitan Detroit and Ann Arbor",
+   "verdict": "confirmed",
+   "inAfter": "As well as metropolitan Detroit it serves Ann Arbor.",
+   "note": "The operator's master plan (July 2017) defines its primary area as the ten-county Detroit-Warren-Ann Arbor Combined Statistical Area; its live transport page lists buses to Ann Arbor from both terminals.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Metro Airport serves the metropolitan Detroit area; the Toledo, Ohio, area about 40 miles (64 km) south; the Ann Arbor area to the west"
+    },
+    {
+     "file": "op-masterplan-2017",
+     "org": "Wayne County Airport Authority (operator, metroairport.com)",
+     "quote": "The primary area is defined as the 10-county Detroit-Warren-Ann Arbor Combined Statistical Area",
+     "dated": "2017-07"
+    },
+    {
+     "file": "op-public-transport",
+     "org": "Wayne County Airport Authority (operator, metroairport.com)",
+     "quote": [
+      "Michigan Flyer",
+      "Destination (To & From): East Lansing, Whitmore Lake & Ann Arbor",
+      "Destination (To & From): Downtown Ann Arbor"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "a hub for Delta Air Lines",
+   "verdict": "softened",
+   "inAfter": "It is a hub for Delta Air Lines",
+   "note": "Was 'the second largest hub for Delta Air Lines'. Delta's own facts page names Atlanta as its largest hub and lists Detroit among its hubs without ranking the rest, so 'second largest' rests on Wikipedia alone. The operator's 2025 report shows Delta and Delta Connection with 11,961,108 of the airport's 16,665,644 enplanements.",
+   "sources": [
+    {
+     "file": "delta-stats",
+     "org": "Delta Air Lines",
+     "quote": [
+      "Delta operates significant hubs and key markets in Amsterdam, Atlanta, Bogota, Boston, Detroit",
+      "Largest Hub: Atlanta, world's largest airline hub and most-traveled airport"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is the second-largest hub for Delta Air Lines."
+    },
+    {
+     "file": "op-history",
+     "org": "Wayne County Airport Authority (operator, metroairport.com)",
+     "quote": "Delta Air Lines and Northwest Airlines officially merge in 2008, making Delta the hub airline at DTW by 2009."
+    }
+   ]
+  },
+  {
+   "claim": "33.4 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "handled 33.4 million passengers in 2025",
+   "note": "Replaces 'more than 140 destinations, including 30 international ones and 43 states' as the line on how busy it is (see the cut). TOTAL passengers, arrivals plus departures: the operator gives 33,372,682 for 2025, up 1.2 per cent, of which 16,665,644 enplaned. The FAA's preliminary CY2025 table counts 16,294,768 revenue enplanements (boardings only, about half of total passengers), consistent with it.",
+   "sources": [
+    {
+     "file": "op-cy2025",
+     "org": "Wayne County Airport Authority (operator, metroairport.com)",
+     "quote": [
+      "Total Passengers 2,622,631 2,734,512 (111,881) -4.1% 33,372,682 32,971,575 401,107 1.2%",
+      "Enplaned Passengers 1,351,355 1,403,693 (52,338) -3.7% 16,665,644 16,453,913 211,731 1.3%"
+     ],
+     "dated": "2026-03-02"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat1_header = Passengers",
+      "stat1_data = 33,372,682",
+      "stat_year = 2025"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "18 GL MI DTW Detroit Detroit Metro Wayne County P L 16,294,768 16,110,696 1.14%",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "McNamara Terminal: 122 gates across three concourses",
+   "verdict": "confirmed",
+   "inAfter": "The McNamara Terminal is the big one, with 122 gates across three concourses",
+   "note": "The drafting note asked for the operator's figure. The operator's master plan gives McNamara 122 gates, and Wikipedia's current article gives 122 (Concourse A 64, B 17, C 41). The operator's newest gate count found is that 2017 report; its live FAQ confirms Concourses A, B and C in McNamara and D in the Evans Terminal. Airport-wide totals are cut: the master plan says 147 gates in 2017, Wikipedia both '129 in-service gates' and 'a total of 151 gates'.",
+   "sources": [
+    {
+     "file": "op-masterplan-2017",
+     "org": "Wayne County Airport Authority (operator, metroairport.com)",
+     "quote": "The McNamara Terminal primarily accommodates Delta, its regional affiliates, and its alliance partners and includes 122 gates; the North Terminal accommodates all other airlines serving the Airport and includes 26 gates.",
+     "dated": "2017-07"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "is the larger of the two terminals, containing 122 gates between its three concourses, lettered A, B, and C",
+      "McNamara Terminal's linear Concourse A houses 64 gates",
+      "The smaller Concourses B and C, containing 17 and 41 gates respectively"
+     ]
+    },
+    {
+     "file": "op-faq",
+     "org": "Wayne County Airport Authority (operator, metroairport.com)",
+     "quote": [
+      "Will the Express Tram take me to the Evans Terminal? B or C Concourse?",
+      "No, the Express Tram only travels from end to end of Concourse A, within the McNamara Terminal."
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "only Delta, Aeromexico, Air France and WestJet use McNamara",
+   "verdict": "corrected",
+   "inAfter": "Only four airlines use it: Delta, Aeromexico, Air France and WestJet.",
+   "note": "Was 'used exclusively by Delta, its SkyTeam partners and WestJet'. The operator's airline directory (live) and its 2025 traffic report name the four airlines in McNamara; every other airline is in the Evans Terminal. Naming them is plainer for a UK agent than 'SkyTeam partners'.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Wayne County Airport Authority (operator, metroairport.com)",
+     "quote": [
+      "Aeromexico McNamara Terminal",
+      "Air France McNamara Terminal",
+      "Delta Air Lines McNamara Terminal",
+      "WestJet Airlines McNamara Terminal",
+      "Lufthansa Evans Terminal"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-cy2025",
+     "org": "Wayne County Airport Authority (operator, metroairport.com)",
+     "quote": [
+      "MCNAMARA TERMINAL Delta Mainline",
+      "Aeromexico 35,148",
+      "Air France 86,748",
+      "WestJet 44,914",
+      "TOTAL MCNAMARA TERMINAL 12,127,918"
+     ],
+     "dated": "2026-03-02"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "As of 2026, the McNamara Terminal is served exclusively by Delta Air Lines, other members of the SkyTeam airline alliance, and WestJet."
+    }
+   ]
+  },
+  {
+   "claim": "opened on 24 February 2002",
+   "verdict": "confirmed",
+   "inAfter": "It opened on 24 February 2002",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the McNamara Terminal opened on February 24, 2002"
+    },
+    {
+     "file": "nwa-history",
+     "org": "Northwest Airlines History Center",
+     "quote": "The Edward H. McNamara Terminal - Northwest's WorldGateway - opened to customers February 24, 2002",
+     "dated": "2022-04-10"
+    },
+    {
+     "file": "op-stakeholders",
+     "org": "Wayne County Airport Authority (operator, metroairport.com)",
+     "quote": "Since its opening in February 2002, the McNamara",
+     "dated": "2003 to 2004 (report to key stakeholders; covers 2002 to 2003)"
+    }
+   ],
+   "note": "Historical fact from 2002, so the age of the sources does not matter."
+  },
+  {
+   "claim": "first major airport terminal in the US to open after 9/11",
+   "verdict": "confirmed",
+   "inAfter": "the first major airport terminal in the United States to open after the September 11 attacks",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "as the first major airport terminal in the U.S. to open after the September 11 attacks"
+    },
+    {
+     "file": "op-stakeholders",
+     "org": "Wayne County Airport Authority (operator, metroairport.com)",
+     "quote": "McNamara Terminal was the first major terminal project to open in the United States in the post - 9/11 era.",
+     "dated": "2003 to 2004 (report to key stakeholders; covers 2002 to 2003)"
+    }
+   ],
+   "note": "Historical fact from 2002, so the age of the sources does not matter."
+  },
+  {
+   "claim": "replaced the Davey Terminal as Northwest's Detroit base",
+   "verdict": "confirmed",
+   "inAfter": "replaced the old Davey Terminal as the Detroit base of Northwest Airlines",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It replaced the Davey Terminal as the primary base of Northwest Airlines in Detroit."
+    },
+    {
+     "file": "op-stakeholders",
+     "org": "Wayne County Airport Authority (operator, metroairport.com)",
+     "quote": "the former J.M. Davey Terminal vacated when former occupant, Northwest Airlines, moved to the McNamara Terminal",
+     "dated": "2003 to 2004 (report to key stakeholders; covers 2002 to 2003)"
+    }
+   ],
+   "note": "Historical fact from 2002, so the age of the sources does not matter."
+  },
+  {
+   "claim": "J.D. Power: first for customer satisfaction among the biggest North American airports in 2010, 2019 and 2023",
+   "verdict": "corrected",
+   "inAfter": "JD Power has ranked the airport first for customer satisfaction among the biggest airports in North America three times, in 2010, 2019 and 2023",
+   "note": "Was 'the best large airport in the United States ... in 2010, 2019 and 2022'. The operator lists J.D. Power wins in 2010 (large airports, then 30 million passengers or more) and in 2019 and 2023 (mega airports, 33 million or more), each the study's biggest category that year; the third win was 2023, not 2022, and the operator lists none since. J.D. Power's own site answered with a Cloudflare block, so each year is confirmed by the operator and a news report of that year's study. Written 'JD Power', without stops, in the house style used for US and UK.",
+   "sources": [
+    {
+     "file": "op-awards",
+     "org": "Wayne County Airport Authority (operator, metroairport.com)",
+     "quote": "J.D. Power and Associates Highest Customer Satisfaction - North America Mega Airport Category 2023 2019 Large Airport Category 2010",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-history",
+     "org": "Wayne County Airport Authority (operator, metroairport.com)",
+     "quote": [
+      "2010: Detroit Metropolitan Airport ranks highest in overall customer satisfaction among large airports in the J.D. Power and Associates 2010 North America Airport Satisfaction Study.",
+      "2019: DTW is awarded first place in Customer Satisfaction for Mega Airports by J.D. Power.",
+      "2023: DTW is ranked number one in customer satisfaction for mega airports according to the J.D. Power 2023 North America Airport Satisfaction Study."
+     ]
+    },
+    {
+     "file": "cnn-jdp-2010",
+     "org": "CNN",
+     "quote": "Detroit Metropolitan Airport in Michigan received the best grades among large airports -- those servicing 30 million or more passengers per year",
+     "dated": "2010-02-24"
+    },
+    {
+     "file": "freep-jdp-2019",
+     "org": "Detroit Free Press",
+     "quote": "making it 2019's top-ranked mega airport for customer satisfaction",
+     "dated": "2019-09-25"
+    },
+    {
+     "file": "wxyz-jdp",
+     "org": "WXYZ Detroit",
+     "quote": [
+      "The J.D. Power 2023 North America Airport Satisfaction Study was released on Wednesday and found DTW ranked highest for mega airports in the U.S.",
+      "Mega airports are defined as those with 33 million or more passengers per year"
+     ],
+     "dated": "2023-09"
+    }
+   ]
+  },
+  {
+   "claim": "six runways",
+   "verdict": "confirmed",
+   "inAfter": "Six runways serve",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runways listed: 6"
+    },
+    {
+     "file": "op-turkish",
+     "org": "Wayne County Airport Authority (operator, metroairport.com)",
+     "quote": "With two award-winning passenger terminals, six jet runways",
+     "dated": "2023-11-06"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport has six runways, two terminals"
+    }
+   ]
+  },
+  {
+   "claim": "4,850 acre site",
+   "verdict": "confirmed",
+   "inAfter": "the 4,850 acre site",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport covers 4,850 acres (1,960 ha) of land."
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "22 ACREAGE:",
+      "4,850"
+     ],
+     "dated": "2026-09 (current record)"
+    }
+   ]
+  },
+  {
+   "claim": "second largest hub for Delta",
+   "verdict": "cut",
+   "wasBefore": "and the second largest hub for Delta Air Lines",
+   "why": "Only Wikipedia ranks it second; Delta's own facts page names only its largest hub (Atlanta). Softened to a hub."
+  },
+  {
+   "claim": "more than 140 destinations, 30 international, 43 states",
+   "verdict": "cut",
+   "wasBefore": "It flies to more than 140 destinations, including 30 international ones and 43 states.",
+   "why": "Sources disagree: Wikipedia says over 140 destinations, the operator 'more than 125 nonstop destinations' (November 2023) and '125+' on its live About page; the international and state counts rest on Wikipedia alone. Replaced by the operator's 2025 passenger total."
+  },
+  {
+   "claim": "reach crosses the border: Toledo about 40 miles south, Windsor and south western Ontario",
+   "verdict": "cut",
+   "wasBefore": "Its reach crosses the border.",
+   "why": "Only Wikipedia names Toledo, Windsor and Ontario as served. The operator's master plan names Windsor and Toledo only as other airports in its secondary area, and Windsor's tourism page does not mention Detroit's airport. The coordinates check could not test '40 miles south' (it measured from Detroit, not the airport). Ann Arbor is kept."
+  },
+  {
+   "claim": "the Toledo area, Windsor and south western Ontario",
+   "verdict": "cut",
+   "wasBefore": "the Toledo area about 40 miles south, Windsor and south western Ontario",
+   "why": "See above: Wikipedia alone."
+  },
+  {
+   "claim": "used exclusively by Delta, its SkyTeam partners and WestJet",
+   "verdict": "cut",
+   "wasBefore": "used exclusively by Delta, its SkyTeam partners and WestJet",
+   "why": "Reworded to the airlines the operator names in McNamara today."
+  },
+  {
+   "claim": "best large airport in the US in 2010, 2019 and 2022",
+   "verdict": "cut",
+   "wasBefore": "J.D. Power has named it the best large airport in the United States for customer satisfaction three times, in 2010, 2019 and 2022",
+   "why": "Wrong year and category: the wins were 2010 (large airports) and 2019 and 2023 (mega airports), on the operator's list and contemporary news reports. Wikipedia's 2022 is not supported."
+  },
+  {
+   "claim": "maintenance facilities can handle a 747-400",
+   "verdict": "cut",
+   "wasBefore": "and the maintenance facilities here can handle aircraft as large as a 747-400",
+   "why": "Only Wikipedia, and a Northwest-era detail of no use to a UK agent."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which is worth knowing when a client is choosing a connecting point",
+   "why": "Advice kept from the old text; the rankings it rests on are sourced above."
+  }
+ ],
+ "tracerOk": {}
+}

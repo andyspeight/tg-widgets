@@ -1,0 +1,345 @@
+{
+ "iata": "PIE",
+ "id": "recp5RdYHZITS8JAr",
+ "name": "St. Petersburg Clearwater International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/St._Pete%E2%80%93Clearwater_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The quieter way into the Tampa Bay area, in Pinellas County, 9 miles north of downtown St Petersburg, 7 miles south east of Clearwater and 17 miles south west of Tampa.\n\nIt is a small airport and that is the point. One terminal with two gate areas, easy to move through, and it markets itself as \"Tampa Bay The Easy Way\". For a client staying on the Gulf beaches it is closer than flying into Tampa, though the route map is far smaller, so check what actually flies before assuming it works.\n\nIt is also home to Coast Guard Air Station Clearwater, the largest and busiest Coast Guard air station in the United States.\n\nThere are two runways, the longer at 9,730 feet with an instrument approach, on a 1,900 acre site.",
+ "after": "The quieter way into the Tampa Bay area, in Pinellas County, 9 miles north of downtown St Petersburg, 7 miles south east of Clearwater and 17 miles south west of Tampa.\n\nIt is a small airport and that is the point: one terminal, easy to move through. The route map is mostly Allegiant's, to US cities, so check what actually flies before assuming it works.\n\nIt is also home to Coast Guard Air Station Clearwater, the largest and busiest air station in the US Coast Guard.\n\nThere are two runways, the longer at 9,730 feet with an instrument approach.",
+ "claims": [
+  {
+   "claim": "the quieter way into the Tampa Bay area",
+   "verdict": "confirmed",
+   "inAfter": "The quieter way into the Tampa Bay area",
+   "note": "'Quieter' rests on the FAA's CY2025 table: PIE is a small hub with 1,398,845 enplanements, Tampa International a large hub with 12,110,427. The fuller name 'Tampa International' is confirmed by the FAA and Wikipedia, but the text no longer needs it (the Tampa comparison is cut, see below).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is a public/military airport in Pinellas County, Florida, United States, serving the Tampa Bay Area"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "92 SO FL PIE Clearwater St Pete-Clearwater International P S 1,398,845 1,228,048 13.91%",
+      "27 SO FL TPA Tampa Tampa International P L 12,110,427 12,075,591 0.29%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "op-airlines",
+     "org": "St. Pete-Clearwater International Airport (operator, Pinellas County)",
+     "quote": "Our airlines fly non-stop to/from over 60 cities, making it convenient for you to make your way to Tampa Bay.",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "in Pinellas County",
+   "verdict": "confirmed",
+   "inAfter": "in Pinellas County",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is a public/military airport in Pinellas County, Florida"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "5 COUNTY:",
+      "PINELLAS FL",
+      "COUNTY OF PINELLAS"
+     ],
+     "dated": "2026-09-03 (record effective date)"
+    }
+   ]
+  },
+  {
+   "claim": "9 miles north of downtown St Petersburg",
+   "verdict": "confirmed",
+   "inAfter": "9 miles north of downtown St Petersburg",
+   "note": "The FAA master record gives the distance from the central business district of its associated city, St Petersburg-Clearwater, as 8 nautical miles north, which is 9.2 statute miles; north rules out Clearwater, which lies north west of the airport. The coordinates check could not test this figure: GeoNames spells the city 'St. Petersburg', so geo.mjs fell back to Pinellas Park and its CHECK line does not apply. Other figures measure from somewhere else: the operator's directions page says '4 miles north of St. Petersburg' and Wikipedia's own history section 'six miles north of St. Petersburg', neither from downtown. Both agree on north.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "9 miles (14 km) north of downtown St. Petersburg"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "ST PETERSBURG-",
+      "CBD TO AIRPORT (NM):",
+      "08 N"
+     ],
+     "dated": "2026-09-03 (record effective date)"
+    }
+   ]
+  },
+  {
+   "claim": "7 miles south east of Clearwater",
+   "verdict": "confirmed",
+   "inAfter": "7 miles south east of Clearwater",
+   "note": "Coordinates: 12.7 km (7.9 miles) in a straight line at 119 degrees (south east); ratio 0.89.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "7 miles (11 km) southeast of Clearwater"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Clearwater (GeoNames 4151316): 12.7 km (7.9 miles), bearing 119 degrees, which is south east"
+    }
+   ]
+  },
+  {
+   "claim": "17 miles south west of Tampa",
+   "verdict": "confirmed",
+   "inAfter": "17 miles south west of Tampa",
+   "note": "Coordinates: 22.9 km (14.2 miles) in a straight line at 260 degrees, which is west on an 8-point rose and one point from south west, inside the tolerance; 17 miles is a ratio of 1.20, a road distance round the bay.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "17 miles (27 km) southwest of Tampa"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Tampa (GeoNames 4174757): 22.9 km (14.2 miles), bearing 260 degrees, which is west"
+    }
+   ]
+  },
+  {
+   "claim": "a small airport",
+   "verdict": "confirmed",
+   "inAfter": "It is a small airport",
+   "note": "The FAA classes it as a small hub (79 small hubs in CY2025). Traffic was a record 2,794,067 passengers in 2025, up 14 per cent (operator, January 2026; the Wikipedia infobox agrees); not added, as the old text gave no figure.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "categorized it as a small-hub primary commercial service facility"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "92 SO FL PIE Clearwater St Pete-Clearwater International P S 1,398,845 1,228,048 13.91%",
+      "79 Small Count"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "one terminal, easy to move through",
+   "verdict": "softened",
+   "inAfter": "one terminal, easy to move through",
+   "note": "Was 'One terminal with two gate areas'; the two gate areas rest on Wikipedia alone (the operator's terminal map is an image). 'Easy to move through' is the old text's judgement; the operator says every gate is a short walk from the kerb and parking.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "has one terminal with two gate areas"
+    },
+    {
+     "file": "op-terminal-project",
+     "org": "St. Pete-Clearwater International Airport (operator, Pinellas County)",
+     "quote": "The work will involve improvements to the existing terminal building, as well as a new terminal building expansion just north of baggage claim with jet bridges.",
+     "dated": "2026"
+    },
+    {
+     "file": "op-home",
+     "org": "St. Pete-Clearwater International Airport (operator, Pinellas County)",
+     "quote": "Every gate is a short walk from curbside and parking.",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "the route map is mostly Allegiant's, to US cities",
+   "verdict": "corrected",
+   "inAfter": "The route map is mostly Allegiant's, to US cities",
+   "note": "Replaces 'the route map is far smaller' (than Tampa's), which had no second source, with who flies now. The operator's airlines page (23 Sep 2026) lists 63 Allegiant destinations, all in the US, against Sun Country's one (Minneapolis-St Paul) and Sun Country casino charters to Gulfport-Biloxi. BermudAir has announced winter flights to Turks and Caicos, Belize and Anguilla from December 2026, subject to government approval (operator, 3 June 2026); not added, as they have not started and rest on BermudAir's release alone.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "St. Pete-Clearwater International Airport (operator, Pinellas County)",
+     "quote": [
+      "Enjoy non-stop service to destinations around the United States with value-conscious airlines",
+      "Allegiant",
+      "Akron-Canton, OH",
+      "Wichita, KS",
+      "Sun Country",
+      "Minneapolis-St. Paul, MN"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Allegiant's destination count from PIE has since increased to 59 airports in the eastern United States."
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "operating_base = Allegiant Air"
+    }
+   ]
+  },
+  {
+   "claim": "Coast Guard Air Station Clearwater, the largest and busiest air station in the US Coast Guard",
+   "verdict": "corrected",
+   "inAfter": "It is also home to Coast Guard Air Station Clearwater, the largest and busiest air station in the US Coast Guard.",
+   "note": "Was 'the largest and busiest Coast Guard air station in the United States', Wikipedia's wording. The Coast Guard's own page says largest and busiest in the Coast Guard; the operator says busiest in the world.",
+   "sources": [
+    {
+     "file": "uscg-clearwater",
+     "org": "US Coast Guard",
+     "quote": [
+      "We are the largest and busiest Air Station in the Coast Guard.",
+      "Air Station Clearwater is located on the NW side of the St Petersburg - Clearwater Int'l Airport."
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is also the home of Coast Guard Air Station Clearwater, the largest and busiest U.S. Coast Guard Air Station in the United States"
+    },
+    {
+     "file": "op-history",
+     "org": "St. Pete-Clearwater International Airport (operator, Pinellas County)",
+     "quote": "It is home to the busiest Coast Guard Air Station in the world."
+    }
+   ]
+  },
+  {
+   "claim": "two runways",
+   "verdict": "confirmed",
+   "inAfter": "There are two runways",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "St. Pete-Clearwater International Airport (operator, Pinellas County)",
+     "quote": "The airport is a 2,000-acre fully certified facility with 2 runways.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runways listed: 2"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It has two asphalt runways"
+    }
+   ]
+  },
+  {
+   "claim": "the longer at 9,730 feet",
+   "verdict": "confirmed",
+   "inAfter": "the longer at 9,730 feet",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "18/36 is 9,730 by 150 feet (2,966 x 46 m)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runway 18/36: 2,966 m (9,730 ft)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "18/36",
+      "9,730"
+     ],
+     "dated": "2026-09-03 (record effective date)"
+    }
+   ]
+  },
+  {
+   "claim": "with an instrument approach",
+   "verdict": "confirmed",
+   "inAfter": "with an instrument approach",
+   "note": "The FAA's current procedures (cycle 2610) include ILS approaches to both ends of runway 18/36.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "with an ILS approach"
+    },
+    {
+     "file": "faa-dtpp",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "ILS OR LOC RWY 18",
+      "ILS OR LOC RWY 36"
+     ],
+     "dated": "2026-09 (cycle 2610)"
+    }
+   ]
+  },
+  {
+   "claim": "two gate areas",
+   "verdict": "cut",
+   "wasBefore": "One terminal with two gate areas",
+   "why": "The two gate areas (A-Side and B-Side) rest on Wikipedia alone; the operator's terminal map is an image. One terminal is kept."
+  },
+  {
+   "claim": "markets itself as 'Tampa Bay The Easy Way'",
+   "verdict": "cut",
+   "wasBefore": "and it markets itself as \"Tampa Bay The Easy Way\"",
+   "why": "Only Wikipedia; the operator's own site now uses 'Easy As PIE' and no saved operator page carries the old slogan."
+  },
+  {
+   "claim": "closer than Tampa for the Gulf beaches",
+   "verdict": "cut",
+   "wasBefore": "For a client staying on the Gulf beaches it is closer than flying into Tampa",
+   "why": "No written second source: the county tourism bureau's site (visitstpeteclearwater.com) answered 403. The location sentence shows the airport sits on the Pinellas side, near Clearwater and St Petersburg. The operator advertises a new Grouper Airport Express shuttle to Clearwater Beach, but the transit agency's page (psta.net) answered 502, so it is not added."
+  },
+  {
+   "claim": "the route map is far smaller",
+   "verdict": "cut",
+   "wasBefore": "though the route map is far smaller",
+   "why": "A comparison with Tampa with no second source; replaced by who flies (Allegiant), from the operator's own list."
+  },
+  {
+   "claim": "largest and busiest Coast Guard air station in the United States",
+   "verdict": "cut",
+   "wasBefore": "the largest and busiest Coast Guard air station in the United States",
+   "why": "Reworded to the Coast Guard's own words: the largest and busiest air station in the Coast Guard."
+  },
+  {
+   "claim": "1,900 acre site",
+   "verdict": "cut",
+   "wasBefore": "on a 1,900 acre site",
+   "why": "Sources disagree: the FAA master record and Wikipedia give 1,900 acres, the operator's own history page a 2,000-acre facility. Of no use to a UK agent, so cut rather than chosen."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and that is the point",
+   "why": "The old text's judgement, kept: the case for this airport is that it is small, and the FAA classes it a small hub against Tampa International's large hub."
+  },
+  {
+   "text": "so check what actually flies before assuming it works",
+   "why": "Advice kept from the old text; the route map is mostly one low-cost airline's, to US cities."
+  }
+ ],
+ "tracerOk": {}
+}
