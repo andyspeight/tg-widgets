@@ -1,0 +1,114 @@
+{
+ "iata": "XMN",
+ "id": "rec82sY47Df84uOE2",
+ "name": "Xiamen Gaoqi International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Xiamen_Gaoqi_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Fujian's main airport, on the north side of Xiamen Island and only 10 km from downtown, which makes it one of the more convenient arrivals in coastal China. It is the hub for XiamenAir and for TAECO, a large aircraft maintenance operation.\n\nThe terminal numbering catches people out. Terminal 1 was demolished in 2012 and Terminal 2 became the domestic area of Terminal 3, so a client told to go to Terminal 2 is looking for part of another building. Terminal 4 was completed in 2014.\n\nThe airport has an unusual history. It was built by Japan during the occupation, converted to civilian use after the surrender, then left largely abandoned through the 1950s because of shelling risk from Kinmen just offshore. It reopened properly in 1983 with funding from the Kuwait Fund, and traffic grew quickly enough after that to need three new terminals inside twenty years.",
+ "after": "Xiamen's airport, on the north side of Xiamen Island and only 10 km from downtown, which makes it one of the more convenient arrivals in coastal China.\n\nIts days are numbered. The new Xiamen Xiang'an International Airport is expected to open by the end of 2026 and take over all of Gaoqi's passenger and cargo flights, so check which airport a client will use for any trip from late 2026.\n\nUntil then, the terminal numbering can catch people out: the old Terminal 2 has been turned into part of Terminal 3, so a client told to go to Terminal 2 is looking for part of another building.",
+ "claims": [
+  {
+   "claim": "Xiamen's airport, north side of Xiamen Island, 10 km from downtown",
+   "verdict": "softened",
+   "inAfter": "Xiamen's airport, on the north side of Xiamen Island and only 10 km from downtown",
+   "note": "Was 'Fujian's main airport', which no second source says. Straight line 8.5 km (ratio 1.18), north east of the GeoNames centre.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is located on the north side of Xiamen Island, 10 km (6.2 mi) away from the city's downtown area."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 8.5 km (5.3 miles)",
+      "Bearing from the city centre: 33 degrees, which is north east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Xiang'an airport expected to open by the end of 2026, taking over all of Gaoqi's passenger and cargo flights",
+   "verdict": "corrected",
+   "inAfter": "The new Xiamen Xiang'an International Airport is expected to open by the end of 2026 and take over all of Gaoqi's passenger and cargo flights",
+   "note": "New in the text, and the most important thing about this airport now: the old text did not mention the move. The Beijing News (6 July 2026) says Xiang'an was in its final push and expected to open by the end of this year, taking over all Gaoqi's passenger and cargo business; Wikipedia says Gaoqi will stop all civilian flights once Xiang'an opens. No exact date was found.",
+   "sources": [
+    {
+     "file": "bjnews-0706",
+     "org": "The Beijing News",
+     "dated": "2026-07-06",
+     "quote": "目前，厦门翔安国际机场建设工作已进入全面收尾冲刺阶段，预计将于今年底正式投运，全面承接高崎国际机场的客货运业务"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "In late 2026, the airport will cease all civilian traffic once Xiamen Xiang'an International Airport is completed and commences operations.",
+      "Gaoqi Airport will cease all civilian operations once Xiang'an Airport opens."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "old Terminal 2 turned into part of Terminal 3",
+   "verdict": "confirmed",
+   "inAfter": "the old Terminal 2 has been turned into part of Terminal 3",
+   "sources": [
+    {
+     "file": "xmnn-2024",
+     "org": "Xiamen Daily (xmnn.cn)",
+     "dated": "2024-08-29",
+     "quote": "T3航站楼新增候机区，是由原厦门机场第二国际（地区）入境通道、红点设计博物馆、T2航站楼改造而来"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On 5 May 2012, the renovated Terminal 2 was re-opened as a section of Terminal 3 to serve domestic flights"
+    }
+   ]
+  },
+  {
+   "claim": "Fujian's main airport; hub for XiamenAir and TAECO",
+   "verdict": "cut",
+   "wasBefore": "Fujian's main airport, on the north side of Xiamen Island and only 10 km from downtown, which makes it one of the more convenient arrivals in coastal China. It is the hub for XiamenAir and for TAECO, a large aircraft maintenance operation.",
+   "why": "Location kept. 'Main' and the hub labels rest on Wikipedia alone; XiamenAir's site answered 502. Xiamen Daily and Fujian news confirm XiamenAir flies from Xiamen but do not call it a hub."
+  },
+  {
+   "claim": "Terminal 1 demolished 2012; Terminal 4 completed 2014",
+   "verdict": "cut",
+   "wasBefore": "The terminal numbering catches people out. Terminal 1 was demolished in 2012 and Terminal 2 became the domestic area of Terminal 3, so a client told to go to Terminal 2 is looking for part of another building. Terminal 4 was completed in 2014.",
+   "why": "The Terminal 2 point is kept with Xiamen Daily. Terminal 1's demolition and Terminal 4 rest on Wikipedia alone, and the whole airport is due to move by the end of 2026."
+  },
+  {
+   "claim": "history: built by Japan, abandoned in the 1950s for fear of shelling from Kinmen, reopened 1983 with Kuwait Fund money, three terminals in twenty years",
+   "verdict": "cut",
+   "wasBefore": "The airport has an unusual history. It was built by Japan during the occupation, converted to civilian use after the surrender, then left largely abandoned through the 1950s because of shelling risk from Kinmen just offshore. It reopened properly in 1983 with funding from the Kuwait Fund, and traffic grew quickly enough after that to need three new terminals inside twenty years.",
+   "why": "Wikipedia alone in the sources that could be read, and of little use now the airport is about to close."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which makes it one of the more convenient arrivals in coastal China",
+   "why": "The old text's view, following from the sourced 10 km."
+  },
+  {
+   "text": "Its days are numbered.",
+   "why": "Lead-in to the sourced move."
+  },
+  {
+   "text": "so check which airport a client will use for any trip from late 2026",
+   "why": "Advice following from the sourced move."
+  },
+  {
+   "text": "Until then, the terminal numbering can catch people out:",
+   "why": "Lead-in kept from the old text."
+  },
+  {
+   "text": "so a client told to go to Terminal 2 is looking for part of another building",
+   "why": "Follows from the sourced Terminal 2 change."
+  }
+ ],
+ "tracerOk": {}
+}
