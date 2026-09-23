@@ -1,0 +1,149 @@
+{
+ "iata": "WUH",
+ "id": "rec4Ral6lMhiAHx4Z",
+ "name": "Wuhan Tianhe International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Wuhan_Tianhe_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Central China's busiest airport, and the one that sits nearest the middle of the country's route network, which is why so many internal connections route through it. It handled just over 31.3 million passengers in 2025, making it the fourteenth busiest in China.\n\nIt is a hub for both China Eastern and China Southern, with Air China treating it as a focus city, so domestic coverage from here is unusually good for a city this far from the coast.\n\nThe detail that matters most for booking is the transit visa. Since 2019, passengers from 53 countries, including EU states, Japan, South Korea, Russia and the United States, can enter China through this airport without a Chinese visa for up to 144 hours when they are transiting onward to a third country. That opens up a genuine stopover, though the onward third country condition is strict.\n\nThe airport opened in 1995 and lies 26 km north of the city in Huangpi District. The name Tianhe means Sky River, an old Chinese name for the Milky Way.",
+ "after": "Central China's busiest airport, 26 km north of Wuhan in Huangpi District. It handled just over 31.3 million passengers in 2025, making it the 14th busiest in China.\n\nFor UK clients the rule that matters is entry: British passport holders can enter China without a visa for up to 30 days, including in transit, until 31 December 2026. Check the position for any trip after that date.\n\nThe airport opened in 1995.",
+ "claims": [
+  {
+   "claim": "Central China's busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "Central China's busiest airport",
+   "note": "CAAC 2025: Wuhan 31,339,277, Changsha 30,253,675, Zhengzhou 29,191,990, Nanchang 11,936,032.",
+   "sources": [
+    {
+     "file": "caac-2025-central",
+     "org": "Civil Aviation Administration of China",
+     "dated": "2026-02-26",
+     "quote": [
+      "武汉/天河 | 14 | 31339277",
+      "长沙/黄花 | 15 | 30253675",
+      "郑州/新郑 | 17 | 29191990"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is the busiest airport in central China"
+    }
+   ]
+  },
+  {
+   "claim": "26 km north of Wuhan in Huangpi District",
+   "verdict": "confirmed",
+   "inAfter": "26 km north of Wuhan in Huangpi District.",
+   "note": "Straight line 21.9 km at 347 degrees (north); ratio 1.19.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is located in Wuhan's suburban Huangpi District, around 26 km (16 mi) to the north of Wuhan city center."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Wuhan (Huangpi)",
+      "Straight-line distance from the city centre: 21.9 km (13.6 miles)",
+      "Bearing from the city centre: 347 degrees, which is north"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "just over 31.3 million passengers in 2025, 14th in China",
+   "verdict": "confirmed",
+   "inAfter": "It handled just over 31.3 million passengers in 2025, making it the 14th busiest in China.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "Civil Aviation Administration of China",
+     "dated": "2026-02-26",
+     "quote": "passenger rank 14 in China; passengers 2025: 31,339,277"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport served 31,339,277 passengers in 2025, making it the 14th busiest airport by passenger traffic in China."
+    }
+   ]
+  },
+  {
+   "claim": "UK passport holders visa free for up to 30 days, including transit, until 31 December 2026",
+   "verdict": "corrected",
+   "inAfter": "British passport holders can enter China without a visa for up to 30 days, including in transit, until 31 December 2026.",
+   "note": "Replaces the 2019 144-hour transit rule, which is out of date for UK clients: since 17 February 2026 they need no visa at all for stays of up to 30 days, transit included, under a waiver that runs to 31 December 2026.",
+   "sources": [
+    {
+     "file": "embassy-uk-waiver",
+     "org": "Embassy of the People's Republic of China in the UK",
+     "dated": "2026-02-16",
+     "quote": "o rdinary passport holders from the UK and Canada  can be exempted from visa to enter China and stay for up to 30 days for business, tourism, family/friends visit, exchange and transit purposes."
+    },
+    {
+     "file": "fcdo-china-entry",
+     "org": "UK Foreign, Commonwealth and Development Office (FCDO)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Until 31 December 2026, you can enter China visa free for stays of up to 30 days for business, tourism, family or friend visits or transit."
+    }
+   ]
+  },
+  {
+   "claim": "opened in 1995",
+   "verdict": "confirmed",
+   "inAfter": "The airport opened in 1995.",
+   "sources": [
+    {
+     "file": "cnhubei-2008",
+     "org": "Cnhubei (Hubei news portal)",
+     "quote": "1995年4月15日武汉天河机场投入营运"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It was opened on 15 April 1995"
+    }
+   ]
+  },
+  {
+   "claim": "nearest the middle of the route network, so many internal connections",
+   "verdict": "cut",
+   "wasBefore": "and the one that sits nearest the middle of the country's route network, which is why so many internal connections route through it.",
+   "why": "Wikipedia alone, and an explanation rather than a fact."
+  },
+  {
+   "claim": "hub for China Eastern and China Southern, Air China focus city",
+   "verdict": "cut",
+   "wasBefore": "It is a hub for both China Eastern and China Southern, with Air China treating it as a focus city, so domestic coverage from here is unusually good for a city this far from the coast.",
+   "why": "Wikipedia alone; the operator's site (whairport.com) answered 404."
+  },
+  {
+   "claim": "144-hour visa-free transit for 53 countries since 2019",
+   "verdict": "cut",
+   "wasBefore": "The detail that matters most for booking is the transit visa. Since 2019, passengers from 53 countries, including EU states, Japan, South Korea, Russia and the United States, can enter China through this airport without a Chinese visa for up to 144 hours when they are transiting onward to a third country. That opens up a genuine stopover, though the onward third country condition is strict.",
+   "why": "Out of date for the text's readers: UK passport holders have needed no visa for stays of up to 30 days since 17 February 2026 (Chinese Embassy, FCDO). The 2019 transit figures rest on Wikipedia alone."
+  },
+  {
+   "claim": "opened 1995 in Huangpi; Tianhe means Sky River, the Milky Way",
+   "verdict": "cut",
+   "wasBefore": "The airport opened in 1995 and lies 26 km north of the city in Huangpi District. The name Tianhe means Sky River, an old Chinese name for the Milky Way.",
+   "why": "Opening and location kept. The name's meaning rests on Wikipedia alone (the dictionary it cites answered 503)."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "For UK clients the rule that matters is entry:",
+   "why": "Lead-in to the sourced visa rule."
+  },
+  {
+   "text": "Check the position for any trip after that date.",
+   "why": "Advice: the waiver ends on 31 December 2026."
+  }
+ ],
+ "tracerOk": {
+  "31.3": "31,339,277 rounded (CAAC, Wikipedia)"
+ }
+}
