@@ -1,0 +1,194 @@
+{
+ "iata": "TRN",
+ "id": "recDWibv8xmjFdTEA",
+ "name": "Turin Airport",
+ "country": "Italy",
+ "wikipedia": "https://en.wikipedia.org/wiki/Turin_Airport",
+ "audited": "2026-09-23",
+ "before": "Turin's airport, at Caselle Torinese 16 km north north west of the city, and the obvious arrival for the western Alps. It is also named after Sandro Pertini, the former Italian president.\n\nFor ski work this is the useful part. Scheduled shuttle buses run from the airport straight to mountain towns and resorts on both sides of the border, among them Ayas, Gressoney, Champorcher, Clavière, Cesana, Montgenevre, Briançon, Puy Saint Vincent, Névache in the Vallée de la Clarée and Serre Chevalier. There is no need to put a client in a hire car unless they want one.\n\nFor Turin itself there is a railway station on the Turin to Ceres line into the centre, and shuttle buses run by SADEM and Flibco.\n\nThe runway is 3,300 metres and Runway 36 is certified to ILS Category IIIB, so the airport can accept aircraft down to 75 metres of visual range.",
+ "after": "Turin's airport, at Caselle Torinese 16 km north north west of the city, and the obvious arrival for the nearby Alps.\n\nFor ski work, the airport advertises charter buses to the mountains, so a hire car is not the only option.\n\nTurin itself is served by trains from the airport's own station and by shuttle buses run by Arriva and Flibco.\n\nIts single runway is 3,300 metres long.",
+ "claims": [
+  {
+   "claim": "at Caselle Torinese",
+   "verdict": "confirmed",
+   "inAfter": "Turin's airport, at Caselle Torinese",
+   "sources": [
+    {
+     "file": "op-contacts",
+     "org": "SAGAT (the airport operator, aeroportoditorino.it)",
+     "quote": "STRADA SAN MAURIZIO 12 - 10072 CASELLE TORINESE (TORINO), ITALIA"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "is an international airport (civil and military) located at Caselle Torinese"
+    }
+   ]
+  },
+  {
+   "claim": "16 km north north west of the city",
+   "verdict": "confirmed",
+   "inAfter": "16 km north north west of the city",
+   "note": "Coordinates: 14.8 km in a straight line at 349 degrees (ratio 1.08; 11 degrees off north north west).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "16 km (9.9 mi) north-northwest of the city of Turin"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 14.8 km (9.2 miles)",
+      "Bearing from the city centre: 349 degrees"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the airport advertises charter buses to the mountains",
+   "verdict": "softened",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "the airport advertises charter buses to the mountains",
+   "note": "Was 'Scheduled shuttle buses run from the airport straight to mountain towns and resorts on both sides of the border', with ten named resorts (see the cut). What can be read tonight is the airport's own home page, which offers 'BY BUS CHARTER To Mountains'; its bus page, read in September, lists only the city services. Attributed to the airport, whose offer it is.",
+   "sources": [
+    {
+     "file": "op-home",
+     "org": "SAGAT (the airport operator, aeroportoditorino.it)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "BY BUS CHARTER To Mountains"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "there are also some scheduled shuttle services to nearby mountain towns and resorts"
+    }
+   ]
+  },
+  {
+   "claim": "trains from the airport's own station into Turin",
+   "verdict": "confirmed",
+   "inAfter": "Turin itself is served by trains from the airport's own station",
+   "note": "The operator: trains to Turin Porta Susa in about half an hour, seven days a week, from a station opposite Arrivals.",
+   "sources": [
+    {
+     "file": "op-train",
+     "org": "SAGAT (the airport operator, aeroportoditorino.it)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "The railway line connects Turin Airport with Turin Porta Susa station in about half an hour, 7 days a week .",
+      "The airport station is located opposite the Arrivals area of the terminal."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "The airport is served by a railway station on the Turin–Ceres railway, which connects it to Turin city centre."
+    }
+   ]
+  },
+  {
+   "claim": "shuttle buses run by Arriva and Flibco",
+   "verdict": "corrected",
+   "inAfter": "shuttle buses run by Arriva and Flibco",
+   "note": "Was 'SADEM and Flibco'. SADEM is the old name: the operator now names ARRIVA ITALIA, whose own page runs a daily Torino Centro to Torino Airport line (offer for July 2026 on the page). Flibco is named by the operator ('from 15 June') and Wikipedia.",
+   "sources": [
+    {
+     "file": "op-bus",
+     "org": "SAGAT (the airport operator, aeroportoditorino.it)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The connection between the centre of Turin and Turin airport is guaranteed by the ARRIVA ITALIA service"
+    },
+    {
+     "file": "arriva-airport",
+     "org": "Arriva Italia (the bus operator, torino.arriva.it)",
+     "dated": "2026 (offer for journeys from 01/07/2026 to 31/07/2026 on the page)",
+     "quote": [
+      "Il collegamento quotidiano che ti porta comodamente dal centro città - stazioni di Porta Nuova e Porta Susa - al Torino Airport di Caselle.",
+      "Promo valida per acquisti effettuati dal 24/06/2026 al 31/07/2026"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "There is also a shuttle bus to Turin, operated by SADEM and Flibco."
+    }
+   ]
+  },
+  {
+   "claim": "a single runway of 3,300 metres",
+   "verdict": "confirmed",
+   "inAfter": "Its single runway is 3,300 metres long.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 18/36: 3,300 m (10,827 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "The airport has one runway designated 18/36 with an asphalt surface measuring 3,300 by 60 metres"
+    }
+   ]
+  },
+  {
+   "claim": "also named after Sandro Pertini, the former Italian president",
+   "verdict": "cut",
+   "wasBefore": "It is also named after Sandro Pertini, the former Italian president.",
+   "why": "Wikipedia alone. The operator's pages read tonight (home, company, contacts, transport) do not use the name, and no other source was found."
+  },
+  {
+   "claim": "scheduled shuttle buses to ten named mountain towns and resorts on both sides of the border",
+   "verdict": "cut",
+   "wasBefore": "For ski work this is the useful part. Scheduled shuttle buses run from the airport straight to mountain towns and resorts on both sides of the border, among them Ayas, Gressoney, Champorcher, Clavière, Cesana, Montgenevre, Briançon, Puy Saint Vincent, Névache in the Vallée de la Clarée and Serre Chevalier. There is no need to put a client in a hire car unless they want one.",
+   "why": "Wikipedia alone, and seasonal: nothing dated in the last 12 months names these resorts. The airport's bus page lists only the city services in September; Resalp's site (a Briançon coach operator) could not be reached (tunnel connection failure). Softened to the airport's own charter-bus offer; worth checking by hand before the winter season."
+  },
+  {
+   "claim": "on the Turin to Ceres line",
+   "verdict": "cut",
+   "wasBefore": "on the Turin to Ceres line",
+   "why": "The line's name rests on Wikipedia alone; the operator says only that trains run to Turin Porta Susa."
+  },
+  {
+   "claim": "SADEM",
+   "verdict": "cut",
+   "wasBefore": "shuttle buses run by SADEM and Flibco",
+   "why": "Out of date name: the operator and the bus company itself now say Arriva (see above)."
+  },
+  {
+   "claim": "Runway 36 certified to ILS Category IIIB, down to 75 metres of visual range",
+   "verdict": "cut",
+   "wasBefore": "Runway 36 is certified to ILS Category IIIB, so the airport can accept aircraft down to 75 metres of visual range",
+   "why": "Wikipedia alone; it would need the AIP, and ENAV's public AIP index answered 502 tonight."
+  },
+  {
+   "claim": "western (the compass word)",
+   "verdict": "cut",
+   "wasBefore": "the obvious arrival for the western Alps",
+   "why": "No saved source uses the word, so the gate's bearing check cannot pass it; reworded to 'the nearby Alps'."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and the obvious arrival for the nearby Alps",
+   "why": "The old text's judgement, kept."
+  },
+  {
+   "text": "so a hire car is not the only option",
+   "why": "Advice that follows from the airport's own charter-bus offer; softer than the old 'There is no need to put a client in a hire car'."
+  }
+ ],
+ "tracerOk": {}
+}
