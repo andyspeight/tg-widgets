@@ -1,0 +1,146 @@
+{
+ "iata": "SWA",
+ "id": "recPx4ufzEU7PNXpG",
+ "name": "Jieyang Chaoshan International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Jieyang_Chaoshan_International_Airport",
+ "audited": "2026-09-23",
+ "before": "An airport serving three cities at once: Jieyang, Shantou and Chaozhou in Guangdong. The site was deliberately chosen near the geographic centre of all three, which is why the name matches none of them cleanly and the code SWA comes from Shantou.\n\nIt has grown fast. In 2025 it handled 10.229 million passengers, up 18 per cent year on year.\n\nA terminal expansion completed in December 2022 doubled the building by adding a second wing, taking it to 113,000 square metres and lifting design capacity from 4.5 million to 14.5 million passengers a year. There are 26 jetways, but only two are allocated to international flights, with two more dual-use, so international capacity is narrow.\n\nThere is an adjacent Jieyang Airport railway station, and a second check-in facility outside Shantou Railway Station, which is useful for a client staying in Shantou.\n\nIt opened on 15 December 2011, replacing Shantou Waisha Airport, which closed to commercial flights the same day.",
+ "after": "The airport for Jieyang in Guangdong. It sits between three cities, Jieyang, Shantou and Chaozhou.\n\nTraffic is growing fast: in 2025 it handled about 10.2 million passengers, up 18 per cent on 2024.\n\nIt has its own railway station, Jieyang Airport.",
+ "claims": [
+  {
+   "claim": "the airport for Jieyang in Guangdong",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Jieyang in Guangdong.",
+   "note": "CAAC files it under Jieyang (揭阳/潮汕); OurAirports gives the municipality as Jieyang.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport serving the cities of Jieyang, Shantou and Chaozhou in South Central China's Guangdong province"
+    },
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 揭阳/潮汕: passenger rank 41 in China"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Jieyang (Rongcheng)"
+    }
+   ]
+  },
+  {
+   "claim": "sits between Jieyang, Shantou and Chaozhou",
+   "verdict": "softened",
+   "inAfter": "It sits between three cities, Jieyang, Shantou and Chaozhou.",
+   "note": "Was 'serving three cities at once ... The site was deliberately chosen near the geographic centre of all three'. The coordinates put the airport inside the triangle the three city centres make: 14.1 km east of Jieyang, 16.6 km south west of Chaozhou and 28.3 km north west of Shantou. Why the site was chosen rests on Wikipedia alone, so it is cut.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "the site was chosen to be near the geographic center of Jieyang, Shantou, and Chaozhou",
+      "serving the cities of Jieyang, Shantou and Chaozhou"
+     ]
+    },
+    {
+     "file": "geo-three-cities",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from Shantou: 28.3 km",
+      "Bearing from Shantou to the airport: 321 degrees, which is north west",
+      "Straight-line distance from Jieyang: 14.1 km",
+      "Bearing from Jieyang to the airport: 85 degrees, which is east",
+      "Straight-line distance from Chaozhou: 16.6 km",
+      "Bearing from Chaozhou to the airport: 227 degrees, which is south west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 10.2 million passengers in 2025, up 18 per cent",
+   "verdict": "confirmed",
+   "inAfter": "in 2025 it handled about 10.2 million passengers, up 18 per cent on 2024.",
+   "note": "CAAC 10,228,556 (41st in China), up from 8,665,819; Wikipedia gives 10.229 million and 18.0 per cent, from CAAC. 'Growing fast' is kept from the old text's 'It has grown fast', on the strength of the 18 per cent.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "passengers 2025: 10,228,556",
+      "passengers 2024: 8,665,819",
+      "change 18%"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "10.229 million passenger movements, representing a year-on-year increases of 15.5% and 18.0% respectively"
+    }
+   ]
+  },
+  {
+   "claim": "its own railway station, Jieyang Airport",
+   "verdict": "confirmed",
+   "inAfter": "It has its own railway station, Jieyang Airport.",
+   "note": "China Railway's own station list (12306) has a station named 揭阳机场, Jieyang Airport (code JUA). Wikipedia says it is next to the airport.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is served by the adjacent Jieyang Airport railway station."
+    },
+    {
+     "file": "railway-12306-stations",
+     "org": "China Railway (12306 station list)",
+     "dated": "2026-09-23",
+     "quote": "|揭阳机场|JUA|jieyangjichang|"
+    }
+   ]
+  },
+  {
+   "claim": "serving three cities at once",
+   "verdict": "cut",
+   "wasBefore": "An airport serving three cities at once: Jieyang, Shantou and Chaozhou in Guangdong.",
+   "why": "Reworded: the position between the three cities is kept with the coordinates as the second source. Nothing outside Wikipedia says it serves Shantou and Chaozhou in so many words: the Guangdong airport group's site answers 468 and Shantou's transport bureau 405."
+  },
+  {
+   "claim": "site deliberately chosen near the centre of all three; name matches none of them; code SWA comes from Shantou",
+   "verdict": "cut",
+   "wasBefore": "The site was deliberately chosen near the geographic centre of all three, which is why the name matches none of them cleanly and the code SWA comes from Shantou.",
+   "why": "The reason for the site is Wikipedia's alone; 'matches none of them' is not right (the name starts with Jieyang); and no source says where the code SWA comes from."
+  },
+  {
+   "claim": "2022 terminal expansion: second wing, 113,000 square metres, capacity 4.5 to 14.5 million",
+   "verdict": "cut",
+   "wasBefore": "A terminal expansion completed in December 2022 doubled the building by adding a second wing, taking it to 113,000 square metres and lifting design capacity from 4.5 million to 14.5 million passengers a year.",
+   "why": "Wikipedia alone. The Guangdong airport group's site answers 468, and Guangdong and Jieyang government sites do not connect."
+  },
+  {
+   "claim": "26 jetways, two international and two dual-use; international capacity narrow",
+   "verdict": "cut",
+   "wasBefore": "There are 26 jetways, but only two are allocated to international flights, with two more dual-use, so international capacity is narrow.",
+   "why": "Wikipedia alone, and the conclusion drawn from it goes with it."
+  },
+  {
+   "claim": "adjacent railway station and a check-in facility at Shantou Railway Station",
+   "verdict": "cut",
+   "wasBefore": "There is an adjacent Jieyang Airport railway station, and a second check-in facility outside Shantou Railway Station, which is useful for a client staying in Shantou.",
+   "why": "The railway station is kept, with China Railway's station list as the second source. The Shantou check-in rests on Wikipedia alone: Shantou's transport bureau site answered 405."
+  },
+  {
+   "claim": "opened 15 December 2011, replacing Shantou Waisha, closed to commercial flights the same day",
+   "verdict": "cut",
+   "wasBefore": "It opened on 15 December 2011, replacing Shantou Waisha Airport, which closed to commercial flights the same day.",
+   "why": "Wikipedia alone for the date and the switch. OurAirports lists Shantou Waisha with no scheduled service, but gives no date."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "10.2": "rounded from 10,228,556 (CAAC) and 10.229 million (Wikipedia)"
+ }
+}

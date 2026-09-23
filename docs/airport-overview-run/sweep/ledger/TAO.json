@@ -1,0 +1,233 @@
+{
+ "iata": "TAO",
+ "id": "recQqjpGuqt402Y5v",
+ "name": "Qingdao Jiaodong International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Qingdao_Jiaodong_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Qingdao's airport and the largest in Shandong, at Jiaodong in Jiaozhou about 39 km from the city centre. It opened on 12 August 2021, replacing Qingdao Liuting International, so any guidance naming Liuting is out of date.\n\nThe metro is the way in. Qingdao Metro Line 8 runs between the airport and Qingdao North railway station, which matters given how far out the airport sits.\n\nIt is built for far more than it currently carries. The terminal is rated for 35 million passengers a year and handled 26.9 million in 2025, so it is not congested. Two runways of 3,600 metres are rated class 4F, able to take an A380, with 178 aircraft stands.\n\nThe terminal is worth a look: a single 478,000 square metre building laid out in a starfish shape with five airside concourses radiating from the centre, under a stainless steel roof spanning 223,000 square metres.",
+ "after": "Qingdao's airport and the largest in Shandong, in Jiaozhou, about 40 km from the city centre. It replaced Qingdao Liuting International, which has closed, so any guidance naming Liuting is out of date.\n\nThe metro is the way in. Since 22 September 2026, Line 8 has run from the airport straight into the city centre at May Fourth Square, with no change of train. It also stops at Qingdao North railway station.\n\nThe airport handled 26.9 million passengers in 2025. There are two runways, each 3,600 m long.",
+ "claims": [
+  {
+   "claim": "Qingdao's airport and the largest in Shandong",
+   "verdict": "confirmed",
+   "inAfter": "Qingdao's airport and the largest in Shandong",
+   "note": "CAAC 2025: Qingdao 26,896,534 passengers, Jinan 20,329,972, Yantai 8,036,554, every other Shandong airport under 3 million.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is currently the largest airport in Shandong"
+    },
+    {
+     "file": "caac-2025-shandong",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "Row: 青岛/胶东 | 19 | 26896534",
+      "Row: 济南/遥墙 | 25 | 20329972",
+      "In words: Qingdao 26,896,534 passengers; Jinan 20,329,972"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in Jiaozhou",
+   "verdict": "confirmed",
+   "inAfter": "in Jiaozhou",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is located in Jiaodong, Jiaozhou"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Qingdao (Jiaozhou)"
+    }
+   ]
+  },
+  {
+   "claim": "about 40 km from the city centre",
+   "verdict": "softened",
+   "inAfter": "about 40 km from the city centre",
+   "note": "Was 'about 39 km'. The coordinates give 42.2 km in a straight line from the GeoNames centre of Qingdao, so Wikipedia's 39 km is measured from somewhere else; 'about 40 km' is true of both. The bearing (north west) has no written source and is left out.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "approximately 39 kilometres (24 mi) from Qingdao city centre"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 42.2 km"
+    }
+   ]
+  },
+  {
+   "claim": "replaced Qingdao Liuting International, which has closed",
+   "verdict": "confirmed",
+   "inAfter": "It replaced Qingdao Liuting International, which has closed",
+   "note": "OurAirports lists Liuting as closed with its old codes (ZSQD, TAO) as keywords, and gives both codes to Jiaodong. The opening date, 12 August 2021, rests on Wikipedia alone and is cut.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "replaced Qingdao Liuting International Airport as the city's main airport in 2021"
+    },
+    {
+     "file": "ourairports-liuting",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": [
+      "\"closed\",\"Qingdao Liuting International Airport\"",
+      "\"ZSQD, TAO\"",
+      "\"ZSQD\",\"large_airport\",\"Qingdao Jiaodong International Airport\""
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Line 8 now runs from the airport straight into the city centre at May Fourth Square, no change, since 22 September 2026",
+   "verdict": "corrected",
+   "inAfter": "Since 22 September 2026, Line 8 has run from the airport straight into the city centre at May Fourth Square, with no change of train.",
+   "note": "Replaces 'Line 8 runs between the airport and Qingdao North railway station', true until the day before this check. Line 8's southern section opened at 05:07 on 22 September 2026 and the 61.4 km line now runs from Jiaozhou North via the airport and Qingdao North to May Fourth Square (五四广场). Qingdao Daily gives about 40 minutes at best, airport to May Fourth Square, and express trains that stop only at May Fourth Square, Xiwujiacun, Qingdao North, the airport and Jiaozhou North; the time has one source and is not in the text.",
+   "sources": [
+    {
+     "file": "qdnews-line8-full",
+     "org": "Qingdao Daily (Guanhai News)",
+     "dated": "2026-09-21",
+     "quote": [
+      "青岛日报社/观海新闻9月21日讯 青岛地铁8号线南段明日开通",
+      "8号线全线通车后，从五四广场前往青岛胶东国际机场，无须换乘，最快40分钟左右即可地铁速通"
+     ]
+    },
+    {
+     "file": "xinhua-line8",
+     "org": "Xinhua (Shandong)",
+     "dated": "2026-09-23",
+     "quote": [
+      "9月22日5:07，随着首班“快速列车”从五四广场站发出驶往胶东机场，8号线南段开通",
+      "从胶东机场下了飞机，坐8号线就能一路到市中心、到海边"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Line 8 also stops at Qingdao North railway station",
+   "verdict": "confirmed",
+   "inAfter": "It also stops at Qingdao North railway station.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Qingdao Metro Line 8 operates between Jiaodong Airport and Qingdao North railway station"
+    },
+    {
+     "file": "xinhua-line8",
+     "org": "Xinhua (Shandong)",
+     "dated": "2026-09-23",
+     "quote": "8号线北段于2020年12月开通运营，线路起自胶州北站，经青岛胶东国际机场过海至青岛北站"
+    },
+    {
+     "file": "qdnews-line8-full",
+     "org": "Qingdao Daily (Guanhai News)",
+     "dated": "2026-09-21",
+     "quote": "快速列车沿途仅停靠五四广场、西吴家村、青岛北站、胶东机场、胶州北站等车站"
+    }
+   ]
+  },
+  {
+   "claim": "26.9 million passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "The airport handled 26.9 million passengers in 2025.",
+   "note": "CAAC 26,896,534, up 2.7 per cent (19th in China). Wikipedia swaps CAAC's growth figures for passengers and movements, so its percentages are not used.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "passengers 2025: 26,896,534"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "handled 26.9 million passengers"
+    }
+   ]
+  },
+  {
+   "claim": "two runways, each 3,600 m",
+   "verdict": "confirmed",
+   "inAfter": "There are two runways, each 3,600 m long.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport has two Class 4F runways, both 3,600 metres (11,800 ft) long."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "dated": "2026-09-23",
+     "quote": [
+      "Runway 16/34: 3,600 m",
+      "Runway 17/35: 3,600 m",
+      "Runways listed: 2"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "at Jiaodong, about 39 km",
+   "verdict": "cut",
+   "wasBefore": "at Jiaodong in Jiaozhou about 39 km from the city centre",
+   "why": "Reworded as 'in Jiaozhou, about 40 km from the city centre' (see above)."
+  },
+  {
+   "claim": "opened 12 August 2021",
+   "verdict": "cut",
+   "wasBefore": "It opened on 12 August 2021, replacing Qingdao Liuting International",
+   "why": "The date rests on Wikipedia alone. The replacement of Liuting is kept, with OurAirports as the second source."
+  },
+  {
+   "claim": "Line 8 between the airport and Qingdao North",
+   "verdict": "cut",
+   "wasBefore": "Qingdao Metro Line 8 runs between the airport and Qingdao North railway station, which matters given how far out the airport sits.",
+   "why": "Out of date since 22 September 2026: the line now runs through Qingdao North to May Fourth Square in the city centre (Qingdao Daily, Xinhua)."
+  },
+  {
+   "claim": "built for far more than it carries; 35 million capacity; not congested",
+   "verdict": "cut",
+   "wasBefore": "It is built for far more than it currently carries. The terminal is rated for 35 million passengers a year and handled 26.9 million in 2025, so it is not congested.",
+   "why": "The 35 million design capacity rests on Wikipedia alone, and 'not congested' is a conclusion from it. The 2025 figure is kept."
+  },
+  {
+   "claim": "class 4F, A380, 178 stands",
+   "verdict": "cut",
+   "wasBefore": "Two runways of 3,600 metres are rated class 4F, able to take an A380, with 178 aircraft stands.",
+   "why": "The two 3,600 m runways are kept (OurAirports). Class 4F, the A380 and the 178 stands rest on Wikipedia alone."
+  },
+  {
+   "claim": "terminal: 478,000 square metres, starfish shape, five concourses, stainless steel roof",
+   "verdict": "cut",
+   "wasBefore": "The terminal is worth a look: a single 478,000 square metre building laid out in a starfish shape with five airside concourses radiating from the centre, under a stainless steel roof spanning 223,000 square metres.",
+   "why": "Wikipedia alone; the airport's and the metro's own sites did not connect, and no second source describes the building."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so any guidance naming Liuting is out of date",
+   "why": "Advice kept from the old text, following from Liuting's closure (two sources)."
+  },
+  {
+   "text": "The metro is the way in.",
+   "why": "Advice kept from the old text; the next two sentences give the line with two sources each."
+  }
+ ],
+ "tracerOk": {
+  "May Fourth Square": "五四广场 (Wusi Guangchang) in both Chinese sources; the English name of the square"
+ }
+}
