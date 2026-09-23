@@ -1,0 +1,440 @@
+{
+ "iata": "SDR",
+ "id": "recfEUIA1deZi0C42",
+ "name": "Seve Ballesteros-Santander Airport",
+ "country": "Spain",
+ "wikipedia": "https://en.wikipedia.org/wiki/Santander_Airport",
+ "audited": "2026-09-23",
+ "before": "Cantabria's only airport, just outside Santander. It handled 1,103,353 passengers in 2018, a long way up from 180,000 in 1995, though traffic has slipped back since in line with the wider Spanish pattern.\n\nIt is a small and simple building: eight check in desks, three baggage carousels and seven boarding gates, with the ability to handle flights from outside the Schengen zone.\n\nThe runway has an unusual setting. It is 2,420 metres, built on ground reclaimed from the Bay of Santander, and runway 29 finishes about 20 metres from the water while runway 11 ends 150 metres from the S-10 highway and a shopping centre. A precision approach lighting system was added at runway 29 in 2021.\n\nBuses run from Santander's main bus station in the centre, and ALSA coaches on the routes to Bilbao, Gijón, Oviedo and Laredo will stop at the airport if booked in advance.\n\nThe airport opened in 1977 and was renamed in April 2015 after Seve Ballesteros, the golfer, who was born at Pedreña a few kilometres away.",
+ "after": "Santander's airport, at Maliaño just outside the city. It handled just over a million passengers in 2025, about 2 per cent fewer than in 2024.\n\nThe terminal is small and simple, and it can handle flights from outside the Schengen area.\n\nIts single runway, 2,320 metres long, sits on reclaimed marshland beside the Bay of Santander.\n\nBuses run between the airport and Santander's bus station, and ALSA coaches on the routes to Bilbao, Gijón, Oviedo and Laredo will stop at the airport if booked in advance.\n\nThe airport first opened in 1953 and was largely rebuilt between 1973 and 1977. It was renamed in April 2015 after the golfer Seve Ballesteros, who was born nearby at Pedreña.",
+ "claims": [
+  {
+   "claim": "Santander's airport, at Maliaño",
+   "verdict": "softened",
+   "inAfter": "Santander's airport, at Maliaño",
+   "note": "Was 'Cantabria's only airport'. Wikipedia says so, but the Cantabria government and tourism sites could not be reached (502, 403) and no other saved page says it plainly. The airport's town, Maliaño, is in both the AIP and Wikipedia.",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "location = Maliaño, Camargo, Cantabria, Spain"
+    },
+    {
+     "file": "enaire-aip",
+     "org": "ENAIRE (Spanish AIP)",
+     "quote": [
+      "LEXJ - SANTANDER/Seve Ballesteros-Santander",
+      "39600 Maliaño (Cantabria)",
+      "11-JUN-26"
+     ],
+     "dated": "2026-06-11"
+    }
+   ]
+  },
+  {
+   "claim": "just outside the city",
+   "verdict": "confirmed",
+   "inAfter": "just outside the city",
+   "note": "Aena says 5 km from the city, the AIP 4 km south; the coordinates give 4.5 km in a straight line at 196 degrees, south.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport near Santander, Spain"
+    },
+    {
+     "file": "aena-presentation",
+     "org": "Aena (operator)",
+     "quote": "situated five kilometres from the city",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "enaire-aip",
+     "org": "ENAIRE (Spanish AIP)",
+     "quote": [
+      "Distance and direction from the city",
+      "4 km S."
+     ],
+     "dated": "2026-06-11"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 4.5 km",
+      "Bearing from the city centre: 196 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "just over a million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled just over a million passengers in 2025",
+   "note": "Was 1,103,353 in 2018. Aena gives 1,069,390 for 2025 and Eurostat 1,067,870, 0.1 per cent apart.",
+   "sources": [
+    {
+     "file": "aena-annual-2025",
+     "org": "Aena (operator)",
+     "quote": [
+      "AÑO 2025",
+      "SEVE BALLESTEROS-SANTANDER 1.069.390 -2,4%"
+     ],
+     "dated": "2026"
+    },
+    {
+     "file": "aena-presentation",
+     "org": "Aena (operator)",
+     "quote": [
+      "1,069,390",
+      "passengers in 2025"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": "passengers carried in 2025: 1,067,870"
+    }
+   ]
+  },
+  {
+   "claim": "about 2 per cent fewer than in 2024",
+   "verdict": "corrected",
+   "inAfter": "about 2 per cent fewer than in 2024",
+   "note": "Replaces 'traffic has slipped back since in line with the wider Spanish pattern'. Aena: -2.4 per cent; Eurostat: 1,091,427 in 2024 to 1,067,870 in 2025, -2.2 per cent. Rounded to about 2 per cent.",
+   "sources": [
+    {
+     "file": "aena-annual-2025",
+     "org": "Aena (operator)",
+     "quote": "SEVE BALLESTEROS-SANTANDER 1.069.390 -2,4%",
+     "dated": "2026"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": [
+      "passengers carried in 2024: 1,091,427",
+      "passengers carried in 2025: 1,067,870"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "can handle flights from outside the Schengen area",
+   "verdict": "confirmed",
+   "inAfter": "it can handle flights from outside the Schengen area",
+   "note": "Aena's live airline list includes Ryanair flights to the UK, which is outside Schengen, and the AIP lists customs and immigration.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "As an international airport, it is also capable of handling flights from countries outside the Schengen zone."
+    },
+    {
+     "file": "aena-airlines",
+     "org": "Aena (operator)",
+     "quote": [
+      "RYANAIR UK (RUK)",
+      "LONDRES /STANSTED (STN)",
+      "MANCHESTER (MAN)"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "enaire-aip",
+     "org": "ENAIRE (Spanish AIP)",
+     "quote": "Customs and Immigration",
+     "dated": "2026-06-11"
+    }
+   ]
+  },
+  {
+   "claim": "single runway",
+   "verdict": "confirmed",
+   "inAfter": "Its single runway",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport has a single runway, runway 11/29"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "Runways listed: 1"
+    },
+    {
+     "file": "enaire-aip",
+     "org": "ENAIRE (Spanish AIP)",
+     "quote": "FATO: RWY 11/29.",
+     "dated": "2026-06-11"
+    }
+   ]
+  },
+  {
+   "claim": "runway 2,320 metres",
+   "verdict": "corrected",
+   "inAfter": "2,320 metres long",
+   "note": "Was 2,420 metres. The Spanish AIP (11 June 2026) and OurAirports both give 2,320 m; Wikipedia's own feet figure, 7,612 ft, is 2,320 m, so its 2,420 is a slip. Aena's history says the runway was lengthened to 2,400 m in the 1970s.",
+   "sources": [
+    {
+     "file": "enaire-aip",
+     "org": "ENAIRE (Spanish AIP)",
+     "quote": [
+      "2320 x 45",
+      "RWY: ASPH (1)"
+     ],
+     "dated": "2026-06-11"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "Runway 11/29: 2,320 m (7,612 ft), ASP"
+    }
+   ]
+  },
+  {
+   "claim": "on reclaimed marshland beside the Bay of Santander",
+   "verdict": "softened",
+   "inAfter": "sits on reclaimed marshland beside the Bay of Santander",
+   "note": "Was 'built on ground reclaimed from the Bay of Santander'. Aena describes the site as marshland behind the bay, enclosed by a sea wall that the tide broke through in 1959.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "built on ground reclaimed from the Bay of Santander"
+    },
+    {
+     "file": "aena-history",
+     "org": "Aena (operator)",
+     "quote": [
+      "behind the bay and next to the Raos marshlands",
+      "the tide broke through the sea wall that enclosed the wetlands and sea water flooded the runways"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "buses between the airport and Santander's bus station",
+   "verdict": "softened",
+   "inAfter": "Buses run between the airport and Santander's bus station",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "There is also a regular bus line from Santander's main bus station in the city centre."
+    },
+    {
+     "file": "aena-bus",
+     "org": "Aena (operator)",
+     "quote": "Service between the airport and the bus station in Santander.",
+     "dated": "2026-09-23 (live page)"
+    }
+   ],
+   "note": "Was 'from Santander's main bus station in the centre'; 'main' and 'in the centre' rest on Wikipedia alone, so the text follows Aena's wording."
+  },
+  {
+   "claim": "ALSA coaches to Bilbao, Gijón, Oviedo and Laredo stop if booked",
+   "verdict": "confirmed",
+   "inAfter": "ALSA coaches on the routes to Bilbao, Gijón, Oviedo and Laredo will stop at the airport if booked in advance",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The line buses from ALSA also stop in the airport prior booking in the routes that connect Santander with other towns in northern Spain like Bilbao, Gijón, Oviedo or Laredo."
+    },
+    {
+     "file": "aena-bus",
+     "org": "Aena (operator)",
+     "quote": [
+      "Alsa links Santander Airport to different locations in the north of Spain: Bilbao, Gij",
+      "Oviedo, Laredo, etc.",
+      "Buses stop at the airport provided that travellers have bought tickets in advance."
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "first opened in 1953",
+   "verdict": "corrected",
+   "inAfter": "The airport first opened in 1953",
+   "note": "Was 'opened in 1977'. The airport at Parayas opened on 25 September 1953; 1977 was the reopening after the 1970s rebuild.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It opened in 1953"
+    },
+    {
+     "file": "aena-history",
+     "org": "Aena (operator)",
+     "quote": "The new airport was opened on the 25 September 1953 and, that very same day, La Albericia was closed for good.",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "largely rebuilt between 1973 and 1977",
+   "verdict": "corrected",
+   "inAfter": "was largely rebuilt between 1973 and 1977",
+   "note": "Aena dates the remodelling 1973 to 1977; Wikipedia has the airport closed from April 1974 to 8 August 1977 for the work.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "After a three-year closure (from April 1974 until 8 August 1977), in which the airport underwent a major renovation"
+    },
+    {
+     "file": "aena-history",
+     "org": "Aena (operator)",
+     "quote": [
+      "1973-1977",
+      "The airport underwent significant remodelling during these years"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "renamed in April 2015 after Seve Ballesteros",
+   "verdict": "confirmed",
+   "inAfter": "It was renamed in April 2015 after the golfer Seve Ballesteros",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport is named after the famous golf player Seve Ballesteros",
+      "The Spanish government approved the change on 16 April 2015."
+     ]
+    },
+    {
+     "file": "aena-history",
+     "org": "Aena (operator)",
+     "quote": "On 16 April 2015, the Official State Gazette (BOE) published the change in the airport's name to Seve Ballesteros-Santander",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "seve-biografia",
+     "org": "Seve Ballesteros official site (Fundación Seve Ballesteros)",
+     "quote": "Su historial incluye 93 victorias, entre ellas cinco Grandes, The Open Championship 1979, 1984 y 1988"
+    },
+    {
+     "file": "enaire-aip",
+     "org": "ENAIRE (Spanish AIP)",
+     "quote": [
+      "LEXJ - SANTANDER/Seve Ballesteros-Santander",
+      "11-JUN-26"
+     ],
+     "dated": "2026-06-11"
+    }
+   ],
+   "note": "The June 2026 AIP carries the name, so it is current."
+  },
+  {
+   "claim": "born nearby at Pedreña",
+   "verdict": "softened",
+   "inAfter": "who was born nearby at Pedreña",
+   "note": "Was 'born at Pedreña a few kilometres away'. His official site puts Pedreña on the south side of the Bay of Santander, and Aena puts the airport on the west side of the same bay; the distance in kilometres rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "born in Pedreña, a few kilometres from the airport"
+    },
+    {
+     "file": "seve-biografia",
+     "org": "Seve Ballesteros official site (Fundación Seve Ballesteros)",
+     "quote": "nació el 9 de abril de 1957 en Pedreña, una pequeña villa ubicada al Sur de la Bahía de Santander"
+    },
+    {
+     "file": "aena-presentation",
+     "org": "Aena (operator)",
+     "quote": "in the municipality of Camargo, on the western side of the Bay."
+    }
+   ]
+  },
+  {
+   "claim": "Cantabria's only airport",
+   "verdict": "cut",
+   "wasBefore": "Cantabria's only airport",
+   "why": "Wikipedia alone; the Cantabria government (502) and tourism (403) sites could not be reached. Softened to Santander's airport at Maliaño."
+  },
+  {
+   "claim": "1,103,353 passengers in 2018",
+   "verdict": "cut",
+   "wasBefore": "It handled 1,103,353 passengers in 2018",
+   "why": "Seven years stale; replaced by 2025 (Aena and Eurostat)."
+  },
+  {
+   "claim": "up from 180,000 in 1995",
+   "verdict": "cut",
+   "wasBefore": "a long way up from 180,000 in 1995",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "slipped back in line with the wider Spanish pattern",
+   "verdict": "cut",
+   "wasBefore": "though traffic has slipped back since in line with the wider Spanish pattern",
+   "why": "Wrong for 2025: Aena's own table has Santander down 2.4 per cent while Spanish airports as a whole rose 3.9 per cent. Replaced by the 2 per cent fall, which two sources give."
+  },
+  {
+   "claim": "eight check-in desks, three carousels, seven gates",
+   "verdict": "cut",
+   "wasBefore": "eight check in desks, three baggage carousels and seven boarding gates",
+   "why": "Wikipedia alone; Aena's pages give no counts."
+  },
+  {
+   "claim": "runway 2,420 metres",
+   "verdict": "cut",
+   "wasBefore": "It is 2,420 metres",
+   "why": "Wrong: 2,320 m per the Spanish AIP and OurAirports."
+  },
+  {
+   "claim": "runway ends 20 m from the water and 150 m from the S-10 and a shopping centre",
+   "verdict": "cut",
+   "wasBefore": "runway 29 finishes about 20 metres from the water while runway 11 ends 150 metres from the S-10 highway and a shopping centre",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "unusual setting",
+   "verdict": "cut",
+   "wasBefore": "The runway has an unusual setting.",
+   "why": "The lead-in rested on the distances cut above."
+  },
+  {
+   "claim": "precision approach lighting added at runway 29 in 2021",
+   "verdict": "cut",
+   "wasBefore": "A precision approach lighting system was added at runway 29 in 2021.",
+   "why": "The AIP confirms runway 29 has a precision (CAT I) approach lighting system, but the 2021 date rests on Wikipedia alone, and it is of no use to a travel agent."
+  },
+  {
+   "claim": "opened in 1977",
+   "verdict": "cut",
+   "wasBefore": "The airport opened in 1977",
+   "why": "Wrong: it opened in 1953 and reopened in 1977 after a rebuild (Aena and Wikipedia)."
+  },
+  {
+   "claim": "a few kilometres away",
+   "verdict": "cut",
+   "wasBefore": "who was born at Pedreña a few kilometres away",
+   "why": "The distance rests on Wikipedia alone; softened to 'nearby'."
+  },
+  {
+   "claim": "main bus station in the centre",
+   "verdict": "cut",
+   "wasBefore": "Buses run from Santander's main bus station in the centre",
+   "why": "'Main' and 'in the centre' rest on Wikipedia alone; reworded to Aena's 'between the airport and the bus station in Santander'."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The terminal is small and simple",
+   "why": "Kept from the old text; it handles about a million passengers a year."
+  }
+ ],
+ "tracerOk": {}
+}

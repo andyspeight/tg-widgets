@@ -1,0 +1,254 @@
+{
+ "iata": "NTE",
+ "id": "rec735bOYMJ3T9SwH",
+ "name": "Nantes Atlantique Airport",
+ "country": "France",
+ "wikipedia": "https://en.wikipedia.org/wiki/Nantes_Atlantique_Airport",
+ "audited": "2026-09-23",
+ "before": "The main airport for Nantes, 8 km south west of the city in Bouguenais, and busier than most regional French airports at just over 7.2 million passengers in 2019.\n\nThe terminal is a single L shaped building split into four numbered halls. Halls 1 to 3 form the long side across two floors, with check in and baggage claim downstairs and the departure lounges above. Hall 4 is a later single storey building set at a right angle and joined by a lobby, so clients should check which hall their flight uses rather than assuming one entrance.\n\nA separate freight terminal sits to the south with 6,000 square metres of storage.\n\nThe airport shares its site with an Airbus factory, which builds the centre wing box for the Airbus fleet and works in composite materials. It is run by the Nantes chamber of commerce rather than a national operator.",
+ "after": "The main airport for Nantes, 8 km south west of the city in Bouguenais, and busier than most regional French airports, with about 7.2 million passengers in 2025. It is run by Vinci Airports through its subsidiary Aéroports du Grand Ouest.\n\nThe terminal is split into halls, so clients should check which hall their flight uses. Vinci Airports says a building linking the halls, due to open in 2027, will let passengers move between them without going outside.",
+ "claims": [
+  {
+   "claim": "the main airport for Nantes",
+   "verdict": "confirmed",
+   "inAfter": "The main airport for Nantes",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is an international airport serving Nantes, France."
+    },
+    {
+     "file": "sia-eaip",
+     "org": "DGAC SIA (French AIP)",
+     "quote": [
+      "NANTES ATLANTIQUE",
+      "8km SW NANTES"
+     ],
+     "dated": "2026-08-06"
+    },
+    {
+     "file": "vinci-nantes",
+     "org": "Vinci Airports",
+     "quote": "1er aéroport du Grand Ouest",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "8 km south west of the city",
+   "verdict": "confirmed",
+   "inAfter": "8 km south west of the city",
+   "note": "The coordinates give 8.3 km in a straight line at 211 degrees, south west.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is located 8 kilometres (5.0 mi) southwest of the city, in Bouguenais."
+    },
+    {
+     "file": "sia-eaip",
+     "org": "DGAC SIA (French AIP)",
+     "quote": [
+      "8km SW NANTES",
+      "valide à partir du 06 AUG 2026"
+     ],
+     "dated": "2026-08-06"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 8.3 km",
+      "Bearing from the city centre: 211 degrees, which is south west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in Bouguenais",
+   "verdict": "confirmed",
+   "inAfter": "in Bouguenais",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "southwest of the city, in Bouguenais."
+    },
+    {
+     "file": "sia-eaip",
+     "org": "DGAC SIA (French AIP)",
+     "quote": "44346 BOUGUENAIS CEDEX",
+     "dated": "2026-08-06"
+    }
+   ]
+  },
+  {
+   "claim": "busier than most regional French airports",
+   "verdict": "confirmed",
+   "inAfter": "busier than most regional French airports",
+   "note": "Eighth of all French airports in 2025 in the UAF ranking; only Nice, Marseille, Lyon, Basel-Mulhouse and Toulouse among the regional airports are busier.",
+   "sources": [
+    {
+     "file": "uaf-2025",
+     "org": "Union des Aéroports Français (operators' figures)",
+     "quote": "8 Nantes Atlantique 7 189 480 2.6% -0.5%",
+     "dated": "2026-03"
+    },
+    {
+     "file": "aj-hiver-2025",
+     "org": "Air Journal",
+     "quote": "Nantes-Atlantique demeure le huitième aéroport français en nombre de passagers",
+     "dated": "2025-10-26"
+    }
+   ]
+  },
+  {
+   "claim": "about 7.2 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "with about 7.2 million passengers in 2025",
+   "note": "Was 'just over 7.2 million passengers in 2019'. UAF (figures supplied by the operators) gives 7,189,480 for 2025 and Eurostat 7,175,680, 0.2 per cent apart; both round to 7.2 million. Vinci's own airport page shows '7,1M', which reads as the same figure cut short rather than a different count, since the UAF figure is the one the operator itself reported. Air Journal (October 2025) had forecast that 2025 might pass 7.2 million.",
+   "sources": [
+    {
+     "file": "uaf-2025",
+     "org": "Union des Aéroports Français (operators' figures)",
+     "quote": [
+      "Nantes Atlantique 7 227 411 5 800 372 6 535 074 7 009 445 7 189 480 2.6% -0.5%",
+      "Les données figurant dans ce document ont été communiquées par les exploitants des aéroports concernés."
+     ],
+     "dated": "2026-03"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": "passengers carried in 2025: 7,175,680"
+    }
+   ]
+  },
+  {
+   "claim": "run by Vinci Airports through its subsidiary Aéroports du Grand Ouest",
+   "verdict": "corrected",
+   "inAfter": "It is run by Vinci Airports through its subsidiary Aéroports du Grand Ouest.",
+   "note": "Was 'run by the Nantes chamber of commerce rather than a national operator', which Wikipedia's own body text still says (its infobox has AGO). The concession company AGO is 85 per cent Vinci Airports; the chamber of commerce (CCI Nantes Saint-Nazaire) holds 10 per cent. The French AIP names AGO as the aerodrome administration.",
+   "sources": [
+    {
+     "file": "aj-hiver-2025",
+     "org": "Air Journal",
+     "quote": "Géré par Vinci Airports via sa filiale Aéroports du Grand Ouest (AGO)",
+     "dated": "2025-10-26"
+    },
+    {
+     "file": "vinci-nantes",
+     "org": "Vinci Airports",
+     "quote": [
+      "Société concessionnaire",
+      "Aéroports du Grand Ouest",
+      "85% VINCI Airports ; 10% CCI Nantes Saint-Nazaire ; 5% ETPO"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "sia-eaip",
+     "org": "DGAC SIA (French AIP)",
+     "quote": "AEROPORT DU GRAND OUEST (AGO)",
+     "dated": "2026-08-06"
+    }
+   ]
+  },
+  {
+   "claim": "the terminal is split into halls",
+   "verdict": "softened",
+   "inAfter": "The terminal is split into halls",
+   "note": "Was 'a single L shaped building split into four numbered halls'. The operator's June 2026 release confirms several halls; the shape and the count rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport has a single L-shaped passenger terminal, which is divided into four numbered halls."
+    },
+    {
+     "file": "nr-liaison-halls",
+     "org": "Vinci Airports (Nantes Atlantique newsroom)",
+     "quote": "Une connexion est créée entre tous les halls, permettant de rendre accessible l’ensemble des espaces de l’aérogare sans passer par l’extérieur.",
+     "dated": "2026-06-16"
+    }
+   ]
+  },
+  {
+   "claim": "Vinci Airports: a building linking the halls, due to open in 2027, will let passengers move between them without going outside",
+   "verdict": "corrected",
+   "inAfter": "Vinci Airports says a building linking the halls, due to open in 2027, will let passengers move between them without going outside.",
+   "primary": true,
+   "attribution": "Vinci Airports",
+   "note": "Attributed statement, checked against the airport's own release of 16 June 2026 (the airport is run by Vinci Airports, and the release speaks for it). It replaces 'Hall 4 ... joined by a lobby': the operator says the new link will let all passengers move from one hall to another without going outside, so the halls are not yet joined inside for every passenger. The halls themselves carry two sources in the claim before.",
+   "sources": [
+    {
+     "file": "nr-liaison-halls",
+     "org": "Vinci Airports (Nantes Atlantique newsroom)",
+     "quote": [
+      "AÉROPORT NANTES ATLANTIQUE, 16 JUIN 2026",
+      "L’aéroport Nantes Atlantique, géré par VINCI Airports",
+      "Le projet prévoit la création d’un bâtiment de liaison bidirectionnel entre les halls. Cette connexion permettra à tous les passagers de circuler d’un hall à l’autre sans passer par l’extérieur",
+      "avec une mise en service prévue en 2027"
+     ],
+     "dated": "2026-06-16"
+    }
+   ]
+  },
+  {
+   "claim": "just over 7.2 million passengers in 2019",
+   "verdict": "cut",
+   "wasBefore": "at just over 7.2 million passengers in 2019",
+   "why": "Six years stale; replaced by 2025 from UAF and Eurostat."
+  },
+  {
+   "claim": "single L shaped building with four numbered halls",
+   "verdict": "cut",
+   "wasBefore": "The terminal is a single L shaped building split into four numbered halls.",
+   "why": "The shape and the number of halls rest on Wikipedia alone; the operator's passenger site is behind a Cloudflare block. Softened to 'split into halls', which the operator's release confirms."
+  },
+  {
+   "claim": "Halls 1 to 3 on two floors, check-in and baggage below, lounges above",
+   "verdict": "cut",
+   "wasBefore": "Halls 1 to 3 form the long side across two floors, with check in and baggage claim downstairs and the departure lounges above.",
+   "why": "Wikipedia alone; no second source reachable."
+  },
+  {
+   "claim": "Hall 4 at a right angle, joined by a lobby",
+   "verdict": "cut",
+   "wasBefore": "Hall 4 is a later single storey building set at a right angle and joined by a lobby",
+   "why": "Wikipedia alone, and the operator's June 2026 release says a link is being built so that passengers can move between halls without going outside. Replaced by that statement."
+  },
+  {
+   "claim": "rather than assuming one entrance",
+   "verdict": "cut",
+   "wasBefore": "rather than assuming one entrance",
+   "why": "Trimmed; the advice to check the hall stands on its own."
+  },
+  {
+   "claim": "freight terminal to the south, 6,000 square metres",
+   "verdict": "cut",
+   "wasBefore": "A separate freight terminal sits to the south with 6,000 square metres of storage.",
+   "why": "Wikipedia alone; the French AIP lists only a 10 ft cargo loading platform. Of no use to a travel agent."
+  },
+  {
+   "claim": "Airbus factory on the site, centre wing boxes and composites",
+   "verdict": "cut",
+   "wasBefore": "The airport shares its site with an Airbus factory, which builds the centre wing box for the Airbus fleet and works in composite materials.",
+   "why": "Wikipedia alone. airbus.com refused both fetches (Incapsula), the Bouguenais town site refused too, and the Nantes Saint-Nazaire development agency confirms Airbus units in Nantes but not the site or the wing boxes."
+  },
+  {
+   "claim": "run by the Nantes chamber of commerce rather than a national operator",
+   "verdict": "cut",
+   "wasBefore": "It is run by the Nantes chamber of commerce rather than a national operator.",
+   "why": "Wrong: the concession company Aéroports du Grand Ouest is 85 per cent Vinci Airports (the chamber holds 10 per cent). Replaced, with three sources."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so clients should check which hall their flight uses",
+   "why": "Advice kept from the old text; it follows from the operator's statement that the halls are not yet linked inside for every passenger."
+  }
+ ],
+ "tracerOk": {}
+}

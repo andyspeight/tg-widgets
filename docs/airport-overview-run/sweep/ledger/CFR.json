@@ -1,0 +1,345 @@
+{
+ "iata": "CFR",
+ "id": "recDlySWqdKpJF7Zr",
+ "name": "Caen Carpiquet airport",
+ "country": "France",
+ "wikipedia": "https://en.wikipedia.org/wiki/Caen%E2%80%93Carpiquet_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Caen, at Carpiquet 6 km west of the city in Calvados, Normandy.\n\nIt is small and growing fast. Passenger numbers went from 180,910 in 2017 to 274,011 in 2018. Chalair Aviation has its head office here.\n\nThere is one concrete runway of 1,900 metres with high intensity approach lighting, plus two grass strips used by light aircraft. Runway 31 carries a Category III instrument landing system, which is generous for an airport this size. Twisto bus line 3 has served the airport since June 2015.\n\nThe site has its own place in the 1944 story. It opened as Air Base 720 in August 1939, was taken by the Luftwaffe in June 1940 and used as a rear base during the Battle of Britain, and was fought over at length by Anglo-Canadian and German troops during the Battle of Normandy.",
+ "after": "The airport for Caen, at Carpiquet 6 km west of the city in Normandy.\n\nIt is small, with just over 300,000 passengers in 2025. Chalair Aviation has its head office here.\n\nThe main runway is 1,900 metres long, and there is also a grass strip. Twisto bus line 3 has served the airport since June 2015.\n\nThe site has its own place in the 1944 story. It opened as an air base in August 1939, was taken over by the Germans in June 1940 and was fought over by Canadian and German troops in July 1944, during the Battle of Normandy.",
+ "claims": [
+  {
+   "claim": "the airport for Caen, at Carpiquet",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Caen, at Carpiquet",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is an international airport located in Carpiquet, 6 km west of Caen"
+    },
+    {
+     "file": "op-quisommesnous",
+     "org": "Aéroport de Caen-Carpiquet (operator)",
+     "quote": [
+      "Aéroport de Caen-Carpiquet",
+      "14650 CARPIQUET"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "6 km west of the city",
+   "verdict": "confirmed",
+   "inAfter": "6 km west of the city",
+   "note": "The French AIP (valid from 6 August 2026) gives 6 km west. The coordinates give 7.0 km in a straight line at 262 degrees, which is west. The operator's pilot sheet says 8 km west, probably by road, and its About page says 10 minutes from the centre; the official 6 km is kept because it passes the coordinates check.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "6 km west of Caen"
+    },
+    {
+     "file": "sia-eaip",
+     "org": "DGAC SIA (French AIP)",
+     "quote": [
+      "6 km West CAEN",
+      "valide à partir du 06 AUG 2026"
+     ],
+     "dated": "2026-08-06"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 7.0 km",
+      "Bearing from the city centre: 262 degrees, which is west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in Normandy",
+   "verdict": "confirmed",
+   "inAfter": "in Normandy",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "in the Normandy (formerly Lower Normandy) region of France"
+    },
+    {
+     "file": "op-quisommesnous",
+     "org": "Aéroport de Caen-Carpiquet (operator)",
+     "quote": "Un aéroport au cœur de la Normandie"
+    }
+   ]
+  },
+  {
+   "claim": "just over 300,000 passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It is small, with just over 300,000 passengers in 2025.",
+   "note": "Was 180,910 in 2017 and 274,011 in 2018. UAF (figures supplied by the operators) gives 307,860 for 2025 and Eurostat 305,767, 0.7 per cent apart, so the text rounds to 'just over 300,000'. Caen ranks 23rd of the French airports in the UAF table, which carries 'small'.",
+   "sources": [
+    {
+     "file": "uaf-2025",
+     "org": "Union des Aéroports Français (operators' figures)",
+     "quote": [
+      "Caen 304 769 301 395 329 632 291 326 307 860 5.7% 1.0%",
+      "23 Caen 307 860",
+      "Les données figurant dans ce document ont été communiquées par les exploitants des aéroports concernés."
+     ],
+     "dated": "2026-03"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": "passengers carried in 2025: 305,767"
+    }
+   ]
+  },
+  {
+   "claim": "Chalair Aviation has its head office here",
+   "verdict": "confirmed",
+   "inAfter": "Chalair Aviation has its head office here.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Chalair Aviation has its head offices at the airport."
+    },
+    {
+     "file": "chalair-legal",
+     "org": "Chalair Aviation",
+     "quote": [
+      "Route de Caen - 14650 Carpiquet - France",
+      "CHALAIR AVIATION Aéroport de Caen-Carpiquet 14650 Carpiquet - France"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "aerotime-chalair-sou",
+     "org": "AeroTime",
+     "quote": "between its home base of Caen in Normandy and Southampton Airport",
+     "dated": "2024"
+    }
+   ]
+  },
+  {
+   "claim": "main runway 1,900 metres",
+   "verdict": "confirmed",
+   "inAfter": "The main runway is 1,900 metres long",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The 1,900-metre (2,078 yd) long main runway"
+    },
+    {
+     "file": "op-fiche-technique",
+     "org": "Aéroport de Caen-Carpiquet (operator)",
+     "quote": "Piste principale - 1900 m x 45 m",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "sia-eaip",
+     "org": "DGAC SIA (French AIP)",
+     "quote": "1900 x 45",
+     "dated": "2026-08-06"
+    }
+   ]
+  },
+  {
+   "claim": "one grass strip",
+   "verdict": "corrected",
+   "inAfter": "and there is also a grass strip",
+   "note": "Was 'two grass strips'. The French AIP, the operator's technical sheet and OurAirports each list one grass runway, parallel to the main one (AIP 800 m, operator 850 m).",
+   "sources": [
+    {
+     "file": "sia-eaip",
+     "org": "DGAC SIA (French AIP)",
+     "quote": "Circling prohibited on grass strip 12L/30R.",
+     "dated": "2026-08-06"
+    },
+    {
+     "file": "op-fiche-technique",
+     "org": "Aéroport de Caen-Carpiquet (operator)",
+     "quote": [
+      "Piste secondaire - 850 m x 50 m",
+      "revêtement : herbe"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 12L/30R: 800 m (2,624 ft), GRASS",
+      "Runways listed: 2"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Twisto bus line 3 since June 2015",
+   "verdict": "confirmed",
+   "inAfter": "Twisto bus line 3 has served the airport since June 2015.",
+   "note": "The operator's live transport page confirms line 3 still runs, from Carpiquet through Caen to Ifs.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Since 29 June 2015, it has been served by Twisto bus line 3."
+    },
+    {
+     "file": "carpiquet-aeroport",
+     "org": "Ville de Carpiquet (commune)",
+     "quote": "Depuis le 29 juin 2015, l’aéroport est connecté au réseau Twisto via la liane 3.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-transports",
+     "org": "Aéroport de Caen-Carpiquet (operator)",
+     "quote": "La ligne 3 Twisto dessert l’aéroport et relie Carpiquet à Ifs",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "opened as an air base in August 1939",
+   "verdict": "softened",
+   "inAfter": "It opened as an air base in August 1939",
+   "note": "Was 'Air Base 720'. Wikipedia numbers it 720 and the commune of Carpiquet 131; both give the opening as 17 August 1939, so the date stays and the number goes.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Air base 720 Caen-Carpiquet was inaugurated on 17 August 1939."
+    },
+    {
+     "file": "carpiquet-decouvrir",
+     "org": "Ville de Carpiquet (commune)",
+     "quote": "la base aérienne de Caen-Carpiquet n°131, officiellement inauguré le 17 août 1939",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "taken over by the Germans in June 1940",
+   "verdict": "softened",
+   "inAfter": "was taken over by the Germans in June 1940",
+   "note": "Was 'taken by the Luftwaffe'. The commune says the Germans took over the base in June 1940; 'Luftwaffe' is Wikipedia's word alone.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Captured by the Luftwaffe in June 1940"
+    },
+    {
+     "file": "carpiquet-decouvrir",
+     "org": "Ville de Carpiquet (commune)",
+     "quote": "En juin 1940, les Allemands héritent d'une base aérienne moderne et pratiquement terminée.",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "fought over by Canadian and German troops in July 1944, Battle of Normandy",
+   "verdict": "softened",
+   "inAfter": "was fought over by Canadian and German troops in July 1944, during the Battle of Normandy",
+   "note": "Was 'fought over at length by Anglo-Canadian and German troops'. The commune describes the Canadian attack on 4 July 1944 (Operation Windsor) and says the airfield stayed in German hands until 9 July; 'Anglo' and 'at length' rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In June and July 1944, during the Battle of Normandy, Anglo-Canadian and German troops engaged in long and harsh fights over control of the strategically important aerodrome."
+    },
+    {
+     "file": "carpiquet-decouvrir",
+     "org": "Ville de Carpiquet (commune)",
+     "quote": [
+      "Les troupes canadiennes (8e brigade et The Royal Winnipeg Rifles), commandées par le général Dempsey, lancent une offensive (l'opération Windsor) sur Carpiquet le 4 juillet 1944 afin de libérer l'aéroport qui était un objectif prioritaire du débarquement de Normandie.",
+      "reste aux mains des forces allemandes jusqu'au 9 juillet"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "in Calvados",
+   "verdict": "cut",
+   "wasBefore": "in Calvados",
+   "why": "Only Wikipedia says so plainly. Normandy is kept, in the operator's own words."
+  },
+  {
+   "claim": "growing fast",
+   "verdict": "cut",
+   "wasBefore": "It is small and growing fast.",
+   "why": "No longer true. UAF: 307,860 in 2025, 1.0 per cent above 2019 (304,769); Eurostat: 301,285 in 2022 and 305,767 in 2025. 'Small' is kept with the 2025 figure."
+  },
+  {
+   "claim": "180,910 in 2017 to 274,011 in 2018",
+   "verdict": "cut",
+   "wasBefore": "Passenger numbers went from 180,910 in 2017 to 274,011 in 2018.",
+   "why": "Seven and eight years stale; replaced by the 2025 figure from UAF and Eurostat."
+  },
+  {
+   "claim": "concrete runway",
+   "verdict": "cut",
+   "wasBefore": "There is one concrete runway of 1,900 metres",
+   "why": "The surface is asphalt (operator: tarmac; AIP: bituminous concrete; OurAirports: ASP), so 'concrete' misleads, and the surface is no use to an agent. The length is kept."
+  },
+  {
+   "claim": "high intensity approach lighting",
+   "verdict": "cut",
+   "wasBefore": "with high intensity approach lighting",
+   "why": "True (AIP and operator) but of no use to a travel agent; dropped with the landing-system sentence."
+  },
+  {
+   "claim": "two grass strips used by light aircraft",
+   "verdict": "cut",
+   "wasBefore": "plus two grass strips used by light aircraft",
+   "why": "The AIP, the operator and OurAirports list one grass strip, not two; corrected to one. Who uses it is not stated by a second source."
+  },
+  {
+   "claim": "Runway 31 Category III ILS, generous for its size",
+   "verdict": "cut",
+   "wasBefore": "Runway 31 carries a Category III instrument landing system, which is generous for an airport this size.",
+   "why": "Wrong. The runway is now numbered 12/30, and both the French AIP (valid 6 August 2026: 'RWY 30 equipped with an ILS CAT 1 only') and the operator's technical sheet ('ILS : cat. I') give Category I. Once corrected there is nothing notable left to say, so the sentence goes."
+  },
+  {
+   "claim": "Air Base 720",
+   "verdict": "cut",
+   "wasBefore": "It opened as Air Base 720 in August 1939",
+   "why": "The base number is disputed (Wikipedia 720, the commune 131). Softened to 'an air base', with the date both agree on."
+  },
+  {
+   "claim": "taken by the Luftwaffe",
+   "verdict": "cut",
+   "wasBefore": "was taken by the Luftwaffe in June 1940",
+   "why": "Softened to 'taken over by the Germans', which both sources say."
+  },
+  {
+   "claim": "rear base during the Battle of Britain",
+   "verdict": "cut",
+   "wasBefore": "used as a rear base during the Battle of Britain",
+   "why": "Wikipedia alone; the commune's history does not mention it and no other source was reachable (the web archive is blocked here)."
+  },
+  {
+   "claim": "fought over at length by Anglo-Canadian troops",
+   "verdict": "cut",
+   "wasBefore": "was fought over at length by Anglo-Canadian and German troops",
+   "why": "Softened to Canadian and German troops in July 1944, which both sources say."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The site has its own place in the 1944 story.",
+   "why": "The old text's lead-in to the history, kept; the July 1944 fighting it introduces is sourced in the next sentence."
+  }
+ ],
+ "tracerOk": {
+  "300,000": "Rounded down from UAF 307,860 and Eurostat 305,767 for 2025; see the passengers claim."
+ }
+}

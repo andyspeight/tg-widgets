@@ -1,0 +1,382 @@
+{
+ "iata": "GOA",
+ "id": "recVs8luay5GcYi1X",
+ "name": "Genoa Cristoforo Colombo Airport",
+ "country": "Italy",
+ "wikipedia": "https://en.wikipedia.org/wiki/Genoa_Cristoforo_Colombo_Airport",
+ "audited": "2026-09-23",
+ "before": "Liguria's airport, built on an artificial peninsula in the sea 7.4 km west of Genoa, which puts it in a small club alongside Nice, Venice, Gibraltar and Hong Kong. It serves the city and the Port of Genoa and draws from southern Piedmont as well.\n\nIt is not large. It handled 1,455,626 passengers in 2018, twenty first in Italy, and lost 14 routes in January 2022 when Volotea closed its base here after five years.\n\nGround transport takes a little explaining. The nearest station, Genova Sestri Ponente-Aeroporto, is linked to the terminal by an AMT bus called Airlink, and AMT also runs Volabus direct to Genoa's two main stations at Piazza Principe and Brignole. By road the A10 has its own Genova Aeroporto exit. Worth telling a client travelling in a group: for three or more people a fixed taxi fare can be agreed to the main stations.\n\nThe airport opened in 1962 and the current terminal dates from 1986. It is named after Christopher Columbus, who was born in the city.",
+ "after": "Genoa's airport, built on an artificial peninsula in the sea 7.4 km west of the city.\n\nIt is not large, but traffic grew fast in 2025: about 1.6 million passengers used it, up 18 per cent on 2024. Aeroitalia opened a base here in February 2026.\n\nGround transport takes a little explaining. The nearest station, Genova Sestri Ponente-Aeroporto, is linked to the terminal by an AMT bus called Airlink, and AMT also runs Volabus direct to Genoa's two main stations at Piazza Principe and Brignole. By road there is a dedicated Genova Aeroporto motorway exit.\n\nThe airport opened in 1962 and the terminal dates from 1986, extended by a new east wing in March 2025. It is named after Christopher Columbus.",
+ "claims": [
+  {
+   "claim": "Genoa's airport",
+   "verdict": "softened",
+   "inAfter": "Genoa's airport",
+   "note": "Was 'Liguria's airport'. Wikipedia calls it the most important airport in Liguria, but no second source says so plainly; that it is Genoa's airport is beyond doubt.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "west of Genoa, Italy"
+    },
+    {
+     "file": "assaeroporti-2025-12",
+     "org": "Aeroporto di Genova S.p.A. (operator), in the Assaeroporti 2025 notes",
+     "quote": "L’aeroporto Cristoforo Colombo di Genova ha chiuso il 2025 con 1.577.159 passeggeri",
+     "dated": "2026-01"
+    }
+   ]
+  },
+  {
+   "claim": "built on an artificial peninsula in the sea",
+   "verdict": "confirmed",
+   "inAfter": "built on an artificial peninsula in the sea",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport built on an artificial peninsula"
+    },
+    {
+     "file": "primocanale-1986",
+     "org": "Primocanale",
+     "quote": [
+      "creare una penisola artificiale davanti a Sestri Ponente",
+      "Migliaia di metri cubi di materiale vennero riversati in mare per realizzare la piattaforma destinata a ospitare la pista."
+     ],
+     "dated": "2026-05-10"
+    }
+   ]
+  },
+  {
+   "claim": "7.4 km west of the city",
+   "verdict": "confirmed",
+   "inAfter": "7.4 km west of the city",
+   "note": "The coordinates give 8.3 km in a straight line from the GeoNames centre at 276 degrees, which is west; 7.4 km is within the tolerance (ratio 0.89), the difference being where the centre is taken.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "4 NM (7.4 km; 4.6 mi) west of Genoa"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 8.3 km",
+      "Bearing from the city centre: 276 degrees, which is west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "traffic grew fast in 2025",
+   "verdict": "corrected",
+   "inAfter": "traffic grew fast in 2025",
+   "note": "Replaces 'lost 14 routes in January 2022 when Volotea closed its base', which is now the wrong picture: 2025 was the airport's best year. The operator gives +18.1 per cent on 2024; Eurostat's 2024 and 2025 figures give the same. Pinned to 2025 because growth has since slowed: Assaeroporti's July 2026 table has Genoa up 3.1 per cent on July 2025.",
+   "sources": [
+    {
+     "file": "assaeroporti-2025-12",
+     "org": "Aeroporto di Genova S.p.A. (operator), in the Assaeroporti 2025 notes",
+     "quote": "MOVIMENTATI (+ 18,1% SUL 2024)",
+     "dated": "2026-01"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": [
+      "passengers carried in 2024: 1,342,363",
+      "passengers carried in 2025: 1,585,262"
+     ]
+    },
+    {
+     "file": "assaeroporti-stat",
+     "org": "Assaeroporti",
+     "quote": [
+      "TOTALI DEL MESE LUGLIO 2026 (SU BASE 2025)",
+      "17\tGenova\t2.219\t6\t174.429\t3,1\t13,6\t-50,3"
+     ],
+     "dated": "2026-07"
+    }
+   ]
+  },
+  {
+   "claim": "about 1.6 million passengers in 2025, up 18 per cent on 2024",
+   "verdict": "corrected",
+   "inAfter": "about 1.6 million passengers used it, up 18 per cent on 2024",
+   "note": "Was 1,455,626 in 2018. The operator's own note gives 1,577,159 for 2025 (+18.1 per cent); Eurostat gives 1,585,262, 0.5 per cent higher, and 1,342,363 for 2024, which is also +18.1 per cent. Both round to 1.6 million.",
+   "sources": [
+    {
+     "file": "assaeroporti-2025-12",
+     "org": "Aeroporto di Genova S.p.A. (operator), in the Assaeroporti 2025 notes",
+     "quote": [
+      "L’aeroporto Cristoforo Colombo di Genova ha chiuso il 2025 con 1.577.159 passeggeri",
+      "movimentati (+18,1% sul 2024)"
+     ],
+     "dated": "2026-01"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": [
+      "passengers carried in 2024: 1,342,363",
+      "passengers carried in 2025: 1,585,262"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Aeroitalia opened a base here in February 2026",
+   "verdict": "corrected",
+   "inAfter": "Aeroitalia opened a base here in February 2026",
+   "note": "Replaces the 2022 Volotea base closure as the current base news: two Aeroitalia aircraft are based at Genoa, with flights to Rome from 2 February 2026 and to Sardinia from June.",
+   "sources": [
+    {
+     "file": "op-aeroitalia-roma",
+     "org": "Aeroporto di Genova S.p.A. (operator)",
+     "quote": [
+      "Aeroitalia approda a Genova con due aeromobili",
+      "Una base con due aerei stabilmente presenti in aeroporto",
+      "Dal 2 febbraio 2026"
+     ],
+     "dated": "2026-02"
+    },
+    {
+     "file": "italiavola-aeroitalia-base",
+     "org": "Italiavola",
+     "quote": [
+      "Aeroitalia apre la nuova base operativa a Genova",
+      "Pubblicato da ITALIAVOLA il 9 FEBBRAIO 2026",
+      "a Genova sono basati due aeromobili"
+     ],
+     "dated": "2026-02-09"
+    }
+   ]
+  },
+  {
+   "claim": "nearest station Genova Sestri Ponente-Aeroporto, linked by AMT's Airlink bus",
+   "verdict": "confirmed",
+   "inAfter": "The nearest station, Genova Sestri Ponente-Aeroporto, is linked to the terminal by an AMT bus called Airlink",
+   "note": "AMT's live page: Airlink runs every 15 minutes, 6.00 to 22.00, and takes about 5 minutes.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The closest railway station to the airport is Genova Sestri Ponente-Aeroporto"
+    },
+    {
+     "file": "op-daper",
+     "org": "Aeroporto di Genova S.p.A. (operator)",
+     "quote": "alla stazione Sestri Ponente – Aeroporto",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "amt-airlink",
+     "org": "AMT Genova (bus operator)",
+     "quote": [
+      "Genova Airlink è il collegamento diretto tra la stazione FS di Sestri Ponente e l’Aeroporto",
+      "e il terminal arrivi dell’aeroporto Cristoforo Colombo"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "AMT's Volabus to Piazza Principe and Brignole",
+   "verdict": "confirmed",
+   "inAfter": "AMT also runs Volabus direct to Genoa's two main stations at Piazza Principe and Brignole",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "AMT also operates Volabus, a bus service linking the airport with the Genova Piazza Principe and Genova Brignole railway stations."
+    },
+    {
+     "file": "amt-volabus",
+     "org": "AMT Genova (bus operator)",
+     "quote": "Volabus è il servizio AMT che collega direttamente l’aeroporto di Genova con le principali stazioni ferroviarie cittadine, Genova Brignole e Genova Piazza Principe",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "dedicated Genova Aeroporto motorway exit",
+   "verdict": "softened",
+   "inAfter": "By road there is a dedicated Genova Aeroporto motorway exit.",
+   "note": "Was 'the A10 has its own Genova Aeroporto exit'. The operator confirms the dedicated motorway link and the Genova-Aeroporto toll barrier but does not name the motorway; the A10 rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "by the A10 Motorway, with the closest exit being 'Genova Aeroporto'"
+    },
+    {
+     "file": "op-daper",
+     "org": "Aeroporto di Genova S.p.A. (operator)",
+     "quote": [
+      "attraverso un raccordo dedicato, al sistema autostradale",
+      "Dal casello autostradale di Genova-Aeroporto"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-transport-en",
+     "org": "Aeroporto di Genova S.p.A. (operator)",
+     "quote": [
+      "From the Genoa-airport motorway toll barrier",
+      "The motorway access road terminates at the roundabout inside the airport perimeter."
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "opened in 1962",
+   "verdict": "confirmed",
+   "inAfter": "The airport opened in 1962",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport began construction in 1954 and opened in 1962"
+    },
+    {
+     "file": "primocanale-1986",
+     "org": "Primocanale",
+     "quote": "il 12 ottobre 1962 , il nuovo aeroporto venne inaugurato dal presidente della Repubblica Antonio Segni",
+     "dated": "2026-05-10"
+    }
+   ]
+  },
+  {
+   "claim": "terminal dates from 1986",
+   "verdict": "confirmed",
+   "inAfter": "the terminal dates from 1986",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The current terminal building was opened in 1986."
+    },
+    {
+     "file": "primocanale-1986",
+     "org": "Primocanale",
+     "quote": "Il 10 maggio 1986 il nuovo terminal venne finalmente inaugurato",
+     "dated": "2026-05-10"
+    }
+   ]
+  },
+  {
+   "claim": "new east wing in March 2025",
+   "verdict": "corrected",
+   "inAfter": "extended by a new east wing in March 2025",
+   "note": "Replaces 'the current terminal dates from 1986', which is no longer the whole story. The 5,500 square metre east wing opened to passengers on 19 March 2025, with new security lanes and three gates; the operator says a wider refurbishment is to follow.",
+   "sources": [
+    {
+     "file": "op-come-si-trasforma",
+     "org": "Aeroporto di Genova S.p.A. (operator)",
+     "quote": "Il 17 marzo 2025 segna una data storica per l'Aeroporto di Genova con l'inaugurazione della nuova ala est che sarà ufficialmente aperta ai passeggeri dal 19 marzo.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "italiavola-ala-est",
+     "org": "Italiavola",
+     "quote": [
+      "Inaugurata la nuova ala est dell’Aeroporto di Genova",
+      "Pubblicato da ITALIAVOLA il 17 MARZO 2025",
+      "che sarà ufficialmente aperta ai passeggeri dal prossimo 19 marzo."
+     ],
+     "dated": "2025-03-17"
+    }
+   ]
+  },
+  {
+   "claim": "named after Christopher Columbus",
+   "verdict": "confirmed",
+   "inAfter": "It is named after Christopher Columbus.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is named after the notable Genoese navigator and explorer Christopher Columbus"
+    },
+    {
+     "file": "primocanale-1986",
+     "org": "Primocanale",
+     "quote": "Genova decolla sul mare: quarant'anni fa l'inaugurazione del nuovo 'Cristoforo Colombo'",
+     "dated": "2026-05-10"
+    },
+    {
+     "file": "cristoforocolombo-vela",
+     "org": "cristoforocolombo.com",
+     "quote": "Aeroporto Cristoforo Colombo di Genova"
+    }
+   ]
+  },
+  {
+   "claim": "Liguria's airport",
+   "verdict": "cut",
+   "wasBefore": "Liguria's airport",
+   "why": "Wikipedia alone; softened to Genoa's airport."
+  },
+  {
+   "claim": "in a small club with Nice, Venice, Gibraltar and Hong Kong",
+   "verdict": "cut",
+   "wasBefore": "which puts it in a small club alongside Nice, Venice, Gibraltar and Hong Kong",
+   "why": "Wikipedia alone, and loose: Venice's airport is not on a sea peninsula."
+  },
+  {
+   "claim": "serves the Port of Genoa and southern Piedmont",
+   "verdict": "cut",
+   "wasBefore": "It serves the city and the Port of Genoa and draws from southern Piedmont as well.",
+   "why": "Wikipedia alone; no second source for the catchment."
+  },
+  {
+   "claim": "1,455,626 passengers in 2018, twenty first in Italy",
+   "verdict": "cut",
+   "wasBefore": "It handled 1,455,626 passengers in 2018, twenty first in Italy",
+   "why": "Seven years stale. Replaced by the 2025 figure; no 2025 national rank found in two sources."
+  },
+  {
+   "claim": "lost 14 routes in January 2022 when Volotea closed its base",
+   "verdict": "cut",
+   "wasBefore": "and lost 14 routes in January 2022 when Volotea closed its base here after five years",
+   "why": "Stale: traffic has since passed its 2019 record, Volotea still flies here (Paris Orly and Madrid in 2025) and Aeroitalia opened a base in February 2026."
+  },
+  {
+   "claim": "the A10",
+   "verdict": "cut",
+   "wasBefore": "By road the A10 has its own Genova Aeroporto exit.",
+   "why": "The motorway's name rests on Wikipedia alone; softened to a dedicated Genova Aeroporto motorway exit, which the operator confirms."
+  },
+  {
+   "claim": "fixed taxi fare for three or more people",
+   "verdict": "cut",
+   "wasBefore": "Worth telling a client travelling in a group: for three or more people a fixed taxi fare can be agreed to the main stations.",
+   "why": "Wikipedia alone. The operator's current taxi fare sheet is behind a block, and the Genoa radio taxi cooperative sells fixed-price airport transfers online with no group condition, so the rule as stated is unconfirmed."
+  },
+  {
+   "claim": "current terminal",
+   "verdict": "cut",
+   "wasBefore": "the current terminal dates from 1986",
+   "why": "Reworded: the 1986 terminal was extended by a new east wing in March 2025."
+  },
+  {
+   "claim": "Columbus was born in the city",
+   "verdict": "cut",
+   "wasBefore": "who was born in the city",
+   "why": "Wikipedia alone among saved pages (Britannica and Visit Genoa refused or had moved). The name is kept."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "It is not large",
+   "why": "Kept from the old text; about 1.6 million passengers a year is small next to Italy's main airports."
+  },
+  {
+   "text": "Ground transport takes a little explaining.",
+   "why": "The old text's lead-in to the sourced bus, rail and road links that follow."
+  }
+ ],
+ "tracerOk": {}
+}
