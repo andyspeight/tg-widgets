@@ -1,0 +1,470 @@
+{
+ "iata": "LUN",
+ "id": "recBX3EACHZjYVFRD",
+ "name": "Kenneth Kaunda International Airport",
+ "country": "Zambia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Kenneth_Kaunda_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Zambia's main airport, in Chongwe District off the Great East Road about 27 km north east of central Lusaka. It carries 71 per cent of all passenger traffic in the country and is the hub for Zambia Airways, Proflight Zambia, Royal Zambian Airlines and Mahogany Air.\n\nThe terminal to know is Terminal Two, which opened in August 2021 with six gates and handles every international flight. Terminal One is domestic only and has no jet bridges. The new building came out of a 360 million dollar expansion begun in 2015, with 22 check in counters and twelve border channels.\n\nTransfers are simple. It is a 15 to 20 minute taxi ride into the centre, most Lusaka hotels run their own shuttles, and Avis and Europcar both have desks. There is a bus to Chelston bus station but it does not keep to a timetable.\n\nThe airport opened in 1967 and was renamed in 2011 after Kenneth Kaunda, Zambia's first president.",
+ "after": "Zambia's main airport, about 27 km north east of central Lusaka. In 2025 it handled more than 70 per cent of the passengers at Zambia's airports, and it is the base for Zambia Airways and Proflight Zambia.\n\nInternational flights use Terminal Two, which opened in August 2021 as part of a 360 million dollar expansion, and domestic flights use Terminal One.\n\nTaxis are the usual way into the city, and hotels can arrange shuttles. Avis and Europcar offer car hire.\n\nThe airport opened in 1967 and was renamed in 2011 after Kenneth Kaunda, Zambia's first president.",
+ "claims": [
+  {
+   "claim": "Zambia's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Zambia's main airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "is the largest in Zambia"
+    },
+    {
+     "file": "zacl-ar2025",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "Annual Report 2025",
+     "quote": "KKIA remained the principal hub, accounting for 73.57% of total passenger traffic"
+    },
+    {
+     "file": "zacl-ar2021",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "Annual Report 2021",
+     "quote": "KKIA is the main international hub"
+    }
+   ]
+  },
+  {
+   "claim": "about 27 km north east of central Lusaka",
+   "verdict": "confirmed",
+   "inAfter": "about 27 km north east of central Lusaka",
+   "note": "Coordinates: 19.7 km in a straight line at 65 degrees (north east), so 27 km passes as a road distance (ratio 1.37). The operator gives 27 km from the business district; its 2023 annual report gives 25.8 km from the Lusaka Main Post Office.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "approximately 27 kilometres (17 mi) northeast of the city centre of Lusaka"
+    },
+    {
+     "file": "zacl-kkia",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Kenneth Kaunda International Airport is situated in the capital city Lusaka, 27 kilometers from the main business district."
+    },
+    {
+     "file": "zacl-ar2023",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "Annual Report 2023",
+     "quote": "Distance from CBD 25.8Km from Lusaka Main Post Office"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 19.7 km (12.2 miles)",
+      "Bearing from the city centre: 65 degrees, which is north east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in 2025 more than 70 per cent of the passengers at Zambia's airports",
+   "verdict": "corrected",
+   "inAfter": "In 2025 it handled more than 70 per cent of the passengers at Zambia's airports",
+   "note": "Was 'It carries 71 per cent of all passenger traffic in the country'. The operator's 2025 annual report gives 71 per cent as the airport's share of ENPLANED (paying) passengers; its share of all passengers was 73.57 per cent (1,795,801 of 2,441,100). Wikipedia calls the 71 per cent all passenger traffic. 'More than 70 per cent' is true on both measures, so the text uses that and names the year.",
+   "sources": [
+    {
+     "file": "zacl-ar2025",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "Annual Report 2025",
+     "quote": [
+      "KKIA remained the principal hub, accounting for 73.57% of total passenger traffic",
+      "KKIA 1,462,144 333,657 1,795,801 73.57%",
+      "KKIA accounted for 71% of total enplaned passengers"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "Overall, the airport accounts for 71% of all passenger airport traffic in Zambia in 2025."
+    }
+   ]
+  },
+  {
+   "claim": "the base for Zambia Airways and Proflight Zambia",
+   "verdict": "softened",
+   "inAfter": "it is the base for Zambia Airways and Proflight Zambia",
+   "note": "Was 'the hub for Zambia Airways, Proflight Zambia, Royal Zambian Airlines and Mahogany Air'. Proflight's own page says it operates from its base in Lusaka; Zambia Airways gives its head office at the airport, and every route on its home page (read 23 Sep 2026, with news dated 19 August 2026) starts or ends in Lusaka. The operator's 2025 report calls the two the dominant Zambian airlines. Royal Zambian Airlines and Mahogany Air are cut (below).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "The airport serves as a hub for Zambia Airways, Proflight Zambia, Royal Zambian Airlines, and Mahogany Air."
+    },
+    {
+     "file": "proflight-about",
+     "org": "Proflight Zambia",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Proflight Zambia, established in 2005, is Zambia’s leading schedule airline. Operating from its base in Lusaka"
+    },
+    {
+     "file": "zambiaairways-headoffice",
+     "org": "Zambia Airways",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Head Office :",
+      "34/947M Kenneth Kaunda International Airport"
+     ]
+    },
+    {
+     "file": "zambiaairways-home",
+     "org": "Zambia Airways",
+     "dated": "2026-09-23 (live page, news dated Aug 19, 2026)",
+     "quote": [
+      "LUSAKA HARARE",
+      "LUSAKA NAIROBI",
+      "LUSAKA DAR ES SALAAM",
+      "LUSAKA JO'BURG",
+      "Aug 19, 2026"
+     ]
+    },
+    {
+     "file": "zacl-ar2025",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "Annual Report 2025",
+     "quote": "competitive pricing by dominant local domiciled carriers i.e., Zambia Airways and Proflight"
+    }
+   ]
+  },
+  {
+   "claim": "International flights use Terminal Two",
+   "verdict": "confirmed",
+   "inAfter": "International flights use Terminal Two",
+   "note": "The operator commissioned the new terminal as its international passenger terminal in 2021 and in its 2023 report still splits the capacity into an international terminal and a domestic terminal; its April 2026 release confirms Terminal One is the domestic terminal (see the next claims).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "All international flights use the new terminal, called Terminal Two, while domestic flights use the original terminal, Terminal One."
+    },
+    {
+     "file": "zacl-ar2021",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "Annual Report 2021",
+     "quote": [
+      "i. KKIA Terminal II, Cargo Terminal, ATC Tower, Presidential",
+      "operating as an international passenger terminal"
+     ]
+    },
+    {
+     "file": "zacl-ar2023",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "Annual Report 2023",
+     "quote": "Capacity of Terminal 6MAPs (4million International Terminal & 2million Domestic Terminal)"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal Two opened in August 2021",
+   "verdict": "confirmed",
+   "inAfter": "which opened in August 2021",
+   "note": "The day differs: Wikipedia says officially opened on 5 August 2021, the operator's annual report says commissioned on 9 August 2021. Only the month is given.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "The new terminal was officially opened 5 August 2021."
+    },
+    {
+     "file": "zacl-ar2021",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "Annual Report 2021",
+     "quote": "new Terminal at KKIA was commissioned on 9th August 2021"
+    }
+   ]
+  },
+  {
+   "claim": "part of a 360 million dollar expansion",
+   "verdict": "confirmed",
+   "inAfter": "as part of a 360 million dollar expansion",
+   "note": "The project also covered a cargo terminal, control tower, presidential pavilion, fire station, hotel and office park (operator, 2021). The 2015 start is cut (below).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "US$360 million expansion and improvement of the airport"
+    },
+    {
+     "file": "zacl-ar2021",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "Annual Report 2021",
+     "quote": "The overall project is valued at US$360million."
+    },
+    {
+     "file": "zacl-ar2017",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "Annual Report 2017",
+     "quote": "This is a US$360 million project to build an ultra modern terminal building"
+    }
+   ]
+  },
+  {
+   "claim": "domestic flights use Terminal One",
+   "verdict": "confirmed",
+   "inAfter": "domestic flights use Terminal One",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "Terminal One has no jet bridges and is used for domestic traffic."
+    },
+    {
+     "file": "zacl-t1-exercise",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "2026-04-30",
+     "quote": [
+      "Apr 30, 2026",
+      "the Domestic Passenger Terminal Building at Kenneth Kaunda International Airport (KKIA) Terminal One"
+     ]
+    },
+    {
+     "file": "zacl-ar2023",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "Annual Report 2023",
+     "quote": "the rehabilitation works at the old Terminal, currently utilised as a domestic terminal"
+    }
+   ]
+  },
+  {
+   "claim": "Taxis are the usual way into the city",
+   "verdict": "softened",
+   "inAfter": "Taxis are the usual way into the city",
+   "note": "Was 'It is a 15 to 20 minute taxi ride into the centre' (journey time cut, below). The operator has a taxi rank outside the terminal and quotes fares to the city centre; its FAQ says there is no public bus.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "Taxis are the most common form of transport to and from the city"
+    },
+    {
+     "file": "zacl-transport",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "A taxi rank is situated just outside the terminal building.",
+      "a taxi fare to the city center starts from K250.00 local currency or $25.00"
+     ]
+    },
+    {
+     "file": "zacl-faqs",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "undated live page",
+     "quote": "We have taxis available to/from the airport. We currently do not have any public bus services to/from the airport."
+    }
+   ]
+  },
+  {
+   "claim": "hotels can arrange shuttles",
+   "verdict": "softened",
+   "inAfter": "hotels can arrange shuttles",
+   "note": "Was 'most Lusaka hotels run their own shuttles'. The operator says hotels (and travel agencies) can arrange shuttles at a fee, not that most run their own.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "most hotels in Lusaka have shuttle services into the airport"
+    },
+    {
+     "file": "zacl-transport",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "The local hotels and travel agencies are able to secure shuttle services and car rentals at a fee."
+    }
+   ]
+  },
+  {
+   "claim": "Avis and Europcar offer car hire",
+   "verdict": "softened",
+   "inAfter": "Avis and Europcar offer car hire.",
+   "note": "Was 'Avis and Europcar both have desks'. The operator's transport page lists Avis and Europcar (with BKS Travel & Tours) under taxis and car rental, directly above its list of registered taxi operators at KKIA; it does not describe desks.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "There are also 2 car rental companies at the airport, Avis and Europcar"
+    },
+    {
+     "file": "zacl-transport",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "TAXIS & CAR RENTAL",
+      "AVIS",
+      "EUROPCAR",
+      "REGISTERED TAXI OPERATORS AT KKIA"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "opened in 1967",
+   "verdict": "confirmed",
+   "inAfter": "The airport opened in 1967",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "The airport opened in 1967 as Lusaka International Airport."
+    },
+    {
+     "file": "zacl-kkia",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Opened in 1967, the airport provides services for Domestic, Regional and International flights"
+    }
+   ]
+  },
+  {
+   "claim": "renamed in 2011 after Kenneth Kaunda, Zambia's first president",
+   "verdict": "confirmed",
+   "inAfter": "was renamed in 2011 after Kenneth Kaunda, Zambia's first president",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "It was renamed in 2011 in honour of Kenneth Kaunda (1924–2021), the nation's first president."
+    },
+    {
+     "file": "news24-rename-2011",
+     "org": "News24",
+     "dated": "2011-09-27",
+     "quote": [
+      "27 Sep 2011",
+      "Zambia's new President Michael Sata on Tuesday renamed the country's three main airports after liberation heroes, including the country's first president Kenneth Kaunda.",
+      "Capital city Lusaka's airport will now carry Kaunda's name"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in Chongwe District off the Great East Road",
+   "verdict": "cut",
+   "wasBefore": "in Chongwe District off the Great East Road",
+   "why": "Wikipedia alone. The operator's airport, transport and contact pages give only the distance from the city (27 km) and a Lusaka post box; the distance and direction are kept."
+  },
+  {
+   "claim": "71 per cent of all passenger traffic in the country",
+   "verdict": "cut",
+   "wasBefore": "It carries 71 per cent of all passenger traffic in the country",
+   "why": "Corrected (see above): 71 per cent is the operator's figure for enplaned passengers in 2025; for all passengers it was 73.57 per cent."
+  },
+  {
+   "claim": "hub for Zambia Airways, Proflight Zambia, Royal Zambian Airlines and Mahogany Air",
+   "verdict": "cut",
+   "wasBefore": "is the hub for Zambia Airways, Proflight Zambia, Royal Zambian Airlines and Mahogany Air",
+   "why": "Zambia Airways and Proflight kept as based here. Royal Zambian Airlines and Mahogany Air could not be confirmed as current: neither is among the 15 scheduled airlines in the operator's 2025 annual report, and the operator's airline directory lists only Royal Air Charters, a charter operator. Their own sites could not be found without a search engine."
+  },
+  {
+   "claim": "the terminal to know is Terminal Two, six gates, every international flight",
+   "verdict": "cut",
+   "wasBefore": "The terminal to know is Terminal Two, which opened in August 2021 with six gates and handles every international flight.",
+   "why": "Reworded: Terminal Two for international flights and its August 2021 opening are kept. The six gates are cut: the operator's 2023 report gives six aerobridges for the airport as a whole and does not say which terminal has them, so only Wikipedia places them."
+  },
+  {
+   "claim": "Terminal One domestic only, no jet bridges",
+   "verdict": "cut",
+   "wasBefore": "Terminal One is domestic only and has no jet bridges.",
+   "why": "Domestic use kept with the operator's April 2026 release. 'No jet bridges' rests on Wikipedia alone."
+  },
+  {
+   "claim": "expansion begun in 2015, 22 check-in counters, twelve border channels",
+   "verdict": "cut",
+   "wasBefore": "The new building came out of a 360 million dollar expansion begun in 2015, with 22 check in counters and twelve border channels.",
+   "why": "The 360 million dollar project is kept (operator's 2017 and 2021 reports). The 2015 start and the counter and border-channel numbers rest on Wikipedia alone, quoting the 2015 plans; Lusaka Times, which Wikipedia cites, answered with a Cloudflare check, and the operator's 2016 report is a scanned image with no text."
+  },
+  {
+   "claim": "Transfers are simple",
+   "verdict": "cut",
+   "wasBefore": "Transfers are simple.",
+   "why": "A judgement that rested on the 15 to 20 minute taxi time, which is cut."
+  },
+  {
+   "claim": "15 to 20 minute taxi ride into the centre",
+   "verdict": "cut",
+   "wasBefore": "It is a 15 to 20 minute taxi ride into the centre",
+   "why": "Wikipedia alone (citing an unofficial airport guide site). The operator puts the airport 27 km from the business district, which makes 15 to 20 minutes doubtful. Softened to taxis being the usual way in."
+  },
+  {
+   "claim": "most Lusaka hotels run their own shuttles; Avis and Europcar desks",
+   "verdict": "cut",
+   "wasBefore": "most Lusaka hotels run their own shuttles, and Avis and Europcar both have desks",
+   "why": "Softened to what both sources say: hotels can arrange shuttles, and Avis and Europcar offer car hire."
+  },
+  {
+   "claim": "bus to Chelston bus station, no timetable",
+   "verdict": "cut",
+   "wasBefore": "There is a bus to Chelston bus station but it does not keep to a timetable.",
+   "why": "Sources disagree: Wikipedia describes an irregular bus to Chelston, while the operator's FAQ says 'We currently do not have any public bus services to/from the airport' (the FAQ is undated and partly out of date). Cut rather than choose."
+  },
+  {
+   "claim": "Held back: about 1.8 million passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: a verified 2025 passenger total that replaces nothing in the old text (which gave only a share). 1,795,801 passengers in 2025: 1,462,144 international and 333,657 domestic (operator's 2025 annual report; the same figure is in Wikipedia's infobox).",
+   "sources": [
+    {
+     "file": "zacl-ar2025",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "Annual Report 2025",
+     "quote": "KKIA 1,462,144 333,657 1,795,801 73.57%"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "stat1_data = 1,795,801"
+    }
+   ]
+  },
+  {
+   "claim": "Held back: FCDO on visas and the KAZA UNIVISA at Lusaka",
+   "verdict": "cut",
+   "why": "Held back: replaces nothing in the old text. The FCDO (updated 1 June 2026, still current 24 September 2026) says British passport holders do not need a visa for Zambia, that the KAZA UNIVISA (50 US dollars, 30 days, Zambia and Zimbabwe plus day trips to Botswana) can be bought on arrival at Kenneth Kaunda International Airport, and that the 25 US dollar international departure tax is normally in the ticket. Would go in as an attributed statement.",
+   "sources": [
+    {
+     "file": "fcdo-zambia-entry",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-06-01",
+     "quote": [
+      "British passport holders do not need a visa to enter Zambia.",
+      "It costs 50 US dollars and is valid for 30 days.",
+      "Kenneth Kaunda International Airport, Lusaka",
+      "On leaving Zambia, all air passengers must pay the equivalent to 25 US dollars for international travel"
+     ]
+    },
+    {
+     "file": "fcdo-zambia",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-06-01",
+     "quote": [
+      "Still current at:",
+      "24 September 2026",
+      "1 June 2026"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

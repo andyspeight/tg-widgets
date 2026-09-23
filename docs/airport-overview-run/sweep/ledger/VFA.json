@@ -1,0 +1,265 @@
+{
+ "iata": "VFA",
+ "id": "recQH2ucQLMsWVVR1",
+ "name": "Victoria Falls International Airport",
+ "country": "Zimbabwe",
+ "wikipedia": "https://en.wikipedia.org/wiki/Victoria_Falls_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Victoria Falls, 18 km south of the town, and an airport that exists almost entirely to serve the falls themselves.\n\nIt was rebuilt in the 2010s under a 150 million dollar loan from the Exim Bank of China, which paid for a new runway, new taxiways and a new terminal, lifting capacity from 500,000 passengers a year to 1.7 million.\n\nIt runs 24 hours a day with immigration and customs on site, which gives real flexibility on arrival and departure times. Facilities include restaurants, duty free shops, banking, refuelling and cargo and passenger handling.\n\nOnward arrangements are straightforward. Shuttle services run to the hotels and into town, tour operators and car hire firms are represented, and the Zimbabwe Tourism Authority keeps an office at the airport to help arriving visitors.",
+ "after": "The airport for Victoria Falls, 18 km south of the town, serving the tourism built around the falls.\n\nAccording to the Airports Company of Zimbabwe, the airport is open from 6am to 6pm daily and can extend its hours on request, so check before booking a late arrival or departure. Immigration and customs are on site.\n\nTour operators and car hire firms are represented at the airport.",
+ "claims": [
+  {
+   "claim": "the airport for Victoria Falls",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Victoria Falls",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "is an international airport serving the Victoria Falls tourism industry"
+    },
+    {
+     "file": "acz-vfa",
+     "org": "Airports Company of Zimbabwe (operator)",
+     "dated": "2026-09-23 (live page, © 2026)",
+     "quote": "Besides offering access to one of the Seven Natural Wonders of the World, Victoria Falls International Airport is naturally located in a central position in the Southern Africa Region"
+    }
+   ]
+  },
+  {
+   "claim": "18 km south of the town",
+   "verdict": "confirmed",
+   "inAfter": "18 km south of the town",
+   "note": "Coordinates: 18.3 km in a straight line at 178 degrees (south). The operator gives 21 km south-east, most likely by road: 21 km is 1.15 times the straight line and south-east is next to south on the compass, so both pass the coordinates check. The text keeps the figure that Wikipedia and the coordinates share.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "is 18 kilometres (11 mi) south of the town of Victoria Falls, Zimbabwe"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 18.3 km (11.4 miles)",
+      "Bearing from the city centre: 178 degrees, which is south"
+     ]
+    },
+    {
+     "file": "acz-vfa",
+     "org": "Airports Company of Zimbabwe (operator)",
+     "dated": "2026-09-23 (live page, © 2026)",
+     "quote": "The airport is located 21 km South-East of Victoria Falls Town."
+    }
+   ]
+  },
+  {
+   "claim": "serving the tourism built around the falls",
+   "verdict": "softened",
+   "inAfter": "serving the tourism built around the falls",
+   "note": "Was 'an airport that exists almost entirely to serve the falls themselves'. Wikipedia describes it as serving the Victoria Falls tourism industry; the operator's page is written around the falls and calls the airport a 'Regional Tourism Hub'. 'Almost entirely' is the old text's intensifier and is dropped.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "is an international airport serving the Victoria Falls tourism industry"
+    },
+    {
+     "file": "acz-vfa",
+     "org": "Airports Company of Zimbabwe (operator)",
+     "dated": "2026-09-23 (live page, © 2026)",
+     "quote": [
+      "It is home to one of the Seven (7) Natural Wonders of the World and a World Heritage site",
+      "It is at the hub of a vast, pristine wildlife-rich tourism belt."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "open 6am to 6pm daily, longer on request (according to the Airports Company of Zimbabwe)",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Airports Company of Zimbabwe",
+   "inAfter": "According to the Airports Company of Zimbabwe, the airport is open from 6am to 6pm daily and can extend its hours on request",
+   "note": "Was 'It runs 24 hours a day ... which gives real flexibility on arrival and departure times' (Wikipedia). The airport's own page, on the site of the company that runs Zimbabwe's airports, says '12 hours operation; 0600 - 1800 hours daily', extendable on request subject to approval. The two disagree, so the text gives the operator's own figure as an attributed statement and tells the agent to check. Flagged for the owner.",
+   "sources": [
+    {
+     "file": "acz-vfa",
+     "org": "Airports Company of Zimbabwe (operator)",
+     "dated": "2026-09-23 (live page, © 2026)",
+     "quote": [
+      "12 hours operation; 0600 – 1800 hours daily. Hours of operation may be extended upon request, subject approval.",
+      "2026 Airports Company of Zimbabwe . Designed by Mugonat Systems"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "immigration and customs on site",
+   "verdict": "confirmed",
+   "inAfter": "Immigration and customs are on site.",
+   "note": "The operator's airport page lists the immigration officer and the ZIMRA (Zimbabwe Revenue Authority) officer among the airport's contacts; the FCDO says visas, including the KAZA Univisa, are issued at Victoria Falls airport.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "The airport operates 24 hours per day, with immigration and customs services available."
+    },
+    {
+     "file": "acz-vfa",
+     "org": "Airports Company of Zimbabwe (operator)",
+     "dated": "2026-09-23 (live page, © 2026)",
+     "quote": [
+      "Airport Contact Information",
+      "Immigration Mr. B. Madawo",
+      "ZIMRA Mr. P. Khoza"
+     ]
+    },
+    {
+     "file": "fcdo-zimbabwe-entry",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-15",
+     "quote": "The KAZA Univisa is available at Harare, Bulawayo and Victoria Falls airports"
+    }
+   ]
+  },
+  {
+   "claim": "tour operators and car hire firms are represented",
+   "verdict": "confirmed",
+   "inAfter": "Tour operators and car hire firms are represented at the airport.",
+   "note": "The operator's list of car rental companies at Victoria Falls International Airport (live, 23 Sep 2026) has Avis, Europcar and Impala alongside travel and tour firms (Khanondo Travel and Tours, LED Travel and Tours, Afrotrails) and an airport taxi firm. The names are not added.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "There is a variety of tour operators and car rentals."
+    },
+    {
+     "file": "acz-carrentals-vfa",
+     "org": "Airports Company of Zimbabwe (operator)",
+     "dated": "2026-09-23 (live page, © 2026)",
+     "quote": [
+      "Car rental companies available at Victoria Falls International Airport Avis",
+      "Europcar",
+      "Khanondo Travel and Tours (Private) Limited",
+      "LED Travel and Tours",
+      "Afrotrails"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "exists almost entirely to serve the falls",
+   "verdict": "cut",
+   "wasBefore": "and an airport that exists almost entirely to serve the falls themselves",
+   "why": "Softened to 'serving the tourism built around the falls' (see above)."
+  },
+  {
+   "claim": "rebuilt in the 2010s under a 150 million dollar Exim Bank of China loan; new runway, taxiways and terminal",
+   "verdict": "cut",
+   "wasBefore": "It was rebuilt in the 2010s under a 150 million dollar loan from the Exim Bank of China, which paid for a new runway, new taxiways and a new terminal",
+   "why": "Wikipedia alone (it dates the loan to April 2013). The operator's page describes today's 4,000 m runway, parallel taxiway and linked international and domestic terminals, but says nothing of when or how they were built. The 2016 NewZimbabwe report Wikipedia cites is gone (404, after a plain 403), the Zimbabwean state papers answer with Cloudflare checks (noted at Harare), and the Chinese embassy's news archive cannot be searched without a search engine."
+  },
+  {
+   "claim": "capacity from 500,000 to 1.7 million passengers a year",
+   "verdict": "cut",
+   "wasBefore": "lifting capacity from 500,000 passengers a year to 1.7 million",
+   "why": "Sources disagree: Wikipedia says 1.7 million, the operator's own page gives a combined capacity of 1.5 million passengers a year ('Combined capacity to handle 1.5 million passengers per annum'). The 500,000 starting point rests on Wikipedia alone."
+  },
+  {
+   "claim": "runs 24 hours a day, real flexibility on times",
+   "verdict": "cut",
+   "wasBefore": "It runs 24 hours a day with immigration and customs on site, which gives real flexibility on arrival and departure times.",
+   "why": "Contradicted by the operator, which gives 12 hours a day, 6am to 6pm, extendable on request (corrected above as an attributed statement). Immigration and customs on site are kept."
+  },
+  {
+   "claim": "facilities: restaurants, duty free, banking, refuelling, handling",
+   "verdict": "cut",
+   "wasBefore": "Facilities include restaurants, duty free shops, banking, refuelling and cargo and passenger handling.",
+   "why": "Partly unconfirmed and of little use for booking. The operator's Victoria Falls lists show a café and an airline caterer under dining and no bank (its banks list for the airport is empty); duty-free shops rest on Wikipedia alone; refuelling (Puma and Zuva, per the operator) and cargo handling are services to airlines."
+  },
+  {
+   "claim": "onward arrangements are straightforward",
+   "verdict": "cut",
+   "wasBefore": "Onward arrangements are straightforward.",
+   "why": "A judgement that rested on the shuttles and the tourist office, which are cut."
+  },
+  {
+   "claim": "shuttle services to hotels and into town",
+   "verdict": "cut",
+   "wasBefore": "Shuttle services run to the hotels and into town",
+   "why": "Wikipedia alone. The operator lists car hire, tour firms and an airport taxi firm at Victoria Falls, but no shuttle service."
+  },
+  {
+   "claim": "Zimbabwe Tourism Authority office at the airport",
+   "verdict": "cut",
+   "wasBefore": "and the Zimbabwe Tourism Authority keeps an office at the airport to help arriving visitors",
+   "why": "Wikipedia alone. The Tourism Authority's own site (zimbabwetourism.net) returned an empty page to the link lister, the plain fetch and the browser, so it could not be checked."
+  },
+  {
+   "claim": "Held back: FCDO on visas and the KAZA Univisa at Victoria Falls airport",
+   "verdict": "cut",
+   "why": "Held back: replaces nothing in the old text. The FCDO (Zimbabwe page updated 15 July 2026) says a visa is needed and most visitors get it on arrival, paid in US dollars, and that the KAZA Univisa (50 US dollars, 30 days, Zimbabwe and Zambia plus day trips to Botswana) is available at Victoria Falls airport. Would go in as an attributed statement.",
+   "sources": [
+    {
+     "file": "fcdo-zimbabwe-entry",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-15",
+     "quote": [
+      "You must have a visa to visit Zimbabwe. Most visitors get their visa on arrival.",
+      "Take enough US dollars with you in small notes to pay for your visa.",
+      "The KAZA Univisa is available at Harare, Bulawayo and Victoria Falls airports",
+      "It costs 50 US dollars and is valid for 30 days."
+     ]
+    },
+    {
+     "file": "fcdo-zimbabwe",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-15",
+     "quote": [
+      "Still current at:",
+      "24 September 2026",
+      "Updated:",
+      "15 July 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Held back: 4,000 metre runway",
+   "verdict": "cut",
+   "why": "Held back: new, replaces nothing once the rebuild history is cut. Runway 4,000 m (operator, which says it takes wide-bodied aircraft such as the 747-400, 777 and A340; OurAirports 4,000 m; Wikipedia's infobox 4000).",
+   "sources": [
+    {
+     "file": "acz-vfa",
+     "org": "Airports Company of Zimbabwe (operator)",
+     "dated": "2026-09-23 (live page, © 2026)",
+     "quote": "4,000m long x 60m wide Runway – with capacity to accommodate wide body Aircraft – B747-400/B777/A340 or aircraft in that category."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": "Runway 12/30: 4,000 m (13,123 ft), ASP"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "r1_length_m = 4000"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so check before booking a late arrival or departure.",
+   "why": "Advice that follows from the operator's stated hours, which contradict the old text's 24 hours."
+  }
+ ],
+ "tracerOk": {}
+}

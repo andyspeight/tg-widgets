@@ -1,0 +1,306 @@
+{
+ "iata": "MFU",
+ "id": "recHhOzNXGyg719xN",
+ "name": "Mfuwe International Airport",
+ "country": "Zambia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Mfuwe_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for South Luangwa. It serves Mfuwe, a scattered settlement in Mambwe District in Zambia's Eastern Province, and it exists almost entirely for the safari trade built around South Luangwa National Park and the other wildlife areas of the Luangwa Valley.\n\nIt is one of only four international airports in Zambia, a status it was given in 1995, and the international flights it does take are seasonal, which matters a great deal when planning a safari itinerary. Check what is actually flying for the client's travel dates rather than assuming a year round service.\n\nThere is a single runway, at an elevation of 1,853 feet.",
+ "after": "The airport for South Luangwa National Park, serving Mfuwe and the park's safari lodges and camps.\n\nIt is one of only four international airports in Zambia, a status it was given in 1995. Proflight Zambia flies here from Lusaka. Check what is flying on the client's travel dates rather than assuming a set pattern: in September 2026 Proflight's timetable showed two flights a day each way until 31 October and fewer from November.\n\nThere is a single runway, at an elevation of 1,853 feet.",
+ "claims": [
+  {
+   "claim": "the airport for South Luangwa National Park",
+   "verdict": "confirmed",
+   "inAfter": "The airport for South Luangwa National Park",
+   "note": "Was 'The airport for South Luangwa'; the park's full name is added from the same sources.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "It serves the tourism industry based on the nearby South Luangwa National Park"
+    },
+    {
+     "file": "zacl-mia",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Mfuwe International Airport was opened in mid 70s as a domestic airport to service the South Luangwa National Game Park"
+    },
+    {
+     "file": "proflight-to-mfuwe",
+     "org": "Proflight Zambia",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Proflight Zambia offers direct flights to Mfuwe from Lusaka, providing a convenient connection between the renowned South Luangwa National Park and Zambia’s capital."
+    }
+   ]
+  },
+  {
+   "claim": "serving Mfuwe",
+   "verdict": "confirmed",
+   "inAfter": "serving Mfuwe",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "is an airport serving Mfuwe"
+    },
+    {
+     "file": "proflight-to-mfuwe",
+     "org": "Proflight Zambia",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Mfuwe, located near South Luangwa National Park, is the premier destination for unforgettable safari experiences."
+    },
+    {
+     "file": "zacl-mia",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "P. O Box 2",
+      "MFUWE, ZAMBIA"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "serving the park's safari lodges and camps",
+   "verdict": "softened",
+   "inAfter": "and the park's safari lodges and camps",
+   "note": "Was 'it exists almost entirely for the safari trade built around South Luangwa National Park and the other wildlife areas of the Luangwa Valley'. The operator says it serves over twenty lodges and campsites; Wikipedia says it serves the tourism industry based on the park. 'Almost entirely' and the other wildlife areas are cut (below).",
+   "sources": [
+    {
+     "file": "zacl-mia",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "The airport serves over twenty lodges and campsites."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "It serves the tourism industry based on the nearby South Luangwa National Park and other wildlife areas in the Luangwa Valley."
+    }
+   ]
+  },
+  {
+   "claim": "one of only four international airports in Zambia",
+   "verdict": "confirmed",
+   "inAfter": "It is one of only four international airports in Zambia",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "It is one of four international airports in Zambia"
+    },
+    {
+     "file": "zacl-t1-exercise",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "2026-04-30",
+     "quote": [
+      "Apr 30, 2026",
+      "the four designated international airports, namely: Kenneth Kaunda in Lusaka, Simon Mwansa Kapwepwe in Ndola, Harry Mwaanga Nkumbula in Livingstone and Mfuwe"
+     ]
+    },
+    {
+     "file": "zacl-ar2025",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "Annual Report 2025",
+     "quote": "its network of four international airports and nine domestic airports"
+    }
+   ]
+  },
+  {
+   "claim": "international status given in 1995",
+   "verdict": "confirmed",
+   "inAfter": "a status it was given in 1995",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "declared an international airport in 1995"
+    },
+    {
+     "file": "zacl-mia",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "The airport gained its International status in 1995 when it was gazetted as a port of entry and exit."
+    }
+   ]
+  },
+  {
+   "claim": "Proflight Zambia flies here from Lusaka",
+   "verdict": "corrected",
+   "inAfter": "Proflight Zambia flies here from Lusaka.",
+   "note": "Replaces 'the international flights it does take are seasonal' (cut below) with who flies now. Proflight's live timetable (read 23 Sep 2026) has direct Lusaka flights and connections beyond Lusaka; the operator names Proflight as the airline at Mfuwe (2023 report) and speaks of daily Lusaka flights. Zambia Airways flew Lusaka to Mfuwe three times a week from May 2024 (AeroRoutes), but its own 2026 pages list no Mfuwe route, so it is not named.",
+   "sources": [
+    {
+     "file": "proflight-to-mfuwe",
+     "org": "Proflight Zambia",
+     "dated": "2026-09-23 (live timetable)",
+     "quote": [
+      "Proflight Zambia offers direct flights to Mfuwe from Lusaka",
+      "P0 804 Daily 10:35 11:45 Current 31 Oct"
+     ]
+    },
+    {
+     "file": "zacl-mia",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "There are daily flights from Lusaka to Mfuwe"
+    },
+    {
+     "file": "zacl-ar2023",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "Annual Report 2023",
+     "quote": [
+      "Mfuwe International Airport",
+      "Capacity of Terminal 0.1 MAP",
+      "Airlines Operating Proflight Zambia"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Proflight's timetable: two flights a day each way until 31 October, fewer from November",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Proflight",
+   "inAfter": "in September 2026 Proflight's timetable showed two flights a day each way until 31 October and fewer from November",
+   "note": "Attributed statement, checked against Proflight's own timetables for its own flights, read on 23 September 2026 (hence 'in September 2026'). Lusaka to Mfuwe: P0 804 and P0 808 daily until 31 October (14 a week); in November P0 800, 804 and 808 on set days (9 a week); from 1 December to 3 January 804 and 808 on set days (7 a week). Mfuwe to Lusaka mirrors it (P0 805 and 809 daily until 31 October). It carries the old text's point that the service is not the same all year.",
+   "sources": [
+    {
+     "file": "proflight-to-mfuwe",
+     "org": "Proflight Zambia",
+     "dated": "2026-09-23 (live timetable)",
+     "quote": [
+      "P0 804 Daily 10:35 11:45 Current 31 Oct",
+      "P0 808 Daily 16:35 17:45 Current 31 Oct",
+      "P0 800 Fr | Su 06:55 08:05 01 Nov 30 Nov",
+      "P0 804 Mo | Tu | Sa 10:35 11:45 01 Nov 30 Nov",
+      "P0 808 We | Th | Fr | Su 16:35 17:45 01 Nov 30 Nov",
+      "P0 804 Tu | We | Fr | Sa 10:35 11:45 01 Dec 03 Jan",
+      "P0 808 Mo | Th | Su 16:35 17:45 01 Dec 03 Jan"
+     ]
+    },
+    {
+     "file": "proflight-from-mfuwe",
+     "org": "Proflight Zambia",
+     "dated": "2026-09-23 (live timetable)",
+     "quote": [
+      "P0 805 Daily 12:20 13:30 Current 31 Oct",
+      "P0 809 Daily 18:20 19:30 Current 31 Oct",
+      "P0 805 Mo | Tu | Sa 12:20 13:30 01 Nov 30 Nov",
+      "P0 809 We | Th | Fr | Su 18:20 19:30 01 Nov 30 Nov"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a single runway, elevation 1,853 feet",
+   "verdict": "confirmed",
+   "inAfter": "There is a single runway, at an elevation of 1,853 feet.",
+   "note": "The operator gives the runway as 2.2 km (2,200 m by 30 m in its 2023 report); OurAirports 2,240 m. Its 2025 report says the airfield pavements are being rebuilt with the existing runway to become a taxiway, due March 2027 (held back, below), so there is still one runway.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "elevation 1,853 ft (565 m)",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": [
+      "The airport elevation is 1,853 feet (565 m) above mean sea level.",
+      "It has one runway."
+     ]
+    },
+    {
+     "file": "zacl-mia",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "It has a runway measuring 2.2 km long."
+    }
+   ]
+  },
+  {
+   "claim": "a scattered settlement in Mambwe District in Zambia's Eastern Province",
+   "verdict": "cut",
+   "wasBefore": "a scattered settlement in Mambwe District in Zambia's Eastern Province",
+   "why": "Wikipedia alone. The operator and Proflight say only that Mfuwe is near South Luangwa National Park (kept). zambiatourism.com was checked but is a commercial guide that sells advertising and lodge listings, not the tourism agency, so it does not count."
+  },
+  {
+   "claim": "exists almost entirely for the safari trade; other wildlife areas of the Luangwa Valley",
+   "verdict": "cut",
+   "wasBefore": "it exists almost entirely for the safari trade built around South Luangwa National Park and the other wildlife areas of the Luangwa Valley",
+   "why": "Softened to what both sources say: it serves the park's safari lodges and camps. 'Almost entirely' and the other Luangwa Valley wildlife areas rest on Wikipedia alone."
+  },
+  {
+   "claim": "the international flights it does take are seasonal",
+   "verdict": "cut",
+   "wasBefore": "and the international flights it does take are seasonal, which matters a great deal when planning a safari itinerary",
+   "why": "Could not be confirmed as current. Proflight's timetable from Mfuwe has only Lusaka flights (with connections beyond); the operator's undated airport page mentions direct flights to Lilongwe, and its 2025 report counts only 874 international passengers of 33,235 at Mfuwe that year, with no route named. The Ulendo Airlink schedule Wikipedia cites was at flyulendo.com, which is now a hijacked gambling site. Replaced by who flies now (Proflight from Lusaka) and the timetable's seasonal pattern."
+  },
+  {
+   "claim": "check what is flying rather than assuming a year round service",
+   "verdict": "cut",
+   "wasBefore": "Check what is actually flying for the client's travel dates rather than assuming a year round service.",
+   "why": "Reworded, not removed: the advice now follows from Proflight's own timetable, which changes month by month."
+  },
+  {
+   "claim": "Held back: 33,235 passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: replaces nothing in the old text, and rests on the operator's 2025 annual report alone (Wikipedia gives no figure). 33,235 passengers in 2025, 32,361 domestic and 874 international; 1.36 per cent of the ZACL network.",
+   "sources": [
+    {
+     "file": "zacl-ar2025",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "Annual Report 2025",
+     "quote": "MIA 874 32,361 33,235 1.36%"
+    }
+   ]
+  },
+  {
+   "claim": "Held back: runway rebuilding due March 2027",
+   "verdict": "cut",
+   "why": "Held back: new, replaces nothing, and rests on the operator's 2025 annual report alone. The runway, taxiway and apron are being rebuilt under a design-and-build contract, with the existing runway to become a taxiway; 10 per cent done at the end of 2025, completion scheduled for March 2027. Worth re-checking for disruption before the dry season of 2027.",
+   "sources": [
+    {
+     "file": "zacl-ar2025",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "Annual Report 2025",
+     "quote": [
+      "Runway Rehabilitation: The airfield pavement rehabilitation which includes the runway, taxiway and apron, will",
+      "be executed under a design-and-build model, with the existing runway repurposed as a taxiway. Progress stood at",
+      "10%, with the completion scheduled for March 2027."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Held back: opening hours 7am to 6pm",
+   "verdict": "cut",
+   "why": "Held back: new, replaces nothing, one source, and dated 2023. The operator's 2023 report gives Mfuwe's operating hours as 7am to 6pm Central Africa Time (Lusaka is open 24 hours).",
+   "sources": [
+    {
+     "file": "zacl-ar2023",
+     "org": "Zambia Airports Corporation Limited (operator)",
+     "dated": "Annual Report 2023",
+     "quote": "Operating Hours 7am-6pm CAT"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Check what is flying on the client's travel dates rather than assuming a set pattern",
+   "why": "Advice kept from the old text; Proflight's own timetable changes from two flights a day each way to fewer from November (sourced)."
+  }
+ ],
+ "tracerOk": {}
+}
