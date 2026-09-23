@@ -1,0 +1,181 @@
+{
+ "iata": "PEN",
+ "id": "recU2W7qXEcTO9S5U",
+ "name": "Penang International Airport",
+ "country": "Malaysia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Penang_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Penang's airport, at the south eastern tip of the island 16 km from George Town, and the main gateway to north western Malaysia. It carried over 7.6 million passengers in 2024, against a peak of 8.3 million in 2019 and an annual capacity of 6.5 million, so it is running above what it was built for.\n\nIt is the main hub for Firefly and one of AirAsia's operating bases. The route to Kuala Lumpur is one of the busiest air corridors in the country, and the link to Singapore Changi is the third busiest of Malaysia's ASEAN routes.\n\nFreight matters more here than the size suggests. Penang handles the second largest cargo tonnage in Malaysia and the highest by export value, with RM365 billion of exports passing through in 2023.\n\nRapid Penang runs four bus routes between the airport and different parts of George Town.\n\nThe airport was completed in 1935 as Bayan Lepas International Airport, when Penang was part of the British Straits Settlements.",
+ "after": "Penang's airport is 16 km south of George Town. In 2024 it was Malaysia's second busiest airport for flights after KLIA, and it carried over 7.6 million passengers.\n\nAn RM1.5 billion expansion, due by 2028, will let the airport handle 12 million passengers a year.\n\nFreight matters more here than the size suggests: Penang handles the second largest cargo tonnage in Malaysia after KLIA.",
+ "claims": [
+  {
+   "claim": "Penang's airport, 16 km south of George Town",
+   "verdict": "confirmed",
+   "inAfter": "Penang's airport is 16 km south of George Town.",
+   "note": "Straight line 14.4 km at 207 degrees; ratio 1.11, and south is 27 degrees from the computed bearing.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "16 km (9.9 mi) south of the city centre"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 14.4 km (8.9 miles)",
+      "Bearing from the city centre: 207 degrees"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Malaysia's second busiest airport for flights after KLIA in 2024",
+   "verdict": "corrected",
+   "inAfter": "In 2024 it was Malaysia's second busiest airport for flights after KLIA",
+   "note": "Replaces 'the main gateway to north western Malaysia', which only Wikipedia says. Malay Mail reports CAAM's 2024 figures: 64,507 movements at Penang against Kota Kinabalu's 63,822. Wikipedia's lead still says third busiest, but its statistics section agrees with CAAM.",
+   "sources": [
+    {
+     "file": "mm-2025-01",
+     "org": "Malay Mail",
+     "dated": "2025-01-24",
+     "quote": [
+      "Penang International Airport (PIA) has become Malaysia’s second busiest airport after Kuala Lumpur International Airport (KLIA), according to data from the Civil Aviation Authority of Malaysia (CAAM).",
+      "PIA recorded 64,507 aircraft movements in 2024"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "PIA is the second busiest airport in Malaysia in terms of aircraft movements after Kuala Lumpur International Airport (KLIA)."
+    }
+   ]
+  },
+  {
+   "claim": "over 7.6 million passengers in 2024",
+   "verdict": "confirmed",
+   "inAfter": "it carried over 7.6 million passengers.",
+   "note": "The ministry's four 2024 quarterly tables give 1,763,597 + 1,898,369 + 1,981,411 + 1,998,248 = 7,641,625 (before transit). Its 2025 tables add up to 8,269,978, back at the 2019 peak, but no second source for 2025 was found, so the text keeps 2024.",
+   "sources": [
+    {
+     "file": "mot-q1-2024-pax",
+     "org": "Malaysian Ministry of Transport",
+     "quote": "PULAU PINANG"
+    },
+    {
+     "file": "mot-q4-2024-pax",
+     "org": "Malaysian Ministry of Transport",
+     "quote": "1,998,248"
+    },
+    {
+     "file": "mot-q3-2024-pax",
+     "org": "Malaysian Ministry of Transport",
+     "quote": "1,981,411"
+    },
+    {
+     "file": "mot-q2-2024-pax",
+     "org": "Malaysian Ministry of Transport",
+     "quote": "1,898,369"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2024, PIA recorded over 7.6 million passengers, compared to nearly 6.8 million in 2023."
+    }
+   ]
+  },
+  {
+   "claim": "RM1.5 billion expansion, due by 2028, to 12 million passengers a year",
+   "verdict": "corrected",
+   "inAfter": "An RM1.5 billion expansion, due by 2028, will let the airport handle 12 million passengers a year.",
+   "note": "Replaces 'an annual capacity of 6.5 million, so it is running above what it was built for': the 6.5 million rests on Wikipedia alone. The Star reported on 16 October 2024 that works had begun, in three packages.",
+   "sources": [
+    {
+     "file": "star-2024-10",
+     "org": "The Star (Malaysia)",
+     "dated": "2024-10-16",
+     "quote": [
+      "Expansion works on Penang International Airport (PIA) have begun, with the RM1.5bil project split into three packages to be completed by 2028.",
+      "\"The airport expansion will cater for 12 million passengers annually,\" he said."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "federal government announced plans to expand the PIA to accommodate 12 million passengers per year by 2028",
+      "Costing RM1.5 billion, the PIA's expansion includes"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "second largest cargo tonnage in Malaysia after KLIA",
+   "verdict": "confirmed",
+   "inAfter": "Penang handles the second largest cargo tonnage in Malaysia after KLIA.",
+   "note": "The ministry's Q4 2025 cargo table: KLIA 187,997,615 kg, Penang 28,760,688 kg, KLIA2 19,196,466 kg, Kota Kinabalu 11,155,802 kg.",
+   "sources": [
+    {
+     "file": "mot-q4-2025-cargo",
+     "org": "Malaysian Ministry of Transport",
+     "dated": "2025-Q4",
+     "quote": [
+      "KLIA 4,437,176",
+      "PULAU PINANG 340,546",
+      "28,760,688",
+      "KLIA2 953,375",
+      "19,196,466"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It also handled the second largest cargo tonnage of all airports in the country"
+    }
+   ]
+  },
+  {
+   "claim": "south eastern tip; main gateway to north western Malaysia",
+   "verdict": "cut",
+   "wasBefore": "Penang's airport, at the south eastern tip of the island 16 km from George Town, and the main gateway to north western Malaysia.",
+   "why": "The distance is kept; the tip and the gateway are Wikipedia's alone. Replaced by the 2024 flights ranking."
+  },
+  {
+   "claim": "2019 peak of 8.3 million; capacity 6.5 million, running above it",
+   "verdict": "cut",
+   "wasBefore": "It carried over 7.6 million passengers in 2024, against a peak of 8.3 million in 2019 and an annual capacity of 6.5 million, so it is running above what it was built for.",
+   "why": "The 2024 figure is kept (ministry and Wikipedia). The 2019 peak and the 6.5 million capacity rest on Wikipedia alone; the expansion sentence carries the point."
+  },
+  {
+   "claim": "main hub for Firefly, AirAsia base; KL corridor; Changi third busiest ASEAN route",
+   "verdict": "cut",
+   "wasBefore": "It is the main hub for Firefly and one of AirAsia's operating bases. The route to Kuala Lumpur is one of the busiest air corridors in the country, and the link to Singapore Changi is the third busiest of Malaysia's ASEAN routes.",
+   "why": "Wikipedia alone (Firefly's about page answered 404), and the route figures are from 2019 and 2023."
+  },
+  {
+   "claim": "export value RM365 billion in 2023",
+   "verdict": "cut",
+   "wasBefore": "Penang handles the second largest cargo tonnage in Malaysia and the highest by export value, with RM365 billion of exports passing through in 2023.",
+   "why": "The cargo ranking is kept with the ministry's table; the export value rests on Wikipedia alone."
+  },
+  {
+   "claim": "Rapid Penang four bus routes",
+   "verdict": "cut",
+   "wasBefore": "Rapid Penang runs four bus routes between the airport and different parts of George Town.",
+   "why": "Wikipedia alone; the operator's site (myrapid.com.my) answered 403."
+  },
+  {
+   "claim": "completed in 1935 as Bayan Lepas International Airport",
+   "verdict": "cut",
+   "wasBefore": "The airport was completed in 1935 as Bayan Lepas International Airport, when Penang was part of the British Straits Settlements.",
+   "why": "Wikipedia alone in the saved sources: the Singapore newspaper archive it cites puts up a robot check, which the sweep does not get round."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Freight matters more here than the size suggests",
+   "why": "The old text's lead-in, kept: the ministry's table puts Penang second for cargo although it is smaller than several airports for passengers."
+  }
+ ],
+ "tracerOk": {}
+}
