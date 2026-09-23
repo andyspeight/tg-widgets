@@ -1,0 +1,198 @@
+{
+ "iata": "DJE",
+ "id": "recVSrotn8vsjTg4S",
+ "name": "Djerba Zarzis International Airport",
+ "country": "Tunisia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Djerba%E2%80%93Zarzis_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Djerba, and an important arrival point for seasonal leisure flights to the island.\n\nIt is older than most Tunisian resort airports, dating from 1950 when it opened as Djerba Mellita. It was enlarged and renamed Djerba Zarzis International in 1970.\n\nBecause the traffic is largely seasonal, check what is actually flying for a client's dates rather than assuming a year round schedule.",
+ "after": "Djerba-Zarzis is the airport for Djerba, and an important arrival point for seasonal flights.\n\nBecause some routes run only in season, check what is actually flying for a client's dates rather than assuming a year round schedule.",
+ "claims": [
+  {
+   "claim": "Djerba-Zarzis is the airport for Djerba",
+   "verdict": "confirmed",
+   "inAfter": "Djerba-Zarzis is the airport for Djerba",
+   "note": "The old text opened 'The airport for Djerba'. The name comes from the renaming sentence, which is cut for its dates (below); OACA's figures, Tunisair Express and Wikipedia all write it Djerba-Zarzis, and Tunisair Express gives its address as Djerba's international airport. City Served is blank on the record.",
+   "sources": [
+    {
+     "file": "tunisair-express-aeroports",
+     "org": "Tunisair Express (tunisairexpress.net)",
+     "dated": "read 2026-09-23 (page footer 2026)",
+     "quote": [
+      "L'aéroport international de Djerba-Zarzis",
+      "Adresse : Aéroport International de Djerba"
+     ]
+    },
+    {
+     "file": "mosaique-2024",
+     "org": "Mosaique FM (Tunisian radio, reporting an OACA communiqué)",
+     "dated": "2025-01-05 (on the page)",
+     "quote": "le trafic sur l'aéroport Djerba-Zarzis"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "is an international airport serving the island of Djerba in Tunisia"
+    }
+   ]
+  },
+  {
+   "claim": "an important arrival point for seasonal flights",
+   "verdict": "softened",
+   "inAfter": "and an important arrival point for seasonal flights.",
+   "note": "Was 'seasonal leisure flights to the island'. Important: OACA's 2024 figures give Djerba-Zarzis 2,203,957 passengers, up 12.8 per cent, second only to Tunis-Carthage among the airports OACA runs. Seasonal: Nouvelair's new Djerba to Nice flights run from 15 June to 14 September 2026, and Transavia's Montpellier to Djerba flights, 'une route saisonnière', run to 18 October 2026 (Destination Tunisie). 'Leisure' and 'to the island' are dropped: beyond Wikipedia, only an unofficial guide site says them.",
+   "sources": [
+    {
+     "file": "mosaique-2024",
+     "org": "Mosaique FM (Tunisian radio, reporting an OACA communiqué)",
+     "dated": "2025-01-05 (on the page)",
+     "quote": [
+      "2025/01/05 12:04",
+      "le trafic sur l'aéroport Djerba-Zarzis a augmenté de 12.8% avec un nombre total de 2.203.957 passagers reçus",
+      "l'Aéroport Tunis-Carthage a accueilli un nombre record de passagers qui s'établit à 7.249.701"
+     ]
+    },
+    {
+     "file": "destinationtunisie-nouvelair-2026",
+     "org": "Destination Tunisie (Tunisian tourism trade news)",
+     "dated": "2025-11-20 (on the page)",
+     "quote": [
+      "20 novembre 2025",
+      "nouveaux vols saisonniers",
+      "Djerba-Nice:",
+      "A compter du 15 juin, deux fréquences par semaine les lundis et vendredis jusqu'au 14 septembre 2026."
+     ]
+    },
+    {
+     "file": "destinationtunisie-transavia",
+     "org": "Destination Tunisie (Tunisian tourism trade news)",
+     "dated": "2026-04-21 (on the page)",
+     "quote": [
+      "21 avril 2026",
+      "Tous les lundis jusqu'au 18 octobre 2026, Transavia opèrera sur la ligne Montpellier-Djerba",
+      "Une route saisonnière"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "Today, it is an important destination for seasonal leisure flights."
+    }
+   ]
+  },
+  {
+   "claim": "some routes run only in season",
+   "verdict": "softened",
+   "inAfter": "Because some routes run only in season",
+   "note": "Was 'Because the traffic is largely seasonal'. No monthly traffic figures for Djerba could be read (OACA's site did not connect), so the text says what the route announcements show: seasonal routes such as Nouvelair's Djerba to Nice (15 June to 14 September 2026) and Transavia's Montpellier to Djerba (to 18 October 2026).",
+   "sources": [
+    {
+     "file": "destinationtunisie-nouvelair-2026",
+     "org": "Destination Tunisie (Tunisian tourism trade news)",
+     "dated": "2025-11-20 (on the page)",
+     "quote": [
+      "nouveaux vols saisonniers",
+      "A compter du 15 juin, deux fréquences par semaine les lundis et vendredis jusqu'au 14 septembre 2026."
+     ]
+    },
+    {
+     "file": "destinationtunisie-transavia",
+     "org": "Destination Tunisie (Tunisian tourism trade news)",
+     "dated": "2026-04-21 (on the page)",
+     "quote": [
+      "Une route saisonnière",
+      "Tous les lundis jusqu'au 18 octobre 2026"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "seasonal leisure flights"
+    }
+   ]
+  },
+  {
+   "claim": "seasonal leisure flights to the island",
+   "verdict": "cut",
+   "wasBefore": "an important arrival point for seasonal leisure flights to the island",
+   "why": "'Leisure' and 'to the island' rest on Wikipedia and on djerbaairport.net, an unofficial guide site (it sells hotels and speaks of OACA in the third person), which is not a second source. Softened (above)."
+  },
+  {
+   "claim": "older than most Tunisian resort airports, opened in 1950 as Djerba Mellita",
+   "verdict": "cut",
+   "wasBefore": "It is older than most Tunisian resort airports, dating from 1950 when it opened as Djerba Mellita.",
+   "why": "Wikipedia alone, and disputed: the unofficial djerbaairport.net says the airport started serving in 1970. OACA, the operator, could not be reached (oaca.nat.tn failed to connect when tried for Tunis, one try). The comparison with other resort airports would need their opening dates as well.",
+   "sources": [
+    {
+     "file": "djerbaairport-net",
+     "org": "djerbaairport.net (an unofficial airport guide that sells hotels; not the operator)",
+     "dated": "read 2026-09-23 (footer 2026)",
+     "quote": "Airport started serving in 1970 to bring tourists directly to the Djerba Island."
+    }
+   ]
+  },
+  {
+   "claim": "enlarged and renamed Djerba Zarzis International in 1970",
+   "verdict": "cut",
+   "wasBefore": "It was enlarged and renamed Djerba Zarzis International in 1970.",
+   "why": "Wikipedia alone for the enlargement and the renaming date (the unofficial guide site has 1970 as the start of service instead). The name itself is kept (above)."
+  },
+  {
+   "claim": "the traffic is largely seasonal",
+   "verdict": "cut",
+   "wasBefore": "Because the traffic is largely seasonal",
+   "why": "No monthly traffic figures could be read to show how much of the year is seasonal. Softened to the seasonal routes the sources name (above)."
+  },
+  {
+   "claim": "2,203,957 passengers in 2024, up 12.8 per cent",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing (the old text gave no traffic figure). OACA's 2024 figure, reported by Mosaique FM on 5 January 2025, matches the Wikipedia infobox. No 2025 figure was found.",
+   "sources": [
+    {
+     "file": "mosaique-2024",
+     "org": "Mosaique FM (Tunisian radio, reporting an OACA communiqué)",
+     "dated": "2025-01-05 (on the page)",
+     "quote": "le trafic sur l'aéroport Djerba-Zarzis a augmenté de 12.8% avec un nombre total de 2.203.957 passagers reçus"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": [
+      "stat1_header = Passengers (2024)",
+      "stat1_data = 2,203,957"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FCDO advice on the Libyan border area, which excludes Zarzis",
+   "verdict": "cut",
+   "why": "Held back: a warning that replaces nothing, but the one Andy may want here. The FCDO advises against all travel to the town of Ben Guerdane and its surroundings and within 20 km of the Libyan border north of Dhehiba, and against all but essential travel within 75 km of the border, excluding Zarzis, the C118 road and all areas of Medenine Governorate north of that road (updated 24 July 2026, still current 23 September 2026). Djerba is not named in the advice.",
+   "sources": [
+    {
+     "file": "fcdo-tunisia",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-24 (updated; still current 23 September 2026)",
+     "quote": [
+      "Still current at: 23 September 2026",
+      "Updated: 24 July 2026",
+      "the town of Ben Guerdane and immediate surrounding area",
+      "within 20km of the rest of the Tunisia-Libya border area north of Dhehiba",
+      "In addition, FCDO advises against all but essential travel to within 75km of the Tunisia-Libya border, including Remada and El Borma but excluding Zarzis, the C118 road and all areas in Medenine Governorate north of the road."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "check what is actually flying for a client's dates rather than assuming a year round schedule.",
+   "why": "The old text's advice, kept: the named seasonal routes stop in September and October."
+  }
+ ],
+ "tracerOk": {}
+}

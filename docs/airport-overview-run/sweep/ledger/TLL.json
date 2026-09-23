@@ -1,0 +1,239 @@
+{
+ "iata": "TLL",
+ "id": "rec4HxNezV5RZhTbY",
+ "name": "Lennart Meri Tallinn Airport",
+ "country": "Estonia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Tallinn_Airport",
+ "audited": "2026-09-23",
+ "before": "Estonia's main airport, and one of the easiest capital arrivals in Europe. It is 5 km south east of the centre of Tallinn, on the eastern shore of Lake Ulemiste, so the transfer is short whichever way a client travels.\n\nEverything runs from a single passenger terminal with seventeen gates, alongside four cargo terminals. The runway is 3,480 metres, long enough for a 747, which is more capability than the traffic needs and means weather diversions and the occasional large charter are straightforward.\n\nOne oddity worth knowing about. The Estonian EXPO Center keeps a permanent exhibition near Gate 3, opened in 2010, where companies show what they do to passengers waiting to board. It is a trade display rather than a shop, and there is nothing quite like it in another European terminal.\n\nThe airport is officially named after Lennart Meri, a former president of Estonia, and was called Tallinn Ulemiste until 2009, so older references use that name.",
+ "after": "Estonia's main airport, and one of the easiest capital arrivals in Europe. It is 5 km south east of the centre of Tallinn, on the shore of Lake Ülemiste, so the transfer is short whichever way a client travels.\n\nPassenger flights all use a single terminal. The runway is 3,480 metres, which is more than the everyday traffic needs.\n\nIt has carried the name of Lennart Meri, a former president of Estonia, since 2009, though the operator still uses plain Tallinn Airport as well.",
+ "claims": [
+  {
+   "claim": "Estonia's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Estonia's main airport",
+   "note": "Eurostat reports no other Estonian airport for 2025 (the file header lists every EE airport it reports, high to low: Tallinn alone). The operator runs the regional airports too.",
+   "sources": [
+    {
+     "file": "eurostat-ee",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat EE_EETN LENNART MERI TALLINN airport: passengers carried in 2025: 3,472,035"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "is the largest international airport in Estonia"
+    }
+   ]
+  },
+  {
+   "claim": "5 km south east of the centre of Tallinn",
+   "verdict": "confirmed",
+   "inAfter": "It is 5 km south east of the centre of Tallinn",
+   "note": "Coordinates: 5.2 km in a straight line at 120 degrees, south east.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 5.2 km (3.2 miles)",
+      "Bearing from the city centre: 120 degrees, which is south east"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "The airport is located 2.7 nautical miles (5.0 km; 3.1 mi) southeast of the city centre of Estonian capital Tallinn"
+    }
+   ]
+  },
+  {
+   "claim": "on the shore of Lake Ülemiste",
+   "verdict": "softened",
+   "inAfter": "on the shore of Lake Ülemiste",
+   "note": "Was 'on the eastern shore of Lake Ulemiste'. The operator says it sits on the shores of Lake Ülemiste; 'eastern' rests on Wikipedia alone, so it goes. The lake's name takes its umlaut.",
+   "sources": [
+    {
+     "file": "op-sustainability",
+     "org": "AS Tallinna Lennujaam (the airport operator, airport.ee)",
+     "dated": "read 2026-09-23 (live page, figures for 2025)",
+     "quote": "We’re located in the middle of nature and on the shores of Lake Ülemiste"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "on the eastern shore of Lake Ülemiste"
+    }
+   ]
+  },
+  {
+   "claim": "passenger flights all use a single terminal",
+   "verdict": "corrected",
+   "inAfter": "Passenger flights all use a single terminal.",
+   "note": "Was 'Everything runs from a single passenger terminal with seventeen gates, alongside four cargo terminals'. The airport's own map is of one passenger terminal (reisiterminal, singular throughout), covering the non-Schengen area and the arrivals baggage hall; Wikipedia says the same. The gate and cargo terminal counts are cut (below).",
+   "sources": [
+    {
+     "file": "op-map",
+     "org": "AS Tallinna Lennujaam (the airport operator, airport.ee)",
+     "dated": "read 2026-09-23 (the airport's own passenger terminal map, in Estonian)",
+     "quote": [
+      "Reisiterminali kaart",
+      "Asub reisiterminali Non-Schengen alal",
+      "Asub terminali keskel vahetult enne saabuva pagasi ala"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "There is one passenger terminal and four cargo terminals at the airport."
+    }
+   ]
+  },
+  {
+   "claim": "the runway is 3,480 metres",
+   "verdict": "confirmed",
+   "inAfter": "The runway is 3,480 metres",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": "Runway 08/26: 3,480 m (11,417 ft), ASP"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "that is 3,480 m × 45 m (11,417 ft × 148 ft)"
+    }
+   ]
+  },
+  {
+   "claim": "named after Lennart Meri, a former president of Estonia, since 2009",
+   "verdict": "confirmed",
+   "inAfter": "It has carried the name of Lennart Meri, a former president of Estonia, since 2009",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "AS Tallinna Lennujaam (the airport operator, airport.ee)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "In 2009, Tallinn Airport was named after President Lennart Meri to honor his memory and his contribution to the restoration of the Estonian state."
+    },
+    {
+     "file": "op-lennart",
+     "org": "AS Tallinna Lennujaam (the airport operator, airport.ee)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "he was the President of Estonia from 1992-2001"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": [
+      "The airport is also officially called Lennart Meri Tallinn Airport (Estonian: Lennart Meri Tallinna lennujaam) after the former president of Estonia Lennart Meri.",
+      "Prime Minister Andrus Ansip officially announced the renaming would take place in March 2009."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the operator still uses plain Tallinn Airport",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "operator",
+   "inAfter": "though the operator still uses plain Tallinn Airport as well.",
+   "note": "Replaces 'so older references use that name' (the Ülemiste name, cut below). The operator's own pages call it Tallinn Airport in 2025 and 2026; Wikipedia's article carries the same title.",
+   "sources": [
+    {
+     "file": "op-sustainability",
+     "org": "AS Tallinna Lennujaam (the airport operator, airport.ee)",
+     "dated": "read 2026-09-23 (live page, figures for 2025)",
+     "quote": "Tallinn Airport achieved Level 3+ (carbon neutrality) of the Airport Carbon Accreditation (ACA) programme in 2025"
+    },
+    {
+     "file": "op-about",
+     "org": "AS Tallinna Lennujaam (the airport operator, airport.ee)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "make up Tallinn Airport Group"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "Tallinn Airport (IATA: TLL, ICAO: EETN)"
+    }
+   ]
+  },
+  {
+   "claim": "the eastern shore",
+   "verdict": "cut",
+   "wasBefore": "on the eastern shore of Lake Ulemiste",
+   "why": "'Eastern' rests on Wikipedia alone; the operator says only that it sits on the lake's shores. Softened (see above)."
+  },
+  {
+   "claim": "seventeen gates; four cargo terminals",
+   "verdict": "cut",
+   "wasBefore": "Everything runs from a single passenger terminal with seventeen gates, alongside four cargo terminals.",
+   "why": "Both counts rest on Wikipedia alone, and the airport's own terminal map gives no count. The single passenger terminal is kept (see above)."
+  },
+  {
+   "claim": "long enough for a 747; weather diversions and large charters straightforward",
+   "verdict": "cut",
+   "wasBefore": "long enough for a 747, which is more capability than the traffic needs and means weather diversions and the occasional large charter are straightforward.",
+   "why": "The 747 rests on Wikipedia alone; the operator's pages read (its about page and its aviation charges page) do not describe the runway. The diversions and charters lean on it, so they go too. The runway length and the old text's judgement on it are kept."
+  },
+  {
+   "claim": "the Estonian EXPO Center near Gate 3, opened 2010; nothing like it in Europe",
+   "verdict": "cut",
+   "wasBefore": "One oddity worth knowing about. The Estonian EXPO Center keeps a permanent exhibition near Gate 3, opened in 2010, where companies show what they do to passengers waiting to board. It is a trade display rather than a shop, and there is nothing quite like it in another European terminal.",
+   "why": "Wikipedia alone, and the airport's own terminal map (read 23 Sep 2026) shows no exhibition, so it may no longer be there. The 'nothing quite like it' judgement rests on it."
+  },
+  {
+   "claim": "called Tallinn Ülemiste until 2009",
+   "verdict": "cut",
+   "wasBefore": "and was called Tallinn Ulemiste until 2009, so older references use that name.",
+   "why": "Wikipedia alone; the operator's own sentence has Tallinn Airport, not Ülemiste, renamed in 2009. Replaced with the operator's own use of the plain name (see above)."
+  },
+  {
+   "claim": "3.47 million passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing. Eurostat has 3,472,035 passengers in 2025 (3,471,878 in 2024), and Wikipedia says the terminal served over 3.5 million in 2025. Wikipedia alone also has trams T2 and T4 back at the terminal from 1 August 2026; that would need a second source before use.",
+   "sources": [
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "dated": "annual data to 2025",
+     "quote": [
+      "Eurostat EE_EETN Lennart Meri Tallinn Airport: passengers carried in 2024: 3,471,878",
+      "Eurostat EE_EETN Lennart Meri Tallinn Airport: passengers carried in 2025: 3,472,035"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "served over 3.5 million in 2025"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and one of the easiest capital arrivals in Europe.",
+   "why": "The old text's judgement, kept; the 5 km distance that follows is sourced."
+  },
+  {
+   "text": "so the transfer is short whichever way a client travels.",
+   "why": "The old text's judgement, kept; it follows from the 5 km distance (sourced)."
+  },
+  {
+   "text": "which is more than the everyday traffic needs.",
+   "why": "The old text's judgement, kept in a shorter form: a 3,480 metre runway at an airport of about 3.5 million passengers a year (sourced)."
+  }
+ ],
+ "tracerOk": {}
+}

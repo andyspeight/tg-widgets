@@ -1,0 +1,269 @@
+{
+ "iata": "NBE",
+ "id": "recQDoZO29SH8PsYh",
+ "name": "Enfidha - Hammamet International Airport",
+ "country": "Tunisia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Enfidha%E2%80%93Hammamet_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The holiday airport for this stretch of the Tunisian coast, at Enfidha about 40 km south west of Hammamet. Most of the traffic is European airlines bringing clients to the resorts, so the timetable is heavily seasonal.\n\nGround transport is the part that needs organising. There is a bus from the airport into the nearby town of Enfidha, and from there louages, the Tunisian shared taxis, run to Tunis and Sousse. For most clients a pre-booked resort transfer is the practical answer.",
+ "after": "The holiday airport for this stretch of the Tunisian coast, at Enfidha about 40 km south west of Hammamet. Its airlines are mostly European, bringing clients to the resorts, so the timetable is heavily seasonal.\n\nGround transport is the part that needs organising. For most clients a pre-booked resort transfer is the practical answer.",
+ "claims": [
+  {
+   "claim": "the holiday airport for this stretch of the Tunisian coast",
+   "verdict": "confirmed",
+   "inAfter": "The holiday airport for this stretch of the Tunisian coast",
+   "note": "The operator's airline page lists 23 airlines, all European and many of them holiday and charter carriers (TUI Group, easyJet UK, Enter Air, Smartwings, Neos). Travel Weekly reports TUI adding Enfidha from Stansted to its summer 2025 holiday programme. The airport carries Hammamet in its name.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-27",
+     "quote": "The airport is mostly used by European airlines bringing travellers to Tunisian holiday resorts."
+    },
+    {
+     "file": "travelweekly-tui",
+     "org": "Travel Weekly (UK travel trade press)",
+     "dated": "2024-04-03 (on the page)",
+     "quote": [
+      "Stansted will see a new route to Enfidha",
+      "customers being able to fly on more Tui holidays from their local airport than ever before",
+      "Apr 3, 2024"
+     ]
+    },
+    {
+     "file": "op-airlines",
+     "org": "TAV Tunisie (the airport operator, enfidhahammametairport.com)",
+     "dated": "read 2026-09-23 (the airport's airline page)",
+     "quote": [
+      "TUI Group",
+      "EASYJET UK",
+      "ENTER AIR",
+      "SMARTWINGS",
+      "NEOS"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "at Enfidha",
+   "verdict": "confirmed",
+   "inAfter": "at Enfidha",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Enfidha"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-27",
+     "quote": "is an airport in Enfidha, Tunisia"
+    }
+   ]
+  },
+  {
+   "claim": "about 40 km south west of Hammamet",
+   "verdict": "confirmed",
+   "inAfter": "about 40 km south west of Hammamet.",
+   "note": "Coordinates: 39.4 km from the GeoNames centre of Hammamet at 204 degrees, inside the check for south west.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Hammamet (GeoNames 2473744): 39.4 km (24.5 miles), bearing 204 degrees, which is south west"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-27",
+     "quote": "located about 40 kilometres (25 miles) southwest from the town of Hammamet"
+    }
+   ]
+  },
+  {
+   "claim": "its airlines are mostly European",
+   "verdict": "softened",
+   "inAfter": "Its airlines are mostly European",
+   "note": "Was 'Most of the traffic is European airlines'. The operator's airline page lists 23 airlines and every one is European, from airBaltic and Brussels Airlines to LOT, Luxair, TUI and easyJet UK, but it gives no traffic shares, so the text now speaks of the airlines rather than the traffic. 'Mostly' is Wikipedia's word.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "TAV Tunisie (the airport operator, enfidhahammametairport.com)",
+     "dated": "read 2026-09-23 (the airport's airline page)",
+     "quote": [
+      "AIR BALTIC",
+      "BRUSSELS AIRLINES",
+      "LOT - POLSKIE LINIE LOTNICZE (POLISH AIRLINES)",
+      "LUXAIR",
+      "EASYJET UK",
+      "TUI Group"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-27",
+     "quote": "The airport is mostly used by European airlines"
+    }
+   ]
+  },
+  {
+   "claim": "bringing clients to the resorts",
+   "verdict": "confirmed",
+   "inAfter": "bringing clients to the resorts",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-27",
+     "quote": "bringing travellers to Tunisian holiday resorts"
+    },
+    {
+     "file": "travelweekly-tui",
+     "org": "Travel Weekly (UK travel trade press)",
+     "dated": "2024-04-03 (on the page)",
+     "quote": [
+      "Stansted will see a new route to Enfidha",
+      "customers being able to fly on more Tui holidays from their local airport than ever before"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the timetable is heavily seasonal",
+   "verdict": "confirmed",
+   "inAfter": "so the timetable is heavily seasonal.",
+   "note": "TAV reports Monastir and Enfidha together: 122,788 passengers in December 2025 and 100,967 in January 2026, against 3,198,931 for the whole of 2025, so a winter month carries under 4 per cent of the year where an even spread would be about 8. TUI's Enfidha route from Stansted came as part of its summer programme (Travel Weekly). No source splits the seasonal pattern for Enfidha alone.",
+   "sources": [
+    {
+     "file": "tav-fy25",
+     "org": "TAV Airports (the operator, ir.tav.aero)",
+     "dated": "2026-02-17 (2025 full year investor presentation, date on its first page)",
+     "quote": [
+      "February 17, 2026",
+      "Monastir and Enfidha (100%)",
+      "December Chg. Jan-Dec Chg.",
+      "Tunisia 114.362 122.788 7% 2.925.073 3.198.931 9%",
+      "Tunisia 93.935 100.967 7%"
+     ]
+    },
+    {
+     "file": "travelweekly-tui",
+     "org": "Travel Weekly (UK travel trade press)",
+     "dated": "2024-04-03 (on the page)",
+     "quote": [
+      "Tui has added 345,000 seats to its summer 2025 programme",
+      "Stansted will see a new route to Enfidha"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "most of the traffic is European airlines",
+   "verdict": "cut",
+   "wasBefore": "Most of the traffic is European airlines bringing clients to the resorts",
+   "why": "No source gives traffic shares by airline. Softened to the airlines themselves (above)."
+  },
+  {
+   "claim": "a bus to the town of Enfidha, and louages from there to Tunis and Sousse",
+   "verdict": "cut",
+   "wasBefore": "There is a bus from the airport into the nearby town of Enfidha, and from there louages, the Tunisian shared taxis, run to Tunis and Sousse.",
+   "why": "Wikipedia alone for where the bus goes and for the louages. The operator's 2021 fact sheet lists bus, taxi and tourist taxi as the transport options, with no destinations, and is five years old. The operator's transport page today shows only headings (how to reach the airport, rail, car hire, airport taxi), and its detail page answered 404 to a plain fetch, which the brief does not allow a browser retry for.",
+   "sources": [
+    {
+     "file": "tav-enfidha-2021",
+     "org": "TAV Tunisie (the airport operator, fact sheet on webcmsnbe.tav.aero)",
+     "dated": "2021 (the sheet's own title)",
+     "quote": [
+      "ENFIDHA-HAMMAMET INTERNATIONAL AIRPORT IN NUMBERS - 2021",
+      "BUS, TAXI, TOURISTIC TAXI"
+     ]
+    },
+    {
+     "file": "op-transport",
+     "org": "TAV Tunisie (the airport operator, enfidhahammametairport.com)",
+     "dated": "read 2026-09-23",
+     "quote": "How to Reach the Airport,Rail Transportation,Rent A Car,Airport Taxi"
+    }
+   ]
+  },
+  {
+   "claim": "about 1.3 million passengers in 2024, close to the 1.453 million of 2019",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing (the old text gave no traffic figure). The operator's history page and the Wikipedia infobox agree on 2024 (1.3 million; 1,290,699). TAV reports 2025 only for Monastir and Enfidha together (3,198,931).",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "TAV Tunisie (the airport operator, enfidhahammametairport.com)",
+     "dated": "read 2026-09-23 (the airport's history page)",
+     "quote": [
+      "In 2019, considered the reference year before the COVID-19 pandemic, the airport handled 1.453 million passengers.",
+      "recording 1.3 million passengers, nearly returning to pre-pandemic levels"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-27",
+     "quote": [
+      "stat1_data = 1,290,699",
+      "stat_year = 2024"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "TUI flies here, including from Stansted",
+   "verdict": "cut",
+   "why": "Held back: new facts that replace nothing, useful to a UK agent. The operator's airline list includes TUI Group, and Travel Weekly reported TUI adding Enfidha from Stansted for summer 2025 (April 2024, older than twelve months). The operator's list also includes easyJet UK, on that one source only.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "TAV Tunisie (the airport operator, enfidhahammametairport.com)",
+     "dated": "read 2026-09-23 (the airport's airline page)",
+     "quote": [
+      "TUI Group",
+      "EASYJET UK"
+     ]
+    },
+    {
+     "file": "travelweekly-tui",
+     "org": "Travel Weekly (UK travel trade press)",
+     "dated": "2024-04-03 (on the page)",
+     "quote": "Stansted will see a new route to Enfidha"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO advises against all travel to parts of Tunisia",
+   "verdict": "cut",
+   "why": "Held back: a warning that replaces nothing. The FCDO advises against all travel to parts of Tunisia, in the Algerian border area in the west and the Libyan border area in the south (updated 24 July 2026, still current 23 September 2026). Enfidha and Hammamet are not in those areas.",
+   "sources": [
+    {
+     "file": "fcdo-tunisia",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-24 (updated; still current 23 September 2026)",
+     "quote": [
+      "FCDO advises against all travel to parts of Tunisia.",
+      "Still current at: 23 September 2026",
+      "Updated: 24 July 2026",
+      "Western Tunisia, including the Tunisia-Algeria border",
+      "Southern Tunisia, including the Tunisia-Libya border"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Ground transport is the part that needs organising.",
+   "why": "The old text's framing, kept. The airport is about 40 km from Hammamet (coordinates), and neither source shows a direct public link to the resorts: the operator's 2021 fact sheet names only bus, taxi and tourist taxi."
+  },
+  {
+   "text": "For most clients a pre-booked resort transfer is the practical answer.",
+   "why": "The old text's advice, kept, for the same reason. The unconfirmed bus and louage details that led to it are cut."
+  }
+ ],
+ "tracerOk": {}
+}

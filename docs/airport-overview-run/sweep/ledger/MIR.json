@@ -1,0 +1,324 @@
+{
+ "iata": "MIR",
+ "id": "recVWK5wwa5WJaxVW",
+ "name": "Monastir Habib Bourguiba International Airport",
+ "country": "Tunisia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Monastir_Habib_Bourguiba_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The resort airport for Monastir and Sousse, and the arrival point for Monastir-Skanes and Port El Kantaoui. Almost all of its charter flying is concentrated in the tourist season, with Nouvelair and Tunisair the main carriers.\n\nThe traffic figures tell a clear story. The airport led Tunisia with 4,279,802 passengers in 2007, was down to 1.586 million by 2019 and 420,000 in 2021, and has climbed back steadily since to 1.6 million in 2024. Against a terminal rated for 3.5 million a year, that leaves plenty of room.\n\nThe train is a genuine advantage here. The airport is on the electrified Sahel Metro line between Sousse and Monastir, so a client can reach either town by rail rather than by coach.\n\nThe airport opened in 1968 and has been run by TAV Airports Holding since 2008, on rights that run to May 2047.\n\nIt is named after Habib Bourguiba, the former president, who was born in Monastir.",
+ "after": "The resort airport for Monastir and Sousse. Its traffic is concentrated in the tourist season, and Nouvelair and Tunisair both fly here.\n\nThe airport handled 1.586 million passengers in 2019, fell to 420,000 in 2021 and has climbed back steadily since, to 1.6 million in 2024. Against a capacity of about 3.5 million a year, that leaves plenty of room.\n\nThe train is a genuine advantage here. Trains on the electrified Sahel Metro line stop at the airport, between Sousse and Monastir, so a client can reach either town by rail rather than by coach.\n\nThe airport opened in 1968 and has been run by TAV Airports Holding since 2008, on rights that run to May 2047.\n\nIt is named after Habib Bourguiba.",
+ "claims": [
+  {
+   "claim": "the resort airport for Monastir and Sousse",
+   "verdict": "confirmed",
+   "inAfter": "The resort airport for Monastir and Sousse.",
+   "note": "The operator calls the airport an entry point for vacationers and Monastir one of Tunisia's best tourist destinations, and its rail page puts the airport's stop on the line from Sousse to the city of Monastir. Coordinates: 6.8 km from the GeoNames centre of Monastir.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "TAV Tunisie (the airport operator, habibbourguibaairport.com)",
+     "dated": "read 2026-09-23 (the airport's About page)",
+     "quote": "Monastir Habib Bourguiba International airport is a prestigious and much praised entry point for vacationers and visitors of Tunisia."
+    },
+    {
+     "file": "op-history",
+     "org": "TAV Tunisie (the airport operator, habibbourguibaairport.com)",
+     "dated": "read 2026-09-23 (the airport's history page)",
+     "quote": "located in the southern west of Monastir city one of the best touristic destinations in Tunisia"
+    },
+    {
+     "file": "op-rail",
+     "org": "TAV Tunisie (the airport operator, habibbourguibaairport.com)",
+     "dated": "read 2026-09-23 (the airport's rail page)",
+     "quote": "serving Sousse Bab Jedid, Sousse Sud, the Sousse industrial zone, Sahline, Habib Bourguiba Airport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-04",
+     "quote": [
+      "is an airport serving Monastir and Sousse areas in Tunisia",
+      "The airport activity mainly serves tourists coming to visit Monastir, Sousse and the surrounding resorts"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "its traffic is concentrated in the tourist season",
+   "verdict": "softened",
+   "inAfter": "Its traffic is concentrated in the tourist season",
+   "note": "Was 'Almost all of its charter flying is concentrated in the tourist season'. No source splits charter from scheduled flying. TAV reports Monastir and Enfidha together: 122,788 passengers in December 2025 and 100,967 in January 2026, against 3,198,931 for the whole of 2025, so a winter month carries under 4 per cent of the year where an even spread would be about 8.",
+   "sources": [
+    {
+     "file": "tav-fy25",
+     "org": "TAV Airports (the operator, ir.tav.aero)",
+     "dated": "2026-02-17 (2025 full year investor presentation, date on its first page)",
+     "quote": [
+      "February 17, 2026",
+      "Monastir and Enfidha (100%)",
+      "December Chg. Jan-Dec Chg.",
+      "Tunisia 114.362 122.788 7% 2.925.073 3.198.931 9%",
+      "Tunisia 93.935 100.967 7%"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-04",
+     "quote": "Almost all charter flights are concentrated within the tourist season."
+    }
+   ]
+  },
+  {
+   "claim": "Nouvelair and Tunisair both fly here",
+   "verdict": "softened",
+   "inAfter": "and Nouvelair and Tunisair both fly here.",
+   "note": "Was 'with Nouvelair and Tunisair the main carriers'. The operator's airline page lists both among about 30 airlines but does not rank them, so 'main' is dropped. Nouvelair's own flight board for 23 September 2026 shows its flights into Monastir from Nice, Moscow and Belgrade.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "TAV Tunisie (the airport operator, habibbourguibaairport.com)",
+     "dated": "read 2026-09-23 (the airport's airline page)",
+     "quote": [
+      "NOUVELAIR IATA: BJ",
+      "TUNISAIR IATA: TU"
+     ]
+    },
+    {
+     "file": "nouvelair-vols",
+     "org": "Nouvelair (nouvelair.com, live flight board)",
+     "dated": "2026-09-23 (the board's date)",
+     "quote": [
+      "23 SEP 2026",
+      "BJ 0595 Nice 20:26 Monastir 21:04"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-04",
+     "quote": "The main airlines operating currently at the airport are Nouvelair and Tunisair."
+    }
+   ]
+  },
+  {
+   "claim": "1.586 million passengers in 2019, 420,000 in 2021, climbing steadily to 1.6 million in 2024",
+   "verdict": "confirmed",
+   "inAfter": "The airport handled 1.586 million passengers in 2019, fell to 420,000 in 2021 and has climbed back steadily since, to 1.6 million in 2024.",
+   "note": "Reworded, as the 2007 figure it followed is cut. The operator's history page gives every year: 1.586 million (2019), 0.42 million (2021), 1.01 million (2022), 1.5 million (2023) and 1.6 million (2024); the Wikipedia infobox has 1,634,374 for 2024. 2024 is the latest year the operator gives for Monastir alone: TAV's 2025 results report Monastir and Enfidha together (3,198,931, up 9 per cent).",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "TAV Tunisie (the airport operator, habibbourguibaairport.com)",
+     "dated": "read 2026-09-23 (the airport's history page)",
+     "quote": [
+      "In 2019 (year of reference and pre- covid-19) Monastir airport recorded 1.586 million passengers.",
+      "In 2021 (post Covid), the airport recorded 0.42 million and shows a good return In 2022 and 2023 recording 1.01 million and 1.5 million passengers, respectively.",
+      "In 2024, the number of pasengers continue its increase to reach 1.6 million."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-04",
+     "quote": [
+      "In 2019 Monastir airport recorded 1.586 million passengers. In 2021 (post Covid), the airport recorded 0.42 million.",
+      "In 2024, the number of passengers continue its increase to reach 1.6 million."
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-04",
+     "quote": [
+      "stat1_data = 1,634,374",
+      "stat_year = 2024"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a capacity of about 3.5 million a year, which leaves plenty of room",
+   "verdict": "confirmed",
+   "inAfter": "Against a capacity of about 3.5 million a year, that leaves plenty of room.",
+   "note": "Was 'a terminal rated for 3.5 million a year'. The operator gives the airport's capacity as around 3.5 million a year, Wikipedia the terminal's; 1.6 million in 2024 is under half of it.",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "TAV Tunisie (the airport operator, habibbourguibaairport.com)",
+     "dated": "read 2026-09-23 (the airport's history page)",
+     "quote": "The passenger capacity of Monastir Airport is around 3. 5 million per year."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-04",
+     "quote": "With a capacity of 3.5 million passengers per year, the terminal covers 28,000 m2."
+    }
+   ]
+  },
+  {
+   "claim": "the airport has its own stop on the electrified Sahel Metro, between Sousse and Monastir",
+   "verdict": "confirmed",
+   "inAfter": "Trains on the electrified Sahel Metro line stop at the airport, between Sousse and Monastir, so a client can reach either town by rail rather than by coach.",
+   "note": "Reworded so the line is not read as ending at Monastir: the operator's rail page has it running from Sousse Bab Jedid through the airport's stop and the city of Monastir on to Mahdia, with electric trains. The airport's stop sits between Sahline, on the Sousse side, and the Eddkhila tourist area and Monastir.",
+   "sources": [
+    {
+     "file": "op-rail",
+     "org": "TAV Tunisie (the airport operator, habibbourguibaairport.com)",
+     "dated": "read 2026-09-23 (the airport's rail page)",
+     "quote": [
+      "This line connects Sousse Bab Jedid to Mahdia",
+      "serving Sousse Bab Jedid, Sousse Sud, the Sousse industrial zone, Sahline, Habib Bourguiba Airport, a large part of the Eddkhila tourist area, the Monastir university campus, the city of Monastir",
+      "Replacing the old electric equipment, the fleet currently has seven electric multiple units (EMUs)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-04",
+     "quote": "The airport is served by trains on the electrified, metre-gauge Sahel Metro line and between Sousse and Gare Habib Bourguiba Monastir."
+    }
+   ]
+  },
+  {
+   "claim": "opened in 1968",
+   "verdict": "confirmed",
+   "inAfter": "The airport opened in 1968",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "TAV Tunisie (the airport operator, habibbourguibaairport.com)",
+     "dated": "read 2026-09-23 (the airport's history page)",
+     "quote": "started its operations in1968 under the Office of Civil Aviation and Airports (OACA)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-04",
+     "quote": "Monastir Airport first began operating in 1968 under the control of the Office of Civil Aviation and Airports."
+    }
+   ]
+  },
+  {
+   "claim": "run by TAV Airports Holding since 2008, on rights to May 2047",
+   "verdict": "confirmed",
+   "inAfter": "has been run by TAV Airports Holding since 2008, on rights that run to May 2047.",
+   "note": "TAV won the tender in May 2007 and took over in 2008 (the operator); Wikipedia's lead dates the award to March 2007, its body the rights to 2008. TAV's 2025 results still list Monastir as 100 per cent TAV's.",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "TAV Tunisie (the airport operator, habibbourguibaairport.com)",
+     "dated": "read 2026-09-23 (the airport's history page)",
+     "quote": [
+      "In May 2007 TAV airports announced as the winner bidder",
+      "to take over the operation of Monastir airport in 2008 to hold the right to operate it until May 2047",
+      "TAV Airports Holding"
+     ]
+    },
+    {
+     "file": "tav-fy25",
+     "org": "TAV Airports (the operator, ir.tav.aero)",
+     "dated": "2026-02-17 (2025 full year investor presentation, date on its first page)",
+     "quote": "Monastir and Enfidha (100%)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-04",
+     "quote": "The rights were given from 2008 and expire in May 2047"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-04",
+     "quote": "operator = TAV Airports Holding"
+    }
+   ]
+  },
+  {
+   "claim": "named after Habib Bourguiba",
+   "verdict": "softened",
+   "inAfter": "It is named after Habib Bourguiba.",
+   "note": "The operator's pages carry the full name, Monastir Habib Bourguiba International Airport. That he was the former president and born in Monastir rests on Wikipedia alone and is cut (below).",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "TAV Tunisie (the airport operator, habibbourguibaairport.com)",
+     "dated": "read 2026-09-23 (the airport's About page)",
+     "quote": "Monastir Habib Bourguiba International airport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-04",
+     "quote": "The airport is named after former president Habib Bourguiba"
+    }
+   ]
+  },
+  {
+   "claim": "the arrival point for Monastir-Skanes and Port El Kantaoui",
+   "verdict": "cut",
+   "wasBefore": "and the arrival point for Monastir-Skanes and Port El Kantaoui",
+   "why": "Wikipedia alone. The operator's rail page names the Eddkhila tourist area on the Metro line, not these resorts, and no second source was found."
+  },
+  {
+   "claim": "almost all charter flying in the tourist season",
+   "verdict": "cut",
+   "wasBefore": "Almost all of its charter flying is concentrated in the tourist season",
+   "why": "No source splits charter from scheduled flying, and TAV's monthly figures cover Monastir and Enfidha together. Softened (above)."
+  },
+  {
+   "claim": "Nouvelair and Tunisair the main carriers",
+   "verdict": "cut",
+   "wasBefore": "with Nouvelair and Tunisair the main carriers",
+   "why": "The operator lists both among about 30 airlines without ranking them. Softened to both flying here (above)."
+  },
+  {
+   "claim": "the traffic figures tell a clear story",
+   "verdict": "cut",
+   "wasBefore": "The traffic figures tell a clear story.",
+   "why": "Framing for the fall from the 2007 peak, which is cut (below)."
+  },
+  {
+   "claim": "led Tunisia with 4,279,802 passengers in 2007",
+   "verdict": "cut",
+   "wasBefore": "The airport led Tunisia with 4,279,802 passengers in 2007",
+   "why": "Wikipedia alone. The operator's history gives figures from 2019 only, and OACA, which ran the airport in 2007, could not be reached (oaca.nat.tn failed to connect when tried for Tunis, one try)."
+  },
+  {
+   "claim": "the former president, born in Monastir",
+   "verdict": "cut",
+   "wasBefore": "the former president, who was born in Monastir",
+   "why": "Wikipedia alone. The operator's pages give only the name, and a look at a Tunisian tourism site (discovertunisia.com, links only, nothing saved) found no page on Monastir or Bourguiba. Its ownership was not confirmed either."
+  },
+  {
+   "claim": "FCDO advises against all travel to parts of Tunisia",
+   "verdict": "cut",
+   "why": "Held back: a warning that replaces nothing. The FCDO advises against all travel to parts of Tunisia, in the Algerian border area in the west and the Libyan border area in the south (updated 24 July 2026, still current 23 September 2026). Monastir and Sousse are not in those areas.",
+   "sources": [
+    {
+     "file": "fcdo-tunisia",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-24 (updated; still current 23 September 2026)",
+     "quote": [
+      "FCDO advises against all travel to parts of Tunisia.",
+      "Still current at: 23 September 2026",
+      "Updated: 24 July 2026",
+      "Western Tunisia, including the Tunisia-Algeria border",
+      "Southern Tunisia, including the Tunisia-Libya border"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The train is a genuine advantage here.",
+   "why": "The old text's framing, kept: the airport has its own stop, and the operator's rail page gives a train every 40 minutes on average, 46 a day, between 5 am and 10 pm."
+  }
+ ],
+ "tracerOk": {
+  "420,000": "Both sources write it 0.42 million (the operator: 'the airport recorded 0.42 million'; Wikipedia: 'the airport recorded 0.42 million'). See the traffic claim."
+ }
+}

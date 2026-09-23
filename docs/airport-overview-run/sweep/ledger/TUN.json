@@ -1,0 +1,285 @@
+{
+ "iata": "TUN",
+ "id": "recSl4XM3IwtnmjYp",
+ "name": "Tunis Carthage International Airport",
+ "country": "Tunisia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Tunis%E2%80%93Carthage_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Tunisia's main airport and the capital's own, named after Carthage, which lies just to the east. It is the home base for Tunisair, Tunisair Express, Nouvelair and Tunisavia.\n\nThe site has been in aviation since 1920, when Tunisia's first seaplane base was built on the Lake of Tunis. A land airfield followed in 1938, carrying around 5,800 passengers a year on the Paris to Tunis run.\n\nThe Second World War made it important. The United States Twelfth Air Force used it as a headquarters and command base for the Italian campaign of 1943, and once the combat units moved on it became a major transshipment hub for cargo and personnel, a stop on the Cairo to Dakar route across North Africa.\n\nThe present airport was built from 1944 with French funding and became Tunisair's main hub in 1948, the airline flying DC-3s to Marseille, Rome, Algiers, Tripoli and down to Djerba and Sfax. Through the 1950s it was a regular stopover for Air France, TWA and others on long haul routes.\n\nThe Tunisian Civil Aviation and Airports Authority has its head office here.",
+ "after": "Tunis-Carthage is Tunisia's main airport and the capital's own. It is the home base for Tunisair, and Tunisair Express and Nouvelair also fly from here.",
+ "claims": [
+  {
+   "claim": "Tunis-Carthage is Tunisia's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Tunis-Carthage is Tunisia's main airport",
+   "note": "Main means busiest. OACA's 2024 figures, as Mosaique FM reported them on 5 January 2025, give Tunis-Carthage 7,249,701 of the 12.538 million passengers at all Tunisian airports, more than half; Djerba-Zarzis came next among OACA's airports with 2,203,957. TAV's two Tunisian airports, Monastir and Enfidha, handled 2,925,073 between them in 2024 and 3,198,931 in 2025 (TAV, 17 February 2026). The Wikipedia infobox has the same 7,249,701 for 2024. The name is written Tunis-Carthage by OACA's figures, Tunisair and Tunisair Express alike. No 2025 figure for Tunis-Carthage itself was found.",
+   "sources": [
+    {
+     "file": "mosaique-2024",
+     "org": "Mosaique FM (Tunisian radio, reporting an OACA communiqué)",
+     "dated": "2025-01-05 (on the page)",
+     "quote": [
+      "2025/01/05 12:04",
+      "enregistrant un nombre record de 12,538 millions de voyageurs",
+      "l'Aéroport Tunis-Carthage a accueilli un nombre record de passagers qui s'établit à 7.249.701",
+      "alors que le trafic sur l'aéroport Djerba-Zarzis a augmenté de 12.8% avec un nombre total de 2.203.957 passagers reçus"
+     ]
+    },
+    {
+     "file": "tav-fy25",
+     "org": "TAV Airports (operator of Monastir and Enfidha, ir.tav.aero)",
+     "dated": "2026-02-17 (2025 full year investor presentation, date on its first page)",
+     "quote": [
+      "2025 FULL YEAR",
+      "February 17, 2026",
+      "Monastir and Enfidha (100%)",
+      "Tunisia 114.362 122.788 7% 2.925.073 3.198.931 9%"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-21",
+     "quote": [
+      "stat1_data = 7,249,701",
+      "stat_year = 2024"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the capital's own airport",
+   "verdict": "confirmed",
+   "inAfter": "and the capital's own.",
+   "note": "Coordinates: 6.5 km from the GeoNames centre of Tunis, the national capital.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "City centre: Tunis (GeoNames 2464470)",
+      "GeoNames class PPLC, the national capital",
+      "Straight-line distance from the city centre: 6.5 km (4.1 miles)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-21",
+     "quote": "is the international airport of Tunis, the capital of Tunisia"
+    }
+   ]
+  },
+  {
+   "claim": "the home base for Tunisair",
+   "verdict": "confirmed",
+   "inAfter": "It is the home base for Tunisair",
+   "note": "Tunisair's own site gives its head office as Charguia II, 2035 Tunis - Carthage, lists sales desks at Tunis-Carthage airport, and sells its lounge only for departures from Tunis Carthage. No Tunisair page uses the word hub; the Wikipedia infobox lists it as one.",
+   "sources": [
+    {
+     "file": "tunisair-contact",
+     "org": "Tunisair (tunisair.com)",
+     "dated": "read 2026-09-23",
+     "quote": [
+      "au Siège Social de Tunisair, Direction Relation Clientèle et Call center, Charguia II - 2035 Tunis - Carthage",
+      "Agences Aéroport de Tunis-Carthage"
+     ]
+    },
+    {
+     "file": "tunisair-lounge",
+     "org": "Tunisair (tunisair.com)",
+     "dated": "read 2026-09-23",
+     "quote": "Ce service est exclusivement disponible au départ de l'aéroport Tunis Carthage."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-21",
+     "quote": "It serves as the home base for Tunisair, Tunisair Express, Nouvelair Tunisia, and Tunisavia."
+    }
+   ]
+  },
+  {
+   "claim": "Tunisair Express flies from here",
+   "verdict": "softened",
+   "inAfter": "and Tunisair Express and Nouvelair also fly from here.",
+   "note": "Was 'home base'. Tunisair Express's own list of the airports it serves includes Tunis-Carthage, and its office is at Charguia II, Tunis, but none of its pages calls Tunis its base, so the text says only that it flies from here. The site is live (footer 2026) and sells flights from Tunis Carthage.",
+   "sources": [
+    {
+     "file": "tunisair-express-aeroports",
+     "org": "Tunisair Express (tunisairexpress.net)",
+     "dated": "read 2026-09-23 (page footer 2026)",
+     "quote": [
+      "Voici la liste des aéroports desservis par Tunisair Express.",
+      "Aéroport international de Tunis-Carthage",
+      "2026 Tunisair Express"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-21",
+     "quote": "It serves as the home base for Tunisair, Tunisair Express, Nouvelair Tunisia, and Tunisavia."
+    }
+   ]
+  },
+  {
+   "claim": "Nouvelair flies from here",
+   "verdict": "softened",
+   "inAfter": "Nouvelair also fly from here.",
+   "note": "Was 'home base'. Nouvelair's live flight board for 23 September 2026 shows its flights between Tunis and Rabat, Nice and Bologna, alongside flights at Monastir and Djerba; none of its readable pages says which airport is its base, so the text says only that it flies from here.",
+   "sources": [
+    {
+     "file": "nouvelair-vols",
+     "org": "Nouvelair (nouvelair.com, live flight board)",
+     "dated": "2026-09-23 (the board's date)",
+     "quote": [
+      "23 SEP 2026",
+      "BJ 0180 Tunis 19:20 Rabat 21:38 Atterri",
+      "BJ 0613 Bologne 22:00 Tunis 22:30"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-21",
+     "quote": "It serves as the home base for Tunisair, Tunisair Express, Nouvelair Tunisia, and Tunisavia."
+    }
+   ]
+  },
+  {
+   "claim": "named after Carthage, which lies just to the east",
+   "verdict": "cut",
+   "wasBefore": "named after Carthage, which lies just to the east",
+   "why": "Wikipedia alone. The name Tunis-Carthage is kept (above); no second source says where Carthage lies from the airport, and OACA's site could not be reached."
+  },
+  {
+   "claim": "home base for Tunisair Express, Nouvelair and Tunisavia",
+   "verdict": "cut",
+   "wasBefore": "It is the home base for Tunisair, Tunisair Express, Nouvelair and Tunisavia.",
+   "why": "Home base is confirmed for Tunisair only. Tunisair Express and Nouvelair are softened to flying from here (above). Tunisavia rests on Wikipedia alone: no Tunisavia page was found to show it is still based or flying here."
+  },
+  {
+   "claim": "in aviation since 1920, Tunisia's first seaplane base on the Lake of Tunis",
+   "verdict": "cut",
+   "wasBefore": "The site has been in aviation since 1920, when Tunisia's first seaplane base was built on the Lake of Tunis.",
+   "why": "Wikipedia alone. OACA, the operator, whose history this would be, could not be reached: oaca.nat.tn failed to connect through the proxy (remote connection failure, one try)."
+  },
+  {
+   "claim": "a land airfield in 1938, about 5,800 passengers a year on the Paris to Tunis run",
+   "verdict": "cut",
+   "wasBefore": "A land airfield followed in 1938, carrying around 5,800 passengers a year on the Paris to Tunis run.",
+   "why": "Wikipedia alone; no second source found."
+  },
+  {
+   "claim": "the Second World War made it important",
+   "verdict": "cut",
+   "wasBefore": "The Second World War made it important.",
+   "why": "Framing for the wartime sentence, which is cut (below)."
+  },
+  {
+   "claim": "USAAF Twelfth Air Force headquarters for the Italian campaign; transshipment hub on the Cairo to Dakar route",
+   "verdict": "cut",
+   "wasBefore": "The United States Twelfth Air Force used it as a headquarters and command base for the Italian campaign of 1943, and once the combat units moved on it became a major transshipment hub for cargo and personnel, a stop on the Cairo to Dakar route across North Africa.",
+   "why": "Wikipedia alone. The article credits public-domain material from the US Air Force Historical Research Agency but cites only that agency's home page, and the page it came from could not be found without a search."
+  },
+  {
+   "claim": "the present airport built from 1944 with French funding",
+   "verdict": "cut",
+   "wasBefore": "The present airport was built from 1944 with French funding",
+   "why": "Wikipedia alone; no second source found (OACA's site could not be reached)."
+  },
+  {
+   "claim": "Tunisair's main hub from 1948, flying DC-3s to Marseille, Rome, Algiers, Tripoli, Djerba and Sfax",
+   "verdict": "cut",
+   "wasBefore": "became Tunisair's main hub in 1948, the airline flying DC-3s to Marseille, Rome, Algiers, Tripoli and down to Djerba and Sfax.",
+   "why": "Only Wikipedia ties the 1948 start and the DC-3 routes to this airport. Tunisair's own history has the company founded in 1948 with four DC-3s and flying commercially only from 1 April 1949, and names neither the airport nor the routes.",
+   "sources": [
+    {
+     "file": "tunisair-histoire",
+     "org": "Tunisair (tunisair.com)",
+     "dated": "read 2026-09-23 (the company's history page)",
+     "quote": [
+      "Le 21 octobre 1948 marque le début officiel de TUNISAIR avec la parution du décret approuvant ses statuts.",
+      "exploiter quatre avions Dakota (DC-3) acquis auprès de l’armée américaine",
+      "Début de l’exploitation commerciale, initialement sous affrètement d’Air France."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a regular 1950s stopover for Air France, TWA and others on long haul routes",
+   "verdict": "cut",
+   "wasBefore": "Through the 1950s it was a regular stopover for Air France, TWA and others on long haul routes.",
+   "why": "Wikipedia alone; no second source found."
+  },
+  {
+   "claim": "OACA has its head office here",
+   "verdict": "cut",
+   "wasBefore": "The Tunisian Civil Aviation and Airports Authority has its head office here.",
+   "why": "Wikipedia alone. OACA's own site (oaca.nat.tn) failed to connect (remote connection failure, one try) and the transport ministry's site (transport.tn) answered 405 to the link lister (one try). Neither was retried."
+  },
+  {
+   "claim": "7,249,701 passengers in 2024, a record, up 8.8 per cent",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing (the old text gave no traffic figure). OACA's 2024 figure, reported by Mosaique FM on 5 January 2025, matches the Wikipedia infobox. No 2025 figure for Tunis-Carthage was found.",
+   "sources": [
+    {
+     "file": "mosaique-2024",
+     "org": "Mosaique FM (Tunisian radio, reporting an OACA communiqué)",
+     "dated": "2025-01-05 (on the page)",
+     "quote": "l'Aéroport Tunis-Carthage a accueilli un nombre record de passagers qui s'établit à 7.249.701, soit une hausse de 8.8% par rapport à 2023"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-21",
+     "quote": "stat1_data = 7,249,701"
+    }
+   ]
+  },
+  {
+   "claim": "OACA runs the airport",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing (the old text named OACA only for its head office, which is cut). OACA's communiqué counts Tunis-Carthage among the airports it runs, and the Wikipedia infobox names it as operator.",
+   "sources": [
+    {
+     "file": "mosaique-2024",
+     "org": "Mosaique FM (Tunisian radio, reporting an OACA communiqué)",
+     "dated": "2025-01-05 (on the page)",
+     "quote": [
+      "L'OACA a souligné, dans un communiqué, que 9.646.949 passagers ont été accueillis dans les aéroports qu'il exploite",
+      "D'après la même source, l'Aéroport Tunis-Carthage a accueilli"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-21",
+     "quote": "operator = Tunisian Civil Aviation & Airports Authority"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO advises against all travel to parts of Tunisia",
+   "verdict": "cut",
+   "why": "Held back: a warning that replaces nothing. The FCDO advises against all travel to parts of Tunisia, in the Algerian border area in the west and the Libyan border area in the south (updated 24 July 2026, still current 23 September 2026). Tunis is not in those areas.",
+   "sources": [
+    {
+     "file": "fcdo-tunisia",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-24 (updated; still current 23 September 2026)",
+     "quote": [
+      "FCDO advises against all travel to parts of Tunisia.",
+      "Still current at: 23 September 2026",
+      "Updated: 24 July 2026",
+      "Western Tunisia, including the Tunisia-Algeria border",
+      "Southern Tunisia, including the Tunisia-Libya border"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
