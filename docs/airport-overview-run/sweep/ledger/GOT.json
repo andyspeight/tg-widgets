@@ -1,0 +1,199 @@
+{
+ "iata": "GOT",
+ "id": "rec6wNQo6zOVvxkl5",
+ "name": "Göteborg Landvetter Airport",
+ "country": "Sweden",
+ "wikipedia": "https://en.wikipedia.org/wiki/G%C3%B6teborg_Landvetter_Airport",
+ "audited": "2026-09-23",
+ "before": "Sweden's second largest airport after Stockholm Arlanda, 20 km east south east of Gothenburg and 40 km west of Borås. It carried just over 5.3 million passengers in 2024 and is also a significant freight airport.\n\nSince Göteborg City Airport closed to commercial flights, this is the city's only passenger airport, so there is no alternative to weigh up.\n\nThe gate arrangement is worth knowing. The old domestic and international terminals merged into one building in 2014, and the transfer area with its shops and restaurants is open to all passengers. Gates 10 to 19 now handle everything inside the Schengen area, and gates 22 to 24 sit in the international transit area for non-Schengen flights. There are eleven air bridges at gates 12 to 17 and 19 to 23; the rest are bus gates, so not every departure walks onto the aircraft.\n\nThe airport is named after Landvetter, the locality it sits in, and is run by Swedavia.",
+ "after": "Sweden's second largest airport after Stockholm Arlanda, 20 km east south east of Gothenburg and 40 km west of Borås. It handled about 5.4 million passengers in 2025 and is also an important cargo airport.\n\nGöteborg City Airport no longer takes passenger flights, which leaves Landvetter as the city's only passenger airport. Not every departure boards by air bridge, as some gates are bus gates. The airport is run by Swedavia.",
+ "claims": [
+  {
+   "claim": "Sweden's second largest airport after Stockholm Arlanda",
+   "verdict": "confirmed",
+   "inAfter": "Sweden's second largest airport after Stockholm Arlanda",
+   "note": "Eurostat 2025: Arlanda 24,309,609, Landvetter 5,439,214, then Luleå 1,104,751. Swedavia's own page says 'Sweden's second largest airport'.",
+   "sources": [
+    {
+     "file": "swedavia-about",
+     "org": "Swedavia (operator, swedavia.com)",
+     "dated": "2026",
+     "quote": "was inaugurated on October 3, 1977 and is Sweden's second largest airport"
+    },
+    {
+     "file": "eurostat-se",
+     "org": "Eurostat",
+     "dated": "2026-09-23",
+     "quote": [
+      "Eurostat SE_ESSA STOCKHOLM/ARLANDA airport: passengers carried in 2025: 24,309,609",
+      "Eurostat SE_ESGG GOTEBORG/LANDVETTER airport: passengers carried in 2025: 5,439,214",
+      "Eurostat SE_ESPA LULEA/KALLAX airport: passengers carried in 2025: 1,104,751"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "it is Sweden's second-largest airport after Stockholm Arlanda"
+    }
+   ]
+  },
+  {
+   "claim": "20 km east south east of Gothenburg; 40 km west of Borås",
+   "verdict": "confirmed",
+   "inAfter": "20 km east south east of Gothenburg and 40 km west of Borås",
+   "note": "Coordinates: Gothenburg 19.2 km at 105 degrees (east south east is 112.5, so 7.5 degrees off; ratio 1.04); Borås 39.8 km at 261 degrees, west (ratio 1.01).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is 11 NM (20 km; 13 mi) east-southeast of Gothenburg and 40 km (25 mi) west of Borås"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 19.2 km (12.0 miles)",
+      "Bearing from the city centre: 105 degrees",
+      "Straight-line distance from Borås (GeoNames 2720501): 39.8 km (24.7 miles), bearing 261 degrees, which is west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 5.4 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled about 5.4 million passengers in 2025",
+   "note": "Was 'just over 5.3 million passengers in 2024' (true: Eurostat 5,335,959) but a year stale. 2025: Swedavia 5,436,212, Eurostat 5,439,214.",
+   "sources": [
+    {
+     "file": "swedavia-about",
+     "org": "Swedavia (operator, swedavia.com)",
+     "dated": "2026",
+     "quote": "Western Sweden’s international airport with 5,4 million passengers 2025"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "dated": "2026-09-23",
+     "quote": "Eurostat SE_ESGG Göteborg Landvetter Airport: passengers carried in 2025: 5,439,214"
+    }
+   ]
+  },
+  {
+   "claim": "an important cargo airport",
+   "verdict": "confirmed",
+   "inAfter": "is also an important cargo airport",
+   "note": "Was 'significant freight airport'. 'Important' is Wikipedia's word; Swedavia calls Landvetter 'a hub for intercontinental air cargo'.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Landvetter is also an important freight airport"
+    },
+    {
+     "file": "swedavia-about",
+     "org": "Swedavia (operator, swedavia.com)",
+     "dated": "2026",
+     "quote": "we are a hub for intercontinental air cargo"
+    }
+   ]
+  },
+  {
+   "claim": "Göteborg City Airport no longer takes passenger flights; Landvetter is the city's only passenger airport",
+   "verdict": "confirmed",
+   "inAfter": "Göteborg City Airport no longer takes passenger flights, which leaves Landvetter as the city's only passenger airport.",
+   "note": "Säve's own site (Swedish): in 2015 all heavy jet traffic was moved away, 'marking the start of the transition away from commercial passenger traffic'; from 1 January 2026 the airfield is closed to general aviation and only rescue, ambulance and police helicopters may use it. Eurostat's 2025 list has no Säve (ESGP) row and no other Gothenburg airport. The heliport detail itself rests on Säve's site alone, so it is not in the text.",
+   "sources": [
+    {
+     "file": "save-home",
+     "org": "Säve Flygplats (operator of the former Göteborg City Airport, saveflygplats.com)",
+     "dated": "2026",
+     "quote": [
+      "Omfattande beslut fattas om att omdirigera all tung jettrafik från flygplatsen, vilket markerar början på övergången från kommersiell passagerartrafik.",
+      "Från 1 januari är flygplatsen stängd för allmän luftfart. Endast hemmahörande och besökande SAR-, ambulans- och polishelikoptrar tillåts."
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Since the closure of Göteborg City Airport for commercial operations, it's the city's only commercial passenger airport"
+    },
+    {
+     "file": "eurostat-se",
+     "org": "Eurostat",
+     "dated": "2026-09-23",
+     "quote": "Eurostat SE_ESGG GOTEBORG/LANDVETTER airport: passengers carried in 2025: 5,439,214"
+    }
+   ]
+  },
+  {
+   "claim": "some gates are bus gates; not every departure boards by air bridge",
+   "verdict": "confirmed",
+   "inAfter": "Not every departure boards by air bridge, as some gates are bus gates.",
+   "note": "Swedavia's terminal map (April 2024) marks 'Bussgate 24A–E' (Swedish for bus gate; the PDF's text layer splits it as '2 4A–E'). Wikipedia lists 10–11, 18A–H and 24A–E as bus gates and eleven air bridges.",
+   "sources": [
+    {
+     "file": "swedavia-map-pdf",
+     "org": "Swedavia (operator, swedavia.com)",
+     "dated": "2024-04",
+     "quote": "Bussgate 2 4A–E"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Gates 10–11, 18A–H and 24A–E transport passengers to the aircraft via an airside bus transfer"
+    }
+   ]
+  },
+  {
+   "claim": "run by Swedavia",
+   "verdict": "confirmed",
+   "inAfter": "The airport is run by Swedavia.",
+   "sources": [
+    {
+     "file": "swedavia-about",
+     "org": "Swedavia (operator, swedavia.com)",
+     "dated": "2026",
+     "quote": "The airport is owned and run by Swedavia."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is operated by Swedavia, the national airport company"
+    }
+   ]
+  },
+  {
+   "claim": "just over 5.3 million passengers in 2024; significant freight airport",
+   "verdict": "cut",
+   "wasBefore": "It carried just over 5.3 million passengers in 2024 and is also a significant freight airport.",
+   "why": "The 2024 figure was right (Eurostat 5,335,959) but a year old; replaced by 2025 above. The freight point is kept, reworded."
+  },
+  {
+   "claim": "terminals merged into one building in 2014; transfer area open to all",
+   "verdict": "cut",
+   "wasBefore": "The old domestic and international terminals merged into one building in 2014, and the transfer area with its shops and restaurants is open to all passengers.",
+   "why": "Wikipedia alone. Swedavia's map, FAQ, security and passport pages do not say it, and its 2025 annual report does not mention the terminal."
+  },
+  {
+   "claim": "gates 10 to 19 Schengen; gates 22 to 24 non-Schengen transit area",
+   "verdict": "cut",
+   "wasBefore": "Gates 10 to 19 now handle everything inside the Schengen area, and gates 22 to 24 sit in the international transit area for non-Schengen flights.",
+   "why": "Wikipedia alone. Swedavia's map shows passport control points but its text does not tie them to gate numbers."
+  },
+  {
+   "claim": "eleven air bridges at gates 12 to 17 and 19 to 23",
+   "verdict": "cut",
+   "wasBefore": "There are eleven air bridges at gates 12 to 17 and 19 to 23; the rest are bus gates, so not every departure walks onto the aircraft.",
+   "why": "The count and gate numbers rest on Wikipedia alone. The bus gates are kept (Swedavia's map)."
+  },
+  {
+   "claim": "named after Landvetter, the locality it sits in",
+   "verdict": "cut",
+   "wasBefore": "The airport is named after Landvetter, the locality it sits in, and is run by Swedavia.",
+   "why": "The name's origin rests on Wikipedia alone, and 'the locality it sits in' goes further than Wikipedia, which says only that Landvetter is a locality in Härryda municipality. Swedavia running it is kept."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
