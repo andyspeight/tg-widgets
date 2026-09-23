@@ -1,0 +1,123 @@
+{
+ "iata": "IAS",
+ "id": "recurB5Do9kMGEEdX",
+ "name": "Iaşi International Airport",
+ "country": "Romania",
+ "wikipedia": "https://en.wikipedia.org/wiki/Ia%C8%99i_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The most important airport in the Romanian region of Moldavia and third busiest in the country, 8 km east of central Iași.\n\nThe terminal split is the thing to get right. Passenger flights use two buildings: T4 handles all domestic and Schengen flights, and T3 handles non-Schengen. The older T1 is now offices and storage, and there are plans to turn the former T2 into a cargo terminal.\n\nGetting into the city is cheap and simple. CTP route 50 runs non-stop to Union Square and the railway station every 30 minutes, taking about 20 minutes, for 4 lei as of December 2025.\n\nThe airport is close enough to the border to be a practical arrival from the Republic of Moldova by road.\n\nIt is one of the oldest accredited airports in Romania. Scheduled flights on the Bucharest to Galați to Iași to Chișinău route began on 24 June 1926.",
+ "after": "The airport for Iași, and Romania's third busiest.\n\nCTP city bus route 50 serves the airport. A standard city ticket costs 4 lei and is valid for 120 minutes on any route.",
+ "claims": [
+  {
+   "claim": "the airport for Iași",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Iași",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport located in Iași, Romania"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Iaşi"
+    }
+   ]
+  },
+  {
+   "claim": "Romania's third busiest",
+   "verdict": "confirmed",
+   "inAfter": "Romania's third busiest",
+   "note": "Eurostat 2025: Bucharest Otopeni 17.0 million, Cluj 3.55 million, Iași 2,242,921, Timișoara 1.46 million.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Iași Airport is the third-busiest airport in Romania in terms of passenger traffic"
+    },
+    {
+     "file": "eurostat-ro-2025",
+     "org": "Eurostat",
+     "quote": [
+      "Eurostat RO_LROP BUCURESTI/HENRI COANDA airport: passengers carried in 2025: 16,998,844",
+      "Eurostat RO_LRCL CLUJ NAPOCA/AVRAM IANCU airport: passengers carried in 2025: 3,547,053",
+      "Eurostat RO_LRIA IASI airport: passengers carried in 2025: 2,242,921",
+      "Eurostat RO_LRTR TIMISOARA/TRAIAN VUIA airport: passengers carried in 2025: 1,458,022"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "CTP bus route 50 serves the airport",
+   "verdict": "confirmed",
+   "inAfter": "CTP city bus route 50 serves the airport.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "CTP, the public transit operator in Iași, provides non-stop service on route 50"
+    },
+    {
+     "file": "ctp-traseul50",
+     "org": "CTP Iași (city transport operator)",
+     "dated": "2026-09-23",
+     "quote": [
+      "Traseul 50 aeroport",
+      "Traseul 50 către aeroport / Route 50 to the airport"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a standard city ticket costs 4 lei, valid 120 minutes on any route",
+   "verdict": "confirmed",
+   "inAfter": "A standard city ticket costs 4 lei and is valid for 120 minutes on any route.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the fare is 4.00 lei (€0.79), for a ticket valid for 120 minutes with multiple trips on any route within the urban area"
+    },
+    {
+     "file": "ctp-tarife",
+     "org": "CTP Iași (city transport operator)",
+     "dated": "2026-09-23",
+     "quote": "Bilet urban 1 călătorie, 120 minute [1] / 4,00 lei"
+    }
+   ]
+  },
+  {
+   "claim": "most important in Moldavia; third busiest; 8 km east of central Iași",
+   "verdict": "cut",
+   "wasBefore": "The most important airport in the Romanian region of Moldavia and third busiest in the country, 8 km east of central Iași.",
+   "why": "Third busiest is kept (Eurostat). 'Most important in Moldavia' rests on Wikipedia alone. '8 km east' fails the coordinates check: the airport is 2.2 km from the GeoNames centre of Iași, a ratio of 3.7, and no second written source gives a distance."
+  },
+  {
+   "claim": "terminals: T4 domestic and Schengen, T3 non-Schengen, T1 offices, T2 to become cargo",
+   "verdict": "cut",
+   "wasBefore": "The terminal split is the thing to get right. Passenger flights use two buildings: T4 handles all domestic and Schengen flights, and T3 handles non-Schengen. The older T1 is now offices and storage, and there are plans to turn the former T2 into a cargo terminal.",
+   "why": "Wikipedia alone: the airport's own site returns an empty page, even through the browser."
+  },
+  {
+   "claim": "route 50 non-stop to Union Square and the station every 30 minutes, about 20 minutes, 4 lei",
+   "verdict": "cut",
+   "wasBefore": "Getting into the city is cheap and simple. CTP route 50 runs non-stop to Union Square and the railway station every 30 minutes, taking about 20 minutes, for 4 lei as of December 2025.",
+   "why": "Route 50 and the 4 lei fare are kept with CTP's own pages. The stops, frequency and journey time rest on Wikipedia alone (CTP's route detail page did not load)."
+  },
+  {
+   "claim": "close to the border; reachable from Moldova by road",
+   "verdict": "cut",
+   "wasBefore": "The airport is close enough to the border to be a practical arrival from the Republic of Moldova by road.",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "one of the oldest accredited airports; flights from 24 June 1926",
+   "verdict": "cut",
+   "wasBefore": "It is one of the oldest accredited airports in Romania. Scheduled flights on the Bucharest to Galați to Iași to Chișinău route began on 24 June 1926.",
+   "why": "History resting on Wikipedia alone."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
