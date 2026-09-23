@@ -1,0 +1,168 @@
+{
+ "iata": "GRX",
+ "id": "recSYihNJSaciQJy7",
+ "name": "F.G.L. Airport Granada-Jaén Airport",
+ "country": "Spain",
+ "wikipedia": "https://en.wikipedia.org/wiki/Federico_Garc%C3%ADa_Lorca_Granada_Airport",
+ "audited": "2026-09-23",
+ "before": "Granada's airport, about 15 km west of the city near Chauchina and Santa Fe.\n\nThe name causes confusion, so it is worth being clear. Jaén is in the title but the city of Jaén is 100 km to the north, so this is a Granada airport in every practical sense, and a client heading to Jaén has a long drive ahead.\n\nConstruction began in 1970 and it opened as Aeropuerto de Granada in 1972. It was renamed in June 2006 after Federico García Lorca, the poet, who was born near the city.",
+ "after": "Granada's airport, about 15 km west of the city near Chauchina and Santa Fe.\n\nThe name causes confusion, so it is worth being clear. Jaén is in the title but the city of Jaén is about 100 km to the north, so this is a Granada airport in every practical sense, and a client heading to Jaén has a long drive ahead.\n\nConstruction began in 1970 and it opened in June 1972. It was renamed after Federico García Lorca in June 2006.",
+ "claims": [
+  {
+   "claim": "about 15 km west of Granada",
+   "verdict": "confirmed",
+   "inAfter": "Granada's airport, about 15 km west of the city",
+   "note": "Coordinates: 15.1 km from the GeoNames centre of Granada, due west (270 degrees). Aena gives 17 km from the city, which reads as a road distance.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 15.1 km (9.4 miles)",
+      "Bearing from the city centre: 270 degrees, which is west"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-21",
+     "quote": "about 9.4 miles (15 km) west of Granada"
+    },
+    {
+     "file": "aena-presentation",
+     "org": "Aena (the airport operator, aena.es)",
+     "dated": "read 2026-09-23 (the airport's presentation page)",
+     "quote": "17 kilometers from the capital of Granada"
+    }
+   ]
+  },
+  {
+   "claim": "near Chauchina and Santa Fe",
+   "verdict": "confirmed",
+   "inAfter": "near Chauchina and Santa Fe.",
+   "sources": [
+    {
+     "file": "aena-history",
+     "org": "Aena (the airport operator, aena.es)",
+     "dated": "read 2026-09-23 (the airport's history page)",
+     "quote": [
+      "Between Chauchina and Santa Fe",
+      "the construction of a new airport in the municipalities of Chauchina and Santa Fe in the sixties"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-21",
+     "quote": "The airport is located near to Chauchina and Santa Fe"
+    }
+   ]
+  },
+  {
+   "claim": "Jaén in the name",
+   "verdict": "confirmed",
+   "inAfter": "Jaén is in the title",
+   "sources": [
+    {
+     "file": "aena-history",
+     "org": "Aena (the airport operator, aena.es)",
+     "dated": "read 2026-09-23 (the airport's history page)",
+     "quote": "The airport became officially known as Federico García Lorca Granada-Jaén Airport on 13 June 2006."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-21",
+     "quote": "although it has Jaén in its name"
+    }
+   ]
+  },
+  {
+   "claim": "the city of Jaén about 100 km to the north",
+   "verdict": "softened",
+   "inAfter": "but the city of Jaén is about 100 km to the north",
+   "note": "Was '100 km'. Aena gives 106 km from the city of Jaén and Wikipedia 100 km; both read as road distances, since Jaén is 64.6 km due north in a straight line (a ratio of 1.55 for 100 km). 'About' covers the two.",
+   "sources": [
+    {
+     "file": "aena-presentation",
+     "org": "Aena (the airport operator, aena.es)",
+     "dated": "read 2026-09-23 (the airport's presentation page)",
+     "quote": "and 106 from the city of Ja&eacute;n"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-21",
+     "quote": "62.5 miles (100 km) south of Jaén"
+    },
+    {
+     "file": "geo-jaen",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the airport to Jaén: 64.6 km, bearing 359 degrees, which is north"
+    }
+   ]
+  },
+  {
+   "claim": "construction began in 1970 and it opened in June 1972",
+   "verdict": "corrected",
+   "inAfter": "Construction began in 1970 and it opened in June 1972.",
+   "note": "Was 'opened as Aeropuerto de Granada in 1972'. Aena dates the inauguration to 15 June 1972 but gives no name for it; the name rests on Wikipedia alone and is cut.",
+   "sources": [
+    {
+     "file": "aena-history",
+     "org": "Aena (the airport operator, aena.es)",
+     "dated": "read 2026-09-23 (the airport's history page)",
+     "quote": "Construction started in 1970 and the new airport was inaugurated on 15 June 1972"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-21",
+     "quote": "Construction of the airport began in 1970 and it opened as Aeropuerto de Granada in 1972."
+    }
+   ]
+  },
+  {
+   "claim": "renamed after Federico García Lorca in June 2006",
+   "verdict": "confirmed",
+   "inAfter": "It was renamed after Federico García Lorca in June 2006.",
+   "sources": [
+    {
+     "file": "aena-history",
+     "org": "Aena (the airport operator, aena.es)",
+     "dated": "read 2026-09-23 (the airport's history page)",
+     "quote": "The airport became officially known as Federico García Lorca Granada-Jaén Airport on 13 June 2006."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-21",
+     "quote": "On June 13, 2006, it was officially named after the poet Federico García Lorca, born near Granada."
+    }
+   ]
+  },
+  {
+   "claim": "opened as 'Aeropuerto de Granada'",
+   "verdict": "cut",
+   "wasBefore": "it opened as Aeropuerto de Granada in 1972",
+   "why": "Wikipedia alone: Aena's history gives the 1972 inauguration but not the name it opened under."
+  },
+  {
+   "claim": "Lorca the poet, born near the city",
+   "verdict": "cut",
+   "wasBefore": "after Federico García Lorca, the poet, who was born near the city",
+   "why": "Wikipedia alone here: Aena's pages name him without describing him, and the Lorca heritage trust's site (patronatogarcialorca.org) answered with an empty challenge page, which ends the attempt."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The name causes confusion, so it is worth being clear.",
+   "why": "The old text's framing, kept; the name and the distances that follow are sourced."
+  },
+  {
+   "text": "so this is a Granada airport in every practical sense, and a client heading to Jaén has a long drive ahead.",
+   "why": "The old text's judgement, kept: Aena puts the airport 17 km from Granada and 106 km from Jaén."
+  }
+ ],
+ "tracerOk": {}
+}

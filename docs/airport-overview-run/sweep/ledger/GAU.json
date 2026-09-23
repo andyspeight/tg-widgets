@@ -1,0 +1,516 @@
+{
+ "iata": "GAU",
+ "id": "recFATh9Zw57TCfgE",
+ "name": "Lokpriya Gopinath Bordoloi International Airport",
+ "country": "India",
+ "wikipedia": "https://en.wikipedia.org/wiki/Lokpriya_Gopinath_Bordoloi_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The main airport of Northeast India, at Borjhar about 28 km from Guwahati and 26 km from Dispur. It is managed by the Airports Authority of India and doubles as an Indian Air Force base.\n\nTerminal 2 is the reason to look at this airport again. Designed by Nuru Karim, it takes its shape from Assam's kopou phool, the foxtail orchid, and uses more than 140 tonnes of bamboo, drawing on Assam's bholuka bamboo craft and the building techniques of the Apatani people of Arunachal Pradesh. It won an International Architecture Award in 2025. Inside there are ten air bridges and sixteen self service bag drops.\n\nTerminal 1 has been in service since 1958. It covers 28,685 square metres across three levels, with arrivals on the ground floor, the boarding area on the mezzanine and departures above, and four air bridges. It is rated for six million passengers a year.\n\nThe airport is named after Gopinath Bordoloi, the independence activist who became Assam's first Chief Minister after independence.",
+ "after": "The main airport of Northeast India, at Borjhar about 28 km from Guwahati. It is run by the Adani group on a 50-year lease from the Airports Authority of India, and doubles as an Indian Air Force base.\n\nTerminal 2, inaugurated in December 2025, is built for 13.1 million passengers a year, and the airport now lists its airlines there. Designed by Nuru Karim, it draws on Assam's foxtail orchid (kopou phool) and uses more than 140 tonnes of bamboo, with elements of Assam's bholuka bamboo craft and the building methods of the Apatani people of Arunachal Pradesh. It won an International Architecture Award in 2025.\n\nThe airport dates from 1958 and is named after Gopinath Bordoloi, the independence activist who became Assam's first Chief Minister.",
+ "claims": [
+  {
+   "claim": "the main airport of Northeast India",
+   "verdict": "confirmed",
+   "inAfter": "The main airport of Northeast India",
+   "note": "AAI's full-year table for April 2025 to March 2026 gives Guwahati 6.62 million passengers, over four times the next north-eastern airport (Agartala, 1.54 million; then Imphal, 1.37 million, and Dibrugarh, 0.84 million). Bagdogra (3.66 million) is in West Bengal, outside the north east. The operator calls it the largest airport in Assam and a doorway to the seven sister states.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "It is the primary airport of Northeast India."
+    },
+    {
+     "file": "aai-mar2026-pax",
+     "org": "Airports Authority of India",
+     "dated": "April 2025 to March 2026 (Traffic News, March 2026 annexure III)",
+     "quote": [
+      "Total Passengers(Domestic+International)",
+      "Change 2025-2026 2024-2025",
+      "GUWAHATI 548775 588484 -6.7% 6622784 6160157 7.5%",
+      "AGARTALA 124620 122975 1.3% 1538175 1410793 9.0%",
+      "IMPHAL 123345 131466 -6.2% 1366765 1406227 -2.8%",
+      "MOHANBARI (DIBRUGARH) 75537 73332 3.0% 838752 822437 2.0%"
+     ]
+    },
+    {
+     "file": "op-about",
+     "org": "Guwahati International Airport Ltd (Adani group, the operator, lgbia-guwahati.adaniairports.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "is the largest airport in the state of Assam",
+      "serves as a doorway to the seven sister states"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "at Borjhar",
+   "verdict": "confirmed",
+   "inAfter": "at Borjhar",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "It is located at Borjhar"
+    },
+    {
+     "file": "op-home",
+     "org": "Guwahati International Airport Ltd (Adani group, the operator, lgbia-guwahati.adaniairports.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Borjhar, Guwahati, Assam"
+    },
+    {
+     "file": "airporttech-project",
+     "org": "Airport Technology (trade press)",
+     "dated": "undated project page (it expects the new terminal in June 2022)",
+     "quote": "is located in Borjhar in the state of Assam"
+    }
+   ]
+  },
+  {
+   "claim": "about 28 km from Guwahati",
+   "verdict": "confirmed",
+   "inAfter": "about 28 km from Guwahati",
+   "note": "The coordinates put it 18.2 km in a straight line south west of the GeoNames centre of Guwahati (242 degrees); 28 km reads as the road distance (ratio 1.54, inside the check's tolerance of 1.6).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "28 km (18 mi) from Guwahati"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 18.2 km (11.3 miles)",
+      "Bearing from the city centre: 242 degrees, which is south west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "run by the Adani group on a 50-year lease from the Airports Authority of India",
+   "verdict": "corrected",
+   "inAfter": "It is run by the Adani group on a 50-year lease from the Airports Authority of India",
+   "note": "Was 'managed by the Airports Authority of India', which Wikipedia's opening still says. AAI's own notice says it handed operation, management and development to Guwahati International Airport Ltd, a company of the Adani group, for 50 years from 8 October 2021; ANI's report of March 2026 says Adani Airport Holdings runs it through that company, and Wikipedia's infobox names the same operator. The start date rests on AAI alone, so the text gives none.",
+   "sources": [
+    {
+     "file": "aai-guwahati",
+     "org": "Airports Authority of India (the owner, aai.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "had awarded the Concession to Guwahati International Airport Ltd.(GIAL) (SPV of Adani Enterprises Ltd.) for Operation, Management and Development (OMD) of the Guwahati International Airport",
+      "through Public Private Partnership for a lease period of 50 years with effect from 08.10.2021."
+     ]
+    },
+    {
+     "file": "sentinel-ai-t2",
+     "org": "The Sentinel, Assam (ANI report)",
+     "dated": "15 Mar 2026",
+     "quote": [
+      "Published on : 15 Mar 2026",
+      "AAHL operates the airport through its subsidiary, Guwahati International Airport Limited (GIAL)."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "In February 2019, the airport was given on lease for 50 years' ownership to Adani Group"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": [
+      "owner = Airports Authority of India",
+      "operator = Guwahati International Airport Limited"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "doubles as an Indian Air Force base",
+   "verdict": "confirmed",
+   "inAfter": "doubles as an Indian Air Force base",
+   "note": "Not a time-sensitive claim, so Airport Technology's undated page counts; the operator's current page confirms the runway serves military as well as civil aircraft.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "also serves as an Indian Air Force base"
+    },
+    {
+     "file": "airporttech-project",
+     "org": "Airport Technology (trade press)",
+     "dated": "undated project page (it expects the new terminal in June 2022)",
+     "quote": "The airport also serves as an important base for the Indian Air Force (IAF) in the north-eastern region."
+    },
+    {
+     "file": "op-about",
+     "org": "Guwahati International Airport Ltd (Adani group, the operator, lgbia-guwahati.adaniairports.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "serving both civil and military aircraft"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2 inaugurated in December 2025",
+   "verdict": "corrected",
+   "inAfter": "Terminal 2, inaugurated in December 2025",
+   "note": "New to the text: the old version described Terminal 2 without saying it had opened, and described Terminal 1 as the terminal in service. The Prime Minister inaugurated it on 20 December 2025.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "On 20 December 2025, Prime Minister Narendra Modi inaugurated the new integrated terminal building at the Lokpriya Gopinath Bordoloi International Airport in Guwahati, Assam."
+    },
+    {
+     "file": "newsmill-inauguration",
+     "org": "The News Mill (Guwahati)",
+     "dated": "20 December 2025",
+     "quote": [
+      "20 December 2025, 4:23 pm",
+      "Prime Minister Narendra Modi inaugurated the new terminal building of Lokpriya Gopinath Bordoloi International Airport in Guwahati, Assam, on December 20."
+     ]
+    },
+    {
+     "file": "sentinel-ai-t2",
+     "org": "The Sentinel, Assam (ANI report)",
+     "dated": "15 Mar 2026",
+     "quote": "the newly inaugurated Terminal 2"
+    }
+   ]
+  },
+  {
+   "claim": "built for 13.1 million passengers a year",
+   "verdict": "corrected",
+   "inAfter": "is built for 13.1 million passengers a year",
+   "note": "Replaces Terminal 1's rating of six million a year, like for like: the capacity of the terminal now in use.",
+   "sources": [
+    {
+     "file": "newsmill-inauguration",
+     "org": "The News Mill (Guwahati)",
+     "dated": "20 December 2025",
+     "quote": "is designed to handle 13.1 million passengers per year"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "the terminal has an annual passenger handling capacity of 13.1 million"
+    }
+   ]
+  },
+  {
+   "claim": "the airport lists its airlines at Terminal 2",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "the airport now lists its airlines there",
+   "note": "Replaces the old text's picture of Terminal 1 as the terminal in service. The operator's airline table puts every airline it shows (Alliance Air, Air India, Air India Express, IndiGo, Akasa Air, SpiceJet, Thai AirAsia and Druk Air) at T2, and its home page gives waiting times for T2 only; the table has a 'Load More Airlines' button, so the text does not say 'all'. ANI (The Sentinel, 15 March 2026) reports that Air India and Air India Express moved all their flights from Terminal 1 to Terminal 2 from 16 March 2026; Air India's own release answered HTTP 503 (connection reset) twice.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Guwahati International Airport Ltd (Adani group, the operator, lgbia-guwahati.adaniairports.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "ALLIANCE AIR Code : 9I T2 Domestic",
+      "AIR INDIA Code : AI T2 Domestic",
+      "AIR INDIA EXPRESS Code : IX T2 Domestic",
+      "INDIGO Code : 6E T2 Domestic",
+      "AKASA AIR Code : QP T2 Domestic",
+      "SPICE JET Code : SG T2 Domestic",
+      "THAI AIR ASIA Code : FD T2 International",
+      "DRUK AIR Code : KB T2 International"
+     ]
+    },
+    {
+     "file": "sentinel-ai-t2",
+     "org": "The Sentinel, Assam (ANI report)",
+     "dated": "15 Mar 2026",
+     "quote": "Air India and Air India Express will move all flight operations at Lokpriya Gopinath Bordoloi International Airport (LGBIA) in Guwahati from Terminal 1 to the newly inaugurated Terminal 2, effective from March 16."
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2 designed by Nuru Karim",
+   "verdict": "confirmed",
+   "inAfter": "Designed by Nuru Karim",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "Terminal 2 is designed by internationally acclaimed Indian architect Nuru Karim."
+    },
+    {
+     "file": "sentinel-ai-t2",
+     "org": "The Sentinel, Assam (ANI report)",
+     "dated": "15 Mar 2026",
+     "quote": "Designed by internationally acclaimed Indian architect Nuru Karim, the terminal draws inspiration from Assam's kopou phool (foxtail orchid)"
+    }
+   ]
+  },
+  {
+   "claim": "draws on Assam's foxtail orchid (kopou phool)",
+   "verdict": "softened",
+   "inAfter": "it draws on Assam's foxtail orchid (kopou phool)",
+   "note": "Was 'takes its shape from'. Both sources say the design draws inspiration from the flower; The News Mill describes 57 columns resembling it, not the building's shape.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "draws inspiration from Assam’s Kopou phool (foxtail orchid)"
+    },
+    {
+     "file": "sentinel-ai-t2",
+     "org": "The Sentinel, Assam (ANI report)",
+     "dated": "15 Mar 2026",
+     "quote": "the terminal draws inspiration from Assam's kopou phool (foxtail orchid)"
+    },
+    {
+     "file": "newsmill-inauguration",
+     "org": "The News Mill (Guwahati)",
+     "dated": "20 December 2025",
+     "quote": "57 columns resembling the Kopou flower"
+    }
+   ]
+  },
+  {
+   "claim": "more than 140 tonnes of bamboo",
+   "verdict": "confirmed",
+   "inAfter": "uses more than 140 tonnes of bamboo",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "incorporates more than 140 metric tonnes of bamboo"
+    },
+    {
+     "file": "sentinel-ai-t2",
+     "org": "The Sentinel, Assam (ANI report)",
+     "dated": "15 Mar 2026",
+     "quote": "incorporates more than 140 metric tonnes (MT) of bamboo"
+    },
+    {
+     "file": "newsmill-inauguration",
+     "org": "The News Mill (Guwahati)",
+     "dated": "20 December 2025",
+     "quote": "It uses 140 metric tonnes of locally sourced bamboo"
+    }
+   ]
+  },
+  {
+   "claim": "bholuka bamboo craft and Apatani building methods",
+   "verdict": "confirmed",
+   "inAfter": "with elements of Assam's bholuka bamboo craft and the building methods of the Apatani people of Arunachal Pradesh",
+   "note": "Reworded from 'drawing on ... the building techniques of'; both sources call the Apatani a tribe.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "integrates elements of Assam’s traditional bholuka bamboo craftsmanship along with bamboo construction techniques associated with the Apatani tribe of Arunachal Pradesh"
+    },
+    {
+     "file": "sentinel-ai-t2",
+     "org": "The Sentinel, Assam (ANI report)",
+     "dated": "15 Mar 2026",
+     "quote": "The design includes elements from Assam's bholuka bamboo craftsmanship and the bamboo building methods of the Apatani tribe from Arunachal Pradesh"
+    }
+   ]
+  },
+  {
+   "claim": "International Architecture Award 2025",
+   "verdict": "confirmed",
+   "inAfter": "It won an International Architecture Award in 2025.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "The design received the International Architecture Award 2025 for integrating regional identity with contemporary infrastructure."
+    },
+    {
+     "file": "sentinel-ai-t2",
+     "org": "The Sentinel, Assam (ANI report)",
+     "dated": "15 Mar 2026",
+     "quote": "The design received the International Architecture Award 2025 for integrating regional identity with contemporary infrastructure."
+    }
+   ]
+  },
+  {
+   "claim": "the airport dates from 1958",
+   "verdict": "softened",
+   "inAfter": "The airport dates from 1958",
+   "note": "Was 'Terminal 1 has been in service since 1958', which no longer describes where flights go (see Terminal 2 above). Both sources date the airport's establishment to 1958; Wikipedia cites Airport Technology's page for its history.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "since its establishment in 1958"
+    },
+    {
+     "file": "airporttech-project",
+     "org": "Airport Technology (trade press)",
+     "dated": "undated project page (it expects the new terminal in June 2022)",
+     "quote": "The airport has undergone numerous expansions and renovations since its establishment in 1958."
+    }
+   ]
+  },
+  {
+   "claim": "named after Gopinath Bordoloi",
+   "verdict": "confirmed",
+   "inAfter": "is named after Gopinath Bordoloi",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "It is named after Gopinath Bordoloi"
+    },
+    {
+     "file": "airporttech-project",
+     "org": "Airport Technology (trade press)",
+     "dated": "undated project page (it expects the new terminal in June 2022)",
+     "quote": "it was named after a prominent freedom fighter named Gopinath Bordoloi"
+    }
+   ]
+  },
+  {
+   "claim": "the independence activist who became Assam's first Chief Minister",
+   "verdict": "confirmed",
+   "inAfter": "the independence activist who became Assam's first Chief Minister",
+   "note": "Airport Technology calls him a freedom fighter; The News Mill reports the 80-foot statue of him, as Assam's first chief minister, unveiled outside the airport on 20 December 2025.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "an independence activist and the first Chief Minister of Assam"
+    },
+    {
+     "file": "airporttech-project",
+     "org": "Airport Technology (trade press)",
+     "dated": "undated project page (it expects the new terminal in June 2022)",
+     "quote": "a prominent freedom fighter named Gopinath Bordoloi"
+    },
+    {
+     "file": "newsmill-inauguration",
+     "org": "The News Mill (Guwahati)",
+     "dated": "20 December 2025",
+     "quote": "He also unveiled an 80-foot statue of Gopinath Bordoloi, Assam’s first chief minister, installed outside the airport."
+    }
+   ]
+  },
+  {
+   "claim": "26 km from Dispur",
+   "verdict": "cut",
+   "wasBefore": "and 26 km from Dispur",
+   "why": "Wikipedia alone; the coordinates check measures from Guwahati's centre only, and no other source read gives a distance to Dispur."
+  },
+  {
+   "claim": "managed by the Airports Authority of India",
+   "verdict": "cut",
+   "wasBefore": "It is managed by the Airports Authority of India",
+   "why": "Out of date: AAI handed operation and management to the Adani group's Guwahati International Airport Ltd on a 50-year lease from 8 October 2021 (see above). AAI remains the owner."
+  },
+  {
+   "claim": "Terminal 2 is the reason to look again",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 is the reason to look at this airport again.",
+   "why": "Framing, not a fact. Replaced by what has actually changed: the terminal's inauguration, its capacity and the airport's own airline list."
+  },
+  {
+   "claim": "takes its shape from the kopou phool",
+   "verdict": "cut",
+   "wasBefore": "it takes its shape from Assam's kopou phool, the foxtail orchid",
+   "why": "Softened to 'draws on' (see above): the sources say inspiration, not shape."
+  },
+  {
+   "claim": "ten air bridges and sixteen self-service bag drops",
+   "verdict": "cut",
+   "wasBefore": "Inside there are ten air bridges and sixteen self service bag drops.",
+   "why": "Wikipedia alone for the finished terminal ('10 aerobridges, 16 self-baggage drop counters'). Airport Technology's page gives 16 self-baggage drop counters only as a plan, on an undated page that expected the terminal in June 2022, and no count of air bridges; the operator's self-baggage-drop page gives no number."
+  },
+  {
+   "claim": "Terminal 1 in service since 1958",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 has been in service since 1958.",
+   "why": "Out of date as the description of the terminal in use: the operator lists its airlines at Terminal 2, and Air India and Air India Express moved there from Terminal 1 on 16 March 2026 (ANI). Softened to the airport's founding year (see above)."
+  },
+  {
+   "claim": "Terminal 1's size, levels and four air bridges",
+   "verdict": "cut",
+   "wasBefore": "It covers 28,685 square metres across three levels, with arrivals on the ground floor, the boarding area on the mezzanine and departures above, and four air bridges.",
+   "why": "Wikipedia alone, and it describes a terminal the operator no longer lists for any airline."
+  },
+  {
+   "claim": "rated for six million passengers a year",
+   "verdict": "cut",
+   "wasBefore": "It is rated for six million passengers a year.",
+   "why": "Replaced by the capacity of the terminal now in use, 13.1 million a year (see above). The six million was Terminal 1's rating."
+  },
+  {
+   "claim": "first Chief Minister after independence",
+   "verdict": "cut",
+   "wasBefore": "Assam's first Chief Minister after independence",
+   "why": "'After independence' rests on Wikipedia alone; The News Mill says only 'Assam's first chief minister', which the text keeps."
+  },
+  {
+   "claim": "6.62 million passengers in the year to March 2026",
+   "verdict": "cut",
+   "why": "Held back: a verified total that replaces nothing in the old text, which gave no passenger figure. AAI's table gives 6,622,784 passengers for April 2025 to March 2026, up 7.5 per cent on 6,160,157, and Wikipedia's infobox gives the same figure.",
+   "sources": [
+    {
+     "file": "aai-mar2026-pax",
+     "org": "Airports Authority of India",
+     "dated": "April 2025 to March 2026 (Traffic News, March 2026 annexure III)",
+     "quote": [
+      "Total Passengers(Domestic+International)",
+      "GUWAHATI 548775 588484 -6.7% 6622784 6160157 7.5%"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": [
+      "stat1_data = 6,622,784",
+      "stat_year = April 2025 – March 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the largest airport terminal in the Northeast",
+   "verdict": "cut",
+   "why": "Held back: verified, but it replaces nothing in the old text.",
+   "sources": [
+    {
+     "file": "newsmill-inauguration",
+     "org": "The News Mill (Guwahati)",
+     "dated": "20 December 2025",
+     "quote": "making it the largest airport terminal in the Northeast"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "became the largest airport terminal in Northeast India upon inauguration"
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

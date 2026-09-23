@@ -1,0 +1,324 @@
+{
+ "iata": "CCJ",
+ "id": "recA0oO6FtlwEKooq",
+ "name": "Calicut International Airport",
+ "country": "India",
+ "wikipedia": "https://en.wikipedia.org/wiki/Calicut_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Kozhikode in Kerala, known locally as Karipur. It is at Karippur in Malappuram, 28 km from the city, and it is an operating base for Air India Express.\n\nOne thing worth flagging before quoting: this is a tabletop runway, one of only a few in India.\n\nGetting to the city is easy enough by road. The airport sits between two national highways, NH-966 just over 2 km away and NH-66 about 8 km away, with good onward connections north to Kannur and Wayanad and south to Malappuram, Palakkad, Thrissur and Coimbatore. Kerala State Road Transport runs an air conditioned FlyBus into Kozhikode, which is the cheapest way in, though there are only a handful of services. Pre-paid taxis, Uber and Ola all serve the terminal.\n\nThe airport opened in April 1988 and took international status in February 2006. It matches Hyderabad for international traffic.",
+ "after": "The airport for Kozhikode in Kerala, also known as Karipur Airport. It stands 28 km from the city at Karipur in Malappuram district, and Air India Express flies from here.\n\nThe runway is a tabletop.\n\nIt opened in April 1988 and was declared an international airport in February 2006.",
+ "claims": [
+  {
+   "claim": "the airport for Kozhikode in Kerala",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Kozhikode in Kerala",
+   "note": "AAI's traffic tables list the airport as Kozhikode; its own page and address use the older name, Calicut.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "is an international airport serving the city of Kozhikode in the state of Kerala, India"
+    },
+    {
+     "file": "aaib-axh-2021",
+     "org": "Aircraft Accident Investigation Bureau (Ministry of Civil Aviation)",
+     "dated": "final report on the accident of 07 August 2020 (it cites events up to September 2021)",
+     "quote": [
+      "Kozhikode International Airport is also known as",
+      "It is located at Karipur in Malappuram district of Kerala, India"
+     ]
+    },
+    {
+     "file": "aai-calicut",
+     "org": "Airports Authority of India (the operator, aai.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Airport Director, Airports Authority of India",
+      "Calicut International Airport, Calicut Airport (PO), Malappuram District, Kerala State - Pin. 673 647"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "also known as Karipur Airport",
+   "verdict": "softened",
+   "inAfter": "also known as Karipur Airport",
+   "note": "Was 'known locally as Karipur'. Wikipedia says locally; the accident investigators say only 'also known as', so the text uses their wording.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "locally referred to as Karipur Airport"
+    },
+    {
+     "file": "aaib-axh-2021",
+     "org": "Aircraft Accident Investigation Bureau (Ministry of Civil Aviation)",
+     "dated": "final report on the accident of 07 August 2020 (it cites events up to September 2021)",
+     "quote": "Airport or Karipur Airport. Its IATA code is CCJ and ICAO code is VOCL."
+    }
+   ]
+  },
+  {
+   "claim": "at Karipur in Malappuram district",
+   "verdict": "confirmed",
+   "inAfter": "at Karipur in Malappuram district",
+   "note": "The old text spelt it Karippur, as Wikipedia's body does; Wikipedia's infobox and the investigators spell it Karipur, which the text now uses. AAI's address confirms Malappuram district.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "It is situated at Karippur, Malappuram"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "location = Karipur, Kondotty, Malappuram district, Kerala, India"
+    },
+    {
+     "file": "aaib-axh-2021",
+     "org": "Aircraft Accident Investigation Bureau (Ministry of Civil Aviation)",
+     "dated": "final report on the accident of 07 August 2020 (it cites events up to September 2021)",
+     "quote": "It is located at Karipur in Malappuram district of Kerala, India"
+    },
+    {
+     "file": "aai-calicut",
+     "org": "Airports Authority of India (the operator, aai.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Calicut Airport (PO), Malappuram District, Kerala State"
+    }
+   ]
+  },
+  {
+   "claim": "28 km from the city",
+   "verdict": "confirmed",
+   "inAfter": "28 km from the city",
+   "note": "The coordinates put it 22.8 km in a straight line south east of the GeoNames centre of Kozhikode (123 degrees); 28 km reads as the road distance (ratio 1.23, inside the check's tolerance).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "28 km (17 mi) away from Kozhikode city"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 22.8 km (14.1 miles)",
+      "Bearing from the city centre: 123 degrees, which is south east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Air India Express flies from here",
+   "verdict": "softened",
+   "inAfter": "Air India Express flies from here",
+   "note": "Was 'an operating base for Air India Express'. The airline's own site lists Kozhikode among its Indian airports and sells Kozhikode to Dubai flights, but none of its pages read (who we are, careers, airports, a route page) names its bases. The investigators' report shows crew based at Kozhikode in 2020, which is too old for an airline claim. So the text keeps only what two current sources support.",
+   "sources": [
+    {
+     "file": "aix-airports",
+     "org": "Air India Express (airindiaexpress.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Fly from over 45 destinations in India.",
+      "Kozhikode"
+     ]
+    },
+    {
+     "file": "aix-ccj-dxb",
+     "org": "Air India Express (airindiaexpress.com)",
+     "dated": "read 2026-09-23 (live page offering September 2026 deals)",
+     "quote": [
+      "Book your Kozhikode to Dubai flight with Air India Express",
+      "September 2026 booking deals"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "serves as an operating base for Air India Express"
+    }
+   ]
+  },
+  {
+   "claim": "the runway is a tabletop",
+   "verdict": "confirmed",
+   "inAfter": "The runway is a tabletop.",
+   "note": "Framing dropped: the old text introduced this as 'one thing worth flagging before quoting', which rests on no source.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "It is one of the few airports in the country with a tabletop runway."
+    },
+    {
+     "file": "aaib-axh-2021",
+     "org": "Aircraft Accident Investigation Bureau (Ministry of Civil Aviation)",
+     "dated": "final report on the accident of 07 August 2020 (it cites events up to September 2021)",
+     "quote": [
+      "The airport is located on a tabletop terrain with a steep fall on both sides.",
+      "Being a table top runway, there is constraint with respect to availability of land."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "opened in April 1988",
+   "verdict": "confirmed",
+   "inAfter": "It opened in April 1988",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "The airport opened on 13 April 1988"
+    },
+    {
+     "file": "aaib-axh-2021",
+     "org": "Aircraft Accident Investigation Bureau (Ministry of Civil Aviation)",
+     "dated": "final report on the accident of 07 August 2020 (it cites events up to September 2021)",
+     "quote": "and became operational in April, 1988."
+    }
+   ]
+  },
+  {
+   "claim": "declared an international airport in February 2006",
+   "verdict": "confirmed",
+   "inAfter": "was declared an international airport in February 2006",
+   "note": "Was worded 'took international status in February 2006'; reworded to the investigators' phrase.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "It received the international airport status on 2 February 2006."
+    },
+    {
+     "file": "aaib-axh-2021",
+     "org": "Aircraft Accident Investigation Bureau (Ministry of Civil Aviation)",
+     "dated": "final report on the accident of 07 August 2020 (it cites events up to September 2021)",
+     "quote": "It was declared an International Airport in February, 2006."
+    }
+   ]
+  },
+  {
+   "claim": "known locally as Karipur",
+   "verdict": "cut",
+   "wasBefore": "known locally as Karipur",
+   "why": "Softened to 'also known as Karipur Airport' (see above): only Wikipedia says the name is local."
+  },
+  {
+   "claim": "an operating base for Air India Express",
+   "verdict": "cut",
+   "wasBefore": "it is an operating base for Air India Express",
+   "why": "Softened to 'Air India Express flies from here' (see above). The base rests on Wikipedia alone for the present: the airline's pages read name no bases, and the 2021 accident report that shows a crew base in 2020 is too old for a time-sensitive claim."
+  },
+  {
+   "claim": "one thing worth flagging before quoting",
+   "verdict": "cut",
+   "wasBefore": "One thing worth flagging before quoting",
+   "why": "Framing, not a fact. It implied a consequence for bookings (such as limits on wide-bodied aircraft) that no current source read here confirms. The tabletop runway itself is kept."
+  },
+  {
+   "claim": "one of only a few tabletop runways in India",
+   "verdict": "cut",
+   "wasBefore": "one of only a few in India",
+   "why": "Wikipedia alone. The investigators say 'Kozhikode and Mangalore are two table-top runways in peninsular India', which is a narrower statement and does not say how many India has."
+  },
+  {
+   "claim": "getting to the city is easy enough by road",
+   "verdict": "cut",
+   "wasBefore": "Getting to the city is easy enough by road.",
+   "why": "A judgement resting on Wikipedia's road description, which could not be confirmed (below)."
+  },
+  {
+   "claim": "between two national highways, NH-966 about 2 km and NH-66 about 8 km away",
+   "verdict": "cut",
+   "wasBefore": "The airport sits between two national highways, NH-966 just over 2 km away and NH-66 about 8 km away",
+   "why": "Wikipedia alone. AAI's transport page for Calicut carries no content, and the investigators' report does not mention the roads."
+  },
+  {
+   "claim": "onward road connections north and south",
+   "verdict": "cut",
+   "wasBefore": "with good onward connections north to Kannur and Wayanad and south to Malappuram, Palakkad, Thrissur and Coimbatore",
+   "why": "Wikipedia alone, and 'good' is a judgement."
+  },
+  {
+   "claim": "KSRTC FlyBus into Kozhikode",
+   "verdict": "cut",
+   "wasBefore": "Kerala State Road Transport runs an air conditioned FlyBus into Kozhikode",
+   "why": "Wikipedia alone, and a service needs a current source. The Kerala State Road Transport Corporation's site (keralartc.com) answered with a proxy connection timeout (HTTP 503) on the one try the brief allows, and AAI's transport page for Calicut is empty."
+  },
+  {
+   "claim": "cheapest way in, only a handful of services",
+   "verdict": "cut",
+   "wasBefore": "which is the cheapest way in, though there are only a handful of services",
+   "why": "Wikipedia alone, undated."
+  },
+  {
+   "claim": "pre-paid taxis, Uber and Ola",
+   "verdict": "cut",
+   "wasBefore": "Pre-paid taxis, Uber and Ola all serve the terminal.",
+   "why": "Wikipedia alone. AAI's transport page for Calicut, which for other airports tabulates taxi services, carries no table; its conveniences page answered 404."
+  },
+  {
+   "claim": "matches Hyderabad for international traffic",
+   "verdict": "cut",
+   "wasBefore": "It matches Hyderabad for international traffic.",
+   "why": "Wrong. AAI's international passenger table gives Kozhikode 2,920,143 for April 2025 to March 2026 against Hyderabad's 5,463,102 (and 2,965,957 against 5,048,572 in 2024-25), so it carries a little over half Hyderabad's international traffic. No like-for-like replacement has two sources (see the held-back total below).",
+   "sources": [
+    {
+     "file": "aai-mar2026-pax",
+     "org": "Airports Authority of India",
+     "dated": "April 2025 to March 2026 (Traffic News, March 2026 annexure III A)",
+     "quote": [
+      "International Passengers",
+      "Change 2025-2026 2024-2025",
+      "KOZHIKODE 123237 234182 -47.4% 2920143 2965957 -1.5%",
+      "HYDERABAD (GHIAL) 315776 419637 -24.8% 5463102 5048572 8.2%"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "It is tied with Hyderabad in terms of international traffic."
+    }
+   ]
+  },
+  {
+   "claim": "3.86 million passengers in the year to March 2026",
+   "verdict": "cut",
+   "why": "Held back: a verified total that replaces nothing in the old text, which gave no passenger figure. AAI's table gives 3,855,618 passengers for April 2025 to March 2026 (up 4.3 per cent on 3,695,944), and Wikipedia's infobox gives the same. Of those, 2,920,143 were international (AAI alone), so roughly three in four passengers fly abroad, but that share has only one source.",
+   "sources": [
+    {
+     "file": "aai-mar2026-pax",
+     "org": "Airports Authority of India",
+     "dated": "April 2025 to March 2026 (Traffic News, March 2026 annexure III)",
+     "quote": [
+      "Total Passengers(Domestic+International)",
+      "KOZHIKODE 202932 296735 -31.6% 3855618 3695944 4.3%"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": [
+      "stat1_data = 38,55,618",
+      "stat_year = April 2025 - March 2026"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

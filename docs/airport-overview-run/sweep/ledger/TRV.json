@@ -1,0 +1,449 @@
+{
+ "iata": "TRV",
+ "id": "recM9H94ybh1rLnZF",
+ "name": "Thiruvananthapuram International Airport",
+ "country": "India",
+ "wikipedia": "https://en.wikipedia.org/wiki/Thiruvananthapuram_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Kerala's first airport, established in 1932, and the fifth in India to be declared international, in 1991. It is second busiest in the state and sixteenth in the country, handling more than 4.8 million passengers in the 2024-25 financial year.\n\nThe location is remarkable. It is only 3.7 km west of the city centre and the Padmanabhaswamy Temple, and about a kilometre from the Arabian Sea at Shankumugham Beach, which makes it the closest airport in India to a body of water. Kovalam beach is 16 km away and Technopark 13 km.\n\nThere are two terminals: Terminal 1 for domestic flights and Terminal 2 for international, with three baggage carousels and full immigration and customs. The single runway is 3,373 metres and takes any aircraft type.\n\nIt is a working base as well as a passenger airport. The Indian Air Force's Southern Air Command and the Indian Coast Guard are headquartered here, and Air India keeps a maintenance unit with twin hangars for 737 type aircraft.",
+ "after": "Kerala's first airport, established in 1932 and declared international in 1991. Second busiest in the state and sixteenth in the country, it handled just under 4.7 million passengers in the 2025-26 financial year.\n\nIt is only 3.7 km west of the city centre and close to Shankumugham Beach. Technopark is 13 km away.\n\nThere are two terminals and a single runway. Terminal 1 takes domestic flights and Terminal 2 international ones, but the airport lists Air India Express at Terminal 2 for its domestic flights too, and IndiGo at both.",
+ "claims": [
+  {
+   "claim": "Kerala's first airport",
+   "verdict": "confirmed",
+   "inAfter": "Kerala's first airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "it is the first airport in the state of Kerala"
+    },
+    {
+     "file": "op-about",
+     "org": "Thiruvananthapuram International Airport Ltd (Adani group, the operator, thiruvananthapuram.adaniairports.com)",
+     "dated": "read 2026-09-23 (live page; it quotes 2024-25 traffic)",
+     "quote": "Thiruvananthapuram International Airport (TIA), established in 1932, was the first airport in the state of Kerala, India."
+    },
+    {
+     "file": "airporttech-project",
+     "org": "Airport Technology (trade press)",
+     "dated": "undated project page, written before the new international terminal opened (it expects it by April 2010)",
+     "quote": "Trivandrum International Airport is the first of three airports in the state of Kerala, India."
+    }
+   ]
+  },
+  {
+   "claim": "established in 1932",
+   "verdict": "confirmed",
+   "inAfter": "established in 1932",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "Established in 1932"
+    },
+    {
+     "file": "op-about",
+     "org": "Thiruvananthapuram International Airport Ltd (Adani group, the operator, thiruvananthapuram.adaniairports.com)",
+     "dated": "read 2026-09-23 (live page; it quotes 2024-25 traffic)",
+     "quote": "Thiruvananthapuram International Airport (TIA), established in 1932"
+    },
+    {
+     "file": "airporttech-project",
+     "org": "Airport Technology (trade press)",
+     "dated": "undated project page, written before the new international terminal opened (it expects it by April 2010)",
+     "quote": "The airport was set up as a part of the Kerala Flying Club in 1932."
+    }
+   ]
+  },
+  {
+   "claim": "declared international in 1991",
+   "verdict": "confirmed",
+   "inAfter": "declared international in 1991",
+   "note": "Airport Technology dates the upgrade to January 1991, Wikipedia to 1 January 1991. 'The fifth in India' is cut (below).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "On 1 January 1991, TIA was upgraded to an international airport"
+    },
+    {
+     "file": "airporttech-project",
+     "org": "Airport Technology (trade press)",
+     "dated": "undated project page, written before the new international terminal opened (it expects it by April 2010)",
+     "quote": "It was upgraded to an international airport, the first to be located outside the metropolitan area, in January 1991."
+    }
+   ]
+  },
+  {
+   "claim": "second busiest in Kerala",
+   "verdict": "confirmed",
+   "inAfter": "Second busiest in the state",
+   "note": "AAI's full-year table for April 2025 to March 2026: Kochi 11.3 million, Thiruvananthapuram 4.69 million, Kozhikode 3.86 million, Kannur 1.43 million.",
+   "sources": [
+    {
+     "file": "aai-mar2026-pax",
+     "org": "Airports Authority of India",
+     "dated": "April 2025 to March 2026 (Traffic News, March 2026 annexure III)",
+     "quote": [
+      "Total Passengers(Domestic+International)",
+      "Change 2025-2026 2024-2025",
+      "KOCHI 740281 842371 -12.1% 11302552 11140778 1.5%",
+      "THIRUVANANTHAPURAM 293524 376410 -22.0% 4694206 4891009 -4.0%",
+      "KOZHIKODE 202932 296735 -31.6% 3855618 3695944 4.3%",
+      "KANNUR (KIAL) 39532 102790 -61.5% 1434168 1344021 6.7%"
+     ]
+    },
+    {
+     "file": "op-about",
+     "org": "Thiruvananthapuram International Airport Ltd (Adani group, the operator, thiruvananthapuram.adaniairports.com)",
+     "dated": "read 2026-09-23 (live page; it quotes 2024-25 traffic)",
+     "quote": "making it the second busiest airport in the state"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "The airport is the second-busiest airport in the state of Kerala"
+    }
+   ]
+  },
+  {
+   "claim": "sixteenth busiest in India",
+   "verdict": "confirmed",
+   "inAfter": "sixteenth in the country",
+   "note": "AAI's table for April 2025 to March 2026 has fifteen airports ahead of Thiruvananthapuram's 4,694,206 (the lowest of them Bhubaneswar, 5,130,834) and Patna next behind (4,386,376). In 2024-25 it ranked higher, fourteenth, with 4,891,009.",
+   "sources": [
+    {
+     "file": "aai-mar2026-pax",
+     "org": "Airports Authority of India",
+     "dated": "April 2025 to March 2026 (Traffic News, March 2026 annexure III)",
+     "quote": [
+      "Total Passengers(Domestic+International)",
+      "DELHI 7001938 7016092 -0.2% 78701971 79259890 -0.7%",
+      "MUMBAI (MIAL) 4337575 4622535 -6.2% 55290095 55122422 0.3%",
+      "BENGALURU (BIAL) 3649460 3638080 0.3% 44470035 41875620 6.2%",
+      "HYDERABAD (GHIAL) 2288274 2599325 -12.0% 30483885 29482396 3.4%",
+      "CHENNAI 1775631 1909441 -7.0% 23017324 22411290 2.7%",
+      "KOLKATA 1793004 1927598 -7.0% 21102741 21831118 -3.3%",
+      "AHMEDABAD 1105726 1211034 -8.7% 13822287 13427697 2.9%",
+      "KOCHI 740281 842371 -12.1% 11302552 11140778 1.5%",
+      "PUNE 925085 855298 8.2% 11005988 10457694 5.2%",
+      "GUWAHATI 548775 588484 -6.7% 6622784 6160157 7.5%",
+      "GOA 511959 633081 -19.1% 6126944 7244874 -15.4%",
+      "LUCKNOW 497253 511187 -2.7% 6065957 6438506 -5.8%",
+      "JAIPUR 466085 533019 -12.6% 5627147 6057249 -7.1%",
+      "GOA (MOPA) 472914 429397 10.1% 5376516 4643852 15.8%",
+      "BHUBANESWAR 423985 460337 -7.9% 5130834 4838751 6.0%",
+      "THIRUVANANTHAPURAM 293524 376410 -22.0% 4694206 4891009 -4.0%",
+      "PATNA 362962 381528 -4.9% 4386376 3819477 14.8%"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "the 16th overall in India, as of 2026"
+    }
+   ]
+  },
+  {
+   "claim": "just under 4.7 million passengers in 2025-26",
+   "verdict": "corrected",
+   "inAfter": "it handled just under 4.7 million passengers in the 2025-26 financial year",
+   "note": "Was 'more than 4.8 million in the 2024-25 financial year', which AAI bears out (4,891,009; the operator says 4.9 million). The 2025-26 total is out: 4,694,206, down 4.0 per cent. India's financial year runs April to March.",
+   "sources": [
+    {
+     "file": "aai-mar2026-pax",
+     "org": "Airports Authority of India",
+     "dated": "April 2025 to March 2026 (Traffic News, March 2026 annexure III)",
+     "quote": [
+      "Total Passengers(Domestic+International)",
+      "Change 2025-2026 2024-2025",
+      "THIRUVANANTHAPURAM 293524 376410 -22.0% 4694206 4891009 -4.0%"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": [
+      "stat1_data = 46,94,206",
+      "stat_year = April 2025 - March 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "3.7 km west of the city centre",
+   "verdict": "confirmed",
+   "inAfter": "It is only 3.7 km west of the city centre",
+   "note": "The coordinates put it 3.2 km in a straight line west of the GeoNames centre (263 degrees; ratio 1.14).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "the airport is approximately 3.7 km (2.3 mi) due west from the city centre"
+    },
+    {
+     "file": "op-about",
+     "org": "Thiruvananthapuram International Airport Ltd (Adani group, the operator, thiruvananthapuram.adaniairports.com)",
+     "dated": "read 2026-09-23 (live page; it quotes 2024-25 traffic)",
+     "quote": "the airport is approximately 3.7 km due west from the city centre"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 3.2 km (2.0 miles)",
+      "Bearing from the city centre: 263 degrees, which is west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "close to Shankumugham Beach",
+   "verdict": "softened",
+   "inAfter": "close to Shankumugham Beach",
+   "note": "Was 'about a kilometre from the Arabian Sea at Shankumugham Beach'. The operator places Terminal 1 near the beach (spelling it Sankhumukham); the kilometre rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "It shares a visible proximity to Shankumugham Beach"
+    },
+    {
+     "file": "op-about",
+     "org": "Thiruvananthapuram International Airport Ltd (Adani group, the operator, thiruvananthapuram.adaniairports.com)",
+     "dated": "read 2026-09-23 (live page; it quotes 2024-25 traffic)",
+     "quote": "Terminal 1, which is situated near the famous Sankhumukham beach"
+    }
+   ]
+  },
+  {
+   "claim": "Technopark 13 km away",
+   "verdict": "confirmed",
+   "inAfter": "Technopark is 13 km away.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "13 km (8.1 mi) from Technopark"
+    },
+    {
+     "file": "op-about",
+     "org": "Thiruvananthapuram International Airport Ltd (Adani group, the operator, thiruvananthapuram.adaniairports.com)",
+     "dated": "read 2026-09-23 (live page; it quotes 2024-25 traffic)",
+     "quote": "13 km from Technopark"
+    }
+   ]
+  },
+  {
+   "claim": "two terminals",
+   "verdict": "confirmed",
+   "inAfter": "There are two terminals",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "There are two terminals."
+    },
+    {
+     "file": "op-about",
+     "org": "Thiruvananthapuram International Airport Ltd (Adani group, the operator, thiruvananthapuram.adaniairports.com)",
+     "dated": "read 2026-09-23 (live page; it quotes 2024-25 traffic)",
+     "quote": "Thiruvananthapuram International Airport Limited (TIAL) operates two terminals"
+    }
+   ]
+  },
+  {
+   "claim": "a single runway",
+   "verdict": "softened",
+   "inAfter": "a single runway",
+   "note": "Was 'The single runway is 3,373 metres and takes any aircraft type'. The length is cut because the sources disagree (below); 'any aircraft type' rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "Thiruvananthapuram International Airport has a single 3,373 m (11,066 ft)-long runway"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 14/32: 3,398 m (11,148 ft), ASP",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 1 domestic, Terminal 2 international",
+   "verdict": "corrected",
+   "inAfter": "Terminal 1 takes domestic flights and Terminal 2 international ones",
+   "note": "Was 'Terminal 1 for domestic flights and Terminal 2 for international'. That is still the operator's own summary and Wikipedia's, and the operator's airline table bears it out for Air India (Terminal 1, domestic) and the foreign airlines (Terminal 2), but not for every domestic flight: see the next claim.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Thiruvananthapuram International Airport Ltd (Adani group, the operator, thiruvananthapuram.adaniairports.com)",
+     "dated": "read 2026-09-23 (live page; it quotes 2024-25 traffic)",
+     "quote": "Terminal 1, which is situated near the famous Sankhumukham beach, manages domestic flight operations while Terminal 2, which is in Chackai, manages international flight operations."
+    },
+    {
+     "file": "op-airlines",
+     "org": "Thiruvananthapuram International Airport Ltd (Adani group, the operator, thiruvananthapuram.adaniairports.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "AIR INDIA Code : AI T1 Domestic",
+      "OMAN AIR Code : WY T2 International",
+      "EMIRATES Code : EK T2 International"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "Terminal 1 is for domestic flights, and Terminal 2 is for all international flights."
+    }
+   ]
+  },
+  {
+   "claim": "the airport lists Air India Express at Terminal 2 for domestic flights too, and IndiGo at both terminals",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "the airport lists Air India Express at Terminal 2 for its domestic flights too, and IndiGo at both",
+   "note": "New to the text, and a correction: Wikipedia still says all domestic flights use Terminal 1. The operator's own airline table is the terminal authority, so the sentence names it. No second source was found: Air India Express's route page for Thiruvananthapuram answered 404.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Thiruvananthapuram International Airport Ltd (Adani group, the operator, thiruvananthapuram.adaniairports.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "AIR INDIA EXPRESS Code : IX T2 Domestic / International",
+      "INDIGO Code : 6E T1 / T2 Domestic / International"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the fifth airport in India declared international",
+   "verdict": "cut",
+   "wasBefore": "and the fifth in India to be declared international",
+   "why": "Wikipedia alone ('the fifth international airport of India after Delhi, Bombay, Madras and Calcutta'). Airport Technology calls it 'the first to be located outside the metropolitan area', which is consistent but does not give the count. The 1991 date is kept."
+  },
+  {
+   "claim": "more than 4.8 million passengers in 2024-25",
+   "verdict": "cut",
+   "wasBefore": "handling more than 4.8 million passengers in the 2024-25 financial year",
+   "why": "Replaced by the 2025-26 total (see above). AAI's March 2026 table confirms 4,891,009 for 2024-25."
+  },
+  {
+   "claim": "the location is remarkable",
+   "verdict": "cut",
+   "wasBefore": "The location is remarkable.",
+   "why": "A judgement; the facts behind it that two sources support are kept."
+  },
+  {
+   "claim": "3.7 km from the Padmanabhaswamy Temple",
+   "verdict": "cut",
+   "wasBefore": "and the Padmanabhaswamy Temple",
+   "why": "Sources disagree: Wikipedia gives 3.7 km to the city centre and the temple, the operator 3 km to the temple."
+  },
+  {
+   "claim": "about a kilometre from the Arabian Sea",
+   "verdict": "cut",
+   "wasBefore": "and about a kilometre from the Arabian Sea at Shankumugham Beach",
+   "why": "Softened to 'close to Shankumugham Beach' (see above); the kilometre rests on Wikipedia alone."
+  },
+  {
+   "claim": "the closest airport in India to a body of water",
+   "verdict": "cut",
+   "wasBefore": "which makes it the closest airport in India to a body of water",
+   "why": "Wikipedia alone, uncited there, and not something a second source was found to say."
+  },
+  {
+   "claim": "Kovalam beach 16 km away",
+   "verdict": "cut",
+   "wasBefore": "Kovalam beach is 16 km away",
+   "why": "Sources disagree: Wikipedia says 16 km, the operator 14 km."
+  },
+  {
+   "claim": "Terminal 1 for all domestic flights",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 for domestic flights and Terminal 2 for international",
+   "why": "Out of date as a rule for every flight: the operator lists Air India Express's domestic flights at Terminal 2 and IndiGo at both terminals. Corrected (see above)."
+  },
+  {
+   "claim": "three baggage carousels, full immigration and customs",
+   "verdict": "cut",
+   "wasBefore": "with three baggage carousels and full immigration and customs",
+   "why": "Wikipedia alone for the carousel count; 'full immigration and customs' is implied by any international terminal and adds nothing."
+  },
+  {
+   "claim": "runway 3,373 metres, takes any aircraft type",
+   "verdict": "cut",
+   "wasBefore": "The single runway is 3,373 metres and takes any aircraft type.",
+   "why": "The length is disputed: 3,373 m in Wikipedia's text, 3,400 m in its infobox, 3,398 m in OurAirports and 3,996 m on Airport Technology's old page. 'Any aircraft type' rests on Wikipedia alone. The single runway is kept (see above).",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "r1_length_m = 3400"
+    },
+    {
+     "file": "airporttech-project",
+     "org": "Airport Technology (trade press)",
+     "dated": "undated project page, written before the new international terminal opened (it expects it by April 2010)",
+     "quote": "the airport has one 3,996m-long (13,110ft) asphalt runway(14/32)."
+    }
+   ]
+  },
+  {
+   "claim": "a working base as well as a passenger airport",
+   "verdict": "cut",
+   "wasBefore": "It is a working base as well as a passenger airport.",
+   "why": "Framing for the military and maintenance claims below, which could not be confirmed."
+  },
+  {
+   "claim": "IAF Southern Air Command and the Coast Guard headquartered here",
+   "verdict": "cut",
+   "wasBefore": "The Indian Air Force's Southern Air Command and the Indian Coast Guard are headquartered here",
+   "why": "Wikipedia alone ('the airport headquarters the Southern Air Command (India) of the Indian Air Force (IAF) and the Indian Coast Guard'), with no second source. The Indian Air Force's site answered HTTP 503 on the one try allowed; the operator's pages read do not mention military use, and Airport Technology's page does not either."
+  },
+  {
+   "claim": "Air India's maintenance unit with twin 737 hangars",
+   "verdict": "cut",
+   "wasBefore": "and Air India keeps a maintenance unit with twin hangars for 737 type aircraft",
+   "why": "Who runs it is unclear. AI Engineering Services Ltd, the state-owned maintenance company that stayed with the government when Air India was sold, lists Thiruvananthapuram first among its facilities; Wikipedia calls the unit Air India's and alone describes the twin 737 hangars. Air India's own site answered this session with connection resets (HTTP 503).",
+   "sources": [
+    {
+     "file": "aiesl-facilities",
+     "org": "AI Engineering Services Ltd (aiesl.in)",
+     "dated": "Last Updated On: 23 Sep 2026",
+     "quote": [
+      "Our Facilities Thiruvananthapuram (TRV)",
+      "Last Updated On: 23 Sep 2026"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "The airport hosts Air India's narrow body maintenance, repair and overhaul (MRO) unit consisting of twin hangars for servicing Boeing 737-type aircraft"
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
