@@ -6,8 +6,364 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Almaty_International_Airport",
  "audited": "2026-09-23",
  "before": "Kazakhstan's main international gateway and the busiest airport in Central Asia, larger than the airport at the capital. It is the principal hub of Air Astana and handled 7.2 million passengers in 2022, roughly two thirds of them on domestic routes.\n\nTerminal 2 is the thing that has changed here. It opened in June 2024, handles international flights only, and covers more than 53,000 square metres with 50 check in counters, 20 passport control booths and four automated e-gates. It sits north east of Terminal 1 and is joined to it by an indoor bridge, so a domestic to international connection stays under cover. Between them the terminals lift the airport's capacity to 14 million passengers a year.\n\nThere is a small museum inside Terminal 2 covering the airport's history, alongside the duty free and VIP lounges.\n\nTerminal 1 dates from December 2003, rebuilt after a fire in 1999.\n\nBus routes 3 and 92 stop in front of both terminals, and Yandex Taxi operates here alongside ordinary taxis. The airport is owned by the Turkish operator TAV.",
- "after": "Kazakhstan's main international gateway and the busiest airport in Central Asia, larger than the airport at the capital. It is the principal hub of Air Astana and handled 7.2 million passengers in 2022, roughly two thirds of them on domestic routes.\n\nTerminal 2 is the thing that has changed here. It opened in June 2024, handles international flights only, and covers more than 53,000 square metres with 50 check in counters, 20 passport control booths and four automated e-gates. It sits north east of Terminal 1 and is joined to it by an indoor bridge, so a domestic to international connection stays under cover. Between them the terminals lift the airport's capacity to 14 million passengers a year.\n\nThere is a small museum inside Terminal 2 covering the airport's history, alongside the duty free and VIP lounges.\n\nTerminal 1 dates from December 2003, rebuilt after a fire in 1999.\n\nBus routes 3 and 92 stop in front of both terminals, and Yandex Taxi operates here alongside ordinary taxis. The airport is owned by the Turkish operator TAV.",
- "claims": [],
+ "after": "Kazakhstan's main international gateway and the busiest airport in Central Asia, larger than the airport at the capital. It handled 11.4 million passengers in 2024. Air Astana uses it as one of its two hubs, the other being Astana.\n\nTerminal 2, opened in June 2024, handles international flights only, leaving Terminal 1 for domestic ones. It covers more than 53,000 square metres, with 50 check in counters. Together the two terminals give the airport a capacity of about 14 million passengers a year.\n\nBus 92 runs from both terminals by day and bus 3 at night. TAV Airports, the Turkish operator that is part of Groupe ADP, owns 85 per cent of the airport and runs it.",
+ "claims": [
+  {
+   "claim": "Kazakhstan's main international gateway",
+   "verdict": "confirmed",
+   "inAfter": "Kazakhstan's main international gateway",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the main international gateway into the country"
+    },
+    {
+     "file": "orda-horizon",
+     "org": "Orda.kz",
+     "quote": "Almaty Airport already handles more than half of all international passenger traffic in Kazakhstan.",
+     "dated": "2025-08-05"
+    }
+   ]
+  },
+  {
+   "claim": "busiest airport in Central Asia",
+   "verdict": "confirmed",
+   "inAfter": "the busiest airport in Central Asia",
+   "note": "Orda's line comes with the airport's 2025 forecast; TAV's actual 2025 total (11.9 million) is below the forecast but still well ahead of any other Central Asian airport named in these sources.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "As of 2024 it is the busiest airport in Kazakhstan (as well as in Central Asia)"
+    },
+    {
+     "file": "orda-horizon",
+     "org": "Orda.kz",
+     "quote": "making it the busiest in Central Asia",
+     "dated": "2025-08-05"
+    }
+   ]
+  },
+  {
+   "claim": "larger than the airport at the capital",
+   "verdict": "confirmed",
+   "inAfter": "larger than the airport at the capital",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is larger than Nursultan Nazarbayev International Airport (NQZ) in Astana"
+    },
+    {
+     "file": "timesca-t2",
+     "org": "Times of Central Asia",
+     "quote": "Almaty International Airport is the nation’s largest air hub",
+     "dated": "2024-06-03"
+    },
+    {
+     "file": "airport-tech",
+     "org": "Airport Technology",
+     "quote": "is the biggest airport in Kazakhstan"
+    }
+   ]
+  },
+  {
+   "claim": "one of Air Astana's two hubs, the other Astana",
+   "verdict": "corrected",
+   "inAfter": "Air Astana uses it as one of its two hubs, the other being Astana.",
+   "note": "Was 'the principal hub of Air Astana'. The airline's own August 2026 results speak of its Almaty and Astana hubs. The same report says Air Astana raised Almaty to London to four flights a week in the second quarter of 2026 (not added).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is a principal hub of Air Astana"
+    },
+    {
+     "file": "airastana-h1-2026",
+     "org": "Air Astana (results, 5 August 2026)",
+     "quote": [
+      "Almaty and Astana hubs",
+      "at our hubs in the medium-term"
+     ],
+     "dated": "2026-08-05"
+    }
+   ]
+  },
+  {
+   "claim": "11.4 million passengers in 2024",
+   "verdict": "corrected",
+   "inAfter": "It handled 11.4 million passengers in 2024.",
+   "note": "Was 7.2 million in 2022. Wikipedia's infobox (from the Kazakh AIP) gives 11,426,650 and TAV 11,426,790 for 2024. TAV also reports 11,930,941 for 2025 (up 4 per cent), but no second organisation for 2025 could be found once the search budget ran out, so 2024 is used.",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat1_data = 11,426,650",
+      "stat_year = 2024"
+     ]
+    },
+    {
+     "file": "tav-fy25-investor",
+     "org": "TAV Airports (operator), FY25 investor presentation",
+     "quote": [
+      "December Chg. Jan-Dec Chg.",
+      "Almaty 970.676 942.593 -3% 11.426.790 11.930.941 4%"
+     ],
+     "dated": "2026-03-10"
+    }
+   ]
+  },
+  {
+   "claim": "T2 opened June 2024",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 2, opened in June 2024",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On 1 June 2024, Terminal 2 at Almaty International Airport opened"
+    },
+    {
+     "file": "timesca-t2",
+     "org": "Times of Central Asia",
+     "quote": "On June 1, a new international terminal was opened at Almaty Airport",
+     "dated": "2024-06-03"
+    },
+    {
+     "file": "hurriyet-t2",
+     "org": "Hurriyet Daily News",
+     "quote": "The first passengers arrived at the new terminal on June 1 from London",
+     "dated": "2024-06-02"
+    }
+   ]
+  },
+  {
+   "claim": "T2 international only, T1 domestic",
+   "verdict": "confirmed",
+   "inAfter": "handles international flights only, leaving Terminal 1 for domestic ones",
+   "note": "Settled: all international flights moved into T2 by mid-June 2024 and the old terminal was repurposed for domestic flights. TAV's March 2026 presentation still lists the 'Almaty new international terminal', and the airport's own bus page refers to 'the international terminal'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "exclusively serving international flights"
+    },
+    {
+     "file": "timesca-t2",
+     "org": "Times of Central Asia",
+     "quote": "All international flights will be transferred to the new terminal by mid-June and the old terminal, repurposed for domestic flights.",
+     "dated": "2024-06-03"
+    },
+    {
+     "file": "astanatimes-t2",
+     "org": "The Astana Times",
+     "quote": "The new terminal has been serving all international flights since the middle of June.",
+     "dated": "2024-06-26"
+    },
+    {
+     "file": "tav-fy25-investor",
+     "org": "TAV Airports (operator), FY25 investor presentation",
+     "quote": "Ankara and Almaty new international terminal",
+     "dated": "2026-03-10"
+    },
+    {
+     "file": "alaport-bus",
+     "org": "Almaty International Airport (operator website)",
+     "quote": "The card can be purchased in the international terminal on the first floor in the arrivals area."
+    }
+   ]
+  },
+  {
+   "claim": "T2 more than 53,000 square metres",
+   "verdict": "confirmed",
+   "inAfter": "It covers more than 53,000 square metres",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the terminal covers over 53,000 square meters"
+    },
+    {
+     "file": "astanatimes-t2",
+     "org": "The Astana Times",
+     "quote": "the new international terminal spans 53,500 square meters",
+     "dated": "2024-06-26"
+    },
+    {
+     "file": "orda-horizon",
+     "org": "Orda.kz",
+     "quote": "The new international terminal spans nearly 54,000 square meters",
+     "dated": "2025-08-05"
+    }
+   ]
+  },
+  {
+   "claim": "50 check in counters",
+   "verdict": "confirmed",
+   "inAfter": "with 50 check in counters",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "includes 50 check-in counters, 20 passport control booths, and four automated e-gates"
+    },
+    {
+     "file": "astanatimes-t2",
+     "org": "The Astana Times",
+     "quote": [
+      "It features 50 check-in counters"
+     ],
+     "dated": "2024-06-26"
+    }
+   ]
+  },
+  {
+   "claim": "capacity about 14 million a year",
+   "verdict": "confirmed",
+   "inAfter": "Together the two terminals give the airport a capacity of about 14 million passengers a year.",
+   "note": "The Ministry of Transport and TAV both give 14 million; the airport's president put it at 13 million, rising to 14 million with digital tools. 2025 traffic (11.9 million, TAV) is close to it.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "increasing the airport's potential capacity to 14 million passengers per year"
+    },
+    {
+     "file": "timesca-t2",
+     "org": "Times of Central Asia",
+     "quote": "the new terminal will increase the airport's capacity to 14 million passengers per year",
+     "dated": "2024-06-03"
+    },
+    {
+     "file": "hurriyet-t2",
+     "org": "Hurriyet Daily News",
+     "quote": "the new terminal increases the airport's annual passenger capacity to more than 14 million",
+     "dated": "2024-06-02"
+    }
+   ]
+  },
+  {
+   "claim": "bus 92 by day from both terminals, bus 3 at night",
+   "verdict": "corrected",
+   "inAfter": "Bus 92 runs from both terminals by day and bus 3 at night.",
+   "note": "Was 'Bus routes 3 and 92 stop in front of both terminals'. The operator's live page (fetched 23 September 2026) splits them: 92 by day from T1 and T2 (06:00 to 23:00), 3 at night (23:00 to 06:00).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is serviced by bus routes 3 and 92, with bus stations located in front of both the domestic (Terminal 1) and international (Terminal 2) terminals"
+    },
+    {
+     "file": "alaport-bus",
+     "org": "Almaty International Airport (operator website)",
+     "quote": [
+      "Bus routes operate on the airport premises: daytime route №92 and nighttime route №3.",
+      "Bus route №92 runs from airport terminals T1 and T2"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "TAV Airports, Turkish, part of Groupe ADP, owns 85 per cent and runs it",
+   "verdict": "corrected",
+   "inAfter": "TAV Airports, the Turkish operator that is part of Groupe ADP, owns 85 per cent of the airport and runs it.",
+   "note": "Was 'owned by the Turkish operator TAV'. TAV holds 85 per cent; the Kazakhstan Infrastructure Fund, managed by VPE Capital, is the co-investor. Wikipedia's own terminal section says TAV took full ownership, which TAV's March 2026 presentation contradicts.",
+   "sources": [
+    {
+     "file": "tav-fy25-investor",
+     "org": "TAV Airports (operator), FY25 investor presentation",
+     "quote": [
+      "Almaty (85%, no concession)",
+      "1. Groupe ADP"
+     ],
+     "dated": "2026-03-10"
+    },
+    {
+     "file": "hurriyet-t2",
+     "org": "Hurriyet Daily News",
+     "quote": [
+      "TAV Airports holds an 85 percent stake in the SPV, which acquired Almaty Airport in 2021",
+      "TAV Airports, a member of Groupe ADP"
+     ],
+     "dated": "2024-06-02"
+    },
+    {
+     "file": "orda-horizon",
+     "org": "Orda.kz",
+     "quote": "Almaty Airport has been owned by Turkish company TAV Airports Holdings",
+     "dated": "2025-08-05"
+    }
+   ]
+  },
+  {
+   "claim": "principal hub of Air Astana",
+   "verdict": "cut",
+   "wasBefore": "It is the principal hub of Air Astana",
+   "why": "Air Astana names Almaty and Astana as its hubs; reworded to 'one of Air Astana's two hubs'."
+  },
+  {
+   "claim": "7.2 million in 2022, two thirds domestic",
+   "verdict": "cut",
+   "wasBefore": "handled 7.2 million passengers in 2022, roughly two thirds of them on domestic routes",
+   "why": "Out of date. Replaced by the 2024 total from two sources. The domestic share has fallen to about 55 per cent (TAV, 2024 and 2025), but only TAV gives the split, so it is not stated."
+  },
+  {
+   "claim": "Terminal 2 is the thing that has changed",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 is the thing that has changed here.",
+   "why": "Framing sentence; the change is stated in the dated facts that follow."
+  },
+  {
+   "claim": "north east of T1, joined by an indoor bridge",
+   "verdict": "cut",
+   "wasBefore": "It sits north east of Terminal 1 and is joined to it by an indoor bridge, so a domestic to international connection stays under cover.",
+   "why": "Only Wikipedia; no second source found."
+  },
+  {
+   "claim": "passport booths and e-gates as first worded",
+   "verdict": "cut",
+   "wasBefore": "20 passport control booths and four automated e-gates",
+   "why": "Cut in review (23 Sep). Wikipedia gives 20 passport booths and four e-gates as if for the whole terminal; The Astana Times (June 2024) says the 20 are in departures, with 32 more in arrivals, and the four gates are for Kazakh citizens. The two sources disagree on what the figures cover and only one gives the detail, so neither version is kept."
+  },
+  {
+   "claim": "capacity sentence as first worded",
+   "verdict": "cut",
+   "wasBefore": "Between them the terminals lift the airport's capacity to 14 million passengers a year.",
+   "why": "Reworded to 'about 14 million', since the airport's president gave 13 million rising to 14."
+  },
+  {
+   "claim": "museum, duty free and VIP lounges in T2",
+   "verdict": "cut",
+   "wasBefore": "There is a small museum inside Terminal 2 covering the airport's history, alongside the duty free and VIP lounges.",
+   "why": "The only second source (Astana Times, June 2024) calls the museum 'upcoming'; no confirmation that it opened."
+  },
+  {
+   "claim": "T1 from December 2003, after the 1999 fire",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 dates from December 2003, rebuilt after a fire in 1999.",
+   "why": "Only Wikipedia; the two cited period sources tried did not cover it."
+  },
+  {
+   "claim": "bus 3 and 92 in front of both terminals",
+   "verdict": "cut",
+   "wasBefore": "Bus routes 3 and 92 stop in front of both terminals",
+   "why": "Reworded from the operator's page: 92 by day from both terminals, 3 at night."
+  },
+  {
+   "claim": "Yandex Taxi",
+   "verdict": "cut",
+   "wasBefore": "and Yandex Taxi operates here alongside ordinary taxis",
+   "why": "No second source; the operator's transport page mentions only its official taxi stand."
+  },
+  {
+   "claim": "owned by the Turkish operator TAV",
+   "verdict": "cut",
+   "wasBefore": "The airport is owned by the Turkish operator TAV.",
+   "why": "Corrected: TAV owns 85 per cent, not all of it."
+  }
+ ],
  "opinion": [],
  "tracerOk": {}
 }

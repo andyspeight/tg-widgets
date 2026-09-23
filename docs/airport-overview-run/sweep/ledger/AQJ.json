@@ -1,0 +1,133 @@
+{
+ "iata": "AQJ",
+ "id": "recE0OapEYs5NuC3n",
+ "name": "King Hussein International Airport",
+ "country": "Jordan",
+ "wikipedia": "https://en.wikipedia.org/wiki/King_Hussein_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Jordan's Red Sea airport, just north of Aqaba, and one of only three civilian airports in the country alongside Queen Alia and Amman's City Airport.\n\nThe geography is remarkable. Within a 24 km radius of Aqaba there are three other countries, Egypt, Saudi Arabia and Israel, and a second airport at Ramon opened across the Israeli border in 2019 nominally serving Eilat.\n\nWeather is rarely a problem. Conditions are normally excellent and the airport is seldom closed, though strong southerly winds can carry sandstorms across the Red Sea from Egypt. There is a single runway with a Category I instrument landing system.\n\nIt is a busier site than the passenger traffic suggests, with a cargo terminal opened in January 2005, a private jet terminal, an aircraft maintenance centre, a light aircraft assembly plant, two flying academies and a Royal Pavilion, since King Abdullah II keeps a palace on the shoreline.\n\nOne caveat. The airport was reported to have been hit in a missile attack in July 2026, with damage to aircraft on the ground, and accounts of the incident differ. Check the current operating position before committing a client.",
+ "after": "King Hussein International is Aqaba's airport, just north of the city, with a single runway.\n\nThe FCDO reports Iranian strikes on targets in Jordan since July 2026, with renewed attacks and interceptions in and around Aqaba in early September, and tells British nationals in the Middle East to be prepared for flight cancellations and airspace closures.\n\nCheck the current operating position before committing a client.",
+ "claims": [
+  {
+   "claim": "King Hussein International is Aqaba's airport, just north of the city",
+   "verdict": "confirmed",
+   "inAfter": "King Hussein International is Aqaba's airport, just north of the city",
+   "note": "Coordinates put it 9.5 km from the GeoNames centre of Aqaba, bearing 6 degrees (north).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "King Hussein International Airport, Arabic: مطار الملك حسين الدولي, (IATA: AQJ, ICAO: OJAQ), also known as Aqaba Airport, is a minor international airport located in the vicinity of a northern suburb of Aqaba, Jordan"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Airport: King Hussein International Airport (OurAirports OJAQ, IATA AQJ)",
+      "Bearing from the city centre: 6 degrees, which is north"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "single runway",
+   "verdict": "confirmed",
+   "inAfter": "with a single runway",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport has a single runway"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "Runways listed: 1"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: Iranian strikes in Jordan since July 2026; renewed attacks and interceptions around Aqaba in early September; be prepared for flight cancellations and airspace closures",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "The FCDO reports Iranian strikes on targets in Jordan since July 2026, with renewed attacks and interceptions in and around Aqaba in early September, and tells British nationals in the Middle East to be prepared for flight cancellations and airspace closures.",
+   "note": "Attributed statement, checked against the FCDO page (updated 10 September 2026, still current 23 September 2026). July is 2026: the page was last updated 10 September 2026 and the Jerusalem Post dates the first Aqaba attack 19 July 2026.",
+   "sources": [
+    {
+     "file": "fcdo-jordan",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "Since 8 July there have been strikes and retaliatory attacks by Iran in a number of locations across the region, including Jordan, against US military and civilian infrastructure.",
+      "In early September renewed attacks and interceptions occurred in and around Aqaba.",
+      "British nationals currently in the Middle East should be prepared for possible flight cancellations, periodic airspace closures",
+      "10 September 2026",
+      "23 September 2026"
+     ],
+     "dated": "2026-09-10"
+    }
+   ]
+  },
+  {
+   "claim": "one of three civilian airports in Jordan",
+   "verdict": "cut",
+   "wasBefore": "one of only three civilian airports in the country alongside Queen Alia and Amman's City Airport",
+   "why": "Only Wikipedia."
+  },
+  {
+   "claim": "Red Sea airport",
+   "verdict": "cut",
+   "wasBefore": "Jordan's Red Sea airport, just north of Aqaba",
+   "why": "Reworded to what two sources give."
+  },
+  {
+   "claim": "three countries within 24 km; Ramon opened 2019",
+   "verdict": "cut",
+   "wasBefore": "Within a 24 km radius of Aqaba there are three other countries, Egypt, Saudi Arabia and Israel, and a second airport at Ramon opened across the Israeli border in 2019 nominally serving Eilat.",
+   "why": "Only Wikipedia could be saved."
+  },
+  {
+   "claim": "weather rarely a problem; sandstorms",
+   "verdict": "cut",
+   "wasBefore": "Weather is rarely a problem. Conditions are normally excellent and the airport is seldom closed, though strong southerly winds can carry sandstorms across the Red Sea from Egypt.",
+   "why": "Only Wikipedia."
+  },
+  {
+   "claim": "geography remarkable",
+   "verdict": "cut",
+   "wasBefore": "The geography is remarkable.",
+   "why": "Goes with the cut sentence."
+  },
+  {
+   "claim": "Category I ILS",
+   "verdict": "cut",
+   "wasBefore": "There is a single runway with a Category I instrument landing system.",
+   "why": "Runway kept; the ILS category has one source."
+  },
+  {
+   "claim": "cargo terminal 2005, private jet terminal, maintenance, assembly plant, academies, Royal Pavilion",
+   "verdict": "cut",
+   "wasBefore": "It is a busier site than the passenger traffic suggests, with a cargo terminal opened in January 2005",
+   "why": "Only Wikipedia; the operator page reached lists menus, not facts."
+  },
+  {
+   "claim": "July 2026 missile attack, damage to aircraft, accounts differ",
+   "verdict": "cut",
+   "wasBefore": "The airport was reported to have been hit in a missile attack in July 2026, with damage to aircraft on the ground, and accounts of the incident differ.",
+   "why": "Iran's Revolutionary Guard said US aircraft were hit at the airport on 19 July 2026; only Wikipedia could be saved for that (Times of Israel and The Hindu refused the fetcher). The Jerusalem Post (19 July 2026, saved as jpost-902996) confirms an Iranian ballistic missile fired at the Aqaba area that day and a US Aegis interception of the warhead, but says nothing of damage at the airport. Replaced by the FCDO's current account of attacks in and around Aqaba."
+  },
+  {
+   "claim": "one caveat",
+   "verdict": "cut",
+   "wasBefore": "One caveat.",
+   "why": "Lead-in no longer needed."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Check the current operating position before committing a client.",
+   "why": "Advice that follows from the FCDO's warning of cancellations and airspace closures."
+  }
+ ],
+ "tracerOk": {}
+}
