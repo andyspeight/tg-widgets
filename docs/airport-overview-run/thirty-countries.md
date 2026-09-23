@@ -11,8 +11,8 @@ one was sourced by hand and put through the same rule as everything else:
 
 **Result: 10 airports kept, 20 countries left out.** 18 airports were added on
 23 Sep; later that day Andy had the eight flagged ones pulled ("pull all of those
-airports"), keeping only what two independent publishers support, plus Banjul (see
-the open question below). The table went from 1,018 to 1,036 and back to 1,028
+airports"), keeping only what two independent publishers support, plus Banjul, which Andy
+chose to keep (see below). The table went from 1,018 to 1,036 and back to 1,028
 records, and covers 205 of the 234 countries with scheduled service.
 
 The 10 kept records have the same thin shape as the 418: Name, IATA, Country, Lat, Lng,
@@ -46,7 +46,7 @@ of them can be re-added quickly if a second source turns up.
 | Liberia | ROB Roberts | Liberia Civil Aviation Authority: "more than 228,000 ... annually". WFP Logistics Cluster: "more than 450,000 ... annually" | Double |
 | Cook Islands | RAR Rarotonga | WFP Logistics Cluster: 348,017 in 2017. Cook Islands News (30 Jan 2024): arrivals alone "more than 170,000 in 2019" | Double |
 | Tonga | TBU Fua'amotu | JICA study (Jul 2025): 213,296 international passengers in 2019. Tonga Statistics Department: 136,059 arrivals and 139,527 departures in 2019 (all ports) | Double |
-| Gambia | BJL Banjul | Gambia Bureau of Statistics, Transport Statistics Summary Report 2023: 477,512 in 2019, 418,807 in 2023 | KEPT, but one publisher: see open question |
+| Gambia | BJL Banjul | Gambia Bureau of Statistics, Transport Statistics Summary Report 2023: 477,512 in 2019, 418,807 in 2023 | KEPT on Andy's call: one publisher, but a popular airport (see below) |
 | Somalia | MGQ Aden Adde | National Bureau of Statistics, Facts and Figures 2021, table 1.19: 278,012 international passengers (Feb to Dec 2021), Garowe 16,689 | PULLED 23 Sep (Flagged: one publisher) |
 | Anguilla | AXA Clayton J. Lloyd | Anguilla Statistics Department monthly reports, summed: 57,718 in 2019, 114,433 in 2024, 118,186 in 2025 | PULLED 23 Sep (Flagged: one publisher) |
 | Greenland | GOH Nuuk | Statistics Greenland (bank.stat.gl): 259,449 in 2025 (see the Greenland call below) | PULLED 23 Sep (Flagged: one publisher, judgement call) |
@@ -99,14 +99,13 @@ was not. Nuuk was then pulled with the other flagged airports, because Statistic
 Greenland is its only publisher, so Greenland currently has no airport. If it is
 re-added, this reasoning still decides which one.
 
-## Open question for Andy
+## Banjul: kept on Andy's call
 
-**Banjul (BJL) rests on one publisher too.** The Gambia Bureau of Statistics is its
-only source: an official series, 418,807 to 477,512 a year and so about four times
-over the floor, which is why it was grouped with the double-sourced airports rather
-than the flagged eight. No independent second source could be found on 23 Sep. Under
-the strict standard applied to the eight it would be pulled as well. Kept until
-Andy decides.
+Banjul (BJL) rests on one publisher, the Gambia Bureau of Statistics: an official
+series, 418,807 to 477,512 a year, about four times over the floor. No independent
+second source could be found on 23 Sep, so under the strict standard applied to the
+eight it would have gone too. Asked, Andy said: "keep banjul, its a popular
+airport." It stays, as a deliberate exception to the two-publisher standard.
 
 ## Traps worth knowing (they will bite the next person)
 

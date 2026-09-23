@@ -98,7 +98,7 @@ including the eight pulled, is in `thirty-countries.md`.
 
 Kept: UBN Mongolia, VTE Laos, MJI Libya, BWN Brunei, BJL Gambia, LLW Malawi,
 FNA Sierra Leone, ROB Liberia, RAR Cook Islands, TBU Tonga. Banjul (BJL) rests on
-one publisher too and is an open question for Andy.
+one publisher too; Andy kept it as a popular airport.
 
 Pulled 23 Sep: MGQ Somalia, AXA Anguilla, GOH Greenland, KBL Afghanistan,
 HIR Solomon Islands, JUB South Sudan, PBH Bhutan, TMS Sao Tome & Principe.
