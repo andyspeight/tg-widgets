@@ -1,0 +1,387 @@
+{
+ "iata": "HDS",
+ "id": "recs0A18kTRUNjNEV",
+ "name": "Eastgate Airport / Air Force Base Hoedspruit",
+ "country": "South Africa",
+ "wikipedia": "https://en.wikipedia.org/wiki/Air_Force_Base_Hoedspruit",
+ "audited": "2026-09-23",
+ "before": "The airport for the private game reserves around Hoedspruit and for the Kruger National Park through the nearby Orpen Gate. The civilian terminal, called Eastgate Airport, was built at the southern end of a South African Air Force base in the early 1990s.\n\nThat shared use is the thing to know. This is an active air force base with a civil terminal attached, so the facilities are modest: car hire and foreign exchange, and charter flights from operators including Federal Air, Genair and Execujet alongside the scheduled services.\n\nThe setting is genuinely wild. The base sits inside its own game reserve and keeping animals off the runway was a serious problem, so three cheetahs were introduced onto the airfield. Animal incursions dropped by 90 per cent, and another South African Air Force base has since copied the idea.\n\nThe base opened on 1 July 1978 and was built to be heavily protected, with hardened aircraft shelters. It has also served as an emergency landing site for the Space Shuttle.",
+ "after": "The airport for the private game reserves around Hoedspruit and for the Kruger National Park through the Orpen Gate. Its civilian terminal, Eastgate Airport, sits on a South African Air Force base.\n\nThat shared use is the thing to know. This is an active air force base with a civil terminal attached, so the facilities are modest, though there is car hire. Charter operators including Federal Air, Genair and Execujet fly here alongside the scheduled services.\n\nThe base opened on 1 July 1978 and was built for fighters, with hardened aircraft shelters. It was also one of the emergency landing sites for the Space Shuttle.",
+ "claims": [
+  {
+   "claim": "the airport for the private game reserves around Hoedspruit and for Kruger National Park through the Orpen Gate",
+   "verdict": "softened",
+   "inAfter": "The airport for the private game reserves around Hoedspruit and for the Kruger National Park through the Orpen Gate.",
+   "note": "Was 'through the nearby Orpen Gate'. The operator describes itself as the way in to the private game reserves and Kruger, and names the Orpen Gate; 'nearby' is Wikipedia's word alone, so it goes. Airlink's network page also sells Hoedspruit for its private game reserves. GeoNames has no entry for Hoedspruit, so no distance was computed.",
+   "sources": [
+    {
+     "file": "eastgate-home",
+     "org": "Eastgate Airport (the airport operator, eastgateairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's home page)",
+     "quote": [
+      "Just outside Hoedspruit, in the eastern reaches of South Africa’s Limpopo Province lies the Eastgate Airport, your gateway to the heartland of the country’s abundant wildlife in private game reserves, the world-famous Kruger National Park",
+      "Mozambique corridor entrance through Orpen Gate, Kruger Park."
+     ]
+    },
+    {
+     "file": "airlink-network",
+     "org": "Airlink (flyairlink.com, its route network page)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Hoedspruit offers safari adventures, private game reserves, and stunning bushveld landscapes"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The terminal's main business is serving tourists visiting private game reserves in the area as well as access to the Kruger National Park via the nearby Orpen Gate."
+    }
+   ]
+  },
+  {
+   "claim": "the civilian terminal, Eastgate Airport, sits on a South African Air Force base",
+   "verdict": "softened",
+   "inAfter": "Its civilian terminal, Eastgate Airport, sits on a South African Air Force base.",
+   "note": "Was 'was built at the southern end of a South African Air Force base in the early 1990s'. The name and the air force base are confirmed; the southern end and the date are cut (below). The operator's pages use the air force's runways and need the military's permission out of hours.",
+   "sources": [
+    {
+     "file": "saairforce-hoedspruit",
+     "org": "saairforce.co.za (the unofficial South African Air Force website)",
+     "dated": "read 2026-09-23 (undated base page)",
+     "quote": "an unused portion of the base was converted into a civilian airport known as Eastgate Airport"
+    },
+    {
+     "file": "eastgate-aviation",
+     "org": "Eastgate Airport (the airport operator, eastgateairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's aviation page)",
+     "quote": [
+      "By making use of the airforce runways, Eastgate Airport can accommodate any aircraft",
+      "Confirmation to operate to/from Hoedspruit Airforce Base (pdf)"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "is an airbase of the South African Air Force",
+      "A civil airport terminal, known as the Eastgate Airport, was established at the southern end of the airfield in the early 1990s."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "an active air force base with a civil terminal attached",
+   "verdict": "confirmed",
+   "inAfter": "This is an active air force base with a civil terminal attached",
+   "note": "saairforce.co.za lists the units at the base now (101, 19 and 514 Squadrons, 7 Air Servicing Unit, the Command and Control School, the Air Force Gymnasium and the Lowveld Airspace Control Sector, as Wikipedia does). The operator's live pages put its planes on the air force's runways and parking, need the military's permission after hours, and give the air force switchboard and fire section as emergency contacts.",
+   "sources": [
+    {
+     "file": "saairforce-hoedspruit",
+     "org": "saairforce.co.za (the unofficial South African Air Force website)",
+     "dated": "read 2026-09-23 (undated base page)",
+     "quote": [
+      "Squadrons at this base:",
+      "101 Squadron , 19 Squadron , 514 Squadron , 7 Air Servicing Unit , Air Force Command and Control School , Air Force Gymnasium , Lowveld Airspace Control Sector"
+     ]
+    },
+    {
+     "file": "eastgate-aviation",
+     "org": "Eastgate Airport (the airport operator, eastgateairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's aviation page)",
+     "quote": [
+      "After-hours on request and with permission from the Military.",
+      "Jet airliners and other large aircraft to be parked on airforce parking bay on request only."
+     ]
+    },
+    {
+     "file": "eastgate-facilities",
+     "org": "Eastgate Airport (the airport operator, eastgateairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's facilities page)",
+     "quote": [
+      "Airforce Switchboard: +27 15 799 2911",
+      "Airforce Fire Section: +27 15 799 3105"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an airbase of the South African Air Force"
+    }
+   ]
+  },
+  {
+   "claim": "car hire at the terminal",
+   "verdict": "confirmed",
+   "inAfter": "though there is car hire",
+   "note": "The operator lists Avis (with a desk at the airport), Europcar and Budget. It also lists a lounge (The Baobab Lounge) and a restaurant for light meals; those are not added.",
+   "sources": [
+    {
+     "file": "eastgate-facilities",
+     "org": "Eastgate Airport (the airport operator, eastgateairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's facilities page)",
+     "quote": [
+      "Avis, in its consistent effort to meet the growing national and international needs of its customers, operates an exclusive car rental operation at the Northern Kruger Park’s Gateway airport, Eastgate.",
+      "Car Rental",
+      "Avis Car Rental",
+      "Europcar",
+      "Budget"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Facilities at the terminal include car hire and foreign exchange."
+    }
+   ]
+  },
+  {
+   "claim": "charter operators including Federal Air, Genair and Execujet",
+   "verdict": "confirmed",
+   "inAfter": "Charter operators including Federal Air, Genair and Execujet fly here",
+   "note": "The operator's live flight page lists Federal Air, Genair and Cezzani (Mpumalanga-based) and Execujet, SA Historical Flight and Genair (Johannesburg-based). Its lounge page gives Federal Airlines guests free access, so FedAir at least is current; Federal Airlines' own home page names its destinations (Kruger, Sabi Sands, Timbavati) but not the airports it uses. The list closely follows Wikipedia's, sourced to a 2012 copy of the operator's page, so it may not be freshly kept: worth a check before a client books a named operator.",
+   "sources": [
+    {
+     "file": "eastgate-flights",
+     "org": "Eastgate Airport (the airport operator, eastgateairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's flight information page)",
+     "quote": [
+      "The following Mpumalanga-based Charter companies use Hoedspruit Airport:",
+      "Federal Air | Genair | Cezzani",
+      "The following Johannesburg-based Charter companies use Hoedspruit Airport:",
+      "Execujet | SA Historical Flight | Genair"
+     ]
+    },
+    {
+     "file": "eastgate-facilities",
+     "org": "Eastgate Airport (the airport operator, eastgateairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's facilities page)",
+     "quote": "Access is complimentary for all FedAir guests"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Charter flights are offered by Federal Air, Genair, Cesszani, Execujet, SA Historical Flight and Bataleur."
+    }
+   ]
+  },
+  {
+   "claim": "scheduled services",
+   "verdict": "confirmed",
+   "inAfter": "alongside the scheduled services",
+   "note": "The operator names Airlink, CemAir and FlySafair for its scheduled flights; Airlink's own network page lists Hoedspruit. Not named in the text, as the old sentence did not name them.",
+   "sources": [
+    {
+     "file": "eastgate-flights",
+     "org": "Eastgate Airport (the airport operator, eastgateairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's flight information page)",
+     "quote": [
+      "Operated by Airlink",
+      "Operated by Cemair",
+      "Operated by SafAir"
+     ]
+    },
+    {
+     "file": "eastgate-home",
+     "org": "Eastgate Airport (the airport operator, eastgateairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's home page)",
+     "quote": "In addition to these scheduled flights, Eastgate Airport is ideally suited to the handling of private charter flights."
+    },
+    {
+     "file": "airlink-network",
+     "org": "Airlink (flyairlink.com, its route network page)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Hoedspruit",
+      "A gateway to South Africa’s renowned wildlife, Hoedspruit offers safari adventures"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the base opened on 1 July 1978",
+   "verdict": "confirmed",
+   "inAfter": "The base opened on 1 July 1978",
+   "note": "GlobalSecurity adds that it was opened at an official ceremony by the then Minister of Defence, P. W. Botha, and that the first Mirage landed on 8 March 1978.",
+   "sources": [
+    {
+     "file": "globalsecurity-hoedspruit",
+     "org": "GlobalSecurity.org",
+     "dated": "read 2026-09-23 (undated page)",
+     "quote": "The Base was opened on the 1st of July 1978 during an official ceremony by the then Minister of Defence, Minister P.W. Botha."
+    },
+    {
+     "file": "saairforce-hoedspruit",
+     "org": "saairforce.co.za (the unofficial South African Air Force website)",
+     "dated": "read 2026-09-23 (undated base page)",
+     "quote": "this modern fighter base was opened on 1 July 1978"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The base was officially opened on 1 July 1978."
+    }
+   ]
+  },
+  {
+   "claim": "built for fighters, with hardened aircraft shelters",
+   "verdict": "softened",
+   "inAfter": "was built for fighters, with hardened aircraft shelters",
+   "note": "Was 'was built to be heavily protected, with hardened aircraft shelters'. saairforce.co.za calls it a modern fighter base, once known as Fighter Town for its Mirages and its numerous hardened aircraft shelters; GlobalSecurity calls it the cornerstone of fighter training. 'Heavily protected' is Wikipedia's framing ('a highly protected wartime base') and is dropped; the shelters carry the point.",
+   "sources": [
+    {
+     "file": "saairforce-hoedspruit",
+     "org": "saairforce.co.za (the unofficial South African Air Force website)",
+     "dated": "read 2026-09-23 (undated base page)",
+     "quote": "This base was formelly known as Fighter Town, RSA, due to the Mirage F1 and Mirage IIIs that were based there and its numerous hardened aircraft shelters."
+    },
+    {
+     "file": "globalsecurity-hoedspruit",
+     "org": "GlobalSecurity.org",
+     "dated": "read 2026-09-23 (undated page)",
+     "quote": "AFB Hoedspruit is the cornerstone of fighter training"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It was designed from the start to be a highly protected wartime base. As such, it has armoured and Hardened Aircraft Shelters"
+    }
+   ]
+  },
+  {
+   "claim": "one of the emergency landing sites for the Space Shuttle",
+   "verdict": "softened",
+   "inAfter": "It was also one of the emergency landing sites for the Space Shuttle.",
+   "note": "Was 'It has also served as an emergency landing site for the Space Shuttle', which could be read as a landing that happened. GlobalSecurity's list of Space Shuttle emergency landing sites includes Hoedspruit, and the operator says it was earmarked for NASA shuttle landings in the 1980s; nothing read says a shuttle ever landed there.",
+   "sources": [
+    {
+     "file": "globalsecurity-sts-els",
+     "org": "GlobalSecurity.org",
+     "dated": "read 2026-09-23 (undated page)",
+     "quote": [
+      "SPACE SHUTTLE EMERGENCY LANDING SITES",
+      "3. EMERGENCY LANDING SITES:",
+      "Hoedspruit, South Africa"
+     ]
+    },
+    {
+     "file": "eastgate-home",
+     "org": "Eastgate Airport (the airport operator, eastgateairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's home page)",
+     "quote": "Earmarked for NASA shuttle landing in the 1980’s."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It was also an emergency landing site for the Space Shuttle."
+    }
+   ]
+  },
+  {
+   "claim": "nearby",
+   "verdict": "cut",
+   "wasBefore": "through the nearby Orpen Gate",
+   "why": "'Nearby' is Wikipedia's word alone; the operator names the Orpen Gate without a distance, and GeoNames has no Hoedspruit entry for a computed one. Softened (above)."
+  },
+  {
+   "claim": "built at the southern end of the base",
+   "verdict": "cut",
+   "wasBefore": "was built at the southern end of a South African Air Force base",
+   "why": "Wikipedia alone. The operator's aviation page gives the airfield's reference point and runway thresholds but not where the terminal stands, and no other page read places it."
+  },
+  {
+   "claim": "in the early 1990s",
+   "verdict": "cut",
+   "wasBefore": "in the early 1990s",
+   "why": "Wikipedia contradicts itself: its Eastgate section says the terminal was established in the early 1990s, its lead that an unused part of the base was converted in the late 1990s. saairforce.co.za has the late 1990s sentence word for word as Wikipedia's lead, so the two count as one source, and the operator gives no date."
+  },
+  {
+   "claim": "foreign exchange at the terminal",
+   "verdict": "cut",
+   "wasBefore": "car hire and foreign exchange",
+   "why": "Not borne out by the operator's live facilities page, which lists car hire, a lounge and a restaurant, and under Banking says only that 'All major banks are situated in Hoedspruit' (ABSA, Standard Bank, First National Bank, Capitec). Wikipedia's source for foreign exchange is an older banking page on the same site. Car hire is kept (above).",
+   "sources": [
+    {
+     "file": "eastgate-facilities",
+     "org": "Eastgate Airport (the airport operator, eastgateairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's facilities page)",
+     "quote": [
+      "All major banks are situated in Hoedspruit:",
+      "ABSA",
+      "Standard Bank",
+      "First National Bank",
+      "Capitec"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the base inside its own game reserve; three cheetahs cut runway incursions by 90 per cent; copied by another SAAF base",
+   "verdict": "cut",
+   "wasBefore": "The setting is genuinely wild. The base sits inside its own game reserve and keeping animals off the runway was a serious problem, so three cheetahs were introduced onto the airfield. Animal incursions dropped by 90 per cent, and another South African Air Force base has since copied the idea.",
+   "why": "Wikipedia alone (the 25 square km AFB Hoedspruit Game Reserve, the three cheetahs, the 90 per cent and AFB Makhado). The base pages at saairforce.co.za and GlobalSecurity say nothing of them, the official SAAF site (af.mil.za) answered 502 to the link lister (one try), and the operator's pages do not mention them. The opening judgement ('genuinely wild') rests on them and goes too. Worth restoring if the air force's own account can be read."
+  },
+  {
+   "claim": "built to be heavily protected",
+   "verdict": "cut",
+   "wasBefore": "was built to be heavily protected",
+   "why": "Wikipedia's framing ('a highly protected wartime base'); the second sources describe a fighter base with hardened aircraft shelters. Softened (above)."
+  },
+  {
+   "claim": "has served as an emergency landing site",
+   "verdict": "cut",
+   "wasBefore": "It has also served as an emergency landing site for the Space Shuttle.",
+   "why": "Reworded so it does not suggest a shuttle landed there: the sources list it among the emergency landing sites (above)."
+  },
+  {
+   "claim": "aircraft may land only in set hours",
+   "verdict": "cut",
+   "why": "Held back, one source: the operator's aviation page says aircraft can land and take off only from 08:00 to 15:30 on weekdays and 11:00 to 14:00 at weekends and on public holidays, with other times on request and with the military's permission, and out-of-hours fees. It matters for a charter plan, but no second source was found.",
+   "sources": [
+    {
+     "file": "eastgate-aviation",
+     "org": "Eastgate Airport (the airport operator, eastgateairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's aviation page)",
+     "quote": [
+      "Aircraft can only land and take off between the following hours*:",
+      "08:00 – 15:30",
+      "11:00 – 14:00",
+      "* After-hours on request and with permission from the Military. Out block fees will apply."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: violent incidents around Kruger National Park",
+   "verdict": "cut",
+   "why": "Held back: a warning that replaces nothing. The FCDO's South Africa advice (updated 8 July 2026, still current 23 September 2026) has a Kruger National Park section: SANParks advises against the Numbi gate after a violent attack killed a tourist, with protests and violent incidents on the R538 to that gate, and two local tourists were killed in a rare violent incident inside the park in May 2026 (suspects arrested). The Numbi gate is not the Orpen Gate this airport's text names; the May 2026 line applies to the park as a whole. See the same entry at MQP.",
+   "sources": [
+    {
+     "file": "fcdo-za-safety",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "updated 2026-07-08, still current 2026-09-23 (the main page, fcdo-za)",
+     "quote": "After a violent attack killed a tourist in the Kruger National Park, SANParks advise against using the Numbi gate. There have been protests and violent incidents on the R538 road leading to the gate. In May 2026, 2 local tourists were killed in a rare violent incident within the park and the suspects were arrested."
+    },
+    {
+     "file": "fcdo-za",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-08 (updated; still current 23 September 2026)",
+     "quote": [
+      "Still current at:",
+      "23 September 2026",
+      "Updated:",
+      "8 July 2026"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "That shared use is the thing to know.",
+   "why": "The old text's judgement, kept: the civil terminal on an active air force base (sourced)."
+  },
+  {
+   "text": "so the facilities are modest",
+   "why": "The old text's judgement, kept: the operator lists car hire, a lounge and a restaurant for light meals, with the banks in town (sourced)."
+  }
+ ],
+ "tracerOk": {}
+}

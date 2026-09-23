@@ -1,0 +1,189 @@
+{
+ "iata": "WRO",
+ "id": "rec9IDbdkXrFGqDKo",
+ "name": "Copernicus Wrocław Airport",
+ "country": "Poland",
+ "wikipedia": "https://en.wikipedia.org/wiki/Wroc%C5%82aw_Airport",
+ "audited": "2026-09-23",
+ "before": "Poland's fifth busiest airport, ten kilometres west of Wroclaw, handling more than 3.8 million passengers in 2023.\n\nEverything works from one runway and one passenger terminal, with separate cargo and general aviation terminals alongside. The international departures hall has a duty free area. The cargo terminal is better equipped than the size suggests, with 3,300 square metres of storage, a bonded warehouse, a freezer and a store for radioactive materials.\n\nBuses do the work of getting into the city. MPK Wroclaw lines 106 by day and 206 at night both run to the main railway station and the main bus station, with plenty of stops along the way.\n\nThis is a joint civil and military field, used by the Polish Air Force, the United States Air Force, NATO and the Heavy Airlift Wing, so military movements are routine. The airport is named after Nicolaus Copernicus.",
+ "after": "Poland's fifth busiest airport, ten kilometres west of Wrocław, with a single runway. It handled about 4.9 million passengers in 2025, on Eurostat's figures.\n\nCity buses do the work of getting into town. Line 106 runs by day to the main railway station and night bus 206 to the main bus station, both with plenty of stops along the way.\n\nThe airport is named after Nicolaus Copernicus.",
+ "claims": [
+  {
+   "claim": "Poland's fifth busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "Poland's fifth busiest airport",
+   "note": "Eurostat's 2025 table of every Polish airport it reports: Warsaw Chopin, Krakow, Gdansk and Katowice, then Wroclaw with 4,900,785, ahead of Poznan.",
+   "sources": [
+    {
+     "file": "eurostat-pl",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat PL_EPKT KATOWICE/PYRZOWICE airport: passengers carried in 2025: 7,285,733",
+      "Eurostat PL_EPWR WROCLAW/STRACHOWICE airport: passengers carried in 2025: 4,900,785",
+      "Eurostat PL_EPPO POZNAN/LAWICA airport: passengers carried in 2025: 4,123,773"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "It is Poland's 5th busiest airport."
+    }
+   ]
+  },
+  {
+   "claim": "ten kilometres west of Wroclaw",
+   "verdict": "confirmed",
+   "inAfter": "ten kilometres west of Wrocław",
+   "note": "Coordinates: 10.3 km in a straight line at 271 degrees, west.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 10.3 km (6.4 miles)",
+      "Bearing from the city centre: 271 degrees, which is west"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "The airport is located ten kilometres (six miles) west of the city centre"
+    }
+   ]
+  },
+  {
+   "claim": "a single runway",
+   "verdict": "confirmed",
+   "inAfter": "with a single runway.",
+   "note": "Kept from 'Everything works from one runway and one passenger terminal'; the terminals are cut (below).",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 11/29: 2,503 m (8,212 ft), CONC-ASPH",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "It has one runway"
+    }
+   ]
+  },
+  {
+   "claim": "about 4.9 million passengers in 2025 (Eurostat)",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Eurostat",
+   "inAfter": "It handled about 4.9 million passengers in 2025, on Eurostat's figures.",
+   "note": "Was 'more than 3.8 million passengers in 2023' (Eurostat 3,880,957). A passenger total replaces a passenger total: Eurostat has 4,900,785 for 2025. The operator's site refused a plain request and the browser (403) and the civil aviation office's statistics could not be reached, so the figure is attributed to Eurostat.",
+   "sources": [
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "dated": "annual data to 2025",
+     "quote": [
+      "Eurostat PL_EPWR Copernicus Wrocław Airport: passengers carried in 2023: 3,880,957",
+      "Eurostat PL_EPWR Copernicus Wrocław Airport: passengers carried in 2025: 4,900,785"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "city buses: 106 by day to the main railway station, night bus 206 to the main bus station, many stops",
+   "verdict": "corrected",
+   "inAfter": "Line 106 runs by day to the main railway station and night bus 206 to the main bus station, both with plenty of stops along the way.",
+   "note": "Was 'MPK Wroclaw lines 106 by day and 206 at night both run to the main railway station and the main bus station'. The city's own timetables run 106 from PORT LOTNICZY to DWORZEC GLOWNY (the main railway station) and list 206 among the night buses, from PORT LOTNICZY to DWORZEC AUTOBUSOWY (the bus station); each route passes several streets. The MPK name rests on Wikipedia alone, so the text says city buses.",
+   "sources": [
+    {
+     "file": "wroclaw-lines",
+     "org": "City of Wrocław (its public transport timetables, wroclaw.pl)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "106",
+      "Przebieg trasy: PORT LOTNICZY - Graniczna - Skarżyńskiego - Graniczna - TAT - Podwale - Dworcowa - DWORZEC GŁÓWNY (DWORCOWA)",
+      "Autobus nocny",
+      "206",
+      "Przebieg trasy: PORT LOTNICZY - Graniczna - TAT - Podwale - Świdnicka - Swobodna - Sucha - DWORZEC AUTOBUSOWY"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": [
+      "The airport is served by two city bus (MPK Wrocław) lines, which on their routes have many stops in the city.",
+      "Line 106 (day) or 206'(night) connect to main railway station and main bus station."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after Nicolaus Copernicus",
+   "verdict": "confirmed",
+   "inAfter": "The airport is named after Nicolaus Copernicus.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": "Airport: Copernicus Wrocław Airport (OurAirports EPWR, IATA WRO)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "On 6 December 2005, the airport was renamed after the famous astronomer Nicolaus Copernicus"
+    }
+   ]
+  },
+  {
+   "claim": "more than 3.8 million passengers in 2023",
+   "verdict": "cut",
+   "wasBefore": "handling more than 3.8 million passengers in 2023.",
+   "why": "Superseded by the 2025 total. Corrected (see above)."
+  },
+  {
+   "claim": "one passenger terminal, with separate cargo and general aviation terminals",
+   "verdict": "cut",
+   "wasBefore": "Everything works from one runway and one passenger terminal, with separate cargo and general aviation terminals alongside.",
+   "why": "The terminals rest on Wikipedia alone, which contradicts itself (its lead says one passenger terminal, its facilities section 'domestic, international and cargo terminals'), and the operator's site refused a plain request and the browser (403). The single runway is kept (see above)."
+  },
+  {
+   "claim": "a duty free area in the international departures hall",
+   "verdict": "cut",
+   "wasBefore": "The international departures hall has a duty free area.",
+   "why": "Wikipedia alone; the operator's site could not be read."
+  },
+  {
+   "claim": "the cargo terminal: 3,300 m2, a bonded warehouse, a freezer, a radioactive materials store",
+   "verdict": "cut",
+   "wasBefore": "The cargo terminal is better equipped than the size suggests, with 3,300 square metres of storage, a bonded warehouse, a freezer and a store for radioactive materials.",
+   "why": "Wikipedia alone; the operator's site could not be read, and a count or specification could only come back as the airport's own, attributed."
+  },
+  {
+   "claim": "MPK Wroclaw runs the lines; both lines to both stations",
+   "verdict": "cut",
+   "wasBefore": "MPK Wroclaw lines 106 by day and 206 at night both run to the main railway station and the main bus station",
+   "why": "The city's timetables give each line one end: 106 at the main railway station, 206 at the bus station. The MPK name rests on Wikipedia alone. Corrected (see above)."
+  },
+  {
+   "claim": "a joint civil and military field used by the Polish Air Force, the USAF, NATO and the Heavy Airlift Wing",
+   "verdict": "cut",
+   "wasBefore": "This is a joint civil and military field, used by the Polish Air Force, the United States Air Force, NATO and the Heavy Airlift Wing, so military movements are routine.",
+   "why": "Wikipedia alone, and partly out of date on its own account (the 3rd Air Base that shared the runway was reformed in 2010). The 2019 US and Polish defence declaration that Wikipedia cites sets up an aerial port of debarkation without naming Wroclaw on the page read (the White House archive), so it cannot be the second source."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "City buses do the work of getting into town.",
+   "why": "The old text's framing, kept; the lines that follow are sourced."
+  }
+ ],
+ "tracerOk": {}
+}

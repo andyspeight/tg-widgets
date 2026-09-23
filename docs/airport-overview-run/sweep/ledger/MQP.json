@@ -1,0 +1,280 @@
+{
+ "iata": "MQP",
+ "id": "recYNQZZ4nNHpfO6k",
+ "name": "Kruger Mpumalanga International Airport",
+ "country": "South Africa",
+ "wikipedia": "https://en.wikipedia.org/wiki/Kruger_Mpumalanga_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Kruger National Park, 16 km from Mbombela as the crow flies and 27 km by road. It opened in October 2002, replacing the smaller Nelspruit Airport, and it exists mainly for safari traffic.\n\nThe terminal is the thing clients remember. It is almost entirely under a thatched roof covering around 7,350 square metres, which makes it the largest thatched structure in Africa.\n\nFlights are to other South African cities and to regional destinations. A direct European link was tried between November 2022 and March 2023, when Discover Airlines flew from Frankfurt by way of Windhoek, but it was dropped for lack of demand.",
+ "after": "The airport for Kruger National Park, 16 km from Mbombela as the crow flies and 27 km by road.\n\nWhat clients remember is the terminal. It sits under a thatched roof covering around 7,350 square metres, and the airport calls itself the largest thatch-constructed airport in the world.\n\nFlights are to other South African cities and to regional destinations. A direct European link was tried between November 2022 and March 2023, when Eurowings Discover flew from Frankfurt by way of Windhoek, but it was dropped for lack of demand.",
+ "claims": [
+  {
+   "claim": "the airport for Kruger National Park",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Kruger National Park",
+   "note": "The operator calls itself the gateway to Kruger National Park on its home and About pages (the house style bars 'gateway to' in the text itself). SANParks' own site refused the link lister (403) and was not tried again.",
+   "sources": [
+    {
+     "file": "kmia-about",
+     "org": "Kruger Mpumalanga International Airport (the airport operator, kmiairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's About page)",
+     "quote": "Welcome to Kruger Mpumalanga International Airport (KMIA) your gateway to the world-famous Kruger National Park"
+    },
+    {
+     "file": "kmia-home",
+     "org": "Kruger Mpumalanga International Airport (the airport operator, kmiairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's home page)",
+     "quote": "Located in Mbombela, Nelspruit, Kruger Mpumalanga International Airport serves as the ultimate gateway to the world favourite Kruger National Park"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It primarily serves tourists to Kruger National Park."
+    }
+   ]
+  },
+  {
+   "claim": "16 km from Mbombela as the crow flies",
+   "verdict": "confirmed",
+   "inAfter": "16 km from Mbombela as the crow flies",
+   "note": "Coordinates: 17.0 km in a straight line from the GeoNames centre of Mbombela, north east (ratio 0.94).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an airport located 16 km (9.9 mi), or 27 km (17 mi) by road, north east of Mbombela (formerly known as Nelspruit)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 17.0 km (10.6 miles)",
+      "Bearing from the city centre: 53 degrees, which is north east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "27 km by road",
+   "verdict": "confirmed",
+   "inAfter": "and 27 km by road",
+   "note": "27 km against 17.0 km in a straight line is a ratio of 1.59, just inside the 1.6 allowed for a road distance. ABB's July 2001 release on the start of construction put the site '25 km outside Nelspruit'; the operator says only 'a short drive from Nelspruit'.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "or 27 km (17 mi) by road"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 17.0 km (10.6 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "the terminal sits under a thatched roof covering around 7,350 square metres",
+   "verdict": "softened",
+   "inAfter": "It sits under a thatched roof covering around 7,350 square metres",
+   "note": "Was 'It is almost entirely under a thatched roof covering around 7,350 square metres'. The operator says the terminal is built entirely under thatch and spans 7,350 square metres; Wikipedia says almost entirely, covering about 7,350 square metres. The text drops the quantifier the two disagree on.",
+   "sources": [
+    {
+     "file": "kmia-about",
+     "org": "Kruger Mpumalanga International Airport (the airport operator, kmiairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's About page)",
+     "quote": "Constructed entirely under thatch in a striking African theme, the terminal spans 7,350 square meters"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport terminal is almost entirely covered by a thatched roof, making it the largest thatched structure in Africa, covering approximately 7,350 m2"
+    }
+   ]
+  },
+  {
+   "claim": "the airport calls itself the largest thatch-constructed airport in the world",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "the airport",
+   "inAfter": "the airport calls itself the largest thatch-constructed airport in the world",
+   "note": "Replaces 'which makes it the largest thatched structure in Africa' (Wikipedia alone, cut below) with the operator's own claim, attributed, as at Buffalo, Cologne Bonn and Manaus. Nobody else was found to rank it.",
+   "sources": [
+    {
+     "file": "kmia-about",
+     "org": "Kruger Mpumalanga International Airport (the airport operator, kmiairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's About page)",
+     "quote": "the terminal spans 7,350 square meters, making it the largest thatch-constructed airport in the world"
+    }
+   ]
+  },
+  {
+   "claim": "flights to other South African cities and to regional destinations",
+   "verdict": "confirmed",
+   "inAfter": "Flights are to other South African cities and to regional destinations.",
+   "note": "The airport's own destination page lists Cape Town, Durban and Johannesburg, and Livingstone (Zambia), Vilanculos (Mozambique) and Victoria Falls. Its airline page lists Airlink, FlySafair, fastjet (Victoria Falls to Kruger) and Federal Airlines, a charter and lodge shuttle airline. Not named in the text: the old sentence was general and still holds.",
+   "sources": [
+    {
+     "file": "kmia-where",
+     "org": "Kruger Mpumalanga International Airport (the airport operator, kmiairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's live 'Where can I fly?' page)",
+     "quote": [
+      "destinations you can travel to from KMI Airport",
+      "Cape Town",
+      "DURBAN",
+      "Johannesburg",
+      "Livingstone, Zambia",
+      "Vilanculos, Mozambique",
+      "Victoria falls, ZIMBABWE AND ZAMBIA"
+     ]
+    },
+    {
+     "file": "kmia-airlines",
+     "org": "Kruger Mpumalanga International Airport (the airport operator, kmiairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's airline page)",
+     "quote": "and from Victoria Falls to Kruger Nelspruit Mpumalanga in South Africa and Maun in Botswana"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "There are scheduled passenger flights to other South African cities as well as regional destinations."
+    }
+   ]
+  },
+  {
+   "claim": "Eurowings Discover flew Frankfurt to the airport via Windhoek from November 2022 to March 2023, dropped for lack of demand",
+   "verdict": "corrected",
+   "inAfter": "A direct European link was tried between November 2022 and March 2023, when Eurowings Discover flew from Frankfurt by way of Windhoek, but it was dropped for lack of demand.",
+   "note": "Was 'Discover Airlines'. Both reports name the airline as it was called at the time, Eurowings Discover (Tourism Update: 'Lufthansa's long-haul leisure brand'); Wikipedia calls it Discover Airlines. Tourism Update (February 2022) gave the first season as 15 November 2022 to 25 March 2023, three times a week via Windhoek; Aviation.Direct (17 March 2023) reported the flights, running since November 2022, suspended indefinitely for lack of demand, with no date to resume. The airport's current destination list has no European city.",
+   "sources": [
+    {
+     "file": "tourismupdate-discover",
+     "org": "Southern & East African Tourism Update (tourismupdate.co.za)",
+     "dated": "2022-02-11 (date on the article)",
+     "quote": [
+      "Eurowings Discover, Lufthansa’s long-haul leisure brand, will this year become the first intercontinental airline ever to start scheduled flights to Kruger Mpumalanga International Airport (KMIA).",
+      "In its first season (November 15, 2022 to March 25, 2023), the airline will fly three times a week from Frankfurt to Mbombela KMIA, with a short stopover in Windhoek."
+     ]
+    },
+    {
+     "file": "aviationdirect-discover",
+     "org": "Aviation.Direct",
+     "dated": "2023-03-17 (date above the headline on the saved page)",
+     "quote": [
+      "Eurowings Discover gibt Flüge zum Krüger-Nationalpark auf",
+      "Mangels Nachfrage setzt die Ferienfluggesellschaft Eurowings Discover die erst im November des Vorjahres aufgenommenen Flüge nach Mpumalanga",
+      "Es handelte sich um so genannte Direktflüge, die eine Zwischenlandung in Windhoek hatten. Angeboten wurden diese seit November 2022 dreimal wöchentlich.",
+      "Daher wird diese Route vorläufig eingestellt."
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "From November 2022 to March 2023, German low-cost carrier Discover Airlines operated flights between it Frankfurt and Kruger Mpumalanga via Windhoek, Namibia. However, this route was terminated due to low demand."
+    },
+    {
+     "file": "kmia-where",
+     "org": "Kruger Mpumalanga International Airport (the airport operator, kmiairport.co.za)",
+     "dated": "read 2026-09-23 (the airport's live 'Where can I fly?' page)",
+     "quote": "destinations you can travel to from KMI Airport"
+    }
+   ]
+  },
+  {
+   "claim": "opened in October 2002",
+   "verdict": "cut",
+   "wasBefore": "It opened in October 2002",
+   "why": "Wikipedia alone (21 October 2002). The operator's home, About, airline and development zone pages give no opening date; the only other source found, ABB's July 2001 release on the start of construction, expected the airport to be 'fully operational in the second half of 2002', a forecast rather than a record."
+  },
+  {
+   "claim": "replacing the smaller Nelspruit Airport",
+   "verdict": "cut",
+   "wasBefore": "replacing the smaller Nelspruit Airport",
+   "why": "Wikipedia alone. OurAirports lists Nelspruit Airport (FANS) as a small airport without scheduled service, which does not by itself show that this airport replaced it, and no operator page mentions it."
+  },
+  {
+   "claim": "it exists mainly for safari traffic",
+   "verdict": "cut",
+   "wasBefore": "and it exists mainly for safari traffic",
+   "why": "Wikipedia alone ('primarily serves tourists to Kruger National Park'). The operator calls itself the gateway to Kruger National Park (kept in the first sentence) and aims to be 'Africa's preferred tourist gateway', but gives no split of its traffic."
+  },
+  {
+   "claim": "almost entirely under thatch",
+   "verdict": "cut",
+   "wasBefore": "It is almost entirely under a thatched roof",
+   "why": "The operator says entirely, Wikipedia almost entirely. Softened to 'under a thatched roof' (above)."
+  },
+  {
+   "claim": "the largest thatched structure in Africa",
+   "verdict": "cut",
+   "wasBefore": "which makes it the largest thatched structure in Africa",
+   "why": "Wikipedia alone. The operator makes a different claim, the largest thatch-constructed airport in the world, which the text now gives as the airport's own (above)."
+  },
+  {
+   "claim": "Discover Airlines",
+   "verdict": "cut",
+   "wasBefore": "Discover Airlines",
+   "why": "Both second sources name the airline as it was called when it flew here, Eurowings Discover. Corrected (above)."
+  },
+  {
+   "claim": "about 315,000 passengers in 2024, and more than that in the first ten months of 2025",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing (the old text gives no traffic). The operator's monthly figures add up to 314,957 passengers in 2024, Wikipedia's infobox figure for 2024, against 255,176 in 2019; January to October 2025 add up to 318,919, already more than the whole of 2024 and about 24 per cent up on the same months of 2024.",
+   "sources": [
+    {
+     "file": "kmia-stats-2025",
+     "org": "Kruger Mpumalanga International Airport (the airport operator, kmiairport.co.za)",
+     "dated": "2025-11 (uploaded November 2025, per its address; monthly figures to October 2025)",
+     "quote": [
+      "20 24 18 044 17 252 20 013 24 085 24 725 27 534 29 266 32 456 31 610 31 514 29 020 29 438",
+      "20 25 25 144 25 095 29 093 31 454 32 560 31 091 36 217 36 167 34 517 37 581",
+      "20 19 17 820 18 020 20 686 21 129 20 907 21 164 24 422 25 386 22 620 23 919 21 659 17 444",
+      "Annual Comparison -TOTAL PAX"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": [
+      "stat_year = 2024",
+      "stat1_data = 314,957"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: SANParks advises against the Kruger park's Numbi gate",
+   "verdict": "cut",
+   "why": "Held back: a warning that replaces nothing, but the one Andy may most want here. The FCDO's South Africa advice (updated 8 July 2026, still current 23 September 2026) says that after a violent attack killed a tourist in Kruger National Park, SANParks advises against using the Numbi gate, with protests and violent incidents on the R538 road leading to it, and that two local tourists were killed in a rare violent incident inside the park in May 2026 (suspects arrested). The FCDO does not say how far the gate is from this airport, and that was not checked. As an attributed line it could rest on the FCDO page alone: 'The FCDO says SANParks advises against using the park's Numbi gate.' SANParks' own site refused the link lister (403) and was not tried again.",
+   "sources": [
+    {
+     "file": "fcdo-za-safety",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "updated 2026-07-08, still current 2026-09-23 (the main page, fcdo-za)",
+     "quote": [
+      "Kruger National Park",
+      "After a violent attack killed a tourist in the Kruger National Park, SANParks advise against using the Numbi gate. There have been protests and violent incidents on the R538 road leading to the gate. In May 2026, 2 local tourists were killed in a rare violent incident within the park and the suspects were arrested."
+     ]
+    },
+    {
+     "file": "fcdo-za",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-08 (updated; still current 23 September 2026)",
+     "quote": [
+      "Still current at:",
+      "23 September 2026",
+      "Updated:",
+      "8 July 2026"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "What clients remember is the terminal.",
+   "why": "The old text's judgement ('The terminal is the thing clients remember'), reworded so two sentences in a row do not start with 'The'; the thatched terminal that follows is sourced."
+  }
+ ],
+ "tracerOk": {}
+}

@@ -1,0 +1,276 @@
+{
+ "iata": "GRJ",
+ "id": "recjzsPoWabYPZHNK",
+ "name": "George Airport",
+ "country": "South Africa",
+ "wikipedia": "https://en.wikipedia.org/wiki/George_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for George in the Western Cape.\n\nIt has a good record for its size. Airports Council International has named it Africa's best airport in the under two million passengers category six times, most recently in 2017.\n\nThere is an odd detail in its origins. When it was built in 1977 it was an exact replica of Keetmanshoop Airport in Namibia, though expansion and renovation since have left it looking completely different.\n\nIt was formerly called P. W. Botha Airport, after the state president who lived in this part of the country, so the old name still appears in older material.",
+ "after": "The airport for George in the Western Cape.\n\nIt has a good record for its size. Airports Council International has named it among Africa's best airports with under two million passengers a year, most recently in its awards for 2024.\n\nIt was formerly called PW Botha Airport, after the state president who lived in this part of the country, so the old name still appears in older material.",
+ "claims": [
+  {
+   "claim": "the airport for George in the Western Cape",
+   "verdict": "confirmed",
+   "inAfter": "The airport for George in the Western Cape.",
+   "note": "Coordinates: 9.0 km in a straight line south west of the GeoNames centre of George. The operator places it at the heart of the Western Cape's Garden Route.",
+   "sources": [
+    {
+     "file": "acsa-about-george",
+     "org": "Airports Company South Africa (ACSA, the operator, airports.co.za)",
+     "dated": "read 2026-09-23 (the airport's About page)",
+     "quote": "The town of George lies halfway between Cape Town and Port Elizabeth"
+    },
+    {
+     "file": "acsa-george",
+     "org": "Airports Company South Africa (ACSA, the operator, airports.co.za)",
+     "dated": "read 2026-09-23 (the airport's home page)",
+     "quote": "George Airport is located at the heart of the Western Cape's Garden Route"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an airport located in George, Western Cape, South Africa"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 9.0 km (5.6 miles)",
+      "Bearing from the city centre: 238 degrees, which is south west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named by ACI among Africa's best airports with under two million passengers a year, most recently in its awards for 2024",
+   "verdict": "corrected",
+   "inAfter": "Airports Council International has named it among Africa's best airports with under two million passengers a year, most recently in its awards for 2024.",
+   "note": "Was 'named it Africa's best airport in the under two million passengers category six times, most recently in 2017'. ACI's own winners list has George among its three 2024 winners in Africa for under two million passengers a year (with Bram Fischer and Ivato; the award goes to the top 20 per cent), and it also won Easiest Airport Journey in Africa that year. The 2025 winners, the latest ACI has published, are Bram Fischer, Port Elizabeth and Upington, so 2024 is the most recent; ACSA's own awards list agrees on both years. 'Among' replaces 'best' because ACI names several winners in the category; ACSA writes '(1st)' against both Bram Fischer and George. The 2017 award (announced 7 March 2018) is confirmed by the George Herald. The count of six is cut (below).",
+   "sources": [
+    {
+     "file": "aci-past-winners",
+     "org": "Airports Council International (ACI World, aci.aero)",
+     "dated": "read 2026-09-23 (ACI's list of past ASQ winners, 2021 to 2024)",
+     "quote": [
+      "2024 Winners Best Airports by Size and Region Africa This award recognizes airports with the top 20% overall satisfaction score by size and region at departure. Under 2 million passengers per year Bram Fischer International Airport (Bloemfontein, South Africa) George Airport (George, South Africa) Ivato International Airport (Antananarivo, Madagascar)",
+      "Easiest Airport Journey",
+      "Dakar Blaise Diagne International Airport (Diass, Senegal) George Airport (George, South Africa)"
+     ]
+    },
+    {
+     "file": "aci-asq-2025",
+     "org": "Airports Council International (ACI World, aci.aero)",
+     "dated": "read 2026-09-23 (ACI's page of 2025 winners, the latest it has published)",
+     "quote": [
+      "2025 ASQ CUSTOMER EXPERIENCE AWARD WINNERS",
+      "Best Airports at Departures, by size and region Africa Under 2 million passengers per year Bram Fischer International Airport (Bloemfontein, South Africa) Port Elizabeth Airport (Port Elizabeth, South Africa) Upington Airport (Upington, South Africa) 2 to 5 million passengers per year"
+     ]
+    },
+    {
+     "file": "acsa-awards",
+     "org": "Airports Company South Africa (ACSA, the operator, airports.co.za)",
+     "dated": "read 2026-09-23 (the company's awards list, which runs to 2026)",
+     "quote": [
+      "2024 – ACI ASQ Awards Bram Fischer International Airport – Best Airport by Size (Under 2 million passengers) – Africa (1st) George Airport – Best Airport by Size (Under 2 million passengers) – Africa (1st)",
+      "2025 – ACI ASQ Awards",
+      "Bram Fischer International Airport – Best Airport Departures (Under 2 million passengers) – Africa (1st)",
+      "Upington International Airport – Best Airport Departures (Under 2 million passengers) – Africa (1st)",
+      "Chief Dawid Stuurman Airport – Best Airport Departures (Under 2 million passengers) – Africa (1st)"
+     ]
+    },
+    {
+     "file": "georgeherald-asq2018",
+     "org": "George Herald",
+     "dated": "2018-03-08 (date on the article)",
+     "quote": "Airports Council International (ACI) on Wednesday 7 March, announced that George Airport came out tops as Africa's best airport in the category under two million passengers per year."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "George Airport has won the award for Africa's best airport in the category under two million passengers per year six times; the last time was in 2017."
+    }
+   ]
+  },
+  {
+   "claim": "formerly called PW Botha Airport",
+   "verdict": "confirmed",
+   "inAfter": "It was formerly called PW Botha Airport",
+   "note": "Written PW Botha without full stops, as Houston wrote George HW Bush and Providence TF Green, because the gate splits sentences at initials. OurAirports lists \"P.W. Botha Airport\" as another name for George Airport (FAGG). OurAirports is a community database; no official page read gives the old name (ACSA's airport, history and milestone pages do not mention it).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It was formerly known as P. W. Botha Airport"
+    },
+    {
+     "file": "ourairports-fagg",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": "\"George\",\"yes\",\"FAGG\",\"GRJ\",\"FAGG\",,\"https://www.airports.co.za/airports/george-airport\",\"https://en.wikipedia.org/wiki/George_Airport\",\"P.W. Botha Airport\""
+    }
+   ]
+  },
+  {
+   "claim": "named after the state president who lived in this part of the country",
+   "verdict": "confirmed",
+   "inAfter": "after the state president who lived in this part of the country",
+   "note": "South African History Online: Botha was first elected to parliament from the town of George in 1948, was later state president, and spent his last years at his house, Die Anker, near Wilderness in the Western Cape, where he died in 2006.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "named after the state president who lived in this part of the country"
+    },
+    {
+     "file": "saho-pwbotha",
+     "org": "South African History Online (sahistory.org.za)",
+     "dated": "2011-02-17 (the date the page gives for itself)",
+     "quote": [
+      "Botha was first elected to the national parliament from the town of George in the Western Cape",
+      "whom he spent his last years with at their house 'Die Anker' near the Wilderness, Western Cape.",
+      "to this former state president"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "six times, most recently in 2017",
+   "verdict": "cut",
+   "wasBefore": "six times, most recently in 2017",
+   "why": "'Six times' is not ACI's count. The George Herald (8 March 2018) and ACSA's own page for the airport say George has won the South African Airport of the Year award six times, a different award; Wikipedia appears to have run the two together. ACI's own winners lists (2021 to 2025) have George in the Africa under two million category only for 2024, and ACSA's awards list names George for ACI awards in 2008 (fourth, under five million passengers), 2009 (first, Best Airport in Africa), 2018 (Best Airport by Region, the 2017 award the George Herald reports) and 2024, never six times in this category. '2017' as the most recent is overtaken by 2024. Corrected (above).",
+   "sources": [
+    {
+     "file": "georgeherald-asq2018",
+     "org": "George Herald",
+     "dated": "2018-03-08 (date on the article)",
+     "quote": "George Airport has been awarded the South African Airport of the Year award six times"
+    },
+    {
+     "file": "acsa-about-george",
+     "org": "Airports Company South Africa (ACSA, the operator, airports.co.za)",
+     "dated": "read 2026-09-23",
+     "quote": "George Airport has been awarded the South African Airport of the Year award six times"
+    },
+    {
+     "file": "acsa-awards",
+     "org": "Airports Company South Africa (ACSA, the operator, airports.co.za)",
+     "dated": "read 2026-09-23 (the company's awards list, which runs to 2026)",
+     "quote": [
+      "2009 ACI Best Airport Africa",
+      "1 st Position – George Airport",
+      "Under 5 Million Passengers",
+      "4th Position – George Airport",
+      "George Airport - Best Airport by Region"
+     ]
+    },
+    {
+     "file": "aci-past-winners",
+     "org": "Airports Council International (ACI World, aci.aero)",
+     "dated": "read 2026-09-23 (ACI's list of past ASQ winners, 2021 to 2024)",
+     "quote": [
+      "2023 Winners Best Airports by Size and Region Africa This award recognizes airports with the top 20% overall satisfaction score by size and region at departure. Under 2 million passengers per year Abeid Amani Karume International Airport (Zanzibar, Tanzania) Ivato International Airport (Antananarivo, Madagascar) Moi International Airport (Mombasa, Kenya)",
+      "Under 2 million passengers per year Moi International Airport - Mombasa, Kenya"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "built in 1977 as an exact replica of Keetmanshoop Airport in Namibia; since expanded and renovated beyond recognition",
+   "verdict": "cut",
+   "wasBefore": "There is an odd detail in its origins. When it was built in 1977 it was an exact replica of Keetmanshoop Airport in Namibia, though expansion and renovation since have left it looking completely different.",
+   "why": "Wikipedia alone (the 1977 date is in its text and infobox only). ACSA's airport, About, history and milestone pages and the Namibia Airports Company's own Keetmanshoop page were read and none mentions the replica or the opening year. ACSA's milestones do record an R43 million upgrade of George in 2007 (one source, and a new fact, so not added)."
+  },
+  {
+   "claim": "about 940,000 passengers in the year to March 2026, up 12.7 per cent",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing (the old text gives no traffic). ACSA's own table gives 939,332 passengers in its financial year 2025/26 (April 2025 to March 2026), up 12.70 per cent on 833,455 and the highest in a table that starts in 2012/13; Wikipedia's infobox gives the same 939,332 for FY2025-26, citing ACSA. The current year to August 2026 is 347,905, 5.79 per cent down on the same months of 2025.",
+   "sources": [
+    {
+     "file": "acsa-grj-pax",
+     "org": "Airports Company South Africa (ACSA, the operator, airports.co.za)",
+     "dated": "read 2026-09-23 (monthly table to August 2026)",
+     "quote": [
+      "Flight Type Month FY FY12/13",
+      "01-Apr",
+      "12-Mar",
+      "803 184 833 455 939 332 347 905",
+      "6,02% 3,77% 12,70% -62,96%",
+      "369 271 347 905",
+      "15,18% -5,79%"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": [
+      "stat1_data = 939,332",
+      "stat_year = FY2025–26",
+      "footnotes = Source: Airports Company South Africa"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Africa's first solar-powered airport",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing, though it could stand in for the cut 'odd detail'. ACSA says a 200 square metre solar plant was launched at the airport in February 2016 and that George was Africa's first solar-powered airport; the George Herald (8 March 2018) says the same in near-identical words, so it may come from ACSA itself.",
+   "sources": [
+    {
+     "file": "acsa-about-george",
+     "org": "Airports Company South Africa (ACSA, the operator, airports.co.za)",
+     "dated": "read 2026-09-23",
+     "quote": [
+      "In February 2016, a 200 square meter solar plant was launched at the airport",
+      "George Airport is Africa's first airport to be solar powered."
+     ]
+    },
+    {
+     "file": "georgeherald-asq2018",
+     "org": "George Herald",
+     "dated": "2018-03-08 (date on the article)",
+     "quote": "George Airport is Africa's first airport to be solar powered."
+    }
+   ]
+  },
+  {
+   "claim": "a trial town bus to the airport (GO GEORGE Route 19) since 20 September 2026",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing, and three days old. George's municipal bus service, GO GEORGE, began a trial Route 19 AIRPORT on Sunday 20 September 2026, from the Transport Hub in Cradock Street in the town centre to a stop inside the airport grounds, daily from 05:00 to 20:00, about every 22 minutes at peak and every 45 minutes off peak (GO GEORGE's own release and the George Herald, both 22 September 2026; the Herald's wording follows the release). It is a trial, so it would need re-checking before it goes in.",
+   "sources": [
+    {
+     "file": "gogeorge-airport",
+     "org": "GO GEORGE (George Municipality bus service, gogeorge.org.za)",
+     "dated": "2026-09-22 (date on the release)",
+     "quote": [
+      "George Municipality and the Western Cape Government have announced the activation of a GO GEORGE trial route between the George CBD and George Airport on Sunday 20 September 2026",
+      "Route 19 AIRPORT will operate from 05:00 to 20:00 daily. During peak hours, buses will depart approximately every 22 minutes, with a 45 minute frequency during off peak times.",
+      "Departing from the Transport Hub in Cradock Street, the route will stop at all existing bus stops between the CBD and MediClinic, and thereafter at the AIRPORT 711 stop inside the airport grounds.",
+      "September 22, 2026"
+     ]
+    },
+    {
+     "file": "georgeherald-gogeorge",
+     "org": "George Herald",
+     "dated": "2026-09-22 (date on the article)",
+     "quote": [
+      "Go George launching a trial bus service linking the airport with the George CBD seven days a week",
+      "The new Route 19 Airport will start operating on Sunday 20 September",
+      "Tuesday, 22 September 2026, 18:00"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "It has a good record for its size.",
+   "why": "The old text's judgement, kept: ACI's awards in its under two million passenger category (sourced)."
+  },
+  {
+   "text": "so the old name still appears in older material.",
+   "why": "The old text's inference, kept; it follows from the renaming (sourced)."
+  }
+ ],
+ "tracerOk": {}
+}
