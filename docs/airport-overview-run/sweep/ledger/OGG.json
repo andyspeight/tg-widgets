@@ -1,0 +1,316 @@
+{
+ "iata": "OGG",
+ "id": "recdV84exKT250JRT",
+ "name": "Kahului International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Kahului_Airport",
+ "audited": "2026-09-23",
+ "before": "Maui's main airport, just east of Kahului, and in full operation since 1952.\n\nMost arrivals come from Honolulu. The Honolulu to Kahului corridor is one of the heaviest trafficked air routes in the United States, ranked thirteenth in 2004 with 1,632,000 passengers.\n\nThe gate layout is worth knowing because it is not intuitive. Odd numbered gates have jetways and even numbered ones use stairs down to the ramp. The south side holds gates 1 to 16 and the north side gates 17 to 39. Inter-island flights use one set of gates and overseas flights another, because the larger transoceanic aircraft will not fit at every stand. Four gates are rarely used at all for that reason.\n\nMainland non-stop flights began in 1982 and 1983, and today the airport takes A330s, 767s and 777s alongside the 717s and 737s that work the inter-island routes.\n\nUSDA agricultural inspection sits on the ground level alongside ticketing and baggage claim.\n\nThe code OGG honours Bertram Hogg, a Kauai born pilot who flew for what is now Hawaiian Airlines.",
+ "after": "Maui's main airport, just east of Kahului. It has been in full operation since 1952 and is the second busiest airport in Hawaii, after Honolulu. The FAA's preliminary figures show nearly 3.5 million passengers boarding flights here in 2025.\n\nScheduled flights from the mainland began in 1983. Hawaiian Airlines flies Boeing 717s between the islands, and from 3 October 2026 Alaska Airlines adds three daily Boeing 737-800 round trips to Honolulu.\n\nTravellers flying on to the US mainland must have their bags inspected by the US Department of Agriculture, at stations in front of or at the airline check-in counters.\n\nThe code OGG honours Jim Hogg, a former Hawaiian Airlines pilot.",
+ "claims": [
+  {
+   "claim": "Maui's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Maui's main airport",
+   "note": "The FAA's CY2025 table has no row at all for Maui's two other airports, Kapalua and Hana; the other Maui County airports in it (Molokai, Lanai) are on other islands.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the main airport of Maui in the state of Hawaii"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "54 WP HI OGG Kahului Kahului P M 3,450,472 3,415,615 1.02%",
+      "254 WP HI MKK Kaunakakai Molokai P N 74,970 84,029 -10.78%",
+      "282 WP HI LNY Lanai City Lanai P N 49,572 25,186 96.82%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "op-act100-2025",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": "including major hubs such as Daniel K. Inouye International Airport (HNL), Kahului Airport (OGG), and Ellison Onizuka Kona International Airport at Keahole (KOA)",
+     "dated": "2025 (Act 100 report)"
+    }
+   ]
+  },
+  {
+   "claim": "just east of Kahului",
+   "verdict": "confirmed",
+   "inAfter": "just east of Kahului",
+   "note": "Coordinates give 2.7 miles in a straight line at 80 degrees (east); the operator says three miles east of the town.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "located east of Kahului"
+    },
+    {
+     "file": "op-airport-info",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": "is located three miles east of the town of Kahului",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 4.3 km (2.7 miles)",
+      "Bearing from the city centre: 80 degrees, which is east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in full operation since 1952",
+   "verdict": "confirmed",
+   "inAfter": "It has been in full operation since 1952",
+   "note": "The state's aviation history dates the start of full commercial airline operations to June 1952. Historical fact, so the age of the sources does not matter.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It has offered full airport operations since 1952."
+    },
+    {
+     "file": "hawaiiaviation-ogg",
+     "org": "Hawaii Department of Transportation (Hawaii Aviation history site)",
+     "quote": "Full commercial airline operations from Kahului began in June 1952"
+    }
+   ]
+  },
+  {
+   "claim": "second busiest airport in Hawaii, after Honolulu",
+   "verdict": "corrected",
+   "inAfter": "is the second busiest airport in Hawaii, after Honolulu",
+   "note": "Added as the line on how busy it is, in place of the 2004 route ranking (cut below). The FAA's CY2025 table ranks the Hawaii airports Honolulu, Kahului, Kona, Lihue, Hilo.",
+   "sources": [
+    {
+     "file": "op-airport-info",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": "Kahului is the second busiest airport in the State of Hawaii",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "30 WP HI HNL Honolulu Daniel K Inouye International P L 10,430,353 10,449,022 -0.18%",
+      "54 WP HI OGG Kahului Kahului P M 3,450,472 3,415,615 1.02%",
+      "79 WP HI LIH Lihue Lihue P S 1,822,008 1,776,627 2.55%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "FAA: nearly 3.5 million passengers boarded here in 2025",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FAA",
+   "inAfter": "The FAA's preliminary figures show nearly 3.5 million passengers boarding flights here in 2025.",
+   "note": "ENPLANEMENTS (boardings only), attributed to the FAA, whose own table is the source: 3,450,472 in CY2025, up 1.02 per cent. The state's 2025 figure sits in a Tableau dashboard that draws its numbers as an image, so no operator figure could be saved; Wikipedia's infobox gives 7,127,946 total passengers (arrivals plus departures) for 2025, sourced to the state and the FAA, which is consistent with about half of that boarding.",
+   "sources": [
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration (FAA)",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "54 WP HI OGG Kahului Kahului P M 3,450,472 3,415,615 1.02%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat2_header = Passengers",
+      "stat2_data = 7,127,946"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "scheduled flights from the mainland began in 1983",
+   "verdict": "corrected",
+   "inAfter": "Scheduled flights from the mainland began in 1983.",
+   "note": "Was 'Mainland non-stop flights began in 1982 and 1983'. The state's aviation history gives 1983 for the first scheduled direct flights from the mainland (charters from 1975). Wikipedia says 1982 to 1983 in one place and the mid-1980s in another; its 1982 to 1983 range agrees with the state's 1983, which is used.",
+   "sources": [
+    {
+     "file": "hawaiiaviation-ogg",
+     "org": "Hawaii Department of Transportation (Hawaii Aviation history site)",
+     "quote": [
+      "Scheduled direct flights to Maui from the mainland began arriving at Kahului in 1983",
+      "Charter flights from the Mainland began arriving at Kahului in 1975."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 1982–83 Kahului started receiving nonstop flights from the United States mainland"
+    }
+   ]
+  },
+  {
+   "claim": "Hawaiian Airlines flies Boeing 717s between the islands",
+   "verdict": "corrected",
+   "inAfter": "Hawaiian Airlines flies Boeing 717s between the islands",
+   "note": "Replaces 'the 717s and 737s that work the inter-island routes' with the airline that flies them, as the caller asked. Hawaiian's release of 18 September 2026 says its 717s will keep serving all its inter-island markets, some 140 flights a day, and that it plans to retire them in 2028. The state's Honolulu page confirms Hawaiian flies to the neighbour islands; Wikipedia confirms 717s on inter-island flights.",
+   "sources": [
+    {
+     "file": "hawaiian-737-release",
+     "org": "Hawaiian Airlines (Alaska Air Group newsroom)",
+     "quote": [
+      "Hawaiian’s 717 fleet will continue to serve all Neighbor Island markets with some 140 daily flights",
+      "In 2028, Hawaiian plans to retire its 717 fleet"
+     ],
+     "dated": "2026-09-18"
+    },
+    {
+     "file": "op-hnl-faq",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": "If you are flying with Hawaiian Airlines to the neighbor islands, you will depart from Terminal 1.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "narrow-body aircraft like the Boeing 717 and 737 used on inter-island flights"
+    }
+   ]
+  },
+  {
+   "claim": "from 3 October 2026 Alaska Airlines adds three daily 737-800 round trips to Honolulu",
+   "verdict": "corrected",
+   "inAfter": "from 3 October 2026 Alaska Airlines adds three daily Boeing 737-800 round trips to Honolulu",
+   "note": "The current change on the Honolulu route, in place of the 2004 ranking. Hawaiian's own release and AeroRoutes' schedule report agree on the date, the aircraft and three daily round trips. Neither independent source says how the two airlines are owned, so the text does not.",
+   "sources": [
+    {
+     "file": "hawaiian-737-release",
+     "org": "Hawaiian Airlines (Alaska Air Group newsroom)",
+     "quote": [
+      "Alaska Airlines will introduce daily Boeing 737-800 service on select Honolulu (HNL) -Kahului (OGG) flights Oct. 3",
+      "While guests will begin seeing the 737 on three Honolulu-Kahului round trips"
+     ],
+     "dated": "2026-09-18"
+    },
+    {
+     "file": "aeroroutes-as-hi",
+     "org": "AeroRoutes",
+     "quote": "the Oneworld member initially plans to operate Honolulu – Kahului service with 3 daily round-trip starting 03OCT26",
+     "dated": "2026-09-19"
+    }
+   ]
+  },
+  {
+   "claim": "USDA inspection of bags for the US mainland, at or in front of the check-in counters",
+   "verdict": "corrected",
+   "inAfter": "Travellers flying on to the US mainland must have their bags inspected by the US Department of Agriculture, at stations in front of or at the airline check-in counters.",
+   "note": "Was 'USDA agricultural inspection sits on the ground level alongside ticketing and baggage claim'. The operator's page says where the stations are and who they apply to, which is the part a traveller needs.",
+   "sources": [
+    {
+     "file": "op-agriculture",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": [
+      "Passengers checking in for a flight to a destination in the Continental United States (Mainland) must be processed through a United States (U.S.) Department of Agriculture inspection.",
+      "Inspection stations for check-in baggage are located in front of or at the airline check-in counters."
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "usda-hawaii",
+     "org": "US Department of Agriculture (APHIS)",
+     "quote": "You must present all food, plants, and other agricultural items to the USDA inspector at the airport before you leave Hawaii.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The Kahului Airport terminal building has ticketing, USDA agricultural inspection, and baggage claim areas on the ground level."
+    }
+   ]
+  },
+  {
+   "claim": "the code OGG honours Jim Hogg, a former Hawaiian Airlines pilot",
+   "verdict": "corrected",
+   "inAfter": "The code OGG honours Jim Hogg, a former Hawaiian Airlines pilot.",
+   "note": "Was 'Bertram Hogg, a Kauai born pilot who flew for what is now Hawaiian Airlines'. The operator calls him Jim Hogg and says he became the airline's chief pilot in 1946 and chose OGG rather than HOG for the navigation beacon he had test-flown. Wikipedia gives Bertram J. 'Jimmy' Hogg; the first name Bertram and his Kauai birth rest on Wikipedia alone, so the operator's form of the name is used.",
+   "sources": [
+    {
+     "file": "op-faq",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": [
+      "OGG is named after Jim Hogg, a former Hawaiian Airlines pilot.",
+      "He chose OGG rather than HOG."
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The FAA/IATA airport code OGG pays homage to aviation pioneer Bertram J. \"Jimmy\" Hogg, a Kauai native who worked for what is now Hawaiian Airlines"
+    }
+   ]
+  },
+  {
+   "claim": "most arrivals come from Honolulu",
+   "verdict": "cut",
+   "wasBefore": "Most arrivals come from Honolulu.",
+   "why": "Wikipedia says only that many flights come from Honolulu; nothing supports 'most'."
+  },
+  {
+   "claim": "Honolulu to Kahului thirteenth busiest US route in 2004",
+   "verdict": "cut",
+   "wasBefore": "The Honolulu to Kahului corridor is one of the heaviest trafficked air routes in the United States, ranked thirteenth in 2004 with 1,632,000 passengers.",
+   "why": "A 22-year-old ranking on Wikipedia alone; no current ranking found. Replaced by what is changing on the route now (Alaska 737s from 3 October 2026)."
+  },
+  {
+   "claim": "gate layout not intuitive",
+   "verdict": "cut",
+   "wasBefore": "The gate layout is worth knowing because it is not intuitive.",
+   "why": "Lead-in to the gate details, which are cut below."
+  },
+  {
+   "claim": "odd gates have jetways, even gates stairs",
+   "verdict": "cut",
+   "wasBefore": "Odd numbered gates have jetways and even numbered ones use stairs down to the ramp.",
+   "why": "Only Wikipedia; the operator's map page is an image with no gate list. The terminal has also changed: by 2025 the south-side holdrooms were merged into one enclosed, air-conditioned hall (Wikipedia; the state's 2025 Act 100 report lists a major new holdroom and a beautified gate area), so the old description may no longer hold."
+  },
+  {
+   "claim": "south gates 1 to 16, north gates 17 to 39",
+   "verdict": "cut",
+   "wasBefore": "The south side holds gates 1 to 16 and the north side gates 17 to 39.",
+   "why": "Only Wikipedia, and see the 2025 holdroom works above."
+  },
+  {
+   "claim": "inter-island and overseas gates separate; four gates rarely used",
+   "verdict": "cut",
+   "wasBefore": "Inter-island flights use one set of gates and overseas flights another, because the larger transoceanic aircraft will not fit at every stand. Four gates are rarely used at all for that reason.",
+   "why": "Only Wikipedia, drawn from the 2016 master plan; not confirmed as current."
+  },
+  {
+   "claim": "mainland non-stops began 1982 and 1983; A330s, 767s and 777s today",
+   "verdict": "cut",
+   "wasBefore": "Mainland non-stop flights began in 1982 and 1983, and today the airport takes A330s, 767s and 777s alongside the 717s and 737s that work the inter-island routes.",
+   "why": "The start is corrected to 1983 (the state's history). The wide-body types rest on Wikipedia alone: the only current report found (Hawaii News Now, February 2026) has Delta's Minneapolis A330-300 service to Maui starting later, in the winter season. The inter-island types are kept, with the airlines that fly them."
+  },
+  {
+   "claim": "USDA on the ground level with ticketing and baggage claim",
+   "verdict": "cut",
+   "wasBefore": "USDA agricultural inspection sits on the ground level alongside ticketing and baggage claim.",
+   "why": "Reworded to what the operator says: inspection for mainland-bound bags at or in front of the check-in counters."
+  },
+  {
+   "claim": "Bertram Hogg, Kauai born",
+   "verdict": "cut",
+   "wasBefore": "The code OGG honours Bertram Hogg, a Kauai born pilot who flew for what is now Hawaiian Airlines.",
+   "why": "The first name and birthplace rest on Wikipedia alone; the operator names him Jim Hogg, a former Hawaiian Airlines pilot."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

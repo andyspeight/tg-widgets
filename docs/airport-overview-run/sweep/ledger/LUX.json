@@ -1,0 +1,278 @@
+{
+ "iata": "LUX",
+ "id": "recguCjODRPaftwU0",
+ "name": "Luxembourg-Findel International Airport",
+ "country": "Luxembourg",
+ "wikipedia": "https://en.wikipedia.org/wiki/Luxembourg_Airport",
+ "audited": "2026-09-23",
+ "before": "Luxembourg's only international airport, and the only one in the country with a paved runway, about 6 km east of Luxembourg City. It carried over five million passengers in 2024.\n\nFreight is where it punches far above its weight. It is fifth busiest in Europe by cargo tonnage, and both Luxair and Cargolux have their headquarters on the site. All of that runs on a single runway handling around 100,000 movements a year, which is a lot for one strip.\n\nThe big change for clients is the tram. Line 1 of the Luxembourg City tramway was extended from Kirchberg to the airport in March 2025, so the terminal now has a direct rail link into the city. Buses 6, 16 and 29 also run into Luxembourg City, and regional line 302 goes over the border to Trier.\n\nThere are two terminals. Terminal A, inaugurated in May 2008, is the main one. Terminal B is unusual: it has gates but no check in counters and no arrivals hall, and was built for small aircraft, reopening in 2017 able to handle up to 110 passengers.",
+ "after": "Luxembourg's only airport with scheduled flights, and the only one in the country with a paved runway, about 6 km east of Luxembourg City. It handles more than five million passengers a year on a single runway.\n\nThe tram is the easy way in: Line 1 runs from the terminal into Luxembourg City. Buses 6, 16 and 29 also run into the city. Regional bus 302 goes over the border to Trier.\n\nThere are two terminals. Terminal A is the main one, with check-in and baggage reclaim. Beyond it, Terminal B has gates but no check-in counters or arrivals hall, and is reached through Terminal A.",
+ "claims": [
+  {
+   "claim": "only airport in Luxembourg with scheduled flights; only one with a paved runway",
+   "verdict": "softened",
+   "inAfter": "Luxembourg's only airport with scheduled flights, and the only one in the country with a paved runway",
+   "note": "Was 'Luxembourg's only international airport'. OurAirports lists every Luxembourg airfield: only Findel has scheduled service and a paved (asphalt) runway; the others are grass strips and heliports. 'Only airport with scheduled flights' is what that data shows, and says the same thing to an agent.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "serves as the principal airport of Luxembourg and the sole international airport within the country",
+      "it remains the only airport in Luxembourg equipped with a paved runway"
+     ]
+    },
+    {
+     "file": "ourairports-lu",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": [
+      "ELLX | large_airport | Luxembourg-Findel International Airport | scheduled service: yes | runways: 06/24 13123 ft ASPHALT",
+      "ELNT | small_airport | Wiltz-Noertrange Airfield | scheduled service: no | runways: 08/26 2155 ft grass",
+      "ELUS | small_airport | Useldange Glider Field | scheduled service: no | runways: 10/28 2625 ft grass"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 6 km east of Luxembourg City",
+   "verdict": "confirmed",
+   "inAfter": "about 6 km east of Luxembourg City",
+   "note": "Coordinates: 6.0 km in a straight line at 72 degrees, which is east; ratio 1.00.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is approximately 3.25 nautical miles (6.02 km; 3.74 mi) to the east of Luxembourg City"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 6.0 km",
+      "Bearing from the city centre: 72 degrees, which is east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "more than five million passengers a year",
+   "verdict": "corrected",
+   "inAfter": "It handles more than five million passengers a year",
+   "note": "Was 'over five million passengers in 2024'. Eurostat: 5,147,854 in 2024 and 5,300,525 in 2025, so it holds for both years.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In 2024, Luxembourg Airport accommodated over five million passengers"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": [
+      "passengers carried in 2024: 5,147,854",
+      "passengers carried in 2025: 5,300,525"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a single runway",
+   "verdict": "confirmed",
+   "inAfter": "on a single runway",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "on a single runway"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "dated": "2026-09-23",
+     "quote": [
+      "Runway 06/24: 4,000 m",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "tram Line 1 from the terminal into the city",
+   "verdict": "softened",
+   "inAfter": "Line 1 runs from the terminal into Luxembourg City",
+   "note": "Was 'extended from Kirchberg to the airport in March 2025'. The operator's live timetable has the tram running Stadion to Aéroport through Kirchberg; the March 2025 date rests on Wikipedia alone (the tram company's own pages reached did not give it).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is home to the northern terminus of Line 1 of the Luxembourg City tramway"
+    },
+    {
+     "file": "lux-bus-tram",
+     "org": "lux-Airport (operator)",
+     "dated": "2026-09-23",
+     "quote": [
+      "Stadion → Aéroport",
+      "Aéroport → Stadion",
+      "Kirchberg, Luxexpo"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "buses 6, 16 and 29 into the city; regional 302 to Trier",
+   "verdict": "confirmed",
+   "inAfter": "Buses 6, 16 and 29 also run into the city.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is connected via public bus routes 6, 16, and 29 to Luxembourg City, and regional bus line 302 to Trier, Germany."
+    },
+    {
+     "file": "lux-bus-tram",
+     "org": "lux-Airport (operator)",
+     "dated": "2026-09-23",
+     "quote": [
+      "Bus 6",
+      "Bus 16",
+      "Bus 29",
+      "Bus 302",
+      "Trier (D) → Howald"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "regional bus 302 to Trier",
+   "verdict": "confirmed",
+   "inAfter": "Regional bus 302 goes over the border to Trier.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "regional bus line 302 to Trier, Germany"
+    },
+    {
+     "file": "lux-bus-tram",
+     "org": "lux-Airport (operator)",
+     "dated": "2026-09-23",
+     "quote": [
+      "Bus 302",
+      "Trier (D) → Howald"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "two terminals",
+   "verdict": "confirmed",
+   "inAfter": "There are two terminals.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Construction of the new Terminal A started in 2005",
+      "Terminal B opened in 2004."
+     ]
+    },
+    {
+     "file": "lux-airport-map",
+     "org": "lux-Airport (operator)",
+     "dated": "2026-09-23",
+     "quote": [
+      "35 Access to Terminal B",
+      "48 Access to Terminal A"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Terminal A the main one, with check-in and baggage reclaim",
+   "verdict": "confirmed",
+   "inAfter": "Terminal A is the main one, with check-in and baggage reclaim.",
+   "note": "The operator's map puts the check-in desks, passport controls and baggage claim in Terminal A, and shows Terminal B (gates, lounges and a Luxair gate-area desk) reached from Terminal A.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Construction of the new Terminal A started in 2005",
+      "The building is unique as it only has gates and no check-in counters or arrivals hall."
+     ]
+    },
+    {
+     "file": "lux-airport-map",
+     "org": "lux-Airport (operator)",
+     "dated": "2026-09-23",
+     "quote": [
+      "7 Check-in Desks",
+      "31 Baggage Claim",
+      "35 Access to Terminal B",
+      "48 Access to Terminal A"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Terminal B: gates but no check-in or arrivals hall",
+   "verdict": "confirmed",
+   "inAfter": "Terminal B has gates but no check-in counters or arrivals hall, and is reached through Terminal A.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The building is unique as it only has gates and no check-in counters or arrivals hall."
+    },
+    {
+     "file": "lux-airport-map",
+     "org": "lux-Airport (operator)",
+     "dated": "2026-09-23",
+     "quote": [
+      "48 Access to Terminal A",
+      "52 Info Desk Luxair (Gate Area)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "only international airport; five million in 2024 (first paragraph as written)",
+   "verdict": "cut",
+   "wasBefore": "Luxembourg's only international airport, and the only one in the country with a paved runway, about 6 km east of Luxembourg City. It carried over five million passengers in 2024.",
+   "why": "Reworded as above: scheduled flights rather than 'international', and the passenger figure for both 2024 and 2025."
+  },
+  {
+   "claim": "fifth busiest in Europe by cargo tonnage; Luxair and Cargolux headquarters on the site",
+   "verdict": "cut",
+   "wasBefore": "Freight is where it punches far above its weight. It is fifth busiest in Europe by cargo tonnage, and both Luxair and Cargolux have their headquarters on the site.",
+   "why": "The cargo ranking is Wikipedia's alone and sits next to a 2010 world ranking, so its date is unclear. Cargolux's own contact page gives its headquarters as 70 rue de Luxembourg, Sandweiler, which does not say 'at the airport'; Luxair was not checked. Cut rather than half-kept."
+  },
+  {
+   "claim": "around 100,000 movements a year on one runway, a lot for one strip",
+   "verdict": "cut",
+   "wasBefore": "All of that runs on a single runway handling around 100,000 movements a year, which is a lot for one strip.",
+   "why": "The single runway is kept (OurAirports). The movement count rests on Wikipedia alone."
+  },
+  {
+   "claim": "tram extended from Kirchberg in March 2025; direct rail link",
+   "verdict": "cut",
+   "wasBefore": "The big change for clients is the tram. Line 1 of the Luxembourg City tramway was extended from Kirchberg to the airport in March 2025, so the terminal now has a direct rail link into the city.",
+   "why": "Reworded: the tram to the terminal is kept with the operator as the second source; the March 2025 date rests on Wikipedia alone."
+  },
+  {
+   "claim": "Terminal A inaugurated May 2008; Terminal B for small aircraft, reopened 2017 for up to 110 passengers",
+   "verdict": "cut",
+   "wasBefore": "Terminal A, inaugurated in May 2008, is the main one. Terminal B is unusual: it has gates but no check in counters and no arrivals hall, and was built for small aircraft, reopening in 2017 able to handle up to 110 passengers.",
+   "why": "Reworded: the two terminals and what each has are kept with the operator's map. The 2008 and 2017 dates and the aircraft size rest on Wikipedia alone."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The tram is the easy way in",
+   "why": "Advice kept from the old text ('The big change for clients is the tram'); the tram's route has two sources."
+  }
+ ],
+ "tracerOk": {}
+}

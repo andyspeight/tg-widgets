@@ -1,0 +1,468 @@
+{
+ "iata": "IAH",
+ "id": "recdwi0k2pF1EzbDx",
+ "name": "George Bush Intercontinental Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/George_Bush_Intercontinental_Airport",
+ "audited": "2026-09-23",
+ "before": "Houston's main international airport, about 23 miles north of downtown, and one of United Airlines' largest hubs. It is second in Texas for international passengers behind Dallas Fort Worth and fifteenth busiest in the United States overall.\n\nIt is big and spread out: five terminals and 10,000 acres with five runways. Two people movers hold it together. The Skyway runs airside between all five terminals, so a connecting passenger stays inside security. The Subway runs landside between the terminals and the airport hotel.\n\nTerminals D and E have the international arrivals facility, and Terminal D has gates built for the A380 and 747-8. Terminal A takes non-United domestic carriers across two concourses and 21 gates, and Terminal B is used for United Express.\n\nIt opened in 1969 as Houston Intercontinental and was renamed in 1997 after George H. W. Bush, the forty first president and a Houston resident. Before United, it was a hub for Continental and, earlier, Eastern and Texas International.",
+ "after": "Houston's main international airport, about 23 miles north of downtown. It is a hub for United Airlines and, with more than 48 million passengers in 2025, the fifteenth busiest airport in the United States. For international passengers it is second in Texas, behind Dallas Fort Worth.\n\nIt is big and spread out: five terminals, five runways and 10,000 acres. The Skyway runs airside between all five terminals, so a connecting passenger stays inside security, while the Subway runs landside between the terminals and the airport hotel.\n\nMost international flights use Terminals D and E, with customs in the Terminal E arrivals hall. Terminal A is mainly for other airlines' domestic flights and Terminal B for United Express. United is rebuilding Terminal B, with a new 22-gate North Concourse due to open in autumn 2026.\n\nIt opened in 1969 as Houston Intercontinental and was later renamed after President George HW Bush.",
+ "claims": [
+  {
+   "claim": "Houston's main international airport",
+   "verdict": "confirmed",
+   "inAfter": "Houston's main international airport",
+   "note": "The operator gives IAH over 48.7 million passengers and 189 nonstop destinations in 2025 against 13.9 million and 81 at Hobby; the FAA's CY2025 table gives 23,265,028 enplanements against 6,790,274 at Hobby.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the main international airport in Houston, Texas, United States, serving the Greater Houston metropolitan area"
+    },
+    {
+     "file": "op-about",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": [
+      "With 26 passenger airlines offering nonstop service to over 189 destinations, it is a primary hub for international travel.",
+      "HOU welcomed 13.9 million passengers in 2025. It offers nonstop flights to 81 destinations"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "15 SW TX IAH Houston George Bush Intcntl/Houston P L 23,265,028 23,349,157 -0.36%",
+      "37 SW TX HOU Houston William P Hobby P M 6,790,274 7,116,967 -4.59%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "about 23 miles north of downtown",
+   "verdict": "confirmed",
+   "inAfter": "about 23 miles north of downtown",
+   "note": "Coordinates give 15.3 miles in a straight line at 5 degrees (north), a ratio of 1.50, so 23 is the road distance; the operator gives the same 23 miles. The FAA record's '15 N' is in nautical miles, to the airport reference point.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Located about 23 miles (37 km) north of Downtown Houston"
+    },
+    {
+     "file": "op-about",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "Located 23 miles north of Downtown Houston",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 24.7 km (15.3 miles)",
+      "Bearing from the city centre: 5 degrees, which is north"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a hub for United Airlines",
+   "verdict": "softened",
+   "inAfter": "It is a hub for United Airlines",
+   "note": "Was 'one of United Airlines' largest hubs'. United's own release of June 2026 lists Houston among its seven US hubs but does not rank them, so 'largest' rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Houston Intercontinental is one of the largest passenger hubs for United Airlines"
+    },
+    {
+     "file": "united-cartagena",
+     "org": "United Airlines",
+     "quote": [
+      "With U.S. hubs in Chicago, Denver, Houston, Los Angeles, New York/Newark, San Francisco and Washington, D.C.",
+      "offering nonstop flights to 57 destinations from its hub in Houston"
+     ],
+     "dated": "2026-06-29"
+    }
+   ]
+  },
+  {
+   "claim": "more than 48 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "with more than 48 million passengers in 2025",
+   "note": "Added as the traffic line the caller asked for. TOTAL passengers, arrivals plus departures. The operator gives 'more than 48 million' in its 2 September 2026 release and 'over 48.7 million' on its About page; Wikipedia's infobox gives 48,131,213 (citing the operator and the FAA). The two operator figures do not match each other, so the text uses the one every source supports. The FAA's preliminary CY2025 table counts 23,265,028 revenue enplanements (boardings only), consistent with it.",
+   "sources": [
+    {
+     "file": "op-129m",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "IAH welcomed more than 48 million passengers in 2025, including a record 12.4 million international travelers, up 2.5% from 2024.",
+     "dated": "2026-09-02"
+    },
+    {
+     "file": "op-about",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "IAH served over 48.7 million passengers in 2025",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat1_header = Passengers",
+      "stat1_data = 48,131,213",
+      "stat_year = 2025"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "15 SW TX IAH Houston George Bush Intcntl/Houston P L 23,265,028 23,349,157 -0.36%",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "the fifteenth busiest airport in the United States",
+   "verdict": "confirmed",
+   "inAfter": "the fifteenth busiest airport in the United States",
+   "note": "The FAA ranks by boardings: 15th in its preliminary CY2025 table, and its CY2024 column puts Houston 15th that year too (below Newark's 24.5 million, above Boston's 21.1 million). Wikipedia gives 15th on total passengers for 2022. Unlike Phoenix, the sources agree.",
+   "sources": [
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "15 SW TX IAH Houston George Bush Intcntl/Houston P L 23,265,028 23,349,157 -0.36%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the 15th busiest in the United States for total passenger traffic as of 2022"
+    }
+   ]
+  },
+  {
+   "claim": "second in Texas for international passengers, behind Dallas Fort Worth",
+   "verdict": "confirmed",
+   "inAfter": "For international passengers it is second in Texas, behind Dallas Fort Worth.",
+   "note": "Checked against both operators' own 2025 figures: IAH a record 12.4 million international passengers, DFW 12,652,411 (its December 2025 report, calendar year to date; 12,427,720 in 2024). The next Texas airports are far smaller in all traffic (FAA CY2025: Austin 10.65 million boardings of every kind).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is the second busiest airport in Texas for international passenger traffic as of 2025, behind Dallas Fort Worth International Airport"
+    },
+    {
+     "file": "op-129m",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "including a record 12.4 million international travelers",
+     "dated": "2026-09-02"
+    },
+    {
+     "file": "dfw-dec2025",
+     "org": "DFW International Airport (operator of Dallas Fort Worth)",
+     "quote": [
+      "DFW Total Passengers",
+      "CYTD Passengers",
+      "85,660,127 12,652,411 73,007,716 87,817,864 12,427,720 75,390,144"
+     ],
+     "dated": "2026-01 (December 2025 report)"
+    }
+   ]
+  },
+  {
+   "claim": "five terminals, five runways, 10,000 acres",
+   "verdict": "confirmed",
+   "inAfter": "five terminals, five runways and 10,000 acres",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "IAH covers 10,000 acres (40 km2) of land and has five runways.",
+      "George Bush Intercontinental Airport has five terminals and 116 total gates."
+     ]
+    },
+    {
+     "file": "op-connecting",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "All five terminals at IAH are connected by an above-ground automated people-mover (Skyway) and an underground train (Subway).",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "22 ACREAGE: 10,000",
+     "dated": "2026-09 (current record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runways listed: 5"
+    }
+   ]
+  },
+  {
+   "claim": "Skyway airside between all five terminals; connecting passengers stay inside security",
+   "verdict": "confirmed",
+   "inAfter": "The Skyway runs airside between all five terminals, so a connecting passenger stays inside security",
+   "sources": [
+    {
+     "file": "op-connecting",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": [
+      "All five terminals at IAH are connected by an above-ground automated people-mover (Skyway) and an underground train (Subway).",
+      "The above-ground Skyway provides transportation between terminals while inside security."
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The Skyway automated people mover system provides airside connections between all five terminals."
+    }
+   ]
+  },
+  {
+   "claim": "Subway landside between the terminals and the airport hotel",
+   "verdict": "confirmed",
+   "inAfter": "the Subway runs landside between the terminals and the airport hotel",
+   "note": "The operator names the hotel as the Marriott.",
+   "sources": [
+    {
+     "file": "op-connecting",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "The below-ground Subway train provides transportation between terminals while outside security (pre-security).",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-subway-45",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "Today, the Subway operates along a two-mile underground track connecting Terminals A, B, C, the Marriott Hotel and D/E pre-security.",
+     "dated": "2026-08-03"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The Subway is an automated people mover system that provides landside connections between the five terminals and the airport hotel."
+    }
+   ]
+  },
+  {
+   "claim": "most international flights use Terminals D and E",
+   "verdict": "confirmed",
+   "inAfter": "Most international flights use Terminals D and E",
+   "note": "'Most' because flights from Canada use Terminal A (Wikipedia; Alaska's guide puts Air Canada's counter there). The operator calls the new D-West Concourse the airport's newest international gateway and says roughly 35,000 international travellers a day now pass through Terminal E. Wikipedia also says that from March 2026 airlines began moving their international check-in from Terminal D to Terminal E; no saved operator page says so in words, so the text does not.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Terminal D (1990) is primarily used for non-United international flights.",
+      "Terminal E (2003) is used for United international flights and international arrivals.",
+      "Flights from Canada on Air Canada and WestJet arrive in terminal A."
+     ]
+    },
+    {
+     "file": "op-starbucks-e",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "Velvet Taco officially opened Monday, Jan. 5, in the new Terminal D-West Concourse, delivering one of Houston’s most recognizable culinary brands to the airport’s newest international gateway.",
+     "dated": "2026-06-19"
+    },
+    {
+     "file": "op-chilis-intl",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": [
+      "Across the expanded Terminal D and modernized Terminal E",
+      "roughly 35,000 international travelers now move through Terminal E each day"
+     ],
+     "dated": "2026-08-25"
+    }
+   ]
+  },
+  {
+   "claim": "customs in the Terminal E arrivals hall",
+   "verdict": "corrected",
+   "inAfter": "with customs in the Terminal E arrivals hall",
+   "note": "Was 'Terminals D and E have the international arrivals facility'. The operator's live page sends every international passenger through customs and immigration in the Terminal E international arrivals hall.",
+   "sources": [
+    {
+     "file": "op-home",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "International passengers will proceed through Customs & Immigration in the Terminal E international arrivals hall.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Terminal E (2003) is used for United international flights and international arrivals."
+    }
+   ]
+  },
+  {
+   "claim": "Terminal A mainly for other airlines' domestic flights",
+   "verdict": "confirmed",
+   "inAfter": "Terminal A is mainly for other airlines' domestic flights",
+   "note": "The operator's airline directory and map are drawn by script and could not be saved as text, so the second source is an airline's own page: Alaska checks in and boards in Terminal A, next to Air Canada.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Terminal A is primarily used by non-United domestic carriers and occasionally United Express."
+    },
+    {
+     "file": "alaska-guide-iah",
+     "org": "Alaska Airlines (own airport page, alaskaair.com)",
+     "quote": [
+      "Terminal A - Gates 8, 11, and 24.",
+      "Terminal A - counter next to Air Canada"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal B for United Express",
+   "verdict": "confirmed",
+   "inAfter": "Terminal B for United Express",
+   "note": "The operator's Terminal B update describes the south concourse's 18 gates for Embraer E175s, the regional jets United Express flies.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Terminal B is used for United Express flights."
+    },
+    {
+     "file": "op-termb-oct25",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "The Terminal B South concourse will modernize 18 E175 gates",
+     "dated": "2025-10-17"
+    }
+   ]
+  },
+  {
+   "claim": "United rebuilding Terminal B; 22-gate North Concourse due autumn 2026",
+   "verdict": "corrected",
+   "inAfter": "United is rebuilding Terminal B, with a new 22-gate North Concourse due to open in autumn 2026.",
+   "note": "The works the caller asked about. The operator's update (October 2025, within 12 months) and Wikipedia agree on 22 gates and completion in autumn 2026. United's newsroom had no opening date as of 23 September 2026. The $2.5 billion project is a United and Houston Airports collaboration.",
+   "sources": [
+    {
+     "file": "op-termb-oct25",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": [
+      "a collaboration between United Airlines and Houston Airports to reimagine one of the airport’s original terminals",
+      "Inside, 22 gates will serve United’s growing fleet as part of the airline’s United NEXT initiative.",
+      "Completion is scheduled for fall 2026."
+     ],
+     "dated": "2025-10-17"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The 22-gate north expansion is slated to open in fall 2026",
+      "The Terminal B Transformation is expected to complete by fall 2026."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "opened in 1969 as Houston Intercontinental",
+   "verdict": "confirmed",
+   "inAfter": "It opened in 1969 as Houston Intercontinental",
+   "note": "The Handbook of Texas gives the opening day as 8 June 1969. Historical fact, so the age of the sources does not matter.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Initially named Houston Intercontinental Airport upon its opening in 1969"
+    },
+    {
+     "file": "tsha-iah",
+     "org": "Texas State Historical Association (Handbook of Texas)",
+     "quote": [
+      "Houston Intercontinental Airport had its beginning in 1957",
+      "Finally, after eight projected opening dates, the new airport opened, on June 8, 1969."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "later renamed after President George HW Bush",
+   "verdict": "softened",
+   "inAfter": "was later renamed after President George HW Bush",
+   "note": "Was 'renamed in 1997 after George H. W. Bush, the forty first president and a Houston resident'. The Handbook of Texas confirms the airport is named after President George Bush but gives no year; the year, the 41st and the Houston residence rest on Wikipedia alone. Initials written without stops, in the house style used for JD Power. Historical fact, so the age of the sources does not matter.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "it was renamed in honor of George H. W. Bush, the 41st president of the United States and a resident of Houston, in 1997"
+    },
+    {
+     "file": "tsha-iah",
+     "org": "Texas State Historical Association (Handbook of Texas)",
+     "quote": "Aerial View of the current Intercontinental Airport, named after President George Bush."
+    }
+   ]
+  },
+  {
+   "claim": "one of United's largest hubs",
+   "verdict": "cut",
+   "wasBefore": "and one of United Airlines' largest hubs",
+   "why": "United lists Houston among its hubs without ranking them; 'largest' rests on Wikipedia alone. Softened to a hub."
+  },
+  {
+   "claim": "second in Texas for international and fifteenth in the US (old wording)",
+   "verdict": "cut",
+   "wasBefore": "It is second in Texas for international passengers behind Dallas Fort Worth and fifteenth busiest in the United States overall.",
+   "why": "Reworded; both facts kept with 2025 figures from the FAA and both operators."
+  },
+  {
+   "claim": "five terminals and 10,000 acres with five runways (old wording)",
+   "verdict": "cut",
+   "wasBefore": "five terminals and 10,000 acres with five runways",
+   "why": "Reworded and kept."
+  },
+  {
+   "claim": "two people movers hold it together",
+   "verdict": "cut",
+   "wasBefore": "Two people movers hold it together.",
+   "why": "A lead-in, merged into the sentence on the Skyway and the Subway."
+  },
+  {
+   "claim": "Terminals D and E have the international arrivals facility; Terminal D A380 and 747-8 gates",
+   "verdict": "cut",
+   "wasBefore": "Terminals D and E have the international arrivals facility, and Terminal D has gates built for the A380 and 747-8.",
+   "why": "Customs is now in the Terminal E international arrivals hall (operator); the A380 and 747-8 gates rest on Wikipedia alone."
+  },
+  {
+   "claim": "Terminal A two concourses and 21 gates",
+   "verdict": "cut",
+   "wasBefore": "Terminal A takes non-United domestic carriers across two concourses and 21 gates, and Terminal B is used for United Express.",
+   "why": "The concourse and gate counts rest on Wikipedia alone; the allocations are kept."
+  },
+  {
+   "claim": "renamed 1997; forty first president; Houston resident",
+   "verdict": "cut",
+   "wasBefore": "was renamed in 1997 after George H. W. Bush, the forty first president and a Houston resident",
+   "why": "The year, the 41st and the Houston residence rest on Wikipedia alone (the Bush library's site had no usable page, and the Handbook of Texas gives no year)."
+  },
+  {
+   "claim": "former hub for Continental, Eastern and Texas International",
+   "verdict": "cut",
+   "wasBefore": "Before United, it was a hub for Continental and, earlier, Eastern and Texas International.",
+   "why": "Only Wikipedia; the Handbook of Texas entry does not cover it. Of little use to a UK agent today."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "It is big and spread out",
+   "why": "The old text's framing; the terminals, runways and acreage that follow are sourced."
+  }
+ ],
+ "tracerOk": {}
+}

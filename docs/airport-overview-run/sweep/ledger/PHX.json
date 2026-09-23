@@ -1,0 +1,438 @@
+{
+ "iata": "PHX",
+ "id": "recc39VShcKTMRz7Y",
+ "name": "Phoenix Sky Harbor International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Phoenix_Sky_Harbor_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Arizona's largest airport, only three miles east of downtown Phoenix, and eleventh busiest in the United States. It is a hub for American Airlines and a base for Southwest and Frontier.\n\nThe terminal numbering catches everyone out. There are only two terminals and they are called 3 and 4. Terminals 1 and 2 were retired and the airport chose not to renumber the survivors because passengers already knew them. Terminal 4 is the big one with 92 gates, used by American, Southwest and all international carriers. Terminal 3 has 27 gates and takes most other domestic and pre-cleared arrivals, including Alaska, Delta, United and Frontier.\n\nThree parallel runways serve the 3,400 acre site, all of them able to take aircraft at 900,000 lb or more.\n\nIt is a joint civil and military field. The 161st Air Refueling Wing of the Arizona Air National Guard flies KC-135R tankers from the Goldwater enclave here, so military aircraft are routine.",
+ "after": "Arizona's largest airport, east of downtown Phoenix. It handled 51.6 million passengers in 2025 and is a hub for American Airlines.\n\nThe terminal numbering catches people out: there are only two terminals, numbered 3 and 4. Terminal 4 is the big one, used by American, Southwest and most international airlines, including British Airways, which has flown nonstop to London since 1996. Most other domestic flights and pre-cleared arrivals use Terminal 3, including Alaska, Delta, United and Frontier. Sky Harbor says a new six-gate North Concourse at Terminal 3 should be finished in 2027.\n\nThree runways serve the 3,400 acre site.\n\nIt is a joint civil and military field. The 161st Air Refueling Wing, part of the Arizona Air National Guard, flies KC-135R tankers from Goldwater Air National Guard Base here.",
+ "claims": [
+  {
+   "claim": "Arizona's largest airport",
+   "verdict": "confirmed",
+   "inAfter": "Arizona's largest airport",
+   "note": "The FAA's CY2025 table gives Phoenix 25,094,817 enplanements against 1,891,548 at Tucson and 1,032,493 at Mesa Gateway, the next Arizona airports.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is Arizona's largest and busiest airport."
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "13 WP AZ PHX Phoenix Phoenix Sky Harbor International P L 25,094,817 25,595,723 -1.96%",
+      "77 WP AZ TUS Tucson International Airport Tucson International P S 1,891,548 1,959,789 -3.48%",
+      "104 WP AZ IWA Mesa Mesa Gateway P S 1,032,493 978,296 5.54%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "east of downtown Phoenix",
+   "verdict": "softened",
+   "inAfter": "east of downtown Phoenix",
+   "note": "Was 'only three miles east'. The coordinates give 4.0 miles in a straight line from the GeoNames centre, so three miles is a ratio of 0.75 and fails the check. The FAA master record says '03 E', which is three NAUTICAL miles (about 3.5 statute miles), while Wikipedia gives 3 statute miles and converts it to 2.6 nautical miles, so the written sources do not agree on the figure; the operator's pages give no distance. The bearing is agreed by all three.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is a civil-military public international airport 3 miles (2.6 nmi; 4.8 km) east of downtown Phoenix"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "3 CBD TO AIRPORT (NM): 03 E",
+     "dated": "2026-09 (current record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 6.5 km (4.0 miles)",
+      "Bearing from the city centre: 103 degrees, which is east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "51.6 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled 51.6 million passengers in 2025",
+   "note": "Replaces 'eleventh busiest in the United States' (cut below). TOTAL passengers, arrivals plus departures: the operator's 2025 annual report gives 51,618,649 for the calendar year, down 1.4 per cent on 52,325,266 in 2024 (its history page says more than 52 million in 2024); 25,893,806 enplaned. Wikipedia's infobox gives 51,620,420, the same to one decimal place. The FAA's preliminary CY2025 table counts 25,094,817 revenue enplanements (boardings only), consistent with both.",
+   "sources": [
+    {
+     "file": "op-stats-2025",
+     "org": "Phoenix Sky Harbor International Airport (operator, City of Phoenix Aviation Department)",
+     "quote": [
+      "PASSENGERS, CARGO, AND AIRCRAFT OPERATIONS AT PHOENIX AIRPORTS",
+      "Calendar YTD",
+      "51,618,649",
+      "25,893,806",
+      "December 2025"
+     ],
+     "dated": "2026 (annual statistics for calendar 2025)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat2_header = Passengers",
+      "stat2_data = 51,620,420",
+      "stat_year = 2025"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "13 WP AZ PHX Phoenix Phoenix Sky Harbor International P L 25,094,817 25,595,723 -1.96%",
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "op-history",
+     "org": "Phoenix Sky Harbor International Airport (operator, City of Phoenix Aviation Department)",
+     "quote": "Phoenix Sky Harbor served more than 52 million passengers in 2024.",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "a hub for American Airlines",
+   "verdict": "confirmed",
+   "inAfter": "is a hub for American Airlines",
+   "note": "The operator's December 2025 carrier table shows American as the largest airline here (947,555 enplaned that month), ahead of Southwest (764,530).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport serves as a hub for American Airlines"
+    },
+    {
+     "file": "aa-about",
+     "org": "American Airlines",
+     "quote": "American has hubs in Charlotte, Chicago, Dallas-Fort Worth, Los Angeles, Miami, New York, Philadelphia, Phoenix and Washington, D.C.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "op-stats-2025",
+     "org": "Phoenix Sky Harbor International Airport (operator, City of Phoenix Aviation Department)",
+     "quote": [
+      "American Airlines 464,092 424,832 58,631 947,555",
+      "Southwest Airlines 503,088 246,572 14,870 764,530"
+     ],
+     "dated": "2026 (annual statistics for calendar 2025)"
+    }
+   ]
+  },
+  {
+   "claim": "only two terminals, numbered 3 and 4",
+   "verdict": "confirmed",
+   "inAfter": "there are only two terminals, numbered 3 and 4",
+   "note": "The operator's live airline list and its 2025 statistics name only Terminals 3 and 4.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport has 119 active aircraft gates in two Terminals (3 and 4)."
+    },
+    {
+     "file": "op-stats-2025",
+     "org": "Phoenix Sky Harbor International Airport (operator, City of Phoenix Aviation Department)",
+     "quote": [
+      "Subtotal Terminal 3",
+      "Subtotal Terminal 4"
+     ],
+     "dated": "2026 (annual statistics for calendar 2025)"
+    },
+    {
+     "file": "op-airlines",
+     "org": "Phoenix Sky Harbor International Airport (operator, City of Phoenix Aviation Department)",
+     "quote": [
+      "American Airlines Terminal 4",
+      "Delta Air Lines Terminal 3"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 4 is the big one",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 4 is the big one",
+   "note": "Operator's 2025 figures: 18,406,770 passengers enplaned at Terminal 4 against 6,077,864 at Terminal 3. Gate counts are cut (below).",
+   "sources": [
+    {
+     "file": "op-stats-2025",
+     "org": "Phoenix Sky Harbor International Airport (operator, City of Phoenix Aviation Department)",
+     "quote": [
+      "18,406,770",
+      "6,077,864"
+     ],
+     "dated": "2026 (annual statistics for calendar 2025)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the largest and busiest of the two terminals"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 4 used by American, Southwest and most international airlines",
+   "verdict": "corrected",
+   "inAfter": "used by American, Southwest and most international airlines",
+   "note": "Was 'all international carriers'. The operator's live list puts Aeromexico, Air France, British Airways, China Airlines, STARLUX, Volaris and WestJet in Terminal 4, but Air Canada and Porter in Terminal 3.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Phoenix Sky Harbor International Airport (operator, City of Phoenix Aviation Department)",
+     "quote": [
+      "American Airlines Terminal 4",
+      "Southwest Airlines Terminal 4",
+      "British Airways Terminal 4",
+      "Air France Terminal 4",
+      "China Airlines Terminal 4",
+      "STARLUX Airlines Terminal 4",
+      "Air Canada Terminal 3",
+      "Porter Airlines Terminal 3"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "International carriers, American Airlines and Southwest Airlines operate in Terminal 4."
+    }
+   ]
+  },
+  {
+   "claim": "British Airways, nonstop to London since 1996",
+   "verdict": "corrected",
+   "inAfter": "including British Airways, which has flown nonstop to London since 1996",
+   "note": "Replaces the vague 'all international carriers' with the one route a UK agent needs. The operator marked the route's 30th anniversary on 1 July 2026 and calls it a nonstop flight; British Airways sells Phoenix from London with a 10 hour 30 minute flight time. None of the saved pages names the London airport, so the text says London.",
+   "sources": [
+    {
+     "file": "op-ba-30",
+     "org": "Phoenix Sky Harbor International Airport (operator, City of Phoenix Aviation Department)",
+     "quote": [
+      "When British Airways first launched service between Phoenix and London in 1996",
+      "It’s a nonstop flight that can take you to one of the world’s most dynamic cities"
+     ],
+     "dated": "2026-06"
+    },
+    {
+     "file": "op-ba-30b",
+     "org": "Phoenix Sky Harbor International Airport (operator, City of Phoenix Aviation Department)",
+     "quote": "July 1 marks the 30th anniversary of British Airways service between Phoenix and London.",
+     "dated": "2026-06"
+    },
+    {
+     "file": "ba-phoenix",
+     "org": "British Airways",
+     "quote": [
+      "Our cheapest flights to Phoenix from London",
+      "10 hrs 30 mins"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Sky Harbor landed its first transatlantic flights in 1996 when British Airways inaugurated nonstop service to London."
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 3: most other domestic flights and pre-cleared arrivals, including Alaska, Delta, United and Frontier",
+   "verdict": "confirmed",
+   "inAfter": "Most other domestic flights and pre-cleared arrivals use Terminal 3, including Alaska, Delta, United and Frontier.",
+   "note": "The operator's list does not use the word pre-cleared, but the two Canadian airlines in Terminal 3 (Air Canada and Porter) are the pre-cleared arrivals Wikipedia describes.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Phoenix Sky Harbor International Airport (operator, City of Phoenix Aviation Department)",
+     "quote": [
+      "Alaska Airlines Terminal 3",
+      "Delta Air Lines Terminal 3",
+      "United Airlines Terminal 3",
+      "Frontier Airlines Terminal 3",
+      "Air Canada Terminal 3"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Terminal 3 is used by most domestic or precleared arrivals including Alaska Airlines, Delta Air Lines, Frontier Airlines, and United Airlines."
+    }
+   ]
+  },
+  {
+   "claim": "Sky Harbor: six-gate North Concourse at Terminal 3 due in 2027",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Sky Harbor",
+   "inAfter": "Sky Harbor says a new six-gate North Concourse at Terminal 3 should be finished in 2027.",
+   "note": "Added because the caller asked for works under way since 2024. A forward-looking plan, so it is attributed to the operator, whose own pages are the only ones saved on it: about 20 per cent built in February 2026, six new gates and completion expected in 2027 (August 2026). Wikipedia's current article does not mention it.",
+   "sources": [
+    {
+     "file": "op-t3-aug",
+     "org": "Phoenix Sky Harbor International Airport (operator, City of Phoenix Aviation Department)",
+     "quote": [
+      "This new concourse will add approximately 173,000 square feet of space for six new passenger gates.",
+      "The project is expected to be completed in 2027."
+     ],
+     "dated": "2026-08"
+    },
+    {
+     "file": "op-t3-north",
+     "org": "Phoenix Sky Harbor International Airport (operator, City of Phoenix Aviation Department)",
+     "quote": "Progress continues on the Terminal 3 north concourse project, with construction approximately 20% complete.",
+     "dated": "2026-02"
+    }
+   ]
+  },
+  {
+   "claim": "three runways, 3,400 acre site",
+   "verdict": "confirmed",
+   "inAfter": "Three runways serve the 3,400 acre site.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "PHX covers 3,400 acres (14 km2) at an elevation of 1,135 ft (346 m)."
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "22 ACREAGE: 3,400",
+      "07L/25R",
+      "07R/25L",
+      "08/26"
+     ],
+     "dated": "2026-09 (current record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runways listed: 3"
+    }
+   ]
+  },
+  {
+   "claim": "joint civil and military field",
+   "verdict": "confirmed",
+   "inAfter": "It is a joint civil and military field.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is a civil-military public international airport"
+    },
+    {
+     "file": "anng-161arw-home",
+     "org": "161st Air Refueling Wing, Arizona Air National Guard (US Air Force)",
+     "quote": "Goldwater Air National Guard Base as well as Sky Harbor International Airport (PHX), is a NO-DRONE ZONE.",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "161st Air Refueling Wing flies KC-135R tankers from Goldwater Air National Guard Base",
+   "verdict": "confirmed",
+   "inAfter": "The 161st Air Refueling Wing, part of the Arizona Air National Guard, flies KC-135R tankers from Goldwater Air National Guard Base here.",
+   "note": "Was 'from the Goldwater enclave'; the base's own name is used. Sky Harbor and Harbor are proper names and keep their US spelling.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport is also home to the 161st Air Refueling Wing (161 ARW), an Air Mobility Command (AMC)–gained unit of the Arizona Air National Guard.",
+      "The military enclave is known as Goldwater Air National Guard Base.",
+      "the 161 ARW flies the KC-135R Stratotanker aircraft"
+     ]
+    },
+    {
+     "file": "anng-161arw",
+     "org": "161st Air Refueling Wing, Arizona Air National Guard (US Air Force)",
+     "quote": [
+      "161ST AIR REFUELING WING, ARIZONA AIR NATIONAL GUARD",
+      "The 161st operates the KC-135 “R” model, the latest version of the aircraft."
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "anng-161arw-home",
+     "org": "161st Air Refueling Wing, Arizona Air National Guard (US Air Force)",
+     "quote": "Goldwater Air National Guard Base as well as Sky Harbor International Airport (PHX)",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "three miles from downtown",
+   "verdict": "cut",
+   "wasBefore": "only three miles east of downtown Phoenix",
+   "why": "Fails the coordinates check (4.0 miles in a straight line, ratio 0.75); the FAA gives 3 nautical miles and Wikipedia 3 statute miles, and the operator gives no figure. The bearing is kept."
+  },
+  {
+   "claim": "eleventh busiest in the United States",
+   "verdict": "cut",
+   "wasBefore": "and eleventh busiest in the United States",
+   "why": "Good sources disagree: Wikipedia says 11th by boardings in 2025, but the FAA's preliminary CY2025 table ranks Phoenix 13th (25,094,817), behind Charlotte and Seattle. Replaced by the operator's 2025 passenger total."
+  },
+  {
+   "claim": "a base for Southwest and Frontier",
+   "verdict": "cut",
+   "wasBefore": "and a base for Southwest and Frontier",
+   "why": "Rests on Wikipedia alone: Southwest's media fact sheets page had nothing on it and no Frontier source was found. Southwest stays in the text through its terminal."
+  },
+  {
+   "claim": "numbering catches everyone out; called 3 and 4",
+   "verdict": "cut",
+   "wasBefore": "The terminal numbering catches everyone out. There are only two terminals and they are called 3 and 4.",
+   "why": "Reworded and kept (see above)."
+  },
+  {
+   "claim": "Terminals 1 and 2 retired; airport chose not to renumber",
+   "verdict": "cut",
+   "wasBefore": "Terminals 1 and 2 were retired and the airport chose not to renumber the survivors because passengers already knew them.",
+   "why": "Only Wikipedia gives the reason; none of the operator's pages read (airlines, about, history, development, maps, parking FAQ) explains the numbering."
+  },
+  {
+   "claim": "Terminal 4: 92 gates, all international carriers",
+   "verdict": "cut",
+   "wasBefore": "Terminal 4 is the big one with 92 gates, used by American, Southwest and all international carriers.",
+   "why": "The gate count rests on Wikipedia alone (which also says '86 (now 92)' and 119 in all); 'all international carriers' is wrong on the operator's list, which puts Air Canada and Porter in Terminal 3."
+  },
+  {
+   "claim": "Terminal 3: 27 gates",
+   "verdict": "cut",
+   "wasBefore": "Terminal 3 has 27 gates and takes most other domestic and pre-cleared arrivals",
+   "why": "The gate count rests on Wikipedia alone, and six more gates are being added (operator, August 2026). The allocation is kept."
+  },
+  {
+   "claim": "three parallel runways, 900,000 lb",
+   "verdict": "cut",
+   "wasBefore": "Three parallel runways serve the 3,400 acre site, all of them able to take aircraft at 900,000 lb or more.",
+   "why": "'Parallel' and the weight limit rest on Wikipedia alone: the FAA record lists the runways as 07L/25R, 07R/25L and 08/26 and its weight fields did not come through in the saved text. Three runways and the site area are kept."
+  },
+  {
+   "claim": "the Goldwater enclave; military aircraft routine",
+   "verdict": "cut",
+   "wasBefore": "from the Goldwater enclave here, so military aircraft are routine",
+   "why": "The base is now named as its wing names it; 'routine' is a judgement (the operator's 2025 figures show 1,194 military movements at Sky Harbor, down from 2,271 in 2024)."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The terminal numbering catches people out",
+   "why": "The old text's framing, softened from 'everyone'; the numbering it points to is sourced above."
+  }
+ ],
+ "tracerOk": {}
+}

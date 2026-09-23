@@ -1,0 +1,463 @@
+{
+ "iata": "HNL",
+ "id": "recqbMjPOf2onuVUA",
+ "name": "Daniel K. Inouye International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Daniel_K._Inouye_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Hawaii's main airport, three miles north west of downtown Honolulu, and the hub for Hawaiian Airlines. It offers non-stop flights across North America, Asia and Oceania.\n\nThe site is enormous, covering more than one per cent of the whole island of Oahu.\n\nIts runways are genuinely unusual. There are four major runways, operated jointly with the adjacent Hickam Air Force Base, and the principal one, 8R/26L, is known as the Reef Runway. Completed in 1977, it was the world's first major runway built entirely offshore, and was a designated alternate landing site for the Space Shuttle. Beyond the paved runways there are two marked offshore waterways for seaplanes.\n\nThere are 60 gates across three terminals, 54 with jet bridges and six hard stands. Terminals 1 and 2 are connected after security, which is worth knowing for a connection.\n\nThe airport is named after Daniel Inouye, a Honolulu native, Medal of Honor recipient and senator for Hawaii from 1963 until his death in 2012.",
+ "after": "Hawaii's main airport, north west of downtown Honolulu. It is a hub for Hawaiian Airlines and handles more than 21 million passengers a year, with non-stop flights across North America, Asia and Oceania.\n\nIts four runways are shared with the neighbouring Joint Base Pearl Harbor-Hickam. The Reef Runway, completed in 1977, was the world's first major runway built entirely offshore. Beyond the paved runways there are two marked offshore waterways for seaplanes.\n\nThere are three terminals. Hawaiian Airlines checks in its inter-island flights at Terminal 1, Mokulele Airlines uses the commuter Terminal 3 and the other airlines check in at Terminal 2. Terminals 1 and 2 are connected after security, which is worth knowing for a connection.\n\nThe airport is named after Daniel Inouye, a Honolulu native, Medal of Honor recipient and senator for Hawaii from 1963 until his death in 2012.",
+ "claims": [
+  {
+   "claim": "Hawaii's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Hawaii's main airport",
+   "note": "The FAA's preliminary CY2025 table gives Honolulu 10,430,353 enplanements, three times Kahului (3,450,472), the next Hawaii airport in the table.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the primary airport serving the U.S. state of Hawaii"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "30 WP HI HNL Honolulu Daniel K Inouye International P L 10,430,353 10,449,022 -0.18%",
+      "54 WP HI OGG Kahului Kahului P M 3,450,472 3,415,615 1.02%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "op-airport-info",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": "is one of the world’s largest, busiest and most beautiful airports",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "north west of downtown Honolulu",
+   "verdict": "softened",
+   "inAfter": "north west of downtown Honolulu",
+   "note": "Was 'three miles north west'. The coordinates put the airport 4.4 miles in a straight line from the GeoNames centre, so three miles is a ratio of 0.68 and fails the check. The FAA master record gives '03 NW', which is three NAUTICAL miles (about 3.5 statute miles) from the business district to the airport reference point, so the two written sources do not agree on the unit and the figure goes. The bearing stays: Wikipedia and the FAA both say north west, and the computed 280 degrees is west, one point away.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "three miles (five kilometers) northwest of Honolulu's central business district"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "3 CBD TO AIRPORT (NM): 03 NW",
+     "dated": "2026-09 (current record, last inspected 06/27/2025)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 7.1 km (4.4 miles)",
+      "Bearing from the city centre: 280 degrees, which is west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a hub for Hawaiian Airlines",
+   "verdict": "softened",
+   "inAfter": "a hub for Hawaiian Airlines",
+   "note": "Was 'the hub'. The caller asked how the airline describes the service now that Hawaiian is in the Alaska Air Group. Hawaiian's own release of 18 September 2026 calls Honolulu and Kahului 'the company's two largest Hawaii hubs' and announces Alaska-branded 737s on Honolulu to Kahului from 3 October; its About page says Hawaiian has combined passenger service systems with Alaska Airlines and that Hawaiian flights stay Hawaiian-branded. No independent page on the ownership could be saved (transportation.gov answered 403; the Maui Now report of August 2025 reprints the airline's release), so the text says only what both sources support: a hub for Hawaiian.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport serves as the main hub of Hawaiian Airlines"
+    },
+    {
+     "file": "alaska-hnl-lobby",
+     "org": "Hawaiian Airlines (Alaska Air Group newsroom)",
+     "quote": [
+      "Alaska Airlines will introduce daily Boeing 737-800 service on select Honolulu (HNL) -Kahului (OGG) flights Oct. 3",
+      "connecting the company’s two largest Hawaiʻi hubs"
+     ],
+     "dated": "2026-09-18"
+    },
+    {
+     "file": "about-hawaiian",
+     "org": "Hawaiian Airlines (Alaska Air Group newsroom)",
+     "quote": [
+      "Now that Hawaiian Airlines has combined passenger service systems with Alaska Airlines",
+      "Hawaiian flights will remain clearly branded across our website and app"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "more than 21 million passengers a year",
+   "verdict": "corrected",
+   "inAfter": "handles more than 21 million passengers a year",
+   "note": "Added at the caller's request for a traffic line, in place of the site-size line (cut below) as the measure of how big it is. TOTAL passengers, arrivals plus departures: the operator's live page says more than 21 million enplaned and deplaned a year, and Wikipedia's infobox gives 21,985,522 for 2025, sourced to the state. The state's own 2025 table is a Tableau dashboard that draws its figures as an image (updated 17 September 2026), so it could not be saved as text. The FAA's preliminary CY2025 table counts 10,430,353 revenue enplanements (boardings only, about half of total passengers), down 0.18 per cent, consistent with it.",
+   "sources": [
+    {
+     "file": "op-airport-info",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": "plays host to more than 21 million passengers (enplaned/deplaned) each year",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat2_header = Total passengers",
+      "stat2_data = 21,985,522"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "30 WP HI HNL Honolulu Daniel K Inouye International P L 10,430,353 10,449,022 -0.18%",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "non-stop flights across North America, Asia and Oceania",
+   "verdict": "confirmed",
+   "inAfter": "with non-stop flights across North America, Asia and Oceania",
+   "note": "The operator's live airline list includes carriers from Canada, Japan, Korea, the Philippines, Australia, New Zealand and Fiji alongside the US airlines, and Hawaiian describes its own network as reaching Asia, Oceania and North America.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Daniel K. Inouye Airport offers nonstop flights to many places in North America, Asia, and Oceania."
+    },
+    {
+     "file": "op-airlines",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": [
+      "Air Canada Lobby 4, Terminal 2",
+      "Japan Airlines Lobby 5, Terminal 2",
+      "Korean Air Lobby 4, Terminal 2",
+      "Qantas Lobby 4, Terminal 2",
+      "Air New Zealand Lobby 6, Terminal 2",
+      "Fiji Airways Lobby 4, Terminal 2"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "about-hawaiian",
+     "org": "Hawaiian Airlines (Alaska Air Group newsroom)",
+     "quote": "offering our guests a global network reaching across the Pacific, Asia, Oceania, North America and beyond",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "four runways shared with Joint Base Pearl Harbor-Hickam",
+   "verdict": "corrected",
+   "inAfter": "Its four runways are shared with the neighbouring Joint Base Pearl Harbor-Hickam.",
+   "note": "Was 'operated jointly with the adjacent Hickam Air Force Base', Wikipedia's wording. The operator and the FAA master record both name the joint base, Joint Base Pearl Harbor-Hickam, and the operator says the two share runways and taxiways. Harbor is kept in the US spelling because it is part of the base's proper name.",
+   "sources": [
+    {
+     "file": "op-airport-info",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": [
+      "HNL has four active runways",
+      "Joint Base Pearl Harbor Hickam (JBPHH) and HNL operate as a joint use facility and share runways and taxiways."
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "(JOINT BASE PEARL HARBOR-HICKAM)",
+     "dated": "2026-09 (current record, last inspected 06/27/2025)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport has four major runways, which it operates in conjunction with the adjacent Hickam Air Force Base."
+    }
+   ]
+  },
+  {
+   "claim": "Reef Runway completed in 1977, the world's first major runway built entirely offshore",
+   "verdict": "confirmed",
+   "inAfter": "The Reef Runway, completed in 1977, was the world's first major runway built entirely offshore.",
+   "note": "The state's aviation history site dates completion to October 1977. Historical fact, so the age of the sources does not matter.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "also known as the Reef Runway, was the world's first major runway constructed entirely offshore",
+      "Completed in 1977"
+     ]
+    },
+    {
+     "file": "hawaiiaviation-1970s",
+     "org": "Hawaii Department of Transportation (Hawaii Aviation history site)",
+     "quote": [
+      "The Reef Runway, built to alleviate the aircraft noise patterns over Honolulu and surrounding areas, was completed in October 1977.",
+      "The $89 million project was the world’s first major runway built entirely offshore."
+     ]
+    },
+    {
+     "file": "op-airport-info",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": "including the 12,000-foot Reef Runway which was the world’s first major runway built entirely offshore",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "two marked offshore waterways for seaplanes",
+   "verdict": "confirmed",
+   "inAfter": "Beyond the paved runways there are two marked offshore waterways for seaplanes.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "has two designated offshore waterways designated 8W/26W and 4W/22W for use by seaplanes"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "RYS 04W/22W AND 08W/26W RECREATIONAL BOATING ACTIVITIES ON AND INVOF WATERWAYS.",
+     "dated": "2026-09 (current record, last inspected 06/27/2025)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 04W/22W: 914 m (3,000 ft), WATER",
+      "Runway 08W/26W: 1,551 m (5,090 ft), WATER"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "three terminals",
+   "verdict": "confirmed",
+   "inAfter": "There are three terminals.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "in three terminals"
+    },
+    {
+     "file": "op-wikiwiki",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": "The Wiki Wiki Bus operates daily between Terminals 1, 2 and 3 and the Skyline Rail Station.",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Hawaiian checks in its inter-island flights at Terminal 1",
+   "verdict": "corrected",
+   "inAfter": "Hawaiian Airlines checks in its inter-island flights at Terminal 1",
+   "note": "Replaces the gate count (cut below) with the allocation a traveller needs. Stated for inter-island flights only, because that is what holds after 3 October 2026: Hawaiian's release of 18 September says inter-island check-in stays at Terminal 1, Lobby 3, while check-in for all its international departures moves to Terminal 2, Lobby 4 from 3 October (today its Japan flights already check in there). That move has only the airline's own pages behind it, so it is not in the text.",
+   "sources": [
+    {
+     "file": "op-faq",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": "If you are flying with Hawaiian Airlines to the neighbor islands, you will depart from Terminal 1.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "alaska-hnl-lobby",
+     "org": "Hawaiian Airlines (Alaska Air Group newsroom)",
+     "quote": [
+      "Neighbor Island flights will continue to check in and drop bags at Terminal 1, Lobby 3",
+      "Beginning Oct. 3, check-in and bag drop for all international departures will move from Terminal 1, Lobby 3 to the adjacent Terminal 2, Lobby 4."
+     ],
+     "dated": "2026-09-18"
+    },
+    {
+     "file": "op-airlines",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": "Hawaiian Airlines Lobby 2, 3, and 4 of Terminal 1",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "alaska-guide-hnl",
+     "org": "Alaska Airlines (own airport page, alaskaair.com)",
+     "quote": [
+      "Check-in for all Hawaiian Airlines flights (excluding Japan flights) is in Terminal 1.",
+      "Check-in for all Hawaiian Airlines Japan flights is in Terminal 2, Lobby 4."
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Mokulele Airlines uses the commuter Terminal 3",
+   "verdict": "confirmed",
+   "inAfter": "Mokulele Airlines uses the commuter Terminal 3",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": "Mokulele Airlines Terminal 3",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "mokulele-hnl",
+     "org": "Mokulele Airlines",
+     "quote": [
+      "Mokulele flies into the commuter terminal at Daniel K. Inouye International Airport",
+      "Airport Location : *Commuter Terminal 3- 3073 Aolele St."
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "the other airlines check in at Terminal 2",
+   "verdict": "confirmed",
+   "inAfter": "the other airlines check in at Terminal 2",
+   "note": "The operator's live list puts every other airline (16 of them, from Air Canada to WestJet) in a Terminal 2 lobby; Alaska's own guide confirms its lobby there, next to Japan Airlines.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": [
+      "Alaska Airlines Lobby 5, Terminal 2",
+      "American Airlines Lobby 7, Terminal 2",
+      "Delta Lobby 7, Terminal 2",
+      "Southwest Lobby 7, Terminal 2",
+      "United Airlines Lobby 8, Terminal 2",
+      "Westjet Lobby 6, Terminal 2"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "alaska-guide-hnl",
+     "org": "Alaska Airlines (own airport page, alaskaair.com)",
+     "quote": "Alaska: Lobby 5 (Located next to Japan Airlines) in Terminal 2",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Terminal 2 is the largest terminal at HNL and is the only terminal which can take international arrivals."
+    }
+   ]
+  },
+  {
+   "claim": "Terminals 1 and 2 connected after security",
+   "verdict": "confirmed",
+   "inAfter": "Terminals 1 and 2 are connected after security",
+   "note": "The operator does not use the words 'after security', but its shuttle page sends passengers who checked in at Terminal 1 to the C and G gates of Terminal 2 by the Wiki Wiki bus, trams or carts on the gate level, and Alaska's guide puts Hawaiian's gates in concourses A, B and C although Hawaiian checks in at Terminal 1.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Terminal 1 and Terminal 2 are connected post-security"
+    },
+    {
+     "file": "op-wikiwiki",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": "Passengers checking in at Terminal 1 for flights departing from Terminal 2 may catch either the Wiki Wiki bus, open-air electric trams or electric courtesy carts on the third level of Terminal 1 for a ride to the C Gates or G Gates.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "alaska-guide-hnl",
+     "org": "Alaska Airlines (own airport page, alaskaair.com)",
+     "quote": "Hawaiian gates are in councourses A, B, and C.",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "named after Daniel Inouye, Honolulu native, Medal of Honor, senator for Hawaii 1963 to his death in 2012",
+   "verdict": "confirmed",
+   "inAfter": "The airport is named after Daniel Inouye, a Honolulu native, Medal of Honor recipient and senator for Hawaii from 1963 until his death in 2012.",
+   "note": "The Senate's biography says he won election to the Senate in 1962 (so he took his seat in 1963) and served as president pro tempore until his death in 2012. The Congressional Biographical Directory answered with a Cloudflare check and was not used.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is named after Honolulu native and Medal of Honor recipient Daniel Inouye (1924–2012), who represented Hawaii in the United States Senate from 1963 until his death in 2012."
+    },
+    {
+     "file": "senate-inouye",
+     "org": "United States Senate",
+     "quote": [
+      "Daniel K. Inouye was born in Honolulu, Hawaii, on September 7, 1924",
+      "Inouye was awarded the Congressional Medal of Honor",
+      "In 1962 he won election to the U.S. Senate.",
+      "served as the Senate's president pro tempore from 2010 until his death in 2012"
+     ]
+    },
+    {
+     "file": "op-airport-info",
+     "org": "Hawaii Department of Transportation, Airports Division (operator)",
+     "quote": "formerly known as Honolulu International Airport",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "three miles from downtown",
+   "verdict": "cut",
+   "wasBefore": "three miles north west of downtown Honolulu",
+   "why": "Fails the coordinates check (4.4 miles in a straight line, ratio 0.68), and the FAA's '03 NW' is in nautical miles, so the two written sources do not give the same figure. The bearing is kept."
+  },
+  {
+   "claim": "the hub for Hawaiian Airlines",
+   "verdict": "cut",
+   "wasBefore": "and the hub for Hawaiian Airlines",
+   "why": "Softened to 'a hub': Hawaiian now calls Honolulu and Kahului its two largest Hawaii hubs."
+  },
+  {
+   "claim": "the site covers more than one per cent of Oahu",
+   "verdict": "cut",
+   "wasBefore": "The site is enormous, covering more than one per cent of the whole island of Oahu.",
+   "why": "The percentage rests on Wikipedia alone and the area itself is disputed: the operator says 4,790 acres of dry and submerged land, the FAA record and Wikipedia 4,220 acres. Replaced by the passenger figure as the measure of scale."
+  },
+  {
+   "claim": "runways genuinely unusual",
+   "verdict": "cut",
+   "wasBefore": "Its runways are genuinely unusual.",
+   "why": "A lead-in; the facts that follow carry the point."
+  },
+  {
+   "claim": "operated jointly with the adjacent Hickam Air Force Base",
+   "verdict": "cut",
+   "wasBefore": "operated jointly with the adjacent Hickam Air Force Base",
+   "why": "Old name: the operator and the FAA record name Joint Base Pearl Harbor-Hickam."
+  },
+  {
+   "claim": "the principal runway is 8R/26L",
+   "verdict": "cut",
+   "wasBefore": "the principal one, 8R/26L, is known as the Reef Runway",
+   "why": "'Principal' rests on Wikipedia alone, and 8L/26R is the longer runway (12,360 ft against 12,000 ft, OurAirports and the FAA record). The designation is of no use to an agent; the Reef Runway itself is kept."
+  },
+  {
+   "claim": "designated alternate landing site for the Space Shuttle",
+   "verdict": "cut",
+   "wasBefore": "and was a designated alternate landing site for the Space Shuttle",
+   "why": "Only Wikipedia. The state's aviation history pages for the 1970s and 1980s, the obvious second source, do not mention it."
+  },
+  {
+   "claim": "60 gates, 54 with jet bridges and six hard stands",
+   "verdict": "cut",
+   "wasBefore": "There are 60 gates across three terminals, 54 with jet bridges and six hard stands.",
+   "why": "The gate counts rest on Wikipedia alone; the operator's pages give no totals. Three terminals kept, with who uses which."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which is worth knowing for a connection",
+   "why": "Advice kept from the old text; the connection it rests on is sourced above."
+  }
+ ],
+ "tracerOk": {}
+}
