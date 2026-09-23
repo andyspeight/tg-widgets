@@ -1,0 +1,524 @@
+{
+ "iata": "TUL",
+ "id": "recTPkkFmNkvJtKqL",
+ "name": "Tulsa International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Tulsa_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Tulsa's airport, five miles north east of downtown, and a working industrial site as much as a passenger terminal. It is the global maintenance headquarters for American Airlines, and Spirit AeroSystems builds Boeing and Gulfstream parts here.\n\nFor passengers there are two concourses. Concourse A has eleven gates, seven in use, serving Alaska, Allegiant, American and Delta. Concourse B, rebuilt between 2010 and 2012, has eleven gates with eight in use, for Southwest and United. A 45,000 square foot customs facility allows direct international flights, starting with Mexico.\n\nThree runways cross the 4,360 acre site, the longest at 10,000 feet. The 138th Fighter Wing of the Oklahoma Air National Guard is based alongside.\n\nThe aviation industry here dates from the Second World War, when Douglas Aircraft built aircraft at Air Force Plant No. 3 on the south east side. Part of that building now assembles school buses.\n\nThe Tulsa Air and Space Museum is on the north west side of the airport. It was called Tulsa Municipal until 1963.",
+ "after": "Tulsa's airport, a few miles north east of downtown, and an aerospace industrial site as well as a passenger airport. American Airlines has had a major maintenance base here since 1946.\n\nFor passengers there are two concourses. Alaska, Allegiant, American and Delta use Concourse A. Southwest and United use Concourse B, which was renovated between 2010 and 2012. A 45,000 square foot customs facility opened in May 2026, and the first international flights, a seasonal Sun Country service to Cancún, began that month.\n\nThree runways serve the 4,360 acre site, the longest at 10,000 feet. The 138th Fighter Wing of the Oklahoma Air National Guard is based alongside.\n\nDuring the Second World War, Douglas Aircraft assembled bombers at Air Force Plant 3.\n\nThe Tulsa Air and Space Museum is at the airport, which was called Tulsa Municipal until 1963.",
+ "claims": [
+  {
+   "claim": "a few miles north east of downtown",
+   "verdict": "softened",
+   "inAfter": "a few miles north east of downtown",
+   "note": "Was 'five miles'. Wikipedia's five miles (8 km) fails the coordinates check: the straight line from the GeoNames centre is 10.7 km (6.6 miles), a ratio of 0.76. The FAA record gives 5 nautical miles (about 5.8 statute miles). 'A few miles' is what every source supports. The bearing (63 degrees, north east) passes. OurAirports has no home link for KTUL; flytulsa.com is the site in Wikipedia's infobox and every release on it is issued by the Tulsa Airports Improvement Trust.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is a civil-military airport five miles (8 km) northeast of Downtown Tulsa"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "3 CBD TO AIRPORT (NM):",
+      "05 NE"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 10.7 km (6.6 miles)",
+      "Bearing from the city centre: 63 degrees, which is north east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "an aerospace industrial site as well as a passenger airport",
+   "verdict": "confirmed",
+   "inAfter": "and an aerospace industrial site as well as a passenger airport",
+   "note": "Was 'a working industrial site as much as a passenger terminal'. The operator calls its land an aerospace campus and names its manufacturers and maintenance tenants; News On 6 reported another manufacturer arriving in July 2026.",
+   "sources": [
+    {
+     "file": "op-park",
+     "org": "Tulsa Airports Improvement Trust (operator, flytulsa.com, including its history linked there)",
+     "quote": [
+      "Park Aerospace joins a growing list of aerospace companies investing in Tulsa International Airport's aerospace campus.",
+      "Home to a diverse mix of aerospace manufacturers, maintenance providers, suppliers and aviation businesses"
+     ],
+     "dated": "2026-07-21"
+    },
+    {
+     "file": "newson6-park",
+     "org": "News On 6 (Griffin Media)",
+     "quote": [
+      "Tulsa International Airport is adding another major aerospace manufacturer",
+      "reinforces the airport's role as a growing hub for aviation manufacturing"
+     ],
+     "dated": "2026-07-21"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2008, Tulsa Airport Authority began a new industrial land development project."
+    }
+   ]
+  },
+  {
+   "claim": "American Airlines maintenance base here since 1946",
+   "verdict": "softened",
+   "inAfter": "American Airlines has had a major maintenance base here since 1946.",
+   "note": "Was 'the global maintenance headquarters for American Airlines'. Only Wikipedia calls it the headquarters. The operator's history and Wikipedia date the base to 1946, and the state's July 2026 study confirms it is still there and still large (5,000 staff), so 'major'. American's own pages could not confirm more: aa.com's group facts and history pages do not mention Tulsa, and news.aa.com shows a Cloudflare check (not retried).",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "Tulsa Airports Improvement Trust (operator, flytulsa.com, including its history linked there)",
+     "quote": [
+      "In 1946, American Airlines moved its maintenance, repair and overhaul (MRO) base from New York to Tulsa.",
+      "They located their operations in the two, southernmost hangars of the former Douglas Modification Center."
+     ]
+    },
+    {
+     "file": "okspace-brochure",
+     "org": "Oklahoma Department of Aerospace and Aeronautics (state study, published on infinityone.ok.gov)",
+     "quote": [
+      "PREPARED FOR THE OKLAHOMA DEPARTMENT OF AEROSPACE & AERONAUTICS",
+      "American Airlines' Tulsa Tech Ops: World's largest commercial aircraft maintenance base with 5,000 team members"
+     ],
+     "dated": "2026-07 (date in the page's URL)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "In 1946 American Airlines acquired two former Air Force hangars to start a maintenance and engineering base at Tulsa Municipal Airport.",
+      "The airport is also the global maintenance headquarters for American Airlines."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "two concourses",
+   "verdict": "confirmed",
+   "inAfter": "For passengers there are two concourses.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Concourse A, which houses Alaska, Allegiant, American and Delta, has 11 departure gates",
+      "Southwest and United use Concourse B."
+     ]
+    },
+    {
+     "file": "op-airlines",
+     "org": "Tulsa Airports Improvement Trust (operator, flytulsa.com, including its history linked there)",
+     "quote": [
+      "Gates: A5, A7, A9, A10",
+      "Gates: B6, B8, B9, B10"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Alaska, Allegiant, American and Delta use Concourse A",
+   "verdict": "confirmed",
+   "inAfter": "Alaska, Allegiant, American and Delta use Concourse A.",
+   "note": "The operator's live list puts all four at A gates. It also lists Sun Country at gate A2; its Tulsa flights were seasonal and ran to 9 August 2026 (operator), so it is named in the customs sentence instead.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Tulsa Airports Improvement Trust (operator, flytulsa.com, including its history linked there)",
+     "quote": [
+      "Alaska Airlines",
+      "Gates: A3",
+      "Allegiant Air",
+      "Gates: A10",
+      "American Airlines",
+      "Gates: A5, A7, A9, A10",
+      "Delta Air Lines",
+      "Gates: A3, A4, A6"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Concourse A, which houses Alaska, Allegiant, American and Delta, has 11 departure gates"
+    }
+   ]
+  },
+  {
+   "claim": "Southwest and United use Concourse B",
+   "verdict": "confirmed",
+   "inAfter": "Southwest and United use Concourse B",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Tulsa Airports Improvement Trust (operator, flytulsa.com, including its history linked there)",
+     "quote": [
+      "Southwest Airlines",
+      "Gates: B1, B3, B4, B5",
+      "United Airlines",
+      "Gates: B6, B8, B9, B10"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Southwest and United use Concourse B."
+    }
+   ]
+  },
+  {
+   "claim": "Concourse B renovated between 2010 and 2012",
+   "verdict": "softened",
+   "inAfter": "which was renovated between 2010 and 2012",
+   "note": "Was 'rebuilt'. Both sources describe a renovation: the operator says work began in late 2010 and the concourse reopened in May 2012; Wikipedia gives 7 September 2010 to 18 January 2012. The costs differ ($29.4 million against $17.9 million) and are not given.",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "Tulsa Airports Improvement Trust (operator, flytulsa.com, including its history linked there)",
+     "quote": [
+      "In late 2010, work began to update the airline gate areas, restrooms, and mechanical systems on Concourse B.",
+      "opening festivities in May 2012"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Concourse B (home to Southwest and United) underwent a $17.9 million renovation between September 7, 2010 and January 18, 2012"
+    }
+   ]
+  },
+  {
+   "claim": "45,000 square foot customs facility opened in May 2026",
+   "verdict": "corrected",
+   "inAfter": "A 45,000 square foot customs facility opened in May 2026",
+   "note": "Was 'allows direct international flights, starting with Mexico', with no date. The facility's ribbon was cut on 7 May 2026. It is formally the Federal Inspection Services (FIS) General Aviation Facility, but the operator says it adds commercial passenger processing to the general aviation and cargo clearance Customs already did here.",
+   "sources": [
+    {
+     "file": "op-customs",
+     "org": "Tulsa Airports Improvement Trust (operator, flytulsa.com, including its history linked there)",
+     "quote": [
+      "May 7, 2026",
+      "celebrated the ribbon cutting of its Federal Inspection Services (FIS) - General Aviation (GA) Facility today",
+      "The new 45,000-square-foot international customs facility will allow commercial air carriers to offer nonstop international flights directly from Tulsa for the first time."
+     ],
+     "dated": "2026-05-07"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In May 2026, a new $42 million, 45,000-square-foot Customs building"
+    }
+   ]
+  },
+  {
+   "claim": "first international flights: seasonal Sun Country service to Cancun, from May 2026",
+   "verdict": "corrected",
+   "inAfter": "and the first international flights, a seasonal Sun Country service to Cancún, began that month.",
+   "note": "Was 'starting with Mexico'. The first flight was on 21 May 2026, twice weekly. The operator says the season ran to 9 August 2026, so there are no international flights at the moment; whether Cancún returns next year is not yet announced on any page read.",
+   "sources": [
+    {
+     "file": "op-customs",
+     "org": "Tulsa Airports Improvement Trust (operator, flytulsa.com, including its history linked there)",
+     "quote": "The first international commercial flight will launch on May 21, with nonstop seasonal service from Tulsa to Cancun, Mexico, operating through August 9.",
+     "dated": "2026-05-07"
+    },
+    {
+     "file": "op-suncountry",
+     "org": "Tulsa Airports Improvement Trust (operator, flytulsa.com, including its history linked there)",
+     "quote": [
+      "May 21, 2026",
+      "Tulsa International Airport (TUL) and Sun Country Airlines today celebrated the launch of new twice-weekly seasonal service to Cancun (CUN) and Minneapolis (MSP).",
+      "The new Cancun route marks Tulsa International Airport's first-ever commercial international service",
+      "Offered on Thursdays & Sundays through August 9, 2026"
+     ],
+     "dated": "2026-05-21"
+    },
+    {
+     "file": "newson6-first-intl",
+     "org": "News On 6 (Griffin Media)",
+     "quote": [
+      "October 29, 2025",
+      "Tulsa International Airport announced direct flights to Cancun, Mexico begin May 21st, with Sun Country Airlines offering twice a week service.",
+      "The Cancun flight is first direct passenger flight announced that will utilize a new U.S. Customs facility at the airport",
+      "The new direct flight was announced as seasonal service"
+     ],
+     "dated": "2025-10-29"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Direct commercial international flights to Mexico started the same month."
+    }
+   ]
+  },
+  {
+   "claim": "three runways, 4,360 acres, longest 10,000 feet",
+   "verdict": "confirmed",
+   "inAfter": "Three runways serve the 4,360 acre site, the longest at 10,000 feet.",
+   "note": "'Cross' became 'serve': two of the three runways are parallel.",
+   "sources": [
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "22 ACREAGE:",
+      "4,360",
+      "08/26",
+      "18L/36R",
+      "18R/36L",
+      "10,000"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 18L/36R: 3,048 m (10,000 ft), CON",
+      "Runways listed: 3"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport covers 4,360 acres (1,764 ha) and has three paved runways"
+    }
+   ]
+  },
+  {
+   "claim": "138th Fighter Wing, Oklahoma Air National Guard, based alongside",
+   "verdict": "confirmed",
+   "inAfter": "The 138th Fighter Wing of the Oklahoma Air National Guard is based alongside.",
+   "note": "DVIDS dates the wing's activity at Tulsa Air National Guard Base to July 2026; Wikipedia places that base at the airport.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The 138th Fighter Wing of the Oklahoma Air National Guard is based at the co-located Tulsa Air National Guard Base."
+    },
+    {
+     "file": "dvids-138fw",
+     "org": "DVIDS (US Department of Defense)",
+     "quote": [
+      "Tulsa , OK, US",
+      "The 138th Fighter Wing conducts an active shooter exercise, July 16, 2026, at Tulsa Air National Guard Base, Okla.",
+      "The Oklahoma Air National Guard (OKANG) officially broke ground today for a new Airmen's Center."
+     ],
+     "dated": "2026-07-16 (date in the quoted caption)"
+    },
+    {
+     "file": "fw138",
+     "org": "138th Fighter Wing (US Air National Guard)",
+     "quote": [
+      "138th Fighter Wing",
+      "Oklahoma Air National Guard breaks ground on new Airmen's center"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Douglas Aircraft assembled bombers at Air Force Plant 3 in the Second World War",
+   "verdict": "confirmed",
+   "inAfter": "During the Second World War, Douglas Aircraft assembled bombers at Air Force Plant 3.",
+   "note": "Written 'Plant 3' rather than 'No. 3' because the gate's sentence splitter breaks after 'No.'; the operator writes 'Air Force Plant #3'. The side of the airport is cut (see below).",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "Tulsa Airports Improvement Trust (operator, flytulsa.com, including its history linked there)",
+     "quote": [
+      "Once the plant was opened and performing final assembly on B-24 bombers and A-24 dive-bombers",
+      "Douglas Aircraft Company operated both during the war."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The plant was operated by Douglas Aircraft Corporation to manufacture, assemble and modify bombers for the USAAF from 1942 to 1945"
+    }
+   ]
+  },
+  {
+   "claim": "Tulsa Air and Space Museum at the airport",
+   "verdict": "confirmed",
+   "inAfter": "The Tulsa Air and Space Museum is at the airport",
+   "note": "Open: the museum's own page lists Tuesday to Saturday hours. It says it is on the north side of the airport, Wikipedia the north west, so no side is given.",
+   "sources": [
+    {
+     "file": "tasm-about",
+     "org": "Tulsa Air and Space Museum (tulsamuseum.org)",
+     "quote": "In 2005, TASM moved into the Sherman and Ellie Smith Hanger One (its current location) on a 17.8 acre campus on the north side of the Tulsa International Airport.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "tasm-home",
+     "org": "Tulsa Air and Space Museum (tulsamuseum.org)",
+     "quote": [
+      "Opening Hours",
+      "Tuesday",
+      "10:00 am",
+      "3624 N 74th E Ave"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The Tulsa Air and Space Museum is on the northwest side of the airport."
+    }
+   ]
+  },
+  {
+   "claim": "called Tulsa Municipal until 1963",
+   "verdict": "confirmed",
+   "inAfter": "which was called Tulsa Municipal until 1963",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "Tulsa Airports Improvement Trust (operator, flytulsa.com, including its history linked there)",
+     "quote": [
+      "The new Tulsa Municipal Airport opened on July 3, 1928.",
+      "On August 28, 1963 it was renamed, Tulsa International Airport."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "It was named Tulsa Municipal Airport when the city acquired it in 1929; it received its present name in 1963.",
+      "on August 28, 1963, the facility was renamed Tulsa International Airport"
+     ]
+    }
+   ],
+   "note": "The operator's history is the PDF its About Us page links as 'View Full History' (op-about)."
+  },
+  {
+   "claim": "Spirit AeroSystems builds Boeing and Gulfstream parts here",
+   "verdict": "cut",
+   "wasBefore": "Spirit AeroSystems builds Boeing and Gulfstream parts here",
+   "why": "Out of date and not confirmable as written. Boeing completed its purchase of Spirit AeroSystems on 8 December 2025 and Spirit's Tulsa operations are joining Boeing; Spirit's own contact page now lists the site as 'Boeing Tulsa', 3330 N. Mingo Rd. Only Wikipedia places the plant at the airport, and nothing current mentions Gulfstream work.",
+   "sources": [
+    {
+     "file": "spirit-locations",
+     "org": "Spirit AeroSystems (a Boeing company)",
+     "quote": [
+      "As of December 8, 2025, Spirit AeroSystems, Inc. is wholly owned by The Boeing Company",
+      "Boeing Tulsa",
+      "3330 N. Mingo Rd."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "boeing-spirit",
+     "org": "Boeing",
+     "quote": [
+      "Dec. 8, 2025",
+      "Spirit AeroSystems' commercial and aftermarket operations in Wichita, Kansas ; Dallas, Texas ; and Tulsa, Oklahoma"
+     ],
+     "dated": "2025-12-08"
+    }
+   ]
+  },
+  {
+   "claim": "Concourse A: eleven gates, seven in use",
+   "verdict": "cut",
+   "wasBefore": "Concourse A has eleven gates, seven in use",
+   "why": "The total of eleven rests on Wikipedia alone, and 'seven in use' is out of date: the operator's live list shows eight A gates in use (A2 to A7, A9, A10). Counts are cut rather than replaced; the airlines are kept."
+  },
+  {
+   "claim": "Concourse B: eleven gates, eight in use",
+   "verdict": "cut",
+   "wasBefore": "has eleven gates with eight in use",
+   "why": "The total of eleven rests on Wikipedia alone. Eight B gates are in use on the operator's live list (B1, B3 to B6, B8 to B10), but a half-confirmed count is cut with the other."
+  },
+  {
+   "claim": "allows direct international flights, starting with Mexico",
+   "verdict": "cut",
+   "wasBefore": "allows direct international flights, starting with Mexico",
+   "why": "Replaced by what happened: the facility opened in May 2026 and Sun Country's seasonal Cancún flights began that month (see the customs claims)."
+  },
+  {
+   "claim": "the aviation industry here dates from the Second World War",
+   "verdict": "cut",
+   "wasBefore": "The aviation industry here dates from the Second World War",
+   "why": "Wrong. The operator's history and Wikipedia both put Spartan Aircraft's plant beside the new airport in 1928, well before the war. The wartime Douglas plant is kept as a fact in its own right.",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "Tulsa Airports Improvement Trust (operator, flytulsa.com, including its history linked there)",
+     "quote": [
+      "Skelly built a brand-new manufacturing plant on land just south of the new Tulsa Municipal Airport",
+      "1928 was a very good year for Tulsa aviation."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In January 1928 Skelly bought the Mid-Continent Aircraft Company of Tulsa and renamed it the Spartan Aircraft Company. It first built a two-seat biplane, the Spartan C3 at its facility near the new airport."
+    }
+   ]
+  },
+  {
+   "claim": "Air Force Plant No. 3 on the south east side",
+   "verdict": "cut",
+   "wasBefore": "on the south east side",
+   "why": "Wikipedia gives the plant both the south east side (introduction) and the east side (Second World War section); the operator's history gives no side."
+  },
+  {
+   "claim": "part of the plant now assembles school buses",
+   "verdict": "cut",
+   "wasBefore": "Part of that building now assembles school buses.",
+   "why": "Only Wikipedia puts IC Bus inside the old bomber plant. IC Bus's own October 2025 post confirms its Tulsa Bus Plant but does not say where it is.",
+   "sources": [
+    {
+     "file": "icbus-250k",
+     "org": "IC Bus",
+     "quote": "After 25 years in operation and 250,000 units (and counting) coming from the IC Bus, LLC (IC Bus) Tulsa Bus Plant"
+    }
+   ]
+  },
+  {
+   "claim": "museum on the north west side",
+   "verdict": "cut",
+   "wasBefore": "is on the north west side of the airport",
+   "why": "Sources disagree on the side: the museum says the north side, Wikipedia the north west. The museum is kept as 'at the airport'."
+  },
+  {
+   "claim": "about 3.2 million passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: verified with two sources, but a new fact that replaces nothing in the old text. TOTAL passengers, arriving plus departing: the operator's December 2025 report gives 3,190,090 for 2025 (down 1.8 per cent); the FAA's preliminary CY2025 table counts 1,597,865 enplanements (boardings only, about half), which is consistent. Was to read: 'It handled about 3.2 million passengers in 2025.'",
+   "sources": [
+    {
+     "file": "op-stats-2025",
+     "org": "Tulsa Airports Improvement Trust (operator, flytulsa.com, including its history linked there)",
+     "quote": [
+      "Calendar Year to Date 2025",
+      "Total Passengers 253,802 266,535 3,190,090 3,247,670"
+     ],
+     "dated": "2026-02 (date in the page's URL)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "84 SW OK TUL Tulsa Tulsa International P S 1,597,865 1,627,181 -1.80%",
+     "dated": "2026-07-08"
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "Second World War": "UK form of World War II, which is how Wikipedia gives it; the operator's history says WWII and 'during the war'."
+ }
+}

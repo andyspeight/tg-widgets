@@ -1,0 +1,445 @@
+{
+ "iata": "MSP",
+ "id": "reci3wL0JG3a3a2F7",
+ "name": "Minneapolis–Saint Paul International Airport / Wold–Chamberlain Field",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Minneapolis–Saint_Paul_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The main gateway to the Twin Cities sits on 2,930 acres of land that belongs to no city at all, an unorganized territory wedged against the boundaries of Minneapolis and Richfield. Despite that oddity, it is about as central as an airport gets, within 10 miles of both downtown Minneapolis and downtown Saint Paul, which makes the transfer into either city short by American standards.\n\nMost passengers arriving here are flying Delta or one of its regional partners, which between them account for roughly 65% of traffic. It is one of Delta's major hubs, so connections are plentiful and the terminals are busy with people changing planes rather than ending their journey. Sun Country and Endeavor Air, both Minnesota outfits, also call it home.\n\nThere is a military side too. The airport shares its runways with an Air Reserve Station supporting Air Force Reserve Command and Air National Guard operations, including the 934th Airlift Wing, so the occasional military aircraft is part of the scenery. Cargo operators use it heavily as well. The Metropolitan Airports Commission runs the whole thing, along with six smaller regional airfields.",
+ "after": "The main airport for the Twin Cities sits on 2,930 acres that belong to no city at all, though it borders Minneapolis and Richfield. It is about seven miles south of downtown Minneapolis.\n\nMost passengers here fly Delta or one of its regional partners, and MSP is one of Delta's major hubs. Sun Country and Endeavor Air also call it home.\n\nThere is a military side too. The airport shares its runways with an Air Reserve Station, home to the 934th Airlift Wing. Cargo airlines use it as well. The Metropolitan Airports Commission runs the airport, along with six smaller airfields in the region.",
+ "claims": [
+  {
+   "claim": "the main airport for the Twin Cities",
+   "verdict": "confirmed",
+   "inAfter": "The main airport for the Twin Cities",
+   "note": "Was 'The main gateway to the Twin Cities': 'gateway to' is a banned phrase. The other airports the operator runs are general aviation fields (see the last claim); the FAA's table puts MSP 17th in the US with 17.5 million boardings in 2025. mspairport.com is OurAirports' home link for KMSP.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is a joint civil-military public international airport serving the Twin Cities in the U.S. state of Minnesota."
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "17 GL MN MSP Minneapolis",
+      "International/Wold-Chamberlain P L 17,488,261 18,054,481 -3.14%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "mac-ar-2025",
+     "org": "Metropolitan Airports Commission (operator, mspairport.com and metroairports.org)",
+     "quote": "The MAC's general aviation airports saw nearly 385,000 operations in 2025",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "2,930 acres",
+   "verdict": "confirmed",
+   "inAfter": "sits on 2,930 acres",
+   "sources": [
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "22 ACREAGE:",
+      "2,930"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "MSP covers 2,930 acres (1,186 ha) of land."
+    }
+   ]
+  },
+  {
+   "claim": "belongs to no city, borders Minneapolis and Richfield",
+   "verdict": "softened",
+   "inAfter": "that belong to no city at all, though it borders Minneapolis and Richfield",
+   "note": "Was 'an unorganized territory wedged against the boundaries of Minneapolis and Richfield'. That the land is in no city is in both sources; the name 'unorganized territory' is Wikipedia's alone (cut below). The operator lists St. Paul, Bloomington, Eagan and Mendota Heights around it too.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Metropolitan Airports Commission (operator, mspairport.com and metroairports.org)",
+     "quote": "MSP is not part of any city but is nestled among several. The airport is surrounded by Minneapolis, St. Paul and the suburban cities of Bloomington, Eagan, Mendota Heights and Richfield.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is located in Fort Snelling Unorganized Territory and sections of the airport border the city limits of Minneapolis and Richfield; however, the airport property is not part of any city or school district."
+    }
+   ]
+  },
+  {
+   "claim": "about seven miles south of downtown Minneapolis",
+   "verdict": "corrected",
+   "inAfter": "It is about seven miles south of downtown Minneapolis.",
+   "note": "Was 'within 10 miles of both downtown Minneapolis and downtown Saint Paul'. For Minneapolis the FAA record gives 6 nautical miles south (about 6.9 statute miles) and the coordinates 7.2 miles at 163 degrees, south; Wikipedia's 'within 10 miles' agrees. No second source gives the distance to Saint Paul (cut below).",
+   "sources": [
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "MINNEAPOLIS",
+      "3 CBD TO AIRPORT (NM):",
+      "06 S"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 11.6 km (7.2 miles)",
+      "Bearing from the city centre: 163 degrees, which is south"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the airport is centrally located within 10 miles (16 kilometers; 9 nautical miles) of both downtown Minneapolis and downtown Saint Paul"
+    }
+   ]
+  },
+  {
+   "claim": "most passengers fly Delta or its regional partners",
+   "verdict": "softened",
+   "inAfter": "Most passengers here fly Delta or one of its regional partners",
+   "note": "Was 'roughly 65% of traffic' (Wikipedia). The operator's 2025 Annual Report gives Delta a 70 per cent passenger market share. The two figures differ and the newer one has only the operator behind it, so the text says 'most', which both support.",
+   "sources": [
+    {
+     "file": "mac-ar-2025-pdf",
+     "org": "Metropolitan Airports Commission (operator, mspairport.com and metroairports.org)",
+     "quote": "Delta, which operates its second-largest hub at MSP and maintains a 70% passenger market share",
+     "dated": "2026-03 (date in the page's URL; report for 2025)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Delta Air Lines and its regional affiliates account for about 65% of the airport's passenger traffic."
+    }
+   ]
+  },
+  {
+   "claim": "one of Delta's major hubs",
+   "verdict": "confirmed",
+   "inAfter": "and MSP is one of Delta's major hubs.",
+   "note": "The operator calls it Delta's second-largest hub.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Metropolitan Airports Commission (operator, mspairport.com and metroairports.org)",
+     "quote": "It's also a base for hometown carrier Sun Country Airlines and Delta Air Lines' second largest hub.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "mac-ar-2025-pdf",
+     "org": "Metropolitan Airports Commission (operator, mspairport.com and metroairports.org)",
+     "quote": "Delta, which operates its second-largest hub at MSP",
+     "dated": "2026-03 (date in the page's URL; report for 2025)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "MSP is a major hub for Delta Air Lines."
+    }
+   ]
+  },
+  {
+   "claim": "Sun Country and Endeavor Air call it home",
+   "verdict": "confirmed",
+   "inAfter": "Sun Country and Endeavor Air also call it home.",
+   "note": "The operator calls Sun Country its hometown carrier and its second-largest; Endeavor, Delta's regional subsidiary, has its headquarters in Minneapolis (55450, the airport's ZIP code on the operator's Terminal 2 address) and a hub here. 'Both Minnesota outfits' is cut (below).",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Metropolitan Airports Commission (operator, mspairport.com and metroairports.org)",
+     "quote": "It's also a base for hometown carrier Sun Country Airlines",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "mac-ar-2025-pdf",
+     "org": "Metropolitan Airports Commission (operator, mspairport.com and metroairports.org)",
+     "quote": "Sun Country - MSP's second-largest carrier",
+     "dated": "2026-03 (date in the page's URL; report for 2025)"
+    },
+    {
+     "file": "endeavor",
+     "org": "Endeavor Air (Delta Air Lines subsidiary)",
+     "quote": [
+      "Headquartered in Minneapolis, Minn., Endeavor has hub operations in Atlanta, Cincinnati, Detroit, Minneapolis, New York, and Raleigh-Durham",
+      "7500 Airline Drive",
+      "Minneapolis, MN 55450"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It also serves as the home airport for Minnesota-based Sun Country Airlines and Endeavor Air, a Delta subsidiary."
+    }
+   ]
+  },
+  {
+   "claim": "shares its runways with an Air Reserve Station, home to the 934th Airlift Wing",
+   "verdict": "confirmed",
+   "inAfter": "The airport shares its runways with an Air Reserve Station, home to the 934th Airlift Wing.",
+   "note": "The FAA record for the airport carries the 934th's operating hours, so the wing flies from the same airfield. 'Supporting Air Force Reserve Command and Air National Guard operations' is cut: the Guard's part rests on Wikipedia alone here.",
+   "sources": [
+    {
+     "file": "dvids-934aw",
+     "org": "DVIDS (US Department of Defense)",
+     "quote": [
+      "934th Airlift Wing",
+      "Minneapolis, MN, US",
+      "The 934th Airlift Wing, Security Forces Squadron, participated in weapons qualification on Feb. 7, 2026 at Minneapolis-St. Paul Air Reserve Station, Minneapolis, Minn."
+     ],
+     "dated": "2026-02-07 (date in the quoted caption)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "MILITARY: ARFC 934 AW OPS",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "MSP is home to the Minneapolis-Saint Paul International Airport Joint Air Reserve Station, supporting both Air Force Reserve Command and Air National Guard flight operations. Units stationed there include the 934th Airlift Wing (934 AW)."
+    }
+   ]
+  },
+  {
+   "claim": "cargo airlines use it",
+   "verdict": "softened",
+   "inAfter": "Cargo airlines use it as well.",
+   "note": "Was 'use it heavily'. The FAA's 2025 all-cargo table ranks MSP 40th in the US by landed weight, which does not support 'heavily'. The operator notes Sun Country's cargo flying for Amazon.",
+   "sources": [
+    {
+     "file": "faa-cy2025-cargo",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary Calendar Year 2025 All-Cargo Landed Weight",
+      "40 GL DMA MN MSP Minneapolis-St Paul"
+     ],
+     "dated": "2026-07-09"
+    },
+    {
+     "file": "mac-ar-2025-pdf",
+     "org": "Metropolitan Airports Commission (operator, mspairport.com and metroairports.org)",
+     "quote": "in passenger volumes in 2025 while it increased cargo operations for Amazon.",
+     "dated": "2026-03 (date in the page's URL; report for 2025)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is also used by a variety of air cargo operators."
+    }
+   ]
+  },
+  {
+   "claim": "run by the Metropolitan Airports Commission, with six smaller airfields",
+   "verdict": "confirmed",
+   "inAfter": "The Metropolitan Airports Commission runs the airport, along with six smaller airfields in the region.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Metropolitan Airports Commission (operator, mspairport.com and metroairports.org)",
+     "quote": "The airport is managed and run by the Metropolitan Airports Commission (MAC)",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "mac-ar-2025-pdf",
+     "org": "Metropolitan Airports Commission (operator, mspairport.com and metroairports.org)",
+     "quote": "all six of the MAC's general aviation airports",
+     "dated": "2026-03 (date in the page's URL; report for 2025)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "METRO ARPT CMSN",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is operated by the Metropolitan Airports Commission, which also handles the operation of six smaller airports in the region."
+    }
+   ]
+  },
+  {
+   "claim": "main gateway",
+   "verdict": "cut",
+   "wasBefore": "The main gateway to the Twin Cities",
+   "why": "House style: 'gateway to' is banned. Reworded as 'the main airport for the Twin Cities' (above)."
+  },
+  {
+   "claim": "an unorganized territory",
+   "verdict": "cut",
+   "wasBefore": "an unorganized territory wedged against the boundaries of Minneapolis and Richfield",
+   "why": "'Unorganized territory' is Wikipedia's alone; the operator says only that the airport is in no city. The borders with Minneapolis and Richfield are kept."
+  },
+  {
+   "claim": "about as central as an airport gets; within 10 miles of downtown Saint Paul; short transfer",
+   "verdict": "cut",
+   "wasBefore": "Despite that oddity, it is about as central as an airport gets, within 10 miles of both downtown Minneapolis and downtown Saint Paul, which makes the transfer into either city short by American standards.",
+   "why": "The Saint Paul distance rests on Wikipedia alone, and 'as central as an airport gets' and 'short by American standards' are unsourced judgements. The Minneapolis distance is kept, made specific (about seven miles)."
+  },
+  {
+   "claim": "roughly 65% of traffic",
+   "verdict": "cut",
+   "wasBefore": "which between them account for roughly 65% of traffic",
+   "why": "The sources differ: Wikipedia 65 per cent, the operator's 2025 Annual Report 70 per cent; BTS's carrier-share page could not be reached (404). Softened to 'most' (above)."
+  },
+  {
+   "claim": "terminals busy with people changing planes rather than ending their journey",
+   "verdict": "cut",
+   "wasBefore": "so connections are plentiful and the terminals are busy with people changing planes rather than ending their journey",
+   "why": "Contradicted by the operator: 69 per cent of MSP's passengers start or end their journey there and 31 per cent are connecting.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Metropolitan Airports Commission (operator, mspairport.com and metroairports.org)",
+     "quote": [
+      "Originating passengers: 69%",
+      "Connecting passengers: 31%"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "both Minnesota outfits",
+   "verdict": "cut",
+   "wasBefore": "both Minnesota outfits",
+   "why": "Out of date for Sun Country: its own boilerplate (in a Tulsa airport release of 21 May 2026) says it is now a wholly owned subsidiary of Allegiant Air. It is still based at MSP (the operator). Endeavor is Delta's subsidiary, headquartered in Minneapolis.",
+   "sources": [
+    {
+     "file": "tul-suncountry-release",
+     "org": "Sun Country Airlines boilerplate, in a Tulsa International Airport release",
+     "quote": [
+      "May 21, 2026",
+      "About Sun Country Airlines: Sun Country Airlines is a wholly owned subsidiary of Allegiant Air."
+     ],
+     "dated": "2026-05-21"
+    }
+   ]
+  },
+  {
+   "claim": "supporting AFRC and ANG operations; occasional military aircraft part of the scenery",
+   "verdict": "cut",
+   "wasBefore": "supporting Air Force Reserve Command and Air National Guard operations, including the 934th Airlift Wing, so the occasional military aircraft is part of the scenery",
+   "why": "Reworded to what two current sources confirm: the Air Reserve Station and the 934th Airlift Wing. The Air National Guard's 133rd Airlift Wing rests on Wikipedia alone here (its DVIDS page address did not resolve), and 'part of the scenery' is framing."
+  },
+  {
+   "claim": "cargo operators use it heavily",
+   "verdict": "cut",
+   "wasBefore": "Cargo operators use it heavily as well.",
+   "why": "'Heavily' is not supported: 40th in the US for all-cargo landed weight in 2025 (FAA). Softened (above)."
+  },
+  {
+   "claim": "runs the whole thing, along with six smaller regional airfields",
+   "verdict": "cut",
+   "wasBefore": "runs the whole thing, along with six smaller regional airfields",
+   "why": "Reworded only ('runs the airport, along with six smaller airfields in the region'); confirmed above."
+  },
+  {
+   "claim": "two terminals not connected airside",
+   "verdict": "cut",
+   "why": "Held back: verified with two sources, but a new fact that replaces nothing in the old text. The two terminals are about a mile apart, off separate roadways, with no walkway between them: passengers change terminals on the free light rail. Worth adding for agents if Andy agrees: it is the thing most likely to catch a traveller out. Was to read: 'There are two terminals, off separate roads and not connected on foot: check which one your airline uses, and allow for the free light rail between them.'",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Metropolitan Airports Commission (operator, mspairport.com and metroairports.org)",
+     "quote": "MSP has one airfield with four runways and two terminal buildings - Terminal 1 and Terminal 2 - each with adjoining parking ramp facilities. Travelers who need to transfer from one terminal to the other use the light rail transit service. There is no pedestrian access between the buildings.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-faqs",
+     "org": "Metropolitan Airports Commission (operator, mspairport.com and metroairports.org)",
+     "quote": "Because the terminals are located off separate roadways, it is best to know which terminal your airline flies from before arriving at the airport.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-airlines",
+     "org": "Metropolitan Airports Commission (operator, mspairport.com and metroairports.org)",
+     "quote": [
+      "Fifteen commercial passenger airlines service MSP; Eleven are located at Terminal 1 and four are located at Terminal 2.",
+      "People needing to travel between MSP's terminals can do so via free Light Rail Transit (LRT) service."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The two terminals are located about one mile (1.6 km) apart",
+      "the terminals are not connected within the airport facilities"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "36.1 million passengers in 2025, down about 3 per cent",
+   "verdict": "cut",
+   "why": "Held back: verified with two sources, but a new fact that replaces nothing in the old text. TOTAL passengers: the operator gives 36,071,627 for 2025, down roughly 3 per cent, with a record 3.61 million international passengers; Wikipedia's infobox has the same total. The FAA's preliminary CY2025 table counts 17,488,261 enplanements (boardings only, about half). Was to read: 'It handled about 36.1 million passengers in 2025.'",
+   "sources": [
+    {
+     "file": "mac-ar-2025",
+     "org": "Metropolitan Airports Commission (operator, mspairport.com and metroairports.org)",
+     "quote": "After four years of steady growth, total passengers at MSP declined by roughly 3% to 36.1 million in 2025.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-about",
+     "org": "Metropolitan Airports Commission (operator, mspairport.com and metroairports.org)",
+     "quote": [
+      "MSP served more than 36 million travelers in 2025",
+      "2025 36,071,627"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat1_data = 36,071,627",
+      "stat_year = 2025"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "International/Wold-Chamberlain P L 17,488,261 18,054,481 -3.14%",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2 North Expansion due early 2027",
+   "verdict": "cut",
+   "why": "Held back: a new fact (current works) that replaces nothing, and it rests on the operator alone. The MAC's 2025 Annual Report says the $263 million Terminal 2 North Expansion is expected to be complete by early 2027; the MAC and Delta finished a two-year renovation of Terminal 1's post-security areas in late 2025.",
+   "sources": [
+    {
+     "file": "mac-ar-2025-pdf",
+     "org": "Metropolitan Airports Commission (operator, mspairport.com and metroairports.org)",
+     "quote": "spaces within the $263 million Terminal 2 North Expansion, expected to be complete by early 2027.",
+     "dated": "2026-03 (date in the page's URL; report for 2025)"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "There is a military side too.",
+   "why": "The old text's framing for the sourced sentence that follows (the Air Reserve Station)."
+  }
+ ],
+ "tracerOk": {}
+}

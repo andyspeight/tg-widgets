@@ -1,0 +1,378 @@
+{
+ "iata": "BHM",
+ "id": "recfexxHOzvx5b6QW",
+ "name": "Birmingham-Shuttlesworth International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Birmingham%E2%80%93Shuttlesworth_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Alabama's busiest airport sits five miles northeast of downtown Birmingham, close to where Interstates 20 and 59 meet, which makes the drive into the city short and simple. It handled just over 3.2 million passengers in 2024, serving both the Birmingham and Tuscaloosa metropolitan areas, so most people passing through are domestic travellers connecting to the rest of the US rather than arriving from abroad.\n\nThe name honours Reverend Fred Shuttlesworth, founding president of the Alabama Christian Movement for Human Rights and one of the leaders of the Birmingham campaign during the civil rights era. The airport took his name in July 2008.\n\nIt is a civil-military field with two runways, the main one running 12,007 feet, and a Category II instrument landing system that keeps traffic moving in poor visibility. There is a staffed US Customs and Border Protection facility on site, though scheduled international services stopped in March 2020 and the international traffic now comes mainly from corporate aircraft and the AirMed International air ambulance operation.\n\nThe Southern Museum of Flight sits on Airport Authority land to the east, with plans in place to move it near Barber Motorsports Park.",
+ "after": "Alabama's busiest airport sits about five miles north east of downtown Birmingham, just off Interstate 20/59, which makes the drive into the city short and simple. It handled just under 3.3 million passengers in 2025.\n\nRenamed in July 2008, it honours Reverend Fred Shuttlesworth, founding president of the Alabama Christian Movement for Human Rights and one of the leaders of the Birmingham campaign during the civil rights era.\n\nIt is a civil-military field with two runways, the main one running 12,007 feet, and Category II instrument landing systems for poor visibility. There is a staffed US Customs and Border Protection facility on site, but no scheduled international flights: every nonstop route is to a US city. The air ambulance operator AirMed International flies worldwide from its base here.",
+ "claims": [
+  {
+   "claim": "Alabama's busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "Alabama's busiest airport",
+   "note": "FAA boardings for 2025: Birmingham 1,615,940, Huntsville 843,482, Mobile and Montgomery further back. flybirmingham.com is OurAirports' home link for KBHM and the site in Wikipedia's infobox.",
+   "sources": [
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "83 SO AL BHM Birmingham",
+      "International P S 1,615,940 1,596,510 1.22%",
+      "110 SO AL HSV Huntsville",
+      "Jones Field P S 843,482 804,665 4.82%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "op-95th",
+     "org": "Birmingham Airport Authority (operator, flybirmingham.com)",
+     "quote": "Alabama's largest commercial airport",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "BHM served 3,243,023 passengers in 2024, and is the largest and busiest airport in the state of Alabama by passenger volume."
+    }
+   ]
+  },
+  {
+   "claim": "about five miles north east of downtown",
+   "verdict": "softened",
+   "inAfter": "sits about five miles north east of downtown Birmingham",
+   "note": "Was 'five miles'. Wikipedia says five miles, the FAA record 4 nautical miles (about 4.6 statute miles); the straight line from the GeoNames centre is 4.2 miles at 46 degrees, north east, so five passes the coordinates check (ratio 1.19). 'About' covers the spread.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is located in Jefferson County, five miles northeast of Downtown Birmingham, near the interchange of Interstates 20 and 59."
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "BIRMINGHAM-SHUTTLESWORTH INTL",
+      "3 CBD TO AIRPORT (NM):",
+      "04 NE"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 6.7 km (4.2 miles)",
+      "Bearing from the city centre: 46 degrees, which is north east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "just off Interstate 20/59",
+   "verdict": "softened",
+   "inAfter": "just off Interstate 20/59, which makes the drive into the city short and simple",
+   "note": "Was 'close to where Interstates 20 and 59 meet'. The operator's directions send drivers from downtown along I-59/20 to exit 129; Wikipedia puts the airport near the I-20 and I-59 interchange. 'Short and simple' is the old text's judgement, following from the distance and the one motorway exit.",
+   "sources": [
+    {
+     "file": "op-directions",
+     "org": "Birmingham Airport Authority (operator, flybirmingham.com)",
+     "quote": [
+      "From Downtown Take I-59/20 East",
+      "Exit 129 toward Airport Blvd."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "near the interchange of Interstates 20 and 59."
+    }
+   ]
+  },
+  {
+   "claim": "just under 3.3 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled just under 3.3 million passengers in 2025.",
+   "note": "Was 'just over 3.2 million in 2024' (3,243,023). TOTAL passengers: the operator's table gives 3,283,164 for 2025, up 1 per cent; Wikipedia's infobox has the same figure. The FAA's preliminary CY2025 table counts 1,615,940 enplanements (boardings only, about half), which is consistent.",
+   "sources": [
+    {
+     "file": "op-stats",
+     "org": "Birmingham Airport Authority (operator, flybirmingham.com)",
+     "quote": [
+      "In 2025, BHM welcomed over 3 million passengers.",
+      "Total 3,283,164 1%"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat2_data = 3,283,164"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "International P S 1,615,940 1,596,510 1.22%",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "renamed in July 2008 after Reverend Fred Shuttlesworth",
+   "verdict": "confirmed",
+   "inAfter": "Renamed in July 2008, it honours Reverend Fred Shuttlesworth",
+   "note": "The Airport Authority board approved the name on 16 July 2008 (operator; Wikipedia adds that the FAA approved it and signs went up in April 2009).",
+   "sources": [
+    {
+     "file": "op-95th",
+     "org": "Birmingham Airport Authority (operator, flybirmingham.com)",
+     "quote": [
+      "July 16, 2008 - The New Birmingham-Shuttlesworth International Airport",
+      "In the summer of 2008, the Birmingham Airport Authority Board of Directors approved renaming the airport to The Birmingham-Shuttlesworth International Airport, in order to honor the legacy of civil rights activist and Birmingham legend Rev. Fred L. Shuttlesworth"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport was renamed in July 2008 after Reverend Fred Shuttlesworth"
+    }
+   ]
+  },
+  {
+   "claim": "founding president of the ACMHR and a leader of the Birmingham campaign",
+   "verdict": "confirmed",
+   "inAfter": "founding president of the Alabama Christian Movement for Human Rights and one of the leaders of the Birmingham campaign during the civil rights era",
+   "note": "The King Institute: a founding member, declared the ACMHR's president at its first mass meeting (1956), and the man who drew King and the SCLC to Birmingham in 1963.",
+   "sources": [
+    {
+     "file": "king-shuttlesworth",
+     "org": "Martin Luther King, Jr. Research and Education Institute (Stanford University)",
+     "quote": [
+      "One of the founding members of the Alabama Christian Movement for Human Rights (ACMHR)",
+      "Shuttlesworth led a mass meeting at Sardis Church the next evening, and was declared president by acclamation, a post he held until 1969.",
+      "In 1963 he drew Martin Luther King and SCLC to Birmingham for a historic confrontation with the forces of segregation."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "founding president of the Alabama Christian Movement for Human Rights and a leader of the Birmingham campaign during the civil rights movement."
+    }
+   ]
+  },
+  {
+   "claim": "civil-military field",
+   "verdict": "confirmed",
+   "inAfter": "It is a civil-military field",
+   "note": "The Alabama Air National Guard's 117th Air Refueling Wing is at Sumpter Smith Air National Guard Base on the airport (DVIDS, August 2026; Wikipedia).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "is a civil-military airport serving Birmingham, Alabama.",
+      "Sumpter Smith Air National Guard Base is located at the airport."
+     ]
+    },
+    {
+     "file": "dvids-117arw",
+     "org": "DVIDS (US Department of Defense)",
+     "quote": [
+      "117th Air Refueling Wing",
+      "Birmingham, AL, US",
+      "Airmen assigned to the 117th Air Refueling Wing inspect a component of the VIPER fuel kit during hands-on familiarization training at Sumpter",
+      "08.02.2026"
+     ],
+     "dated": "2026-08-02 (date in the quoted caption)"
+    },
+    {
+     "file": "op-ga",
+     "org": "Birmingham Airport Authority (operator, flybirmingham.com)",
+     "quote": "BHM accommodates most modern air carriers, cargo, general aviation and military aircraft.",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "two runways, the main one 12,007 feet",
+   "verdict": "confirmed",
+   "inAfter": "with two runways, the main one running 12,007 feet",
+   "sources": [
+    {
+     "file": "op-ga",
+     "org": "Birmingham Airport Authority (operator, flybirmingham.com)",
+     "quote": [
+      "BHM is equipped with two runways, Runway 6/24, RDC D-V and Runway 18/36, RDC D-IV.",
+      "12,007 feet in length"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 06/24: 3,660 m (12,007 ft), ASP",
+      "Runways listed: 2"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "It has two asphalt runways",
+      "The main runway is 12,007 feet (3,660 m) long."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Category II instrument landing systems",
+   "verdict": "confirmed",
+   "inAfter": "and Category II instrument landing systems for poor visibility",
+   "note": "'A Category II instrument landing system' became plural: the operator lists a Category II ILS at each end of the main runway (6 and 24).",
+   "sources": [
+    {
+     "file": "op-ga",
+     "org": "Birmingham Airport Authority (operator, flybirmingham.com)",
+     "quote": [
+      "Category II ILS, precision approach",
+      "Category II SP ILS, precision approach"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "A Category II ILS allows operations in visibility as low as a quarter-mile."
+    }
+   ]
+  },
+  {
+   "claim": "staffed CBP facility on site",
+   "verdict": "confirmed",
+   "inAfter": "There is a staffed US Customs and Border Protection facility on site",
+   "sources": [
+    {
+     "file": "op-ga",
+     "org": "Birmingham Airport Authority (operator, flybirmingham.com)",
+     "quote": [
+      "Birmingham-Shuttlesworth International Airport has full international passenger and cargo facilities with U.S. Customs in the Federal Inspection Station.",
+      "U.S. Customs and Border Protection",
+      "Port Director : Steve Robinson",
+      "Location Address : Concourse A/FIS"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "has a staffed U.S. Customs and Border Protection facility on site."
+    }
+   ]
+  },
+  {
+   "claim": "no scheduled international flights; every nonstop is domestic",
+   "verdict": "corrected",
+   "inAfter": "but no scheduled international flights: every nonstop route is to a US city.",
+   "note": "Was 'scheduled international services stopped in March 2020', a misreading: Wikipedia says only that as of March 2020 there were none. The operator's current list is 22 nonstop destinations 'across the country'.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Birmingham Airport Authority (operator, flybirmingham.com)",
+     "quote": [
+      "The airlines at BHM connect travelers nonstop to 22 airport destinations across the country.",
+      "BHM is home to: American Airlines, Delta Air Lines, Southwest Airlines, United Airlines, and Breeze Airways-with service starting in July, 2026."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "but as of March 2020, there are no scheduled international flights."
+    }
+   ]
+  },
+  {
+   "claim": "AirMed International flies worldwide from its base here",
+   "verdict": "softened",
+   "inAfter": "The air ambulance operator AirMed International flies worldwide from its base here.",
+   "note": "Was 'the international traffic now comes mainly from corporate aircraft and the AirMed International air ambulance operation'. No source measures what 'mainly' makes up the international traffic, and the operator says Kuehne+Nagel flew weekly international cargo flights from Stuttgart until spring 2026. AirMed's own page confirms its Birmingham base and worldwide flying; Wikipedia places the hub at the airport.",
+   "sources": [
+    {
+     "file": "airmed-bases",
+     "org": "AirMed International",
+     "quote": [
+      "Our bases include:",
+      "Birmingham, Alabama",
+      "From our Birmingham base, AirMed provides worldwide service to our customers utilizing three Raytheon Hawker 800 air ambulance aircraft."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "AirMed International, a fixed-wing air ambulance company, operates its main hub from here.",
+      "However, air ambulance operator AirMed International regularly operates to and from destinations throughout the world"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "serving the Birmingham and Tuscaloosa metropolitan areas",
+   "verdict": "cut",
+   "wasBefore": "serving both the Birmingham and Tuscaloosa metropolitan areas",
+   "why": "Wikipedia alone; the operator's pages give driving directions from Tuscaloosa but never name its service area."
+  },
+  {
+   "claim": "most people passing through are domestic travellers",
+   "verdict": "cut",
+   "wasBefore": "so most people passing through are domestic travellers connecting to the rest of the US rather than arriving from abroad",
+   "why": "An inference with no source; replaced by the sourced fact that every nonstop route is domestic."
+  },
+  {
+   "claim": "close to where Interstates 20 and 59 meet",
+   "verdict": "cut",
+   "wasBefore": "close to where Interstates 20 and 59 meet",
+   "why": "Reworded to the operator's own directions (I-59/20, exit 129); see the claim above."
+  },
+  {
+   "claim": "just over 3.2 million passengers in 2024",
+   "verdict": "cut",
+   "wasBefore": "It handled just over 3.2 million passengers in 2024",
+   "why": "A year out of date; replaced by 2025 (see above)."
+  },
+  {
+   "claim": "airport took his name in July 2008",
+   "verdict": "cut",
+   "wasBefore": "The airport took his name in July 2008.",
+   "why": "Merged into the naming sentence, unchanged in substance, to avoid two sentences in a row starting 'The'."
+  },
+  {
+   "claim": "a Category II instrument landing system that keeps traffic moving",
+   "verdict": "cut",
+   "wasBefore": "a Category II instrument landing system that keeps traffic moving in poor visibility",
+   "why": "Reworded: there are two (see above)."
+  },
+  {
+   "claim": "scheduled international services stopped in March 2020; international traffic mainly corporate and AirMed",
+   "verdict": "cut",
+   "wasBefore": "though scheduled international services stopped in March 2020 and the international traffic now comes mainly from corporate aircraft and the AirMed International air ambulance operation",
+   "why": "See the two corrected claims above: the March 2020 date misreads Wikipedia, and 'mainly' has no source."
+  },
+  {
+   "claim": "Southern Museum of Flight on Airport Authority land, to move near Barber Motorsports Park",
+   "verdict": "cut",
+   "wasBefore": "The Southern Museum of Flight sits on Airport Authority land to the east, with plans in place to move it near Barber Motorsports Park.",
+   "why": "Wikipedia alone, and time-sensitive (a planned move). The museum's own site answered a plain request with a 403 and the browser with a bot check ('Checking the site connection security'), so it was left alone; the operator's pages do not mention the museum. Worth checking by hand whether it has moved."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

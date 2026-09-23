@@ -1,0 +1,351 @@
+{
+ "iata": "MDT",
+ "id": "recUjsKL5VXJwVYCZ",
+ "name": "Harrisburg International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Harrisburg_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The main commercial airport for south central Pennsylvania, nine miles south east of Harrisburg, and third in the state for both passengers and cargo behind Philadelphia and Pittsburgh.\n\nThe code catches people out. MDT stands for Middletown, the town on the airport's postal address, not Harrisburg, and locally the airport is often called HIA.\n\nEverything on the ground runs through one building. The Multi-Modal Transportation Facility, built in 2004 and joined to the terminal by a climate controlled sky bridge, holds 2,504 parking spaces on its top three levels, with taxis, limousines, hotel shuttles, buses, the hire car return and six rental desks on the first level.\n\nThe terminal has twelve gates in a pier layout, with Delta, United, Allegiant and American each using their own.\n\nThere is one runway of 10,001 feet, and Runway 13 carries a Category III approach that allows landings down to 600 feet of visibility.\n\nAircraft landing from the south are often routed near the Three Mile Island Nuclear Generating Station, a few miles from the airport.",
+ "after": "Harrisburg's airport, nine miles south east of the city, serving central Pennsylvania. It is the third busiest in the state for passengers, behind Philadelphia and Pittsburgh.\n\nThe code catches people out. MDT stands for Middletown, the town on the airport's postal address, not Harrisburg, and locally the airport is often called HIA.\n\nEverything on the ground runs through one building. The parking garage, joined to the terminal by a climate-controlled skybridge, has the rental car counters, taxis, limousines, hotel shuttles and buses on its first floor.\n\nFour airlines fly from the terminal: Allegiant, American, Delta and United.\n\nThere is one runway of 10,001 feet, and Runway 13 has a Category III approach for landings in low visibility.",
+ "claims": [
+  {
+   "claim": "nine miles south east of Harrisburg",
+   "verdict": "confirmed",
+   "inAfter": "nine miles south east of the city",
+   "note": "The coordinates give 13.7 km (8.5 miles) in a straight line at 131 degrees, south east; the FAA record's 8 nautical miles is about 9.2 statute miles. flyhia.com is OurAirports' home link for KMDT and the site in Wikipedia's infobox.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is a public airport in Lower Swatara Township, Pennsylvania, United States, nine miles (14 km) southeast of Harrisburg"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "HARRISBURG INTL",
+      "3 CBD TO AIRPORT (NM):",
+      "08 SE"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 13.7 km (8.5 miles)",
+      "Bearing from the city centre: 131 degrees, which is south east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "serving central Pennsylvania",
+   "verdict": "softened",
+   "inAfter": "serving central Pennsylvania",
+   "note": "Was 'the main commercial airport for south central Pennsylvania'. Only Wikipedia says 'primary'; the operator describes its job as connecting central Pennsylvania. The FAA's table bears out its size (see the ranking claim), but no second source names a region and calls it the main airport, so the text says whom it serves.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport, frequently referred to as HIA, is the primary commercial airport in South Central Pennsylvania"
+    },
+    {
+     "file": "op-authority",
+     "org": "Susquehanna Area Regional Airport Authority (operator, flyhia.com and its flyhia.blog)",
+     "quote": "Mission Statement : Provide safe, convenient, and affordable airports connecting Central Pennsylvania to the world.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "blog-2025-growth",
+     "org": "Susquehanna Area Regional Airport Authority (operator, flyhia.com and its flyhia.blog)",
+     "quote": "allowing more central Pennsylvania travelers the opportunity to fly from closer to home",
+     "dated": "2026-01-28"
+    }
+   ]
+  },
+  {
+   "claim": "third busiest in Pennsylvania for passengers, behind Philadelphia and Pittsburgh",
+   "verdict": "confirmed",
+   "inAfter": "It is the third busiest in the state for passengers, behind Philadelphia and Pittsburgh.",
+   "note": "FAA boardings for 2025: Philadelphia 14.8 million, Pittsburgh 4.8 million, Harrisburg 810,498, then Lehigh Valley 470,198. The cargo half of the old claim is cut (see below).",
+   "sources": [
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "21 EA PA PHL Philadelphia Philadelphia International P L 14,779,849",
+      "47 EA PA PIT Pittsburgh Pittsburgh International P M 4,792,035",
+      "112 EA PA MDT Harrisburg Harrisburg International P S 810,498 727,163 11.46%",
+      "147 EA PA ABE Allentown Lehigh Valley International P N 470,198"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the third-busiest airport in Pennsylvania for passenger enplanements and cargo shipments behind Philadelphia International Airport and Pittsburgh International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "MDT stands for Middletown, the town on the postal address",
+   "verdict": "confirmed",
+   "inAfter": "MDT stands for Middletown, the town on the airport's postal address, not Harrisburg",
+   "sources": [
+    {
+     "file": "op-faqs",
+     "org": "Susquehanna Area Regional Airport Authority (operator, flyhia.com and its flyhia.blog)",
+     "quote": "The FAA code for Harrisburg International Airport is MDT. MDT refers to Middletown, the borough where we are located outside of Harrisburg, Pennsylvania.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "penndot",
+     "org": "Pennsylvania Department of Transportation (Bureau of Aviation)",
+     "quote": [
+      "Harrisburg International Airport (MDT)",
+      "One Terminal Drive, Suite 300",
+      "Middletown, PA 17057"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport code MDT refers to Middletown, the city name specified on the postal address of the airport."
+    }
+   ]
+  },
+  {
+   "claim": "often called HIA",
+   "verdict": "confirmed",
+   "inAfter": "locally the airport is often called HIA",
+   "note": "The operator calls itself HIA throughout, from its web address down.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport, frequently referred to as HIA"
+    },
+    {
+     "file": "op-faqs",
+     "org": "Susquehanna Area Regional Airport Authority (operator, flyhia.com and its flyhia.blog)",
+     "quote": "The FAA code for Harrisburg International Airport is MDT.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-parking",
+     "org": "Susquehanna Area Regional Airport Authority (operator, flyhia.com and its flyhia.blog)",
+     "quote": "HIA's parking garage is conveniently connected to the terminal by covered moving walkways, elevators and our climate-controlled Skybridge.",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "all ground transport runs through one building",
+   "verdict": "confirmed",
+   "inAfter": "Everything on the ground runs through one building.",
+   "sources": [
+    {
+     "file": "op-ground",
+     "org": "Susquehanna Area Regional Airport Authority (operator, flyhia.com and its flyhia.blog)",
+     "quote": "You can arrange rental cars, taxis, limos, hotel shuttles and public transportation in our transportation center, located on the first floor of our parking garage.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the Multi-Modal Transportation Facility (MMTF) is a four-story facility that handles all ground transportation."
+    }
+   ]
+  },
+  {
+   "claim": "parking garage joined by a climate-controlled skybridge, with rental cars, taxis, limousines, hotel shuttles and buses on the first floor",
+   "verdict": "confirmed",
+   "inAfter": "The parking garage, joined to the terminal by a climate-controlled skybridge, has the rental car counters, taxis, limousines, hotel shuttles and buses on its first floor.",
+   "note": "The operator calls the building its parking garage (and 'parking garage/rental car facility'), not the Multi-Modal Transportation Facility, so the text does too. Ride-hailing pick-ups are on the garage's third floor.",
+   "sources": [
+    {
+     "file": "op-ground",
+     "org": "Susquehanna Area Regional Airport Authority (operator, flyhia.com and its flyhia.blog)",
+     "quote": [
+      "You can arrange rental cars, taxis, limos, hotel shuttles and public transportation in our transportation center, located on the first floor of our parking garage.",
+      "The garage is connected to the terminal via a climate-controlled Skybridge.",
+      "The taxi pick up zone is located just beyond the rental car counters in our transportation center, on the first floor of our parking garage."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Built in 2004, and attached to the new terminal building via a climate-controlled sky bridge",
+      "The first level accommodates all limos, taxis, hotel shuttles, public and charter buses, plus the rental car ready/return lot."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "four airlines: Allegiant, American, Delta and United",
+   "verdict": "confirmed",
+   "inAfter": "Four airlines fly from the terminal: Allegiant, American, Delta and United.",
+   "note": "Frontier left on 13 April 2026 (Wikipedia), which the old text did not mention anyway. The operator says the four fly nonstop to 17 cities.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Susquehanna Area Regional Airport Authority (operator, flyhia.com and its flyhia.blog)",
+     "quote": "Allegiant, American Airlines, Delta Airlines, United Airlines all provide service through HIA",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "As of 2026, four airlines serve Harrisburg International Airport, including Allegiant Air, American Airlines, United Airlines, and Delta Air Lines."
+    }
+   ]
+  },
+  {
+   "claim": "one runway of 10,001 feet",
+   "verdict": "confirmed",
+   "inAfter": "There is one runway of 10,001 feet",
+   "sources": [
+    {
+     "file": "penndot",
+     "org": "Pennsylvania Department of Transportation (Bureau of Aviation)",
+     "quote": [
+      "Runway Information",
+      "10,001'",
+      "Asphalt"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 13/31: 3,048 m (10,001 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It has one asphalt runway, 13/31, 10,001 by 200 feet (3,048 by 61 m)."
+    }
+   ]
+  },
+  {
+   "claim": "Runway 13 has a Category III approach",
+   "verdict": "softened",
+   "inAfter": "and Runway 13 has a Category III approach for landings in low visibility",
+   "note": "The FAA's procedure list has an ILS RWY 13 (CAT II - III) approach. The old figure, landings 'down to 600 feet of visibility', rests on Wikipedia alone (the FAA chart itself could not be opened), so the text says what Category III is for instead: Wikipedia gives its use in reduced runway visual range.",
+   "sources": [
+    {
+     "file": "faa-dtpp",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "ILS RWY 13 (CAT II - III)",
+      "Procedure effective date: 0901Z October 01 to 0901Z October 28, 2026 (2610)"
+     ],
+     "dated": "2026-10-01 (procedure cycle on the page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Runway 13 has a CAT III approach allowing operations down to 600 feet (180 m) RVR (Runway Visual Range)."
+    }
+   ]
+  },
+  {
+   "claim": "third in the state for cargo",
+   "verdict": "cut",
+   "wasBefore": "for both passengers and cargo",
+   "why": "Wrong for 2025 on the FAA's all-cargo landed weight: Philadelphia 2.38 billion lb, Lehigh Valley 673 million, Pittsburgh 532 million, then Harrisburg 372 million, so Harrisburg is fourth. Only Wikipedia (a 2005 FAA citation) has it third. The passenger ranking is kept.",
+   "sources": [
+    {
+     "file": "faa-cy2025-cargo",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary Calendar Year 2025 All-Cargo Landed Weight",
+      "17 EA HAR PA PHL Philadelphia International Philadelphia P L 2,380,275,660",
+      "38 EA HAR PA ABE Lehigh Valley International Allentown P N 672,582,400",
+      "49 EA HAR PA PIT Pittsburgh International Pittsburgh P M 531,631,750",
+      "67 EA HAR PA MDT Harrisburg International Harrisburg P S 371,754,990"
+     ],
+     "dated": "2026-07-09"
+    }
+   ]
+  },
+  {
+   "claim": "main commercial airport for south central Pennsylvania",
+   "verdict": "cut",
+   "wasBefore": "The main commercial airport for south central Pennsylvania",
+   "why": "Softened to 'serving central Pennsylvania' (see above): 'main' and 'south central' rest on Wikipedia alone."
+  },
+  {
+   "claim": "Multi-Modal Transportation Facility built in 2004",
+   "verdict": "cut",
+   "wasBefore": "The Multi-Modal Transportation Facility, built in 2004",
+   "why": "The name and the 2004 date rest on Wikipedia alone; the operator's old page for it is gone (404) and its current pages call the building the parking garage."
+  },
+  {
+   "claim": "2,504 parking spaces on the top three levels",
+   "verdict": "cut",
+   "wasBefore": "holds 2,504 parking spaces on its top three levels",
+   "why": "Wikipedia alone; the operator's parking pages give no count, and its ground transport page now puts ride-hailing pick-ups on the third floor."
+  },
+  {
+   "claim": "hire car return and six rental desks",
+   "verdict": "cut",
+   "wasBefore": "the hire car return and six rental desks",
+   "why": "The count of six rests on Wikipedia alone. The operator lists six on-site brands (Alamo, Avis, Budget, Enterprise, Hertz, National), but three share one phone number, so the number of desks is not clear; the text says rental car counters."
+  },
+  {
+   "claim": "twelve gates in a pier layout, each airline its own",
+   "verdict": "cut",
+   "wasBefore": "The terminal has twelve gates in a pier layout, with Delta, United, Allegiant and American each using their own.",
+   "why": "The gate count, the pier layout and the gate split rest on Wikipedia alone; the operator's terminal map is an image. The four airlines are kept, with two sources."
+  },
+  {
+   "claim": "landings down to 600 feet of visibility",
+   "verdict": "cut",
+   "wasBefore": "that allows landings down to 600 feet of visibility",
+   "why": "Wikipedia alone; the FAA's approach chart could not be opened (the FAA procedure search refused the link tools)."
+  },
+  {
+   "claim": "approaches routed near Three Mile Island",
+   "verdict": "cut",
+   "wasBefore": "Aircraft landing from the south are often routed near the Three Mile Island Nuclear Generating Station, a few miles from the airport.",
+   "why": "Only Wikipedia says so, without a citation. Not checked further: the routing is not something an agent needs."
+  },
+  {
+   "claim": "about 1.6 million passengers in 2025, a record",
+   "verdict": "cut",
+   "why": "Held back: verified with two sources, but a new fact that replaces nothing in the old text. TOTAL passengers: the operator gives 1,623,324 in 2025, a record and up 12.3 per cent; Wikipedia's infobox has the same figure; the FAA's preliminary CY2025 table counts 810,498 enplanements (boardings only, about half), which is consistent. Was to read: 'It handled a record 1.6 million passengers in 2025.'",
+   "sources": [
+    {
+     "file": "blog-2025-growth",
+     "org": "Susquehanna Area Regional Airport Authority (operator, flyhia.com and its flyhia.blog)",
+     "quote": [
+      "Middletown, PA - January 28, 2026 - The Susquehanna Area Regional Airport Authority (SARAA) announced today that Harrisburg International Airport (MDT) had a record-breaking year in 2025",
+      "The airport served 1,623,324 passengers in 2025, a 12.3% increase over 2024"
+     ],
+     "dated": "2026-01-28"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "112 EA PA MDT Harrisburg Harrisburg International P S 810,498 727,163 11.46%",
+     "dated": "2026-07-08"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The code catches people out.",
+   "why": "The old text's framing, kept: it follows from the sourced fact that follows it (MDT stands for Middletown, not Harrisburg)."
+  }
+ ],
+ "tracerOk": {}
+}

@@ -1,0 +1,404 @@
+{
+ "iata": "JAX",
+ "id": "recVO6Jxjh1iUTNES",
+ "name": "Jacksonville International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Jacksonville_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Thirteen miles north of downtown Jacksonville, and a straightforward airport to use. Ticketing is on the second floor at the front of the terminal with baggage claim below it, and both lead back to a mezzanine holding the shops, the restaurants and a single security checkpoint. Past that are Concourses A and C with ten gates each, so twenty in total.\n\nPassenger numbers set a record in the 2024 financial year at just over 7.6 million, up almost five per cent on the year before. It remains a joint civil and military field, which shows in the traffic mix: military movements sit alongside scheduled flights, air taxi work and general aviation.\n\nFor anyone without a car, the Route 1 bus runs into downtown and connects to the Greyhound network and the Skyway monorail. Worth knowing if there is time before a flight: three galleries sit off the main courtyard before security, one of them a permanent exhibit on aviation in the region.",
+ "after": "About 12 miles north of downtown Jacksonville, and a straightforward airport to use. Check-in is on the upper level with baggage claim below it, and both lead back to a central courtyard with the shops, the restaurants and a single security checkpoint. Past that are Concourses A and C with ten gates each, so twenty in total.\n\nPassenger numbers were about 7.6 million in the year to September 2025, just short of the record set the year before. It remains a joint civil and military airport, with an Air National Guard fighter wing based on the field.\n\nFor anyone without a car, JTA's Route 1 bus runs between the airport and downtown. Worth knowing if there is time before a flight: art galleries sit around the central courtyard before security.",
+ "claims": [
+  {
+   "claim": "about 12 miles north of downtown",
+   "verdict": "corrected",
+   "inAfter": "About 12 miles north of downtown Jacksonville",
+   "note": "Was 'thirteen miles' (Wikipedia). The written figures differ: the operator's Concourse B environmental assessment says about 12 miles, Wikipedia 13 miles and the FAA record 9 nautical miles (about 10.4 statute miles). The straight line from the GeoNames centre is 11.2 miles at 350 degrees, north; 12 passes the coordinates check (ratio 1.07), so the text follows the operator. flyjacksonville.com is OurAirports' home link; Wikipedia's flyjax.com is the operator's other address (op-home names it).",
+   "sources": [
+    {
+     "file": "op-conb-ea",
+     "org": "Jacksonville Aviation Authority (operator, flyjacksonville.com and its arts site jaxairportarts.com)",
+     "quote": "JAX is located in Duval County, about 12 miles north of downtown Jacksonville."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 18.1 km (11.2 miles)",
+      "Bearing from the city centre: 350 degrees, which is north"
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "JACKSONVILLE INTL",
+      "3 CBD TO AIRPORT (NM):",
+      "09 N"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is a civil-military public airport 13 miles (21 km) north of Downtown Jacksonville"
+    }
+   ]
+  },
+  {
+   "claim": "check-in upstairs, baggage claim below",
+   "verdict": "confirmed",
+   "inAfter": "Check-in is on the upper level with baggage claim below it",
+   "note": "'At the front of the terminal' dropped: Wikipedia alone. The operator puts departures on the upper level and baggage claim, with all ground transport, on the lower level.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The terminal at JAX is composed of a baggage claim area, on the first floor and a ticketing area on the second floor, at the front of the structure."
+    },
+    {
+     "file": "op-ground",
+     "org": "Jacksonville Aviation Authority (operator, flyjacksonville.com and its arts site jaxairportarts.com)",
+     "quote": [
+      "all ground transportation services -- including rental car agencies, taxi and limousine services - are located on the lower level of the terminal building adjacent to baggage claim.",
+      "Hotel shuttle pick-up is located on the North Upper Level Departure Curb."
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-amenities",
+     "org": "Jacksonville Aviation Authority (operator, flyjacksonville.com and its arts site jaxairportarts.com)",
+     "quote": "Vystar: Pre-Security Departures Level",
+     "dated": "read 2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "central courtyard with shops, restaurants and a single security checkpoint",
+   "verdict": "confirmed",
+   "inAfter": "both lead back to a central courtyard with the shops, the restaurants and a single security checkpoint",
+   "note": "Was 'a mezzanine'. The operator calls the space the centre or central courtyard and its checkpoint 'the TSA Security Checkpoint' (one); its Concourse B assessment records the courtyard being enlarged in 2004 for a new centralised checkpoint and more concessions. Wikipedia uses both 'mezzanine' and 'main courtyard'.",
+   "sources": [
+    {
+     "file": "op-conb-ea",
+     "org": "Jacksonville Aviation Authority (operator, flyjacksonville.com and its arts site jaxairportarts.com)",
+     "quote": "an expansion of the main courtyard to accommodate a new centralized security screening checkpoint and provided more concession space"
+    },
+    {
+     "file": "op-amenities",
+     "org": "Jacksonville Aviation Authority (operator, flyjacksonville.com and its arts site jaxairportarts.com)",
+     "quote": [
+      "While the TSA Security Checkpoint opens at 4:00 am, the terminal is open 24 hours per day.",
+      "Location: Center Courtyard (Pre-Security)",
+      "Location: Pre-security courtyard"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "op-home",
+     "org": "Jacksonville Aviation Authority (operator, flyjacksonville.com and its arts site jaxairportarts.com)",
+     "quote": "The TSA Security Checkpoint usually closes around 10 pm, after the last daily departure.",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Past baggage claim and ticketing is the mezzanine, where shops, restaurants and the security checkpoint are located."
+    }
+   ]
+  },
+  {
+   "claim": "Concourses A and C, ten gates each, twenty in total",
+   "verdict": "confirmed",
+   "inAfter": "Past that are Concourses A and C with ten gates each, so twenty in total.",
+   "note": "True today, but not for long: Concourse B, being built between A and C, takes its first flights on 28 January 2027 with six more gates (Jacksonville Today, 3 September 2026; Wikipedia; the operator's arts site). That is held back below as a new fact, so this sentence needs revisiting after 28 January 2027.",
+   "sources": [
+    {
+     "file": "op-conb-ea",
+     "org": "Jacksonville Aviation Authority (operator, flyjacksonville.com and its arts site jaxairportarts.com)",
+     "quote": [
+      "The Airport has two existing concourses (Concourse A and Concourse C). Each concourse has 10 aircraft gates, each with a passenger boarding bridge.",
+      "bringing the total number of gates available today at JAX to 20."
+     ]
+    },
+    {
+     "file": "jaxtoday-garage",
+     "org": "Jacksonville Today (WJCT Public Media)",
+     "quote": [
+      "Published on September 3, 2026 at 2:56 pm",
+      "Next on the airport's grand opening agenda is the new Concourse B, under construction since spring 2024 between existing concourses A and C. The first flights will leave the new concourse Jan. 28."
+     ],
+     "dated": "2026-09-03"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Beyond the mezzanine are the airport's Concourses A and C, which include 10 gates each (for a total of 20)"
+    }
+   ]
+  },
+  {
+   "claim": "about 7.6 million passengers in the year to September 2025",
+   "verdict": "corrected",
+   "inAfter": "Passenger numbers were about 7.6 million in the year to September 2025",
+   "note": "Was the 2024 financial year's record ('just over 7.6 million'). The operator's table (prepared 14 June 2026) gives 7,573,168 for October 2024 to September 2025, down 1 per cent. TOTAL passengers, enplaned plus deplaned; the FAA's calendar-2025 boardings (3,719,723) are consistent.",
+   "sources": [
+    {
+     "file": "op-enplanements",
+     "org": "Jacksonville Aviation Authority (operator, flyjacksonville.com and its arts site jaxairportarts.com)",
+     "quote": [
+      "Prepared by: Pauline Testagrose 6/14/2026",
+      "Increase/(Decrease)2021/2022 2022/2023 2023/2024 2024/2025 2025/2026",
+      "6,387,924 7,306,171 7,647,916 7,573,168 4,951,039"
+     ],
+     "dated": "2026-06-14"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat2_header = Passengers (fiscal year 2024/2025)",
+      "stat2_data = 7,573,168"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "52 SO FL JAX Jacksonville Jacksonville International P M 3,719,723 3,749,791 -0.80%",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "just short of the record set the year before",
+   "verdict": "confirmed",
+   "inAfter": "just short of the record set the year before",
+   "note": "The record financial year is October 2023 to September 2024 (7,647,916). The operator's January release gives the same picture for the calendar year (2024 its busiest ever).",
+   "sources": [
+    {
+     "file": "op-enplanements",
+     "org": "Jacksonville Aviation Authority (operator, flyjacksonville.com and its arts site jaxairportarts.com)",
+     "quote": "6,387,924 7,306,171 7,647,916 7,573,168 4,951,039",
+     "dated": "2026-06-14"
+    },
+    {
+     "file": "op-2024-record",
+     "org": "Jacksonville Aviation Authority (operator, flyjacksonville.com and its arts site jaxairportarts.com)",
+     "quote": "More than 7.6 million passengers flew through Jacksonville International Airport (JAX) in 2024, making it the busiest year ever in the facility's history."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The 2024 fiscal year (10/1/2023-9/30/2024) set a record for passenger numbers at Jacksonville International Airport. handling 7,647,916 passengers, which was a 4.7% increase from the prior fiscal year."
+    }
+   ]
+  },
+  {
+   "claim": "joint civil and military airport with an Air National Guard fighter wing",
+   "verdict": "confirmed",
+   "inAfter": "It remains a joint civil and military airport, with an Air National Guard fighter wing based on the field.",
+   "note": "The Florida Air National Guard's 125th Fighter Wing, which now flies the F-35A (DVIDS, September 2026). Replaces the old 'traffic mix' clause (cut below).",
+   "sources": [
+    {
+     "file": "dvids-125fw",
+     "org": "DVIDS (US Department of Defense)",
+     "quote": [
+      "Jacksonville ANGB, FL, US",
+      "The 125th Fighter Wing is an Air National Guard unit headquartered at Jacksonville Air National Guard Base (ANGB), Florida, which operates the F-35A Lightning II airframe.",
+      "09.21.2026"
+     ],
+     "dated": "2026-09-21 (latest item on the page)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "MILITARY: ANG:",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "op-conb-ea",
+     "org": "Jacksonville Aviation Authority (operator, flyjacksonville.com and its arts site jaxairportarts.com)",
+     "quote": "JAX also supports the Florida Air National Guard (FANG) 125th Fighter Wing"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "is a civil-military public airport",
+      "Jacksonville Air National Guard Base in the southwest quadrant of the airport",
+      "The wing is the host unit for Jacksonville ANGB"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "JTA Route 1 runs between the airport and downtown",
+   "verdict": "confirmed",
+   "inAfter": "JTA's Route 1 bus runs between the airport and downtown.",
+   "note": "JTA's Route 1 (North Main) timetable from 15 June 2026 runs seven days a week with an airport branch (1A) and ends downtown at the JRTC at LaVilla. On 17 September 2026 JTA cut most routes to a Saturday-level service for lack of money; Route 1 keeps 30-minute weekday frequencies on its main section. The operator's own ground transport page does not mention the bus.",
+   "sources": [
+    {
+     "file": "jta-route1",
+     "org": "JTA (Jacksonville Transportation Authority)",
+     "quote": [
+      "Effective June 15, 2026",
+      "North Main",
+      "Monday to Sunday service",
+      "Jacksonville International Airport",
+      "JRTC at LaVilla",
+      "Downtown 1",
+      "Airport 1A"
+     ],
+     "dated": "2026-06-15"
+    },
+    {
+     "file": "jta-budget",
+     "org": "JTA (Jacksonville Transportation Authority)",
+     "quote": [
+      "(Jacksonville, FL - September 17, 2026) The Jacksonville Transportation Authority announced a series of expense reductions and service modifications",
+      "along with Routes 1, 3, 8, 10, and 19 will operate at 30-minute frequencies during the week"
+     ],
+     "dated": "2026-09-17"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The Route 1 bus connects the airport to downtown Jacksonville"
+    }
+   ]
+  },
+  {
+   "claim": "art galleries around the central courtyard before security",
+   "verdict": "softened",
+   "inAfter": "art galleries sit around the central courtyard before security",
+   "note": "Was 'three galleries sit off the main courtyard before security, one of them a permanent exhibit on aviation in the region'. The operator lists art galleries in the centre courtyard (and elsewhere, before and after security) but gives neither the number nor the aviation exhibit (cut below). 'Worth knowing if there is time before a flight' is the old text's advice.",
+   "sources": [
+    {
+     "file": "op-amenities",
+     "org": "Jacksonville Aviation Authority (operator, flyjacksonville.com and its arts site jaxairportarts.com)",
+     "quote": [
+      "Art Galleries",
+      "Location: Center Courtyard, baggage claim, pre and post security",
+      "galleries highlighting the region's many assets and artists are featured throughout the terminal"
+     ],
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "There are three galleries located off of the main courtyard before the security checkpoint."
+    }
+   ]
+  },
+  {
+   "claim": "thirteen miles",
+   "verdict": "cut",
+   "wasBefore": "Thirteen miles north",
+   "why": "Replaced by the operator's 'about 12 miles' (see above); the sources give 9 nautical, 12 and 13 miles."
+  },
+  {
+   "claim": "ticketing on the second floor at the front of the terminal",
+   "verdict": "cut",
+   "wasBefore": "Ticketing is on the second floor at the front of the terminal",
+   "why": "Reworded to the upper and lower levels the operator names; 'at the front' rests on Wikipedia alone."
+  },
+  {
+   "claim": "2024 financial year record, up almost five per cent",
+   "verdict": "cut",
+   "wasBefore": "Passenger numbers set a record in the 2024 financial year at just over 7.6 million, up almost five per cent on the year before.",
+   "why": "True (operator 7,647,916, up 4.7 per cent on 7,306,171) but a year out of date; replaced by the 2025 financial year, with the record kept as 'the year before'."
+  },
+  {
+   "claim": "traffic mix: military movements alongside scheduled, air taxi and general aviation",
+   "verdict": "cut",
+   "wasBefore": "which shows in the traffic mix: military movements sit alongside scheduled flights, air taxi work and general aviation",
+   "why": "The mix is Wikipedia's FAA figures for the year to February 2023 (63 per cent scheduled, 19 general aviation, 14 air taxi, 4 military); no current second source gives it. Replaced by the Air National Guard wing, which three current sources confirm."
+  },
+  {
+   "claim": "Route 1 connects to Greyhound and the Skyway monorail",
+   "verdict": "cut",
+   "wasBefore": "connects to the Greyhound network and the Skyway monorail",
+   "why": "The Skyway half is going out of date: JTA announced on 17 September 2026 that it is pausing Skyway operations from 2 November 2026 (Jacksonville Today reports the halt too). The Greyhound connection is not on JTA's Route 1 timetable and rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "jta-budget",
+     "org": "JTA (Jacksonville Transportation Authority)",
+     "quote": [
+      "(Jacksonville, FL - September 17, 2026) The Jacksonville Transportation Authority announced a series of expense reductions and service modifications",
+      "Pausing Skyway operations on November 2nd."
+     ],
+     "dated": "2026-09-17"
+    },
+    {
+     "file": "jaxtoday-garage",
+     "org": "Jacksonville Today (WJCT Public Media)",
+     "quote": "Facing shortfall, JTA will cuts jobs, reduce bus service and halt Skyway and NAVI"
+    }
+   ]
+  },
+  {
+   "claim": "three galleries, one a permanent aviation exhibit",
+   "verdict": "cut",
+   "wasBefore": "three galleries sit off the main courtyard before security, one of them a permanent exhibit on aviation in the region",
+   "why": "The count and the aviation exhibit rest on Wikipedia alone; the operator's pages and its arts site list galleries and current exhibitions but no aviation exhibit. The Arts Commission site (jiaarts.org) did not connect (503)."
+  },
+  {
+   "claim": "Concourse B opens 28 January 2027 with six gates",
+   "verdict": "cut",
+   "why": "Held back: verified with two sources, but a new fact that replaces nothing in the old text. The third concourse, being built between A and C since 2024, takes its first flights on 28 January 2027 and adds six gates, five of them for American Airlines. When it opens, the sentence on Concourses A and C (twenty gates) goes out of date. Was to read: 'A third, Concourse B, opens between them on 28 January 2027 with six more gates.'",
+   "sources": [
+    {
+     "file": "jaxtoday-garage",
+     "org": "Jacksonville Today (WJCT Public Media)",
+     "quote": [
+      "Published on September 3, 2026 at 2:56 pm",
+      "Next on the airport's grand opening agenda is the new Concourse B, under construction since spring 2024 between existing concourses A and C. The first flights will leave the new concourse Jan. 28.",
+      "American Airlines will use five of the six new gates."
+     ],
+     "dated": "2026-09-03"
+    },
+    {
+     "file": "jaxairportarts",
+     "org": "Jacksonville Aviation Authority (operator, flyjacksonville.com and its arts site jaxairportarts.com)",
+     "quote": "(Click on video linked for a preview of JAX Concourse B opening January 2027.)",
+     "dated": "read 2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "On May 10, 2024, ground was broken on the new Concourse B, which will house six new gates",
+      "The new concourse is scheduled to begin operations on January 28, 2027."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "third parking garage opening November 2026",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing. Jacksonville Today (3 September 2026) says a third garage with about 2,000 spaces opens in November 2026, before Thanksgiving; Wikipedia says the same. The hourly garage damaged by fire in May 2025 is due back in summer 2027.",
+   "sources": [
+    {
+     "file": "jaxtoday-garage",
+     "org": "Jacksonville Today (WJCT Public Media)",
+     "quote": "But by the next big holiday travel weekend - Thanksgiving - 2,000 more spaces are expected to be available as a third parking garage opens next to the existing two",
+     "dated": "2026-09-03"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and a straightforward airport to use",
+   "why": "The old text's framing, kept: it follows from the sourced layout (one checkpoint, two concourses)."
+  },
+  {
+   "text": "For anyone without a car,",
+   "why": "Framing for the bus claim that follows."
+  },
+  {
+   "text": "Worth knowing if there is time before a flight:",
+   "why": "The old text's advice; the galleries it introduces are sourced."
+  }
+ ],
+ "tracerOk": {}
+}
