@@ -1,0 +1,179 @@
+{
+ "iata": "AHO",
+ "id": "recVkeGHPHZUfVLK6",
+ "name": "Alghero-Fertilia Airport",
+ "country": "Italy",
+ "wikipedia": "https://en.wikipedia.org/wiki/Alghero%E2%80%93Fertilia_Airport",
+ "audited": "2026-09-23",
+ "before": "One of Sardinia's three main airports, 8 km north north west of Alghero, with Olbia serving the north east and Cagliari the south. It is also known as Alghero-Fertilia, after the village next door, and as Riviera del Corallo.\n\nThe runway is 3,000 metres, one of the longest in Italy and a good deal more than the traffic needs. It got that way in the mid 1970s, having started in 1938 as a military field with just 700 metres of runway during the war.\n\nGetting around the island is straightforward from here. ARST, the Sardinian transport operator, runs buses into Alghero and also to Sassari, Olbia and Cagliari, with seasonal private services from Cagliari and Santa Teresa Gallura. By road the SS 42 runs into town and the SS 131 Carlo Felice and SS 291 reach the rest of the island.\n\nAlitalia ran a flight school here from 1980, training up to a hundred pilots a year, until it closed in March 2003.",
+ "after": "One of Sardinia's three main airports, 8 km north north west of Alghero, with Olbia serving the north east and Cagliari the south. It is also known as Alghero-Fertilia and as Riviera del Corallo.\n\nThe runway is 3,000 metres, one of the longest in Italy.\n\nAlitalia ran a flight school here from 1980, training up to a hundred pilots a year, until it closed in March 2003.",
+ "claims": [
+  {
+   "claim": "one of Sardinia's three main airports, with Olbia in the north east and Cagliari in the south",
+   "verdict": "confirmed",
+   "inAfter": "One of Sardinia's three main airports",
+   "note": "Eurostat 2025 has three Sardinian airports: Cagliari 5,286,718, Olbia 4,150,363, Alghero 1,768,930; OurAirports lists the same three with scheduled service in Sardinia. Their coordinates put Olbia on the north east coast (40.90 N, 9.52 E) and Cagliari in the south (39.25 N).",
+   "sources": [
+    {
+     "file": "eurostat-it",
+     "org": "Eurostat",
+     "dated": "2026-09-23",
+     "quote": [
+      "Eurostat IT_LIEE CAGLIARI/ELMAS airport: passengers carried in 2025: 5,286,718",
+      "Eurostat IT_LIEO OLBIA/COSTA SMERALDA airport: passengers carried in 2025: 4,150,363",
+      "Eurostat IT_LIEA ALGHERO/FERTILIA airport: passengers carried in 2025: 1,768,930"
+     ]
+    },
+    {
+     "file": "ourairports-sardinia",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "LIEE CAG Cagliari Elmas Airport at 39.2515, 9.0543 (Cagliari)",
+      "LIEO OLB Olbia Costa Smeralda Airport at 40.8990, 9.5185 (Olbia (SS))"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is one of the three main airports serving Sardinia, the other ones being Olbia in the northeast, and near Cagliari in the south"
+    }
+   ]
+  },
+  {
+   "claim": "Olbia serving the north east and Cagliari the south",
+   "verdict": "confirmed",
+   "inAfter": "with Olbia serving the north east and Cagliari the south",
+   "sources": [
+    {
+     "file": "ourairports-sardinia",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "LIEO OLB Olbia Costa Smeralda Airport at 40.8990, 9.5185",
+      "LIEE CAG Cagliari Elmas Airport at 39.2515, 9.0543"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the other ones being Olbia in the northeast, and near Cagliari in the south"
+    }
+   ]
+  },
+  {
+   "claim": "8 km north north west of Alghero",
+   "verdict": "confirmed",
+   "inAfter": "8 km north north west of Alghero",
+   "note": "Coordinates: 8.4 km at 343 degrees (north north west is 337.5; ratio 0.95).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "4.3 NM (8.0 km; 4.9 mi) north-northwest of the city of Alghero"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 8.4 km (5.2 miles)",
+      "Bearing from the city centre: 343 degrees"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "also known as Alghero-Fertilia and Riviera del Corallo",
+   "verdict": "confirmed",
+   "inAfter": "It is also known as Alghero-Fertilia and as Riviera del Corallo.",
+   "sources": [
+    {
+     "file": "op-home",
+     "org": "SOGEAAL (operator, aeroportodialghero.it)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Portale dell'Aeroporto Alghero-Fertilia \"Riviera del Corallo\""
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Alghero - Riviera del Corallo Airport",
+      "It is also known as Alghero–Fertilia Airport"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "runway 3,000 metres, one of the longest in Italy",
+   "verdict": "confirmed",
+   "inAfter": "The runway is 3,000 metres, one of the longest in Italy.",
+   "note": "OurAirports: 3,000 m, joint ninth longest among Italy's airports with scheduled flights (after Malpensa, Fiumicino, Palermo, Turin, Venice, Verona, Brindisi and Lamezia; level with Bari and Trieste).",
+   "sources": [
+    {
+     "file": "ourairports-it-runways",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "LIEA Alghero-Fertilia Airport 02/20 9843 ft 3000 m",
+      "LICA Lamezia Terme Sant'Eufemia International Airport 10/28 9898 ft 3017 m"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runway 02/20: 3,000 m (9,843 ft), ASP"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the runway was lengthened to the current 3,000 m (9,800 ft), one of the longest runways in Italy"
+    }
+   ]
+  },
+  {
+   "claim": "Alitalia flight school from 1980, up to a hundred pilots a year, closed March 2003",
+   "verdict": "confirmed",
+   "inAfter": "Alitalia ran a flight school here from 1980, training up to a hundred pilots a year, until it closed in March 2003.",
+   "note": "The Chamber of Deputies record (Italian): Alitalia set the school up at Alghero airport in 1980, it was producing a hundred pilots a year by 1994, and Alitalia announced its closure for 20 March 2003.",
+   "sources": [
+    {
+     "file": "camera-2003",
+     "org": "Italian Chamber of Deputies (camera.it, parliamentary question, 2003)",
+     "dated": "2003",
+     "quote": [
+      "stata istituita da Alitalia nel 1980, presso l'aeroporto di Alghero",
+      "di cento piloti all'anno",
+      "la compagnia Alitalia ha dato la notizia ufficiale della chiusura della Scuola di volo di Alghero per il giorno 20 marzo 2003"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "In 1980, Alitalia established a flight school at Alghero Airport which trained up to 100 pilots a year",
+      "The school closed in March 2003."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after the village next door",
+   "verdict": "cut",
+   "wasBefore": "after the village next door, and",
+   "why": "The operator's page gives the name Alghero-Fertilia but not its origin; the village rests on Wikipedia alone."
+  },
+  {
+   "claim": "a good deal more than the traffic needs; history from 1938 and the mid 1970s",
+   "verdict": "cut",
+   "wasBefore": "and a good deal more than the traffic needs. It got that way in the mid 1970s, having started in 1938 as a military field with just 700 metres of runway during the war.",
+   "why": "'More than the traffic needs' is a judgement no source makes; the 1938 opening, the 700 m wartime runway and the mid 1970s lengthening rest on Wikipedia alone."
+  },
+  {
+   "claim": "ARST buses to Alghero, Sassari, Olbia and Cagliari; seasonal private services; SS 42, SS 131 and SS 291",
+   "verdict": "cut",
+   "wasBefore": "Getting around the island is straightforward from here. ARST, the Sardinian transport operator, runs buses into Alghero and also to Sassari, Olbia and Cagliari, with seasonal private services from Cagliari and Santa Teresa Gallura. By road the SS 42 runs into town and the SS 131 Carlo Felice and SS 291 reach the rest of the island.",
+   "why": "Wikipedia alone. ARST's site refused both the link lister and the browser (403), and the airport's bus page could not be found from its home page. Worth putting back when ARST can be read."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "One of Sardinia's": "The tracer catches the possessive together with the sentence's opening words; 'Sardinia' itself is in Wikipedia and the claim rests on Eurostat and OurAirports."
+ }
+}
