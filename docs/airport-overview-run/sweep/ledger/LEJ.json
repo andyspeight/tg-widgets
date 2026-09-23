@@ -1,0 +1,300 @@
+{
+ "iata": "LEJ",
+ "id": "recBNQ7IG0sQRc4We",
+ "name": "Leipzig/Halle Airport",
+ "country": "Germany",
+ "wikipedia": "https://en.wikipedia.org/wiki/Leipzig/Halle_Airport",
+ "audited": "2026-09-23",
+ "before": "One airport for two cities, at Schkeuditz between Leipzig in Saxony and Halle in Saxony-Anhalt. For passengers it is Germany's twelfth largest, with more than 2.19 million in 2024, mostly on European leisure routes.\n\nFreight is the real story. It is DHL Aviation's main European hub and AeroLogic's home base, open around the clock for cargo, and it records more freight-only movements than any other airport in the European Union. In 2024 it handled 1,383,319 tonnes, second in Germany behind Frankfurt and fourth in Europe.\n\nThe layout is kind to a tired client. The terminal is compact with short walking distances, the main car park is built into it, and a pier of six jet bridges runs off it. Note that there is immigration for international arrivals but no international transfer area.\n\nThe railway station sits directly beneath the terminal, with Intercity trains on the Dresden to Cologne route and two S-Bahn lines into Leipzig and Halle.",
+ "after": "One airport for two cities, at Schkeuditz between Leipzig in Saxony and Halle in Saxony-Anhalt. For passengers it is Germany's fifteenth largest, with about 2.1 million in 2025, mostly on leisure routes.\n\nFreight is the real story. It is AeroLogic's home base and is open around the clock for cargo flights. In 2025 it handled about 1.39 million tonnes of cargo, second in Germany behind Frankfurt.\n\nThe railway station sits directly beneath the terminal, with two S-Bahn lines into Leipzig and Halle.",
+ "claims": [
+  {
+   "claim": "at Schkeuditz, between Leipzig and Halle",
+   "verdict": "confirmed",
+   "inAfter": "at Schkeuditz between Leipzig",
+   "note": "Coordinates: 13.2 km north west of Leipzig and 18.8 km east of Halle, so it lies between the two. AeroLogic, whose headquarters is at the airport, gives its address as Schkeuditz.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": [
+      "is an international airport located in Schkeuditz, Saxony, Germany, and serves both Leipzig, Saxony, and Halle, Saxony-Anhalt",
+      "at a location between Halle and Leipzig"
+     ]
+    },
+    {
+     "file": "aerologic-home",
+     "org": "AeroLogic (the cargo airline, aerologic.aero)",
+     "dated": "read 2026-09-23 (live page, ©2026)",
+     "quote": [
+      "Headquarters: Leipzig/Halle Airport",
+      "Josef-von-Copertino-Straße 2",
+      "04435 Schkeuditz"
+     ]
+    },
+    {
+     "file": "geo-leipzig-halle",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from Leipzig (GeoNames 2879139, 51.3396, 12.3713): 13.2 km, bearing from that city 313 degrees, which is north west",
+      "Straight-line distance from Halle (Saale) (GeoNames 2911522, 51.4816, 11.9795): 18.8 km, bearing from that city 111 degrees, which is east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Leipzig in Saxony and Halle in Saxony-Anhalt",
+   "verdict": "confirmed",
+   "inAfter": "Leipzig in Saxony and Halle in Saxony-Anhalt.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "serves both Leipzig, Saxony, and Halle, Saxony-Anhalt"
+    },
+    {
+     "file": "geo-leipzig-halle",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "GeoNames cities15000 admin1 code for Leipzig (GeoNames 2879139): DE.13",
+      "GeoNames cities15000 admin1 code for Halle (Saale) (GeoNames 2911522): DE.14"
+     ]
+    },
+    {
+     "file": "geonames-admin1",
+     "org": "GeoNames (geonames.org)",
+     "dated": "read 2026-09-23 (live file)",
+     "quote": [
+      "DE.13 Saxony Saxony 2842566",
+      "DE.14 Saxony-Anhalt Saxony-Anhalt 2842565"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Germany's fifteenth largest for passengers, about 2.1 million in 2025",
+   "verdict": "corrected",
+   "inAfter": "For passengers it is Germany's fifteenth largest, with about 2.1 million in 2025",
+   "note": "Was 'twelfth largest, with more than 2.19 million in 2024'. A passenger total replaces a passenger total. ADV's full-year 2025 table has 2,119,170 (down 3.7%) and Eurostat 2,111,512; both rank it fifteenth, behind Frankfurt, Munich, Berlin, Dusseldorf, Hamburg, Cologne Bonn, Stuttgart, Hanover, Nuremberg, Memmingen, Dortmund, Karlsruhe/Baden-Baden, Weeze (Niederrhein) and Hahn, and ahead of Bremen. It fell from twelfth as Karlsruhe, Weeze and Hahn grew.",
+   "sources": [
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": [
+      "Kumuliertes Gesamtaufkommen in Deutschland: Passagiere (an+ab) | Januar bis Dezember 2025",
+      "Leipzig/Halle 2.119.170 -3,7 %",
+      "Hahn 2.196.229",
+      "Karlsruhe/Baden-Baden 2.257.542",
+      "Bremen 1.992.727"
+     ]
+    },
+    {
+     "file": "eurostat-de",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat DE_EDFH FRANKFURT-HAHN airport: passengers carried in 2025: 2,153,699",
+      "Eurostat DE_EDDP LEIPZIG/HALLE airport: passengers carried in 2025: 2,111,512",
+      "Eurostat DE_EDDW BREMEN airport: passengers carried in 2025: 1,991,086"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "mostly on leisure routes",
+   "verdict": "softened",
+   "inAfter": "mostly on leisure routes.",
+   "note": "Was 'mostly on European leisure routes'. Eurostat's route figures (2024, the latest it publishes by route) put about three quarters of the passengers on holiday routes: Antalya, Hurghada, Palma, Heraklion, the Canaries, Rhodes, Marsa Alam, Corfu, Kos, Varna, Burgas and Madeira carried 1,557,193 of the 2,040,517 on the routes listed. 'European' is dropped because Hurghada and Marsa Alam are in Egypt. The airport's live board tonight still shows Corendon from Hurghada, Marabu from Mallorca and Freebird from Heraklion.",
+   "sources": [
+    {
+     "file": "eurostat-routes",
+     "org": "Eurostat",
+     "dated": "2024 (annual data, the latest by route)",
+     "quote": [
+      "Eurostat DE_EDDP_TR_LTAI LEIPZIG/HALLE airport - ANTALYA airport: 439,821 passengers in 2024",
+      "Eurostat DE_EDDP_EG_HEGN LEIPZIG/HALLE airport - HURGHADA / INTL airport: 279,222 passengers in 2024",
+      "Eurostat DE_EDDP_ES_LEPA LEIPZIG/HALLE airport - PALMA DE MALLORCA airport: 251,733 passengers in 2024",
+      "Eurostat routes reported for EDDP in 2024: 20, carrying 2,040,517 passengers in all"
+     ]
+    },
+    {
+     "file": "op-lha-home",
+     "org": "Mitteldeutsche Flughafen AG (the airport operator, leipzig-halle-airport.de)",
+     "dated": "read 2026-09-23 (live board)",
+     "quote": [
+      "Corendon Airlines Europe",
+      "Hurghada",
+      "Marabu Airlines",
+      "Mallorca",
+      "Freebird Airlines",
+      "Heraklion"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "mainly on flights to European leisure destinations"
+    }
+   ]
+  },
+  {
+   "claim": "AeroLogic's home base",
+   "verdict": "confirmed",
+   "inAfter": "It is AeroLogic's home base",
+   "note": "AeroLogic, the cargo airline owned by DHL Express and Lufthansa Cargo, gives its headquarters as the airport.",
+   "sources": [
+    {
+     "file": "aerologic-home",
+     "org": "AeroLogic (the cargo airline, aerologic.aero)",
+     "dated": "read 2026-09-23 (live page, ©2026)",
+     "quote": [
+      "Headquarters: Leipzig/Halle Airport",
+      "Joint Venture between DHL Express and Lufthansa Cargo"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "and AeroLogic's main hub"
+    }
+   ]
+  },
+  {
+   "claim": "open around the clock for cargo flights",
+   "verdict": "confirmed",
+   "inAfter": "and is open around the clock for cargo flights.",
+   "sources": [
+    {
+     "file": "op-cargo-airlines",
+     "org": "Mitteldeutsche Flughafen AG (the airport operator, leipzig-halle-airport.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Leipzig/Halle Airport offers 24/7 operations for cargo flights"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "allows 24 hour take off and landing for cargo flights"
+    }
+   ]
+  },
+  {
+   "claim": "about 1.39 million tonnes of cargo in 2025, second in Germany behind Frankfurt",
+   "verdict": "corrected",
+   "inAfter": "In 2025 it handled about 1.39 million tonnes of cargo, second in Germany behind Frankfurt.",
+   "note": "Was 'In 2024 it handled 1,383,319 tonnes, second in Germany behind Frankfurt and fourth in Europe'. A cargo total replaces a cargo total: ADV has 1,391,681 tonnes for 2025 (Frankfurt 2,071,665, Cologne Bonn 842,377) and Eurostat 1,390,730 (Frankfurt 2,026,695). The airport's own cargo page says about 1.4 million tonnes a year. 'Fourth in Europe' is cut (see below).",
+   "sources": [
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": [
+      "Kumuliertes Gesamtaufkommen in Deutschland: Cargo-Aufkommen (an+ab) | Januar bis Dezember 2025",
+      "Leipzig/Halle 1.391.681 +0,4 %",
+      "Frankfurt 2.071.665 +1,1 %",
+      "Köln/Bonn 842.377 -0,4 %"
+     ]
+    },
+    {
+     "file": "eurostat-de-freight",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat DE_EDDF FRANKFURT/MAIN airport: freight and mail loaded and unloaded in 2025: 2,026,695 tonnes",
+      "Eurostat DE_EDDP LEIPZIG/HALLE airport: freight and mail loaded and unloaded in 2025: 1,390,730 tonnes"
+     ]
+    },
+    {
+     "file": "op-cargo-airlines",
+     "org": "Mitteldeutsche Flughafen AG (the airport operator, leipzig-halle-airport.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Leipzig/Halle Airport is one of the top cargo hubs in Europe with annual freight volumes approx. 1.4 million tonnes."
+    }
+   ]
+  },
+  {
+   "claim": "the railway station directly beneath the terminal, with two S-Bahn lines into Leipzig and Halle",
+   "verdict": "confirmed",
+   "inAfter": "The railway station sits directly beneath the terminal, with two S-Bahn lines into Leipzig and Halle.",
+   "note": "The Intercity part of the old sentence is cut (see below). The S-Bahn operator names the lines S5 and S5X, which run together every 30 minutes: 12 minutes from Leipzig Hauptbahnhof and 10 from Halle. It also says the lines pass to Die Länderbahn from December 2026.",
+   "sources": [
+    {
+     "file": "sbahn-flughafen",
+     "org": "S-Bahn Mitteldeutschland (DB Regio, the operator of the lines, s-bahn-mitteldeutschland.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Die S-Bahn-Linien S5* und S5X* bringen Sie direkt aus Richtung Halle, Leipzig, Altenburg oder Zwickau bis zum Flughafen Leipzig/Halle.",
+      "Die S-Bahnen halten unterhalb des Flughafen-Abfertigungsgeb&auml;udes."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": [
+      "Leipzig/Halle Airport railway station is located directly under the passenger terminal",
+      "Two lines of the S-Bahn Mitteldeutschland connect directly to Leipzig and Halle"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "twelfth largest, more than 2.19 million passengers in 2024",
+   "verdict": "cut",
+   "wasBefore": "For passengers it is Germany's twelfth largest, with more than 2.19 million in 2024",
+   "why": "Superseded by the full-year 2025 figures from ADV and Eurostat, which also move it to fifteenth. Corrected (see above)."
+  },
+  {
+   "claim": "European leisure routes",
+   "verdict": "cut",
+   "wasBefore": "mostly on European leisure routes",
+   "why": "Two of the busiest holiday routes (Hurghada and Marsa Alam) are in Egypt, and Antalya is the busiest of all. Softened to 'leisure routes' (see above)."
+  },
+  {
+   "claim": "DHL Aviation's main European hub",
+   "verdict": "cut",
+   "wasBefore": "It is DHL Aviation's main European hub",
+   "why": "Wikipedia alone tonight. DHL's own pages answered 502, the Leipzig newspaper (lvz.de) is blocked by this environment's egress policy, and the airport's cargo pages read do not name DHL. AeroLogic's page names DHL Express only as its co-owner."
+  },
+  {
+   "claim": "more freight-only movements than any other EU airport",
+   "verdict": "cut",
+   "wasBefore": "and it records more freight-only movements than any other airport in the European Union",
+   "why": "Wikipedia alone. Neither ADV nor Eurostat, as read, gives freight-only movements by airport across the EU."
+  },
+  {
+   "claim": "1,383,319 tonnes in 2024; fourth in Europe",
+   "verdict": "cut",
+   "wasBefore": "In 2024 it handled 1,383,319 tonnes, second in Germany behind Frankfurt and fourth in Europe.",
+   "why": "The 2024 tonnage is superseded by 2025 (see above). 'Fourth in Europe' rests on Wikipedia alone; the airport's own page says only 'one of the top cargo hubs in Europe'."
+  },
+  {
+   "claim": "compact terminal, short walks, car park built in, a pier of six jet bridges; immigration but no international transfer area",
+   "verdict": "cut",
+   "wasBefore": "The layout is kind to a tired client. The terminal is compact with short walking distances, the main car park is built into it, and a pier of six jet bridges runs off it. Note that there is immigration for international arrivals but no international transfer area.",
+   "why": "Wikipedia alone. The airport's pages read tonight (home, cargo) do not describe the terminal."
+  },
+  {
+   "claim": "Intercity trains on the Dresden to Cologne route",
+   "verdict": "cut",
+   "wasBefore": "with Intercity trains on the Dresden to Cologne route",
+   "why": "Wikipedia alone. The S-Bahn operator's page names only its own lines, and Deutsche Bahn's station page was not found at the address tried (404)."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "One airport for two cities",
+   "why": "Framing for the sourced location that follows (between Leipzig and Halle, in two states)."
+  },
+  {
+   "text": "Freight is the real story.",
+   "why": "The old text's judgement, kept: about 1.39 million tonnes of cargo against about 2.1 million passengers, and second in Germany for cargo."
+  }
+ ],
+ "tracerOk": {}
+}
