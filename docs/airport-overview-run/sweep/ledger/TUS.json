@@ -1,0 +1,344 @@
+{
+ "iata": "TUS",
+ "id": "recxkSKZn3zUGaltd",
+ "name": "Tucson International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Tucson_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Arizona's second busiest airport after Phoenix Sky Harbor, 8 miles south of downtown Tucson. It handled 1,959,789 enplanements in 2024 and flies non-stop to 23 destinations across the United States and Canada, so it is a regional airport rather than a gateway.\n\nOne layout detail to flag. Concourse C is not in the main terminal at all. It is a separate building to the west with a single gate, so a client sent to C needs directing to a different building. Concourses A and B, with nine and eleven gates, are in the main terminal.\n\nInside the main terminal, baggage claim and pick-up are on the ground level and ticketing, security and the gates are above.\n\nSun Tran bus routes 11 and 25 serve the airport. Two runways operate on a 7,938 acre site at an elevation of 2,643 feet.",
+ "after": "Arizona's second busiest airport after Phoenix Sky Harbor, 8 miles south of downtown Tucson. Preliminary FAA figures show just under 1.9 million passengers boarding flights here in 2025. The airport lists nonstop flights to 16 destinations, all in the United States, so it is a regional airport rather than a gateway.\n\nOne layout detail to flag. Concourse C is not in the main terminal at all, so a client sent to C needs directing to a different building. Concourses A and B are in the main terminal.\n\nInside the main terminal, baggage claim and pick-up are on the ground level and ticketing, security and the gates are above.\n\nSun Tran bus routes 11 and 25 serve the airport. Two runways operate at an elevation of 2,643 feet.",
+ "claims": [
+  {
+   "claim": "Arizona's second busiest airport after Phoenix Sky Harbor",
+   "verdict": "confirmed",
+   "inAfter": "Arizona's second busiest airport after Phoenix Sky Harbor",
+   "note": "FAA 2025 rank order for Arizona: Phoenix Sky Harbor 13th (25,094,817 boardings), Tucson 77th (1,891,548), Mesa Gateway 104th (1,032,493).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the second busiest airport in Arizona, after Phoenix Sky Harbor International Airport."
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration (FAA)",
+     "dated": "2026-07-08",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "July 8, 2026",
+      "13 WP AZ PHX Phoenix Phoenix Sky Harbor International P L 25,094,817 25,595,723 -1.96%",
+      "77 WP AZ TUS Tucson International Airport Tucson International P S 1,891,548 1,959,789 -3.48%",
+      "104 WP AZ IWA Mesa Mesa Gateway P S 1,032,493 978,296 5.54%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "8 miles south of downtown Tucson",
+   "verdict": "confirmed",
+   "inAfter": "8 miles south of downtown Tucson",
+   "note": "Coordinates: 11.9 km (7.4 miles) in a straight line at 185 degrees, which is south; ratio 1.08.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "8 miles (7.0 nmi; 13 km) south of downtown Tucson"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 11.9 km (7.4 miles)",
+      "Bearing from the city centre: 185 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the FAA's preliminary figures: just under 1.9 million boardings in 2025",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FAA",
+   "inAfter": "Preliminary FAA figures show just under 1.9 million passengers boarding flights here in 2025.",
+   "note": "Replaces '1,959,789 enplanements in 2024', which is the same FAA table's 2024 column; 2025 is 1,891,548, down 3.48 per cent. Boardings (enplanements) only, about half of total passengers, as the old text also counted. Attributed to the FAA, as for Kansas City and Kahului, because the operator's own calendar-2025 total was not found on its site.",
+   "sources": [
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration (FAA)",
+     "dated": "2026-07-08",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "July 8, 2026",
+      "77 WP AZ TUS Tucson International Airport Tucson International P S 1,891,548 1,959,789 -3.48%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the airport lists nonstop flights to 16 destinations, all in the United States",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport lists nonstop flights to 16 destinations, all in the United States",
+   "note": "Was '23 destinations across the United States and Canada' (Wikipedia, undated). The operator's live list has 16 cities, four of them seasonal (Chicago Midway, Dallas Love Field, Minneapolis-Saint Paul and Orange County), and no Canadian or Mexican city; its airline page lists six airlines, none of them Canadian. Attributed to the airport because no second organisation publishes a current count.",
+   "sources": [
+    {
+     "file": "op-nonstop",
+     "org": "Tucson Airport Authority (operator, flytucson.com)",
+     "quote": [
+      "Nonstop Destinations",
+      "Atlanta",
+      "Chicago- Midway (seasonal)",
+      "Chicago- O'Hare",
+      "Dallas- Love Field (seasonal)",
+      "Dallas/Fort Worth",
+      "Denver",
+      "Houston- George Bush Intercontinental",
+      "Las Vegas",
+      "Los Angeles",
+      "Minneapolis- Saint Paul (seasonal)",
+      "Orange County (seasonal)",
+      "Portland",
+      "Salt Lake City",
+      "San Diego",
+      "San Francisco",
+      "Seattle"
+     ]
+    },
+    {
+     "file": "op-airlines",
+     "org": "Tucson Airport Authority (operator, flytucson.com)",
+     "quote": "Tucson International Airport (TUS) has service from six airlines, including year-round service from the five largest US airlines."
+    }
+   ]
+  },
+  {
+   "claim": "Concourses A and B are in the main terminal",
+   "verdict": "confirmed",
+   "inAfter": "Concourses A and B are in the main terminal",
+   "note": "The operator's pages are live pages that carry no date of their own (saved 23 September 2026); the layout has not changed since the concourses were renumbered A and B in 2008 (Wikipedia).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Tucson International Airport has one terminal. It contains three concourses",
+      "Concourse C is in a separate building west of the main terminal"
+     ]
+    },
+    {
+     "file": "op-tsa",
+     "org": "Tucson Airport Authority (operator, flytucson.com)",
+     "quote": "Checkpoints for the A and B concourses in the main terminal open by 4 a.m. daily"
+    },
+    {
+     "file": "op-faqs",
+     "org": "Tucson Airport Authority (operator, flytucson.com)",
+     "quote": "located near the gates on the two concourses of the main terminal"
+    }
+   ]
+  },
+  {
+   "claim": "the airport says A and B are not connected after security, so use the checkpoint for your gate",
+   "verdict": "cut",
+   "note": "New to the text, in place of the gate counts it cuts ('with nine and eleven gates', Wikipedia alone). The old text flagged only Concourse C, which no airline currently lists; the airport's own security page says the trap is between A and B, each with its own checkpoint. Attributed to the airport, whose page it is. A judgement call for Andy: drop this sentence if it counts as a new fact.",
+   "sources": [
+    {
+     "file": "op-tsa",
+     "org": "Tucson Airport Authority (operator, flytucson.com)",
+     "quote": [
+      "There are two Transportation Security Administration (TSA) checkpoints at Tucson International Airport; at the entrances to the A and B gates.",
+      "The concourses are not connected post-security so it is important to use the checkpoint for your gate.",
+      "No, the concourses at Tucson International Airport are not connected beyond the TSA checkpoints."
+     ]
+    }
+   ],
+   "why": "Held back in review (23 Sep): verified from the airport's own page, but new to the text rather than a replacement (the gate counts it stood in for were unconfirmed, not stale), so the sweep's rule keeps it out. Useful to agents; Andy can add it. Was to read: \"Concourses A and B are in the main terminal, but the airport says they are not connected after security, so clients must use the checkpoint for their own gate.\""
+  },
+  {
+   "claim": "Concourse C is a separate building, not in the main terminal",
+   "verdict": "confirmed",
+   "inAfter": "Concourse C is not in the main terminal at all, so a client sent to C needs directing to a different building.",
+   "note": "The operator treats the C gates as a separate terminal with its own checkpoint, open only when flights are scheduled from it; its airline page puts all six airlines at A and B gates. The operator's pages are live pages that carry no date of their own (saved 23 September 2026).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Concourse C is in a separate building west of the main terminal"
+    },
+    {
+     "file": "op-tsa",
+     "org": "Tucson Airport Authority (operator, flytucson.com)",
+     "quote": "The checkpoint for the C gates is open only when flights are scheduled from that terminal."
+    },
+    {
+     "file": "op-faqs",
+     "org": "Tucson Airport Authority (operator, flytucson.com)",
+     "quote": [
+      "located near the gates on the two concourses of the main terminal",
+      "These services are not available at the C gates.",
+      "From the C gates, the most direct route is to cross the roadway in front of the terminal"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "baggage claim and pick-up on the ground level; ticketing, security and gates above",
+   "verdict": "confirmed",
+   "inAfter": "baggage claim and pick-up are on the ground level and ticketing, security and the gates are above",
+   "note": "The operator puts baggage claim and the pick-up roadways on the lower level, ticketing on the second level, and the checkpoints on the departures level, with escalators down from the concourses to baggage claim.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "The ground level is designated for baggage claim and passenger pick-up.",
+      "The upper level includes airline ticketing, concessions, airline gates and TSA."
+     ]
+    },
+    {
+     "file": "op-faqs",
+     "org": "Tucson Airport Authority (operator, flytucson.com)",
+     "quote": [
+      "can be met in baggage claim on the lower level at the foot of escalators coming down from the A Concourse",
+      "pre-security on the second level of the terminal. One is in the airline ticketing lobby area"
+     ]
+    },
+    {
+     "file": "op-tsa",
+     "org": "Tucson Airport Authority (operator, flytucson.com)",
+     "quote": "enter the B gates at the west end of the departures level of the main terminal"
+    }
+   ]
+  },
+  {
+   "claim": "Sun Tran routes 11 and 25 serve the airport",
+   "verdict": "confirmed",
+   "inAfter": "Sun Tran bus routes 11 and 25 serve the airport.",
+   "note": "Sun Tran's own August 2026 timetables for both routes list Tucson International Airport. The operator adds that Sun Tran is still fare-free (not added).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Public transportation to the airport is Sun Tran bus routes No. 11 and No. 25."
+    },
+    {
+     "file": "op-transit",
+     "org": "Tucson Airport Authority (operator, flytucson.com)",
+     "quote": [
+      "Two routes on Sun Tran, the region's public transit system, make regular stops at Tucson International Airport.",
+      "Route 11 - Alvernon Way",
+      "Route 25 - South Park Ave"
+     ]
+    },
+    {
+     "file": "suntran-rt11",
+     "org": "Sun Tran (City of Tucson transit)",
+     "dated": "2026-08 (timetable)",
+     "quote": [
+      "Route 11 Alvernon/Ajo",
+      "Tucson International Airport",
+      "August 2026"
+     ]
+    },
+    {
+     "file": "suntran-rt25",
+     "org": "Sun Tran (City of Tucson transit)",
+     "dated": "2026-08 (timetable)",
+     "quote": [
+      "Route 25 S. Park Avenue",
+      "Tucson International Airport",
+      "August 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "two runways",
+   "verdict": "confirmed",
+   "inAfter": "Two runways operate",
+   "note": "Still two in use: the old general aviation runway (11R/29L) closed in November 2023 and its replacement, 12R/30L, is being built; the operator now plans it for 2027, subject to FAA funding (not added).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It has two asphalt runways"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "dated": "2026-09-23 (OurAirports data fetched, per the file's URL line)",
+     "quote": [
+      "Runway 04/22: 2,134 m (7,000 ft), ASP",
+      "Runway 12/30: 3,352 m (10,996 ft), ASP",
+      "Runways listed: 2"
+     ]
+    },
+    {
+     "file": "op-ase",
+     "org": "Tucson Airport Authority (operator, flytucson.com)",
+     "quote": "Runway 12R/30L is currently planned for completion in 2027, pending additional funding from the FAA."
+    }
+   ]
+  },
+  {
+   "claim": "elevation 2,643 feet",
+   "verdict": "confirmed",
+   "inAfter": "at an elevation of 2,643 feet",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "at an elevation of 2,643 ft (806 m)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "dated": "2026-09-23 (OurAirports data fetched, per the file's URL line)",
+     "quote": "elevation 2,643 ft (806 m)"
+    }
+   ]
+  },
+  {
+   "claim": "1,959,789 enplanements in 2024",
+   "verdict": "cut",
+   "wasBefore": "It handled 1,959,789 enplanements in 2024",
+   "why": "Superseded: the FAA's 2025 figure (1,891,548) is out, and replaces it."
+  },
+  {
+   "claim": "non-stop to 23 destinations across the United States and Canada",
+   "verdict": "cut",
+   "wasBefore": "flies non-stop to 23 destinations across the United States and Canada",
+   "why": "Out of date: the operator now lists 16 destinations, none in Canada. Replaced by the airport's own count, attributed."
+  },
+  {
+   "claim": "Concourse C to the west with a single gate",
+   "verdict": "cut",
+   "wasBefore": "It is a separate building to the west with a single gate",
+   "why": "The separate building is kept (Wikipedia, operator). 'To the west' and 'a single gate' rest on Wikipedia alone; the operator speaks of 'the C gates'."
+  },
+  {
+   "claim": "nine and eleven gates",
+   "verdict": "cut",
+   "wasBefore": "with nine and eleven gates",
+   "why": "Wikipedia alone. The operator's airline page shows gates up to A9 and B11 in use but gives no counts."
+  },
+  {
+   "claim": "7,938 acre site",
+   "verdict": "cut",
+   "wasBefore": "on a 7,938 acre site",
+   "why": "Wikipedia alone; no second source for the acreage on the operator's pages."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so it is a regional airport rather than a gateway",
+   "why": "The old text's judgement, kept: it follows from the airport's own list of 16 domestic destinations."
+  },
+  {
+   "text": "One layout detail to flag.",
+   "why": "The old text's framing, kept; it introduces the sourced Concourse C point."
+  }
+ ],
+ "tracerOk": {}
+}

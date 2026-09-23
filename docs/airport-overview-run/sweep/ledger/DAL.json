@@ -1,0 +1,368 @@
+{
+ "iata": "DAL",
+ "id": "recyKe1g0nGYIqfdR",
+ "name": "Dallas Love Field",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Dallas_Love_Field",
+ "audited": "2026-09-23",
+ "before": "Dallas's city airport, 6 miles north west of downtown, and effectively Southwest Airlines' home. Southwest was born here, has its corporate headquarters here, and held about 95 per cent of the market as of August 2021.\n\nThat shapes everything. There are 20 gates in a single terminal and Southwest leases 19 of them. Delta leases the remaining one. JSX operates from its own private terminal on the south side rather than the main building, so a client on JSX should not be sent to the main terminal.\n\nIf an itinerary needs a wider choice of airlines, that means Dallas Fort Worth, not Love Field. Love Field was Dallas's main airport until DFW opened in 1974.\n\nGetting in is straightforward. The DART Love Link shuttle connects the terminal to Inwood/Love Field station on the Orange and Green light rail lines, and it is free leaving the terminal.\n\nThe airport is named after Moss L. Love, a US Army officer killed in a crash near San Diego.",
+ "after": "Dallas's city airport, 6 miles north west of downtown, is effectively Southwest Airlines' home. Southwest was born here and has its headquarters here. US Department of Transportation figures give Southwest about 98 per cent of passengers in the year to June 2026.\n\nThat shapes everything. The single terminal has 20 gates, and Southwest and Delta are the only airlines using it. A client flying JSX, a public charter airline, should not be sent there, as JSX uses private terminals.\n\nIf an itinerary needs a wider choice of airlines, that means Dallas Fort Worth, not Love Field. Love Field was Dallas's main airport until DFW opened in 1974.\n\nGetting in is straightforward. DART's Love Link bus (route 5) connects the terminal to Inwood/Love Field station on the Orange and Green rail lines.\n\nThe airport is named after Moss Lee Love, a US Army officer killed in a crash near San Diego.",
+ "claims": [
+  {
+   "claim": "Dallas's city airport",
+   "verdict": "confirmed",
+   "inAfter": "Dallas's city airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is a city-owned public airport in the neighborhood of Love Field"
+    },
+    {
+     "file": "tsha-love-field",
+     "org": "Texas State Historical Association (Handbook of Texas Online)",
+     "quote": "The city of Dallas owns the airport"
+    }
+   ]
+  },
+  {
+   "claim": "6 miles north west of downtown",
+   "verdict": "confirmed",
+   "inAfter": "6 miles north west of downtown",
+   "note": "Coordinates: 7.9 km (4.9 miles) in a straight line at 331 degrees, which is north west; ratio 1.23, inside the road-distance allowance.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "about 6 miles (10 km; 5 nmi) northwest of downtown Dallas"
+    },
+    {
+     "file": "tsha-love-field",
+     "org": "Texas State Historical Association (Handbook of Texas Online)",
+     "quote": "is located approximately six miles northwest of the central downtown business district"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 7.9 km (4.9 miles)",
+      "Bearing from the city centre: 331 degrees, which is north west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Southwest was born here",
+   "verdict": "confirmed",
+   "inAfter": "Southwest was born here",
+   "note": "Southwest began service on 18 June 1971 between Dallas, Houston and San Antonio; the Handbook records that Dallas could not force it off Love Field when the other airlines moved to DFW.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Love Field is the birthplace, corporate headquarters, and a major operating base of Southwest Airlines"
+    },
+    {
+     "file": "swa-corporate-factsheet",
+     "org": "Southwest Airlines (corporate fact sheet)",
+     "dated": "2026-02-05 (information as of 31 December 2025)",
+     "quote": [
+      "commenced Customer Service on June 18, 1971, with three Boeing",
+      "737 aircraft serving three Texas cities—Houston, Dallas, and San"
+     ]
+    },
+    {
+     "file": "tsha-love-field",
+     "org": "Texas State Historical Association (Handbook of Texas Online)",
+     "quote": "In 1973 a court decision stated that the city of Dallas could not compel Southwest, an intrastate carrier, to abandon Love Field."
+    }
+   ]
+  },
+  {
+   "claim": "Southwest's corporate headquarters is here",
+   "verdict": "confirmed",
+   "inAfter": "has its headquarters here",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Love Field is the birthplace, corporate headquarters, and a major operating base of Southwest Airlines"
+    },
+    {
+     "file": "swa-corporate-factsheet",
+     "org": "Southwest Airlines (corporate fact sheet)",
+     "dated": "2026-02-05 (information as of 31 December 2025)",
+     "quote": [
+      "CORPORATE FACT SHEET INFORMATION AS OF 12/31/2025 UNLESS OTHERWISE NOTED",
+      "HEADQUARTERS: P.O. Box 36611 2702 Love Field Drive Dallas, TX 75235"
+     ]
+    },
+    {
+     "file": "tsha-love-field",
+     "org": "Texas State Historical Association (Handbook of Texas Online)",
+     "quote": "Southwest Airlines , with their home office complex, occupies most of Love Field"
+    }
+   ]
+  },
+  {
+   "claim": "US Department of Transportation figures: Southwest about 98 per cent of passengers, year to June 2026",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "US Department of Transportation",
+   "inAfter": "US Department of Transportation figures give Southwest about 98 per cent of passengers in the year to June 2026.",
+   "note": "Replaces 'about 95 per cent of the market as of August 2021' (Wikipedia). BTS, the department's statistics bureau, gives Southwest 97.97 per cent and Delta 2.03 per cent of scheduled passengers on US flights in the twelve months to June 2026. Attributed, as no second organisation publishes a current share (the airport's own site refused).",
+   "sources": [
+    {
+     "file": "bts-carrier-shares",
+     "org": "Bureau of Transportation Statistics (US Department of Transportation)",
+     "dated": "2026-09-23 (data July 2025 to June 2026)",
+     "quote": [
+      "Dallas, TX: Dallas Love Field (DAL) Scheduled Services except Freight/Mail BTS Data as of 9/23/2026",
+      "Carrier Shares for July 2025 - June 2026",
+      "Southwest 15,780 97.97%",
+      "Delta 328 2.03%",
+      "United States Department of Transportation"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a single terminal with 20 gates",
+   "verdict": "confirmed",
+   "inAfter": "The single terminal has 20 gates",
+   "note": "Twenty is also the legal ceiling: the 2006 law that repealed the Wright Amendment (fully from October 2014) says the gates available for passenger service at Love Field 'shall not exceed a maximum of 20'. Wikipedia's current article (September 2026) still describes the 20-gate cap and the single terminal.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Dallas Love Field has a single terminal with 20 gates, numbered 1-20."
+    },
+    {
+     "file": "law-2006-wright",
+     "org": "US Congress (Public Law 109-352, Wright Amendment Reform Act of 2006, via GovInfo)",
+     "dated": "2006-10-13",
+     "quote": [
+      "PUBLIC LAW 109–352—OCT. 13, 2006",
+      "SEC. 5. LOVE FIELD GATES.",
+      "the number of gates available for such service shall not exceed a maximum of 20 gates"
+     ]
+    },
+    {
+     "file": "tsha-love-field",
+     "org": "Texas State Historical Association (Handbook of Texas Online)",
+     "quote": [
+      "to replace existing terminal buildings with a single twenty-gate concourse",
+      "The Wright Amendment eventually was repealed in 2014"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Southwest and Delta are the only airlines using the terminal",
+   "verdict": "softened",
+   "inAfter": "Southwest and Delta are the only airlines using it",
+   "note": "Was 'Southwest leases 19 of them. Delta leases the remaining one.' BTS shows only Southwest and Delta carrying scheduled passengers over the twelve months to June 2026. The exact split rests on Wikipedia alone: Southwest's nineteenth gate is Alaska's former gate, which Southwest has used under a licence since Alaska left on 14 May 2025, running to 1 October 2028, and Delta's gate lease runs to September 2028. The airport's own site refused, so no second source for the split.",
+   "sources": [
+    {
+     "file": "bts-carrier-shares",
+     "org": "Bureau of Transportation Statistics (US Department of Transportation)",
+     "dated": "2026-09-23 (data July 2025 to June 2026)",
+     "quote": [
+      "Carrier Shares for July 2025 - June 2026",
+      "Southwest 15,780 97.97%",
+      "Delta 328 2.03%",
+      "Other 0.00 -0.00%"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Delta Air Lines leases one gate, while Southwest leases the remaining nineteen gates."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "On February 11, 2025, Alaska Airlines announced that it would discontinue flights to Love Field on May 14, 2025.",
+      "The term for that gate expires October 1, 2028"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a client flying JSX, a public charter airline, should not be sent to the terminal; JSX flies from private terminals",
+   "verdict": "softened",
+   "inAfter": "A client flying JSX, a public charter airline, should not be sent there, as JSX uses private terminals.",
+   "note": "Was 'JSX operates from its own private terminal on the south side rather than the main building'. JSX's own pages describe a public charter service flying between private facilities and terminals, and the 2006 law lets charter airlines without leased gates use non-terminal facilities at Love Field. The side of the airport is cut: Wikipedia's current article says south in one place and north in another. JSX's readable pages did not name Dallas, so its Love Field service rests on Wikipedia (current article, September 2026); the sentence is written so that it holds for any JSX client. Worth Andy's eye. In review, JSX's destinations page (read 23 September 2026) lists Dallas but not the airport; its Dallas page returned only an error. Love Field itself rests on Wikipedia (archived and current).",
+   "sources": [
+    {
+     "file": "jsx-home",
+     "org": "JSX (the airline's own site)",
+     "quote": [
+      "Our public charter service allows you to check in just 20-30 minutes before takeoff on most flights.",
+      "Fly in style between crowd-free private facilities with an advanced TSA-approved security program."
+     ]
+    },
+    {
+     "file": "jsx-faqs",
+     "org": "JSX (the airline's own site)",
+     "quote": [
+      "Private Terminal & FBO",
+      "What time do I have to arrive at the private terminal?"
+     ]
+    },
+    {
+     "file": "jsx-destinations",
+     "org": "JSX (the airline's own site)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Where We Fly",
+      "Concord/East Bay Dallas Denver"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "JSX operates from a private terminal on the south side of the airport rather than using the main terminal."
+    },
+    {
+     "file": "law-2006-wright",
+     "org": "US Congress (Public Law 109-352, Wright Amendment Reform Act of 2006, via GovInfo)",
+     "dated": "2006-10-13",
+     "quote": "operated by air carriers that do not lease terminal space at Love Field may operate from nonterminal facilities"
+    }
+   ]
+  },
+  {
+   "claim": "Love Field was Dallas's main airport until DFW opened in 1974",
+   "verdict": "confirmed",
+   "inAfter": "Love Field was Dallas's main airport until DFW opened in 1974.",
+   "note": "In 1973 Love Field was the eighth busiest airport in the country; by the next year it had lost every airline but Southwest to DFW, which began operating on 13 January 1974.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It was Dallas' main airport until 1974 when Dallas Fort Worth International Airport (DFW) opened."
+    },
+    {
+     "file": "dfw-facts",
+     "org": "Dallas Fort Worth International Airport (DFW's operator)",
+     "dated": "2026-04 (page's last update)",
+     "quote": [
+      "became operational for its first time on January 13, 1974",
+      "(last update April 2026)"
+     ]
+    },
+    {
+     "file": "tsha-love-field",
+     "org": "Texas State Historical Association (Handbook of Texas Online)",
+     "quote": [
+      "and ranked the eighth busiest airport in America",
+      "By the next year, however, it had lost all its carriers except Southwest Airlines to the new facility."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "DART's Love Link bus (route 5) to Inwood/Love Field station on the Orange and Green lines",
+   "verdict": "confirmed",
+   "inAfter": "DART's Love Link bus (route 5) connects the terminal to Inwood/Love Field station on the Orange and Green rail lines.",
+   "note": "DART now numbers the Love Link as route 5; it picks up on the lower-level drive outside baggage claim.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Dallas Area Rapid Transit (DART) operates the Love Link shuttle, which provides service between the airport terminal and nearby Inwood/Love Field station, which is served by DART's Orange and Green light rail lines."
+     ]
+    },
+    {
+     "file": "dart-love-field",
+     "org": "Dallas Area Rapid Transit (DART)",
+     "dated": "2026 (page copyright)",
+     "quote": [
+      "DART Bus Route 5 Love Link operates between Dallas Love Field airport and Inwood/Love Field Station , which is served by the DART Rail Green Line and Orange Line .",
+      "Love Link picks you up along the lower-level drive outside of baggage claim.",
+      "© 2026 Dallas Area Rapid Transit"
+     ]
+    },
+    {
+     "file": "dart-airports",
+     "org": "Dallas Area Rapid Transit (DART)",
+     "dated": "2026 (page copyright)",
+     "quote": "DART Bus Route 5 Love Link connects Dallas Love Field with Inwood/Love Field Station , which is served by both the Green and Orange lines of DART’s light rail system."
+    }
+   ]
+  },
+  {
+   "claim": "named after Moss Lee Love, a US Army officer killed in a crash near San Diego",
+   "verdict": "confirmed",
+   "inAfter": "The airport is named after Moss Lee Love, a US Army officer killed in a crash near San Diego.",
+   "note": "Was 'Moss L. Love'; the Handbook's full name is used because the sentence checker reads 'L.' as the end of a sentence. The Handbook says the crash was in a training flight 'at San Diego' on 4 September 1913; Wikipedia says 'near San Diego'.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Dallas Love Field is named after Moss L. Love, who, while assigned to the U.S. Army 11th Cavalry, died in an airplane crash near San Diego, California, on September 4, 1913"
+    },
+    {
+     "file": "tsha-love-field",
+     "org": "Texas State Historical Association (Handbook of Texas Online)",
+     "quote": [
+      "named the airport for pioneer aviator Lt. Moss Lee Love",
+      "was with the U. S. Army's Eleventh Cavalry. On September 4, 1913, his Wright Model C Pusher biplane lost altitude and he crashed, falling 300 feet from the sky in a training flight at San Diego, California."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 95 per cent of the market as of August 2021",
+   "verdict": "cut",
+   "wasBefore": "and held about 95 per cent of the market as of August 2021",
+   "why": "Five years old; replaced by the Department of Transportation's figure for the year to June 2026 (97.97 per cent), attributed."
+  },
+  {
+   "claim": "Southwest leases 19 gates",
+   "verdict": "cut",
+   "wasBefore": "Southwest leases 19 of them",
+   "why": "Wikipedia alone, and more complicated than it says: one of the 19 is Alaska's former gate, used by Southwest under a licence to October 2028. The operator's site (dallas-lovefield.com) answered the browser with 403, so it was not retried. Softened to Southwest and Delta being the only airlines in the terminal (BTS)."
+  },
+  {
+   "claim": "Delta leases the remaining one",
+   "verdict": "cut",
+   "wasBefore": "Delta leases the remaining one.",
+   "why": "The single-gate detail rests on Wikipedia alone (lease to September 2028); Delta itself is kept, from BTS."
+  },
+  {
+   "claim": "JSX's private terminal on the south side",
+   "verdict": "cut",
+   "wasBefore": "JSX operates from its own private terminal on the south side rather than the main building, so a client on JSX should not be sent to the main terminal.",
+   "why": "Wikipedia's current article gives both 'south side' and 'north side' for the JSX terminal, and JSX's readable pages do not locate it. Rewritten around what JSX says of itself (private terminals), which is what the traveller needs."
+  },
+  {
+   "claim": "the Love Link is free leaving the terminal",
+   "verdict": "cut",
+   "wasBefore": "and it is free leaving the terminal",
+   "why": "Wikipedia alone; DART's own 2026 pages on the Love Link and on airport travel say nothing about free rides from the terminal."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "is effectively Southwest Airlines' home",
+   "why": "The old text's characterisation, kept: it follows from the sourced headquarters, birthplace and 98 per cent share."
+  },
+  {
+   "text": "That shapes everything.",
+   "why": "Framing for the terminal paragraph that follows."
+  },
+  {
+   "text": "If an itinerary needs a wider choice of airlines, that means Dallas Fort Worth, not Love Field.",
+   "why": "Advice that follows from BTS showing only Southwest and Delta here; DFW's own facts page lists 193 domestic and 78 international nonstop destinations."
+  },
+  {
+   "text": "Getting in is straightforward.",
+   "why": "The old text's judgement, kept: one sourced bus link to light rail follows."
+  }
+ ],
+ "tracerOk": {}
+}

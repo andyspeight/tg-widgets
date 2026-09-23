@@ -1,0 +1,331 @@
+{
+ "iata": "CMH",
+ "id": "recuNAMFkkx68Mejf",
+ "name": "John Glenn Columbus International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/John_Glenn_Columbus_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Columbus's airport, 6 miles east of downtown, with 148 non-stop flights a day to 31 airports.\n\nOne thing matters more than anything else here. The three concourses are not connected airside. Each has its own security checkpoint, so moving between them means leaving security and clearing again. A client connecting between airlines in different concourses needs to know that before they arrive.\n\nConcourse A has 7 gates and is mainly Southwest. Concourse B has 16 gates for American, Air Canada and United. Concourse C has 11 gates for Alaska, Breeze, Delta, Frontier and Sun Country, and is also where international arrivals without pre-clearance are processed.\n\nThe code CMH comes from Columbus Municipal Hangar, the airport's original name. It was renamed in 2016 after John Glenn, the astronaut and four-term senator.",
+ "after": "Columbus's main airport, 6 miles east of downtown. The airport says 11 airlines fly nonstop to 53 destinations.\n\nOne thing matters more than anything else here. The three concourses are not connected airside. Each has its own security checkpoint, so moving between them means leaving security and clearing again. A client connecting between airlines in different concourses needs to know that before they arrive.\n\nSouthwest uses Concourse A, while American and United use Concourse B. The airport lists Air Canada, Alaska, Breeze, Delta, Frontier and Sun Country in Concourse C.\n\nIt was called Port Columbus International Airport until 2016, when it was renamed after John Glenn, the astronaut and senator.",
+ "claims": [
+  {
+   "claim": "Columbus's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Columbus's main airport",
+   "note": "Was 'Columbus's airport'. 'Main' added because Columbus has a second airport with scheduled passenger flights, Rickenbacker (Allegiant only), run by the same authority. The FAA's 2025 table has 4,396,625 boardings here against 170,808 at Rickenbacker.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "is an international airport located 6 miles (9.7 km) east of downtown Columbus, Ohio",
+      "which also oversees operations at Rickenbacker International Airport"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "2026-07-08",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "July 8, 2026",
+      "49 GL OH CMH Columbus John Glenn Columbus International P M 4,396,625 4,387,395 0.21%",
+      "199 GL OH LCK Columbus Rickenbacker International P N 170,808 143,035 19.42%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "6 miles east of downtown",
+   "verdict": "confirmed",
+   "inAfter": "6 miles east of downtown",
+   "note": "Coordinates: 10.0 km (6.2 miles) in a straight line from the GeoNames centre, ratio 0.97. The bearing is 66 degrees, which is north east on the 8-point rose; east is the adjacent point, 24 degrees off, inside the tolerance.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "located 6 miles (9.7 km) east of downtown Columbus"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 10.0 km (6.2 miles)",
+      "Bearing from the city centre: 66 degrees, which is north east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the airport says 11 airlines fly nonstop to 53 destinations",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport says 11 airlines fly nonstop to 53 destinations.",
+   "note": "Replaces '148 non-stop flights a day to 31 airports' (undated Wikipedia figure; see the cut). The operator's About page, a live page read 23 September 2026. Attributed, as no second organisation gives a current count. The operator's article of 22 September 2026 gives 'more than 55' for Columbus's two airports together, which is consistent (Rickenbacker adds its own Allegiant routes).",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Columbus Regional Airport Authority (operator, flycolumbus.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "provides access to 53 nonstop destinations with 11 airlines"
+    },
+    {
+     "file": "op-55-destinations",
+     "org": "Columbus Regional Airport Authority (operator, flycolumbus.com)",
+     "dated": "2026-09-22",
+     "quote": [
+      "September 22, 2026",
+      "connects travelers to more than 55 nonstop destinations"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 9 million passengers in 2025",
+   "verdict": "cut",
+   "note": "Replaces '148 non-stop flights a day to 31 airports' (see the cut) as the measure of how busy it is, as was done for Austin and Detroit. TOTAL passengers, arriving plus departing: 9,014,264 in 2025 on the operator's December 2025 report, which its new-terminal site calls a record. The FAA's preliminary CY2025 table counts 4,396,625 enplanements (boardings only, about half of total passengers; the operator's own enplaned count is 4,503,847), in line with it.",
+   "sources": [
+    {
+     "file": "op-stats-dec2025",
+     "org": "Columbus Regional Airport Authority (operator, flycolumbus.com)",
+     "dated": "2026-01 (December 2025 report, calendar-year totals)",
+     "quote": [
+      "Monthly Statistics Report",
+      "December 2025",
+      "CMH TOTAL PASSENGERS 604,516 591,495 782,766 728,100 816,399 844,161 844,823 790,204 778,636 827,219 700,651 705,294 9,014,264",
+      "CMH ENPLANED 293,942 295,677 394,229 356,492 411,729 423,190 418,873 386,891 389,255 413,228 353,939 366,402 4,503,847"
+     ]
+    },
+    {
+     "file": "cmhnext-home",
+     "org": "Columbus Regional Airport Authority (operator, CMH Next new-terminal site, cmhnext.com)",
+     "quote": "With a record 9 million passengers in 2025"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "2026-07-08",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "49 GL OH CMH Columbus John Glenn Columbus International P M 4,396,625 4,387,395 0.21%"
+     ]
+    }
+   ],
+   "why": "Held back in review (23 Sep): verified with two sources, but a passenger total would be a new measure rather than a replacement for the stale flight and destination count, as at Richmond, Rochester and Omaha. The like-for-like replacement is the airport's own destination count, attributed. Andy can add it; the sources stay listed here. Was to read: \"It handled about 9 million passengers in 2025.\""
+  },
+  {
+   "claim": "the three concourses are not connected airside",
+   "verdict": "confirmed",
+   "inAfter": "The three concourses are not connected airside.",
+   "note": "The operator's own words are that passengers 'can only access the amenities within their specific concourse'. Still true in September 2026: the single-concourse terminal that will end it is due in early 2029 (see the report).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The three concourses each have their own TSA security checkpoint, and are not connected airside (post-security)."
+    },
+    {
+     "file": "cmhnext-faqs",
+     "org": "Columbus Regional Airport Authority (operator, CMH Next new-terminal site, cmhnext.com)",
+     "dated": "2026 (page copyright)",
+     "quote": [
+      "Today, having three separate concourses and security checkpoints means passengers can only access the amenities within their specific concourse",
+      "© 2026 Columbus Regional Airport Authority"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "each concourse has its own security checkpoint, so changing concourse means clearing security again",
+   "verdict": "confirmed",
+   "inAfter": "Each has its own security checkpoint, so moving between them means leaving security and clearing again.",
+   "note": "The second half follows from the two sourced facts: separate checkpoints, and no airside link between the concourses. The operator's security page gives separate TSA checkpoint hours for each concourse.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The three concourses each have their own TSA security checkpoint"
+    },
+    {
+     "file": "cmhnext-faqs",
+     "org": "Columbus Regional Airport Authority (operator, CMH Next new-terminal site, cmhnext.com)",
+     "dated": "2026 (page copyright)",
+     "quote": "Today, having three separate concourses and security checkpoints"
+    },
+    {
+     "file": "op-security",
+     "org": "Columbus Regional Airport Authority (operator, flycolumbus.com)",
+     "quote": [
+      "TSA checkpoint hours:",
+      "Concourse A",
+      "Concourse B",
+      "Concourse C"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Southwest in Concourse A; American and United in Concourse B",
+   "verdict": "confirmed",
+   "inAfter": "Southwest uses Concourse A, while American and United use Concourse B.",
+   "note": "The operator's July 2026 figures bear it out: Concourse A's boardings are Southwest's (124,118 in July), and Concourse B's July figure (170,447) is exactly American's plus United's. The operator's flight-preparation page still names Spirit in Concourse B, but its figures show Spirit carrying no one at Columbus from May 2026, and its airlines page no longer lists Spirit, so Spirit is not named.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Concourse A contains 7 gates, and is used primarily by Southwest Airlines.",
+      "is used primarily by American Airlines, Air Canada, and United Airlines"
+     ]
+    },
+    {
+     "file": "op-prepare",
+     "org": "Columbus Regional Airport Authority (operator, flycolumbus.com)",
+     "quote": [
+      "Know your concourse . We have three concourses at CMH.",
+      "Southwest – Concourse A",
+      "American, Spirit, or United – Concourse B"
+     ]
+    },
+    {
+     "file": "op-stats-jul2026",
+     "org": "Columbus Regional Airport Authority (operator, flycolumbus.com)",
+     "dated": "2026-09 (URL; January to July 2026 figures)",
+     "quote": [
+      "CMH by Concourse",
+      "Concourse A 89,933 101,638 145,067 110,098 125,678 130,625 124,118 827,157",
+      "Concourse B 127,901 135,872 170,273 154,539 167,824 171,549 170,447 1,098,405",
+      "American 76,380 80,907 101,104 87,931 100,128 103,546 103,378 653,374",
+      "Southwest 89,933 101,578 144,942 109,964 125,419 130,497 124,118 826,451",
+      "Spirit 10,910 11,919 11,847 8,918 0 0 43,594",
+      "United 40,611 43,046 57,322 57,690 67,696 68,003 67,069 401,437"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the airport lists Air Canada, Alaska, Breeze, Delta, Frontier and Sun Country in Concourse C",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport lists Air Canada, Alaska, Breeze, Delta, Frontier and Sun Country in Concourse C.",
+   "note": "Attributed to the airport because Air Canada's concourse rests on the operator alone: Wikipedia puts Air Canada in Concourse B, while the operator lists it in C on both its flight-preparation and airlines pages, and its July 2026 figures agree (Concourse C's July boardings, 125,428, equal the six airlines' plus terminal charters). Wikipedia agrees on the other five. The airlines page also lists JetBlue in C, but JetBlue's first Columbus flights begin in November 2026, so it is not named yet.",
+   "sources": [
+    {
+     "file": "op-prepare",
+     "org": "Columbus Regional Airport Authority (operator, flycolumbus.com)",
+     "quote": "Air Canada, Alaska, Breeze, Delta, Frontier, or Sun Country – Concourse C"
+    },
+    {
+     "file": "op-stats-jul2026",
+     "org": "Columbus Regional Airport Authority (operator, flycolumbus.com)",
+     "dated": "2026-09 (URL; January to July 2026 figures)",
+     "quote": [
+      "Concourse C 63,645 69,066 92,087 87,041 110,418 118,782 125,428 666,467",
+      "Air Canada 809 844 1,514 1,156 5,551 5,614 5,252 20,740"
+     ]
+    },
+    {
+     "file": "op-nonstop",
+     "org": "Columbus Regional Airport Authority (operator, flycolumbus.com)",
+     "quote": "JetBlue · service begins November 2026"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is used primarily by Alaska Airlines, Breeze Airways, Delta Air Lines, Frontier Airlines, Sun Country Airlines, and Viva (Seasonal Charter)"
+    }
+   ]
+  },
+  {
+   "claim": "called Port Columbus International Airport until 2016, then renamed after John Glenn, astronaut and senator",
+   "verdict": "confirmed",
+   "inAfter": "It was called Port Columbus International Airport until 2016, when it was renamed after John Glenn, the astronaut and senator.",
+   "note": "Was 'renamed in 2016 after John Glenn, the astronaut and four-term senator'. The FAA's July 2026 table still uses the John Glenn name, so it has not changed since. The former name is added from both sources, in place of the unconfirmed 'original name' line (see the cuts); 'four-term' rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In 2016 the airport was re-named from Port Columbus International Airport to its current name, in honor of astronaut and four-term U.S. senator John Glenn."
+    },
+    {
+     "file": "op-history",
+     "org": "Columbus Regional Airport Authority (operator, flycolumbus.com)",
+     "quote": [
+      "U.S. Senator and Astronaut John Glenn inspired a renaming of Port Columbus International Airport to John Glenn Columbus International Airport.",
+      "Port Columbus International Airport (renamed John Glenn Columbus International Airport in 2016)"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "2026-07-08",
+     "quote": [
+      "July 8, 2026",
+      "49 GL OH CMH Columbus John Glenn Columbus International P M 4,396,625"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "148 non-stop flights a day to 31 airports",
+   "verdict": "cut",
+   "wasBefore": "with 148 non-stop flights a day to 31 airports",
+   "why": "Undated Wikipedia figure with no second source, and out of date: the operator's About page now gives 53 nonstop destinations with 11 airlines, and its 22 September 2026 article more than 55 for Columbus's two airports together. Replaced by the airport's own count, attributed. (The helper first put the 2025 passenger total here; held back in review, see below.)"
+  },
+  {
+   "claim": "Concourse A has 7 gates",
+   "verdict": "cut",
+   "wasBefore": "Concourse A has 7 gates",
+   "why": "The three per-concourse gate counts (7, 16 and 11) add up to 34, but the operator says 29 gates are in operation today, and Wikipedia's own total is 29. No source gives current per-concourse counts, so all three are cut."
+  },
+  {
+   "claim": "Concourse B has 16 gates",
+   "verdict": "cut",
+   "wasBefore": "Concourse B has 16 gates",
+   "why": "As for Concourse A: the counts add up to 34 against the operator's 29 in operation."
+  },
+  {
+   "claim": "Concourse C has 11 gates",
+   "verdict": "cut",
+   "wasBefore": "Concourse C has 11 gates",
+   "why": "As for Concourse A: the counts add up to 34 against the operator's 29 in operation."
+  },
+  {
+   "claim": "Air Canada in Concourse B",
+   "verdict": "cut",
+   "wasBefore": "American, Air Canada and United",
+   "why": "Out of date: the operator lists Air Canada in Concourse C, and its July 2026 figures put nobody but American and United in Concourse B. Moved to Concourse C, attributed to the airport."
+  },
+  {
+   "claim": "international arrivals without pre-clearance processed in Concourse C",
+   "verdict": "cut",
+   "wasBefore": "is also where international arrivals without pre-clearance are processed",
+   "why": "Wikipedia alone. The operator's pages, history and terminal map (a PDF with no readable text) do not place the customs hall, and CBP's port pages were not found at the addresses tried (404)."
+  },
+  {
+   "claim": "the code CMH comes from Columbus Municipal Hangar, the original name",
+   "verdict": "cut",
+   "wasBefore": "The code CMH comes from Columbus Municipal Hangar, the airport's original name.",
+   "why": "Wikipedia alone, and contradicted as to the name: the operator's own history and timeline say the airport opened in 1929 as Port Columbus. Two searches of the operator's site found nothing on the code."
+  },
+  {
+   "claim": "four-term senator",
+   "verdict": "cut",
+   "wasBefore": "four-term senator",
+   "why": "Wikipedia alone; the operator says only 'U.S. Senator and Astronaut'. Softened to 'the astronaut and senator'."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "One thing matters more than anything else here.",
+   "why": "The old text's framing, kept: it introduces the one layout point that catches out connecting passengers, which the next two sentences source."
+  },
+  {
+   "text": "A client connecting between airlines in different concourses needs to know that before they arrive.",
+   "why": "Advice to the agent that follows from the two sourced facts before it."
+  }
+ ],
+ "tracerOk": {}
+}
