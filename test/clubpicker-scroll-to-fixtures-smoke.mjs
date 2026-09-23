@@ -1,5 +1,10 @@
 /**
- * Club Picker: tapping a badge takes you to the fixtures (22 Sep 2026).
+ * Tapping something takes you to what it opened (22 Sep 2026).
+ *
+ * Covers the two event widgets that open a panel UNDERNEATH what you tapped:
+ * Club Picker (a badge opens that club's fixtures) and Ticket Month (a date
+ * opens that day's events). Event Menu already does the same thing in its
+ * drawer; the other three have no panel to go to.
  *
  * Client feedback, via Andy: "tapping the dots should take you straight down to
  * the matches, so you don't have to scroll." The dots are the club badges, and
@@ -166,6 +171,67 @@ console.log('\nClub Picker: a tap goes to the matches\n');
   await sleep(20);
   ok('closing the panel does not scroll the visitor anywhere', scrolls.length === afterOpen,
     `${scrolls.length - afterOpen} extra scroll(s)`);
+}
+
+// ── Ticket Month: the same pattern, the same fix ─────────────────────────────
+// A date opens that day's events under the month grid, and a month grid is a
+// screenful on a phone just as the badge grid is.
+console.log('\nTicket Month: a tap on a date goes to that day');
+{
+  const dom = new JSDOM('<!doctype html><html><body></body></html>', { runScripts: 'dangerously', pretendToBeVisual: true });
+  const { window } = dom;
+  const soon = new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10);
+  window.fetch = async () => ({
+    ok: true,
+    json: async () => ({
+      events: [{
+        title: 'Arsenal vs Chelsea', startDate: soon, timeKnown: true, startTime: '15:00',
+        homeTeamKey: 'arsenal', awayTeamKey: 'chelsea', venue: { name: 'Emirates Stadium' },
+        bookingOptions: [{ kind: 'ticket', short: 'Book', url: 'https://dl.tvllnk.com/a' }],
+      }],
+      items: [],
+    }),
+  });
+  const scrolls = [];
+  window.Element.prototype.scrollIntoView = function (opts) { scrolls.push({ id: this.id, opts }); };
+  const script = window.document.createElement('script');
+  script.textContent = readFileSync(new URL('../public/widget-ticketmonth.js', import.meta.url), 'utf8');
+  window.document.body.appendChild(script);
+
+  const el = window.document.createElement('div');
+  window.document.body.appendChild(el);
+  const w = new window.TGTicketMonthWidget(el, { bookingKinds: ['ticket'] });
+  await sleep(25);
+
+  ok('the month drew', !!w.shadow.querySelector('[data-day]'));
+  ok('nothing scrolled while it was drawing itself', scrolls.length === 0, JSON.stringify(scrolls));
+
+  const day = Number(soon.slice(8, 10));
+  const cell = w.shadow.querySelector('[data-day="' + day + '"]');
+  ok('the day with an event is tappable', !!cell);
+  if (cell) {
+    cell.dispatchEvent(new window.Event('click'));
+    await sleep(20);
+    ok('opening a day scrolls to its events', scrolls.length === 1, JSON.stringify(scrolls));
+    ok('it goes to the day panel, not the page top',
+      scrolls.length === 1 && scrolls[0].id === 'tgtm-panel', JSON.stringify(scrolls));
+    ok('it puts the panel at the top so the events show',
+      scrolls.length === 1 && scrolls[0].opts && scrolls[0].opts.block === 'start',
+      JSON.stringify(scrolls[0] && scrolls[0].opts));
+
+    // Closing it again must not drag them anywhere.
+    const afterOpen = scrolls.length;
+    cell.dispatchEvent(new window.Event('click'));
+    await sleep(20);
+    ok('closing the day does not scroll', scrolls.length === afterOpen,
+      `${scrolls.length - afterOpen} extra`);
+
+    // And a re-render must not either.
+    w.update({ heading: 'What is on' });
+    await sleep(10);
+    ok('a re-render does not scroll', scrolls.length === afterOpen,
+      `${scrolls.length - afterOpen} extra`);
+  }
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');

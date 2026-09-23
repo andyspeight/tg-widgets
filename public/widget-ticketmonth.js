@@ -1027,7 +1027,7 @@
     var y = this.view.y, m = this.view.m, d = this.openDay;
     var title = DOW_LONG[new Date(y, m - 1, d).getDay()] + ' ' + d + ' ' + MON_LONG[m - 1];
     var self = this;
-    return '<section class="tgtm-panel" aria-live="polite">'
+    return '<section class="tgtm-panel" id="tgtm-panel" tabindex="-1" aria-live="polite">'
       + '<h3 class="tgtm-ptitle">' + esc(title) + '</h3>'
       + '<div class="tgtm-list">'
       + list.slice(0, clampInt(this.cfg.dayLimit, 1, 50, 12)).map(function (e) { return self._rowHtml(e); }).join('')
@@ -1099,8 +1099,12 @@
     for (var j = 0; j < cells.length; j++) {
       cells[j].addEventListener('click', function () {
         var d = parseInt(this.getAttribute('data-day'), 10);
-        self.openDay = (self.openDay === d) ? null : d;
+        var opening = self.openDay !== d;
+        self.openDay = opening ? d : null;
         self._render();
+        // Only when they opened a day, never when they closed it, and never
+        // from a plain re-render.
+        if (opening) self._goToDay();
       });
     }
     var hfs = this.shadow.querySelectorAll('.tgtm-hf');
@@ -1113,6 +1117,55 @@
         self._render();
       });
     }
+  };
+
+  // Move to the day's events after a real tap.
+  //
+  // Same shape and same reasoning as Club Picker's: the panel opens UNDER the
+  // month grid, and on a phone a month grid is a screenful on its own, so the
+  // events arrived below the fold and the tap looked like it had done nothing
+  // (Tailor Events, 22 Sep 2026, on the club grid: "on small screens you don't
+  // see anything").
+  //
+  // block:'start', not 'nearest': 'nearest' scrolls the least it can and, for a
+  // panel taller than the screen, counts any sliver as in view and does nothing
+  // at all. And only when it is needed, so a desktop where the panel already
+  // opens in full view is left where it is.
+  //
+  // This runs from the click alone. Never from render() or update(), which an
+  // editor calls on every keystroke.
+  var ENOUGH_VISIBLE = 160;   // px of panel on screen that counts as "they can see it"
+
+  TGTicketMonthWidget.prototype._goToDay = function () {
+    var self = this;
+    setTimeout(function () {
+      var panel = self.shadow.getElementById ? self.shadow.getElementById('tgtm-panel')
+        : self.shadow.querySelector('#tgtm-panel');
+      if (!panel) return;
+      if (typeof panel.focus === 'function') panel.focus({ preventScroll: true });
+      if (typeof panel.scrollIntoView !== 'function') return;
+
+      var needed = true;
+      try {
+        if (typeof panel.getBoundingClientRect === 'function') {
+          var r = panel.getBoundingClientRect();
+          var h = window.innerHeight || 0;
+          var shown = Math.min(r.bottom, h) - Math.max(r.top, 0);
+          needed = !(r.top >= 0 && shown >= Math.min(ENOUGH_VISIBLE, r.height || ENOUGH_VISIBLE));
+        }
+      } catch (e) { /* no layout to measure, so scroll and be sure */ }
+      if (!needed) return;
+
+      var reduced = false;
+      try {
+        reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      } catch (e) { /* no matchMedia, fall through to an instant jump */ }
+      try {
+        panel.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start', inline: 'nearest' });
+      } catch (e) {
+        panel.scrollIntoView(); // older browsers take no options
+      }
+    }, 0);
   };
 
   TGTicketMonthWidget.prototype.update = function (next) {
