@@ -1,0 +1,84 @@
+{
+ "iata": "VNX",
+ "id": "recMISxIPI3HZ3Mfz",
+ "name": "Vilankulo Airport",
+ "country": "Mozambique",
+ "wikipedia": "https://en.wikipedia.org/wiki/Vilankulo_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Vilankulo, in Mozambique's Inhambane Province.\n\nIt was substantially rebuilt at the start of the 2010s. A nine million dollar programme refurbished, expanded and modernised the airport, and the new air conditioned terminal was opened in April 2011 by President Armando Guebuza.\n\nThe work did two things that matter when planning an itinerary. It lifted capacity from 75,000 passengers a year to 200,000, and it made it possible for larger aircraft to use the airport at all.",
+ "after": "The airport for Vilankulo, in Inhambane Province, Mozambique. Its present terminal was opened by President Armando Guebuza in April 2011.",
+ "claims": [
+  {
+   "claim": "the airport for Vilankulo, in Inhambane Province",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Vilankulo, in Inhambane Province, Mozambique.",
+   "note": "Coordinates put it 2.1 km south of the GeoNames centre of Vilankulo.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is an airport in Mozambique that serves the city of Vilankulo in the Inhambane Province"
+    },
+    {
+     "file": "newsmoz-2011",
+     "org": "MOZNews (reposting Mozambican agency news)",
+     "dated": "2011-04-14",
+     "quote": "inaugurated a new terminal at Vilankulo airport, in the southern province of Inhambane"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "OurAirports municipality: Vilanculo"
+    }
+   ]
+  },
+  {
+   "claim": "terminal opened by President Guebuza in April 2011",
+   "verdict": "confirmed",
+   "inAfter": "Its present terminal was opened by President Armando Guebuza in April 2011.",
+   "note": "MOZNews's report is dated Thursday 14 April 2011 and says 'on Wednesday', which is 13 April, the date Wikipedia gives.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The new terminal building was inaugurated on 13 April 2011 by Mozambican President Armando Guebuza."
+    },
+    {
+     "file": "newsmoz-2011",
+     "org": "MOZNews (reposting Mozambican agency news)",
+     "dated": "2011-04-14",
+     "quote": [
+      "Thursday, April 14, 2011",
+      "Mozambican President Armando Guebuza on Wednesday inaugurated a new terminal at Vilankulo airport"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "rebuilt at the start of the 2010s",
+   "verdict": "cut",
+   "wasBefore": "It was substantially rebuilt at the start of the 2010s.",
+   "why": "Reworded to the terminal opening, which two sources give."
+  },
+  {
+   "claim": "nine million dollar programme; new air conditioned terminal opened April 2011 by Guebuza",
+   "verdict": "cut",
+   "wasBefore": "A nine million dollar programme refurbished, expanded and modernised the airport, and the new air conditioned terminal was opened in April 2011 by President Armando Guebuza.",
+   "why": "The opening is kept. The cost is disputed: Wikipedia gives US$9 million for the whole programme, the 2011 report US$10 million for the terminal."
+  },
+  {
+   "claim": "two things that matter",
+   "verdict": "cut",
+   "wasBefore": "The work did two things that matter when planning an itinerary.",
+   "why": "Framing sentence for the cut claims that follow."
+  },
+  {
+   "claim": "capacity 75,000 to 200,000; larger aircraft",
+   "verdict": "cut",
+   "wasBefore": "It lifted capacity from 75,000 passengers a year to 200,000, and it made it possible for larger aircraft to use the airport at all.",
+   "why": "Only Wikipedia; the 2011 report gives neither, and the operator's site has no page for the airport that could be saved."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

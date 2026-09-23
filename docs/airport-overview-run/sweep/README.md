@@ -180,5 +180,7 @@ two sources is `Done`, and Done is servable. That is Andy's call, asked on
 | 23 Sep 2026 | ISB Islamabad (helper) | Verified and pushed. Caught: opening 6 May 2018 is 3 May (AFP via Gulf News and The Nation); "largest and now busiest" softened |
 | 23 Sep 2026 | LHE Lahore (helper) | Verified and pushed. Caught: "well equipped for weather" is misleading (fog delays in December 2025 and January 2026 despite its fog landing systems); 15 km fails the coordinates check (6.4 km) |
 | 23 Sep 2026 | PEW Peshawar (helper) | Verified and pushed. Now carries the FCDO's advice against all travel to Peshawar, city included (updated 22 September 2026); "fourth busiest" is contradicted by 2025 figures (Multan ahead). Runway put in metres in review |
+| 23 Sep 2026 | VNX Vilankulo | Verified and pushed, 20 words. The terminal's cost is disputed ($9 million or $10 million) and the capacity figures rest on Wikipedia alone; only the 2011 opening by President Guebuza survives. City Served is blank on the record |
+| 23 Sep 2026 | ABV Abuja | Verified and pushed. 7 kept, 5 cut. Caught: 20 km fails the coordinates (26 km) and the airports authority's page copies Wikipedia; the 2002 terminal split is overtaken by the terminal commissioned in December 2018; the runway's age is disputed (34 or nearly 40 years) |
 
 Integrity pull, evening of 23 Sep: all 23 pushed records match their ledgers word for word, carry Verified Date 2026-09-23 and kept their Status. The other 576 Overview records are unchanged since the morning snapshot.

@@ -1,0 +1,214 @@
+{
+ "iata": "ABV",
+ "id": "recXd184SxrU7D4f2",
+ "name": "Nnamdi Azikiwe International Airport",
+ "country": "Nigeria",
+ "wikipedia": "https://en.wikipedia.org/wiki/Nnamdi_Azikiwe_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Nigeria's capital airport, about 20 km south west of central Abuja. There are separate international and domestic terminals but they share a single runway, which is the detail that matters most here.\n\nThat runway has form. In 2017 it had been in service nearly forty years against a twenty year design life and was showing real fatigue, so the government closed the airport for six weeks and diverted flights to Kaduna while Julius Berger rebuilt it. It reopened on 17 April 2017, two days early.\n\nThe terminal arrangement is straightforward. The building opened in 2002 handles international flights and the older one alongside it takes domestic.\n\nThere is a private jet wing serving business, diplomatic and political traffic, with a dedicated general aviation terminal planned.\n\nBoth the Nigerian Civil Aviation Authority and the Nigerian Safety Investigation Bureau have their head offices on the airport. It is named after Nnamdi Azikiwe, Nigeria's first president.",
+ "after": "Nnamdi Azikiwe International is Abuja's airport, west of the city.\n\nIt has a single runway, which is the detail that matters most here. By 2017 the runway had long outlived its 20-year design life, and the airport closed for six weeks from 8 March while Julius Berger rebuilt it, with flights diverted to Kaduna. The work finished on 17 April 2017, two days ahead of schedule.\n\nA new terminal, built to handle 15 million passengers a year, was commissioned in December 2018.\n\nThe Nigerian Civil Aviation Authority and the Nigerian Safety Investigation Bureau both have their head offices at the airport.",
+ "claims": [
+  {
+   "claim": "Nnamdi Azikiwe International is Abuja's airport",
+   "verdict": "confirmed",
+   "inAfter": "Nnamdi Azikiwe International is Abuja's airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is the main airport serving the Nigerian capital city"
+    },
+    {
+     "file": "cnn-2017",
+     "org": "CNN",
+     "dated": "2017-03-07",
+     "quote": "Abuja’s Nnamdi Azikiwe International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "west of the city",
+   "verdict": "corrected",
+   "inAfter": "west of the city",
+   "note": "Was 'about 20 km south west'. Coordinates give 26.1 km at 257 degrees (west) from the GeoNames centre; 20 km is a ratio of 0.77, outside the tolerance, and the only other written source for it (the airports authority's page) copies Wikipedia word for word, so the figure goes. Wikipedia's 'southwest' is one point from the computed west.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Abuja",
+      "Bearing from the city centre: 257 degrees, which is west"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is approximately 20 km (12 mi) southwest of the city centre"
+    }
+   ]
+  },
+  {
+   "claim": "single runway",
+   "verdict": "confirmed",
+   "inAfter": "It has a single runway",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "has an international and a domestic terminal that share its single runway"
+    },
+    {
+     "file": "cnn-2017",
+     "org": "CNN",
+     "dated": "2017-03-07",
+     "quote": "the airport’s sole runway"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "Runways listed: 1"
+    }
+   ]
+  },
+  {
+   "claim": "2017: runway past its 20-year design life; closed six weeks from 8 March; Julius Berger; flights to Kaduna",
+   "verdict": "corrected",
+   "inAfter": "By 2017 the runway had long outlived its 20-year design life, and the airport closed for six weeks from 8 March while Julius Berger rebuilt it, with flights diverted to Kaduna.",
+   "note": "The runway's age is disputed (CNN, quoting the airports authority: in use for 34 years; Wikipedia: nearly 40), so the text says only that it had outlived its design life.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "It had been built to last for 20 years but had been in use for nearly 40 years at that time.",
+      "The Airport was closed for 6 weeks, and flights were diverted to neighboring Kaduna airport.",
+      "In 2017, the Nigerian Government awarded a contract to Julius Berger for the emergency rehabilitation of the airport's only runway."
+     ]
+    },
+    {
+     "file": "cnn-2017",
+     "org": "CNN",
+     "dated": "2017-03-07",
+     "quote": [
+      "But it will shut down for six weeks from Wednesday, March 8.",
+      "The runway was designed for 20 years, but it has been in use for 34",
+      "Smaller airport in Kaduna expected to pick up the slack"
+     ]
+    },
+    {
+     "file": "julius-berger",
+     "org": "Julius Berger Nigeria (the contractor)",
+     "quote": "Julius Berger Nigeria Plc completed emergency rehabilitation of the existing runway and main taxiways at the Nnamdi Azikiwe International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "work finished 17 April 2017, two days ahead of schedule",
+   "verdict": "corrected",
+   "inAfter": "The work finished on 17 April 2017, two days ahead of schedule.",
+   "note": "Was 'It reopened on 17 April 2017'. Wikipedia gives both 17 and 18 April for the reopening; the contractor gives 17 April for completion, so the text says the work finished then.",
+   "sources": [
+    {
+     "file": "julius-berger",
+     "org": "Julius Berger Nigeria (the contractor)",
+     "quote": "On April 17, 2017, Julius Berger Nigeria Plc completed emergency rehabilitation of the existing runway and main taxiways at the Nnamdi Azikiwe International Airport, 2 days ahead of schedule, beating the highly challenging 6-week project deadline."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The Airport reopened with the completion of the Runway on 17 April 2017, 2 days ahead of schedule."
+    }
+   ]
+  },
+  {
+   "claim": "new terminal for 15 million a year, commissioned December 2018",
+   "verdict": "corrected",
+   "inAfter": "A new terminal, built to handle 15 million passengers a year, was commissioned in December 2018.",
+   "note": "Replaces the 2002 terminal arrangement, which this terminal overtakes. Neither source says which flights use which building now, so the text does not.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "On 20 December 2018, President Muhammadu Buhari commissioned a new terminal building.",
+      "can process up to 15 million passengers annually"
+     ]
+    },
+    {
+     "file": "vanguard-2018",
+     "org": "Vanguard (Nigeria)",
+     "dated": "2018-12",
+     "quote": [
+      "will process 15 million passengers annually when it begins operations",
+      "would be inaugurated on Dec. 20"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "NCAA and NSIB head offices at the airport",
+   "verdict": "confirmed",
+   "inAfter": "The Nigerian Civil Aviation Authority and the Nigerian Safety Investigation Bureau both have their head offices at the airport.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The Nigerian Safety Investigation Bureau (NSIB) has its head office on the airport grounds.",
+      "The Nigerian Civil Aviation Authority (NCAA) has its head office on the airport."
+     ]
+    },
+    {
+     "file": "ncaa-contact",
+     "org": "Nigerian Civil Aviation Authority",
+     "quote": [
+      "Corporate Headquarters",
+      "Nnamdi Azikiwe International Airport, Federal Capital Territory, Abuja."
+     ]
+    },
+    {
+     "file": "nsib",
+     "org": "Nigerian Safety Investigation Bureau",
+     "quote": "Head Office Nnamdi Azikiwe International Airport,"
+    }
+   ]
+  },
+  {
+   "claim": "capital airport, 20 km SW; separate terminals share the runway",
+   "verdict": "cut",
+   "wasBefore": "Nigeria's capital airport, about 20 km south west of central Abuja. There are separate international and domestic terminals but they share a single runway, which is the detail that matters most here.",
+   "why": "Reworded: the distance fails the coordinates check; the terminal split is overtaken by the 2018 terminal."
+  },
+  {
+   "claim": "runway has form; 2017 closure as first worded",
+   "verdict": "cut",
+   "wasBefore": "That runway has form. In 2017 it had been in service nearly forty years against a twenty year design life and was showing real fatigue, so the government closed the airport for six weeks and diverted flights to Kaduna while Julius Berger rebuilt it. It reopened on 17 April 2017, two days early.",
+   "why": "Reworded: the age is disputed and the reopening date conflicts inside Wikipedia."
+  },
+  {
+   "claim": "terminal arrangement: 2002 building international, older one domestic",
+   "verdict": "cut",
+   "wasBefore": "The terminal arrangement is straightforward. The building opened in 2002 handles international flights and the older one alongside it takes domestic.",
+   "why": "Out of date: a new terminal was commissioned in December 2018, and no current source says how flights are split."
+  },
+  {
+   "claim": "private jet wing; GA terminal planned",
+   "verdict": "cut",
+   "wasBefore": "There is a private jet wing serving business, diplomatic and political traffic, with a dedicated general aviation terminal planned.",
+   "why": "Only Wikipedia, and the plan dates from 2016 with no later news."
+  },
+  {
+   "claim": "head offices; named after first president",
+   "verdict": "cut",
+   "wasBefore": "Both the Nigerian Civil Aviation Authority and the Nigerian Safety Investigation Bureau have their head offices on the airport. It is named after Nnamdi Azikiwe, Nigeria's first president.",
+   "why": "The head offices are kept, confirmed by both bodies. The naming line goes: Wikipedia says first president, the airports authority says a founding father, and neither is needed to identify the airport."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which is the detail that matters most here.",
+   "why": "The old text's own emphasis, kept: the 2017 closure that follows shows why."
+  }
+ ],
+ "tracerOk": {}
+}
