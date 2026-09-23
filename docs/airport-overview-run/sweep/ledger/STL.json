@@ -1,0 +1,190 @@
+{
+ "iata": "STL",
+ "id": "recTVHT44fdqeHvqg",
+ "name": "St. Louis Lambert International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/St._Louis_Lambert_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Missouri's largest and busiest airport, 14 miles north west of downtown St Louis, with nonstop flights to more than 80 destinations across the United States, Canada, Mexico, the Caribbean and Europe. It carried nearly 16 million passengers in 2024.\n\nThe terminal split is the thing to get right. Terminal 1 holds 36 gates across concourses A and C. Terminal 2 has 18 gates on concourse E, and every international flight without border preclearance is processed there. Moving between the two is by shuttle bus or on the Metro rail, which has been free between the terminals since July 2024.\n\nMetroLink light rail also connects the airport to the rest of the metropolitan area, with a link to MidAmerica St Louis Airport 37 miles east planned.\n\nFour runways serve the site, three parallel and one crosswind.\n\nThe airport is named after Albert Bond Lambert, the Olympic medallist and St Louis aviator, and made its name through Charles Lindbergh, its pioneering air traffic control and its years as the main hub for TWA.",
+ "after": "The main airport for St Louis, about 14 miles north west of downtown, handling more than 15 million passengers a year.\n\nBritish Airways, the only UK airline with a direct service to St Louis, has flown here from London Heathrow since 19 April 2026, four times a week in the summer season.\n\nThe airport dates from 1920 and is named after Albert Bond Lambert, an early St Louis aviator. Charles Lindbergh flew the mail from here, and America's first air traffic controller worked here, directing aircraft with signal flags.",
+ "claims": [
+  {
+   "claim": "the main airport for St Louis",
+   "verdict": "softened",
+   "inAfter": "The main airport for St Louis",
+   "note": "Was 'Missouri's largest and busiest airport'; the state ranking has only Wikipedia.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the primary international airport serving St. Louis, Missouri, and its metropolitan area"
+    },
+    {
+     "file": "op-2025-fare",
+     "org": "St. Louis Lambert International Airport (operator, flystl.com)",
+     "quote": "is the primary commercial airport for the St. Louis metro area and parts of eastern Missouri and southern Illinois",
+     "dated": "2026-03-26"
+    }
+   ]
+  },
+  {
+   "claim": "about 14 miles north west of downtown",
+   "verdict": "confirmed",
+   "inAfter": "about 14 miles north west of downtown",
+   "note": "Coordinates give 12.5 miles in a straight line at 312 degrees (north west); ratio 1.12.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "being located 14 miles (23 km) northwest of downtown St. Louis"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 20.1 km (12.5 miles)",
+      "Bearing from the city centre: 312 degrees, which is north west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "more than 15 million passengers a year",
+   "verdict": "corrected",
+   "inAfter": "handling more than 15 million passengers a year",
+   "note": "Was 'nearly 16 million passengers in 2024'. Wikipedia's infobox gives 15,303,756 for 2025 and the operator says 15.6 million a year; both are above 15 million, so the text says that.",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat2_data = 15,303,756"
+     ]
+    },
+    {
+     "file": "op-2025-fare",
+     "org": "St. Louis Lambert International Airport (operator, flystl.com)",
+     "quote": "serving 15.6 million passengers annually",
+     "dated": "2026-03-26"
+    }
+   ]
+  },
+  {
+   "claim": "British Airways from Heathrow since 19 April 2026, four a week in summer, only UK airline direct",
+   "verdict": "corrected",
+   "inAfter": "British Airways, the only UK airline with a direct service to St Louis, has flown here from London Heathrow since 19 April 2026, four times a week in the summer season.",
+   "note": "Replaces the vague 'Europe' in the old list of destinations with the one route a UK agent needs. The airport's site also announces daily flights for summer 2027 (one source, so not stated).",
+   "sources": [
+    {
+     "file": "op-ba",
+     "org": "St. Louis Lambert International Airport (operator, flystl.com)",
+     "quote": [
+      "British Airways has officially touched down in St. Louis, Missouri (STL) with the airline’s inaugural flight from London Heathrow Airport (LHR) arriving on time at approximately 7:30 p.m. local time on April 19, 2026.",
+      "The airline will be operating four flights per week during the summer season",
+      "The new route makes British Airways the only U.K. airline to offer direct flights to and from St. Louis."
+     ],
+     "dated": "2026-04-19"
+    },
+    {
+     "file": "ba-mediacentre",
+     "org": "British Airways",
+     "quote": [
+      "Flights will begin on 19 April 2026 and operate four times per week throughout the summer season.",
+      "The new route makes British Airways the only UK airline to offer direct flights to St. Louis"
+     ],
+     "dated": "2025-10-01"
+    }
+   ]
+  },
+  {
+   "claim": "dates from 1920; named after Albert Bond Lambert, early St Louis aviator",
+   "verdict": "confirmed",
+   "inAfter": "The airport dates from 1920 and is named after Albert Bond Lambert, an early St Louis aviator.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "In June 1920, a nearby 170-acre field was leased to the Missouri Aeronautical Society",
+      "Named for Olympic medalist and prominent St. Louis aviator Albert Bond Lambert"
+     ]
+    },
+    {
+     "file": "op-history",
+     "org": "St. Louis Lambert International Airport (operator, flystl.com)",
+     "quote": [
+      "Founded in 1920 by its namesake, Albert Bond Lambert",
+      "Lambert learned to fly with the Wright Brothers, received his pilot’s license in 1911"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Lindbergh flew the mail from here",
+   "verdict": "confirmed",
+   "inAfter": "Charles Lindbergh flew the mail from here",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Charles Lindbergh's first piloting job was flying airmail for Robertson Aircraft Corporation from the airfield."
+    },
+    {
+     "file": "op-history",
+     "org": "St. Louis Lambert International Airport (operator, flystl.com)",
+     "quote": "the Post Office awarded the contract for airmail service between Chicago and St. Louis to Robertson and hired Charles Lindbergh as the chief pilot"
+    }
+   ]
+  },
+  {
+   "claim": "America's first air traffic controller worked here with signal flags",
+   "verdict": "confirmed",
+   "inAfter": "and America's first air traffic controller worked here, directing aircraft with signal flags",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the airport became the first with an air traffic control system–albeit one that communicated with pilots via waving flags"
+    },
+    {
+     "file": "op-history",
+     "org": "St. Louis Lambert International Airport (operator, flystl.com)",
+     "quote": "the nation’s first air traffic controller got his start directing airplanes at Lambert with a pair of signal flags"
+    }
+   ]
+  },
+  {
+   "claim": "largest and busiest in Missouri; 80+ nonstop destinations; nearly 16 million in 2024",
+   "verdict": "cut",
+   "wasBefore": "Missouri's largest and busiest airport, 14 miles north west of downtown St Louis, with nonstop flights to more than 80 destinations across the United States, Canada, Mexico, the Caribbean and Europe. It carried nearly 16 million passengers in 2024.",
+   "why": "Distance kept; traffic updated to the 2025 level; the state ranking and the destination count rest on Wikipedia alone; London named instead of 'Europe'."
+  },
+  {
+   "claim": "terminal split: T1 36 gates A and C; T2 18 gates E; international without preclearance in T2; shuttle or free Metro between terminals",
+   "verdict": "cut",
+   "wasBefore": "The terminal split is the thing to get right. Terminal 1 holds 36 gates across concourses A and C. Terminal 2 has 18 gates on concourse E, and every international flight without border preclearance is processed there. Moving between the two is by shuttle bus or on the Metro rail, which has been free between the terminals since July 2024.",
+   "why": "Only Wikipedia; the airport's terminal maps are images and its transport page does not mention the rail link. Worth restoring once the terminal for the London flight is confirmed."
+  },
+  {
+   "claim": "MetroLink; MidAmerica link planned",
+   "verdict": "cut",
+   "wasBefore": "MetroLink light rail also connects the airport to the rest of the metropolitan area, with a link to MidAmerica St Louis Airport 37 miles east planned.",
+   "why": "Only Wikipedia; Metro St Louis's site has no page on it that could be found."
+  },
+  {
+   "claim": "four runways, three parallel, one crosswind",
+   "verdict": "cut",
+   "wasBefore": "Four runways serve the site, three parallel and one crosswind.",
+   "why": "OurAirports confirms four runways, but one of the 'parallel' three (11/29) sits ten degrees off the other two, and the detail is of little use to an agent."
+  },
+  {
+   "claim": "named after Lambert, Olympic medallist; Lindbergh, ATC, TWA hub",
+   "verdict": "cut",
+   "wasBefore": "The airport is named after Albert Bond Lambert, the Olympic medallist and St Louis aviator, and made its name through Charles Lindbergh, its pioneering air traffic control and its years as the main hub for TWA.",
+   "why": "Reworded from the airport's own history page. The Olympic medal and the TWA hub rest on Wikipedia alone (the airport says only that it played a key role in TWA's earliest days)."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

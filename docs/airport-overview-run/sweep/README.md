@@ -183,6 +183,7 @@ two sources is `Done`, and Done is servable. That is Andy's call, asked on
 | 23 Sep 2026 | VNX Vilankulo | Verified and pushed, 20 words. The terminal's cost is disputed ($9 million or $10 million) and the capacity figures rest on Wikipedia alone; only the 2011 opening by President Guebuza survives. City Served is blank on the record |
 | 23 Sep 2026 | ABV Abuja | Verified and pushed. 7 kept, 5 cut. Caught: 20 km fails the coordinates (26 km) and the airports authority's page copies Wikipedia; the 2002 terminal split is overtaken by the terminal commissioned in December 2018; the runway's age is disputed (34 or nearly 40 years) |
 | 23 Sep 2026 | LOS Lagos | Verified and pushed. 7 kept, 4 cut. Caught: the layout was built around the 1979 terminal, which has been closed since airlines moved to the 2022 terminal by October 2023 and is being rebuilt (22 months from 2025); a fire there in February 2026; "Nigeria's largest airline" is only an aim on Air Peace's own site |
+| 23 Sep 2026 | STL St. Louis | Verified and pushed. 7 kept, 5 cut. Caught: British Airways has flown from Heathrow since 19 April 2026, the only UK airline to St Louis (the old text said only "Europe"); traffic now more than 15 million a year (2025); the terminal gate split and the free Metro ride rest on Wikipedia alone |
 
 Integrity pull, evening of 23 Sep: all 23 pushed records match their ledgers word for word, carry Verified Date 2026-09-23 and kept their Status. The other 576 Overview records are unchanged since the morning snapshot.
 
