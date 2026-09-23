@@ -1,0 +1,227 @@
+{
+ "iata": "PUS",
+ "id": "recyaCTkyqhjJMdZb",
+ "name": "Gimhae International Airport",
+ "country": "South Korea",
+ "wikipedia": "https://en.wikipedia.org/wiki/Gimhae_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Busan, South Korea's second city, at the western end of the city. It carried 17,064,613 passengers in 2018.\n\nThe constraint here is hard and permanent. The airport is beyond its design capacity and hemmed in by mountains and buildings with nowhere to expand, so a replacement is being built on Gadeokdo to meet demand. One of its two runways, 18L/36R, is reserved for military use by Gimhae Air Base, though there are plans to open it to airliners.\n\nBecause the site is shared with the military, photography and video of the apron, runway and military areas is prohibited under the airport's own rules. Worth telling a client who likes taking pictures from the window.\n\nIt is the main hub for Air Busan and Korean Air and an operating base for Jeju Air and Jin Air.\n\nThe Busan-Gimhae Light Rail has a station at the airport.\n\nIt opened in August 1976 and a new international terminal followed on 31 October 2007. The name comes from the nearby city of Gimhae, not Busan, which is why the code PUS and the name do not match.",
+ "after": "The airport for Busan, South Korea's second city, in the Gangseo district at the western end of the city.\n\nIt moved to this site in August 1976, and a new international terminal opened in October 2007. The name comes from the neighbouring city of Gimhae, not Busan, which is why it does not match the code PUS.",
+ "claims": [
+  {
+   "claim": "the airport for Busan",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Busan",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "Korea Airports Corporation (the operator, airport.co.kr/gimhaeeng)",
+     "dated": "read 2026-09-23 (the airport's overview and history page)",
+     "quote": "Located in Daejeo 2-dong, Gangseo-gu, Busan, Gimhae International Airport"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Busan"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "also known as Busan Airport is located on the western end of Busan"
+    }
+   ]
+  },
+  {
+   "claim": "Busan, South Korea's second city",
+   "verdict": "confirmed",
+   "inAfter": "South Korea's second city",
+   "note": "GeoNames' population figures put Busan second in South Korea after Seoul (3,285,147 against Incheon's 3,015,482); Wikipedia calls it the second-largest city.",
+   "sources": [
+    {
+     "file": "geo-cities",
+     "org": "GeoNames (computed)",
+     "quote": [
+      "1. Seoul (GeoNames 1835848, PPLC): population 10,349,312",
+      "2. Busan (GeoNames 1838524, PPLA): population 3,285,147"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "the second-largest city in South Korea"
+    }
+   ]
+  },
+  {
+   "claim": "in the Gangseo district at the western end of the city",
+   "verdict": "confirmed",
+   "inAfter": "in the Gangseo district at the western end of the city.",
+   "note": "The operator gives the address in Gangseo-gu, Busan; the coordinates put the airport 12.0 km from the GeoNames centre of Busan at 316 degrees (north west).",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "Korea Airports Corporation (the operator, airport.co.kr/gimhaeeng)",
+     "dated": "read 2026-09-23 (the airport's overview and history page)",
+     "quote": "Located in Daejeo 2-dong, Gangseo-gu, Busan"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 12.0 km (7.5 miles)",
+      "Bearing from the city centre: 316 degrees, which is north west"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "is located on the western end of Busan"
+    }
+   ]
+  },
+  {
+   "claim": "it moved to this site in August 1976",
+   "verdict": "corrected",
+   "inAfter": "It moved to this site in August 1976",
+   "note": "Was 'It opened in August 1976'. The operator's history starts earlier, with Busan Suyeong Airport in 1958 on a site now occupied by the BEXCO convention centre, and has the airport renamed Gimhae International Airport and moved to its current site in August 1976; Wikipedia says traffic shifted here from the old airport that month.",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "Korea Airports Corporation (the operator, airport.co.kr/gimhaeeng)",
+     "dated": "read 2026-09-23 (the airport's overview and history page)",
+     "quote": [
+      "was first built as Busan Suyeong Airport in August 1958",
+      "it was renamed Gimhae International Airport and relocated to its current location in August 1976"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "In August 1976, Gimhae Airport opened, and commercial air traffic shifted there from the old airport."
+    }
+   ]
+  },
+  {
+   "claim": "a new international terminal opened in October 2007",
+   "verdict": "corrected",
+   "inAfter": "and a new international terminal opened in October 2007.",
+   "note": "Was 'followed on 31 October 2007'. The operator's timeline gives October 2007; the day rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "Korea Airports Corporation (the operator, airport.co.kr/gimhaeeng)",
+     "dated": "read 2026-09-23 (the airport's overview and history page)",
+     "quote": [
+      "2007. 10",
+      "New Gimhae Airport International Terminal opened"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "A new international terminal opened on 31 October 2007."
+    }
+   ]
+  },
+  {
+   "claim": "named after the neighbouring city of Gimhae, not Busan",
+   "verdict": "confirmed",
+   "inAfter": "The name comes from the neighbouring city of Gimhae, not Busan",
+   "note": "Wikipedia: named after the nearby city of Gimhae. The operator places the airport in Busan's Gangseo district and dates the name Gimhae International Airport to the 1976 move; GeoNames puts the centre of Gimhae 8.0 km from the airport.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "the airport is named after the nearby city of Gimhae"
+    },
+    {
+     "file": "op-overview",
+     "org": "Korea Airports Corporation (the operator, airport.co.kr/gimhaeeng)",
+     "dated": "read 2026-09-23 (the airport's overview and history page)",
+     "quote": "it was renamed Gimhae International Airport and relocated to its current location in August 1976"
+    },
+    {
+     "file": "geo-cities",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Gimhae (GeoNames 1842943) to Gimhae International Airport (OurAirports RKPK): 8.0 km (5.0 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "the IATA code is PUS",
+   "verdict": "confirmed",
+   "inAfter": "which is why it does not match the code PUS.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Airport: Gimhae International Airport (OurAirports RKPK, IATA PUS)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "Gimhae International Airport (IATA: PUS, ICAO: RKPK)"
+    }
+   ]
+  },
+  {
+   "claim": "17,064,613 passengers in 2018",
+   "verdict": "cut",
+   "wasBefore": "It carried 17,064,613 passengers in 2018.",
+   "why": "Eight years old. No current total could be read from a second source: Wikipedia's infobox gives 15,752,458 for 2024, and the operator's statistics page is a query form with no figures in either the plain or the browser copy (both deleted)."
+  },
+  {
+   "claim": "the airport name at the western end of the city (old wording)",
+   "verdict": "cut",
+   "wasBefore": "The airport for Busan, South Korea's second city, at the western end of the city.",
+   "why": "Reworded with the district the operator gives (see above)."
+  },
+  {
+   "claim": "the constraint is hard and permanent; beyond capacity and hemmed in; a replacement being built on Gadeokdo",
+   "verdict": "cut",
+   "wasBefore": "The constraint here is hard and permanent. The airport is beyond its design capacity and hemmed in by mountains and buildings with nowhere to expand, so a replacement is being built on Gadeokdo to meet demand.",
+   "why": "Wikipedia alone in what could be read, and the Gadeokdo project's state in 2026 needs a current source. Worth restoring when the transport ministry or a national news page can be read."
+  },
+  {
+   "claim": "runway 18L/36R reserved for Gimhae Air Base, with plans to open it to airliners",
+   "verdict": "cut",
+   "wasBefore": "One of its two runways, 18L/36R, is reserved for military use by Gimhae Air Base, though there are plans to open it to airliners.",
+   "why": "Wikipedia alone. OurAirports lists both runways (18L/36R 2,745 m, 18R/36L 3,200 m) but not their use, and the plans are undated."
+  },
+  {
+   "claim": "photography of the apron, runway and military areas is banned under the airport's rules",
+   "verdict": "cut",
+   "wasBefore": "Because the site is shared with the military, photography and video of the apron, runway and military areas is prohibited under the airport's own rules. Worth telling a client who likes taking pictures from the window.",
+   "why": "Wikipedia alone: it cites the airport's website, but no such rule could be found on the operator's English site. Useful if true, so worth checking by hand."
+  },
+  {
+   "claim": "main hub for Air Busan and Korean Air; base for Jeju Air and Jin Air",
+   "verdict": "cut",
+   "wasBefore": "It is the main hub for Air Busan and Korean Air and an operating base for Jeju Air and Jin Air.",
+   "why": "Wikipedia alone. Air Busan's own site refused the link lister (403) and was not tried again, and the operator's schedule pages are built by script."
+  },
+  {
+   "claim": "a Busan-Gimhae Light Rail station at the airport",
+   "verdict": "cut",
+   "wasBefore": "The Busan-Gimhae Light Rail has a station at the airport.",
+   "why": "Wikipedia alone in what could be read: the operator's transport page saved only its bus tab, and Visit Busan's home page has no transport link. Worth restoring when the operator's subway tab or the light rail's own site can be read."
+  },
+  {
+   "claim": "opened in August 1976; the terminal on 31 October 2007; the name and code (old wording)",
+   "verdict": "cut",
+   "wasBefore": "It opened in August 1976 and a new international terminal followed on 31 October 2007. The name comes from the nearby city of Gimhae, not Busan, which is why the code PUS and the name do not match.",
+   "why": "Reworded (see above): the airport moved here in 1976, the day in October 2007 rests on Wikipedia alone."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "South Korea's": "A possessive; the country is Wikipedia's and GeoNames' (country KR)."
+ }
+}
