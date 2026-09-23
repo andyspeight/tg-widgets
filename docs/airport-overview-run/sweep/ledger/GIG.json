@@ -6,8 +6,500 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Rio_de_Janeiro/Gale%C3%A3o_International_Airport",
  "audited": "2026-09-23",
  "before": "Rio's international airport, 20 km north of downtown, and the arrival point for the long haul flights into the city.\n\nGround transport is better than it looks. The TransCarioca bus rapid transit line runs from both terminals and operates 24 hours a day, with tickets sold at booths on the arrivals level. It links to the metro at Vicente de Carvalho, to suburban rail at several stops, and runs west to Barra da Tijuca and Recreio. A more expensive non-stop service goes to the Gentileza intermodal terminal for the light rail and long distance coaches. There is also a bus to Niterói, and taxis are bookable at company desks in both arrival halls.\n\nSince March 2026 the airport has been jointly managed by RioGaleão, a consortium of Infraero, Changi and Vinci, together with AENA.\n\nThe name comes from the beach in front of the original terminal, where the galleon Padre Eterno was built in 1663. Antonio Carlos Jobim was added in 1999, and the airport appears by name in his Samba do Avião.",
- "after": "Rio's international airport, 20 km north of downtown, and the arrival point for the long haul flights into the city.\n\nGround transport is better than it looks. The TransCarioca bus rapid transit line runs from both terminals and operates 24 hours a day, with tickets sold at booths on the arrivals level. It links to the metro at Vicente de Carvalho, to suburban rail at several stops, and runs west to Barra da Tijuca and Recreio. A more expensive non-stop service goes to the Gentileza intermodal terminal for the light rail and long distance coaches. There is also a bus to Niterói, and taxis are bookable at company desks in both arrival halls.\n\nSince March 2026 the airport has been jointly managed by RioGaleão, a consortium of Infraero, Changi and Vinci, together with AENA.\n\nThe name comes from the beach in front of the original terminal, where the galleon Padre Eterno was built in 1663. Antonio Carlos Jobim was added in 1999, and the airport appears by name in his Samba do Avião.",
- "claims": [],
- "opinion": [],
+ "after": "Rio's main international airport, 20 km north of downtown, where most long haul flights into the city land.\n\nGround transport is better than it looks. Check-in and arrivals are all in Terminal 2, where taxi firms have arrivals desks. TransCarioca BRT buses run to Barra da Tijuca and to Madureira for suburban trains, stopping at Vicente de Carvalho for the metro. A pricier non-stop express goes to the Gentileza terminal, for the light rail and the Novo Rio coach station next door.\n\nAena won an auction in March 2026 for the airport's concession, which runs to 2039. It replaces RIOgaleão, a consortium of Infraero, Changi and Vinci, with the handover expected in the second half of 2026.\n\nThe name comes from the galleon Padre Eterno, built here in the 1660s. Antonio Carlos Jobim was added in 1999, and the airport appears by name in his Samba do Avião.",
+ "claims": [
+  {
+   "claim": "Rio's main international airport",
+   "verdict": "confirmed",
+   "inAfter": "Rio's main international airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the main international airport serving Rio de Janeiro, Brazil"
+    },
+    {
+     "file": "aena-es-press",
+     "org": "Aena (incoming operator)",
+     "quote": "with 17.8 million passengers in 2025, is the main airport of the city of Rio de Janeiro",
+     "dated": "2026-03-30"
+    }
+   ]
+  },
+  {
+   "claim": "20 km from downtown",
+   "verdict": "confirmed",
+   "inAfter": "20 km north of downtown",
+   "note": "20 km is the road distance; the straight line from the GeoNames centre is 12.8 km (ratio 1.56, inside the tolerance).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is located 20 km (12 mi) north of downtown Rio de Janeiro."
+    },
+    {
+     "file": "fuiserviajante-2026",
+     "org": "Fui Ser Viajante (travel guide, updated Aug 2026)",
+     "quote": "a cerca de 20 km do centro do Rio de Janeiro"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 12.8 km"
+    }
+   ]
+  },
+  {
+   "claim": "north of downtown",
+   "verdict": "confirmed",
+   "inAfter": "north of downtown",
+   "note": "Coordinates give 327 degrees, north west on an 8-point rose, one point from north and inside the tolerance.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "north of downtown Rio de Janeiro"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 327 degrees, which is north west"
+    }
+   ]
+  },
+  {
+   "claim": "most long haul flights into the city land here",
+   "verdict": "softened",
+   "inAfter": "where most long haul flights into the city land",
+   "note": "Was 'the arrival point for the long haul flights into the city'. Santos Dumont still takes some longer domestic flights, so 'most' is what the sources support.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the main international airport serving Rio de Janeiro"
+    },
+    {
+     "file": "fuiserviajante-2026",
+     "org": "Fui Ser Viajante (travel guide, updated Aug 2026)",
+     "quote": "O Galeão (GIG) recebe a maioria dos voos internacionais e nacionais de longa distância."
+    },
+    {
+     "file": "aena-es-press",
+     "org": "Aena (incoming operator)",
+     "quote": "of whom 5.7 million were international passengers. These figures consolidate it as the country's second-largest air gateway, behind only Guarulhos",
+     "dated": "2026-03-30"
+    }
+   ]
+  },
+  {
+   "claim": "check-in and arrivals all in Terminal 2",
+   "verdict": "corrected",
+   "inAfter": "Check-in and arrivals are all in Terminal 2",
+   "note": "Replaces 'runs from both terminals' and 'both arrival halls'. Terminal 1 has been closed to passengers since 2016; the concessionaire told BandNews in March 2025 that check-in, departures and arrivals all moved to Terminal 2.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Since November 2016, the check-in and baggage claim areas of Terminal 1 are not in use. All passengers must use Terminal 2"
+    },
+    {
+     "file": "bandnews-t1",
+     "org": "BandNews FM (RIOgaleão statement)",
+     "quote": "onde as atividades de embarque, desembarque e check-in foram transferidas desde a desativação do antigo terminal",
+     "dated": "2025-03-13"
+    },
+    {
+     "file": "fuiserviajante-2026",
+     "org": "Fui Ser Viajante (travel guide, updated Aug 2026)",
+     "quote": [
+      "Hoje em dia, o Terminal 2 concentra praticamente todos os voos domésticos e internacionais.",
+      "disponíveis no piso 1 do Terminal 2"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "taxi firms have arrivals desks",
+   "verdict": "corrected",
+   "inAfter": "where taxi firms have arrivals desks",
+   "note": "Was 'bookable at company desks in both arrival halls'. The operator lists every taxi firm at Terminal 2, ground floor, arrivals.",
+   "sources": [
+    {
+     "file": "riogaleao-taxis",
+     "org": "RIOgaleão (operator)",
+     "quote": [
+      "Confira as empresas que operam no RIOgaleão",
+      "Terminal 2 - Piso 0 – Desembarque"
+     ]
+    },
+    {
+     "file": "fuiserviajante-2026",
+     "org": "Fui Ser Viajante (travel guide, updated Aug 2026)",
+     "quote": "ainda dentro da área de desembarque há quiosques de cooperativas credenciadas"
+    }
+   ]
+  },
+  {
+   "claim": "TransCarioca BRT to Barra da Tijuca and Madureira",
+   "verdict": "confirmed",
+   "inAfter": "TransCarioca BRT buses run to Barra da Tijuca and to Madureira",
+   "sources": [
+    {
+     "file": "riogaleao-brt",
+     "org": "RIOgaleão (operator)",
+     "quote": "As linhas Transcarioca Parador Galeão ligam o Terminal Alvorada, localizado na Barra da Tijuca, e a Estação Madureira, localizada em Madureira, ao Aeroporto RIOgaleão."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The TransCarioca line of the BRT system has an all-stop service that links Terminals 1 and 2 with Madureira station"
+    },
+    {
+     "file": "fuiserviajante-2026",
+     "org": "Fui Ser Viajante (travel guide, updated Aug 2026)",
+     "quote": "A linha 42, Madureira x Galeão (Parador), operada pela Mobi-RIO"
+    }
+   ]
+  },
+  {
+   "claim": "suburban trains at Madureira",
+   "verdict": "confirmed",
+   "inAfter": "Madureira for suburban trains",
+   "sources": [
+    {
+     "file": "riogaleao-brt",
+     "org": "RIOgaleão (operator)",
+     "quote": "Na Estação Madureira é possível fazer integração com os trens da SuperVia."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "where passengers can transfer to the Deodoro, Santa Cruz and Japeri lines of the suburban rail system"
+    }
+   ]
+  },
+  {
+   "claim": "metro at Vicente de Carvalho",
+   "verdict": "confirmed",
+   "inAfter": "stopping at Vicente de Carvalho for the metro",
+   "sources": [
+    {
+     "file": "riogaleao-brt",
+     "org": "RIOgaleão (operator)",
+     "quote": "passam pela Estação Vicente de Carvalho, onde é possível fazer integração com o Metrô Linha 2"
+    },
+    {
+     "file": "fuiserviajante-2026",
+     "org": "Fui Ser Viajante (travel guide, updated Aug 2026)",
+     "quote": "conecta o aeroporto à estação de metrô Vicente de Carvalho"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Vicente de Carvalho (where passengers can transfer to Line 2 of the metro)"
+    }
+   ]
+  },
+  {
+   "claim": "pricier non-stop express to Gentileza",
+   "verdict": "confirmed",
+   "inAfter": "A pricier non-stop express goes to the Gentileza terminal",
+   "note": "R$ 15 against R$ 5 on the ordinary BRT (the operator's own BRT page) and R$ 4.30 on the older fare table.",
+   "sources": [
+    {
+     "file": "riogaleao-onibus",
+     "org": "RIOgaleão (operator)",
+     "quote": [
+      "Galeão x Terminal Gentileza",
+      "R$ 15,00"
+     ]
+    },
+    {
+     "file": "riogaleao-brt",
+     "org": "RIOgaleão (operator)",
+     "quote": "Valor da passagem: R$ 5,00"
+    },
+    {
+     "file": "onibusetransporte-gentileza",
+     "org": "Ônibus & Transporte (trade news)",
+     "quote": [
+      "A linha opera em trajeto expresso, sem paradas",
+      "a tarifa é de R$ 15,00"
+     ],
+     "dated": "2026-02-08"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "There is also a non-stop BRT service to Gentileza Intermodal Terminal with a more expensive fare"
+    }
+   ]
+  },
+  {
+   "claim": "Gentileza for the light rail and Novo Rio coach station",
+   "verdict": "confirmed",
+   "inAfter": "for the light rail and the Novo Rio coach station next door",
+   "sources": [
+    {
+     "file": "fuiserviajante-2026",
+     "org": "Fui Ser Viajante (travel guide, updated Aug 2026)",
+     "quote": "O Terminal Gentileza fica ao lado da Rodoviária Novo Rio, oferecendo fácil integração com o VLT"
+    },
+    {
+     "file": "onibusetransporte-gentileza",
+     "org": "Ônibus & Transporte (trade news)",
+     "quote": "Pelo Terminal Gentileza, os passageiros têm acesso direto à Rodoviária Novo Rio",
+     "dated": "2026-02-08"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "which allows for transfer to the Rio de Janeiro Light Rail and several urban and long-distance bus lines"
+    }
+   ]
+  },
+  {
+   "claim": "Aena won the concession auction in March 2026",
+   "verdict": "corrected",
+   "inAfter": "Aena won an auction in March 2026 for the airport's concession",
+   "note": "Was 'Since March 2026 the airport has been jointly managed by RioGaleão ... together with AENA'. 30 March 2026 was the auction, not a handover: Aena bought 100% of the concessionaire subject to approvals. No source describes joint management.",
+   "sources": [
+    {
+     "file": "agenciabrasil-leilao",
+     "org": "Agência Brasil",
+     "quote": [
+      "foi leiloado nesta segunda-feira (30) por R$ 2,9 bilhões",
+      "A empresa vencedora foi a espanhola Aena"
+     ],
+     "dated": "2026-03-30"
+    },
+    {
+     "file": "aena-es-press",
+     "org": "Aena (incoming operator)",
+     "quote": "Aena has emerged as the successful bidder in the assisted sale process for 100% of the airport concessionaire",
+     "dated": "2026-03-30"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The new biding process took place on March 30, 2026. The winner was AENA"
+    }
+   ]
+  },
+  {
+   "claim": "concession runs to 2039",
+   "verdict": "corrected",
+   "inAfter": "which runs to 2039",
+   "sources": [
+    {
+     "file": "agenciabrasil-leilao",
+     "org": "Agência Brasil",
+     "quote": "até o ano de 2039",
+     "dated": "2026-03-30"
+    },
+    {
+     "file": "infobae-europapress",
+     "org": "Europa Press (via Infobae)",
+     "quote": "el periodo de concesión se extiende hasta 2039",
+     "dated": "2026-03-30"
+    }
+   ]
+  },
+  {
+   "claim": "replaces RIOgaleão (Infraero, Changi, Vinci)",
+   "verdict": "confirmed",
+   "inAfter": "It replaces RIOgaleão, a consortium of Infraero, Changi and Vinci",
+   "note": "Agência Brasil gives the private side as Vinci 70% and Changi 30%, with Infraero holding 49% of the concessionaire and leaving at the handover.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "RioGaleão (formed by Infraero, Changi Airport Group, and Vinci)"
+    },
+    {
+     "file": "agenciabrasil-leilao",
+     "org": "Agência Brasil",
+     "quote": [
+      "Atualmente, a gestão do aeroporto é da RIOgaleão (Rio de Janeiro Airport), controlada pela Vinci Airports (70%) e Changi Airports (30%).",
+      "a Infraero, que hoje detém 49% da operação, deixará o negócio"
+     ],
+     "dated": "2026-03-30"
+    }
+   ]
+  },
+  {
+   "claim": "handover expected in the second half of 2026",
+   "verdict": "corrected",
+   "inAfter": "with the handover expected in the second half of 2026",
+   "note": "In June Aena said it hoped to take over by September, subject to approvals including Cade's. A guide updated on 7 August 2026 says the transition was still under way and the airport still ran as RIOgaleão. No report of completion was found by 23 September 2026, so the text gives the expectation only.",
+   "sources": [
+    {
+     "file": "aena-es-press",
+     "org": "Aena (incoming operator)",
+     "quote": "The transaction is expected to be completed in the second half of 2026",
+     "dated": "2026-03-30"
+    },
+    {
+     "file": "fuiserviajante-2026",
+     "org": "Fui Ser Viajante (travel guide, updated Aug 2026)",
+     "quote": "A transição ainda está em andamento, com conclusão prevista para o segundo semestre de 2026, então por enquanto o aeroporto segue operando como RIOgaleão."
+    },
+    {
+     "file": "pontospravoar-setembro",
+     "org": "Pontos pra Voar (from Valor Econômico)",
+     "quote": "A Aena espera concluir a assunção da operação do Aeroporto Internacional do Galeão até setembro, dependendo apenas das aprovações regulatórias necessárias",
+     "dated": "2026-06-08"
+    }
+   ]
+  },
+  {
+   "claim": "named after the galleon Padre Eterno, built here in the 1660s",
+   "verdict": "softened",
+   "inAfter": "The name comes from the galleon Padre Eterno, built here in the 1660s",
+   "note": "Was 'built in 1663' on 'the beach in front of the original terminal'. Firjan and Wikipedia give 1663; Band says it was launched in 1664 after four years' work. '1660s' is true on every account. The beach detail is only in Wikipedia; Firjan and Band both put the shipyard where the airport now stands.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "This beach is the location where the galleon Padre Eterno was built in 1663."
+    },
+    {
+     "file": "firjan-estaleiro",
+     "org": "Firjan (Memória da Indústria)",
+     "quote": [
+      "A referência ao “Galeão” remete diretamente ao navio Padre Eterno",
+      "Em 1663, o galeão Padre Eterno foi lançado ao mar",
+      "abriga hoje o Aeroporto Internacional Antônio Carlos Jobim"
+     ]
+    },
+    {
+     "file": "band-padre-eterno",
+     "org": "Band (Jornal da Band)",
+     "quote": [
+      "O galeão chamado \"Padre Eterno\" foi lançado ao mar em 1664",
+      "O episódio deu nome ao bairro, ao aeroporto"
+     ],
+     "dated": "2024-07-11"
+    }
+   ]
+  },
+  {
+   "claim": "Antonio Carlos Jobim added in 1999",
+   "verdict": "confirmed",
+   "inAfter": "Antonio Carlos Jobim was added in 1999",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On 5 January 1999 the name was changed adding a tribute to the Brazilian musician Antonio Carlos Jobim."
+    },
+    {
+     "file": "planalto-lei-9778",
+     "org": "Presidency of Brazil (Law 9,778)",
+     "quote": [
+      "9.778, DE 5 DE JANEIRO DE 1999",
+      "passa a ser",
+      "Antonio Carlos Jobim"
+     ],
+     "dated": "1999-01-05"
+    },
+    {
+     "file": "fuiserviajante-2026",
+     "org": "Fui Ser Viajante (travel guide, updated Aug 2026)",
+     "quote": "mudou de nome em 1999"
+    }
+   ]
+  },
+  {
+   "claim": "named in Samba do Avião",
+   "verdict": "confirmed",
+   "inAfter": "the airport appears by name in his Samba do Avião",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Galeão Airport is explicitly mentioned in his composition Samba do Avião."
+    },
+    {
+     "file": "band-padre-eterno",
+     "org": "Band (Jornal da Band)",
+     "quote": "O próprio Tom se referiu ao terminal assim no Samba do Avião.",
+     "dated": "2024-07-11"
+    }
+   ]
+  },
+  {
+   "claim": "the arrival point for the long haul flights",
+   "verdict": "cut",
+   "wasBefore": "the arrival point for the long haul flights into the city",
+   "why": "Too absolute. Softened to 'most long haul flights'."
+  },
+  {
+   "claim": "BRT runs from both terminals",
+   "verdict": "cut",
+   "wasBefore": "The TransCarioca bus rapid transit line runs from both terminals",
+   "why": "Terminal 1 has been closed to passengers since 2016. Replaced by the Terminal 2 sentence."
+  },
+  {
+   "claim": "BRT runs 24 hours a day",
+   "verdict": "cut",
+   "wasBefore": "operates 24 hours a day",
+   "why": "Contradicted by the operator's own BRT page, which gives every day 4am to midnight ('Todos os dias, das 4h às 0h'). Only one source for either figure, so no hours are given."
+  },
+  {
+   "claim": "tickets sold at booths on the arrivals level",
+   "verdict": "cut",
+   "wasBefore": "with tickets sold at booths on the arrivals level",
+   "why": "No second source; current reports say fares are paid with the Jaé card."
+  },
+  {
+   "claim": "suburban rail at several stops",
+   "verdict": "cut",
+   "wasBefore": "to suburban rail at several stops",
+   "why": "Only Madureira is confirmed by the operator. Kept as Madureira."
+  },
+  {
+   "claim": "runs west to Recreio",
+   "verdict": "cut",
+   "wasBefore": "runs west to Barra da Tijuca and Recreio",
+   "why": "The operator lists Barra da Tijuca (Terminal Alvorada) and Madureira only; Recreio has no second source. Barra da Tijuca is kept."
+  },
+  {
+   "claim": "long distance coaches at Gentileza",
+   "verdict": "cut",
+   "wasBefore": "for the light rail and long distance coaches",
+   "why": "Reworded to the Novo Rio coach station next door, which is what the sources say."
+  },
+  {
+   "claim": "bus to Niterói",
+   "verdict": "cut",
+   "wasBefore": "There is also a bus to Niterói",
+   "why": "The operator lists Auto Viação 1001 buses to Charitas (760D and 1760D), not a Niterói line by name, and the line number differs from Wikipedia's 761-D. Not confirmed as written."
+  },
+  {
+   "claim": "taxis at desks in both arrival halls",
+   "verdict": "cut",
+   "wasBefore": "taxis are bookable at company desks in both arrival halls",
+   "why": "Only Terminal 2 has an arrivals hall in use. Corrected."
+  },
+  {
+   "claim": "jointly managed since March 2026",
+   "verdict": "cut",
+   "wasBefore": "Since March 2026 the airport has been jointly managed by RioGaleão",
+   "why": "March 2026 was the auction. The sale was still to complete, with handover expected in the second half of 2026. No source describes joint management."
+  },
+  {
+   "claim": "beach in front of the original terminal",
+   "verdict": "cut",
+   "wasBefore": "the beach in front of the original terminal",
+   "why": "Only Wikipedia. Firjan and Band both place the shipyard where the airport stands, which is kept."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Ground transport is better than it looks.",
+   "why": "Editorial lead-in kept from the old text. The options that follow are each sourced."
+  }
+ ],
  "tracerOk": {}
 }

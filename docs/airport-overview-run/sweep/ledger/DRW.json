@@ -1,0 +1,184 @@
+{
+ "iata": "DRW",
+ "id": "rec9Jbnt1HyNEhpWA",
+ "name": "Darwin International Airport / RAAF Darwin",
+ "country": "Australia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Darwin_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The main and only international airport serving Darwin, 8 km from the city centre in the northern suburb of Eaton. It is Australia's eleventh busiest, with almost 1.8 million passengers in the 2024 financial year.\n\nDomestic and international services operate from a single terminal building, which keeps connections simple. Flights reach regional Northern Territory destinations, the rest of Australia and Southeast Asia, which makes Darwin a practical stepping stone between Australia and Asia.\n\nThe airport shares its runways with RAAF Base Darwin, which occupies the southern side of the field along with the Darwin Aviation Museum. Civil operations are concentrated on the northern side.\n\nTwo solar arrays supply part of the airport's electricity. The first, opened in August 2016, covers six hectares and was described at the time as the largest airside photovoltaic system in the world.\n\nDarwin was one of only two Australian airfields listed as an emergency landing site for the Space Shuttle.",
+ "after": "Darwin's airport, 8 km from the city centre in the suburb of Eaton. It was Australia's eleventh busiest in the 2024 financial year, with almost 1.8 million passengers.\n\nIt is a joint civil and military airfield, sharing its runways with RAAF Base Darwin.\n\nIts first solar array, switched on in August 2016, was described at the time as the world's largest airport solar system.",
+ "claims": [
+  {
+   "claim": "Darwin's airport",
+   "verdict": "confirmed",
+   "inAfter": "Darwin's airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the main airport and the sole international airport serving the Darwin area."
+    },
+    {
+     "file": "dia-home",
+     "org": "Darwin International Airport (operator)",
+     "quote": "Henry Wrigley Drive, Eaton Northern Territory 0820"
+    },
+    {
+     "file": "bitre-fy2024",
+     "org": "BITRE (Bureau of Infrastructure and Transport Research Economics)",
+     "quote": "FY2024 (year ended June 2024) rank 11: DARWIN, total passengers 1,781,681"
+    }
+   ]
+  },
+  {
+   "claim": "8 km from the city centre",
+   "verdict": "confirmed",
+   "inAfter": "8 km from the city centre",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "8 km (5.0 mi) from Darwin city centre, in the suburb of Eaton"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 6.7 km"
+    }
+   ]
+  },
+  {
+   "claim": "in the suburb of Eaton",
+   "verdict": "confirmed",
+   "inAfter": "in the suburb of Eaton",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "in the suburb of Eaton"
+    },
+    {
+     "file": "dia-home",
+     "org": "Darwin International Airport (operator)",
+     "quote": "Henry Wrigley Drive, Eaton Northern Territory 0820"
+    }
+   ]
+  },
+  {
+   "claim": "Australia's eleventh busiest, FY2024",
+   "verdict": "confirmed",
+   "inAfter": "It was Australia's eleventh busiest in the 2024 financial year",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the eleventh busiest airport in Australia measured by passenger movements"
+    },
+    {
+     "file": "bitre-fy2024",
+     "org": "BITRE (Bureau of Infrastructure and Transport Research Economics)",
+     "quote": "FY2024 (year ended June 2024) rank 11: DARWIN, total passengers 1,781,681"
+    }
+   ]
+  },
+  {
+   "claim": "almost 1.8 million passengers",
+   "verdict": "confirmed",
+   "inAfter": "with almost 1.8 million passengers",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "with almost 1.8 million passengers travelling through in FY 2024"
+    },
+    {
+     "file": "bitre-fy2024",
+     "org": "BITRE (Bureau of Infrastructure and Transport Research Economics)",
+     "quote": "DARWIN 2024: domestic 1,593,329; international 188,352; total 1,781,681"
+    }
+   ]
+  },
+  {
+   "claim": "joint civil-military airfield sharing runways with RAAF Base Darwin",
+   "verdict": "confirmed",
+   "inAfter": "It is a joint civil and military airfield, sharing its runways with RAAF Base Darwin.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It shares runways with the Royal Australian Air Force's RA"
+    },
+    {
+     "file": "defence-raaf-darwin",
+     "org": "Australian Department of Defence",
+     "quote": [
+      "An operational joint civil-military airfield.",
+      "In addition to civil aircraft operations, the airfield supports both Australian and international military aircraft operations."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "first solar array, August 2016, world's largest airport solar system",
+   "verdict": "softened",
+   "inAfter": "Its first solar array, switched on in August 2016, was described at the time as the world's largest airport solar system.",
+   "note": "Wikipedia says largest airside photovoltaic system; RenewEconomy says believed to be the world's largest airport solar system. The softer wording is what both support. Six hectares is Wikipedia only.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "opened on 5 August 2016",
+      "At the time of construction it was described as the largest airside photovolta"
+     ]
+    },
+    {
+     "file": "reneweconomy-solar",
+     "org": "RenewEconomy",
+     "quote": [
+      "believed to be the world's largest airport solar system",
+      "Aug 5, 2016"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "only international airport",
+   "verdict": "cut",
+   "wasBefore": "The main and only international airport serving Darwin",
+   "why": "Kept as main airport; the international point has one source."
+  },
+  {
+   "claim": "single terminal for domestic and international",
+   "verdict": "cut",
+   "wasBefore": "Domestic and international services operate from a single terminal building, which keeps connections simple.",
+   "why": "Logged contradiction left open: Wikipedia says both a single terminal and separate international and domestic terminals, and no official source was reachable to settle it."
+  },
+  {
+   "claim": "regional NT, Australia and SE Asia; stepping stone",
+   "verdict": "cut",
+   "wasBefore": "Flights reach regional Northern Territory destinations, the rest of Australia and Southeast Asia, which makes Darwin a practical stepping stone between Australia and Asia.",
+   "why": "No second source for the network description."
+  },
+  {
+   "claim": "RAAF on the southern side with the museum; civil on the north",
+   "verdict": "cut",
+   "wasBefore": "which occupies the southern side of the field along with the Darwin Aviation Museum. Civil operations are concentrated on the northern side.",
+   "why": "Only Wikipedia."
+  },
+  {
+   "claim": "two arrays, six hectares, largest airside PV",
+   "verdict": "cut",
+   "wasBefore": "Two solar arrays supply part of the airport's electricity. The first, opened in August 2016, covers six hectares and was described at the time as the largest airside photovoltaic system in the world.",
+   "why": "Softened to what two sources support."
+  },
+  {
+   "claim": "Space Shuttle emergency site",
+   "verdict": "cut",
+   "wasBefore": "Darwin was one of only two Australian airfields listed as an emergency landing site for the Space Shuttle.",
+   "why": "Only Wikipedia."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

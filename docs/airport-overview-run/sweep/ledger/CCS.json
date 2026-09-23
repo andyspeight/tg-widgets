@@ -1,0 +1,472 @@
+{
+ "iata": "CCS",
+ "id": "recVpb3a1DlfENy08",
+ "name": "Maiquetía Simón Bolívar International Airport",
+ "country": "Venezuela",
+ "wikipedia": "https://en.wikipedia.org/wiki/Sim%C3%B3n_Bol%C3%ADvar_International_Airport_(Venezuela)",
+ "audited": "2026-09-23",
+ "before": "Venezuela's main international gateway, at Maiquetía in Vargas, serving Caracas, whose centre lies about 21 km to the west.\n\nThis is an airport where the route map needs checking before anything is promised. International services have been contracting for over a decade. KLM left in 2005 and British Airways stopped direct London flights the same year. Since 2014 foreign and domestic carriers have cut or ended services over political instability and an inability to recover 3.8 billion dollars owed to airlines. Some carriers schedule a stop in a neighbouring country so crews do not have to stay overnight in Caracas, which is considered unsafe. In November 2025 Venezuela withdrew operating permits from six airlines, Iberia, TAP, Avianca, LATAM Colombia, Turkish Airlines and Gol, after they suspended flights.\n\nWhat remains reaches destinations in Central and South America with a few services to Spain, Russia and China.\n\nTreat any schedule for this airport as provisional and verify it directly before booking.\n\nIt is commonly known simply as Maiquetía.",
+ "after": "Venezuela's main international gateway, serving Caracas from Maiquetía in La Guaira state, about 21 km north of the city. It is commonly known simply as Maiquetía.\n\nTwo earthquakes on 24 June 2026 damaged the terminal and stopped passenger flights. The airport reopened on 1 September from temporary terminals while the main terminal is repaired, at about a quarter of its usual capacity. Airlines were coming back in stages that month: Air Europa and Iberia from Madrid; American Airlines from Miami; Avianca and LATAM from Bogotá; and Copa from Panama City.\n\nThe FCDO advises against all but essential travel to most of Venezuela. Treat any schedule for this airport as provisional and verify it directly before booking.",
+ "claims": [
+  {
+   "claim": "Venezuela's main international gateway",
+   "verdict": "confirmed",
+   "inAfter": "Venezuela's main international gateway",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "it is the main international air passenger gateway to Venezuela"
+    },
+    {
+     "file": "travelweek-reopens",
+     "org": "Travelweek (AP)",
+     "quote": "Venezuela's main airport partially resumed commercial operations",
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "riotimes-reopens",
+     "org": "The Rio Times",
+     "quote": "Venezuela's main gateway is back",
+     "dated": "2026-08-31"
+    }
+   ]
+  },
+  {
+   "claim": "serves Caracas",
+   "verdict": "confirmed",
+   "inAfter": "serving Caracas",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "serving Caracas, the capital of the country"
+    },
+    {
+     "file": "fcdo-venezuela",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": "Maiquetía Simón Bolívar International Airport, which serves Caracas",
+     "dated": "2026-09-02"
+    },
+    {
+     "file": "airways-reopens",
+     "org": "Airways Magazine",
+     "quote": "the principal airport serving Caracas",
+     "dated": "2026-09-01"
+    }
+   ]
+  },
+  {
+   "claim": "at Maiquetía in La Guaira state",
+   "verdict": "corrected",
+   "inAfter": "from Maiquetía in La Guaira state",
+   "note": "Was 'in Vargas'. Current reports place it in La Guaira state; Wikipedia and an older travel guide still say Vargas.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport located in Maiquetía"
+    },
+    {
+     "file": "travelweek-reopens",
+     "org": "Travelweek (AP)",
+     "quote": "La Guaira, Venezuela's second smallest state, which is home to Simón Bolívar International Airport",
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "riotimes-reopens",
+     "org": "The Rio Times",
+     "quote": "Maiquetía International Airport (La Guaira state)",
+     "dated": "2026-08-31"
+    }
+   ]
+  },
+  {
+   "claim": "about 21 km north of Caracas",
+   "verdict": "corrected",
+   "inAfter": "about 21 km north of the city",
+   "note": "Was 'whose centre lies about 21 km to the west', copied from Wikipedia. Every other source puts the airport north of Caracas, so the city lies south of it, not west. The coordinates check measured from Maiquetía town (3.9 km) because the old sentence names no city after the distance; a hand calculation from the same OurAirports and GeoNames coordinates gives about 17.6 km on a bearing of about 316 degrees from central Caracas, north west, which is next to north on the rose. Distances vary by publisher: 21 km (Wikipedia, World Travel Guide), about 20 km (AP), 26 km (Cheapflights).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "about 21 kilometres (13 mi)"
+    },
+    {
+     "file": "wtg-airport",
+     "org": "World Travel Guide",
+     "quote": "is situated 21km (13 miles) north of Caracas"
+    },
+    {
+     "file": "travelweek-reopens",
+     "org": "Travelweek (AP)",
+     "quote": "about 20 kilometers (12 miles) north of Caracas",
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "cheapflights-guide",
+     "org": "Cheapflights",
+     "quote": "(16 miles) north of Caracas"
+    }
+   ]
+  },
+  {
+   "claim": "commonly known as Maiquetía",
+   "verdict": "confirmed",
+   "inAfter": "It is commonly known simply as Maiquetía",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Commonly known simply as Maiquetía"
+    },
+    {
+     "file": "riotimes-reopens",
+     "org": "The Rio Times",
+     "quote": "Maiquetía Airport Reopens September 1",
+     "dated": "2026-08-31"
+    },
+    {
+     "file": "airways-reopens",
+     "org": "Airways Magazine",
+     "quote": "Maiquetía schedule resumes from September 1",
+     "dated": "2026-09-01"
+    }
+   ]
+  },
+  {
+   "claim": "two earthquakes on 24 June 2026 damaged the terminal and stopped passenger flights",
+   "verdict": "corrected",
+   "inAfter": "Two earthquakes on 24 June 2026 damaged the terminal and stopped passenger flights",
+   "note": "Not in the old text, which was drafted from an article section that predates the earthquakes.",
+   "sources": [
+    {
+     "file": "fcdo-venezuela",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": "On 24 June, Venezuela suffered two earthquakes of 7.2 and 7.5 magnitude",
+     "dated": "2026-09-02"
+    },
+    {
+     "file": "riotimes-reopens",
+     "org": "The Rio Times",
+     "quote": "the double earthquake of June 24, 2026",
+     "dated": "2026-08-31"
+    },
+    {
+     "file": "airways-reopens",
+     "org": "Airways Magazine",
+     "quote": [
+      "The quakes damaged the Maiquetía terminal",
+      "Regular passenger traffic stopped"
+     ],
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "travelweek-reopens",
+     "org": "Travelweek (AP)",
+     "quote": "was closed after severe damage to its runways, control tower and passenger and cargo boarding and disembarking buildings",
+     "dated": "2026-09-01"
+    }
+   ]
+  },
+  {
+   "claim": "reopened on 1 September 2026 from temporary terminals",
+   "verdict": "corrected",
+   "inAfter": "The airport reopened on 1 September from temporary terminals",
+   "note": "Wikipedia now says flights resumed at half capacity on 5 August. Airways reports that only cargo came back on 5 August, and the FCDO, AP, Airways and the Latin Times all give 1 September for passengers, so 1 September stands.",
+   "sources": [
+    {
+     "file": "fcdo-venezuela",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": "resumed commercial flight operations on 1 September with limited capacity",
+     "dated": "2026-09-02"
+    },
+    {
+     "file": "airways-reopens",
+     "org": "Airways Magazine",
+     "quote": [
+      "resumed domestic and international passenger operations Tuesday from temporary terminals",
+      "cargo operations returned to the airport on August 5"
+     ],
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "latintimes-aa",
+     "org": "Latin Times",
+     "quote": "resuming operations Tuesday, September 1, inside temporary structures"
+    }
+   ]
+  },
+  {
+   "claim": "main terminal still under repair",
+   "verdict": "corrected",
+   "inAfter": "while the main terminal is repaired",
+   "sources": [
+    {
+     "file": "airways-reopens",
+     "org": "Airways Magazine",
+     "quote": "while repairs to the main terminal continue",
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "travelweek-reopens",
+     "org": "Travelweek (AP)",
+     "quote": "to serve passengers while repairs continue",
+     "dated": "2026-09-01"
+    }
+   ]
+  },
+  {
+   "claim": "about a quarter of usual capacity",
+   "verdict": "corrected",
+   "inAfter": "at about a quarter of its usual capacity",
+   "note": "The transport minister gave 25%; Airways gives 25 to 33% of usual flight volume. The Latin Times notes a separate 70% figure that refers to how full the temporary halls are, not to the airport's traffic.",
+   "sources": [
+    {
+     "file": "travelweek-reopens",
+     "org": "Travelweek (AP)",
+     "quote": "we will recover 25% of the operations we had before the earthquake",
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "latintimes-aa",
+     "org": "Latin Times",
+     "quote": "has recovered just a quarter of its pre-earthquake capacity"
+    },
+    {
+     "file": "airways-reopens",
+     "org": "Airways Magazine",
+     "quote": "approximately 25%-33% of the airport's usual flight volume",
+     "dated": "2026-09-01"
+    }
+   ]
+  },
+  {
+   "claim": "airlines returning in stages in September",
+   "verdict": "corrected",
+   "inAfter": "Airlines were coming back in stages that month",
+   "sources": [
+    {
+     "file": "riotimes-reopens",
+     "org": "The Rio Times",
+     "quote": "airlines are rebuilding their schedules step by step rather than restoring pre-earthquake capacity overnight",
+     "dated": "2026-08-31"
+    },
+    {
+     "file": "airways-reopens",
+     "org": "Airways Magazine",
+     "quote": "An airport reopening date does not mean every carrier, route and frequency returns the same day.",
+     "dated": "2026-09-01"
+    }
+   ]
+  },
+  {
+   "claim": "Air Europa and Iberia from Madrid",
+   "verdict": "corrected",
+   "inAfter": "Air Europa and Iberia from Madrid",
+   "note": "Replaces 'a few services to Spain'. Air Europa from 1 September (five a week), Iberia from 3 September (three a week).",
+   "sources": [
+    {
+     "file": "riotimes-iberia",
+     "org": "The Rio Times",
+     "quote": "Air Europa and Iberia are restoring direct flights to Caracas from Madrid"
+    },
+    {
+     "file": "airways-reopens",
+     "org": "Airways Magazine",
+     "quote": [
+      "with five weekly Madrid frequencies",
+      "Iberia (IB) plans to restore its Caracas operation progressively from September 3"
+     ],
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "travelweek-reopens",
+     "org": "Travelweek (AP)",
+     "quote": [
+      "operated by Copa Airlines of Panama and Air Europa of Spain",
+      "Other airlines, including Spain's Iberia, will be added in the coming days"
+     ],
+     "dated": "2026-09-01"
+    }
+   ]
+  },
+  {
+   "claim": "American Airlines from Miami",
+   "verdict": "corrected",
+   "inAfter": "American Airlines from Miami",
+   "note": "Double daily from 3 September; American first returned on 30 April 2026 after seven years away (AirInsight, Latin Times).",
+   "sources": [
+    {
+     "file": "latintimes-aa",
+     "org": "Latin Times",
+     "quote": "American Airlines resumes the only nonstop U.S.-Venezuela route Sept. 3"
+    },
+    {
+     "file": "riotimes-reopens",
+     "org": "The Rio Times",
+     "quote": "American: Miami–Caracas double daily from September 3",
+     "dated": "2026-08-31"
+    }
+   ]
+  },
+  {
+   "claim": "Avianca and LATAM from Bogotá",
+   "verdict": "corrected",
+   "inAfter": "Avianca and LATAM from Bogotá",
+   "note": "Avianca daily; LATAM Colombia from 4 September, three a week.",
+   "sources": [
+    {
+     "file": "airways-reopens",
+     "org": "Airways Magazine",
+     "quote": [
+      "scheduled the return of daily Bogotá–Caracas service",
+      "LATAM Colombia"
+     ],
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "riotimes-reopens",
+     "org": "The Rio Times",
+     "quote": "LATAM: Bogotá–Caracas from September 4",
+     "dated": "2026-08-31"
+    },
+    {
+     "file": "airinsight-quake",
+     "org": "AirInsight",
+     "quote": "Avianca had resumed Bogotá–Caracas service in February 2026",
+     "dated": "2026-06-25"
+    }
+   ]
+  },
+  {
+   "claim": "Copa from Panama City",
+   "verdict": "corrected",
+   "inAfter": "Copa from Panama City",
+   "sources": [
+    {
+     "file": "airways-reopens",
+     "org": "Airways Magazine",
+     "quote": "Copa Airlines was due to fly a daily Panama City rotation",
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "riotimes-copa-latam",
+     "org": "The Rio Times",
+     "quote": "Copa flies daily to Panama City from 1 September"
+    },
+    {
+     "file": "travelweek-reopens",
+     "org": "Travelweek (AP)",
+     "quote": "Copa Airlines of Panama",
+     "dated": "2026-09-01"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO advises against all but essential travel to most of Venezuela",
+   "verdict": "corrected",
+   "inAfter": "The FCDO advises against all but essential travel to most of Venezuela",
+   "note": "Replaces the unsourced 'Caracas, which is considered unsafe' with the UK government's own position. The FCDO also advises against all travel to border and mining areas. Page updated 2 September 2026.",
+   "sources": [
+    {
+     "file": "fcdo-venezuela",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": [
+      "FCDO advises against all travel to parts of Venezuela.",
+      "The FCDO advises against all but essential travel to the remaining areas of Venezuela",
+      "2 September 2026"
+     ],
+     "dated": "2026-09-02"
+    },
+    {
+     "file": "riotimes-safety",
+     "org": "The Rio Times",
+     "quote": "Britain advises against all but essential travel to most of Venezuela"
+    }
+   ]
+  },
+  {
+   "claim": "treat schedules as provisional and verify before booking",
+   "verdict": "confirmed",
+   "inAfter": "Treat any schedule for this airport as provisional and verify it directly before booking.",
+   "note": "Kept, because every current source says disruption continues.",
+   "sources": [
+    {
+     "file": "fcdo-venezuela",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": "Stay in contact with your airline or travel agent/tour operator for the latest travel information and flight updates.",
+     "dated": "2026-09-02"
+    },
+    {
+     "file": "riotimes-reopens",
+     "org": "The Rio Times",
+     "quote": "schedules remain subject to change while airport restrictions are progressively lifted",
+     "dated": "2026-08-31"
+    },
+    {
+     "file": "airways-reopens",
+     "org": "Airways Magazine",
+     "quote": "a single third-party status page can be misleading during a phased reopening",
+     "dated": "2026-09-01"
+    }
+   ]
+  },
+  {
+   "claim": "in Vargas",
+   "verdict": "cut",
+   "wasBefore": "at Maiquetía in Vargas",
+   "why": "Current sources place it in La Guaira state; corrected above."
+  },
+  {
+   "claim": "Caracas centre about 21 km to the west",
+   "verdict": "cut",
+   "wasBefore": "whose centre lies about 21 km to the west",
+   "why": "Wrong direction. The airport is north of Caracas (World Travel Guide, AP, Cheapflights), so the city is to the south. Corrected above."
+  },
+  {
+   "claim": "route map needs checking",
+   "verdict": "cut",
+   "wasBefore": "This is an airport where the route map needs checking before anything is promised.",
+   "why": "Covered by the closing advice to verify schedules, which carries three sources."
+  },
+  {
+   "claim": "international services contracting for over a decade",
+   "verdict": "cut",
+   "wasBefore": "International services have been contracting for over a decade.",
+   "why": "Out of date. Airlines began returning after the political change of January 2026 (American Airlines from 30 April, Avianca from February, Iberia from 6 April) and were returning again in September after the earthquakes."
+  },
+  {
+   "claim": "KLM and British Airways left in 2005",
+   "verdict": "cut",
+   "wasBefore": "KLM left in 2005 and British Airways stopped direct London flights the same year.",
+   "why": "Twenty-year-old history, not re-verified. The current airline list tells an agent more."
+  },
+  {
+   "claim": "carriers left from 2014 over instability and 3.8 billion dollars owed",
+   "verdict": "cut",
+   "wasBefore": "Since 2014 foreign and domestic carriers have cut or ended services over political instability and an inability to recover 3.8 billion dollars owed to airlines.",
+   "why": "History superseded by the 2026 returns. The 3.8 billion dollar figure is an old IATA number and was not re-verified."
+  },
+  {
+   "claim": "crews avoid overnight stays in Caracas",
+   "verdict": "cut",
+   "wasBefore": "Some carriers schedule a stop in a neighbouring country so crews do not have to stay overnight in Caracas, which is considered unsafe.",
+   "why": "Only one solid dated source: Aviacionline (12 November 2025) reports TAP and GOL adding crew-change stops for security reasons. Reports from 2026 on the US airlines are speculation, and nothing shows which airlines do this since the September reopening. The FCDO advice now carries the safety warning."
+  },
+  {
+   "claim": "permits withdrawn from six airlines in November 2025",
+   "verdict": "cut",
+   "wasBefore": "In November 2025 Venezuela withdrew operating permits from six airlines, Iberia, TAP, Avianca, LATAM Colombia, Turkish Airlines and Gol, after they suspended flights.",
+   "why": "Superseded. The Rio Times reports the episode ended gradually, with Air Europa back in February 2026, Plus Ultra on 3 March and Iberia on 6 April; AirInsight has Avianca back in February. Iberia, Avianca, LATAM Colombia and GOL were all returning in September 2026."
+  },
+  {
+   "claim": "remaining routes to Central and South America, Spain, Russia and China",
+   "verdict": "cut",
+   "wasBefore": "What remains reaches destinations in Central and South America with a few services to Spain, Russia and China.",
+   "why": "Out of date. Replaced by the airlines returning in September 2026, each with two sources."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

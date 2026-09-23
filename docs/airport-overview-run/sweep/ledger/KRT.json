@@ -1,0 +1,198 @@
+{
+ "iata": "KRT",
+ "id": "receA7sH49EXWyysQ",
+ "name": "Khartoum International Airport",
+ "country": "Sudan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Khartoum_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Sudan's main airport, and one that needs checking before anything is quoted into Khartoum.\n\nThe airport was closed for almost two years, from 15 April 2023 to 25 March 2025, during the Battle of Khartoum in the Sudanese civil war. On the first day of the war the Rapid Support Forces attacked the airport, reportedly firing on an arriving Saudia airliner, and two civilians were killed in separate incidents on the site. Around 20 aircraft are believed to have been destroyed in the fighting, after which the RSF occupied the airport. Treat any schedule as provisional and verify it directly.\n\nA replacement is planned. The New Khartoum International Airport is to be built at Omdourman 40 km from the centre, with two 4,000 metre runways, an 86,000 square metre terminal and a 300 room hotel, built by China Harbour Engineering.\n\nThe airport began as the Royal Air Force field Gordon's Tree, which housed an RAF squadron from 1940 and an operational training unit from 1942. The last RAF unit left in July 1956, months after Sudanese independence.\n\nIt also hosts a Sudanese Air Force transport squadron and the Police Air Wing.",
+ "after": "The airport for Sudan's capital, and one that needs checking before anything is quoted into Khartoum.\n\nIt closed when Sudan's war began on 15 April 2023, and it was among the first places the Rapid Support Forces attacked. Domestic flights resumed on 22 October 2025, and the first international flight since the war, a Kuwait Airways service, landed on 28 April 2026. The airport was hit by drones again on 4 May 2026.\n\nTreat any schedule as provisional and verify it directly with the airline before booking.",
+ "claims": [
+  {
+   "claim": "the airport for Sudan's capital",
+   "verdict": "softened",
+   "inAfter": "The airport for Sudan's capital",
+   "note": "Was 'Sudan's main airport'. During the war Port Sudan became the country's international hub (Xinhua, Feb 2026), so main is not safe to say.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "international airport serving Khartoum, the capital of Sudan"
+    },
+    {
+     "file": "geo",
+     "org": "GeoNames",
+     "quote": "GeoNames class PPLC, the national capital"
+    }
+   ]
+  },
+  {
+   "claim": "closed when the war began on 15 April 2023",
+   "verdict": "confirmed",
+   "inAfter": "It closed when Sudan's war began on 15 April 2023",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport was shut down from 15 April 2023"
+    },
+    {
+     "file": "kuwaittimes-apr2026",
+     "org": "Kuwait Times (AFP, Sudanese News Agency)",
+     "quote": "after a three-year hiatus since the outbreak of war on April 15, 2023",
+     "dated": "2026-04-28"
+    },
+    {
+     "file": "xinhua-oct2025",
+     "org": "Xinhua",
+     "quote": "ending a suspension that lasted nearly two and a half years",
+     "dated": "2025-10-22"
+    }
+   ]
+  },
+  {
+   "claim": "among the first places the RSF attacked",
+   "verdict": "softened",
+   "inAfter": "it was among the first places the Rapid Support Forces attacked",
+   "note": "Was the first-day attack with details (the Saudia airliner, two civilians, about 20 aircraft); the detail has one source, the attack itself two.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "At the start of the Sudanese civil war (2023–present) on 15 April 2023, the Rapid Support Forces (RSF) attacked key installations in Khartoum, including Khartoum International Airport."
+    },
+    {
+     "file": "xinhua-first-flight",
+     "org": "Xinhua",
+     "quote": "was among the first locations attacked by the paramilitary Rapid Support Forces (RSF) when fighting erupted in 2023",
+     "dated": "2026-02-01"
+    }
+   ]
+  },
+  {
+   "claim": "domestic flights resumed 22 October 2025",
+   "verdict": "corrected",
+   "inAfter": "Domestic flights resumed on 22 October 2025",
+   "note": "The Overview said the airport was closed until 25 March 2025. That is when the army retook it; flights did not resume until October.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport reopened for domestic flights on 22 October 2025 when Badr Airlines resumed flights between Port Sudan and"
+    },
+    {
+     "file": "xinhua-oct2025",
+     "org": "Xinhua",
+     "quote": [
+      "KHARTOUM, Oct. 22 (Xinhua) -- Sudan on Wednesday announced the reopening of Khartoum International Airport for domestic flights",
+      "A Badr Airlines aircraft landed at Khartoum International Airport"
+     ],
+     "dated": "2025-10-22"
+    }
+   ]
+  },
+  {
+   "claim": "first international flight since the war, Kuwait Airways, 28 April 2026",
+   "verdict": "corrected",
+   "inAfter": "the first international flight since the war, a Kuwait Airways service, landed on 28 April 2026",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "International flights resumed on 28 April 2026 with the arrival of a Kuwait Airways flight."
+    },
+    {
+     "file": "kuwaittimes-apr2026",
+     "org": "Kuwait Times (AFP, Sudanese News Agency)",
+     "quote": [
+      "A Kuwait Airways plane arrived at Khartoum International Airport",
+      "the first direct international flight to the airport after a three-year hiatus",
+      "April 28, 2026"
+     ],
+     "dated": "2026-04-28"
+    }
+   ]
+  },
+  {
+   "claim": "hit by drones on 4 May 2026",
+   "verdict": "corrected",
+   "inAfter": "The airport was hit by drones again on 4 May 2026.",
+   "note": "Dabanga, dated 6 May 2026, says drones targeted the airport on Monday, which was 4 May, and that flights were still suspended two days later.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On 4 May 2026, another drone attack was carried out on the airport"
+    },
+    {
+     "file": "dabanga-may2026",
+     "org": "Dabanga (Radio Dabanga)",
+     "quote": [
+      "06/05/2026",
+      "flights to and from the capital Khartoum remained suspended today, after drones targeted the airport on Monday"
+     ],
+     "dated": "2026-05-06"
+    }
+   ]
+  },
+  {
+   "claim": "Sudan's main airport",
+   "verdict": "cut",
+   "wasBefore": "Sudan's main airport",
+   "why": "Port Sudan has been the international hub during the war."
+  },
+  {
+   "claim": "closed 15 April 2023 to 25 March 2025",
+   "verdict": "cut",
+   "wasBefore": "The airport was closed for almost two years, from 15 April 2023 to 25 March 2025",
+   "why": "Wrong end date for flights: the army retook the airport then, but flights resumed in October 2025."
+  },
+  {
+   "claim": "Saudia fired on, two civilians killed",
+   "verdict": "cut",
+   "wasBefore": "reportedly firing on an arriving Saudia airliner, and two civilians were killed in separate incidents on the site",
+   "why": "One source."
+  },
+  {
+   "claim": "about 20 aircraft destroyed; RSF occupied",
+   "verdict": "cut",
+   "wasBefore": "Around 20 aircraft are believed to have been destroyed in the fighting, after which the RSF occupied the airport.",
+   "why": "One source."
+  },
+  {
+   "claim": "treat schedules as provisional",
+   "verdict": "cut",
+   "wasBefore": "Treat any schedule as provisional and verify it directly.",
+   "why": "Kept, reworded, as advice at the end."
+  },
+  {
+   "claim": "New Khartoum International at Omdurman, 40 km, runways, terminal, hotel, China Harbour",
+   "verdict": "cut",
+   "wasBefore": "A replacement is planned. The New Khartoum International Airport is to be built at Omdourman 40 km from the centre",
+   "why": "No current second source for a pre-war plan; the direction problem logged in drafting also stays unresolved."
+  },
+  {
+   "claim": "RAF Gordon's Tree history",
+   "verdict": "cut",
+   "wasBefore": "The airport began as the Royal Air Force field Gordon's Tree",
+   "why": "Only Wikipedia."
+  },
+  {
+   "claim": "Sudanese Air Force squadron and Police Air Wing",
+   "verdict": "cut",
+   "wasBefore": "It also hosts a Sudanese Air Force transport squadron and the Police Air Wing.",
+   "why": "Only Wikipedia."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and one that needs checking before anything is quoted into Khartoum",
+   "why": "Advice that follows from the sourced timeline."
+  },
+  {
+   "text": "Treat any schedule as provisional and verify it directly with the airline before booking.",
+   "why": "As above."
+  }
+ ],
+ "tracerOk": {}
+}

@@ -6,8 +6,237 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Shiraz_Shahid_Dastgheib_International_Airport",
  "audited": "2026-09-23",
  "before": "The main international airport for Fars province and the largest in the south of Iran, at Shiraz. After renovation in 2005 it was rated the second most reliable and modern airport in the country after Tehran Imam Khomeini, on flight safety and navigation systems.\n\nThere are two connected passenger terminals. Terminal 1 is the older and larger and handles domestic flights only. Terminal 2 takes all scheduled and charter international services.\n\nThat will change. A new international terminal is under construction and was due to be completed by 2024. Once it opens, the current international terminal is to be given over to Hajj flights. Confirm which building applies rather than assuming, because this is still in transition.",
- "after": "The main international airport for Fars province and the largest in the south of Iran, at Shiraz. After renovation in 2005 it was rated the second most reliable and modern airport in the country after Tehran Imam Khomeini, on flight safety and navigation systems.\n\nThere are two connected passenger terminals. Terminal 1 is the older and larger and handles domestic flights only. Terminal 2 takes all scheduled and charter international services.\n\nThat will change. A new international terminal is under construction and was due to be completed by 2024. Once it opens, the current international terminal is to be given over to Hajj flights. Confirm which building applies rather than assuming, because this is still in transition.",
- "claims": [],
+ "after": "The largest airport in the south of Iran, serving Shiraz.\n\nIran closed its airspace after the United States and Israel struck the country on 28 February 2026. Shiraz was operating again by the end of April, but Iranian airspace can still close at short notice. European regulators tell their airlines not to fly in it at any altitude.\n\nThe FCDO advises against all travel to Iran, and the US government tells its citizens not to travel there for any reason.",
+ "claims": [
+  {
+   "claim": "largest airport in the south of Iran",
+   "verdict": "confirmed",
+   "inAfter": "The largest airport in the south of Iran",
+   "note": "Iranian official sites time out from here, so the second source is a travel guide, as TBS used for its distance. Not a time-sensitive claim.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the largest airport in the southern region of Iran"
+    },
+    {
+     "file": "irantourism-airport",
+     "org": "Iran Travel Guide Center (irantourism.travel)",
+     "quote": "SYZ airport is the largest airport on the southern side of the country"
+    }
+   ]
+  },
+  {
+   "claim": "serves Shiraz",
+   "verdict": "confirmed",
+   "inAfter": "serving Shiraz",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport located in Shiraz, Iran"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Shiraz"
+    }
+   ]
+  },
+  {
+   "claim": "Iran closed its airspace after US and Israeli strikes on 28 February 2026",
+   "verdict": "corrected",
+   "inAfter": "Iran closed its airspace after the United States and Israel struck the country on 28 February 2026",
+   "note": "Not in the old text, which was drafted from an article that says nothing about 2026. Replaces the stale terminal-transition paragraph with the position that matters to a traveller now.",
+   "sources": [
+    {
+     "file": "easa-czib-iran",
+     "org": "EASA (EU Aviation Safety Agency)",
+     "quote": "On 28 February 2026, the United States and Israel conducted military strikes targeting sites within Iranian territory.",
+     "dated": "2026-08-31"
+    },
+    {
+     "file": "safeairspace-iran",
+     "org": "Safe Airspace (OPSGROUP)",
+     "quote": "OIIX/Tehran FIR closed following large-scale US and Israeli strikes"
+    },
+    {
+     "file": "iranintl-iraqi",
+     "org": "Iran International",
+     "quote": "a suspension caused by the war and the closure of Iranian and Iraqi airspace",
+     "dated": "2026-08-20"
+    },
+    {
+     "file": "aerotime-feb28",
+     "org": "AeroTime",
+     "quote": "the February 28 US-Israeli strikes on Iran",
+     "dated": "2026-04-27"
+    }
+   ]
+  },
+  {
+   "claim": "Shiraz operating again by the end of April 2026",
+   "verdict": "corrected",
+   "inAfter": "Shiraz was operating again by the end of April",
+   "note": "Both reports carry the Iran Airports and Air Navigation Company's list of 28 April. Iran International's report of 5 July has flights from Bandar Abbas to Shiraz being added, so it was still operating then.",
+   "sources": [
+    {
+     "file": "mee-six-airports",
+     "org": "Middle East Eye",
+     "quote": [
+      "28 April 2026",
+      "six airports are now operational",
+      "Mehrabad, Mashhad, Shiraz, Zahedan, Gorgan and Urmia"
+     ],
+     "dated": "2026-04-28"
+    },
+    {
+     "file": "caspianpost-six",
+     "org": "Caspian Post",
+     "quote": "Six airports in Iran are now operational: Mehrabad, Mashhad, Shiraz, Zahedan, Gorgan, and Urmia",
+     "dated": "2026-04-28"
+    },
+    {
+     "file": "iranintl-bandarabbas",
+     "org": "Iran International",
+     "quote": "Flights linking Bandar Abbas to Tehran, Shiraz",
+     "dated": "2026-07-05"
+    }
+   ]
+  },
+  {
+   "claim": "Iranian airspace can still close at short notice",
+   "verdict": "corrected",
+   "inAfter": "Iranian airspace can still close at short notice",
+   "note": "IranWire reports Shiraz itself shut to all flights until 8pm on 8 June 2026.",
+   "sources": [
+    {
+     "file": "fcdo-iran",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": "Iranian airspace may close at short notice.",
+     "dated": "2026-08-13"
+    },
+    {
+     "file": "easa-czib-iran",
+     "org": "EASA (EU Aviation Safety Agency)",
+     "quote": "implementing temporary airspace closures and restrictions",
+     "dated": "2026-08-31"
+    },
+    {
+     "file": "iranwire-shiraz-cancel",
+     "org": "IranWire",
+     "quote": "have been cancelled until 8:00 PM on Monday, June 8",
+     "dated": "2026-06-08"
+    }
+   ]
+  },
+  {
+   "claim": "European regulators tell airlines not to fly in Iranian airspace",
+   "verdict": "corrected",
+   "inAfter": "European regulators tell their airlines not to fly in it at any altitude",
+   "note": "EASA's bulletin runs to 30 September 2026 unless reviewed; the German and Italian notices it sits alongside run to 12 and 29 November 2026. Safe Airspace also lists a UK AIP entry telling UK operators not to enter the Tehran FIR.",
+   "sources": [
+    {
+     "file": "easa-czib-iran",
+     "org": "EASA (EU Aviation Safety Agency)",
+     "quote": [
+      "Not operate within the airspace of Iran, FIR Tehran (OIIX), at all altitudes and flight levels",
+      "30/09/2026, unless reviewed earlier"
+     ],
+     "dated": "2026-08-31"
+    },
+    {
+     "file": "safeairspace-iran",
+     "org": "Safe Airspace (OPSGROUP)",
+     "quote": [
+      "German operators should not enter the airspace of Iran",
+      "French operators should not enter the airspace of Iran",
+      "UK operators should not enter the OIIX/Tehran FIR"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "UK and US governments advise against all travel to Iran",
+   "verdict": "corrected",
+   "inAfter": "The FCDO advises against all travel to Iran, and the US government tells its citizens not to travel there for any reason",
+   "note": "Each government is the primary source for its own advice. The FCDO page was updated on 13 August 2026 and was still current on 23 September 2026.",
+   "sources": [
+    {
+     "file": "fcdo-iran",
+     "org": "UK Foreign, Commonwealth and Development Office",
+     "quote": [
+      "FCDO advises against all travel to Iran.",
+      "Updated: 13 August 2026"
+     ],
+     "dated": "2026-08-13"
+    },
+    {
+     "file": "usembassy-alert",
+     "org": "US Department of State (Virtual Embassy Iran)",
+     "quote": [
+      "Do not travel to Iran for any reason.",
+      "SEPTEMBER 19, 2026"
+     ],
+     "dated": "2026-09-19"
+    }
+   ]
+  },
+  {
+   "claim": "main international airport for Fars province",
+   "verdict": "cut",
+   "wasBefore": "The main international airport for Fars province",
+   "why": "No second source could be reached. Iranian official and news sites time out from here and SKYbrary returns a blank page. The largest-in-the-south claim is kept instead."
+  },
+  {
+   "claim": "rated second most reliable and modern after Tehran Imam Khomeini in 2005",
+   "verdict": "cut",
+   "wasBefore": "After renovation in 2005 it was rated the second most reliable and modern airport in the country after Tehran Imam Khomeini, on flight safety and navigation systems.",
+   "why": "Nobody names who made the rating and it dates from 2005. A travel guide gives only a looser version ('the second most advanced one, after IKA'). Of no use to an agent now."
+  },
+  {
+   "claim": "two connected terminals",
+   "verdict": "cut",
+   "wasBefore": "There are two connected passenger terminals.",
+   "why": "Sources disagree and none is dated: Wikipedia has Terminal 1 for domestic and Terminal 2 for international flights, while the Iran Travel Guide Center says Terminal 1 is for departures and Terminal 2 for arrivals. The airport's own site cannot be reached."
+  },
+  {
+   "claim": "Terminal 1 older, larger, domestic only",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 is the older and larger and handles domestic flights only.",
+   "why": "As above: disputed, undated, and terminal use during the 2026 disruption is unknown."
+  },
+  {
+   "claim": "Terminal 2 handles all international flights",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 takes all scheduled and charter international services.",
+   "why": "As above: disputed, undated, and terminal use during the 2026 disruption is unknown."
+  },
+  {
+   "claim": "that will change",
+   "verdict": "cut",
+   "wasBefore": "That will change.",
+   "why": "Introduced the terminal transition, which is cut."
+  },
+  {
+   "claim": "new international terminal due by 2024",
+   "verdict": "cut",
+   "wasBefore": "A new international terminal is under construction and was due to be completed by 2024.",
+   "why": "It did not open by 2024. Search results point to Iranian reports (Mehr News, YJC) that work stalled at about 55 per cent when the contractor stopped and that a new 30-month phase was approved, but those sites time out from here and the Internet Archive is blocked, so nothing could be saved. Cut rather than guessed."
+  },
+  {
+   "claim": "current international terminal to go to Hajj flights",
+   "verdict": "cut",
+   "wasBefore": "Once it opens, the current international terminal is to be given over to Hajj flights.",
+   "why": "Depends on the unfinished terminal, and only Wikipedia says so."
+  },
+  {
+   "claim": "confirm which building applies",
+   "verdict": "cut",
+   "wasBefore": "Confirm which building applies rather than assuming, because this is still in transition.",
+   "why": "Replaced by the current travel position, which matters far more."
+  }
+ ],
  "opinion": [],
  "tracerOk": {}
 }
