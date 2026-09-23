@@ -1,0 +1,269 @@
+{
+ "iata": "TSF",
+ "id": "recJmAnvLkyIKz8o5",
+ "name": "Treviso Airport",
+ "country": "Italy",
+ "wikipedia": "https://en.wikipedia.org/wiki/Treviso_Airport",
+ "audited": "2026-09-23",
+ "before": "Sold by some airlines as Venice-Treviso, and that is the thing to be straight with a client about. The airport is 3 km from Treviso and about 31 km from Venice, and Venice's own airport is Marco Polo. It is used mainly by low cost carriers, and Ryanair opened a base here in December 2020 with eighteen new routes.\n\nGetting to Venice is well organised, but it is a transfer. Barzi Bus Service runs a coach timed to Ryanair and Wizz Air flights that reaches Venice in forty minutes by motorway, and since October 2024 a Flibco shuttle has run up to fifteen times a day to Mestre station and Venezia Tronchetto. For Treviso itself a Mobilità di Marca public bus runs to Treviso Centrale station. There is also a daily coach to Ljubljana.\n\nThe terminal opened in 2007 and is named after the sculptor Antonio Canova. The runway is 2,420 metres. Parking runs to 564 long stay spaces and 50 short stay in front of the building.",
+ "after": "Sold by some airlines as Venice-Treviso, and that is the thing to be straight with a client about. The airport is a few kilometres south west of Treviso and about 31 km from Venice, and Venice's own airport is Marco Polo. Ryanair flies here, though its own airport data does not list Treviso as a base.\n\nGetting to Venice is well organised, but it is a transfer. Barzi Service runs a coach about once an hour to Mestre station and Venezia Tronchetto, reaching Venice in about 40 minutes by motorway. For Treviso itself a Mobilità di Marca bus runs to Treviso Centrale station.\n\nThe airport is named after the sculptor Antonio Canova. Its runway is 2,420 metres.",
+ "claims": [
+  {
+   "claim": "sold by some airlines as Venice-Treviso",
+   "verdict": "confirmed",
+   "inAfter": "Sold by some airlines as Venice-Treviso",
+   "note": "Ryanair's own airport data names it 'Venice Treviso'.",
+   "sources": [
+    {
+     "file": "ryanair-api",
+     "org": "Ryanair (its own airport data, ryanair.com)",
+     "dated": "read 2026-09-23 (live data)",
+     "quote": "\"name\":\"Venice Treviso\""
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-08",
+     "quote": "Some airlines refer to the airport unofficially as \"Venice-Treviso\" or similar."
+    }
+   ]
+  },
+  {
+   "claim": "a few kilometres south west of Treviso",
+   "verdict": "softened",
+   "inAfter": "a few kilometres south west of Treviso",
+   "note": "Was '3 km from Treviso'. Wikipedia gives 3.0 km west-southwest, but the straight line from the GeoNames centre is already 4.2 km (ratio 0.71, which fails the coordinates check), so the distance is softened; the direction agrees.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 4.2 km (2.6 miles)",
+      "Bearing from the city centre: 241 degrees, which is south west"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-08",
+     "quote": "is an international airport located 1.6 NM (3.0 km; 1.8 mi) west-southwest of Treviso"
+    }
+   ]
+  },
+  {
+   "claim": "about 31 km from Venice",
+   "verdict": "confirmed",
+   "inAfter": "about 31 km from Venice",
+   "note": "Coordinates: 25.8 km in a straight line from the GeoNames centre of Venice (ratio 1.20, inside the road-distance allowance).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-08",
+     "quote": "approximately 31 km (19 mi) away from the city of Venice"
+    },
+    {
+     "file": "geo-venice",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Venice: 25.8 km (16.1 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "Venice's own airport is Marco Polo",
+   "verdict": "confirmed",
+   "inAfter": "Venice's own airport is Marco Polo",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-08",
+     "quote": "The primary airport serving Venice is Venice Marco Polo Airport."
+    },
+    {
+     "file": "ourairports-veneto",
+     "org": "OurAirports (computed)",
+     "quote": "LIPZ VCE Venice Marco Polo Airport at 45.5053, 12.3519 (Venezia (VE))"
+    }
+   ]
+  },
+  {
+   "claim": "Ryanair flies here, though its own data does not list Treviso as a base",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Ryanair",
+   "inAfter": "Ryanair flies here, though its own airport data does not list Treviso as a base.",
+   "note": "Was 'Ryanair opened a base here in December 2020 with eighteen new routes'. Wikipedia says only that Ryanair announced the base in December 2020; Ryanair's own airport data today has 'base':false for Treviso, with routes to 93 airports. That it flies here rests on Ryanair and Wikipedia; the base status is Ryanair's own statement about its own network, so it is attributed.",
+   "sources": [
+    {
+     "file": "ryanair-api",
+     "org": "Ryanair (its own airport data, ryanair.com)",
+     "dated": "read 2026-09-23 (live data)",
+     "quote": [
+      "\"base\":false",
+      "\"routes\":[\"city:TALLINN\",\"airport:CRV\",\"airport:LTN\""
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-08",
+     "quote": "In December 2020, Ryanair announced it would open a new base at the airport consisting of 18 new routes in addition to several existing ones."
+    }
+   ]
+  },
+  {
+   "claim": "Barzi coach about hourly to Mestre station and Venezia Tronchetto, about 40 minutes to Venice by motorway",
+   "verdict": "corrected",
+   "inAfter": "Barzi Service runs a coach about once an hour to Mestre station and Venezia Tronchetto, reaching Venice in about 40 minutes by motorway.",
+   "note": "Was 'a coach timed to Ryanair and Wizz Air flights that reaches Venice in forty minutes by motorway'. Barzi's own page, with a timetable valid from 1 July to 24 October 2026, now gives an hourly line with one stop at Mestre station, ending at Tronchetto.",
+   "sources": [
+    {
+     "file": "barzi-airport",
+     "org": "Barzi Service (the coach operator, barziservice.com)",
+     "dated": "2026 (timetable in force from 01.07.2026 to 24.10.2026)",
+     "quote": [
+      "Barzi Service fornisce il servizio di linea che unisce l’aeroporto di Treviso al capolinea di Venezia Tronchetto - dove partono i battelli diretti per Piazza San Marco - effettuando una sola fermata alla stazione dei treni di Mestre .",
+      "I bus partono con frequenza di circa 1 ora, il viaggio dura circa 40 minuti in funzione del traffico",
+      "Viaggio diretto via autostrada, con unica fermata alla stazione di Venezia Mestre.",
+      "In vigore dal 01.07.2026 al 24.10.2026"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-08",
+     "quote": "operated by BARZI BUS SERVICE, reaches Venice in 40 minutes by highway"
+    }
+   ]
+  },
+  {
+   "claim": "a Mobilità di Marca bus to Treviso Centrale station",
+   "verdict": "confirmed",
+   "inAfter": "For Treviso itself a Mobilità di Marca bus runs to Treviso Centrale station.",
+   "note": "Mobilità di Marca runs it as the Treviso Airlink shuttle, station to Canova Airport.",
+   "sources": [
+    {
+     "file": "mom-airbus",
+     "org": "Mobilità di Marca (the Treviso bus company, mobilitadimarca.it)",
+     "dated": "read 2026-09-23 (live page; winter timetable from 10/09/2025)",
+     "quote": [
+      "Da Aeroporto Canova a Treviso stazione - From Canova Airport to Treviso train station",
+      "Invernale 2025 dal 10/09/2025"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-08",
+     "quote": "A public bus service, operated by Mobilità di Marca, connects the airport with the railway station (the Treviso Centrale railway station) in the centre of Treviso."
+    }
+   ]
+  },
+  {
+   "claim": "named after the sculptor Antonio Canova",
+   "verdict": "confirmed",
+   "inAfter": "The airport is named after the sculptor Antonio Canova.",
+   "note": "Both bus companies call it the Canova airport; Wikipedia gives the sculptor.",
+   "sources": [
+    {
+     "file": "mom-airbus",
+     "org": "Mobilità di Marca (the Treviso bus company, mobilitadimarca.it)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Treviso - Canova Airport"
+    },
+    {
+     "file": "barzi-airport",
+     "org": "Barzi Service (the coach operator, barziservice.com)",
+     "dated": "2026",
+     "quote": "Arrivare dall’ aeroporto Canova di Treviso a Venezia"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-08",
+     "quote": "It was named after Antonio Canova, a famous Italian sculptor."
+    }
+   ]
+  },
+  {
+   "claim": "runway of 2,420 metres",
+   "verdict": "confirmed",
+   "inAfter": "Its runway is 2,420 metres.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": "Runway 07/25: 2,420 m (7,941 ft), ASP"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-08",
+     "quote": "The runway direction is 07/25 with an asphalt surface 2,420 m (7,940 ft) long"
+    }
+   ]
+  },
+  {
+   "claim": "3 km from Treviso",
+   "verdict": "cut",
+   "wasBefore": "The airport is 3 km from Treviso",
+   "why": "Fails the coordinates check: the straight line alone is 4.2 km. Softened to a few kilometres (see above)."
+  },
+  {
+   "claim": "used mainly by low cost carriers",
+   "verdict": "cut",
+   "wasBefore": "It is used mainly by low cost carriers",
+   "why": "Wikipedia alone. The airport's site (trevisoairport.it) refuses plain requests and the link tools (403, Akamai 'Access Denied'); its home page was read through the browser but gives no detail, and its inner pages could not be found. The operator group SAVE (grupposave.it) refused the link lister too (403)."
+  },
+  {
+   "claim": "Ryanair opened a base in December 2020 with eighteen new routes",
+   "verdict": "cut",
+   "wasBefore": "Ryanair opened a base here in December 2020 with eighteen new routes",
+   "why": "Wikipedia says only that the base was announced, and Ryanair's own data does not list Treviso as a base today. Corrected (see above)."
+  },
+  {
+   "claim": "the coach is timed to Ryanair and Wizz Air flights",
+   "verdict": "cut",
+   "wasBefore": "runs a coach timed to Ryanair and Wizz Air flights",
+   "why": "Barzi's own page now describes an hourly line and names no airline. Corrected (see above)."
+  },
+  {
+   "claim": "Flibco shuttle since October 2024, up to fifteen a day to Mestre and Tronchetto",
+   "verdict": "cut",
+   "wasBefore": "since October 2024 a Flibco shuttle has run up to fifteen times a day to Mestre station and Venezia Tronchetto",
+   "why": "Wikipedia alone: Barzi's page (Wikipedia says the two run it together) does not mention Flibco, and Flibco's site lists no Treviso route among its links. The Mestre and Tronchetto stops stay, on Barzi's line."
+  },
+  {
+   "claim": "a daily coach to Ljubljana",
+   "verdict": "cut",
+   "wasBefore": "There is also a daily coach to Ljubljana.",
+   "why": "Not even in Wikipedia's current article, and not on the bus companies' pages read tonight."
+  },
+  {
+   "claim": "the terminal opened in 2007",
+   "verdict": "cut",
+   "wasBefore": "The terminal opened in 2007 and is named after the sculptor Antonio Canova.",
+   "why": "The 2007 date rests on Wikipedia alone. The airport's site (trevisoairport.it) refuses plain requests and the link tools (403, Akamai 'Access Denied'); its home page was read through the browser but gives no detail, and its inner pages could not be found. The Canova name stays (see above)."
+  },
+  {
+   "claim": "parking: 564 long stay and 50 short stay spaces",
+   "verdict": "cut",
+   "wasBefore": "Parking runs to 564 long stay spaces and 50 short stay in front of the building.",
+   "why": "Wikipedia alone. The airport's site (trevisoairport.it) refuses plain requests and the link tools (403, Akamai 'Access Denied'); its home page was read through the browser but gives no detail, and its inner pages could not be found."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and that is the thing to be straight with a client about",
+   "why": "The old text's advice, kept: it follows from the sourced name and distances."
+  },
+  {
+   "text": "Getting to Venice is well organised, but it is a transfer.",
+   "why": "The old text's framing, kept; the coach behind it is sourced."
+  }
+ ],
+ "tracerOk": {
+  "For Treviso": "The tracer catches the sentence's opening 'For' with the city's name; Treviso itself is in every source."
+ }
+}
