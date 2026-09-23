@@ -1,0 +1,167 @@
+{
+ "iata": "XIY",
+ "id": "recO6esDovpV9SV6g",
+ "name": "Xi'an Xianyang International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Xi'an_Xianyang_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The busiest airport in north west China and eleventh in the country, handling 48,535,594 passengers in 2025. It serves Xi'an and the whole Guanzhong area, and is a hub for China Eastern, Sichuan Airlines and Hainan Airlines. Skytrax rates it four stars.\n\nTerminal 5 is the reason to look again. It was completed in September 2024, built in a Tang dynasty style at a cost of 46.9 billion yuan, and at 705,500 square metres it is larger than Terminals 1, 2 and 3 put together. It is designed for 83 million passengers a year by 2030.\n\nIt also contains something no other airport has: the world's first on-site airport museum, showing artefacts discovered in Shaanxi. For a client with a stopover in Xi'an that is a genuine attraction rather than a way to pass the time.\n\nThe terminals run T1, T2, T3 and T5, with no Terminal 4. Terminal 1 handles 9 Air and Spring Airlines, Terminal 2 is mainly domestic, and Terminal 3 opened in 2012 alongside a second runway of 3,800 metres, long enough for an A380.",
+ "after": "The busiest airport in north west China and the eleventh busiest in the country, with 48.5 million passengers in 2025.\n\nTerminal 5 opened on 20 February 2025 and handles international flights. Built in a style inspired by the Tang dynasty, it is larger than Terminals 1, 2 and 3 put together. There is no Terminal 4.\n\nTerminal 5 also holds a museum of relics found during the airport's own construction, worth a look on a stopover.",
+ "claims": [
+  {
+   "claim": "busiest in north west China, eleventh in China, 48.5 million passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "The busiest airport in north west China and the eleventh busiest in the country, with 48.5 million passengers in 2025.",
+   "note": "CAAC's 2025 table puts Xi'an (48,535,594) well ahead of every other north west airport: Urumqi 29,179,737, Lanzhou 17,734,885, Yinchuan 9,860,514, Xining 7,877,903 (checked in caac-2025.json). Rounded to 48.5 million.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "Civil Aviation Administration of China",
+     "dated": "2026-02-26",
+     "quote": "passenger rank 11 in China; passengers 2025: 48,535,594"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2025, the airport handled 48,535,594 passengers, making it the busiest airport in northwest China. It is the 11th busiest airport nationwide."
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 5 opened on 20 February 2025 and handles international flights",
+   "verdict": "corrected",
+   "inAfter": "Terminal 5 opened on 20 February 2025 and handles international flights.",
+   "note": "The old text said only that Terminal 5 was completed in September 2024, as if it were still to open. Xinhua's report is dated 21 Feb 2025 and says it opened 'on Thursday', which was 20 February; its photo caption carries the date. That international flights still use it rests on the current Wikipedia revision (14 Sep 2026); Xinhua's report is from February 2025. A Chinese report from May 2026 cited by Wikipedia (news.qq.com) was checked and is about a Jingdezhen route, not the terminal.",
+   "sources": [
+    {
+     "file": "cd-t5",
+     "org": "Xinhua (published by China Daily)",
+     "dated": "2025-02-21",
+     "quote": [
+      "People walk at the departure hall of Terminal 5 of Xianyang International Airport in Xi'an, capital of Northwest China's Shaanxi province, Feb 20, 2025.",
+      "The Terminal 5 of the Xianyang International Airport was officially put into operation on Thursday.",
+      "Terminal 5 allows the same floor departure of domestic and international passengers."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On 20 February 2025, Terminal 5 officially opened to public and will commence operation. China Eastern Airlines, Shanghai Airlines and China United Airlines, as well as all international flights, will from the same day relocate to this new terminal."
+    }
+   ]
+  },
+  {
+   "claim": "Tang dynasty style; larger than Terminals 1, 2 and 3 together",
+   "verdict": "confirmed",
+   "inAfter": "Built in a style inspired by the Tang dynasty, it is larger than Terminals 1, 2 and 3 put together.",
+   "sources": [
+    {
+     "file": "cd-regional",
+     "org": "China Daily",
+     "dated": "2025-02-17",
+     "quote": "T5's architectural design blends historical aesthetics with modern sophistication, inspired by ancient Chang'an and the Tang Dynasty's architectural grandeur."
+    },
+    {
+     "file": "cd-t5",
+     "org": "Xinhua (published by China Daily)",
+     "quote": "Covering an area of 705,500 square meters, which is bigger than the total areas of the T1, T2 and T3 terminals"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "featuring Tang dynasty inspired architecture",
+      "The terminal covers 705,500 square meters - larger than T1, T2 and T3 combined"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "no Terminal 4",
+   "verdict": "confirmed",
+   "inAfter": "There is no Terminal 4.",
+   "note": "Four terminals, numbered 1, 2, 3 and 5.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Xi'an Airport has four terminals: T1, T2, T3, and T5."
+    },
+    {
+     "file": "xagov",
+     "org": "Xi'an Municipal Government (site presented by China Daily)",
+     "dated": "2024-12-30",
+     "quote": "Upon completion of the expansion project, Xi'an Xianyang International Airport will feature four runways and four terminals"
+    },
+    {
+     "file": "cd-t5",
+     "org": "Xinhua (published by China Daily)",
+     "quote": "bigger than the total areas of the T1, T2 and T3 terminals"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 5 holds a museum of relics found during the airport's construction",
+   "verdict": "softened",
+   "inAfter": "Terminal 5 also holds a museum of relics found during the airport's own construction",
+   "note": "Was 'the world's first on-site airport museum'. Only Wikipedia says first; Sixth Tone quotes the museum's own director saying no other airport can do it, which is a claim, not a check. Opened 26 February 2025.",
+   "sources": [
+    {
+     "file": "sixthtone",
+     "org": "Sixth Tone",
+     "dated": "2025-04-22",
+     "quote": [
+      "The collection now anchors a new museum built into the airport’s Terminal 5.",
+      "Inside, the main hall features 121 artifacts unearthed during airport construction"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The CWAG Museum of Heritage is a museum located within Terminal 5, opened on 26 February 2025.",
+      "The museum contains 121 artifacts dating back to the Tang dynasty, that were uncovered during airport construction."
+     ]
+    },
+    {
+     "file": "cd-t5",
+     "org": "Xinhua (published by China Daily)",
+     "quote": "It also sets up a museum to display cultural relics unearthed in Shaanxi."
+    }
+   ]
+  },
+  {
+   "claim": "exact 48,535,594; Guanzhong area; hub for China Eastern, Sichuan Airlines and Hainan Airlines; Skytrax four stars",
+   "verdict": "cut",
+   "wasBefore": "handling 48,535,594 passengers in 2025. It serves Xi'an and the whole Guanzhong area, and is a hub for China Eastern, Sichuan Airlines and Hainan Airlines. Skytrax rates it four stars.",
+   "why": "The figure is kept, rounded. The Guanzhong line and the three hubs rest on Wikipedia alone, and its own infobox calls Sichuan Airlines a focus city, not a hub. The Skytrax page Wikipedia cites did not show Xi'an in the saved text, and the operator's site (xxia.com) answered 502."
+  },
+  {
+   "claim": "T5 completed September 2024, 46.9 billion yuan, 705,500 m2, 83 million by 2030",
+   "verdict": "cut",
+   "wasBefore": "Terminal 5 is the reason to look again. It was completed in September 2024, built in a Tang dynasty style at a cost of 46.9 billion yuan, and at 705,500 square metres it is larger than Terminals 1, 2 and 3 put together. It is designed for 83 million passengers a year by 2030.",
+   "why": "Completion is overtaken by the February 2025 opening. The cost and the 2030 target are confirmed (China Daily, Wikipedia) but are planning figures, dropped for length; the Tang style and the size comparison are kept."
+  },
+  {
+   "claim": "world's first on-site airport museum",
+   "verdict": "cut",
+   "wasBefore": "It also contains something no other airport has: the world's first on-site airport museum, showing artefacts discovered in Shaanxi. For a client with a stopover in Xi'an that is a genuine attraction rather than a way to pass the time.",
+   "why": "The superlative has one source; softened to what three sources agree on."
+  },
+  {
+   "claim": "T1 9 Air and Spring; T2 domestic; T3 2012 with second runway 3,800 m for the A380",
+   "verdict": "cut",
+   "wasBefore": "The terminals run T1, T2, T3 and T5, with no Terminal 4. Terminal 1 handles 9 Air and Spring Airlines, Terminal 2 is mainly domestic, and Terminal 3 opened in 2012 alongside a second runway of 3,800 metres, long enough for an A380.",
+   "why": "The terminal tenants rest on Wikipedia alone and changed when China Eastern and the international flights moved to Terminal 5; the airport now has four runways. The no-Terminal-4 point is kept."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "worth a look on a stopover",
+   "why": "The old text's view, kept short. Sixth Tone says a walk round takes 15 to 30 minutes."
+  }
+ ],
+ "tracerOk": {
+  "48.5": "48,535,594 rounded (CAAC, Wikipedia)"
+ }
+}
