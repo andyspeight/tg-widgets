@@ -1,0 +1,445 @@
+{
+ "iata": "CGH",
+ "id": "recjVIWYGw1w4xOLu",
+ "name": null,
+ "country": "Brazil",
+ "wikipedia": "https://en.wikipedia.org/wiki/S%C3%A3o_Paulo%E2%80%93Congonhas_Airport",
+ "audited": "2026-09-23",
+ "before": "São Paulo's city airport, 8 km from downtown in Campo Belo, and second busiest in Brazil after Guarulhos. For a client staying in the city this is by far the most convenient of São Paulo's four commercial airports.\n\nCapacity is deliberately capped. Congonhas is slot restricted to a maximum of 30 operations an hour, one of only five airports in Brazil with such limits, so availability is tighter than the traffic figures suggest.\n\nGetting between airports is well organised. A monorail station sits next to the terminal. Azul runs free transfers to Campinas-Viracopos for its own passengers, and Gol and TAM do the same to Guarulhos. There is also an executive bus line between Guarulhos and Congonhas calling at Tietê bus terminal, Barra Funda, Itaim Bibi, Praça da República and the hotels along Avenida Paulista, taking about an hour depending on traffic.\n\nThe airport was planned in 1919 and opened in April 1936. It was officially renamed after Deputy José Freitas Nobre in 2017, but everyone still says Congonhas.",
+ "after": "São Paulo's city airport, about 9 km from the centre in Campo Belo. It is Brazil's second busiest after Guarulhos, with 24.5 million passengers in 2025. Its scheduled flights are all domestic, mainly with LATAM, Gol and Azul. For a client staying in the city it is the most convenient of São Paulo's airports. Aena, which won a 30-year concession in 2022, runs it.\n\nCapacity is deliberately capped. Congonhas is one of four Brazilian airports where ANAC, the regulator, allocates take-off and landing slots. Regular flights are not allowed after 11pm.\n\nThe Airport Bus Service runs executive coaches between Congonhas and Guarulhos airport. A monorail to the airport, Line 17-Gold, was still under construction in August 2026, according to the city's Metrô.\n\nThe airport opened in 1936. It was officially renamed after Deputy Freitas Nobre in 2017, but it is still known as Congonhas.",
+ "claims": [
+  {
+   "claim": "São Paulo's city airport, about 9 km from the centre",
+   "verdict": "corrected",
+   "inAfter": "São Paulo's city airport, about 9 km from the centre",
+   "note": "Was '8 km from downtown'. Aena gives 8.7 km and the coordinates 9.1 km in a straight line at 192 degrees (south); Wikipedia's 8 km is a ratio of 0.88, inside the tolerance, but the operator's figure rounds to 9.",
+   "sources": [
+    {
+     "file": "aena-caracteristicas-b",
+     "org": "Aena Brasil (operator)",
+     "quote": "Localizado a 8,7 quilômetros do centro de São Paulo",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 9.1 km"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is located 8 km (5 mi) from downtown São Paulo, at Washington Luís Avenue, in the district of Campo Belo."
+    }
+   ]
+  },
+  {
+   "claim": "in Campo Belo",
+   "verdict": "confirmed",
+   "inAfter": "in Campo Belo",
+   "note": "Aena says the airport was built at Vila Congonhas, 'then' in the district of Campo Belo; Wikipedia places it in the district of Campo Belo today.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "in the district of Campo Belo"
+    },
+    {
+     "file": "aena-historico-b",
+     "org": "Aena Brasil (operator)",
+     "quote": "O nome do aeroporto, construído na Vila Congonhas, então distrito de Campo Belo"
+    }
+   ]
+  },
+  {
+   "claim": "Brazil's second busiest after Guarulhos",
+   "verdict": "confirmed",
+   "inAfter": "Brazil's second busiest after Guarulhos",
+   "note": "Wikipedia's ranking is for 2022; Aena's live page says second busiest by passengers, and Aena's March 2026 release puts Galeão third in 2025 with 17.8 million, below Congonhas's 24.5 million.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In 2022, it was the second busiest airport in Brazil by passenger traffic, after São Paulo–Guarulhos."
+    },
+    {
+     "file": "aena-caracteristicas-b",
+     "org": "Aena Brasil (operator)",
+     "quote": "Segundo mais movimentado do Brasil em número de passageiros",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "aena-galeao-press",
+     "org": "Aena",
+     "quote": "International Airport is Brazil's third-busiest airport in terms of passenger volume, with 17.8 million passengers in 2025",
+     "dated": "2026-03-30"
+    }
+   ]
+  },
+  {
+   "claim": "24.5 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "with 24.5 million passengers in 2025",
+   "note": "New figure, as the brief asks for the operator's 2025 traffic. Aena's 2025 results give 24,491,178, exactly Wikipedia's infobox figure (which cites Aena). No ANAC airport table could be saved (its statistics are an interactive panel and a 360 MB file).",
+   "sources": [
+    {
+     "file": "aena-2025-traffic",
+     "org": "Aena",
+     "quote": "stands out with 24,491,178 passengers (+5.9%), 214,951 flights handled (-8.4%)",
+     "dated": "2026-01-13"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 24,491,178 6%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "scheduled flights all domestic",
+   "verdict": "corrected",
+   "inAfter": "Its scheduled flights are all domestic",
+   "note": "New, in place of the old text's silence on it, because a UK agent needs to know that no international flight uses Congonhas. DECEA's live entry allows international landings and take-offs only for state flights with 24 hours' notice.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Since the opening of Guarulhos Airport in 1985, international flights no longer operate from Congonhas",
+      "Congonhas lost its designation as an international airport in 2008"
+     ]
+    },
+    {
+     "file": "aisweb-sbsp",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": "Quando a serviço de Estado (pátrio ou estrangeiro) AD AVBL para OPR LAND/TKOF INTL necessitando de prévia comunicação à administração aeroportuária e dessa para a ANAC",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "mainly LATAM, Gol and Azul",
+   "verdict": "corrected",
+   "inAfter": "mainly with LATAM, Gol and Azul",
+   "note": "Replaces the airline shuttle claims (see the cuts). Aena's live airline list has Azul, GOL, Latam and Voe Pass; ANAC names Latam, Gol and Azul as the airlines agreeing the new late-night rule with Aena and DECEA (September 2026).",
+   "sources": [
+    {
+     "file": "aena-cias",
+     "org": "Aena Brasil (operator)",
+     "quote": [
+      "Azul",
+      "GOL",
+      "Latam",
+      "Voe Pass"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "anac-cgh-23h",
+     "org": "ANAC (National Civil Aviation Agency)",
+     "quote": "a concessionária do aeroporto e as companhias aéreas Latam, Gol e Azul",
+     "dated": "2026-09-09"
+    }
+   ]
+  },
+  {
+   "claim": "Aena won a 30-year concession in 2022 and runs it",
+   "verdict": "corrected",
+   "inAfter": "Aena, which won a 30-year concession in 2022, runs it.",
+   "note": "New: the old text did not say who runs the airport. Aena took over from Infraero on 17 October 2023 (Aena's own history page); the takeover date rests on Aena alone and Wikipedia's infobox dates Aena from 2022, so only the 2022 concession is given. DECEA's live entry names Aena Brasil as operator.",
+   "sources": [
+    {
+     "file": "aena-historico-b",
+     "org": "Aena Brasil (operator)",
+     "quote": [
+      "Em 17 de outubro de 2023, o equipamento passou a ser gerido pela Aena Brasil, depois que a concessionária arrematou um bloco de 11 aeroportos brasileiros em leilão da Agência Nacional de Aviação Civil (Anac), realizado em 2022.",
+      "Nos próximos 30 anos, prazo da concessão"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "on 18 August 2022, the consortium AENA won a 30-year concession to operate the airport.",
+      "The airport is operated by AENA."
+     ]
+    },
+    {
+     "file": "aisweb-sbsp",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": [
+      "Congonhas - Deputado Freitas Nobre",
+      "AENA BRASIL"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "one of four Brazilian airports where ANAC allocates slots",
+   "verdict": "corrected",
+   "inAfter": "Congonhas is one of four Brazilian airports where ANAC, the regulator, allocates take-off and landing slots",
+   "primary": true,
+   "attribution": "ANAC",
+   "note": "Was 'slot restricted to a maximum of 30 operations an hour, one of only five airports in Brazil with such limits'. ANAC coordinates four airports today (Congonhas, Guarulhos, Recife, Santos Dumont); DECEA's live entry also calls Congonhas a coordinated aerodrome. The count of four is ANAC's own, so the sentence names ANAC.",
+   "sources": [
+    {
+     "file": "anac-slots",
+     "org": "ANAC (National Civil Aviation Agency)",
+     "quote": [
+      "Atualmente a ANAC é responsável pela coordenação de quatro aeroportos no Brasil:",
+      "Congonhas (CGH/SBSP)",
+      "A ANAC desempenha o papel de coordenador responsável pela alocação de slots nos aeroportos coordenados do Brasil."
+     ]
+    },
+    {
+     "file": "aisweb-sbsp",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": "Aeródromo coordenado",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "regular flights not allowed after 11pm",
+   "verdict": "corrected",
+   "inAfter": "Regular flights are not allowed after 11pm.",
+   "note": "New, in place of the 30-an-hour cap, which no current source gives. ANAC (9 September 2026): Resolution 55/2008 bars regular commercial and general aviation operations after 23:00; a new exception only lets flights already scheduled that day finish after 23:00 in emergencies such as bad weather. DECEA requires prior permission for any operation between 02:00 and 09:00 UTC, which is 23:00 to 06:00 local time (UTC-3). Wikipedia's 22:30 closing is out of date.",
+   "sources": [
+    {
+     "file": "anac-cgh-23h",
+     "org": "ANAC (National Civil Aviation Agency)",
+     "quote": [
+      "que atualmente veda operações comerciais regulares e de aviação geral depois das 23h",
+      "Publicado em 09/09/2026"
+     ],
+     "dated": "2026-09-09"
+    },
+    {
+     "file": "aisweb-sbsp",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": [
+      "Para operação entre 0200/0900 UTC, o operador da aeronave deve solicitar por e-mail",
+      "UTC-3"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Airport Bus Service coaches between Congonhas and Guarulhos",
+   "verdict": "softened",
+   "inAfter": "The Airport Bus Service runs executive coaches between Congonhas and Guarulhos airport.",
+   "note": "Was one line 'between Guarulhos and Congonhas calling at Tietê bus terminal, Barra Funda, Itaim Bibi, Praça da República and the hotels along Avenida Paulista'. The company's own site shows these as separate routes from Guarulhos (Congonhas, Tietê, Barra Funda, the Paulista and República hotels), not stops on the Congonhas coach, and Itaim Bibi is not on it.",
+   "sources": [
+    {
+     "file": "aena-como-chegar",
+     "org": "Aena Brasil (operator)",
+     "quote": [
+      "Airport Bus Service",
+      "Aeroportos de Guarulhos/Congonhas, Rodoviárias Tietê/Barra Funda e Circuito dos Hotéis (Av. Paulista e República)"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "airportbus-home",
+     "org": "Airport Bus Service (coach operator)",
+     "quote": [
+      "Transporte executivo entre o Aeroporto de Guarulhos e o Aeroporto de Congonhas, com conforto e segurança.",
+      "Aeroporto de Congonhas → GRU"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Metrô: the Line 17-Gold monorail to the airport still under construction in August 2026",
+   "verdict": "corrected",
+   "inAfter": "A monorail to the airport, Line 17-Gold, was still under construction in August 2026, according to the city's Metrô.",
+   "primary": true,
+   "attribution": "Metrô",
+   "note": "Replaces 'A monorail station sits next to the terminal', which reads as if a train can be caught there. The Metrô's August 2026 progress report (published 17 September 2026) has Line 17-Gold under 'works in progress' and says it 'will link' Congonhas to lines 4, 5 and 9; its works page says seven stations are being finished. Aena's own directions page offers only metro plus bus. Attributed to the Metrô, whose line it is.",
+   "sources": [
+    {
+     "file": "metro-relatorio-ago2026",
+     "org": "São Paulo Metrô (Companhia do Metropolitano de São Paulo)",
+     "quote": [
+      "| LINHA 17-OURO | OBRAS EM ANDAMENTO | CARACTERÍSTICAS",
+      "Agosto de 2026 | Portal da Transparência | 19",
+      "A implantação do trecho ligará o Aeroporto de Congonhas às Linha 4-Amarela"
+     ],
+     "dated": "2026-09-17"
+    },
+    {
+     "file": "metro-linha17",
+     "org": "São Paulo Metrô (Companhia do Metropolitano de São Paulo)",
+     "quote": "ligará, através de um ramal, o Aeroporto de Congonhas à Estação Morumbi, da Linha 9-Esmeralda."
+    }
+   ]
+  },
+  {
+   "claim": "opened in 1936",
+   "verdict": "softened",
+   "inAfter": "The airport opened in 1936.",
+   "note": "Was 'opened in April 1936'. Aena gives the year only; the day (12 April) rests on Wikipedia.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport was initially planned in 1919, but it did not open until 12 April 1936."
+    },
+    {
+     "file": "aena-historico-b",
+     "org": "Aena Brasil (operator)",
+     "quote": "Em 1936, ano de sua inauguração"
+    }
+   ]
+  },
+  {
+   "claim": "officially renamed after Deputy Freitas Nobre in 2017",
+   "verdict": "confirmed",
+   "inAfter": "It was officially renamed after Deputy Freitas Nobre in 2017",
+   "note": "Law 13,450 of 16 June 2017, published 19 June 2017. The law says 'Deputado Freitas Nobre'; the first name José rests on Wikipedia alone and is dropped.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Since 19 June 2017, it is officially named after Deputy José Freitas Nobre."
+    },
+    {
+     "file": "planalto-lei-13450",
+     "org": "Presidency of Brazil (Law 13,450)",
+     "quote": [
+      "LEI Nº 13.450, DE 16 DE JUNHO DE 2017.",
+      "passa a ser denominado Aeroporto de São Paulo/Congonhas - Deputado Freitas Nobre."
+     ],
+     "dated": "2017-06-16"
+    }
+   ]
+  },
+  {
+   "claim": "still known as Congonhas",
+   "verdict": "softened",
+   "inAfter": "but it is still known as Congonhas",
+   "note": "Was 'everyone still says Congonhas'. The operator itself calls it Aeroporto de Congonhas.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The name Congonhas, however, remains mostly used."
+    },
+    {
+     "file": "aena-historico-b",
+     "org": "Aena Brasil (operator)",
+     "quote": "O Aeroporto de Congonhas registra, diariamente, um fluxo de público que chega a superar 70 mil passageiros."
+    }
+   ]
+  },
+  {
+   "claim": "8 km from downtown",
+   "verdict": "cut",
+   "wasBefore": "8 km from downtown",
+   "why": "Corrected to about 9 km (Aena 8.7 km; coordinates 9.1 km)."
+  },
+  {
+   "claim": "by far the most convenient of four commercial airports",
+   "verdict": "cut",
+   "wasBefore": "this is by far the most convenient of São Paulo's four commercial airports",
+   "why": "Which four airports is not stated anywhere but Wikipedia, and 'by far' is a judgement; the sentence is kept as opinion without them."
+  },
+  {
+   "claim": "30 operations an hour",
+   "verdict": "cut",
+   "wasBefore": "Congonhas is slot restricted to a maximum of 30 operations an hour",
+   "why": "No current source; the figure rests on Wikipedia alone. Replaced by ANAC's slot coordination and the 11pm rule."
+  },
+  {
+   "claim": "one of only five airports with limits",
+   "verdict": "cut",
+   "wasBefore": "one of only five airports in Brazil with such limits",
+   "why": "Out of date: ANAC coordinates four airports now."
+  },
+  {
+   "claim": "availability tighter than traffic suggests",
+   "verdict": "cut",
+   "wasBefore": "so availability is tighter than the traffic figures suggest",
+   "why": "An inference from the hourly cap, which is cut."
+  },
+  {
+   "claim": "getting between airports is well organised",
+   "verdict": "cut",
+   "wasBefore": "Getting between airports is well organised.",
+   "why": "A judgement that leaned on the airline shuttles, which could not be confirmed."
+  },
+  {
+   "claim": "monorail station next to the terminal",
+   "verdict": "cut",
+   "wasBefore": "A monorail station sits next to the terminal.",
+   "why": "Misleading: the monorail (Line 17-Gold) was still under construction in August 2026 (Metrô). Replaced by the Metrô's own status."
+  },
+  {
+   "claim": "Azul free transfers to Viracopos",
+   "verdict": "cut",
+   "wasBefore": "Azul runs free transfers to Campinas-Viracopos for its own passengers",
+   "why": "No current source: Azul's site refused automated reads (403) and Aena's live list of coaches at the airport does not include it."
+  },
+  {
+   "claim": "Gol and TAM transfers to Guarulhos",
+   "verdict": "cut",
+   "wasBefore": "and Gol and TAM do the same to Guarulhos",
+   "why": "Out of date in its wording (TAM has flown as LATAM since 2016) and not in Aena's live list; no current source."
+  },
+  {
+   "claim": "bus calls at Tietê, Barra Funda, Itaim Bibi, República and Paulista hotels",
+   "verdict": "cut",
+   "wasBefore": "calling at Tietê bus terminal, Barra Funda, Itaim Bibi, Praça da República and the hotels along Avenida Paulista",
+   "why": "The coach company runs these as separate routes from Guarulhos; Itaim Bibi is not on its list."
+  },
+  {
+   "claim": "about an hour",
+   "verdict": "cut",
+   "wasBefore": "taking about an hour depending on traffic",
+   "why": "Journey time rests on Wikipedia alone; neither Aena nor the coach company gives one."
+  },
+  {
+   "claim": "planned in 1919",
+   "verdict": "cut",
+   "wasBefore": "The airport was planned in 1919",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "April 1936",
+   "verdict": "cut",
+   "wasBefore": "opened in April 1936",
+   "why": "The month rests on Wikipedia alone; Aena gives the year, which is kept."
+  },
+  {
+   "claim": "Deputy José Freitas Nobre",
+   "verdict": "cut",
+   "wasBefore": "renamed after Deputy José Freitas Nobre",
+   "why": "The first name rests on Wikipedia alone; the law names Deputado Freitas Nobre."
+  },
+  {
+   "claim": "everyone still says Congonhas",
+   "verdict": "cut",
+   "wasBefore": "but everyone still says Congonhas",
+   "why": "Softened to 'still known as Congonhas'."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "For a client staying in the city it is the most convenient of São Paulo's airports.",
+   "why": "Judgement kept from the old text: at about 9 km from the centre it is far closer than Guarulhos (25 km, GRU Airport) or Viracopos in Campinas."
+  },
+  {
+   "text": "Capacity is deliberately capped.",
+   "why": "Lead-in kept from the old text; the slot coordination and the 11pm rule that follow are sourced."
+  }
+ ],
+ "tracerOk": {
+  "São Paulo's": "possessive of São Paulo, which is in every source",
+  "Deputy Freitas Nobre": "English for the law's 'Deputado Freitas Nobre' (Law 13,450); see the renaming claim"
+ }
+}

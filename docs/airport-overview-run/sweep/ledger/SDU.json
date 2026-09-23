@@ -1,0 +1,422 @@
+{
+ "iata": "SDU",
+ "id": "recDQPZQ05aJK8p7T",
+ "name": "Santos Dumont Airport",
+ "country": "Brazil",
+ "wikipedia": "https://en.wikipedia.org/wiki/Santos_Dumont_Airport",
+ "audited": "2026-09-23",
+ "before": "Rio's city airport, right beside the financial district, and the one to book when a client is working rather than sightseeing. Since 2023 it has been largely domestic, with Galeão taking the international flights, and it remains one of the ten busiest airports in Brazil.\n\nAccess could hardly be simpler. The Rio de Janeiro Light Rail has a terminal station at the airport, linking it to downtown, the metro, the Central Railway Station and the Central Bus Station.\n\nIt is also one of the more interesting airports in Brazil to look at. The whole site was reclaimed from Guanabara Bay in 1934, replacing a seaplane terminal at Calabouço Point, and opened under its present name on 30 November 1936. The 1937 Pan American seaplane terminal still stands, modelled on the company's Miami building, and the passenger terminal begun in 1938 was designed by the MMM Roberto brothers after Paris Le Bourget.\n\nIt is named after Alberto Santos Dumont, the Brazilian aviation pioneer.",
+ "after": "Rio's city airport, right in the centre and the one to book when a client is working rather than sightseeing. Its scheduled flights are domestic, mostly short and medium-haul; international flights use Galeão. A federal limit on passenger numbers has applied since 2024, and it handled 6.2 million passengers in 2025. Infraero, the state airport company, runs it.\n\nAccess could hardly be simpler. The VLT light rail starts here, with connections to the metro at Cinelândia and Carioca, suburban trains at Central and the Rodoviária coach station.\n\nWork began in 1934 on reclaimed land at Calabouço Point, and the airport opened as Santos Dumont on 30 November 1936. Its original terminal, designed by the Roberto brothers and opened in 1945, is a landmark of Brazilian modern architecture, listed since 1998.\n\nIt is named after Alberto Santos Dumont, the Brazilian aviation pioneer.",
+ "claims": [
+  {
+   "claim": "right in the centre",
+   "verdict": "softened",
+   "inAfter": "Rio's city airport, right in the centre",
+   "note": "Was 'right beside the financial district'; 'financial' rests on Wikipedia alone, while the light rail operator and Infraero both place the airport in the city centre. The coordinates give 2.0 km from the GeoNames centre, east.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "and is located adjacent to Rio de Janeiro's financial center"
+    },
+    {
+     "file": "vlt-linha-1---azul",
+     "org": "VLT Carioca (light rail operator, Motiva)",
+     "quote": "liga o Aeroporto Santos Dumont, no centro do Rio, ao Terminal Intermodal Gentileza",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "infraero-sdu-historico",
+     "org": "Infraero (operator)",
+     "quote": "Optou-se então por aproveitar uma área na Ponta do Calabouço, no centro da cidade"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 2.0 km"
+    }
+   ]
+  },
+  {
+   "claim": "scheduled flights domestic",
+   "verdict": "corrected",
+   "inAfter": "Its scheduled flights are domestic",
+   "note": "Was 'Since 2023 it has been largely domestic'. It has been restricted to domestic flights since a 2005 ordinance (Wikipedia), and Infraero's 2025 figures show 6,148,384 scheduled domestic passengers against 77 scheduled international ones (all arrivals, so probably diversions). The 2023 decisions were about limiting its traffic, which is a later claim.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In March 2005, an ordinance restricted the airport's operations to domestic flights, general aviation, and air taxi."
+    },
+    {
+     "file": "infraero-2025-pax",
+     "org": "Infraero (operator)",
+     "quote": [
+      "Row (SBRJ, regular, PAX DOMÉSTICO): PAX DOMÉSTICO | 255863 | 3050669 | 287599 | 3097715 | 543462 | 6148384",
+      "Row (SBRJ, regular, PAX INTERNACIONAL): PAX INTERNACIONAL | 0 | 0 | 0 | 77 | 0 | 77"
+     ],
+     "dated": "2026-03-04"
+    },
+    {
+     "file": "fuiserviajante-sdu",
+     "org": "Fui Ser Viajante (travel guide, updated Aug 2026)",
+     "quote": "Não, o SDU opera apenas voos domésticos, principalmente a ponte aérea para São Paulo e voos para outras capitais brasileiras.",
+     "dated": "2026-08-10"
+    }
+   ]
+  },
+  {
+   "claim": "mostly short and medium-haul",
+   "verdict": "corrected",
+   "inAfter": "mostly short and medium-haul",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport handles only part of Rio's short-to-medium haul domestic air traffic"
+    },
+    {
+     "file": "fuiserviajante-sdu",
+     "org": "Fui Ser Viajante (travel guide, updated Aug 2026)",
+     "quote": "O Santos Dumont concentra voos domésticos de curta e média distância, com destaque para a ponte aérea Rio, São Paulo.",
+     "dated": "2026-08-10"
+    }
+   ],
+   "note": "The travel guide (updated August 2026) only confirms what Wikipedia already says. It also names the Rio to São Paulo air shuttle as the main route, but that has no second current source (the airlines' sites refused automated reads, 403), so it is not in the text."
+  },
+  {
+   "claim": "international flights use Galeão",
+   "verdict": "corrected",
+   "inAfter": "international flights use Galeão",
+   "note": "Was 'with Galeão taking the international flights' since 2023. Aena, which now holds Galeão's concession, gives it 5.7 million international passengers in 2025.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is more of a domestic hub, with Galeão International Airport serving international flights after 2023."
+    },
+    {
+     "file": "aena-galeao-press",
+     "org": "Aena",
+     "quote": [
+      "is the main airport of the city of Rio de Janeiro",
+      "of whom 5.7 million were international passengers"
+     ],
+     "dated": "2026-03-30"
+    }
+   ]
+  },
+  {
+   "claim": "federal limit on passenger numbers since 2024",
+   "verdict": "corrected",
+   "inAfter": "A federal limit on passenger numbers has applied since 2024",
+   "note": "New, in place of 'Since 2023 ... Galeão taking the international flights'. The limit followed the August 2023 decision to push flights to Galeão; it was replaced on 8 November 2023 by an annual cap of 6.5 million from 2024 (Wikipedia). Infraero's 2024 report blames the federal limit for a 46 per cent fall in Santos Dumont's passengers in 2024, and its 2025 report (June 2026) says the limit still shaped 2025. A travel guide updated in August 2026 says the ceiling has been raised to 8 million for 2026; that has no second source, so no figure is given.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "on 8 November 2023 these restrictions were reversed and replaced by an annual cap of 6,5 million passengers starting in 2024."
+    },
+    {
+     "file": "infraero-relatorio-2024",
+     "org": "Infraero (operator)",
+     "quote": [
+      "da limitação operacional de passageiros no Aeroporto Santos Dumont, estabelecida pelo Governo Federal",
+      "a menos que no ano anterior"
+     ],
+     "dated": "2025-07"
+    },
+    {
+     "file": "infraero-relatorio-2025",
+     "org": "Infraero (operator)",
+     "quote": "Esse resultado reflete, principalmente, a limitação operacional de passageiros no Aeroporto Santos Dumont, estabelecida pelo Governo Federal.",
+     "dated": "2026-06"
+    },
+    {
+     "file": "fuiserviajante-sdu",
+     "org": "Fui Ser Viajante (travel guide, updated Aug 2026)",
+     "quote": "depois de um período com teto mais restrito de 6,5 milhões",
+     "dated": "2026-08-10"
+    }
+   ]
+  },
+  {
+   "claim": "6.2 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "it handled 6.2 million passengers in 2025",
+   "note": "Infraero's December 2025 sheet gives 6,201,466 for the year; Wikipedia's infobox (citing Infraero) 6,201,200.",
+   "sources": [
+    {
+     "file": "infraero-2025-pax",
+     "org": "Infraero (operator)",
+     "quote": [
+      "Row: SBRJ | 258530 | 3077262 | 290434 | 3124204 | 548964 | 6201466",
+      "Movimento de Passageiros da REDE INFRAERO em dezembro de 2025"
+     ],
+     "dated": "2026-03-04"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 6,201,200 1%"
+     ]
+    },
+    {
+     "file": "fuiserviajante-sdu",
+     "org": "Fui Ser Viajante (travel guide, updated Aug 2026)",
+     "quote": "em 2025, o aeroporto registrou pouco mais de 6,2 milhões de passageiros",
+     "dated": "2026-08-10"
+    }
+   ]
+  },
+  {
+   "claim": "run by Infraero, the state airport company",
+   "verdict": "corrected",
+   "inAfter": "Infraero, the state airport company, runs it.",
+   "note": "New: the old text did not say who runs it. The brief expected Aena, but Santos Dumont has NOT passed to Aena: DECEA's live entry names Infraero as operator, Infraero lists it among its 24 airports (June 2026) and on its live airport list, and Aena's January 2026 results name its 17 Brazilian airports (six in the north-east and eleven in the block with Congonhas) without Santos Dumont (saved under CGH as aena-2025-traffic). Infraero's shares are held by the federal government (the Union).",
+   "sources": [
+    {
+     "file": "aisweb-sbrj",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": [
+      "Santos Dumont",
+      "PUB/MIL",
+      "INFRAERO"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "infraero-relatorio-2025",
+     "org": "Infraero (operator)",
+     "quote": [
+      "a Infraero atua no desenvolvimento de 24 aeroportos — entre esses, o Aeroporto Santos Dumont/ RJ e 23 aeroportos regionais.",
+      "A União, na condição de titular das ações"
+     ],
+     "dated": "2026-06"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "and is operated by Infraero."
+    }
+   ]
+  },
+  {
+   "claim": "VLT light rail from the airport with metro, rail and coach station connections",
+   "verdict": "confirmed",
+   "inAfter": "The VLT light rail starts here, with connections to the metro at Cinelândia and Carioca, suburban trains at Central and the Rodoviária coach station.",
+   "note": "Line 1 runs from the airport through Cinelândia and Carioca (metro) to the Rodoviária and Terminal Gentileza; Line 3 runs from the airport to Central, for SuperVia trains. Infraero's own page lists the same stations on the line from the airport (fare R$ 5, 6am to midnight).",
+   "sources": [
+    {
+     "file": "vlt-linha-1---azul",
+     "org": "VLT Carioca (light rail operator, Motiva)",
+     "quote": [
+      "MetrôRio",
+      "Cinelândia | Carioca",
+      "Rodoviária do Rio"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "vlt-linha-3---amarela",
+     "org": "VLT Carioca (light rail operator, Motiva)",
+     "quote": [
+      "A Linha 3-Amarela do VLT Carioca faz o trajeto que liga o Aeroporto Santos Dumont à Central",
+      "Trem (SuperVia)"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "infraero-sdu-transporte",
+     "org": "Infraero (operator)",
+     "quote": [
+      "ESTAÇÕES DISPONÍVEIS NA LINHA QUE SAI DO AEROPORTO",
+      "Cinelândia",
+      "Carioca",
+      "Rodoviária"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The Rio de Janeiro Light Rail has a terminal station at the airport connecting the airport with downtown area, the subway system, the Central Railway Station, and the Central Bus Station."
+    }
+   ]
+  },
+  {
+   "claim": "work began in 1934 on reclaimed land at Calabouço Point",
+   "verdict": "softened",
+   "inAfter": "Work began in 1934 on reclaimed land at Calabouço Point",
+   "note": "Was 'The whole site was reclaimed from Guanabara Bay in 1934, replacing a seaplane terminal at Calabouço Point'. Infraero dates the start of work to 1934 at Calabouço Point, the first stage being 370,000 m2 of landfill; 'the whole site' and the seaplane terminal rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "infraero-sdu-historico",
+     "org": "Infraero (operator)",
+     "quote": [
+      "As obras começaram em 1934",
+      "situada na Ponta do Calabouço",
+      "A primeira parte dos trabalhos constituiu-se basicamente da ampliação do aterro em mais 370 mil m²."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 1934, land was reclaimed from the sea to create the first runway of the airport"
+    }
+   ]
+  },
+  {
+   "claim": "opened as Santos Dumont on 30 November 1936",
+   "verdict": "confirmed",
+   "inAfter": "the airport opened as Santos Dumont on 30 November 1936",
+   "sources": [
+    {
+     "file": "infraero-sdu-historico",
+     "org": "Infraero (operator)",
+     "quote": "a inauguração que ocorreu em 30 de novembro de 1936, passando de Aeródromo do Calabouço para Aeroporto Santos Dumont."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "on 30 November, the airport was officially opened, being named Santos Dumont Airport."
+    }
+   ]
+  },
+  {
+   "claim": "terminal designed by the Roberto brothers, opened 1945",
+   "verdict": "softened",
+   "inAfter": "Its original terminal, designed by the Roberto brothers and opened in 1945",
+   "note": "Was 'the passenger terminal begun in 1938 was designed by the MMM Roberto brothers after Paris Le Bourget'. Infraero names Marcelo and Milton Roberto and the 1945 opening by President Getúlio Vargas; Wikipedia adds Mauricio (MMM Roberto), so 'the Roberto brothers' covers both. The 1938 start and the Le Bourget model rest on Wikipedia alone. 'Original' because a new departures building opened in 2007 (Infraero); the 1945 building now handles arrivals (Wikipedia).",
+   "sources": [
+    {
+     "file": "infraero-sdu-historico",
+     "org": "Infraero (operator)",
+     "quote": [
+      "O prédio do Aeroporto Santos Dumont, projetado pelo escritório dos irmãos Marcelo e Milton Roberto, quando ganharam um concurso nacional, foi inaugurado em 1945 pelo presidente Getúlio Vargas.",
+      "um novo terminal de embarque foi inaugurado em 19 de maio de 2007"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "It was a project led by the architects MMM Roberto (Marcelo, Milton and Mauricio Roberto Doria-Baptista)",
+      "It was only in 1945 that the terminal's construction was completed"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "landmark of Brazilian modern architecture, listed since 1998",
+   "verdict": "corrected",
+   "inAfter": "is a landmark of Brazilian modern architecture, listed since 1998",
+   "note": "Replaces 'one of the more interesting airports in Brazil to look at' and the unconfirmed seaplane-terminal detail with what both sources say. Infraero says the state heritage body (INEPAC) listed the original building in 1998; Wikipedia calls it a national landmark from 1998, so the text says only 'listed'.",
+   "sources": [
+    {
+     "file": "infraero-sdu-historico",
+     "org": "Infraero (operator)",
+     "quote": [
+      "foi um marco da arquitetura moderna brasileira",
+      "Em 1998 o prédio original do Aeroporto Santos Dumont é tombado pelo Instituto de Patrimônio Artístico e Cultural (INEPAC)."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Its pioneering, modernist, architectural features caused it to become a Brazilian national landmark in 1998."
+    }
+   ]
+  },
+  {
+   "claim": "named after Alberto Santos Dumont, aviation pioneer",
+   "verdict": "confirmed",
+   "inAfter": "It is named after Alberto Santos Dumont, the Brazilian aviation pioneer.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is named after the Brazilian aviation pioneer Alberto Santos Dumont (1873–1932)"
+    },
+    {
+     "file": "fuiserviajante-sdu",
+     "org": "Fui Ser Viajante (travel guide, updated Aug 2026)",
+     "quote": "leva o nome do aviador brasileiro Alberto Santos Dumont, pioneiro da aviação.",
+     "dated": "2026-08-10"
+    },
+    {
+     "file": "infraero-sdu-historico",
+     "org": "Infraero (operator)",
+     "quote": "retratando o sonho mitológico de Ícaro realizado por Alberto Santos Dumont com o 14-Bis e a aviação moderna"
+    }
+   ]
+  },
+  {
+   "claim": "right beside the financial district",
+   "verdict": "cut",
+   "wasBefore": "right beside the financial district",
+   "why": "'Financial' rests on Wikipedia alone; softened to 'right in the centre', which the light rail operator and Infraero both say."
+  },
+  {
+   "claim": "largely domestic since 2023",
+   "verdict": "cut",
+   "wasBefore": "Since 2023 it has been largely domestic, with Galeão taking the international flights",
+   "why": "Wrong in its dating: it has been domestic only since a 2005 ordinance. What changed from 2023 was the federal limit on its traffic. Replaced by the domestic, Galeão and federal-limit sentences."
+  },
+  {
+   "claim": "one of the ten busiest airports in Brazil",
+   "verdict": "cut",
+   "wasBefore": "and it remains one of the ten busiest airports in Brazil",
+   "why": "Out of date: Wikipedia's ranking dates from before the cap (10.2 million passengers in 2022 against 6.2 million in 2025), and no current ranking was found."
+  },
+  {
+   "claim": "whole site reclaimed from Guanabara Bay",
+   "verdict": "cut",
+   "wasBefore": "The whole site was reclaimed from Guanabara Bay in 1934",
+   "why": "Overstated: Infraero describes a 370,000 m2 extension of landfill at Calabouço Point from 1934. Softened."
+  },
+  {
+   "claim": "replacing a seaplane terminal at Calabouço Point",
+   "verdict": "cut",
+   "wasBefore": "replacing a seaplane terminal at Calabouço Point",
+   "why": "Wikipedia alone; Infraero says only that the Calabouço aerodrome became Santos Dumont Airport."
+  },
+  {
+   "claim": "one of the more interesting airports to look at",
+   "verdict": "cut",
+   "wasBefore": "It is also one of the more interesting airports in Brazil to look at.",
+   "why": "A judgement; replaced by the architecture and listing facts both sources give, and cut for length."
+  },
+  {
+   "claim": "1937 Pan American seaplane terminal modelled on Miami",
+   "verdict": "cut",
+   "wasBefore": "The 1937 Pan American seaplane terminal still stands, modelled on the company's Miami building",
+   "why": "Wikipedia alone; the Air Force pages that would confirm it refused automated reads (403)."
+  },
+  {
+   "claim": "terminal begun in 1938",
+   "verdict": "cut",
+   "wasBefore": "the passenger terminal begun in 1938",
+   "why": "The 1938 start rests on Wikipedia alone; Infraero gives the 1945 opening, which is kept."
+  },
+  {
+   "claim": "MMM Roberto brothers after Paris Le Bourget",
+   "verdict": "cut",
+   "wasBefore": "was designed by the MMM Roberto brothers after Paris Le Bourget",
+   "why": "The Le Bourget model rests on Wikipedia alone, and Infraero names two brothers where Wikipedia names three; softened to 'the Roberto brothers'."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and the one to book when a client is working rather than sightseeing",
+   "why": "Advice kept from the old text; it rests on the airport's position in the centre, which is sourced."
+  },
+  {
+   "text": "Access could hardly be simpler.",
+   "why": "Lead-in kept from the old text; the light rail links that follow are sourced."
+  }
+ ],
+ "tracerOk": {}
+}

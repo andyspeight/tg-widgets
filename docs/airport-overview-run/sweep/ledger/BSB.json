@@ -1,0 +1,324 @@
+{
+ "iata": "BSB",
+ "id": "recHVhuUClZ5AtqjR",
+ "name": "Presidente Juscelino Kubitschek International Airport",
+ "country": "Brazil",
+ "wikipedia": "https://en.wikipedia.org/wiki/Bras%C3%ADlia_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Brasília's airport, 13 km from downtown in the Lago Sul administrative region, and the natural connecting point for anywhere in the Brazilian interior. It is run by Inframerica and shares some of its facilities with the Brasília Air Force Base.\n\nGetting into the city is straightforward. Buses 102 and 102.1 run frequently to the main terminal at the Rodoviária, where travellers can pick up the metro or onward buses, and taxis wait at the terminal.\n\nThe airport's history is the city's history. When Juscelino Kubitschek first landed on the Central Plateau in 1956, Brasília was still only a plan, and the airfield that received the first crews of construction workers in October 1955 had a dirt runway and a terminal that was a cob-walled shack roofed with buriti leaves. It stood where the Integrated Bus and Train Terminal is today. Work on the permanent airport began in November 1956.\n\nIt was named after Kubitschek, Brazil's twenty first president, in April 1999.",
+ "after": "Brasília's airport, 13 km from downtown in the Lago Sul administrative region, and one of Brazil's main connecting hubs. It handled 16.7 million passengers in 2025. Inframerica has run it since 2012, and some facilities are shared with the Brasília Air Force Base. ANAC, the regulator, expects all of Inframerica's shares to be auctioned on 17 December 2026, under a renegotiated concession.\n\nGetting into the city is straightforward. Buses 102 and 102.1 run to the Rodoviária bus station for the metro, and taxis wait outside arrivals.\n\nThe airport's history is the city's history. It opened on 3 May 1957, before the federal capital itself was founded, and took the name of President Juscelino Kubitschek in April 1999.",
+ "claims": [
+  {
+   "claim": "13 km from downtown",
+   "verdict": "confirmed",
+   "inAfter": "13 km from downtown",
+   "note": "The coordinates give 10.0 km in a straight line at 175 degrees (south); 13 km is a ratio of 1.3, inside the tolerance for a road distance.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "located in the administrative region of Lago Sul, in the Federal District, 13 kilometers from downtown Brasília"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 10.0 km"
+    }
+   ]
+  },
+  {
+   "claim": "in the Lago Sul administrative region",
+   "verdict": "confirmed",
+   "inAfter": "in the Lago Sul administrative region",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "located in the administrative region of Lago Sul"
+    },
+    {
+     "file": "bsb-dados",
+     "org": "Inframerica (operator, bsb.aero)",
+     "quote": "Área especial s/n. Lago Sul/DF - CEP 71608-900",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "one of Brazil's main connecting hubs",
+   "verdict": "softened",
+   "inAfter": "one of Brazil's main connecting hubs",
+   "note": "Was 'the natural connecting point for anywhere in the Brazilian interior'. The operator calls it one of Brazil's main connecting hubs and says it links to the interior; the interior half rests on the operator alone. Wikipedia names Gol and LATAM Brasil as hub airlines.",
+   "sources": [
+    {
+     "file": "bsb-dados",
+     "org": "Inframerica (operator, bsb.aero)",
+     "quote": "É o 4º maior aeroporto do país, um dos principais hubs de conexão brasileiros",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "hub = * Gol Transportes Aéreos * LATAM Brasil"
+    }
+   ]
+  },
+  {
+   "claim": "16.7 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled 16.7 million passengers in 2025.",
+   "note": "New figure, as the brief asks for the operator's 2025 traffic. The operator's own statistics feed (the data behind its Dados Operacionais page) gives 16,713,369 for 2025, exactly Wikipedia's infobox figure, which cites Inframerica.",
+   "sources": [
+    {
+     "file": "bsb-stats-2025-12",
+     "org": "Inframerica (operator, bsb.aero)",
+     "quote": [
+      "\"year\":2025",
+      "\"categoryName\":\"Passageiros** (unid.)\",\"value\":16713369"
+     ],
+     "dated": "2026-09-23 (live data)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 16,713,369 10%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Inframerica has run it since 2012",
+   "verdict": "confirmed",
+   "inAfter": "Inframerica has run it since 2012",
+   "note": "Checked as the brief asked: Inframerica (controlled by Corporación América Airports, with Infraero holding 49 per cent of the concession) still runs it. DECEA's live entry and ANAC (9 September 2026) both name it.",
+   "sources": [
+    {
+     "file": "bsb-dados",
+     "org": "Inframerica (operator, bsb.aero)",
+     "quote": [
+      "Em 2012 a Inframerica assumiu a administração do Aeroporto de Brasília.",
+      "Sociedade dividida: 51% Inframerica e 49% Infraero"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "bsb-inframerica",
+     "org": "Inframerica (operator, bsb.aero)",
+     "quote": "A Inframerica é a atual administradora do Aeroporto de Brasília. É controlada pela Corporación América Airports"
+    },
+    {
+     "file": "aisweb-sbbr",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": [
+      "PUB/MIL",
+      "INFRAMERICA"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "on 6 February 2012, the administration of the airport was granted for 25 years to the Consortium Inframérica"
+    }
+   ]
+  },
+  {
+   "claim": "some facilities shared with the Brasília Air Force Base",
+   "verdict": "confirmed",
+   "inAfter": "some facilities are shared with the Brasília Air Force Base",
+   "note": "DECEA's entry lists the aerodrome as public and military, with a military sector and a military apron.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Some of its facilities are shared with the Brasília Air Force Base of the Brazilian Air Force."
+    },
+    {
+     "file": "aisweb-sbbr",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": [
+      "PUB/MIL",
+      "Situado SECT MIL",
+      "ACFT externas ao COMAER com DEST APN MIL"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "ANAC expects all of Inframerica's shares to be auctioned on 17 December 2026",
+   "verdict": "corrected",
+   "inAfter": "ANAC, the regulator, expects all of Inframerica's shares to be auctioned on 17 December 2026, under a renegotiated concession.",
+   "primary": true,
+   "attribution": "ANAC",
+   "note": "New: the brief asked who runs Brasília now. ANAC approved the tender and the contract amendment on 8 September 2026: the concession is being renegotiated through a settlement brokered by the TCU (the federal audit court), all of Inframerica's shares are to be sold in a competitive auction, and ANAC expects the auction on 17 December 2026. Infraero's 2025 report confirms the TCU settlement process, with an outcome expected in 2026. The date is ANAC's own, so the sentence names ANAC. A winner other than Inframerica's owners would take over the airport.",
+   "sources": [
+    {
+     "file": "anac-bsb-repactuacao",
+     "org": "ANAC (National Civil Aviation Agency)",
+     "quote": [
+      "O processo prevê a alienação da totalidade das ações da Inframerica, concessionária do Aeroporto de Brasília",
+      "A expectativa é que o leilão ocorra no dia 17 de dezembro de 2026.",
+      "procedimento competitivo para a repactuação da concessão",
+      "Publicado em 09/09/2026"
+     ],
+     "dated": "2026-09-09"
+    },
+    {
+     "file": "infraero-relatorio-2025",
+     "org": "Infraero (annual report 2025)",
+     "quote": [
+      "Aeroporto Internacional de Brasília (BSB) - Inframérica – as controvérsias relacionadas ao contrato de concessão do aeroporto passaram a ser tratadas no âmbito de solução consensual instaurada pelo TCU.",
+      "desfecho sido projetado para 2026"
+     ],
+     "dated": "2026-06"
+    }
+   ]
+  },
+  {
+   "claim": "buses 102 and 102.1 to the Rodoviária for the metro; taxis at arrivals",
+   "verdict": "softened",
+   "inAfter": "Buses 102 and 102.1 run to the Rodoviária bus station for the metro, and taxis wait outside arrivals.",
+   "note": "Was 'run frequently to the main terminal at the Rodoviária, where travellers can pick up the metro or onward buses'. The operator lists both lines as Rodoviária (with metro interchange) to the airport and puts the taxi rank on the arrivals level of Terminal 1; 'frequently' and 'onward buses' rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "bsb-transporte",
+     "org": "Inframerica (operator, bsb.aero)",
+     "quote": [
+      "LINHA 102 [Rodoviária (integração com o metrô) / Aeroporto]",
+      "LINHA 102.1 [Rodoviária (integração com o metrô) / Aeroporto (HOSFAB)]",
+      "No Terminal 1, o ponto está localizado no piso de Desembarque"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Regular buses, numbers 102 and 102.1, are frequent and link the airport to the main bus terminal at Rodoviária, from where travelers can catch buses or the subway to other parts of the city. The airport is also served by taxis."
+    }
+   ]
+  },
+  {
+   "claim": "opened on 3 May 1957, before the capital was founded",
+   "verdict": "corrected",
+   "inAfter": "It opened on 3 May 1957, before the federal capital itself was founded",
+   "note": "Replaces the history of the 1955 airfield and the 1956 start of work, which rest on Wikipedia alone, with the opening date both sources give.",
+   "sources": [
+    {
+     "file": "bsb-dados",
+     "org": "Inframerica (operator, bsb.aero)",
+     "quote": "No dia 3 de maio de 1957 (antes mesmo da fundação da capital federal), o Aeroporto de Brasília iniciava oficialmente as suas atividades.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "the official inauguration took place on 3 May 1957",
+      "Brasília was only a project when in 1956 President Juscelino Kubitschek landed for the first time in the Central Plateau."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after President Juscelino Kubitschek in April 1999",
+   "verdict": "confirmed",
+   "inAfter": "took the name of President Juscelino Kubitschek in April 1999",
+   "sources": [
+    {
+     "file": "planalto-lei-9794",
+     "org": "Presidency of Brazil (Law 9,794)",
+     "quote": [
+      "LEI No 9.794, DE 20 DE ABRIL DE 1999.",
+      "passa a denominar-se Aeroporto Internacional de Brasília – Presidente Juscelino Kubitschek."
+     ],
+     "dated": "1999-04-20"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Since April 20, 1999, the airport is named after Juscelino Kubitschek (1902–1976), the 21st President of Brazil."
+    }
+   ]
+  },
+  {
+   "claim": "natural connecting point for the interior",
+   "verdict": "cut",
+   "wasBefore": "the natural connecting point for anywhere in the Brazilian interior",
+   "why": "Softened to the operator's 'one of Brazil's main connecting hubs'; 'anywhere in the interior' is a stretch the operator's own words do not make."
+  },
+  {
+   "claim": "It is run by Inframerica",
+   "verdict": "cut",
+   "wasBefore": "It is run by Inframerica",
+   "why": "Kept and dated (since 2012), with the planned December 2026 auction of the concessionaire's shares added."
+  },
+  {
+   "claim": "Brasília Air Force Base shares facilities",
+   "verdict": "cut",
+   "wasBefore": "shares some of its facilities with the Brasília Air Force Base",
+   "why": "Reworded; the fact is kept with DECEA as the second source."
+  },
+  {
+   "claim": "buses run frequently",
+   "verdict": "cut",
+   "wasBefore": "Buses 102 and 102.1 run frequently to the main terminal at the Rodoviária",
+   "why": "'Frequently' rests on Wikipedia alone; the operator gives no frequency."
+  },
+  {
+   "claim": "metro or onward buses",
+   "verdict": "cut",
+   "wasBefore": "where travellers can pick up the metro or onward buses",
+   "why": "Onward buses rest on Wikipedia alone; the operator confirms the metro interchange, which is kept."
+  },
+  {
+   "claim": "taxis wait at the terminal",
+   "verdict": "cut",
+   "wasBefore": "and taxis wait at the terminal",
+   "why": "Reworded to the operator's arrivals-level taxi rank."
+  },
+  {
+   "claim": "Kubitschek first landed on the Central Plateau in 1956",
+   "verdict": "cut",
+   "wasBefore": "When Juscelino Kubitschek first landed on the Central Plateau in 1956, Brasília was still only a plan",
+   "why": "Wikipedia alone; no second source could be read. The point that the airport came before the city is kept from the operator."
+  },
+  {
+   "claim": "first construction crews in October 1955, dirt runway, buriti-leaf shack",
+   "verdict": "cut",
+   "wasBefore": "and the airfield that received the first crews of construction workers in October 1955 had a dirt runway and a terminal that was a cob-walled shack roofed with buriti leaves",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "where the Integrated Bus and Train Terminal is today",
+   "verdict": "cut",
+   "wasBefore": "It stood where the Integrated Bus and Train Terminal is today.",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "work began in November 1956",
+   "verdict": "cut",
+   "wasBefore": "Work on the permanent airport began in November 1956.",
+   "why": "Wikipedia alone; the 1957 opening, which the operator confirms, is kept instead."
+  },
+  {
+   "claim": "Brazil's twenty first president",
+   "verdict": "cut",
+   "wasBefore": "Brazil's twenty first president",
+   "why": "The ordinal rests on Wikipedia alone; the law names him President Juscelino Kubitschek, which is kept."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Getting into the city is straightforward.",
+   "why": "Lead-in kept from the old text; the bus and taxi options that follow are sourced."
+  },
+  {
+   "text": "The airport's history is the city's history.",
+   "why": "Lead-in kept from the old text; the opening before the capital was founded, which follows, is sourced."
+  }
+ ],
+ "tracerOk": {}
+}

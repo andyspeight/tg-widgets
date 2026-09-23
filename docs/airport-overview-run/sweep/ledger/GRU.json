@@ -1,0 +1,434 @@
+{
+ "iata": "GRU",
+ "id": "recM1TPw3I2HtmBgu",
+ "name": "São Paulo/Guarulhos–Governor André Franco Montoro International Airport",
+ "country": "Brazil",
+ "wikipedia": "https://en.wikipedia.org/wiki/S%C3%A3o_Paulo/Guarulhos_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Brazil's biggest airport sits in Guarulhos, a municipality on São Paulo's north-eastern edge, and it handles more passengers, more aircraft movements and more cargo than anywhere else in the country. Locals still call it Cumbica, after the district and the air force base that shares part of the site. The formal name honours André Franco Montoro, a former governor of São Paulo state, and has done since 2001. In 2012 it was rebranded as GRU Airport and handed to a private consortium to run.\n\nMost UK travellers meet it as a gateway rather than a destination: it is the main international door to São Paulo and a major connecting point for onward flights across Brazil and the rest of Latin America. Traffic is heavy enough that operations are capped at 45 an hour, one of only five Brazilian airports with slot restrictions, so schedules tend to be tightly managed.\n\nIts reputation is built on punctuality rather than glamour. Aviation analysts have repeatedly ranked it among the world's most reliable large airports, and it has been picked out as a sensible place to sit out a long layover.",
+ "after": "Brazil's busiest airport, in the Cumbica district of Guarulhos, about 25 km from central São Paulo. It handled more than 47 million passengers in 2025, 16.8 million of them on international flights. An air force base shares the airfield. The formal name honours André Franco Montoro, a former governor of São Paulo state, and has done since 2001. Since 2012 it has been run under a private concession, as GRU Airport.\n\nIt is one of the main hubs in Latin America, and British Airways flies here from Heathrow. ANAC, the regulator, lists it as one of four Brazilian airports where it allocates take-off and landing slots.\n\nIts reputation is built on punctuality rather than glamour. The aviation data firms OAG and Cirium have repeatedly ranked it among the world's most punctual large airports.",
+ "claims": [
+  {
+   "claim": "Brazil's busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "Brazil's busiest airport",
+   "note": "Was 'Brazil's biggest airport'. In 2025 it retook first place in all of Latin America (operator, via Panrotas), and Aena, which runs Galeão, calls Galeão the country's second air gateway behind only Guarulhos.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is the busiest in Brazil in terms of transported passengers"
+    },
+    {
+     "file": "panrotas-maior-2025",
+     "org": "Panrotas (trade press, GRU Airport figures)",
+     "quote": "Guarulhos retoma posto de maior aeroporto da América Latina, diz concessionária",
+     "dated": "2026-02-20"
+    },
+    {
+     "file": "aena-galeao-press",
+     "org": "Aena",
+     "quote": "These figures consolidate it as the country's second-largest air gateway, behind only Guarulhos",
+     "dated": "2026-03-30"
+    }
+   ]
+  },
+  {
+   "claim": "in the Cumbica district of Guarulhos",
+   "verdict": "softened",
+   "inAfter": "in the Cumbica district of Guarulhos",
+   "note": "Replaces 'Locals still call it Cumbica, after the district...'. The operator's own address puts the airport in Cumbica, Guarulhos; the local nickname rests on Wikipedia alone (see the cut).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is popularly known locally as either Cumbica Airport, after the district where it is located"
+    },
+    {
+     "file": "gru-carro",
+     "org": "GRU Airport (operator)",
+     "quote": [
+      "Rodovia Hélio Smidt, s/nº - Cumbica",
+      "Guarulhos - SP, 07190-100"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "about 25 km from central São Paulo",
+   "verdict": "corrected",
+   "inAfter": "about 25 km from central São Paulo",
+   "note": "Replaces 'a municipality on São Paulo's north-eastern edge'. The coordinates give 21.3 km in a straight line at 53 degrees (north east); 25 km by road is a ratio of 1.17, inside the tolerance.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is located 25 km (16 mi) from downtown São Paulo."
+    },
+    {
+     "file": "gru-carro",
+     "org": "GRU Airport (operator)",
+     "quote": [
+      "Distância até o centro da cidade de São Paulo",
+      "25km"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 21.3 km"
+    }
+   ]
+  },
+  {
+   "claim": "more than 47 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled more than 47 million passengers in 2025",
+   "note": "New figure, in place of 'handles more passengers, more aircraft movements and more cargo than anywhere else'. The operator's twelve monthly 2025 totals on its traffic page add up to 47,188,085 passengers (and 305,188 aircraft movements), exactly Wikipedia's infobox; the operator's February release, reported by Panrotas, gave 47.1 million. 'More than 47 million' is true of both.",
+   "sources": [
+    {
+     "file": "panrotas-maior-2025",
+     "org": "Panrotas (trade press, GRU Airport figures)",
+     "quote": "Terminal registra recorde histórico de 47,1 milhões de passageiros em 2025",
+     "dated": "2026-02-20"
+    },
+    {
+     "file": "gru-movimentacao",
+     "org": "GRU Airport (operator)",
+     "quote": [
+      "Janeiro 2025",
+      "Dezembro 2025",
+      "Internacionais"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 47,188,085 8%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "16.8 million international passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "16.8 million of them on international flights",
+   "note": "Replaces 'the main international door to São Paulo' with the figure behind it. The operator's twelve monthly 2025 international totals add up to 16,809,126.",
+   "sources": [
+    {
+     "file": "panrotas-maior-2025",
+     "org": "Panrotas (trade press, GRU Airport figures)",
+     "quote": [
+      "Do total apurado em 2025, 16,8",
+      "foram passageiros de voos internacionais - outro recorde para a administradora"
+     ],
+     "dated": "2026-02-20"
+    },
+    {
+     "file": "gru-movimentacao",
+     "org": "GRU Airport (operator)",
+     "quote": [
+      "Janeiro 2025",
+      "Dezembro 2025",
+      "Internacionais"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "an air force base shares the airfield",
+   "verdict": "confirmed",
+   "inAfter": "An air force base shares the airfield.",
+   "note": "DECEA's aerodrome entry (the air force's air navigation department) lists the airport as public and military, with military aircraft based at BASP, the São Paulo Air Base.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Some of its facilities are shared with the São Paulo Air Force Base of the Brazilian Air Force."
+    },
+    {
+     "file": "aisweb-sbgr",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": [
+      "PUB/MIL",
+      "ACFT MIL sediadas na BASP.",
+      "PRB sobrevoo de HEL sobre a Base Aérea de São Paulo."
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "named after André Franco Montoro, former governor of São Paulo state, since 2001",
+   "verdict": "confirmed",
+   "inAfter": "The formal name honours André Franco Montoro, a former governor of São Paulo state, and has done since 2001.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Since 28 November 2001, the airport has been named after André Franco Montoro (1916–1999), former Governor of São Paulo state."
+    },
+    {
+     "file": "planalto-lei-10314",
+     "org": "Presidency of Brazil (Law 10,314)",
+     "quote": [
+      "LEI No 10.314, DE 28 DE NOVEMBRO DE 2001.",
+      "passa a denominar-se",
+      "Governador André Franco Montoro"
+     ],
+     "dated": "2001-11-28"
+    },
+    {
+     "file": "gru-historico",
+     "org": "GRU Airport (operator)",
+     "quote": "Em 2001, passou a ser chamado de Aeroporto Internacional de São Paulo/Guarulhos - Governador André Franco Montoro."
+    }
+   ]
+  },
+  {
+   "claim": "run under a private concession since 2012",
+   "verdict": "confirmed",
+   "inAfter": "Since 2012 it has been run under a private concession",
+   "sources": [
+    {
+     "file": "gru-historico",
+     "org": "GRU Airport (operator)",
+     "quote": [
+      "E em 6 de fevereiro do mesmo ano foi concedido à iniciativa privada.",
+      "O consórcio formado pelas empresas Invepar e ACSA (Airports Company South Africa) foi anunciado como vencedor do leilão de concessão."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "on 6 February 2012, the administration of the airport was conceded, for 20 years, to the Consortium Invepar–ACSA, also known as GRU Airport"
+    }
+   ],
+   "note": "Was 'handed to a private consortium to run'. The 2012 winners were Invepar and Airports Company South Africa, with Infraero keeping 49 per cent of the concession company; the text does not name today's shareholders, which were not checked against a current source."
+  },
+  {
+   "claim": "runs as GRU Airport (current operator)",
+   "verdict": "confirmed",
+   "inAfter": "as GRU Airport",
+   "note": "Was 'rebranded as GRU Airport'. The brand dates from 15 November 2012 (operator). DECEA's live aerodrome entry names GRU Airport as the operator today.",
+   "sources": [
+    {
+     "file": "gru-historico",
+     "org": "GRU Airport (operator)",
+     "quote": [
+      "o aeroporto ganhou uma nova marca",
+      "GRU Airport – Aeroporto Internacional de São Paulo."
+     ]
+    },
+    {
+     "file": "aisweb-sbgr",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": [
+      "PUB/MIL",
+      "GRU Airport"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "GRU Airport (2012–present)"
+    }
+   ]
+  },
+  {
+   "claim": "one of the main hubs in Latin America",
+   "verdict": "softened",
+   "inAfter": "It is one of the main hubs in Latin America",
+   "note": "Was 'a major connecting point for onward flights across Brazil and the rest of Latin America'. The operator calls it one of Latin America's main hubs; Wikipedia names Gol and LATAM Brasil as the hub airlines, which rests on Wikipedia alone, so the airlines are not named.",
+   "sources": [
+    {
+     "file": "gru-historico",
+     "org": "GRU Airport (operator)",
+     "quote": "Um dos principais HUBs da América Latina, o Aeroporto Internacional de São Paulo, em Guarulhos"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "hub = * Gol Linhas Aéreas * LATAM Brasil"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is the largest airport in Brazil and Latin America"
+    }
+   ]
+  },
+  {
+   "claim": "British Airways flies here from Heathrow",
+   "verdict": "corrected",
+   "inAfter": "British Airways flies here from Heathrow",
+   "note": "New, in place of 'Most UK travellers meet it as a gateway rather than a destination', which no source supports. BA's own page sells London to São Paulo (fares shown to February 2027, 11 hours 40 minutes); the operator's live airline list has British Airways at Terminal 3; the UK CAA's 2025 route table shows 517,683 scheduled passengers between Heathrow and São Paulo Guarulhos (and none from any other UK airport except a few charter passengers in 2024). LATAM also flies London to São Paulo on older sources, but LATAM's own sites refused automated reads (403, 'for security reasons'), so it is not named.",
+   "sources": [
+    {
+     "file": "ba-saopaulo",
+     "org": "British Airways",
+     "quote": [
+      "Our cheapest flights to Sao Paulo from London",
+      "11 hrs 40 mins"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "gru-cias",
+     "org": "GRU Airport (operator)",
+     "quote": [
+      "British Airways",
+      "Terminal 3",
+      "Check-in H"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "quote": "HEATHROW,SAO PAULO (GUARULHOS),517683,517683,0",
+     "dated": "2026-02-25"
+    }
+   ]
+  },
+  {
+   "claim": "one of four Brazilian airports where ANAC allocates slots",
+   "verdict": "corrected",
+   "inAfter": "ANAC, the regulator, lists it as one of four Brazilian airports where it allocates take-off and landing slots.",
+   "primary": true,
+   "attribution": "ANAC",
+   "note": "Was 'one of only five Brazilian airports with slot restrictions'. ANAC's slot page lists four coordinated airports today (Congonhas, Guarulhos, Recife, Santos Dumont); its capacity-declaration page (updated 13 June 2025) lists the same four, and Brasília is now only a 'facilitated' airport. Wikipedia's five (with Brasília and Pampulha) is out of date: ANAC's open-data folder for Pampulha's summer 2026 slots is empty. Attributed to ANAC because only ANAC's own pages give the current count.",
+   "sources": [
+    {
+     "file": "anac-slots",
+     "org": "ANAC (National Civil Aviation Agency)",
+     "quote": [
+      "Atualmente a ANAC é responsável pela coordenação de quatro aeroportos no Brasil:",
+      "Guarulhos (GRU/SBGR)",
+      "A ANAC desempenha o papel de coordenador responsável pela alocação de slots nos aeroportos coordenados do Brasil."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "repeatedly ranked among the world's most punctual large airports",
+   "verdict": "softened",
+   "inAfter": "The aviation data firms OAG and Cirium have repeatedly ranked it among the world's most punctual large airports.",
+   "note": "Was 'most reliable'; the rankings measure punctuality. OAG placed it third among large airports (operator, in its 2015 to 2016 timeline) and second in 2017 (Wikipedia); Cirium's June 2024 report placed it second of all airports and fourth among large airports. Wikipedia's 'first among large airports in 2024' is not what the cited Cirium report says (Congonhas was first), so no single ranking is quoted. Cirium's 2025 awards do not name Guarulhos. In review (23 Sep), 'Aviation analysts' was replaced by the two firms' names, OAG and Cirium, so the text says who ranked it.",
+   "sources": [
+    {
+     "file": "gru-historico",
+     "org": "GRU Airport (operator)",
+     "quote": "GRU Airport foi ranqueado pela OAG, maior empresa de banco de dados da indústria da aviação, como o terceiro mais pontual no mundo em pousos e decolagens, dentro da categoria de grandes aeroportos."
+    },
+    {
+     "file": "cirium-june-2024",
+     "org": "Cirium",
+     "quote": [
+      "THE ON-TIME PERFORMANCE MONTHLY REPORT - AIRPORTS JUNE 2024",
+      "International Airport (GRU) 2 85.13% 96.79% 21,318 43 99",
+      "International Airport (GRU) 4 85.13% 96.79% 21,318 43 99"
+     ],
+     "dated": "2024-07"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2017, it was considered by the company OAG the second best in punctuality in the world and first in Latin America"
+    }
+   ]
+  },
+  {
+   "claim": "Brazil's biggest airport sits in Guarulhos, a municipality on São Paulo's north-eastern edge",
+   "verdict": "cut",
+   "wasBefore": "Guarulhos, a municipality on São Paulo's north-eastern edge",
+   "why": "The coordinates put the airport north east of the centre, but no written source other than the coordinates gives the direction. Replaced by the operator's 25 km from the centre, and 'busiest' for 'biggest'."
+  },
+  {
+   "claim": "more passengers, movements and cargo than anywhere else",
+   "verdict": "cut",
+   "wasBefore": "and it handles more passengers, more aircraft movements and more cargo than anywhere else in the country",
+   "why": "The passenger lead is kept as 'Brazil's busiest airport' with the 2025 figures; the movements and cargo lead rest on Wikipedia alone."
+  },
+  {
+   "claim": "locals still call it Cumbica",
+   "verdict": "cut",
+   "wasBefore": "Locals still call it Cumbica",
+   "why": "The nickname rests on Wikipedia alone: the Estadão and Veja pages Wikipedia cites refused automated reads (403, 405). The Cumbica district is kept from the operator's address."
+  },
+  {
+   "claim": "after the district and the air force base that shares part of the site",
+   "verdict": "cut",
+   "wasBefore": "after the district and the air force base that shares part of the site",
+   "why": "Split into the district (operator address) and the air base (DECEA), each kept on its own."
+  },
+  {
+   "claim": "rebranded as GRU Airport and handed to a private consortium",
+   "verdict": "cut",
+   "wasBefore": "In 2012 it was rebranded as GRU Airport and handed to a private consortium to run",
+   "why": "Reworded so the brand also tells the reader who runs it today (DECEA's live entry)."
+  },
+  {
+   "claim": "UK travellers meet it as a gateway",
+   "verdict": "cut",
+   "wasBefore": "Most UK travellers meet it as a gateway rather than a destination",
+   "why": "A generalisation with no source. Replaced by the British Airways Heathrow service, which three sources confirm."
+  },
+  {
+   "claim": "main international door to São Paulo",
+   "verdict": "cut",
+   "wasBefore": "it is the main international door to São Paulo",
+   "why": "Replaced by the operator's 16.8 million international passengers in 2025."
+  },
+  {
+   "claim": "major connecting point across Brazil and Latin America",
+   "verdict": "cut",
+   "wasBefore": "a major connecting point for onward flights across Brazil and the rest of Latin America",
+   "why": "Softened to the operator's own 'one of the main hubs in Latin America'."
+  },
+  {
+   "claim": "capped at 45 operations an hour",
+   "verdict": "cut",
+   "wasBefore": "Traffic is heavy enough that operations are capped at 45 an hour",
+   "why": "Contradicted by the operator, which gives 60 slots an hour and says DECEA raised its capacity from 47 to 52 movements an hour on 7 October 2015. No current figure has two sources."
+  },
+  {
+   "claim": "one of only five airports with slot restrictions",
+   "verdict": "cut",
+   "wasBefore": "one of only five Brazilian airports with slot restrictions",
+   "why": "Out of date: ANAC now coordinates four airports (Congonhas, Guarulhos, Recife, Santos Dumont). Corrected, attributed to ANAC."
+  },
+  {
+   "claim": "schedules tightly managed",
+   "verdict": "cut",
+   "wasBefore": "so schedules tend to be tightly managed",
+   "why": "An inference from the hourly cap, which is cut."
+  },
+  {
+   "claim": "most reliable large airports",
+   "verdict": "cut",
+   "wasBefore": "ranked it among the world's most reliable large airports",
+   "why": "Reworded to 'most punctual', which is what OAG and Cirium measure."
+  },
+  {
+   "claim": "sensible place for a long layover",
+   "verdict": "cut",
+   "wasBefore": "it has been picked out as a sensible place to sit out a long layover",
+   "why": "A 2021 Club Med list, five years old and never repeated in any source found."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Its reputation is built on punctuality rather than glamour.",
+   "why": "Editorial lead-in kept from the old text; the rankings behind it are in the next sentence."
+  }
+ ],
+ "tracerOk": {}
+}
