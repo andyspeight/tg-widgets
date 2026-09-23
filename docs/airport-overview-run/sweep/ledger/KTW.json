@@ -1,0 +1,168 @@
+{
+ "iata": "KTW",
+ "id": "recbWADb27hX2TyRW",
+ "name": "Katowice Wojciech Korfanty International Airport",
+ "country": "Poland",
+ "wikipedia": "https://en.wikipedia.org/wiki/Katowice_Airport",
+ "audited": "2026-09-23",
+ "before": "Poland's fourth busiest airport, at Pyrzowice 30 km north of Katowice, with just under 7.3 million passengers in 2025. More usefully for a tour operator, it is the largest source of charter flights in the country and second for cargo.\n\nThe terminal split is unusual and worth explaining. Terminal A handles non-Schengen departures, Terminal B handles Schengen departures and Terminal C takes all arrivals, whichever they came from. Between them they are rated for about 8 million passengers a year, with an expansion announced in 2024 aiming at 12 million by 2028.\n\nThe runway is 3,200 metres, the second longest in Poland after Warsaw, and takes aircraft up to a 747 or 777 though not at maximum weight. Antonov An-124s have landed here on occasion.\n\nWizz Air bases aircraft here and services its A321neo fleet on site, with Linetech maintaining Embraer E190s.\n\nTwo things for the enthusiast: the control tower is the tallest in Poland and Eastern Europe at 46 metres, and there are two free plane spotting stands.",
+ "after": "Poland's fourth busiest airport, at Pyrzowice, 30 km north of Katowice. It handled just under 7.3 million passengers in 2025, its first year above 7 million.\n\nThere are three terminals, and the arrivals hall is in Terminal C. The runway is 3,200 metres long.",
+ "claims": [
+  {
+   "claim": "Poland's fourth busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "Poland's fourth busiest airport",
+   "note": "Eurostat 2025: Warsaw Chopin 24.1 million, Kraków 13.2 million, Gdańsk 7,382,025, Katowice 7,285,733.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the fourth-busiest airport in Poland by passenger volumes"
+    },
+    {
+     "file": "eurostat-pl",
+     "org": "Eurostat",
+     "quote": [
+      "Eurostat PL_EPGD Gdańsk Lech Wałęsa: passengers carried in 2025: 7,382,025",
+      "Eurostat PL_EPKT Katowice: passengers carried in 2025: 7,285,733",
+      "Eurostat PL_EPWR Wrocław: passengers carried in 2025: 4,900,785"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "at Pyrzowice, 30 km north of Katowice",
+   "verdict": "confirmed",
+   "inAfter": "at Pyrzowice, 30 km north of Katowice",
+   "note": "Coordinates: 24.4 km in a straight line at 10 degrees, which is north; ratio 1.23. The operator places its cargo terminal in Pyrzowice.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "located in Pyrzowice, 30 km (19 mi) north of Katowice"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 24.4 km",
+      "Bearing from the city centre: 10 degrees, which is north"
+     ]
+    },
+    {
+     "file": "op-news-cargo",
+     "org": "Katowice Airport (operator, katowice-airport.com)",
+     "dated": "2025",
+     "quote": "DHL Express, UPS, and FedEx all have bases at the cargo terminal in Pyrzowice"
+    }
+   ]
+  },
+  {
+   "claim": "just under 7.3 million passengers in 2025, its first year above 7 million",
+   "verdict": "confirmed",
+   "inAfter": "It handled just under 7.3 million passengers in 2025, its first year above 7 million.",
+   "note": "Operator 7,299,085 (up 14.3 per cent) and 'for the first time in the airport's history, more than 7M'; Eurostat 7,285,733, with no earlier year above 6.4 million in its series.",
+   "sources": [
+    {
+     "file": "op-news-2025",
+     "org": "Katowice Airport (operator, katowice-airport.com)",
+     "dated": "2026-01",
+     "quote": [
+      "handled 7 299 085 passengers on flights to/from Katowice Airport",
+      "For the first time in the airport's history, more than 7M passengers were handled in a calendar year"
+     ]
+    },
+    {
+     "file": "eurostat-series-lines",
+     "org": "Eurostat",
+     "dated": "2026-09-23",
+     "quote": [
+      "Eurostat PL_EPKT Katowice Airport: passengers carried in 2024: 6,371,607",
+      "Eurostat PL_EPKT Katowice Airport: passengers carried in 2025: 7,285,733"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "with just shy of 7.3 million passengers in 2025"
+    }
+   ]
+  },
+  {
+   "claim": "three terminals; the arrivals hall is in Terminal C",
+   "verdict": "confirmed",
+   "inAfter": "There are three terminals, and the arrivals hall is in Terminal C.",
+   "note": "Worded as the operator words it: its FAQ puts the handling agents in 'the arrivals hall in Terminal C' and names services in Terminals A and B. Wikipedia says C takes all arrivals; 'all' is left out because the operator does not say it in those words. Which departures use A and which use B (non-Schengen and Schengen) rests on Wikipedia alone, though the operator's note that VAT refunds are given in Terminal A fits it.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "There are three passenger terminals: A (non-Schengen departures), B (Schengen departures), and C (all arrivals)"
+    },
+    {
+     "file": "op-faq",
+     "org": "Katowice Airport (operator, katowice-airport.com)",
+     "dated": "2026-09-23",
+     "quote": [
+      "are located in the arrivals hall in Terminal C",
+      "A medical centre is located in Terminal A",
+      "LOT Polish Airlines in their office on the ground floor of Terminal B"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "runway 3,200 m",
+   "verdict": "confirmed",
+   "inAfter": "The runway is 3,200 metres long.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport's concrete runway is 3200m by 45m"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "dated": "2026-09-23",
+     "quote": [
+      "Runway 08/26: 3,200 m",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "largest source of charter flights in Poland; second for cargo",
+   "verdict": "cut",
+   "wasBefore": "More usefully for a tour operator, it is the largest source of charter flights in the country and second for cargo.",
+   "why": "Wikipedia alone. The operator's statistics split regular and charter traffic but its pages and 2025 release do not claim first place for charters or second for cargo."
+  },
+  {
+   "claim": "terminal split: A non-Schengen departures, B Schengen departures, C all arrivals; 8 million capacity; expansion to 12 million by 2028",
+   "verdict": "cut",
+   "wasBefore": "The terminal split is unusual and worth explaining. Terminal A handles non-Schengen departures, Terminal B handles Schengen departures and Terminal C takes all arrivals, whichever they came from. Between them they are rated for about 8 million passengers a year, with an expansion announced in 2024 aiming at 12 million by 2028.",
+   "why": "The three terminals and Terminal C for arrivals are kept (operator's FAQ). The departure split, the 8 million capacity and the 2028 expansion rest on Wikipedia alone."
+  },
+  {
+   "claim": "runway second longest in Poland; 747 and 777 not at maximum weight; An-124",
+   "verdict": "cut",
+   "wasBefore": "The runway is 3,200 metres, the second longest in Poland after Warsaw, and takes aircraft up to a 747 or 777 though not at maximum weight. Antonov An-124s have landed here on occasion.",
+   "why": "The length is kept. 'Second longest' is at best a tie: OurAirports gives Rzeszów-Jasionka the same 3,200 m. The aircraft lines rest on Wikipedia alone."
+  },
+  {
+   "claim": "Wizz Air base and A321neo maintenance; Linetech E190s",
+   "verdict": "cut",
+   "wasBefore": "Wizz Air bases aircraft here and services its A321neo fleet on site, with Linetech maintaining Embraer E190s.",
+   "why": "Wikipedia alone; the operator's FAQ mentions a Wizz Air desk but not a base, and Wizz Air's own site was not reachable in this sweep."
+  },
+  {
+   "claim": "tallest control tower in Poland and Eastern Europe; two free spotting stands",
+   "verdict": "cut",
+   "wasBefore": "Two things for the enthusiast: the control tower is the tallest in Poland and Eastern Europe at 46 metres, and there are two free plane spotting stands.",
+   "why": "Wikipedia alone; the operator's spotter page gives tips but not the platforms' number or cost."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
