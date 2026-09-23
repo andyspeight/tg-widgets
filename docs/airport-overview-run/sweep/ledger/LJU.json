@@ -1,0 +1,173 @@
+{
+ "iata": "LJU",
+ "id": "recj2FIV9IDUWA6pD",
+ "name": "Ljubljana Jože Pučnik Airport",
+ "country": "Slovenia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Ljubljana_Airport",
+ "audited": "2026-09-23",
+ "before": "Slovenia's largest airport, at Brnik 24 km north west of Ljubljana and 9.5 km east of Kranj, in the foothills of the Kamnik-Savinja Alps.\n\nThe terminal was substantially rebuilt for Slovenia's EU presidency. A 10,000 square metre extension opened in July 2021, more than doubling the departures capacity from 500 passengers an hour to 1,250, and bringing a large duty free shop, a business lounge, an extra air bridge and a new baggage system with two long carousels. The whole complex now covers 28,587 square metres with 22 check in desks.\n\nThe runway is 3,300 metres with an ILS Category IIIb approach on runway 30, which keeps the airport working in poor visibility.\n\nThe airport is still widely called Brnik, its former name, so both turn up in supplier systems.\n\nLonger term plans include a new cargo terminal and a business and logistics district called Airport City.",
+ "after": "Slovenia's main international airport, at Brnik, 24 km north west of Ljubljana and 9.5 km east of Kranj. It handled almost 1.6 million passengers in 2025.\n\nA project that ran from 2019 to 2022 extended the passenger terminal. Its runway is 3,300 metres long.\n\nIt is still widely called Brnik, its former name, so both turn up in supplier systems.",
+ "claims": [
+  {
+   "claim": "Slovenia's main international airport",
+   "verdict": "softened",
+   "inAfter": "Slovenia's main international airport",
+   "note": "Was 'Slovenia's largest airport'. The operator calls it the central Slovenian international airport; Eurostat has no other Slovenian airport to compare it with, so 'main international airport' is the wording both sources support.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the international airport serving Ljubljana and the largest airport in Slovenia"
+    },
+    {
+     "file": "fs-zgodovina",
+     "org": "Fraport Slovenija (operator)",
+     "dated": "2026-09-23",
+     "quote": "Letališče Jožeta Pučnika Ljubljana je osrednje slovensko mednarodno letališče"
+    }
+   ]
+  },
+  {
+   "claim": "at Brnik, 24 km north west of Ljubljana and 9.5 km east of Kranj",
+   "verdict": "confirmed",
+   "inAfter": "at Brnik, 24 km north west of Ljubljana and 9.5 km east of Kranj",
+   "note": "Coordinates: 19.5 km from Ljubljana at 349 degrees (north on the 8-point rose, one point from north west; ratio 1.23) and 8.0 km from Kranj at 102 degrees (east; ratio 1.18). The operator's address is Zgornji Brnik 130a, 4210 Brnik-aerodrom.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is located near Brnik, 24 km (15 mi) northwest of Ljubljana and 9.5 km (5.9 mi) east of Kranj"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from Ljubljana (GeoNames 3196359): 19.5 km",
+      "Straight-line distance from Kranj (GeoNames 3197378): 8.0 km (5.0 miles), bearing 102 degrees, which is east"
+     ]
+    },
+    {
+     "file": "fs-izkaznica",
+     "org": "Fraport Slovenija (operator)",
+     "dated": "2026-09-23",
+     "quote": "Zgornji Brnik 130a"
+    }
+   ]
+  },
+  {
+   "claim": "almost 1.6 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled almost 1.6 million passengers in 2025.",
+   "note": "The old text gave no figure; added as the measure behind 'main airport'. Operator: almost 1.6 million; Eurostat 1,591,308.",
+   "sources": [
+    {
+     "file": "fs-zgodovina",
+     "org": "Fraport Slovenija (operator)",
+     "dated": "2026",
+     "quote": "V letu 2025 je Letališče Ljubljana nadaljevalo trend rasti prometa in oskrbelo skoraj 1,6 milijona potnikov"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": "passengers carried in 2025: 1,591,308"
+    }
+   ]
+  },
+  {
+   "claim": "terminal extended in a project that ran from 2019 to 2022",
+   "verdict": "softened",
+   "inAfter": "A project that ran from 2019 to 2022 extended the passenger terminal.",
+   "note": "Replaces the EU-presidency paragraph. The operator's history dates the start of the terminal extension to 2019 and the end of the old building's renovation, part of the same investment, to February 2022; Wikipedia gives July 2019 to June 2021 for the new extension. The size, capacity and fittings rest on Wikipedia alone (see the cut).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "The construction began in July 2019",
+      "The existing passenger terminal, which covers 13,000 m2 (140,000 sq ft), was partly renovated and functionally incorporated with the new building."
+     ]
+    },
+    {
+     "file": "fs-zgodovina",
+     "org": "Fraport Slovenija (operator)",
+     "dated": "2026-09-23",
+     "quote": [
+      "Stečejo gradbena dela za razširitev novega potniškega terminala T2",
+      "Februarja so se zaključila dela delne prenove stare potniške stavbe v okviru investicije v razširitev novega potniškega terminala"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "runway 3,300 metres",
+   "verdict": "confirmed",
+   "inAfter": "Its runway is 3,300 metres long.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport has a 3,300 m"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "dated": "2026-09-23",
+     "quote": [
+      "Runway 12/30: 3,300 m",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "still widely called Brnik, its former name",
+   "verdict": "confirmed",
+   "inAfter": "It is still widely called Brnik, its former name",
+   "note": "The operator itself still writes 'letališče Brnik' in its history (the 60th anniversary entry, December 2023), and its address is Brnik-aerodrom.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "also known by its previous name Brnik Airport"
+    },
+    {
+     "file": "fs-zgodovina",
+     "org": "Fraport Slovenija (operator)",
+     "dated": "2026-09-23",
+     "quote": "Decembra je minilo 60 let od prvega pristanka in vzleta potniškega letala na letališču Brnik"
+    }
+   ]
+  },
+  {
+   "claim": "Slovenia's largest airport; foothills of the Kamnik-Savinja Alps",
+   "verdict": "cut",
+   "wasBefore": "Slovenia's largest airport, at Brnik 24 km north west of Ljubljana and 9.5 km east of Kranj, in the foothills of the Kamnik-Savinja Alps.",
+   "why": "Reworded: position kept; 'largest' became 'main international airport' (see above). The Alps line rests on Wikipedia alone."
+  },
+  {
+   "claim": "terminal rebuilt for the EU presidency: 10,000 m2 extension July 2021, 500 to 1,250 an hour, duty free, lounge, air bridge, baggage system, 28,587 m2, 22 check-in desks",
+   "verdict": "cut",
+   "wasBefore": "The terminal was substantially rebuilt for Slovenia's EU presidency. A 10,000 square metre extension opened in July 2021, more than doubling the departures capacity from 500 passengers an hour to 1,250, and bringing a large duty free shop, a business lounge, an extra air bridge and a new baggage system with two long carousels. The whole complex now covers 28,587 square metres with 22 check in desks.",
+   "why": "The extension is kept, dated from the operator's history. The size, capacity figures, fittings and desk count rest on Wikipedia alone: the airport's passenger site (lju-airport.si) refused both a plain request and the browser (403), and the operator's corporate history does not give them."
+  },
+  {
+   "claim": "Category IIIb ILS on runway 30",
+   "verdict": "cut",
+   "wasBefore": "The runway is 3,300 metres with an ILS Category IIIb approach on runway 30, which keeps the airport working in poor visibility.",
+   "why": "The runway length is kept (OurAirports). The Category IIIb approach rests on Wikipedia alone."
+  },
+  {
+   "claim": "longer term plans: new cargo terminal and Airport City",
+   "verdict": "cut",
+   "wasBefore": "Longer term plans include a new cargo terminal and a business and logistics district called Airport City.",
+   "why": "Out of date or at least unclear: the operator's history records an expanded cargo terminal opened in April 2023, and the first building of the airport city (DHL's terminal) in October 2007, while Wikipedia describes both as 2017 master plan items. Not restated, as the two sources describe different stages."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so both turn up in supplier systems",
+   "why": "Advice kept from the old text, following from the two names."
+  }
+ ],
+ "tracerOk": {}
+}
