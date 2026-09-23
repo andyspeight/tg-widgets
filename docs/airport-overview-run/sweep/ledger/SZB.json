@@ -1,0 +1,278 @@
+{
+ "iata": "SZB",
+ "id": "recbOi8zeCKrHl32n",
+ "name": "Sultan Abdul Aziz Shah International Airport",
+ "country": "Malaysia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Sultan_Abdul_Aziz_Shah_Airport",
+ "audited": "2026-09-23",
+ "before": "Known to most people as Subang, this is the airport that served Kuala Lumpur from 1965 until 1998, when the much larger Kuala Lumpur International Airport at Sepang took over the long-haul traffic. It did not close. Instead it settled into a second life as Subang SkyPark, a smaller terminal in Selangor's Petaling District handling regional and domestic flights, charter work and a good deal of general aviation.\n\nThe draw is simple: it sits in the Klang Valley, much closer to central Kuala Lumpur than Sepang, so travellers heading into the city save themselves a long transfer. Batik Air Malaysia, Firefly, Berjaya Air, MHS Aviation and Weststar Aviation all operate from here, and commercial jet services returned in 2024, adding more regional routes to the board.\n\nExpect a modest, workmanlike terminal rather than a sprawling international hub, which is part of its appeal for anyone who dislikes long walks between gates. The airport is also building up its aircraft maintenance and aerospace work, so clients may notice hangars and engineering activity alongside the passenger side of things.",
+ "after": "Known to most people as Subang, this is the airport that served Kuala Lumpur from 1965 until 1998, when the new Kuala Lumpur International Airport at Sepang took over. It did not close. Instead it settled into a second life as Subang SkyPark, a smaller airport in Selangor with domestic and regional flights.\n\nThe draw is simple: it is much closer to central Kuala Lumpur than Sepang, so travellers heading into the city save themselves a long transfer. Commercial jet flights returned in August 2024 after 22 years, and Batik Air is among the airlines flying from here.\n\nExpect a modest, workmanlike terminal rather than a sprawling international hub, which is part of its appeal for anyone who dislikes long walks between gates.",
+ "claims": [
+  {
+   "claim": "known to most people as Subang",
+   "verdict": "confirmed",
+   "inAfter": "Known to most people as Subang",
+   "sources": [
+    {
+     "file": "star-jets-2024",
+     "org": "The Star (Malaysia, thestar.com.my)",
+     "dated": "31 July 2024",
+     "quote": "the airport, fondly known as the Subang Airport"
+    },
+    {
+     "file": "perdana-1998",
+     "org": "Perdana Leadership Foundation library (a newspaper article of 30 June 1998, 'Goodbye Subang airport, hello KLIA', by Carolyn Hong)",
+     "dated": "30 June 1998",
+     "quote": "Better known as the Subang airport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "often called Subang Airport"
+    }
+   ]
+  },
+  {
+   "claim": "served Kuala Lumpur from 1965 until 1998, when the new KLIA at Sepang took over",
+   "verdict": "corrected",
+   "inAfter": "this is the airport that served Kuala Lumpur from 1965 until 1998, when the new Kuala Lumpur International Airport at Sepang took over.",
+   "note": "Was 'when the much larger Kuala Lumpur International Airport at Sepang took over the long-haul traffic'. The 1998 article dates Subang's opening to 30 August 1965 and says it was succeeded by the new airport at Sepang, opened by the King the Saturday before 30 June 1998; Wikipedia gives 1965 to 1998. 'Long-haul traffic' understates it: the new airport took over Subang's role as the main airport.",
+   "sources": [
+    {
+     "file": "perdana-1998",
+     "org": "Perdana Leadership Foundation library (a newspaper article of 30 June 1998, 'Goodbye Subang airport, hello KLIA', by Carolyn Hong)",
+     "dated": "30 June 1998",
+     "quote": [
+      "30/06/1998",
+      "since it opened on Aug 30, 1965",
+      "succeeded by the grand Kuala Lumpur International Airport in Sepang opened by the King"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "It served as the main airport for Kuala Lumpur from 1965 to 1998, replacing the former Sungai Besi Airport, before being succeeded by the newer Kuala Lumpur International Airport in Sepang."
+    }
+   ]
+  },
+  {
+   "claim": "it did not close",
+   "verdict": "confirmed",
+   "inAfter": "It did not close.",
+   "note": "The ministry's 2025 tables count 1,853,569 passengers at Subang across the four quarters, and The Star reports new routes in December 2025.",
+   "sources": [
+    {
+     "file": "mot-q4-2025-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 4 of 2025",
+     "quote": "SUBANG 156,165 159,710 315,875 77,980 85,392 163,372 234,145 245,102 479,247"
+    },
+    {
+     "file": "star-batik-2025",
+     "org": "The Star (Malaysia, thestar.com.my)",
+     "dated": "13 December 2025",
+     "quote": "Batik Air has introduced four new direct routes from Sultan Abdul Aziz Shah Airport to local and international cities."
+    }
+   ]
+  },
+  {
+   "claim": "a second life as Subang SkyPark, a smaller airport in Selangor with domestic and regional flights",
+   "verdict": "corrected",
+   "inAfter": "Instead it settled into a second life as Subang SkyPark, a smaller airport in Selangor with domestic and regional flights.",
+   "note": "Was 'a smaller terminal in Selangor's Petaling District handling regional and domestic flights, charter work and a good deal of general aviation'. The SkyPark terminal's own site and Wikipedia give the Subang SkyPark name; GeoNames puts Subang in Selangor; the ministry's tables show both domestic and international passengers (1,347,082 domestic and 506,487 international across 2025), and The Star (2024) describes its jet flights as regional. 'Smaller' is against Kuala Lumpur International Airport: in the fourth quarter of 2025 the ministry counts 479,247 passengers at Subang against 9,781,476 at KLIA and 7,159,338 at KLIA2. The district and the charter and general aviation work rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "skypark-home",
+     "org": "Subang SkyPark (the terminal operator, subangskypark.com)",
+     "dated": "read 2026-09-23 (live page, footer 2019)",
+     "quote": [
+      "Subang SkyPark",
+      "SKYPARK TERMINAL"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": [
+      "also known as Subang SkyPark",
+      "located in Subang, Petaling District, Selangor, Malaysia",
+      "important center for general aviation and domestic flights"
+     ]
+    },
+    {
+     "file": "mot-q4-2025-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 4 of 2025",
+     "quote": [
+      "KLIA 1,081,187",
+      "9,781,476",
+      "KLIA2 1,277,881",
+      "7,159,338"
+     ]
+    },
+    {
+     "file": "geo-region",
+     "org": "GeoNames (computed)",
+     "quote": [
+      "Kampung Baru Subang (GeoNames 1771023), admin1 code MY.12",
+      "MY.12 Selangor Selangor 1733037"
+     ]
+    },
+    {
+     "file": "mot-q1-2025-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 1 of 2025",
+     "quote": "SUBANG 186,986 193,283 380,269 43,277 51,161 94,438 230,263 244,444 474,707"
+    },
+    {
+     "file": "mot-q2-2025-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 2 of 2025",
+     "quote": "SUBANG 164,464 156,504 320,968 51,595 59,443 111,039 216,059 215,947 432,007"
+    },
+    {
+     "file": "mot-q3-2025-pax",
+     "org": "Malaysia's Ministry of Transport (mot.gov.my, Statistik Udara, table 4.5)",
+     "dated": "quarter 3 of 2025",
+     "quote": "SUBANG 167,633 162,337 329,970 64,499 73,139 137,638 232,133 235,476 467,608"
+    },
+    {
+     "file": "star-jets-2024",
+     "org": "The Star (Malaysia, thestar.com.my)",
+     "dated": "31 July 2024",
+     "quote": "to various regional destinations"
+    }
+   ]
+  },
+  {
+   "claim": "much closer to central Kuala Lumpur than Sepang",
+   "verdict": "confirmed",
+   "inAfter": "it is much closer to central Kuala Lumpur than Sepang",
+   "note": "From the centre of Kuala Lumpur: Subang 15.3 km and KLIA at Sepang 44.1 km (OurAirports and GeoNames), or 16.5 km and 45.0 km on Wikipedia's own coordinates.",
+   "sources": [
+    {
+     "file": "geo-kl",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from Kuala Lumpur to Sultan Abdul Aziz Shah International Airport (OurAirports WMSA): 15.3 km",
+      "Straight-line distance from Kuala Lumpur to Kuala Lumpur International Airport (OurAirports WMKK): 44.1 km"
+     ]
+    },
+    {
+     "file": "wikipedia-coords",
+     "org": "Wikimedia",
+     "dated": "coordinates, revisions of 2026-09-10 to 2026-09-23",
+     "quote": [
+      "Straight-line distance from Kuala Lumpur to Sultan Abdul Aziz Shah Airport, from the Wikipedia coordinates: 16.5 km",
+      "Straight-line distance from Kuala Lumpur to Kuala Lumpur International Airport, from the Wikipedia coordinates: 45.0 km"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "commercial jet flights returned in August 2024 after 22 years",
+   "verdict": "corrected",
+   "inAfter": "Commercial jet flights returned in August 2024 after 22 years",
+   "note": "Was 'commercial jet services returned in 2024, adding more regional routes to the board'. The Star (31 July 2024): jets back over Subang from 1 August after a lapse of 22 years, with airlines operating from 1 August. Wikipedia puts the first jet operations in July 2024 and the airlines' flights from 1 August 2024, so the sentence says commercial flights.",
+   "sources": [
+    {
+     "file": "star-jets-2024",
+     "org": "The Star (Malaysia, thestar.com.my)",
+     "dated": "31 July 2024",
+     "quote": [
+      "Wednesday, 31 Jul 2024",
+      "The roar of jetplanes will be heard again in the airspace around the Sultan Abdul Aziz Shah Airport next month, after a lapse of 22 years.",
+      "Starting Aug 1, six airlines will operate out of the airport"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": [
+      "As of 2024, commercial jet operations have returned to Sultan Abdul Aziz Shah Airport",
+      "after a 22-year hiatus",
+      "Starting 1 August 2024, five airlines"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Batik Air is among the airlines flying from here",
+   "verdict": "corrected",
+   "inAfter": "and Batik Air is among the airlines flying from here.",
+   "note": "Replaces 'Batik Air Malaysia, Firefly, Berjaya Air, MHS Aviation and Weststar Aviation all operate from here' with the airline a current source names: The Star (13 December 2025) on Batik Air's four new routes from Subang. The other four rest on Wikipedia alone (cut below).",
+   "sources": [
+    {
+     "file": "star-batik-2025",
+     "org": "The Star (Malaysia, thestar.com.my)",
+     "dated": "13 December 2025",
+     "quote": [
+      "Saturday, 13 Dec 2025",
+      "Batik Air has introduced four new direct routes from Sultan Abdul Aziz Shah Airport to local and international cities."
+     ]
+    },
+    {
+     "file": "star-jets-2024",
+     "org": "The Star (Malaysia, thestar.com.my)",
+     "dated": "31 July 2024",
+     "quote": "The six are AirAsia (Malaysia), Firefly, SKS Airways, Transnusa, Batik Air Malaysia and Scoot."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "including Batik Air Malaysia, Firefly, Berjaya Air, MHS Aviation and Weststar Aviation"
+    }
+   ]
+  },
+  {
+   "claim": "the much larger KLIA took over the long-haul traffic",
+   "verdict": "cut",
+   "wasBefore": "when the much larger Kuala Lumpur International Airport at Sepang took over the long-haul traffic",
+   "why": "Reworded (see above): the new airport took over the main airport role, not only long haul."
+  },
+  {
+   "claim": "a smaller terminal in Selangor's Petaling District; charter work and general aviation",
+   "verdict": "cut",
+   "wasBefore": "Instead it settled into a second life as Subang SkyPark, a smaller terminal in Selangor's Petaling District handling regional and domestic flights, charter work and a good deal of general aviation.",
+   "why": "The district and the charter and general aviation work rest on Wikipedia alone. Reworded (see above)."
+  },
+  {
+   "claim": "it sits in the Klang Valley",
+   "verdict": "cut",
+   "wasBefore": "The draw is simple: it sits in the Klang Valley, much closer to central Kuala Lumpur than Sepang, so travellers heading into the city save themselves a long transfer.",
+   "why": "Trimmed: the distances carry the point (see above), and 'Klang Valley' is Wikipedia's wording and a quoted airline chief's."
+  },
+  {
+   "claim": "Firefly, Berjaya Air, MHS Aviation and Weststar Aviation operate from here",
+   "verdict": "cut",
+   "wasBefore": "Batik Air Malaysia, Firefly, Berjaya Air, MHS Aviation and Weststar Aviation all operate from here, and commercial jet services returned in 2024, adding more regional routes to the board.",
+   "why": "Wikipedia alone for Berjaya Air, MHS Aviation and Weststar Aviation. Firefly is on The Star's list of July 2024, which is more than 12 months old, and no current source for its Subang flying was saved. Batik Air is kept, on The Star of December 2025 (see above)."
+  },
+  {
+   "claim": "building up aircraft maintenance and aerospace work",
+   "verdict": "cut",
+   "wasBefore": "The airport is also building up its aircraft maintenance and aerospace work, so clients may notice hangars and engineering activity alongside the passenger side of things.",
+   "why": "Wikipedia alone."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The draw is simple:",
+   "why": "The old text's framing, kept; the distances that follow are sourced."
+  },
+  {
+   "text": "so travellers heading into the city save themselves a long transfer",
+   "why": "The old text's judgement, following from the distances (sourced)."
+  },
+  {
+   "text": "Expect a modest, workmanlike terminal rather than a sprawling international hub, which is part of its appeal for anyone who dislikes long walks between gates.",
+   "why": "The old text's judgement, kept; the smaller airport and its traffic are sourced."
+  }
+ ],
+ "tracerOk": {}
+}
