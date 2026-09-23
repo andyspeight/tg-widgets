@@ -1,0 +1,373 @@
+{
+ "iata": "RTM",
+ "id": "recR2MgYTxOd7Ae7R",
+ "name": "Rotterdam The Hague Airport",
+ "country": "Netherlands",
+ "wikipedia": "https://en.wikipedia.org/wiki/Rotterdam_The_Hague_Airport",
+ "audited": "2026-09-23",
+ "before": "One airport for Rotterdam and The Hague, 5.5 km north north west of Rotterdam, and third busiest in the Netherlands with over 2.1 million passengers in 2019. It flies to European city and leisure destinations.\n\nGetting into either city is simple. Bus line 33 runs from Rotterdam Centraal through the airport to Meijersplein station, where metro line E connects frequently to Den Haag Centraal, Rotterdam Centraal and the city centre. The A13 motorway runs alongside.\n\nIt is also a busy general aviation field, with flying clubs, a skydiving club and a flight training school based here.\n\nThe airport exists because of the war. Rotterdam's original airport at Waalhaven was wrecked in the German bombing of the city and then destroyed outright to stop the Germans using it, so a new site was found in the Zestienhoven polder, which gave the airport its old name. It opened in October 1956.\n\nKLM Cityhopper's Heathrow route, the longest running service here, was dropped in 2008.",
+ "after": "One airport for Rotterdam and The Hague, 5.5 km north north west of Rotterdam, and the third busiest in the Netherlands with about 2.4 million passengers in 2025. It flies to more than 50 destinations, most of them European city and holiday destinations.\n\nGetting into either city is simple. Bus 33 runs from Rotterdam Centraal to the airport and on to Meijersplein station, where metro line E connects to Den Haag Centraal and Rotterdam Centraal.\n\nIt is also a busy general aviation field, with a flying club and flight school based here.\n\nRotterdam's pre-war airport at Waalhaven was destroyed in the Second World War, so a new site was found in the Zestienhoven polder. The new airport opened in 1956.\n\nTransavia has a base here, and British Airways flies to London City.",
+ "claims": [
+  {
+   "claim": "one airport for Rotterdam and The Hague",
+   "verdict": "confirmed",
+   "inAfter": "One airport for Rotterdam and The Hague",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is a minor international airport serving Rotterdam, the Netherlands' second largest city, and The Hague"
+    },
+    {
+     "file": "rtha-verhaal",
+     "org": "Rotterdam The Hague Airport (operator)",
+     "quote": "sinds 2010 gaan we door het leven als Rotterdam The Hague Airport. Deze naamswijziging houdt verband met de oprichting van de Metropoolregio Rotterdam Den Haag, aangezien de luchthaven strategisch gelegen is tussen deze twee steden."
+    }
+   ]
+  },
+  {
+   "claim": "5.5 km north north west of Rotterdam",
+   "verdict": "confirmed",
+   "inAfter": "5.5 km north north west of Rotterdam",
+   "note": "Coordinates: 4.8 km in a straight line at 323 degrees (north west), one point from north north west and inside the tolerance; 5.5 km is a ratio of 1.15.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is located 5.5 kilometres (3.4 mi; 3.0 nmi) north northwest of Rotterdam"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 4.8 km",
+      "Bearing from the city centre: 323 degrees, which is north west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "third busiest in the Netherlands",
+   "verdict": "confirmed",
+   "inAfter": "the third busiest in the Netherlands",
+   "note": "CBS does not use the word third, but its 2025 release (10 February 2026) gives 78.4 million for the five national airports, of which Schiphol 68.8 million, Eindhoven (\"the Netherlands' second airport\") just over 7 million and Rotterdam nearly 2.4 million, which leaves well under half a million between Maastricht and Groningen.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the third busiest airport in the Netherlands"
+    },
+    {
+     "file": "cbs-2025",
+     "org": "CBS (Statistics Netherlands)",
+     "quote": [
+      "In 2025 reisden 78,4 miljoen luchtvaartpassagiers van en naar de vijf nationale luchthavens in Nederland.",
+      "Schiphol verwerkt in 2025 bijna 478 duizend vluchten en 68,8 miljoen passagiers.",
+      "Met ruim 7 miljoen (+2,3 procent) luchtvaartpassagiers blijft Eindhoven Airport Nederlands tweede luchthaven voor personenvervoer.",
+      "Van en naar Rotterdam The Hague Airport reizen bijna 2,4 miljoen reizigers"
+     ],
+     "dated": "2026-02-10"
+    }
+   ]
+  },
+  {
+   "claim": "about 2.4 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "with about 2.4 million passengers in 2025",
+   "note": "Was \"over 2.1 million in 2019\". The operator gives 2,375,478 including transit (2,355,489 in its facts sheet), Eurostat 2,364,807 and CBS nearly 2.4 million; all round to 2.4 million.",
+   "sources": [
+    {
+     "file": "rtha-jaar-2025",
+     "org": "Rotterdam The Hague Airport (operator)",
+     "quote": [
+      "2016 2017 2018 2019 2020 2021 2022 2023 2024 2025",
+      "Totaal (incl transito) 1.683.863 1.774.976 1.943.733 2.133.976 497.078 764.061 2.133.708 2.242.656 2.253.456 2.375.478"
+     ],
+     "dated": "2026"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": "passengers carried in 2025: 2,364,807"
+    },
+    {
+     "file": "cbs-2025",
+     "org": "CBS (Statistics Netherlands)",
+     "quote": "Van en naar Rotterdam The Hague Airport reizen bijna 2,4 miljoen reizigers",
+     "dated": "2026-02-10"
+    }
+   ]
+  },
+  {
+   "claim": "more than 50 destinations, most of them European city and holiday destinations",
+   "verdict": "corrected",
+   "inAfter": "It flies to more than 50 destinations, most of them European city and holiday destinations.",
+   "note": "Was \"It flies to European city and leisure destinations\". The operator lists 53 today, including Morocco (Al Hoceima, Fez, Nador, Oujda, Tangier), Algiers and several Turkish cities, so \"most of them\" rather than all.",
+   "sources": [
+    {
+     "file": "rtha-destinations",
+     "org": "Rotterdam The Hague Airport (operator)",
+     "quote": [
+      "Fly to more than 50 destinations",
+      "Alicante",
+      "Barcelona",
+      "Faro",
+      "London",
+      "Malaga",
+      "Nador",
+      "Rome"
+     ],
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "rtha-verhaal",
+     "org": "Rotterdam The Hague Airport (operator)",
+     "quote": "Jaarlijks reizen meer dan twee miljoen passagiers via Rotterdam The Hague Airport naar ruim 50 bestemmingen in Europa en Marokko ."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "features scheduled flights to European metropolitan and leisure destinations"
+    }
+   ]
+  },
+  {
+   "claim": "bus 33 and metro line E",
+   "verdict": "confirmed",
+   "inAfter": "Bus 33 runs from Rotterdam Centraal to the airport and on to Meijersplein station, where metro line E connects to Den Haag Centraal and Rotterdam Centraal",
+   "note": "\"Frequently\" dropped; the operator says quickly and easily, and puts both city centres about 30 minutes away.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is served by bus line 33, which runs between Rotterdam Centraal, the airport, and further to Meijersplein station. At Meijersplein, transfers are available to metro line E, with frequent service to Den Haag Centraal, Rotterdam Centraal"
+    },
+    {
+     "file": "rtha-transport",
+     "org": "Rotterdam The Hague Airport (operator)",
+     "quote": [
+      "You can also take bus 33 directly from Rotterdam Central Station.",
+      "With RandstadRail metro line E you can travel quickly and easily from Rotterdam Central Station to metro station Meijersplein. Here you change to RET bus 33.",
+      "With RandstadRail metro line E you can travel from The Hague Central Station to the Meijersplein stop within 30 minutes."
+     ],
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "busy general aviation field with a flying club and flight school",
+   "verdict": "softened",
+   "inAfter": "It is also a busy general aviation field, with a flying club and flight school based here.",
+   "note": "Was \"flying clubs, a skydiving club and a flight training school\". The operator's 2025 figures bear out \"busy\": 37,299 of its 58,654 aircraft movements in 2025 were light aircraft under 6 tonnes, and 17,687 were training flights. Its own news (19 September 2026) confirms the Rotterdamsche Aero Club, a flying club and flight school, is based here. The skydiving club has only Wikipedia.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is also used extensively by general aviation and there are several flying clubs, a skydiving club and a flight training school located at the airport."
+    },
+    {
+     "file": "rtha-aeroclub",
+     "org": "Rotterdam The Hague Airport (operator)",
+     "quote": "De Rotterdamsche Aero Club (RAC) is een luchtvaartvereniging, vliegerssociëteit en vliegschool gevestigd op Rotterdam The Hague Airport.",
+     "dated": "2026-09-19"
+    },
+    {
+     "file": "rtha-jaar-2025",
+     "org": "Rotterdam The Hague Airport (operator)",
+     "quote": [
+      "Lesvluchten 14.019 12.881 13.761 13.511 13.379 17.204 17.863 15.603 16.371 17.687",
+      "Totaal kleine luchtvaart (<6 ton) 30.869 31.387 33.152 31.390 30.689 36.185 38.103 35.271 35.573 37.299"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Waalhaven, the pre-war airport, destroyed in the Second World War",
+   "verdict": "softened",
+   "inAfter": "Rotterdam's pre-war airport at Waalhaven was destroyed in the Second World War",
+   "note": "Was \"wrecked in the German bombing of the city and then destroyed outright to stop the Germans using it\". The operator says only that it was completely destroyed during the war; the detail has only Wikipedia.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Rotterdam had previously had an airport before the war; Waalhaven airport, but it was heavily damaged in the German bombing of Rotterdam, and was later completely destroyed"
+    },
+    {
+     "file": "rtha-verhaal",
+     "org": "Rotterdam The Hague Airport (operator)",
+     "quote": [
+      "In 1920 werd Vliegveld Waalhaven geopend in het zuiden van Rotterdam",
+      "Tijdens de Tweede Wereldoorlog werd Vliegveld Waalhaven volledig verwoest."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "new site in the Zestienhoven polder",
+   "verdict": "confirmed",
+   "inAfter": "so a new site was found in the Zestienhoven polder",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "so a new location was found in the Zestienhoven polder"
+    },
+    {
+     "file": "rtha-verhaal",
+     "org": "Rotterdam The Hague Airport (operator)",
+     "quote": "In 1956 opende Rotterdam The Hague Airport haar deuren in de polder Zestienhoven"
+    }
+   ]
+  },
+  {
+   "claim": "opened in 1956",
+   "verdict": "softened",
+   "inAfter": "The new airport opened in 1956.",
+   "note": "Was \"October 1956\"; the operator gives the year only. Historical date, so the age of the sources does not matter.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the airport was officially opened in October 1956"
+    },
+    {
+     "file": "rtha-verhaal",
+     "org": "Rotterdam The Hague Airport (operator)",
+     "quote": "In 1956 opende Rotterdam The Hague Airport haar deuren"
+    }
+   ]
+  },
+  {
+   "claim": "Transavia has a base here",
+   "verdict": "corrected",
+   "inAfter": "Transavia has a base here",
+   "note": "Replaces the 2008 KLM line with who flies now (see the cut). The operator's 2025 facts sheet lists Transavia, British Airways and TUI as based at RTHA (the PDF text spaces the letters: \"Gestationeerd op RTHA: Transavia, British Airways, TUI\"); 10 of the 15 departures on its board for the afternoon of 23 September 2026 were Transavia (HV); the rest were British Airways (two, to London City), TUI, Pegasus and SunExpress.",
+   "sources": [
+    {
+     "file": "rtha-feiten-2025",
+     "org": "Rotterdam The Hague Airport (operator)",
+     "quote": "Gestati o n e e r d o p R T H A T r a n s a v i a Br i t i s hAi r w a y s T U I",
+     "dated": "2026"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "focus_city = {{bulletedlist|Transavia"
+    },
+    {
+     "file": "rtha-departures",
+     "org": "Rotterdam The Hague Airport (operator)",
+     "quote": [
+      "Wednesday 23 September 2026",
+      "Faro",
+      "23 SEP.HV5203"
+     ],
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "British Airways flies to London City",
+   "verdict": "corrected",
+   "inAfter": "British Airways flies to London City.",
+   "note": "The London service a UK agent needs, replacing the note that KLM's Heathrow route ended in 2008. London City was the fifth most popular destination in 2025 (operator).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "British Airways now flies to Rotterdam from London City Airport."
+    },
+    {
+     "file": "rtha-departures",
+     "org": "Rotterdam The Hague Airport (operator)",
+     "quote": [
+      "17:50",
+      "London City",
+      "23 SEP.BA4457",
+      "20:55",
+      "23 SEP.BA4459"
+     ],
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "rtha-feiten-2025",
+     "org": "Rotterdam The Hague Airport (operator)",
+     "quote": [
+      "Top 5 bestemmingen vanaf RTHA van 2025",
+      "5. London City"
+     ],
+     "dated": "2026"
+    }
+   ]
+  },
+  {
+   "claim": "over 2.1 million passengers in 2019",
+   "verdict": "cut",
+   "wasBefore": "third busiest in the Netherlands with over 2.1 million passengers in 2019",
+   "why": "The rank is kept; the figure is six years stale and replaced by 2025 (operator, Eurostat, CBS)."
+  },
+  {
+   "claim": "European city and leisure destinations",
+   "verdict": "cut",
+   "wasBefore": "It flies to European city and leisure destinations.",
+   "why": "Incomplete: the operator also flies to Morocco, Algeria and Turkey. Replaced by the operator's count and the \"most of them\" wording."
+  },
+  {
+   "claim": "metro line E connects frequently, and to the city centre",
+   "verdict": "cut",
+   "wasBefore": "where metro line E connects frequently to Den Haag Centraal, Rotterdam Centraal and the city centre",
+   "why": "\"Frequently\" and \"the city centre\" have only Wikipedia; the operator names the two central stations."
+  },
+  {
+   "claim": "A13 motorway alongside",
+   "verdict": "cut",
+   "wasBefore": "The A13 motorway runs alongside.",
+   "why": "Only Wikipedia; the operator's transport, parking and FAQ pages do not mention the A13."
+  },
+  {
+   "claim": "flying clubs, a skydiving club and a flight training school",
+   "verdict": "cut",
+   "wasBefore": "with flying clubs, a skydiving club and a flight training school based here",
+   "why": "The skydiving club and the plural clubs have only Wikipedia. Softened to the flying club and flight school the operator confirms."
+  },
+  {
+   "claim": "the airport exists because of the war",
+   "verdict": "cut",
+   "wasBefore": "The airport exists because of the war.",
+   "why": "An interpretation; the facts behind it (Waalhaven destroyed, a new site found) are kept."
+  },
+  {
+   "claim": "wrecked in the German bombing, then destroyed to stop the Germans using it",
+   "verdict": "cut",
+   "wasBefore": "was wrecked in the German bombing of the city and then destroyed outright to stop the Germans using it",
+   "why": "Only Wikipedia gives the detail; the operator says the airport was completely destroyed during the war."
+  },
+  {
+   "claim": "Zestienhoven gave the airport its old name",
+   "verdict": "cut",
+   "wasBefore": "which gave the airport its old name",
+   "why": "Only Wikipedia names the former name; the operator says only that the airport has had several names and has been Rotterdam The Hague Airport since 2010."
+  },
+  {
+   "claim": "opened in October 1956",
+   "verdict": "cut",
+   "wasBefore": "It opened in October 1956.",
+   "why": "The month has only Wikipedia; softened to 1956."
+  },
+  {
+   "claim": "KLM Cityhopper Heathrow route dropped in 2008",
+   "verdict": "cut",
+   "wasBefore": "KLM Cityhopper's Heathrow route, the longest running service here, was dropped in 2008.",
+   "why": "History with one source, and it reads as if London has no service. Replaced by the current London City flights (British Airways) and the main airline."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Getting into either city is simple.",
+   "why": "A judgement kept from the original. The operator calls the airport easily accessible by public transport and puts both central stations about 30 minutes away; the route itself is in the next sentence."
+  }
+ ],
+ "tracerOk": {
+  "Second World War": "UK English for Wikipedia's World War II and the operator's Tweede Wereldoorlog; see the Waalhaven claim."
+ }
+}

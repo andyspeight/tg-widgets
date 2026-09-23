@@ -1,0 +1,321 @@
+{
+ "iata": "OSD",
+ "id": "recvB3u9nFwyRJTOC",
+ "name": "Åre Östersund Airport",
+ "country": "Sweden",
+ "wikipedia": "https://en.wikipedia.org/wiki/%C3%85re_%C3%96stersund_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Östersund and, more usefully for most clients, for the ski resort at Åre. It opened in 1958 and served 465,196 passengers in 2015.\n\nThe distances matter. The airport is 11 km west of Östersund but 94 km east of Åre, so a ski transfer is a real journey, not a hop.\n\nTransport is arranged around that. Airport coaches run into central Östersund, and in winter Åre Flygtransfer meets every SAS and BRA flight for the run out to Åre.\n\nIt was previously called Östersund-Frösön Airport, so the older name still appears in some systems.",
+ "after": "The airport for Östersund and for the ski resort at Åre. It opened to civil flights in 1958 and handled just under 250,000 passengers in 2025.\n\nThe airport is on Frösön, west of Östersund. Swedavia, which runs it, puts it about ten minutes from the city centre but about an hour from Åre, so a ski transfer is a real journey, not a hop.\n\nThe airport coach was replaced in December 2025 by the ordinary city bus, line 4, which runs to its own timetable rather than to flights. In the ski season, transfers to Åre can be pre-booked with Flygtaxi.\n\nSAS flies to Stockholm Arlanda all year and to Copenhagen in winter, and Jonair flies to Umeå.",
+ "claims": [
+  {
+   "claim": "the airport for Östersund and the ski resort at Åre",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Östersund and for the ski resort at Åre.",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "area_served = Östersund & Åre"
+    },
+    {
+     "file": "swedavia-directions2",
+     "org": "Swedavia (operator)",
+     "quote": "During the ski season, transfer services to Åre and Vemdalen are also available."
+    },
+    {
+     "file": "skistar-are-travel",
+     "org": "SkiStar (Åre ski operator)",
+     "quote": "Travel via Åre Östersund Airport"
+    }
+   ]
+  },
+  {
+   "claim": "opened to civil flights in 1958",
+   "verdict": "confirmed",
+   "inAfter": "It opened to civil flights in 1958",
+   "note": "Swedavia adds that the site was an air force base from 1926, so \"to civil flights\" is the precise version of \"opened in 1958\". Historical date, so the age of the sources does not matter.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport opened in 1958."
+    },
+    {
+     "file": "swedavia-about",
+     "org": "Swedavia (operator)",
+     "quote": "Airport operations at Åre Östersund Airport started in 1926, when it was at the time the airforce's fourth flying corps, but it was not until 1958 that the airport opened for regular and civil flights."
+    }
+   ]
+  },
+  {
+   "claim": "just under 250,000 passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "handled just under 250,000 passengers in 2025",
+   "note": "Was 465,196 in 2015; traffic has nearly halved since. Swedavia 245,832 and Eurostat 246,956 for 2025 (0.5 per cent apart); \"just under 250,000\" is true of both. Swedavia's own page gives 239,000 for 2024, matching Eurostat's 239,995.",
+   "sources": [
+    {
+     "file": "swedavia-ar2025",
+     "org": "Swedavia (operator)",
+     "quote": [
+      "NUMBER OF PASSENGERS:",
+      "Åre Östersund Airport 2,500 3,159 245,832 4 international"
+     ],
+     "dated": "2026"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": "passengers carried in 2025: 246,956"
+    }
+   ]
+  },
+  {
+   "claim": "on Frösön",
+   "verdict": "confirmed",
+   "inAfter": "The airport is on Frösön",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "location = Frösön, Sweden"
+    },
+    {
+     "file": "swedavia-directions2",
+     "org": "Swedavia (operator)",
+     "quote": "832 96 Frösön"
+    }
+   ]
+  },
+  {
+   "claim": "west of Östersund",
+   "verdict": "confirmed",
+   "inAfter": "west of Östersund",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is located about 11 km (6.8 mi) west of Östersund"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 284 degrees, which is west"
+    }
+   ]
+  },
+  {
+   "claim": "Swedavia runs the airport",
+   "verdict": "confirmed",
+   "inAfter": "Swedavia, which runs it",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "operator = Swedavia"
+    },
+    {
+     "file": "swedavia-ar2025",
+     "org": "Swedavia (operator)",
+     "quote": [
+      "Swedavia’s ten airports form a network",
+      "Åre Östersund Airport 2,500 3,159 245,832"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Swedavia: about ten minutes from the city centre, about an hour from Åre",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Swedavia",
+   "inAfter": "Swedavia, which runs it, puts it about ten minutes from the city centre but about an hour from Åre",
+   "note": "Attributed to the operator, checked against its own pages. Replaces \"11 km west of Östersund but 94 km east of Åre\": 11 km fails the coordinates check narrowly (6.8 km in a straight line, ratio 1.62) with no second written source, and the Åre distance is disputed (Wikipedia 94 km, SkiStar around 80 km; Åre is too small for the GeoNames check). Both distance sources agree it is far, which is the point of the sentence.",
+   "sources": [
+    {
+     "file": "swedavia-about",
+     "org": "Swedavia (operator)",
+     "quote": [
+      "Travel time from city centre:",
+      "10 minutes",
+      "Travel time from Åre:",
+      "One hour"
+     ],
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "swedavia-directions2",
+     "org": "Swedavia (operator)",
+     "quote": [
+      "Travelling time is approximately ten minutes from Östersund to the airport.",
+      "Travelling time is approximately one hour from Åre to the airport."
+     ],
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "skistar-are-travel",
+     "org": "SkiStar (Åre ski operator)",
+     "quote": "Åre Östersund Airport is around 80 km from Åre"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "94 km (58 mi) east of Åre"
+    }
+   ]
+  },
+  {
+   "claim": "line 4 city bus replaced the airport coach in December 2025, runs to its own timetable",
+   "verdict": "corrected",
+   "inAfter": "The airport coach was replaced in December 2025 by the ordinary city bus, line 4, which runs to its own timetable rather than to flights",
+   "note": "Was \"Airport coaches run into central Östersund\". Changed on 14 December 2025.",
+   "sources": [
+    {
+     "file": "ltr-flyget",
+     "org": "Länstrafiken Jämtland (regional transport authority)",
+     "quote": "Busstrafiken till flyget går i vanlig linjetrafik med linje 4 från och med 14 december 2025.",
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "visitostersund-resa",
+     "org": "Visit Östersund",
+     "quote": [
+      "Från och med december 2025 har flygbussen ersatts med stadstrafikens linje 4 till och från flyget",
+      "Observera att bussen går enligt tidtabell och inte enligt ankommande och avgående flyg."
+     ]
+    },
+    {
+     "file": "swedavia-bus",
+     "org": "Swedavia (operator)",
+     "quote": [
+      "Line 4 takes you between Åre Östersund Airport and Östersund city center.",
+      "Line 4 operates according to the schedule and not according to flight departures and/ or arrivals."
+     ],
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "ski-season transfers to Åre pre-booked with Flygtaxi",
+   "verdict": "corrected",
+   "inAfter": "In the ski season, transfers to Åre can be pre-booked with Flygtaxi.",
+   "note": "Was \"in winter Åre Flygtransfer meets every SAS and BRA flight\". Flygtaxi's page shows the Åre fare for 12 December to 3 May.",
+   "sources": [
+    {
+     "file": "swedavia-bus",
+     "org": "Swedavia (operator)",
+     "quote": "During the ski season, you can pre-book a transfer directly to Åre via Flygtaxi",
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "flygtaxi-are",
+     "org": "Flygtaxi Sverige (transfer operator)",
+     "quote": [
+      "From",
+      "Åre Östersund Airport",
+      "Åre Centrum (Stationshuset Sankt Olavs väg)",
+      "438kr adult/219kr child - 12 dec- 3 may"
+     ],
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "SAS to Stockholm Arlanda all year and Copenhagen in winter; Jonair to Umeå",
+   "verdict": "corrected",
+   "inAfter": "SAS flies to Stockholm Arlanda all year and to Copenhagen in winter, and Jonair flies to Umeå.",
+   "note": "Replaces the stale airline reference in \"every SAS and BRA flight\": BRA is not on Swedavia's current destination list. Copenhagen ran 14 December 2025 to 22 March 2026 (Visit Östersund) and is listed again by Swedavia; SkiStar confirms Stockholm all year with extra international flights in winter. Swedavia's 2025 report names Stockholm, Umeå and Copenhagen as the most popular destinations.",
+   "sources": [
+    {
+     "file": "swedavia-destinations",
+     "org": "Swedavia (operator)",
+     "quote": [
+      "Copenhagen",
+      "SAS SCANDINAVIAN AIRLINES",
+      "Stockholm",
+      "Umeå",
+      "JONAIR"
+     ],
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "visitostersund-resa",
+     "org": "Visit Östersund",
+     "quote": [
+      "SAS trafikerar Arlanda – Östersund",
+      "SAS trafikerar Köpenhamn – Östersund mellan 14 december 2025 – 22 mars 2026.",
+      "Jonair – trafikerar Östersund – Umeå."
+     ]
+    },
+    {
+     "file": "skistar-are-travel",
+     "org": "SkiStar (Åre ski operator)",
+     "quote": "is connected with Stockholm throughout the year, with additional international services during the winter season."
+    }
+   ]
+  },
+  {
+   "claim": "more usefully for most clients",
+   "verdict": "cut",
+   "wasBefore": "more usefully for most clients",
+   "why": "A judgement with no source; the fact behind it (the airport serves Åre) is kept."
+  },
+  {
+   "claim": "465,196 passengers in 2015",
+   "verdict": "cut",
+   "wasBefore": "served 465,196 passengers in 2015",
+   "why": "Ten years stale. Replaced by the 2025 figure (Swedavia, Eurostat)."
+  },
+  {
+   "claim": "the distances matter",
+   "verdict": "cut",
+   "wasBefore": "The distances matter.",
+   "why": "Framing sentence; the point survives in the Swedavia sentence."
+  },
+  {
+   "claim": "11 km west of Östersund",
+   "verdict": "cut",
+   "wasBefore": "The airport is 11 km west of Östersund",
+   "why": "Fails the coordinates check narrowly (6.8 km in a straight line, ratio 1.62) and no second written source gives 11 km. Replaced by Swedavia's ten minutes, attributed."
+  },
+  {
+   "claim": "94 km east of Åre",
+   "verdict": "cut",
+   "wasBefore": "but 94 km east of Åre",
+   "why": "Sources disagree: Wikipedia 94 km, SkiStar around 80 km. Replaced by Swedavia's one hour, attributed, rather than picking or splitting a distance."
+  },
+  {
+   "claim": "transport is arranged around that",
+   "verdict": "cut",
+   "wasBefore": "Transport is arranged around that.",
+   "why": "Framing sentence."
+  },
+  {
+   "claim": "airport coaches run into central Östersund",
+   "verdict": "cut",
+   "wasBefore": "Airport coaches run into central Östersund",
+   "why": "Out of date. The airport coach was replaced by city bus line 4 on 14 December 2025."
+  },
+  {
+   "claim": "Åre Flygtransfer meets every SAS and BRA flight",
+   "verdict": "cut",
+   "wasBefore": "in winter Åre Flygtransfer meets every SAS and BRA flight for the run out to Åre",
+   "why": "Out of date. Swedavia now points to pre-booked Flygtaxi transfers, and BRA is not on Swedavia's destination list."
+  },
+  {
+   "claim": "previously called Östersund-Frösön Airport; older name in some systems",
+   "verdict": "cut",
+   "wasBefore": "It was previously called Östersund-Frösön Airport, so the older name still appears in some systems.",
+   "why": "The former name has only Wikipedia (Swedavia's pages and report do not mention it), and \"still appears in some systems\" has no source at all."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so a ski transfer is a real journey, not a hop",
+   "why": "A conclusion drawn from Swedavia's one-hour figure (and the 80 to 94 km that SkiStar and Wikipedia give), kept from the original text; not a separate fact."
+  }
+ ],
+ "tracerOk": {
+  "250,000": "Rounded up from Swedavia 245,832 and Eurostat 246,956 for 2025 and stated as just under; see the passengers claim."
+ }
+}

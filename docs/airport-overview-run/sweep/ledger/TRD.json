@@ -1,0 +1,339 @@
+{
+ "iata": "TRD",
+ "id": "recBhWxBLfeZZyeDr",
+ "name": "Trondheim Airport, Værnes",
+ "country": "Norway",
+ "wikipedia": "https://en.wikipedia.org/wiki/Trondheim_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Trondheim, at Værnes in Stjørdal 19 km east of the city, and Norway's fourth busiest with 4,441,870 passengers in 2018.\n\nThe best thing about it is the railway station built into the airport, so a client can step off a flight and onto a train without a shuttle.\n\nThe terminal split is simple: Terminal A, from 1994, handles domestic flights and Terminal B, the renovated former main terminal from 1982, handles international. There is also an airport hotel on site.\n\nSAS, Norwegian and Widerøe all treat Værnes as a focus city, and the Oslo route is the fourth busiest in Europe. airBaltic, Finnair, KLM and Wizz Air fly international routes, and Widerøe runs state-contracted services to six airports in Helgeland and Nord-Trøndelag.\n\nThe main runway is 2,999 metres. The airport is operated by Avinor and shares facilities with a Royal Norwegian Air Force station.",
+ "after": "The airport for Trondheim, at Værnes in Stjørdal, about 32 km east of the city. It is Norway's third busiest airport, with 4.1 million passengers in 2025.\n\nThe railway station is a short covered walk from the terminal, so a client can step off a flight and onto a train without a shuttle. There is also an airport hotel.\n\nSAS, Norwegian and Widerøe are the main airlines, and the Oslo route is one of the busiest in Europe. KLM flies to Amsterdam and Finnair to Helsinki.\n\nThe airport is operated by Avinor and shares facilities with a Royal Norwegian Air Force station.",
+ "claims": [
+  {
+   "claim": "at Værnes in Stjørdal",
+   "verdict": "confirmed",
+   "inAfter": "at Værnes in Stjørdal",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is located in Værnes, a village in Stjørdal Municipality"
+    },
+    {
+     "file": "snl-vaernes",
+     "org": "Store norske leksikon",
+     "quote": "Lufthavnen ligger i Stjørdal kommune i Trøndelag"
+    }
+   ]
+  },
+  {
+   "claim": "about 32 km east of the city",
+   "verdict": "corrected",
+   "inAfter": "about 32 km east of the city",
+   "note": "Was 19 km, which failed the coordinates check (26.5 km in a straight line, so 19 cannot be the road distance). Wikipedia's 19 km is how far Stjørdal Municipality lies from Trondheim Municipality, not the airport from the city. SNL gives 32 km in two articles (the Trondheim one updated 27 July 2026); Wikipedia's own rail figure is 33.0 km; 32 over 26.5 is a ratio of 1.2, inside the road-distance tolerance, and the bearing is east.",
+   "sources": [
+    {
+     "file": "snl-trondheim",
+     "org": "Store norske leksikon",
+     "quote": "I Stjørdal ligger Trondheim lufthavn, Værnes 32 kilometer øst for Trondheim",
+     "dated": "2026-07-27"
+    },
+    {
+     "file": "snl-vaernes",
+     "org": "Store norske leksikon",
+     "quote": "cirka tre kilometer fra Stjørdal og 32 kilometer fra Trondheim"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 26.5 km",
+      "Bearing from the city centre: 83 degrees, which is east"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the station is 33.0 kilometres (20.5 mi) from Trondheim Central Station"
+    }
+   ]
+  },
+  {
+   "claim": "Norway's third busiest airport",
+   "verdict": "corrected",
+   "inAfter": "It is Norway's third busiest airport",
+   "note": "Was fourth busiest (2018). On Avinor's 2025 figures Trondheim (4,110 thousand) is now ahead of Stavanger (3,975 thousand).",
+   "sources": [
+    {
+     "file": "avinor-vaernes-terminal-2026",
+     "org": "Avinor (operator)",
+     "quote": "Dette plasserer flyplassen som landets tredje største, etter Oslo lufthavn og Bergen lufthavn.",
+     "dated": "2026-08-13"
+    },
+    {
+     "file": "snl-trondelag",
+     "org": "Store norske leksikon",
+     "quote": "Trondheim lufthavn, Værnes , ligger i Stjørdal og er Norges tredje største målt i antall passasjerer.",
+     "dated": "2026-03-04"
+    },
+    {
+     "file": "avinor-ar2025",
+     "org": "Avinor (operator)",
+     "quote": [
+      "Stavanger Airport 3 975 3 972 0,1 %",
+      "Trondheim Airport 4 110 4 042 1,7 %"
+     ],
+     "dated": "2026"
+    }
+   ]
+  },
+  {
+   "claim": "4.1 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "with 4.1 million passengers in 2025",
+   "note": "Was 4,441,870 in 2018. Avinor 4,110,000 and Eurostat 4,109,825 agree to within 200 passengers.",
+   "sources": [
+    {
+     "file": "avinor-vaernes-terminal-2026",
+     "org": "Avinor (operator)",
+     "quote": "Trondheim lufthavn, Værnes hadde 4 110 000 reisende i 2025.",
+     "dated": "2026-08-13"
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "quote": "passengers carried in 2025: 4,109,825"
+    }
+   ]
+  },
+  {
+   "claim": "railway station a short covered walk from the terminal",
+   "verdict": "softened",
+   "inAfter": "The railway station is a short covered walk from the terminal, so a client can step off a flight and onto a train without a shuttle",
+   "note": "Was \"the railway station built into the airport\". Visit Trondheim describes a short walk through a covered walkway and Wikipedia puts the platform about 190 metres from check-in, so \"built into\" overstated it; no shuttle is needed either way. Avinor's current page confirms the trains call at the airport (Værnes station).",
+   "sources": [
+    {
+     "file": "visittrondheim-air",
+     "org": "Visit Trondheim (tourist board)",
+     "quote": "The train station is located within a short walk from the terminals through a covered walkway.",
+     "dated": "2025-11-14 (page metadata)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The platform is about 190 metres (620 ft) from the check-in at the terminal"
+    },
+    {
+     "file": "avinor-trd-transport",
+     "org": "Avinor (operator)",
+     "quote": "North Local Train on the route Trondheim - Steinkjer passes via the airport (Værnes station).",
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "an airport hotel",
+   "verdict": "softened",
+   "inAfter": "There is also an airport hotel.",
+   "note": "\"On site\" dropped: Avinor presents the Radisson Blu Hotel Trondheim Airport as \"at or right near the airport\", and the chain's own page refused the fetch (403).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "an integrated railway station and an airport hotel"
+    },
+    {
+     "file": "avinor-trd-hotel",
+     "org": "Avinor (operator)",
+     "quote": [
+      "Make your journey easier and stay at a hotel – at or right near the airport.",
+      "Radisson Blu Hotel Trondheim Airport"
+     ],
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "SAS, Norwegian and Widerøe the main airlines",
+   "verdict": "softened",
+   "inAfter": "SAS, Norwegian and Widerøe are the main airlines",
+   "note": "Was \"all treat Værnes as a focus city\", Wikipedia's infobox term. Current check: Avinor's departures board, saved at 13:43 on 23 September 2026, listed 51 departures for the rest of the day (44 flight numbers, some multi-stop flights appear twice). 42 of the 44 were SAS, Norwegian or Widerøe (23 Widerøe, 11 SAS, 8 Norwegian); the other two were KLM and Finnair.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The main airlines at the airport are Scandinavian Airlines (SAS), Norwegian Air Shuttle and Widerøe"
+    },
+    {
+     "file": "avinor-trd-departures",
+     "org": "Avinor (operator)",
+     "quote": [
+      "51 flights departing from TRD",
+      "16:50 Oslo SAS SK373",
+      "17:00 Oslo Norwegian DY765",
+      "17:10 Bergen Widerøe WF681"
+     ],
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "Oslo route one of the busiest in Europe",
+   "verdict": "softened",
+   "inAfter": "the Oslo route is one of the busiest in Europe",
+   "note": "Was \"the fourth busiest in Europe\". Only Wikipedia gives the exact rank; Visit Trondheim (page modified 14 November 2025) says one of Europe's busiest, with around 30 departures a day.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The main route is the service to Oslo, operated by Norwegian, SAS, and Widerøe, which is the fourth-busiest route in Europe"
+    },
+    {
+     "file": "visittrondheim-air",
+     "org": "Visit Trondheim (tourist board)",
+     "quote": "The route Trondheim–Oslo is one of Europe’s busiest air routes, with around 30 daily departures.",
+     "dated": "2025-11-14 (page metadata)"
+    }
+   ]
+  },
+  {
+   "claim": "KLM to Amsterdam and Finnair to Helsinki",
+   "verdict": "softened",
+   "inAfter": "KLM flies to Amsterdam and Finnair to Helsinki.",
+   "note": "Was \"airBaltic, Finnair, KLM and Wizz Air fly international routes\". KLM and Finnair are on Avinor's departures board for 23 September 2026; airBaltic and Wizz Air could not be confirmed (see the cut). The Finnair route has run since June 2019 (Finnair's own release, which says Widerøe operates it for Finnair).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "the airlines airBaltic, Finnair and KLM operate international routes out of Trondheim",
+      "to Amsterdam is provided by KLM"
+     ]
+    },
+    {
+     "file": "avinor-trd-departures",
+     "org": "Avinor (operator)",
+     "quote": [
+      "17:10 Amsterdam KLM KL1154",
+      "18:05 Helsinki Finnair AY950"
+     ],
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "finnair-trd",
+     "org": "Finnair",
+     "quote": "Finnair continues to expand its network in the Nordics and opens a new year-round route to Trondheim in Norway in June 2019.",
+     "dated": "2019-03-19"
+    },
+    {
+     "file": "visittrondheim-air",
+     "org": "Visit Trondheim (tourist board)",
+     "quote": [
+      "INTERNATIONAL FLIGHTS",
+      "Amsterdam",
+      "Helsinki"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "operated by Avinor",
+   "verdict": "confirmed",
+   "inAfter": "The airport is operated by Avinor",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Operated by the state-owned Avinor"
+    },
+    {
+     "file": "avinor-ar2025",
+     "org": "Avinor (operator)",
+     "quote": [
+      "The Group owns, operates and develops 43 airports",
+      "Trondheim Airport 4 110 4 042 1,7 %"
+     ],
+     "dated": "2026"
+    }
+   ]
+  },
+  {
+   "claim": "shares facilities with a Royal Norwegian Air Force station",
+   "verdict": "confirmed",
+   "inAfter": "shares facilities with a Royal Norwegian Air Force station",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "it shares facilities with Værnes Air Station of the Royal Norwegian Air Force"
+    },
+    {
+     "file": "snl-vaernes",
+     "org": "Store norske leksikon",
+     "quote": "Trondheim lufthavn, Værnes er en sivil stamrutelufthavn, samlokalisert med Luftforsvaret"
+    }
+   ]
+  },
+  {
+   "claim": "19 km east of the city",
+   "verdict": "cut",
+   "wasBefore": "19 km east of the city",
+   "why": "Wrong. It fails the coordinates check (26.5 km in a straight line); Wikipedia's 19 km is the distance between the two municipalities. Corrected to about 32 km (SNL)."
+  },
+  {
+   "claim": "Norway's fourth busiest, 4,441,870 in 2018",
+   "verdict": "cut",
+   "wasBefore": "Norway's fourth busiest with 4,441,870 passengers in 2018",
+   "why": "Seven years stale. Trondheim is now third, with 4.1 million in 2025 (Avinor, Eurostat, SNL)."
+  },
+  {
+   "claim": "the best thing about it is the railway station built into the airport",
+   "verdict": "cut",
+   "wasBefore": "The best thing about it is the railway station built into the airport",
+   "why": "Opinion, and \"built into\" overstates it: the station is a short covered walk away. Softened in the station sentence."
+  },
+  {
+   "claim": "Terminal A (1994) domestic, Terminal B (1982) international",
+   "verdict": "cut",
+   "wasBefore": "The terminal split is simple: Terminal A, from 1994, handles domestic flights and Terminal B, the renovated former main terminal from 1982, handles international.",
+   "why": "Only Wikipedia gives the A and B split. SNL dates the terminal work to 1982, 1994 and 2006 without saying which handles what, and Avinor's pages name domestic and international areas, not terminals. Avinor also opened a 1,000 square metre extension (Pir Vest, three new gates) on 13 August 2026, which has one source so far."
+  },
+  {
+   "claim": "hotel on site",
+   "verdict": "cut",
+   "wasBefore": "an airport hotel on site",
+   "why": "Avinor describes the Radisson Blu as at or right near the airport; \"on site\" has only Wikipedia."
+  },
+  {
+   "claim": "focus city for SAS, Norwegian and Widerøe",
+   "verdict": "cut",
+   "wasBefore": "all treat Værnes as a focus city",
+   "why": "Wikipedia infobox jargon; softened to the main airlines, which the departures board confirms."
+  },
+  {
+   "claim": "Oslo route fourth busiest in Europe",
+   "verdict": "cut",
+   "wasBefore": "the Oslo route is the fourth busiest in Europe",
+   "why": "The exact rank has only Wikipedia; softened to one of the busiest (Visit Trondheim)."
+  },
+  {
+   "claim": "airBaltic and Wizz Air fly international routes",
+   "verdict": "cut",
+   "wasBefore": "airBaltic, Finnair, KLM and Wizz Air fly international routes",
+   "why": "airBaltic and Wizz Air not confirmed within 12 months: neither was on the rest of the day's departures board (23 September 2026, from 13:43), airBaltic's destination list from Riga does not show Trondheim (inconclusive, since it does not show Bergen either), and Wizz Air's route page did not load the route. KLM and Finnair kept."
+  },
+  {
+   "claim": "Widerøe state-contracted services to six airports in Helgeland and Nord-Trøndelag",
+   "verdict": "cut",
+   "wasBefore": "Widerøe runs state-contracted services to six airports in Helgeland and Nord-Trøndelag",
+   "why": "The contract status rests on Wikipedia alone (the government page refused the fetch, 403). Widerøe's flights to Brønnøysund, Mo i Rana, Mosjøen, Namsos and Sandnessjøen are on the departures board, but it is regional detail of little use to a UK agent."
+  },
+  {
+   "claim": "main runway 2,999 metres",
+   "verdict": "cut",
+   "wasBefore": "The main runway is 2,999 metres.",
+   "why": "Sources disagree: Wikipedia says 2,999 m in the text and 3,000 m in the infobox, OurAirports 2,759 m, and SNL gives take-off distances of 2,909 and 2,864 m."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
