@@ -1,0 +1,262 @@
+{
+ "iata": "EBL",
+ "id": "rectjJ0PBHkoIEQbw",
+ "name": "Erbil International Airport",
+ "country": "Iraq",
+ "wikipedia": "https://en.wikipedia.org/wiki/Erbil_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The busiest airport in the Kurdistan Region of Iraq and third busiest in the country after Baghdad and Al Najaf, serving Erbil.\n\nIt has one of the longest runways in the world, a legacy of what the site used to be. The airfield was built by the Ba'athist regime in the early 1970s as an Iraqi military base and stayed military until 1991, when the United Nations imposed a no-fly zone over northern Iraq. After 2003 the Kurdistan Regional Government took over, and a new 550 million dollar airport opened alongside the old one on 5 July 2005.\n\nThere are two international airports in the Kurdistan Region, this one and Sulaymaniyah, with a third under construction at Duhok.",
+ "after": "Erbil's airport, in the Kurdistan Region of Iraq, handled about 2.1 million passengers in 2024. The runway is one of the longest in the world. It replaced an older airport next door, a military base until 1991.\n\nThe FCDO advises against all but essential travel to the Kurdistan Region of Iraq. According to the FCDO, Iran has made strikes and retaliatory attacks in Iraq, including the Kurdistan Region, since 8 July 2026, against US military and civilian infrastructure. The FCDO also notes rocket attacks against the airport and short closures, with operations resuming after a few hours, and says routes in and out of the region, including Erbil and Sulaymaniyah airports, may close at short notice. As the FCDO advises, pre-arrange the transfer and check the flight with the airline before travelling.",
+ "claims": [
+  {
+   "claim": "Erbil's airport, in the Kurdistan Region of Iraq",
+   "verdict": "confirmed",
+   "inAfter": "Erbil's airport, in the Kurdistan Region of Iraq",
+   "note": "Coordinates put it 7.5 km from the GeoNames centre of Erbil, bearing 312 degrees (north west). Distance and direction are not added, as they would be new facts.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an airport in the city of Erbil in Kurdistan Region, Iraq"
+    },
+    {
+     "file": "fcdo-iraq-regional",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "Kurdistan Region of Iraq ( KRI )",
+      "Routes in and out of the KRI , including Erbil International Airport"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Arbil"
+    }
+   ]
+  },
+  {
+   "claim": "about 2.1 million passengers in 2024",
+   "verdict": "corrected",
+   "inAfter": "handled about 2.1 million passengers in 2024",
+   "note": "Replaces 'the busiest airport in the Kurdistan Region ... third busiest in the country after Baghdad and Al Najaf', a 2022 ranking with no current comparison source. The operator's table also gives 2,090,838 for 2025 (down 1.8 per cent), but only the operator has 2025, so the text stays with 2024.",
+   "sources": [
+    {
+     "file": "eia-statistics",
+     "org": "Erbil International Airport (operator)",
+     "quote": [
+      "2024 2,128,659",
+      "2025 2,090,838"
+     ],
+     "dated": "2026"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2024",
+      "stat1_data = 2,128,659",
+      "Source: ICAA, COSIT."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "runway one of the longest in the world",
+   "verdict": "confirmed",
+   "inAfter": "The runway is one of the longest in the world.",
+   "note": "4,800 m by 75 m on the operator's page, Wikipedia and OurAirports; the figure is not added.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "has one of the longest runways in the world"
+    },
+    {
+     "file": "eia-the-airport",
+     "org": "Erbil International Airport (operator)",
+     "quote": [
+      "Featuring a runway length of 4800 meters and a width of 75 meters, Erbil International Airport is among the top ten longest runways in the world.",
+      "Copyright &#169; 2026"
+     ],
+     "dated": "2026 (live operator page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "Runway 18/36: 4,800 m (15,748 ft), Concrete"
+    }
+   ]
+  },
+  {
+   "claim": "replaced an older airport next door",
+   "verdict": "softened",
+   "inAfter": "It replaced an older airport next door",
+   "note": "Was 'a new 550 million dollar airport opened alongside the old one on 5 July 2005'. The operator gives a different timeline: the new airport was built from 2005, flights moved across on 1 September 2010 and it was officially opened on 30 March 2011. Wikipedia has 5 July 2005 and USD 550 million. No second source for either set of dates could be saved (the contractor Makyol's site has no Erbil page), so the dates and the cost are dropped and only the undisputed fact is kept.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The new airport is next to the old airport (previously a military field)"
+    },
+    {
+     "file": "eia-the-airport",
+     "org": "Erbil International Airport (operator)",
+     "quote": [
+      "decided to construct a new airport (the current so-called Erbil International Airport) next to the old airport",
+      "the transfer from the old airport to the new airport took place"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the old airport was a military base until 1991",
+   "verdict": "confirmed",
+   "inAfter": "a military base until 1991",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airstrip was used as a military base until 1991"
+    },
+    {
+     "file": "eia-the-airport",
+     "org": "Erbil International Airport (operator)",
+     "quote": [
+      "on the same site as the old airport, which previously served as a military base under the former regime until 1991",
+      "Copyright &#169; 2026"
+     ],
+     "dated": "2026 (live operator page)"
+    }
+   ],
+   "note": "Historical, not time-sensitive; the operator's current page carries it."
+  },
+  {
+   "claim": "FCDO advises against all but essential travel to the Kurdistan Region of Iraq",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "The FCDO advises against all but essential travel to the Kurdistan Region of Iraq.",
+   "note": "Attributed statement, quoted as the FCDO words it. The FCDO lists the Kurdistan Region under its own heading, apart from 'Federal Iraq', where some provinces are all travel and others all but essential. Page updated 22 July 2026, still current 23 September 2026. Not in the old text.",
+   "sources": [
+    {
+     "file": "fcdo-iraq",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "Federal Iraq",
+      "FCDO advises against all but essential travel to the Kurdistan Region of Iraq",
+      "22 July 2026",
+      "23 September 2026"
+     ],
+     "dated": "2026-07-22"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: Iranian strikes and retaliatory attacks in Iraq, including the Kurdistan Region, since 8 July 2026",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "According to the FCDO, Iran has made strikes and retaliatory attacks in Iraq, including the Kurdistan Region, since 8 July 2026, against US military and civilian infrastructure.",
+   "note": "Attributed statement. July is 2026: the page was updated on 22 July 2026. The FCDO's Jordan page carries the same date (see AQJ).",
+   "sources": [
+    {
+     "file": "fcdo-iraq",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "Since 8 July there have been strikes and retaliatory attacks by Iran in a number of locations across the region, Iraq, including the Kurdistan region of Iraq, against US military and civilian infrastructure.",
+      "22 July 2026"
+     ],
+     "dated": "2026-07-22"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: rocket attacks against Erbil airport, short closures; routes including Erbil and Sulaymaniyah airports may close at short notice",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "The FCDO also notes rocket attacks against the airport and short closures, with operations resuming after a few hours, and says routes in and out of the region, including Erbil and Sulaymaniyah airports, may close at short notice.",
+   "note": "Attributed statement, from the Safety and security and Regional risks pages of the same FCDO advice (updated 22 July 2026). The FCDO puts the closures in the same paragraph as drone and rocket attacks on coalition bases since October 2023 but does not date them, so the text gives no date.",
+   "sources": [
+    {
+     "file": "fcdo-iraq-safety",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "Erbil International Airport has had short closures, with operations resuming after a few hours.",
+      "Indirect rocket attacks have occurred against Baghdad International Airport and Erbil Airport."
+     ],
+     "dated": "2026-07-22"
+    },
+    {
+     "file": "fcdo-iraq-regional",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": "Routes in and out of the KRI , including Erbil International Airport and Sulaymaniyah International Airport, may close at short notice.",
+     "dated": "2026-07-22"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: pre-arrange the transfer and check with the airline",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "As the FCDO advises, pre-arrange the transfer and check the flight with the airline before travelling.",
+   "note": "Attributed advice from the FCDO's Air travel section.",
+   "sources": [
+    {
+     "file": "fcdo-iraq-safety",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "Your transfer vehicle should be pre-arranged or provided by a trusted sponsor.",
+      "Flight schedules may change without notice. Contact your airline or travel company for the latest information before travelling."
+     ],
+     "dated": "2026-07-22"
+    }
+   ]
+  },
+  {
+   "claim": "busiest in the Kurdistan Region; third busiest in Iraq after Baghdad and Al Najaf",
+   "verdict": "cut",
+   "wasBefore": "The busiest airport in the Kurdistan Region of Iraq and third busiest in the country after Baghdad and Al Najaf, serving Erbil.",
+   "why": "Wikipedia dates the ranking to 2022 and no current comparison could be saved: the ICAA statistics PDF refuses both fetchers (403) and the statistics office (COSIT) host did not answer. Replaced by the operator's 2024 passenger figure, which Wikipedia's infobox matches."
+  },
+  {
+   "claim": "one of the longest runways, a legacy of the site's past",
+   "verdict": "cut",
+   "wasBefore": "It has one of the longest runways in the world, a legacy of what the site used to be.",
+   "why": "The runway claim is kept. The 'legacy' is wrong on both sources: the old airport had a 2,800 m runway, and the 4,800 m runway came with the new airport built by the Kurdistan Regional Government."
+  },
+  {
+   "claim": "built by the Ba'athist regime in the early 1970s",
+   "verdict": "cut",
+   "wasBefore": "The airfield was built by the Ba'athist regime in the early 1970s as an Iraqi military base and stayed military until 1991",
+   "why": "The early 1970s date has only Wikipedia. 'Military base until 1991' is kept, with the operator as second source."
+  },
+  {
+   "claim": "the UN no-fly zone ended military use",
+   "verdict": "cut",
+   "wasBefore": "when the United Nations imposed a no-fly zone over northern Iraq",
+   "why": "Only Wikipedia makes the link."
+  },
+  {
+   "claim": "the KRG took over after 2003",
+   "verdict": "cut",
+   "wasBefore": "After 2003 the Kurdistan Regional Government took over",
+   "why": "Wikipedia says the KRG took over the region, not the airport. The operator says a civil airport was set up on the site in 2003, with the first commercial flight on 15 December 2003; one source, so not added."
+  },
+  {
+   "claim": "new USD 550 million airport opened on 5 July 2005",
+   "verdict": "cut",
+   "wasBefore": "a new 550 million dollar airport opened alongside the old one on 5 July 2005",
+   "why": "Contradicted by the operator, which says the new airport was built from 2005, took over flights on 1 September 2010 and was officially opened on 30 March 2011. The cost has only Wikipedia. Softened to 'it replaced an older airport next door'."
+  },
+  {
+   "claim": "two international airports in the Kurdistan Region; a third under construction at Duhok",
+   "verdict": "cut",
+   "wasBefore": "There are two international airports in the Kurdistan Region, this one and Sulaymaniyah, with a third under construction at Duhok.",
+   "why": "Time-sensitive and not confirmed: no current source on Duhok's airport could be found. Sulaymaniyah stays in the text through the FCDO's warning, which names both airports."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

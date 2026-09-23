@@ -1,0 +1,359 @@
+{
+ "iata": "DMM",
+ "id": "recDozwPebJFp6Byy",
+ "name": "King Fahd International Airport",
+ "country": "Saudi Arabia",
+ "wikipedia": "https://en.wikipedia.org/wiki/King_Fahd_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Dammam and for the whole Eastern Province of Saudi Arabia, 31 km north west of the city. It is third in the kingdom by passenger numbers, carrying more than 10 million a year across 37 airlines, and it is the hub for Flynas and Flyadeal.\n\nThere are three terminal buildings but a client will only ever use one of them. The Passenger Terminal handles all scheduled traffic. The Aramco Terminal is for Saudi Aramco staff flying to Yanbu, Tanajib and Shaybah, and the Royal Terminal is reserved for the royal family.\n\nDubai is by far the busiest route, with 70 flights a week, about ten a day.\n\nThe airport is newer than its size suggests. It was built as a United States airbase and used mainly during the Gulf War, only opening to commercial traffic in November 1999, replacing Dhahran International which is now King Abdulaziz Air Base. Two runways serve it, each 4 km long.",
+ "after": "The airport for Dammam and the whole of Saudi Arabia's Eastern Province, 31 km north west of the city. One of the kingdom's four main airports, it handles more than 10 million passengers a year and is a hub for Flynas.\n\nAll scheduled flights use the one passenger terminal.\n\nIt opened to commercial flights in 1999, replacing Dhahran International, which is now King Abdulaziz Air Base. There are two runways, each 4 km long.\n\nFCDO advice against travel in Saudi Arabia covers only the Yemen border area and the cities of Abha and Khamis Mushait. The FCDO also reports Houthi missile and drone attacks on cities and airports across the kingdom since 13 July 2026, and tells British nationals in the Middle East to be prepared for flight cancellations and periodic airspace closures.",
+ "claims": [
+  {
+   "claim": "the airport for Dammam and the whole Eastern Province",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Dammam and the whole of Saudi Arabia's Eastern Province",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport serves the entire Eastern Province of Saudi Arabia"
+    },
+    {
+     "file": "airporttech-kfia",
+     "org": "Airport Technology (GlobalData)",
+     "quote": "The airport serves all the cities of the Eastern Province besides the main urban centres, Al Khobar, Dhahran, Dammam, Ras Tanura, Qatif and Jubail Industrial City.",
+     "dated": "2023-07-31"
+    },
+    {
+     "file": "thesaudi-kfia",
+     "org": "the-saudi.net (KFIA project scope summary)",
+     "quote": "KFIA will serve the Eastern Province of the Kingdom of Saudi Arabia"
+    }
+   ]
+  },
+  {
+   "claim": "31 km north west of the city",
+   "verdict": "confirmed",
+   "inAfter": "31 km north west of the city",
+   "note": "Coordinates put it 30.6 km from the GeoNames centre of Dammam at 277 degrees, which is west on an 8-point rose and one point from north west, inside the stated tolerance (ratio 1.01). The project summary gives 30 km north west in its text and '30 Km. West of Dammam' in its data table. Airport Technology's 22 km is the outlier.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is located 31 kilometres (19 miles) northwest of downtown Dammam"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 30.6 km (19.0 miles)",
+      "Bearing from the city centre: 277 degrees, which is west"
+     ]
+    },
+    {
+     "file": "thesaudi-kfia",
+     "org": "the-saudi.net (KFIA project scope summary)",
+     "quote": "which is approximately 30 kilometers northwest of Dammam"
+    }
+   ]
+  },
+  {
+   "claim": "one of the kingdom's four main airports",
+   "verdict": "softened",
+   "inAfter": "One of the kingdom's four main airports",
+   "note": "Was 'third in the kingdom by passenger numbers'. Wikipedia and Airport Technology (undated) both say third, but no source within 12 months ranks it: GACA's and Matarat's sites reset the connection. Arab News (14 December 2025) groups it with Riyadh, Jeddah and Madinah as the four main airports.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is one of the four primary international airports in the kingdom"
+    },
+    {
+     "file": "arabnews-flyadeal-2025",
+     "org": "Arab News",
+     "quote": [
+      "The four main airports in Riyadh, Jeddah, Dammam, and Madinah accounted for 82 percent of total air traffic last year.",
+      "December 14, 2025"
+     ],
+     "dated": "2025-12-14"
+    }
+   ]
+  },
+  {
+   "claim": "more than 10 million passengers a year",
+   "verdict": "confirmed",
+   "inAfter": "it handles more than 10 million passengers a year",
+   "note": "The operator's open data (monthly passengers by route, international and domestic) sums to 12,244,306 passengers for 2024 and 10,965,574 for January to October 2025; 16 cells marked '-' were read as zero. Wikipedia's own statistics section says 'around 9.7 million', which the operator's figures overtake. The text keeps the conservative 'more than 10 million' rather than a summed figure.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "more than 10 million passengers use King Fahd International each year"
+    },
+    {
+     "file": "airporttech-kfia",
+     "org": "Airport Technology (GlobalData)",
+     "quote": "It handles more than ten million passengers a year.",
+     "dated": "2023-07-31"
+    },
+    {
+     "file": "kfia-opendata",
+     "org": "King Fahd International Airport / Dammam Airports Company (operator)",
+     "quote": [
+      "Airport traffic –International",
+      "Airport traffic – Domestic",
+      "2024-2025"
+     ],
+     "dated": "2025"
+    },
+    {
+     "file": "kfia-od-dom-csv",
+     "org": "King Fahd International Airport / Dammam Airports Company (operator)",
+     "quote": ",DMM,2025,Domestic,Jan,Arrival,Jeddah,\" 110,512 \", 705",
+     "dated": "2025"
+    }
+   ]
+  },
+  {
+   "claim": "hub for Flynas",
+   "verdict": "confirmed",
+   "inAfter": "is a hub for Flynas",
+   "note": "Arab News (9 June 2025) names Dammam among Flynas's four main hubs. That is 15 months old, so two newer items back it: Arab News (22 July 2026) has Flynas with six Saudi operating bases, and the operator's current home page announces new Flynas flights from the airport to Turaif. Flynas's own site refuses the fetchers (403).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport serves as a hub to Flynas and Flyadeal"
+    },
+    {
+     "file": "arabnews-flynas-4hubs",
+     "org": "Arab News",
+     "quote": [
+      "its four main hubs — Riyadh, Jeddah, Madinah, and Dammam",
+      "June 9, 2025"
+     ],
+     "dated": "2025-06-09"
+    },
+    {
+     "file": "arabnews-flynas-25jets",
+     "org": "Arab News",
+     "quote": "rising demand across its six Saudi operating bases",
+     "dated": "2026-07-22"
+    },
+    {
+     "file": "kfia-home",
+     "org": "King Fahd International Airport / Dammam Airports Company (operator)",
+     "quote": "The Launch of two weekly Flights from King Fahd International Airport to Turaif, operated by Flynas airlines"
+    }
+   ]
+  },
+  {
+   "claim": "all scheduled flights use the one passenger terminal",
+   "verdict": "softened",
+   "inAfter": "All scheduled flights use the one passenger terminal.",
+   "note": "Was 'three terminal buildings but a client will only ever use one of them. The Passenger Terminal handles all scheduled traffic.' Saudi Aramco's own staff flights use a separate terminal (Wikipedia), hence 'scheduled'. The operator's current map describes the passenger terminal level by level. The Aramco and Royal Terminals are dropped: the Aramco one has only Wikipedia, and the Royal Terminal's second source (Airport Technology) is undated.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the Passenger Terminal serves mainstream passengers"
+    },
+    {
+     "file": "airporttech-kfia",
+     "org": "Airport Technology (GlobalData)",
+     "quote": [
+      "The 327,000m² passenger terminal building is a six-level structure.",
+      "The 15 gates serve as the boarding bridges for international and domestic flights."
+     ],
+     "dated": "2023-07-31"
+    },
+    {
+     "file": "kfia-map",
+     "org": "King Fahd International Airport / Dammam Airports Company (operator)",
+     "quote": [
+      "Departure Level",
+      "Boarding Level",
+      "Arrivals Level"
+     ],
+     "dated": "2026"
+    }
+   ]
+  },
+  {
+   "claim": "opened to commercial flights in 1999",
+   "verdict": "softened",
+   "inAfter": "It opened to commercial flights in 1999",
+   "note": "Was 'November 1999'. Wikipedia says 28 November 1999; Airport Technology says October 1999. The year is agreed, so the text gives only the year. Historical, not time-sensitive.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "opened it to commercial traffic on 28 November 1999"
+    },
+    {
+     "file": "airporttech-kfia",
+     "org": "Airport Technology (GlobalData)",
+     "quote": [
+      "the airport opened for commercial operations in October 1999",
+      "July 31 2023"
+     ],
+     "dated": "2023-07-31"
+    }
+   ]
+  },
+  {
+   "claim": "replaced Dhahran International, now King Abdulaziz Air Base",
+   "verdict": "confirmed",
+   "inAfter": "replacing Dhahran International, which is now King Abdulaziz Air Base",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Dhahran International has since been converted for military usage and was designated the King Abdulaziz Air Base"
+    },
+    {
+     "file": "airporttech-kfia",
+     "org": "Airport Technology (GlobalData)",
+     "quote": "The airline operations were shifted from the former Dhahran International Airport, which currently serves the Royal Saudi Air Force’s King Abdulaziz Air Base, to KFIA.",
+     "dated": "2023-07-31"
+    },
+    {
+     "file": "thesaudi-kfia",
+     "org": "the-saudi.net (KFIA project scope summary)",
+     "quote": "It will replace the Dhahran International Airport for commercial"
+    }
+   ],
+   "note": "Airport Technology (31 July 2023) says the old airport 'currently serves' the air base. Historical change, not a time-sensitive one."
+  },
+  {
+   "claim": "two runways, each 4 km long",
+   "verdict": "confirmed",
+   "inAfter": "There are two runways, each 4 km long.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is served by two runways; both 4 kilometres (2.5 mi) long"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": [
+      "Runway 16L/34R: 4,000 m (13,124 ft), ASP",
+      "Runway 16R/34L: 4,000 m (13,124 ft), ASP"
+     ],
+     "dated": "2026-09-23 (OurAirports data as fetched)"
+    },
+    {
+     "file": "airporttech-kfia",
+     "org": "Airport Technology (GlobalData)",
+     "quote": "The two parallel runways (16R/34L and 16L/34R) are 4,000m (13,123ft) long",
+     "dated": "2023-07-31"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: advice against travel covers only the Yemen border area plus Abha and Khamis Mushait",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "FCDO advice against travel in Saudi Arabia covers only the Yemen border area and the cities of Abha and Khamis Mushait.",
+   "note": "Attributed statement, checked against the FCDO page (updated 20 September 2026, still current 23 September 2026). Revised in review (23 Sep) to name the two cities the FCDO adds to the border advice.",
+   "sources": [
+    {
+     "file": "fcdo-saudi",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "Saudi Arabia-Yemen border",
+      "all travel to within 10km of the border with Yemen",
+      "all but essential travel to areas between 10km and 80km from the border with Yemen, and extends to include the cities of Abha and Khamis Mushait in Aseer province",
+      "20 September 2026",
+      "23 September 2026"
+     ],
+     "dated": "2026-09-20"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: Houthi attacks on cities and airports across Saudi Arabia since 13 July 2026; be prepared for cancellations and airspace closures",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "The FCDO also reports Houthi missile and drone attacks on cities and airports across the kingdom since 13 July 2026, and tells British nationals in the Middle East to be prepared for flight cancellations and periodic airspace closures.",
+   "note": "Attributed statement. Added in review (23 Sep): the attacks the FCDO lists name Abha, Jizan, Najran, Riyadh, Jeddah and Yanbu, not Dammam, but they target airports across the kingdom. July is 2026: the page was updated 20 September 2026.",
+   "sources": [
+    {
+     "file": "fcdo-saudi",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "Since 13 July, the Houthis (a military group in Yemen) have launched missiles and drones targeting cities, airports, military and energy sites across Saudi Arabia",
+      "British nationals currently in the Middle East should be prepared for possible flight cancellations, periodic airspace closures",
+      "20 September 2026"
+     ],
+     "dated": "2026-09-20"
+    }
+   ]
+  },
+  {
+   "claim": "third in the kingdom by passengers; 37 airlines; hub for Flyadeal",
+   "verdict": "cut",
+   "wasBefore": "It is third in the kingdom by passenger numbers, carrying more than 10 million a year across 37 airlines, and it is the hub for Flynas and Flyadeal.",
+   "why": "Passengers and the Flynas hub are kept above. The rank is softened (no source within 12 months). The count of 37 airlines has only Wikipedia; the operator's directory could not be counted. Flyadeal's hub has only Wikipedia; its own site refuses the fetchers and the Arab News reports saved do not name its bases."
+  },
+  {
+   "claim": "three terminal buildings, a client uses one",
+   "verdict": "cut",
+   "wasBefore": "There are three terminal buildings but a client will only ever use one of them.",
+   "why": "Reworded to what the sources support now (see the passenger terminal claim)."
+  },
+  {
+   "claim": "Passenger Terminal handles all scheduled traffic",
+   "verdict": "cut",
+   "wasBefore": "The Passenger Terminal handles all scheduled traffic.",
+   "why": "Reworded, as above."
+  },
+  {
+   "claim": "Aramco Terminal for staff to Yanbu, Tanajib and Shaybah; Royal Terminal for the royal family",
+   "verdict": "cut",
+   "wasBefore": "The Aramco Terminal is for Saudi Aramco staff flying to Yanbu, Tanajib and Shaybah, and the Royal Terminal is reserved for the royal family.",
+   "why": "The Aramco Terminal has only Wikipedia. The Royal Terminal is also in Airport Technology (31 July 2023), but that page's own fact box counts two terminals where Wikipedia has three, and a client never uses it."
+  },
+  {
+   "claim": "Dubai is by far the busiest route, 70 flights a week",
+   "verdict": "cut",
+   "wasBefore": "Dubai is by far the busiest route, with 70 flights a week, about ten a day.",
+   "why": "Contradicted by the operator's open data. In 2024 Jeddah (2,303,525 passengers) and Riyadh (1,590,310) were far busier than Dubai (811,184), and in January to October 2025 Cairo (732,819) was ahead of Dubai (699,673) too. Dubai had 2,828 departures in 2024, about 54 a week."
+  },
+  {
+   "claim": "newer than its size suggests",
+   "verdict": "cut",
+   "wasBefore": "The airport is newer than its size suggests.",
+   "why": "A judgement resting on the airport's land area, which the new text does not give."
+  },
+  {
+   "claim": "built as a US airbase, used mainly in the Gulf War",
+   "verdict": "cut",
+   "wasBefore": "It was built as a United States airbase and used mainly during the Gulf War",
+   "why": "Misleading and single-source. Wikipedia says it was built under the Saudi government's airports programme and that US-led coalition forces used it in early 1991; Airport Technology says Bechtel built it for the Saudi Ministry of Defense and Aviation. No second source for the 1991 use could be saved."
+  },
+  {
+   "claim": "opened November 1999 (old wording)",
+   "verdict": "cut",
+   "wasBefore": "only opening to commercial traffic in November 1999, replacing Dhahran International which is now King Abdulaziz Air Base",
+   "why": "Month disputed (Wikipedia November, Airport Technology October); reworded with the year only. The Dhahran fact is kept."
+  },
+  {
+   "claim": "two runways, 4 km (old wording)",
+   "verdict": "cut",
+   "wasBefore": "Two runways serve it, each 4 km long.",
+   "why": "Reworded; kept above."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {},
+ "reviewed": {
+  "by": "lead auditor",
+  "date": "2026-09-23",
+  "what": "FCDO paragraph made precise (Abha and Khamis Mushait) and the Houthi attacks added, both from the FCDO page."
+ }
+}

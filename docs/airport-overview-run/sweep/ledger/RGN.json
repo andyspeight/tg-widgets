@@ -1,0 +1,192 @@
+{
+ "iata": "RGN",
+ "id": "rectb0QJDhLOG1xER",
+ "name": "Yangon International Airport",
+ "country": "Myanmar (Burma)",
+ "wikipedia": "https://en.wikipedia.org/wiki/Yangon_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Myanmar's main and busiest international airport, in Mingaladon township 15 km north of central Yangon. It is often still called Mingaladon Airport.\n\nThe terminal numbering is counterintuitive and catches people out. Terminal 1 handles all international flights. Terminal 3 handles domestic. Terminal 2, which used to be the international terminal, closed in July 2018 for extensive renovation. So international does not mean Terminal 2 here, despite what older material says.\n\nTerminal 1 opened in March 2016 and raised the airport's capacity from 2.7 million passengers a year to 6 million. Terminal 3 followed in December 2016, replacing the old domestic building.\n\nA modernisation programme from 2003 produced a terminal designed to IATA service standards with separate floors for arrivals and departures, an automated baggage system and four air bridges able to handle four 747s, along with a runway extended to 3,414 metres.",
+ "after": "Myanmar's main and busiest international airport, about 15 km north of central Yangon, with a single 3,414 metre runway.\n\nCheck the terminal before quoting. Terminal 1, opened in March 2016, is the international terminal and Terminal 3 the domestic one. Terminal 2, the old international building, was closed for renovation.\n\nThe FCDO advises against all travel to parts of Myanmar and all but essential travel to others, so check its advice for any onward journey.",
+ "claims": [
+  {
+   "claim": "Myanmar's main and busiest international airport",
+   "verdict": "confirmed",
+   "inAfter": "Myanmar's main and busiest international airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the primary and busiest international airport of Myanmar"
+    },
+    {
+     "file": "op-about",
+     "org": "Yangon International Airport (operator, yangonairport.aero)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "YIA is the busiest and largest airport in Myanmar, to date.",
+      "being the main gateway into Myanmar"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 15 km north of central Yangon",
+   "verdict": "confirmed",
+   "inAfter": "about 15 km north of central Yangon",
+   "note": "Coordinates give 11.6 km in a straight line at 348 degrees (north); ratio 1.29.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "15 kilometres (9.3 mi) north of central Yangon"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 11.6 km (7.2 miles)",
+      "Bearing from the city centre: 348 degrees, which is north"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "single 3,414 metre runway",
+   "verdict": "confirmed",
+   "inAfter": "with a single 3,414 metre runway",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "resulted in a new terminal and an extended 3414 m runway"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": [
+      "Runway 03/21: 3,414 m (11,200 ft), ASP",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 1, opened March 2016, is the international terminal",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 1, opened in March 2016, is the international terminal",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The new international terminal (T1) opened in March 2016"
+    },
+    {
+     "file": "op-about",
+     "org": "Yangon International Airport (operator, yangonairport.aero)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Officially opened by President U Thein Sein on 12 March 2016",
+      "the official opening of the international terminal T1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 3 is the domestic terminal",
+   "verdict": "confirmed",
+   "inAfter": "and Terminal 3 the domestic one",
+   "note": "Wikipedia gives 5 December 2016 for Terminal 3; the operator says only that it opened less than a year after Terminal 1, so no date is stated.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Terminal 3, which is used for domestic flights"
+    },
+    {
+     "file": "op-about",
+     "org": "Yangon International Airport (operator, yangonairport.aero)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Offering unparalleled connectivity to domestic destinations, T3"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2, the old international building, was closed for renovation",
+   "verdict": "softened",
+   "inAfter": "Terminal 2, the old international building, was closed for renovation.",
+   "note": "Wikipedia says it closed in July 2018 and all international flights use Terminal 1; the operator's undated page says it is undergoing a facelift. A Global New Light of Myanmar headline cited by Wikipedia (Myanmar Airways International moving its Singapore flights to Terminal 2) suggests it may be back in use, but the page refused the fetcher, so its present state is not stated: hence the advice to check.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "After the opening of Terminal 1, the former International Terminal was renamed \"Terminal 2.\"",
+      "Terminal 2 was closed in July 2018 to undergo extensive renovation."
+     ]
+    },
+    {
+     "file": "op-about",
+     "org": "Yangon International Airport (operator, yangonairport.aero)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Terminal 2 was our first main international terminal serving a mix of international and regional airlines. Terminal 2 is a familiar sight to travelers from all over the region and it is undergoing a facelift"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: against all travel to parts of Myanmar, all but essential to others",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "The FCDO advises against all travel to parts of Myanmar and all but essential travel to others",
+   "note": "Attributed statement, checked against the FCDO page (updated 4 August 2026, still current 23 September 2026). Yangon itself is on neither list.",
+   "sources": [
+    {
+     "file": "fcdo-myanmar",
+     "org": "UK Foreign, Commonwealth and Development Office (FCDO)",
+     "quote": [
+      "FCDO advises against all travel to parts of Myanmar (Burma).",
+      "FCDO advises against all but essential travel to parts of Myanmar (Burma).",
+      "23 September 2026",
+      "4 August 2026"
+     ],
+     "dated": "2026-08-04"
+    }
+   ]
+  },
+  {
+   "claim": "main and busiest; Mingaladon township; called Mingaladon Airport",
+   "verdict": "cut",
+   "wasBefore": "Myanmar's main and busiest international airport, in Mingaladon township 15 km north of central Yangon. It is often still called Mingaladon Airport.",
+   "why": "Ranking and distance kept. The township and the old name rest on Wikipedia alone."
+  },
+  {
+   "claim": "terminal numbering catches people out; T1 all international; T3 domestic; T2 closed July 2018; not T2 despite older material",
+   "verdict": "cut",
+   "wasBefore": "The terminal numbering is counterintuitive and catches people out. Terminal 1 handles all international flights. Terminal 3 handles domestic. Terminal 2, which used to be the international terminal, closed in July 2018 for extensive renovation. So international does not mean Terminal 2 here, despite what older material says.",
+   "why": "Reworded. 'All' international flights at Terminal 1 may no longer hold (see the Terminal 2 note), so the text tells the agent to check."
+  },
+  {
+   "claim": "T1 opened March 2016, capacity 2.7 to 6 million; T3 December 2016 replacing old domestic",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 opened in March 2016 and raised the airport's capacity from 2.7 million passengers a year to 6 million. Terminal 3 followed in December 2016, replacing the old domestic building.",
+   "why": "T1 date kept. The capacity figures and T3's date rest on Wikipedia alone; the operator now gives a future capacity of 20 million once Terminal 2 is finished."
+  },
+  {
+   "claim": "2003 modernisation features; runway extended to 3,414 m",
+   "verdict": "cut",
+   "wasBefore": "A modernisation programme from 2003 produced a terminal designed to IATA service standards with separate floors for arrivals and departures, an automated baggage system and four air bridges able to handle four 747s, along with a runway extended to 3,414 metres.",
+   "why": "The runway length is kept with OurAirports; the rest describes the old terminal (now Terminal 2) from Wikipedia alone."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Check the terminal before quoting.",
+   "why": "Advice that follows from the uncertain state of Terminal 2."
+  },
+  {
+   "text": "so check its advice for any onward journey.",
+   "why": "Advice attached to the attributed FCDO statement."
+  }
+ ],
+ "tracerOk": {}
+}

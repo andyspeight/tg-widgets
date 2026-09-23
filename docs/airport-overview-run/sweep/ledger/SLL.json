@@ -1,0 +1,334 @@
+{
+ "iata": "SLL",
+ "id": "recAF5wu5jrm2aszF",
+ "name": "Salalah International Airport",
+ "country": "Oman",
+ "wikipedia": "https://en.wikipedia.org/wiki/Salalah_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Oman's second international airport after Muscat, on the coastal plain 5.5 km north east of Salalah in the Dhofar Governorate.\n\nThe season is the thing to understand here. Salalah is at its busiest from July to September, when the Asian monsoon reaches this stretch of coast and brings the Khareef, turning green a part of the Gulf that is arid the rest of the year. Other Gulf carriers long flew here only during the Khareef, and Air India was the first to run international services year round, opening Kozhikode and then Cochin.\n\nThe terminal is newer than the airport's history suggests, with four air conditioned airbridges, a duty free area and an Oman Air lounge opposite the gates for Business and First passengers and for Gold and Silver Sinbad cardholders.\n\nIt began in 1935 as a Royal Air Force airfield and stayed military through the Jebel Akhdar and Dhofar wars, opening to civilian traffic in 1977. The Royal Air Force of Oman still shares the site.",
+ "after": "Salalah's airport, in the Dhofar Governorate, north of the city centre. Its present terminal opened in 2015.\n\nThe season is the thing to understand here. Tourism peaks in the Khareef, the summer monsoon season, when light rain falls on Dhofar.\n\nOman Air and SalamAir both fly to Muscat, and Air India Express to Kozhikode (Calicut) in India. There is an Oman Air lounge for first and business class passengers and Sindbad members, and a duty free area.\n\nIt began as an RAF airfield, and the RAF left in 1977.\n\nThe FCDO reports Iranian strikes and retaliatory attacks in Oman and elsewhere in the region since 8 July 2026 and tells British nationals in the Middle East to be prepared for flight cancellations and periodic airspace closures.",
+ "claims": [
+  {
+   "claim": "north of the city centre",
+   "verdict": "corrected",
+   "inAfter": "north of the city centre",
+   "note": "Was '5.5 km north east'. The coordinates put the runway 2.6 km from the GeoNames centre of Salalah at 358 degrees (north); 5.5 km fails the distance check (ratio 2.09) and north east is 47 degrees off. The distance is dropped because the sources disagree: Wikipedia 5.5 km, its own infobox 13.9 km, the operator 10 km from the city centre. The direction now uses the computed point, with Wikipedia's north east as the adjacent point.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 2.6 km (1.6 miles)",
+      "Bearing from the city centre: 358 degrees, which is north"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "5.5 kilometres (3.4 mi) northeast of Salalah's city centre"
+    }
+   ]
+  },
+  {
+   "claim": "in the Dhofar Governorate",
+   "verdict": "confirmed",
+   "inAfter": "Salalah's airport, in the Dhofar Governorate",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "located on the Salalah coastal plain in the Dhofar Governorate"
+    },
+    {
+     "file": "caa-salalah-en",
+     "org": "Oman Civil Aviation Authority",
+     "quote": "is a key aviation hub strategically located in the Dhofar Governorate",
+     "dated": "2026"
+    }
+   ]
+  },
+  {
+   "claim": "present terminal opened in 2015",
+   "verdict": "corrected",
+   "inAfter": "Its present terminal opened in 2015.",
+   "note": "Replaces 'The terminal is newer than the airport's history suggests', which gave no date. Operations began on 15 June 2015 and the official opening was on 11 November 2015.",
+   "sources": [
+    {
+     "file": "salalahairport-about",
+     "org": "Salalah Airport / Oman Airports (operator)",
+     "quote": [
+      "The airport was opened on November 11, 2015",
+      "the operation of Salalah Airport actually began on 15th June 2015",
+      "© 2026 Salalah Airport All Rights Reserved."
+     ],
+     "dated": "2026 (live operator page)"
+    },
+    {
+     "file": "caa-salalah-en",
+     "org": "Oman Civil Aviation Authority",
+     "quote": [
+      "Salalah Airport, inaugurated on 11 November 2015",
+      "(Last Update : 2026)"
+     ],
+     "dated": "2026"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The new Salalah airport commenced operations in June 2015"
+    }
+   ]
+  },
+  {
+   "claim": "tourism peaks in the Khareef, the summer monsoon season",
+   "verdict": "softened",
+   "inAfter": "Tourism peaks in the Khareef, the summer monsoon season",
+   "note": "Was 'busiest from July to September'. The months disagree: Wikipedia says July to September, Oman's tourism ministry June to September, so the text says summer. Oman Observer (26 August 2026) has SalamAir running up to 15 flights a day between Muscat and Salalah at the 2026 Khareef peak.",
+   "sources": [
+    {
+     "file": "caa-salalah-en",
+     "org": "Oman Civil Aviation Authority",
+     "quote": "an area experiencing significant tourism growth, particularly during the Khareef (monsoon) season",
+     "dated": "2026"
+    },
+    {
+     "file": "omanobserver-salamair",
+     "org": "Oman Observer",
+     "quote": [
+      "during the 2026 Khareef season",
+      "operating up to 15 daily flights during the peak period",
+      "Aug 26, 2026"
+     ],
+     "dated": "2026-08-26"
+    },
+    {
+     "file": "experienceoman-dhofar",
+     "org": "Oman Ministry of Heritage and Tourism (Experience Oman)",
+     "quote": "The Khareef season, which lasts from June to September, is a particularly wonderful time to visit."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "especially from July to September when the Asian monsoon touches the region"
+    }
+   ]
+  },
+  {
+   "claim": "light rain falls on Dhofar in the Khareef",
+   "verdict": "softened",
+   "inAfter": "when light rain falls on Dhofar",
+   "note": "Was 'turning green a part of the Gulf that is arid the rest of the year'. Only the Times of Oman ties the greenery to the Khareef, so the text keeps to the rain, which two sources describe.",
+   "sources": [
+    {
+     "file": "experienceoman-dhofar",
+     "org": "Oman Ministry of Heritage and Tourism (Experience Oman)",
+     "quote": "During this period, the plains and mountains are covered in mist and light showers"
+    },
+    {
+     "file": "timesofoman-khareef",
+     "org": "Times of Oman",
+     "quote": [
+      "The city experienced light rainfall for a second consecutive day on Wednesday",
+      "signalling the gradual arrival of the much-awaited monsoon"
+     ],
+     "dated": "2026-06-24"
+    }
+   ]
+  },
+  {
+   "claim": "Oman Air and SalamAir fly to Muscat",
+   "verdict": "corrected",
+   "inAfter": "Oman Air and SalamAir both fly to Muscat",
+   "note": "Replaces the history of which carriers flew only in the Khareef, which had one source. The operator's live board on 23 September 2026 shows several departures a day to Muscat by each airline. SalamAir is also opening what the Oman Observer calls 'Salalah's first-ever airline base' from late October 2026, with flights to Jeddah, Chattogram and Calicut; one source, so not in the text.",
+   "sources": [
+    {
+     "file": "salalahairport-home",
+     "org": "Salalah Airport / Oman Airports (operator)",
+     "quote": [
+      "Oman Air - WY 904",
+      "Salam Air - OV 102",
+      "Muscat/Seeb",
+      "23/09/2026"
+     ],
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "salamair-home",
+     "org": "SalamAir",
+     "quote": "Muscat To Salalah One way all inclusive",
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "omanair-home",
+     "org": "Oman Air",
+     "quote": [
+      "Flights to Muscat",
+      "Flights to Salalah"
+     ],
+     "dated": "2026-09-23"
+    },
+    {
+     "file": "omanobserver-salamair",
+     "org": "Oman Observer",
+     "quote": "capacity on the Muscat–Salalah route",
+     "dated": "2026-08-26"
+    }
+   ]
+  },
+  {
+   "claim": "Air India Express flies to Kozhikode (Calicut)",
+   "verdict": "corrected",
+   "inAfter": "and Air India Express to Kozhikode (Calicut) in India",
+   "note": "Replaces 'Air India was the first to run international services year round, opening Kozhikode and then Cochin', which had one source. The New Indian Express reports the route restarting on 2 July 2026, twice a week, after Air India Express suspended its Gulf flights in the war; the suspension has one source and is not in the text. Kozhikode and Calicut are the same city; the airport board uses Calicut.",
+   "sources": [
+    {
+     "file": "newindianexpress-2026",
+     "org": "New Indian Express",
+     "quote": [
+      "Flights between Kozhikode and Salalah resumed on July 2",
+      "02 Jul 2026"
+     ],
+     "dated": "2026-07-02"
+    },
+    {
+     "file": "salalahairport-home",
+     "org": "Salalah Airport / Oman Airports (operator)",
+     "quote": [
+      "Air India Express - IX 312",
+      "Calicut"
+     ],
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "Oman Air lounge for first and business class and Sindbad members",
+   "verdict": "confirmed",
+   "inAfter": "There is an Oman Air lounge for first and business class passengers and Sindbad members",
+   "note": "The operator's page spells the programme Sindbad; Wikipedia has Sinbad and limits it to Gold and Silver cardholders, a detail dropped here.",
+   "sources": [
+    {
+     "file": "salalahairport-lounge",
+     "org": "Salalah Airport / Oman Airports (operator)",
+     "quote": [
+      "Oman Air has a dedicated Oman Air Lounge exclusively for Oman Air passengers travelling in first or business class cabins.",
+      "Oman Air Sindbad program offers passengers access to the lounge.",
+      "© 2026 Salalah Airport All Rights Reserved."
+     ],
+     "dated": "2026 (live operator page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "for Business Class, First Class, and Economy Class passengers who are Gold and Silver Sinbad Service Card holders"
+    }
+   ]
+  },
+  {
+   "claim": "duty free area",
+   "verdict": "confirmed",
+   "inAfter": "and a duty free area",
+   "sources": [
+    {
+     "file": "salalahairport-home",
+     "org": "Salalah Airport / Oman Airports (operator)",
+     "quote": "With many recognized top brands operating at Salalah Duty Free"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "A new Duty Free service has been started"
+    }
+   ]
+  },
+  {
+   "claim": "began as an RAF airfield; the RAF left in 1977",
+   "verdict": "softened",
+   "inAfter": "It began as an RAF airfield, and the RAF left in 1977.",
+   "note": "Was 'began in 1935 as a Royal Air Force airfield'. Wikipedia gives 1935, but rafweb.org (Air of Authority, a history of RAF organisation) lists RAF squadron detachments at Salalah from February 1927, so the start date is dropped. Both agree the RAF station closed in 1977 (rafweb: 31 March 1977). Historical, not time-sensitive. Reworded in review (23 Sep): the RAF station closed in 1977, not the airfield, which rafweb notes is now Salalah Airport.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "An airfield was established at Salalah in 1935 by the British Royal Air Force",
+      "The British presence at RAF Salalah ended in 1977"
+     ]
+    },
+    {
+     "file": "rafweb-stations-s",
+     "org": "rafweb.org (Air of Authority)",
+     "quote": [
+      "RAF Salalah",
+      "Closed - 31 Mar 1977",
+      "It is now Salalah Airport"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: Iranian strikes across the region including Oman since 8 July 2026; be prepared for flight cancellations and periodic airspace closures",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "The FCDO reports Iranian strikes and retaliatory attacks in Oman and elsewhere in the region since 8 July 2026 and tells British nationals in the Middle East to be prepared for flight cancellations and periodic airspace closures.",
+   "note": "Attributed statement, checked against the FCDO page (updated 22 July 2026, still current 23 September 2026). The FCDO has no areas of Oman it advises against travel to. Not in the old text.",
+   "sources": [
+    {
+     "file": "fcdo-oman",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "Since 8 July there have been strikes and retaliatory attacks by Iran in a number of locations across the region, including Oman, against US military and civilian infrastructure.",
+      "British nationals currently in the Middle East should be prepared for possible flight cancellations, periodic airspace closures",
+      "22 July 2026",
+      "23 September 2026"
+     ],
+     "dated": "2026-07-22"
+    }
+   ]
+  },
+  {
+   "claim": "Oman's second international airport after Muscat",
+   "verdict": "cut",
+   "wasBefore": "Oman's second international airport after Muscat, on the coastal plain 5.5 km north east of Salalah in the Dhofar Governorate.",
+   "why": "The rank is time-sensitive and only Wikipedia and rafweb.org (undated) give it. The CAA's 'Yearly statistics 2025' file is a lorem-ipsum placeholder and its monthly figures are spreadsheets the fetchers cannot save as text. The distance fails the coordinates check and the sources disagree on it (see the direction claim). 'Coastal plain' has only Wikipedia; the operator calls it the Ittin plain."
+  },
+  {
+   "claim": "busiest July to September; Khareef turns the arid Gulf green",
+   "verdict": "cut",
+   "wasBefore": "Salalah is at its busiest from July to September, when the Asian monsoon reaches this stretch of coast and brings the Khareef, turning green a part of the Gulf that is arid the rest of the year.",
+   "why": "Reworded to what two sources support: the months disagree between sources and the greening has one."
+  },
+  {
+   "claim": "Gulf carriers seasonal only; Air India first year-round, Kozhikode then Cochin",
+   "verdict": "cut",
+   "wasBefore": "Other Gulf carriers long flew here only during the Khareef, and Air India was the first to run international services year round, opening Kozhikode and then Cochin.",
+   "why": "History with one source. Replaced by the airlines flying now, each with two sources."
+  },
+  {
+   "claim": "terminal newer than its history; four air-conditioned airbridges; lounge opposite the gates",
+   "verdict": "cut",
+   "wasBefore": "The terminal is newer than the airport's history suggests, with four air conditioned airbridges, a duty free area and an Oman Air lounge opposite the gates for Business and First passengers and for Gold and Silver Sinbad cardholders.",
+   "why": "The airbridge count is contradicted: the Civil Aviation Authority lists 8 passenger boarding bridges, Wikipedia four. The opening year, the lounge and duty free are kept above."
+  },
+  {
+   "claim": "1935 RAF airfield, military through the Jebel Akhdar and Dhofar wars, civilian from 1977",
+   "verdict": "cut",
+   "wasBefore": "It began in 1935 as a Royal Air Force airfield and stayed military through the Jebel Akhdar and Dhofar wars, opening to civilian traffic in 1977.",
+   "why": "1935 is unsettled (rafweb has RAF detachments from 1927); the wars have only Wikipedia (the RAF Museum pages refuse both fetchers); and rafweb says the RAF station was already serving civil aircraft from 1951, which contradicts 'opening to civilian traffic in 1977'. Softened to the RAF airfield that closed in 1977."
+  },
+  {
+   "claim": "RAF of Oman shares the site",
+   "verdict": "cut",
+   "wasBefore": "The Royal Air Force of Oman still shares the site.",
+   "why": "Only Wikipedia; no second source found."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The season is the thing to understand here.",
+   "why": "Kept from the old text as the lead-in to the Khareef sentence, which carries the sources."
+  }
+ ],
+ "tracerOk": {}
+}

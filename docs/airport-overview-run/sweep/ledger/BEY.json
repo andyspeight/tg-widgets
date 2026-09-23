@@ -1,0 +1,363 @@
+{
+ "iata": "BEY",
+ "id": "recI7QR0egt4RWkp2",
+ "name": "Beirut Rafic Hariri International Airport",
+ "country": "Lebanon",
+ "wikipedia": "https://en.wikipedia.org/wiki/Beirut%E2%80%93Rafic_Hariri_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Lebanon's only working commercial airport, in the southern suburbs of Beirut 9 km from the centre. It is the hub for Middle East Airlines and, along with the Port of Beirut, the country's main point of entry.\n\nThe terminal is U shaped, with an East and a West Wing joined by the main building, and has 23 gates, 19 of them with jetways. There is a three level car park holding 2,350 cars.\n\nGround transport is the part to prepare a client for. There is no public transport to the terminal itself, only taxis, and airport taxis cost more than the ordinary service taxis in the city. The nearest buses stop at the airport roundabout a kilometre away, where LCC route 1 runs to Rue Sadat in Hamra and route 5 to the Charles Helou bus station. Arrange a transfer in advance.\n\nThe airport is run directly by the Directorate General of Civil Aviation, which also controls Lebanese airspace. It was named after Rafic Hariri in 2005, the year the former prime minister was assassinated.",
+ "after": "Lebanon's only airport with commercial flights, in Beirut's southern suburbs 9 km from the centre. It is the base for Middle East Airlines.\n\nAccording to the FCDO, the airport is open and operational, but travellers should check the local security situation before going there. The FCDO advises against all travel to parts of Beirut and its southern suburbs, though not to Route 51 from central Beirut to the airport. Israeli air strikes hit the southern suburbs in 2026, and the FCDO says fighting and strikes have continued since a cessation of hostilities was announced in June, particularly in southern Lebanon. Arrange a transfer in advance.\n\nThe airport is run by the Directorate General of Civil Aviation, which also provides air traffic control for Lebanese airspace. It was renamed in 2005 after Rafic Hariri, the assassinated former prime minister.",
+ "claims": [
+  {
+   "claim": "Lebanon's only airport with commercial flights",
+   "verdict": "confirmed",
+   "inAfter": "Lebanon's only airport with commercial flights",
+   "note": "Was 'only working commercial airport'. Still true in September 2026, but only just: a second airport, René Mouawad at Qlayaat in the north, was officially inaugurated on 6 June 2026 (AGBI, Al Jazeera, Beirut.com) and its operator said on 14 September that it has not yet begun commercial operations (LBCI). The Qlayaat opening is not added to the text because it would be a new fact; flagged for the owner.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the only operational commercial airport in Lebanon"
+    },
+    {
+     "file": "agbi-second-airport",
+     "org": "AGBI (Arabian Gulf Business Insight)",
+     "quote": [
+      "currently has one civilian airport, known as Beirut-Rafic Hariri International Airport",
+      "June 8, 2026"
+     ],
+     "dated": "2026-06-08"
+    },
+    {
+     "file": "lbci-skylounge",
+     "org": "LBCI (Lebanese Broadcasting Corporation International)",
+     "quote": [
+      "Moawad Airport in Qlayaat",
+      "The company said the airport has not yet begun commercial operations",
+      "14-09-2026"
+     ],
+     "dated": "2026-09-14"
+    }
+   ]
+  },
+  {
+   "claim": "in Beirut's southern suburbs",
+   "verdict": "confirmed",
+   "inAfter": "in Beirut's southern suburbs",
+   "note": "Coordinates put it 8.3 km from the GeoNames centre at 189 degrees, which is south.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is located in the Southern Suburbs of Beirut"
+    },
+    {
+     "file": "aljazeera-north-airport",
+     "org": "Al Jazeera",
+     "quote": [
+      "Beirut airport, which is surrounded by the city’s southern suburbs",
+      "17 Jun 2026"
+     ],
+     "dated": "2026-06-17"
+    },
+    {
+     "file": "agbi-second-airport",
+     "org": "AGBI (Arabian Gulf Business Insight)",
+     "quote": "the existing one is located close to Beirut’s southern suburb",
+     "dated": "2026-06-08"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 189 degrees, which is south"
+    }
+   ]
+  },
+  {
+   "claim": "9 km from the centre",
+   "verdict": "confirmed",
+   "inAfter": "9 km from the centre",
+   "note": "Straight line 8.3 km, ratio 1.08, inside the stated tolerance. Airport Technology gives 9 km in its text and 8 km in a caption.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "9 kilometres (5.6 mi) from the city center"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 8.3 km (5.1 miles)"
+    },
+    {
+     "file": "airporttech-bey",
+     "org": "Airport Technology (GlobalData)",
+     "quote": "around 9km from downtown Beirut"
+    }
+   ]
+  },
+  {
+   "claim": "base for Middle East Airlines",
+   "verdict": "confirmed",
+   "inAfter": "It is the base for Middle East Airlines.",
+   "note": "MEA's own site refuses both fetchers (403). Luchtvaartnieuws (28 May 2026) has MEA's new Amsterdam service leaving from Beirut and returning to the Lebanese capital; the airport's own live board on 23 September 2026 is dominated by ME (MEA) flights. 'Hub' softened to 'base', as TBS did.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is the hub for Lebanon's national carrier, Middle East Airlines (MEA)"
+    },
+    {
+     "file": "luchtvaartnieuws-mea",
+     "org": "Luchtvaartnieuws",
+     "quote": [
+      "Middle East Airlines (MEA) hervat deze zomer opnieuw de lijndienst tussen Beiroet en Schiphol",
+      "vertrekt de heenvlucht om 09.40 uur vanuit Beiroet",
+      "28 mei 2026"
+     ],
+     "dated": "2026-05-28"
+    },
+    {
+     "file": "bey-flights-en",
+     "org": "Beirut Rafic Hariri International Airport (DGCA)",
+     "quote": [
+      "Real Time Flight Info. (schedule of today's arrivals/departures )",
+      "ME 252",
+      "ME 425",
+      "ME 405",
+      "ME 427"
+     ],
+     "dated": "2026-09-23"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: airport open and operational; check the local security situation before going there",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "According to the FCDO, the airport is open and operational, but travellers should check the local security situation before going there.",
+   "note": "Attributed statement, checked against the FCDO page (updated 10 August 2026, still current 23 September 2026). Not in the old text, which said nothing of the 2026 conflict. The airport's own live board on 23 September 2026 shows flights arriving.",
+   "sources": [
+    {
+     "file": "fcdo-lebanon",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "Beirut airport is open and operational.",
+      "If you are travelling to the airport, check the local security situation before you travel.",
+      "10 August 2026",
+      "23 September 2026"
+     ],
+     "dated": "2026-08-10"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO advises against all travel to parts of Beirut and its southern suburbs, except Route 51 to the airport",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "The FCDO advises against all travel to parts of Beirut and its southern suburbs, though not to Route 51 from central Beirut to the airport.",
+   "note": "Attributed statement. The listed areas include Burj Al Barajneh, Mraije, Laylaki, Jnah and 'all other areas west of the Camil Chamoun Boulevard ... that becomes the Old Saida Road through Hadath to Beirut airport'. Replaces the old bus advice (walk to the airport roundabout), which had no second source.",
+   "sources": [
+    {
+     "file": "fcdo-lebanon",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "advises against all travel to the following areas of Beirut and its southern suburbs, excluding Route 51 from central Beirut to Rafic Hariri International Airport",
+      "10 August 2026"
+     ],
+     "dated": "2026-08-10"
+    }
+   ]
+  },
+  {
+   "claim": "Israeli air strikes hit Beirut's southern suburbs in 2026",
+   "verdict": "corrected",
+   "inAfter": "Israeli air strikes hit the southern suburbs in 2026",
+   "note": "Al Jazeera adds that Israel did not attack the airport itself in the latest conflict; that is one source, so it is not in the text.",
+   "sources": [
+    {
+     "file": "fcdo-lebanon",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "Since 2 March, conflict in Lebanon escalated in response to regional events.",
+      "Israeli airstrikes have occurred primarily in the South, Nabatieh and Beqaa Governates and Beirut’s southern suburbs"
+     ],
+     "dated": "2026-08-10"
+    },
+    {
+     "file": "aljazeera-north-airport",
+     "org": "Al Jazeera",
+     "quote": [
+      "Beirut airport, which is surrounded by the city’s southern suburbs – known as Dahiyeh.",
+      "Dahiyeh was badly damaged during 2024 and 2026, as Israel attacked Hezbollah targets in the area."
+     ],
+     "dated": "2026-06-17"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: fighting and strikes continued after the June 2026 cessation of hostilities, particularly in southern Lebanon",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "FCDO",
+   "inAfter": "the FCDO says fighting and strikes have continued since a cessation of hostilities was announced in June, particularly in southern Lebanon",
+   "note": "Attributed statement, checked against the FCDO page (updated 10 August 2026, still current 23 September 2026).",
+   "sources": [
+    {
+     "file": "fcdo-lebanon",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "A cessation of hostilities was announced in June 2026 but fighting and airstrikes have continued particularly in southern Lebanon",
+      "23 September 2026"
+     ],
+     "dated": "2026-08-10"
+    }
+   ]
+  },
+  {
+   "claim": "run by the Directorate General of Civil Aviation",
+   "verdict": "confirmed",
+   "inAfter": "The airport is run by the Directorate General of Civil Aviation",
+   "note": "'Directly' dropped. Airport Technology's text says owned and operated by the DGCA, but two of its captions credit MEA's airport services company; the DGCA's own page settles it.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is managed and operated by the Directorate General of Civil Aviation (DGCA)"
+    },
+    {
+     "file": "dgca-about",
+     "org": "Lebanese Directorate General of Civil Aviation",
+     "quote": "Its mission is to regulate and operate B eirut R afic H ariri I nternational A irport ( BRHIA )"
+    },
+    {
+     "file": "airporttech-bey",
+     "org": "Airport Technology (GlobalData)",
+     "quote": "The airport is owned and operated by the Directorate General of Civil Aviation (DGCA), Lebanon."
+    }
+   ]
+  },
+  {
+   "claim": "DGCA provides air traffic control for Lebanese airspace",
+   "verdict": "confirmed",
+   "inAfter": "which also provides air traffic control for Lebanese airspace",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The DGCA is also responsible for operating the air traffic control (ATC) at the airport as well as controlling Lebanon's airspace"
+    },
+    {
+     "file": "dgca-and",
+     "org": "Lebanese Directorate General of Civil Aviation",
+     "quote": "which is the responsible authority for the provision of air traffic services for the entire territory of Lebanon"
+    }
+   ]
+  },
+  {
+   "claim": "renamed in 2005 after Rafic Hariri",
+   "verdict": "confirmed",
+   "inAfter": "It was renamed in 2005 after Rafic Hariri",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport was named after former Lebanese prime minister Rafic Hariri in 2005"
+    },
+    {
+     "file": "airporttech-bey",
+     "org": "Airport Technology (GlobalData)",
+     "quote": "which was renamed from Beirut International Airport in June 2005"
+    },
+    {
+     "file": "agbi-second-airport",
+     "org": "AGBI (Arabian Gulf Business Insight)",
+     "quote": "Beirut-Rafic Hariri International Airport, which was named after the assassinated prime minister",
+     "dated": "2026-06-08"
+    }
+   ],
+   "note": "The name is current: AGBI (8 June 2026) and the airport's own site use it. The 2005 date has Wikipedia and Airport Technology behind it; a historical fact, not a time-sensitive one."
+  },
+  {
+   "claim": "Hariri was the assassinated former prime minister",
+   "verdict": "confirmed",
+   "inAfter": "the assassinated former prime minister",
+   "note": "Was 'in 2005, the year the former prime minister was assassinated'. The year of the assassination has one source here, so the text no longer ties it to 2005.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "former Lebanese prime minister Rafic Hariri in 2005, following his assassination earlier that year"
+    },
+    {
+     "file": "agbi-second-airport",
+     "org": "AGBI (Arabian Gulf Business Insight)",
+     "quote": "which was named after the assassinated prime minister"
+    }
+   ]
+  },
+  {
+   "claim": "only working commercial airport (old wording)",
+   "verdict": "cut",
+   "wasBefore": "Lebanon's only working commercial airport, in the southern suburbs of Beirut 9 km from the centre",
+   "why": "Reworded; the facts are kept above with sources dated June and September 2026."
+  },
+  {
+   "claim": "hub for MEA and, with the Port of Beirut, the main point of entry",
+   "verdict": "cut",
+   "wasBefore": "It is the hub for Middle East Airlines and, along with the Port of Beirut, the country's main point of entry.",
+   "why": "The MEA base is kept above. The point-of-entry claim has only Wikipedia; the DGCA calls the airport 'Lebanon's portal to the world', which is not the same claim."
+  },
+  {
+   "claim": "U-shaped terminal, East and West Wings, 23 gates, 19 with jetways",
+   "verdict": "cut",
+   "wasBefore": "The terminal is U shaped, with an East and a West Wing joined by the main building, and has 23 gates, 19 of them with jetways.",
+   "why": "Sources disagree: Wikipedia says 19 gates have jetways, Airport Technology 21; Roads and Kingdoms (2018) calls it a 24-gate airport. The U shape has only Wikipedia. None of it is dated within 12 months."
+  },
+  {
+   "claim": "three-level car park for 2,350 cars",
+   "verdict": "cut",
+   "wasBefore": "There is a three level car park holding 2,350 cars.",
+   "why": "Sources disagree: Wikipedia 2,350 cars, Airport Technology 2,200. The airport's own parking page gives prices, not capacity."
+  },
+  {
+   "claim": "ground transport needs preparing",
+   "verdict": "cut",
+   "wasBefore": "Ground transport is the part to prepare a client for.",
+   "why": "Lead-in to the cut bus and taxi detail; the transfer advice now follows the FCDO's."
+  },
+  {
+   "claim": "no public transport to the terminal, only taxis; airport taxis dearer than service taxis",
+   "verdict": "cut",
+   "wasBefore": "There is no public transport to the terminal itself, only taxis, and airport taxis cost more than the ordinary service taxis in the city.",
+   "why": "Only Wikipedia. The airport's own taxi page says licensed taxis wait at arrivals at a fixed official fare, but does not compare them with service taxis or say there are no buses. Lonely Planet (404), Roads and Kingdoms (paywalled) and Popula gave nothing."
+  },
+  {
+   "claim": "LCC buses 1 and 5 from the airport roundabout",
+   "verdict": "cut",
+   "wasBefore": "The nearest buses stop at the airport roundabout a kilometre away, where LCC route 1 runs to Rue Sadat in Hamra and route 5 to the Charles Helou bus station.",
+   "why": "Only Wikipedia, undated, and it sends travellers on foot through the southern suburbs, much of which the FCDO now advises against all travel to."
+  },
+  {
+   "claim": "run directly by the DGCA (old wording)",
+   "verdict": "cut",
+   "wasBefore": "The airport is run directly by the Directorate General of Civil Aviation, which also controls Lebanese airspace.",
+   "why": "Reworded without 'directly'; both facts kept above."
+  },
+  {
+   "claim": "named in 2005, the year Hariri was assassinated (old wording)",
+   "verdict": "cut",
+   "wasBefore": "It was named after Rafic Hariri in 2005, the year the former prime minister was assassinated.",
+   "why": "Reworded; the year of the assassination has only Wikipedia here."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Arrange a transfer in advance.",
+   "why": "Kept from the old text. Advice that follows from the FCDO's warning to check the local security situation on the way to the airport and its no-travel areas either side of Route 51."
+  }
+ ],
+ "tracerOk": {}
+}
