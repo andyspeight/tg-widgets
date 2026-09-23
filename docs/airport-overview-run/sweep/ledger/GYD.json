@@ -1,0 +1,273 @@
+{
+ "iata": "GYD",
+ "id": "recZIqZQcATFcw17W",
+ "name": "Heydar Aliyev International Airport",
+ "country": "Azerbaijan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Heydar_Aliyev_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Azerbaijan's main airport and the busiest in the South Caucasus, 20 km north east of Baku on the Baku Airport Highway. It is the hub for Azerbaijan Airlines and for the cargo carriers Azal Avia Cargo and Silk Way West.\n\nTerminal 1 is where a client will almost certainly be. It handles international flights and the bulk of the traffic, with 40 check in desks, 24 passport control positions, 15 gates and twelve air bridges, two of them built for the A380. Terminal 2 takes domestic and short range flights.\n\nTerminal 1 is worth seeing rather than just passing through. Arup designed it in 2010 in a three cornered shape under a semi transparent roof, and the Turkish practice AUTOBAN filled the interior with a series of oak veneer cocoons. There are five lounges and a spa.\n\nIt was commissioned in April 2014 and is built for 6 million passengers a year, currently running at up to 3 million, with parking for 600 cars.\n\nThe airport was formerly called Bina International, after the suburb it stands near.",
+ "after": "Baku's airport, about 20 km north east of the city. It handled 7.5 million passengers in 2024, up 31 per cent. Azerbaijan Airlines is the main airline, and the cargo carrier Silk Way West has its hub here.\n\nInternational flights mainly use Terminal 1, opened in April 2014, which has 40 check in desks, 24 passport desks, 15 gates and 12 air bridges. Arup engineered the triangular building and the Turkish studio Autoban lined it with wooden cocoons clad in oak veneer. There are several lounges.",
+ "claims": [
+  {
+   "claim": "Baku's airport, about 20 km north east of the city",
+   "verdict": "confirmed",
+   "inAfter": "Baku's airport, about 20 km north east of the city",
+   "note": "Coordinates give 17.1 km in a straight line at 52 degrees (north east); ratio 1.17.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "is an airport serving Azerbaijan's capital, Baku",
+      "The airport is 20 kilometers northeast of Baku"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Baku",
+      "Straight-line distance from the city centre: 17.1 km (10.6 miles)",
+      "Bearing from the city centre: 52 degrees, which is north east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "7.5 million passengers in 2024, up 31 per cent",
+   "verdict": "corrected",
+   "inAfter": "It handled 7.5 million passengers in 2024, up 31 per cent.",
+   "note": "Replaces 'currently running at up to 3 million'. No 2025 annual total was published in English (the operator's last annual release, 13 January 2025, covers 2024); its 2026 releases give 3.334 million for January to June and more than 4.9 million for January to August (one source), with traffic at the three main airports level with 2025. Update to 2025 or 2026 when a second source gives a full year.",
+   "sources": [
+    {
+     "file": "op-2024",
+     "org": "Heydar Aliyev International Airport (operator, airport.az)",
+     "quote": "In 2024, the airport served 7.537 million passengers, marking a 31% increase compared to 2023.",
+     "dated": "2025-01-13"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat1_data = 7,537,000",
+      "stat2_data = 31.0%"
+     ]
+    },
+    {
+     "file": "op-8m-2026",
+     "org": "Heydar Aliyev International Airport (operator, airport.az)",
+     "quote": "From January to August 2026, Baku Airport served more than 4.9 million passengers",
+     "dated": "2026-09-10"
+    }
+   ]
+  },
+  {
+   "claim": "Azerbaijan Airlines is the main airline",
+   "verdict": "softened",
+   "inAfter": "Azerbaijan Airlines is the main airline",
+   "note": "Was 'the hub for Azerbaijan Airlines'; the airline's own site refuses automated reads. The operator says AZAL carried 3.314 million of the 7.537 million passengers in 2024, far more than any other single airline (all foreign airlines together carried 3.495 million).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It serves as the hub for national carrier Azerbaijan Airlines"
+    },
+    {
+     "file": "op-2024",
+     "org": "Heydar Aliyev International Airport (operator, airport.az)",
+     "quote": "International flights operated by foreign airlines accounted for 3.495 million passengers, while the national carrier AZAL served 3.314 million passengers.",
+     "dated": "2025-01-13"
+    }
+   ]
+  },
+  {
+   "claim": "Silk Way West has its hub here",
+   "verdict": "confirmed",
+   "inAfter": "and the cargo carrier Silk Way West has its hub here",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "as well as for Azal Avia Cargo and Silk Way West Airlines"
+    },
+    {
+     "file": "stattimes-swa",
+     "org": "STAT Times",
+     "quote": "Silk Way West Airlines establishes a new scheduled route connecting its global hub in Baku with Los Angeles"
+    }
+   ]
+  },
+  {
+   "claim": "international flights mainly use Terminal 1",
+   "verdict": "softened",
+   "inAfter": "International flights mainly use Terminal 1",
+   "note": "Was 'Terminal 1 is where a client will almost certainly be'. Wikipedia says Terminal 2 also takes some low-cost international flights, so 'mainly'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Terminal 1 primarily serves international flights, handling the majority of the airport's passenger traffic."
+    },
+    {
+     "file": "op-about-b",
+     "org": "Heydar Aliyev International Airport (operator, airport.az)",
+     "quote": "All International flights began to arrive and depart from Terminal 1."
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 1 opened April 2014",
+   "verdict": "confirmed",
+   "inAfter": "opened in April 2014",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The opening of Terminal 1 of the Heydar Aliyev International Airport was held on 23 April 2014."
+    },
+    {
+     "file": "op-about-b",
+     "org": "Heydar Aliyev International Airport (operator, airport.az)",
+     "quote": [
+      "23 April 2014",
+      "The opening of Terminal 1 of the Heydar Aliyev International Airport was held."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "T1: 40 check in desks, 24 passport desks, 15 gates, 12 air bridges",
+   "verdict": "confirmed",
+   "inAfter": "which has 40 check in desks, 24 passport desks, 15 gates and 12 air bridges",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It includes 12 boarding bridges, 15 gates, 40 check-in desks, 24 passport control desks"
+    },
+    {
+     "file": "op-about-b",
+     "org": "Heydar Aliyev International Airport (operator, airport.az)",
+     "quote": "Boarding bridges Terminal 1 12 Terminal 2 4 Gates Terminal 1 15 Terminal 2 8 Check-in Desks Terminal 1 40 Terminal 2 48 Passport Control Desk Terminal 1 24",
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "Arup engineered the triangular building; Autoban lined it with oak-veneer wooden cocoons",
+   "verdict": "confirmed",
+   "inAfter": "Arup engineered the triangular building and the Turkish studio Autoban lined it with wooden cocoons clad in oak veneer.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The four-level engineering design of Terminal 1 was developed in 2010 by the Arup Group, featuring a tricorn shape",
+      "The interior, designed by the Turkish company AUTOBAN, includes a series of oak-veneer 'cocoons.'"
+     ]
+    },
+    {
+     "file": "dezeen-2014",
+     "org": "Dezeen",
+     "quote": [
+      "Turkish architecture studio Autoban has designed giant wooden \"cocoons\" for the interior of the new international terminal at Baku airport",
+      "inside the triangular terminal building by engineering firm Arup",
+      "Each is clad in diamond-shaped solid ayous wood shingles covered with oak veneer"
+     ],
+     "dated": "2014-07-25"
+    }
+   ]
+  },
+  {
+   "claim": "several lounges",
+   "verdict": "softened",
+   "inAfter": "There are several lounges.",
+   "note": "Was 'five lounges and a spa'. Counts disagree: Wikipedia five, Dezeen (2014) four Salam Lounges, the operator's live page seven (AZAL, Business, Absheron, Salam, Baku, Premium, Mugam), two of them taking Priority Pass. The spa has one source.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Terminal 1 contains five lounges and a spa."
+    },
+    {
+     "file": "op-lounges",
+     "org": "Heydar Aliyev International Airport (operator, airport.az)",
+     "quote": [
+      "Absheron Lounge",
+      "Salam Lounge",
+      "Business Class Lounge"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "dezeen-2014",
+     "org": "Dezeen",
+     "quote": "Autoban also created four \"Salam Lounges\" for business-class passengers",
+     "dated": "2014-07-25"
+    }
+   ]
+  },
+  {
+   "claim": "main airport, busiest in the South Caucasus, 20 km NE on the Baku Airport Highway",
+   "verdict": "cut",
+   "wasBefore": "Azerbaijan's main airport and the busiest in the South Caucasus, 20 km north east of Baku on the Baku Airport Highway.",
+   "why": "Distance kept. The rankings and the highway rest on Wikipedia alone; the traffic figure is stated instead (for comparison, verified 2025 figures are about 5.6 million at Yerevan and 5.4 million at Tbilisi, in ledgers EVN and TBS)."
+  },
+  {
+   "claim": "hub for AZAL, Azal Avia Cargo and Silk Way West",
+   "verdict": "cut",
+   "wasBefore": "It is the hub for Azerbaijan Airlines and for the cargo carriers Azal Avia Cargo and Silk Way West.",
+   "why": "Reworded: AZAL as main airline and Silk Way West's hub kept with two sources; Azal Avia Cargo has only Wikipedia."
+  },
+  {
+   "claim": "T1 almost certainly; handles international and bulk of traffic",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 is where a client will almost certainly be. It handles international flights and the bulk of the traffic,",
+   "why": "Reworded to 'International flights mainly use Terminal 1'."
+  },
+  {
+   "claim": "two air bridges built for the A380",
+   "verdict": "cut",
+   "wasBefore": "two of them built for the A380",
+   "why": "Only Wikipedia."
+  },
+  {
+   "claim": "Terminal 2 domestic and short range",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 takes domestic and short range flights.",
+   "why": "Wikipedia says Terminal 2 also takes low-cost international flights, and the operator's notice that Terminal 2 reopened for international flights is undated, so its current use is not stated."
+  },
+  {
+   "claim": "T1 worth seeing",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 is worth seeing rather than just passing through.",
+   "why": "Opinion; the design facts that follow are kept."
+  },
+  {
+   "claim": "Arup 2010, three cornered, semi transparent roof; AUTOBAN oak veneer cocoons",
+   "verdict": "cut",
+   "wasBefore": "Arup designed it in 2010 in a three cornered shape under a semi transparent roof, and the Turkish practice AUTOBAN filled the interior with a series of oak veneer cocoons.",
+   "why": "Reworded: Arup, the triangular shape and Autoban's oak-veneer cocoons kept with Dezeen; the 2010 date and the semi-transparent roof have one source (Dezeen describes a domed roof with skylights)."
+  },
+  {
+   "claim": "five lounges and a spa",
+   "verdict": "cut",
+   "wasBefore": "There are five lounges and a spa.",
+   "why": "Sources disagree on the count; softened to several lounges. The spa has one source."
+  },
+  {
+   "claim": "commissioned April 2014, built for 6 million, running at up to 3 million, parking for 600",
+   "verdict": "cut",
+   "wasBefore": "It was commissioned in April 2014 and is built for 6 million passengers a year, currently running at up to 3 million, with parking for 600 cars.",
+   "why": "Out of date: the airport handled 7.5 million passengers in 2024. The 6 million design figure and 600 parking spaces rest on Wikipedia alone, whose own parking section gives over 2,000 spaces."
+  },
+  {
+   "claim": "formerly Bina International",
+   "verdict": "cut",
+   "wasBefore": "The airport was formerly called Bina International, after the suburb it stands near.",
+   "why": "Sources disagree: the operator says it was Baku International Airport before its 2004 renaming, Wikipedia says Bina International."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

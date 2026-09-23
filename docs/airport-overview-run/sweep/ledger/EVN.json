@@ -1,0 +1,203 @@
+{
+ "iata": "EVN",
+ "id": "rec2MHiTnCVQR19Nb",
+ "name": "Zvartnots International Airport",
+ "country": "Armenia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Zvartnots_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Armenia's main way in sits 15 km west of Yerevan and handles more traffic than anywhere else in the country. The runway takes everything up to an A380, and the main approach carries an ILS CAT II, which matters in winter because it allows landings down to a thirty metre ceiling.\n\nSecurity runs in three stages on the way to the gates: a pre-control, passport control, then X-ray. Clients should be told to allow for it. Once through there is an Avolta duty free, the Converse Bank business class lounge looking out over the apron, a post office, a pharmacy and a spread of cafes and places to eat. Car hire is available from Europcar, and there are cash machines from the Armenian banks as well as HSBC and VTB.\n\nRecent work has gone into the systems rather than the shell: a new flight information display, biometric bag drop and passenger checks, and 150 cameras across the site.",
+ "after": "Armenia's main international airport, about 12 km west of central Yerevan. The runway has a Category II landing system, which allows landings with cloud as low as 30 metres.\n\nThere is an Avolta duty free and a business lounge. Car hire firms have desks in the arrivals hall, and several banks have cash machines.",
+ "claims": [
+  {
+   "claim": "Armenia's main international airport",
+   "verdict": "confirmed",
+   "inAfter": "Armenia's main international airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It acts as the main international airport of Armenia"
+    },
+    {
+     "file": "zv-AboutUs",
+     "org": "Armenia International Airports (operator, zvartnots.aero)",
+     "quote": "Zvartnots International Airport of Yerevan, is the main air gate of the Republic of Armenia"
+    }
+   ]
+  },
+  {
+   "claim": "about 12 km west of central Yerevan",
+   "verdict": "corrected",
+   "inAfter": "about 12 km west of central Yerevan",
+   "note": "Was 15 km. Wikipedia gives both 15 km and, for the drive, 12 km; coordinates give 10.3 km in a straight line at 252 degrees (west), so 15 km is a ratio of 1.46 and 12 km of 1.17. The road figure is used.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "By car, the distance from Zvartnots Airport to the centre of Yerevan is 12 kilometers"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 10.3 km (6.4 miles)",
+      "Bearing from the city centre: 252 degrees, which is west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Category II landing system, landings with cloud as low as 30 metres",
+   "verdict": "confirmed",
+   "inAfter": "The runway has a Category II landing system, which allows landings with cloud as low as 30 metres.",
+   "note": "The operator gives the minima as 30 m by 350 m; Wikipedia says 30 m and 300 m visibility. Only the 30 m ceiling, on which they agree, is stated.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Runway 08 is equipped with an ILS CAT II, which enables aircraft operations in low ceiling (30 meters)"
+    },
+    {
+     "file": "zv-AboutUs",
+     "org": "Armenia International Airports (operator, zvartnots.aero)",
+     "quote": "The navigation system installed on the runway ensures 30x350m meteorological minimum for landing, which corresponds to the ICAO 2nd class."
+    }
+   ]
+  },
+  {
+   "claim": "Avolta duty free",
+   "verdict": "confirmed",
+   "inAfter": "There is an Avolta duty free",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport features an Avolta duty-free retail shop after security"
+    },
+    {
+     "file": "zv-Dufry",
+     "org": "Armenia International Airports (operator, zvartnots.aero)",
+     "quote": "The Duty-Free shops by Avolta operate three stores at Zvartnots International Airport in Yerevan"
+    }
+   ]
+  },
+  {
+   "claim": "a business lounge",
+   "verdict": "corrected",
+   "inAfter": "and a business lounge",
+   "note": "Was 'the Converse Bank business class lounge'. The operator calls it the Zvartnots International Airport Business Lounge; Converse Bank Premium is one of fourteen cards it accepts. The operator also says it is open 24 hours and takes Priority Pass and LoungeKey (25,000 AMD online otherwise), but that has one source, so it is not stated.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "as well as the Converse Bank business class lounge"
+    },
+    {
+     "file": "zv-BusinessLounge",
+     "org": "Armenia International Airports (operator, zvartnots.aero)",
+     "quote": [
+      "You can enjoy your stay at Zvartnots International Airport Business Lounge",
+      "Converse Bank Premium"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "car hire desks in the arrivals hall",
+   "verdict": "corrected",
+   "inAfter": "Car hire firms have desks in the arrivals hall",
+   "note": "Was 'Car hire is available from Europcar'. The operator's live list has Carwiz, Enterprise, GoMotion, Hertz and SIXT, and no Europcar. Names are not stated because only the operator gives them.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "At Zvartnots Airport, cars from rental companies are available."
+    },
+    {
+     "file": "zv-Transport",
+     "org": "Armenia International Airports (operator, zvartnots.aero)",
+     "quote": [
+      "Hertz Rent a Car",
+      "SIXT Rent a Car",
+      "Arrival Hall,"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "several banks have cash machines",
+   "verdict": "corrected",
+   "inAfter": "and several banks have cash machines",
+   "note": "Was 'cash machines from the Armenian banks as well as HSBC and VTB'. HSBC is not on the operator's live list.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Ardshinbank, as well as, HSBC, VTB Bank, and Ameriabank ATMs"
+    },
+    {
+     "file": "zv-banks",
+     "org": "Armenia International Airports (operator, zvartnots.aero)",
+     "quote": [
+      "Currency exchanges and automated teller machines are also available",
+      "Ameriabank (ATM)",
+      "VTB (ATM)"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "main way in, 15 km west, handles more traffic than anywhere else",
+   "verdict": "cut",
+   "wasBefore": "Armenia's main way in sits 15 km west of Yerevan and handles more traffic than anywhere else in the country.",
+   "why": "Reworded: main airport and distance kept with two sources each; the ranking has only Wikipedia (the Civil Aviation Committee's statistics pages refuse automated reads)."
+  },
+  {
+   "claim": "runway takes up to an A380",
+   "verdict": "cut",
+   "wasBefore": "The runway takes everything up to an A380",
+   "why": "Only Wikipedia; the operator's About page does not say."
+  },
+  {
+   "claim": "CAT II matters in winter",
+   "verdict": "cut",
+   "wasBefore": "and the main approach carries an ILS CAT II, which matters in winter because it allows landings down to a thirty metre ceiling.",
+   "why": "Reworded: the landing system and 30 m are kept; 'matters in winter' had no source."
+  },
+  {
+   "claim": "three-stage security",
+   "verdict": "cut",
+   "wasBefore": "Security runs in three stages on the way to the gates: a pre-control, passport control, then X-ray.",
+   "why": "Only Wikipedia; the operator's security page does not describe the stages."
+  },
+  {
+   "claim": "allow for security",
+   "verdict": "cut",
+   "wasBefore": "Clients should be told to allow for it.",
+   "why": "Advice tied to the cut claim."
+  },
+  {
+   "claim": "facilities list",
+   "verdict": "cut",
+   "wasBefore": "Once through there is an Avolta duty free, the Converse Bank business class lounge looking out over the apron, a post office, a pharmacy and a spread of cafes and places to eat.",
+   "why": "Duty free and lounge kept (lounge corrected). The apron view, post office, pharmacy and cafes rest on Wikipedia alone."
+  },
+  {
+   "claim": "Europcar, HSBC and VTB",
+   "verdict": "cut",
+   "wasBefore": "Car hire is available from Europcar, and there are cash machines from the Armenian banks as well as HSBC and VTB.",
+   "why": "Out of date against the operator's live pages: no Europcar desk and no HSBC on the list. Reworded to what both sources support."
+  },
+  {
+   "claim": "recent systems work: FIDS, biometrics, 150 cameras",
+   "verdict": "cut",
+   "wasBefore": "Recent work has gone into the systems rather than the shell: a new flight information display, biometric bag drop and passenger checks, and 150 cameras across the site.",
+   "why": "Only Wikipedia, and undated ('recently')."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
