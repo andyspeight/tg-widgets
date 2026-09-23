@@ -1,0 +1,547 @@
+{
+ "iata": "ESB",
+ "id": "recdx2QrheMnZ5mFP",
+ "name": "Esenboğa International Airport",
+ "country": "Türkiye",
+ "wikipedia": "https://en.wikipedia.org/wiki/Ankara_Esenbo%C4%9Fa_Airport",
+ "audited": "2026-09-23",
+ "before": "Ankara's airport, 28 km north east of the Turkish capital, and fourth busiest in the country after the two Istanbul airports and Antalya. It carried more than 13 million passengers in 2025, ten million of them domestic, which tells you what this airport is for.\n\nIt has a good record. ACI Europe named it the best airport in Europe in its size category in 2009, the first such award to a Turkish airport, singling out an unusual piece of environmental engineering: the terminal recycles exhaust gases to power its air conditioning, saving about 25 per cent of its energy. ACI gave it a second award in 2020 in the 15 to 25 million category.\n\nThe terminal opened in October 2006 under a build, operate and transfer contract, and a separate general aviation terminal for private aircraft followed in January 2012.\n\nA second parallel runway is under construction to the east, and the runway designations will change when it opens.\n\nThe name comes from the village of Esenboğa, from Isen Buqa, a Turkic commander in Timur's army who settled his troops here at the Battle of Ankara in 1402.",
+ "after": "Ankara's airport, 28 km north east of the Turkish capital and fourth busiest in the country after the two Istanbul airports and Antalya. It carried almost 14 million passengers in 2025, ten million of them domestic, which tells you what this airport is for.\n\nACI Europe once named it the best airport in Europe in the 5 to 10 million passenger category.\n\nThe terminal opened in 2006, and a separate general aviation terminal for private aircraft followed.\n\nTAV Airports, which runs the airport, says a second runway, 3,750 metres long, has now been completed.\n\nThe name comes from the village of Esenboğa, from Isen Buqa, a Turkic commander in Timur's army who made camp here at the Battle of Ankara in 1402.",
+ "claims": [
+  {
+   "claim": "Ankara's airport, 28 km north east of the Turkish capital",
+   "verdict": "confirmed",
+   "inAfter": "Ankara's airport, 28 km north east of the Turkish capital",
+   "note": "Coordinates: 26.1 km from the GeoNames centre of Ankara at 27 degrees, inside the check for north east; 28 km over 26.1 km straight is a ratio of 1.07, within the range allowed for a road or rounded distance. GeoNames classes Ankara as the national capital.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 26.1 km (16.2 miles)",
+      "Bearing from the city centre: 27 degrees, which is north east",
+      "GeoNames class PPLC, the national capital"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": [
+      "is an international airport of Ankara, the capital city of Turkey",
+      "The airport is located northeast of Ankara, 28 km (17 mi) from the city center."
+     ]
+    },
+    {
+     "file": "tav-esb",
+     "org": "TAV Airports (the operator, tavairports.com)",
+     "dated": "read 2026-09-23 (TAV's page for the airport)",
+     "quote": "Esenboğa Airport, the main gate to Ankara"
+    }
+   ]
+  },
+  {
+   "claim": "fourth busiest in Turkey, after the two Istanbul airports and Antalya",
+   "verdict": "confirmed",
+   "inAfter": "and fourth busiest in the country after the two Istanbul airports and Antalya.",
+   "note": "Eurostat's 2025 table of passengers carried covers all 872 airports that report to it, 58 of them Turkish. Its values are indexed by (airport x 4 + schedule) x 7 + coverage, so an airport's total (schedule and coverage both TOTAL, index 0) sits at its airport index x 28. Esenboga is airport 814, value 22792: 13,926,576. The only Turkish airports above it are Istanbul (870, value 24360: 84,512,620), Sabiha Gokcen (868, value 24304: 48,407,144) and Antalya (816, value 22848: 39,000,664); next below is Izmir (832, value 23296: 12,665,508). Wikipedia's lead gives the same order.",
+   "sources": [
+    {
+     "file": "eurostat-paoa-2025",
+     "org": "Eurostat",
+     "dated": "2025 (annual data; table updated 2026-09-17, date in the file)",
+     "quote": [
+      "\"updated\":\"2026-09-17T23:00:00+0200\"",
+      "\"size\":[1,1,1,872,4,7,1]",
+      "\"TR_LTFM\":\"ISTANBUL/ISTANBUL HAVALIMANI airport\"",
+      "\"TR_LTFM\":870",
+      "\"24360\":84512620",
+      "\"TR_LTFJ\":\"ISTANBUL/SABIHA GOKCEN airport\"",
+      "\"TR_LTFJ\":868",
+      "\"24304\":48407144",
+      "\"TR_LTAI\":\"ANTALYA airport\"",
+      "\"TR_LTAI\":816",
+      "\"22848\":39000664",
+      "\"TR_LTAC\":\"ANKARA/ESENBOGA airport\"",
+      "\"TR_LTAC\":814",
+      "\"22792\":13926576",
+      "\"TR_LTBJ\":832",
+      "\"23296\":12665508"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "It ranked 4th in terms of total passenger traffic (after Istanbul Airport, Sabiha Gökçen Airport and Antalya Airport)"
+    }
+   ]
+  },
+  {
+   "claim": "almost 14 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It carried almost 14 million passengers in 2025",
+   "note": "Was 'more than 13 million' (Wikipedia's lead): true, but it undersells the year. DHMI's figure, as TAV reports it, is 13,987,298; Eurostat has 13,926,576 and Wikipedia's infobox 13,926,680.",
+   "sources": [
+    {
+     "file": "tav-fy25",
+     "org": "TAV Airports (the operator, ir.tav.aero)",
+     "dated": "2026-02-17 (2025 full year investor presentation, date on its first page)",
+     "quote": [
+      "February 17, 2026",
+      "December Chg. Jan-Dec Chg.",
+      "Ankara 1.008.350 1.162.241 15% 12.913.753 13.987.298 8%",
+      "Source: Turkish State Airports Authority (DHMI)"
+     ]
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat TR_LTAC Esenboğa International Airport: passengers carried in 2025: 13,926,576"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": [
+      "stat2_data = 13,926,680",
+      "stat_year = 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "ten million of them domestic",
+   "verdict": "confirmed",
+   "inAfter": "ten million of them domestic",
+   "note": "DHMI via TAV: 10,344,671 domestic of 13,987,298. Eurostat's national figure (coverage NAT, value index 22792 + 1): 10,319,166.",
+   "sources": [
+    {
+     "file": "tav-fy25",
+     "org": "TAV Airports (the operator, ir.tav.aero)",
+     "dated": "2026-02-17 (2025 full year investor presentation, date on its first page)",
+     "quote": [
+      "Ankara 1.008.350 1.162.241 15% 12.913.753 13.987.298 8%",
+      "Domestic 761.081 840.399 10% 9.719.730 10.344.671 6%"
+     ]
+    },
+    {
+     "file": "eurostat-paoa-2025",
+     "org": "Eurostat",
+     "dated": "2025 (annual data; table updated 2026-09-17, date in the file)",
+     "quote": [
+      "\"NAT\":1",
+      "\"22793\":10319166"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "10 million of which were domestic passengers"
+    }
+   ]
+  },
+  {
+   "claim": "ACI Europe once named it the best airport in Europe in the 5 to 10 million category",
+   "verdict": "softened",
+   "inAfter": "ACI Europe once named it the best airport in Europe in the 5 to 10 million passenger category.",
+   "note": "Was 'ACI Europe named it the best airport in Europe in its size category in 2009, the first such award to a Turkish airport'. The airport's awards page confirms the award and its category but gives no year, so the year and the 'first' are cut (below). 'Once' and the category, against almost 14 million passengers now, keep it from reading as current.",
+   "sources": [
+    {
+     "file": "op-awards",
+     "org": "TAV Airports (the operator, esenbogaairport.com, the airport's own site)",
+     "dated": "read 2026-09-23 (the airport's awards page)",
+     "quote": [
+      "Ankara Esenboga Airport is selected to be the \"Best Airport\" by International Airports Council of Europe (ACI Europe).",
+      "is selected as the \"Best Airport\" in \"5-10 million passengers\" category."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": [
+      "Esenboğa International Airport was awarded the best airport in Europe by ACI Europe (Airport Council International)",
+      "Esenboğa was in the 5–10 million per annum category"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the terminal opened in 2006",
+   "verdict": "softened",
+   "inAfter": "The terminal opened in 2006",
+   "note": "Was 'opened in October 2006 under a build, operate and transfer contract'. TAV gives the year; the month and the contract type rest on Wikipedia alone (cut below).",
+   "sources": [
+    {
+     "file": "tav-esb",
+     "org": "TAV Airports (the operator, tavairports.com)",
+     "dated": "read 2026-09-23 (TAV's page for the airport)",
+     "quote": "began providing service in 2006 with its new and modern terminal building"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "The current Terminal, which went into operation on 16 October 2006"
+    }
+   ]
+  },
+  {
+   "claim": "a separate general aviation terminal for private aircraft followed",
+   "verdict": "softened",
+   "inAfter": "and a separate general aviation terminal for private aircraft followed.",
+   "note": "Was '... followed in January 2012'. The airport's release on the opening confirms the terminal and its purpose but carries no date on the page, so the date is cut (below). 'Followed' rests on Wikipedia's date and on the release, which describes the main airport as already holding its ACI Europe award and handling 8.5 million passengers a year.",
+   "sources": [
+    {
+     "file": "op-gat",
+     "org": "TAV Airports (the operator, esenbogaairport.com, the airport's own site)",
+     "dated": "undated on the saved page (the airport's press release)",
+     "quote": [
+      "The General Aviation Terminal of Esenboğa Airport -having the \"Best Airport of Europe\" award- which renders special services for private airplanes was opened with a ceremony",
+      "Esenboğa Airport had 1 million passengers in 2002. Today this number has increased to 8.5 million"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "A new general aviation terminal of 469 m2 (5,048 sq ft) was opened in January 2012 to service private aircraft."
+    }
+   ]
+  },
+  {
+   "claim": "TAV Airports runs the airport",
+   "verdict": "confirmed",
+   "inAfter": "TAV Airports, which runs the airport",
+   "note": "Added only to attribute the runway statement that replaces the stale 'under construction' (next claim). TAV's 2025 results list Esenboga as 100 per cent TAV's; TAV says a December 2022 tender extended its concession to May 2050.",
+   "sources": [
+    {
+     "file": "tav-fy25",
+     "org": "TAV Airports (the operator, ir.tav.aero)",
+     "dated": "2026-02-17 (2025 full year investor presentation, date on its first page)",
+     "quote": "Ankara Esenboga (100%)"
+    },
+    {
+     "file": "tav-esb",
+     "org": "TAV Airports (the operator, tavairports.com)",
+     "dated": "read 2026-09-23 (TAV's page for the airport)",
+     "quote": "Following the tender held in December 2022, TAV Airports extended its concession period until May 2050"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "operator = TAV Airports Holding"
+    }
+   ]
+  },
+  {
+   "claim": "TAV Airports says a second runway, 3,750 metres long, has been completed",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "TAV Airports",
+   "inAfter": "TAV Airports, which runs the airport, says a second runway, 3,750 metres long, has now been completed.",
+   "note": "Replaces 'A second parallel runway is under construction to the east, and the runway designations will change when it opens' (Wikipedia's body, still unchanged). TAV's February and July 2026 results both list the 3,750 m second runway, taxiways, a cargo apron and a new control tower as completed under the new concession (May 2025 to May 2050). Attributed to TAV as the only body stating it; Wikipedia's own infobox already lists runway 03C/21C, the name its body says the old 03R/21L takes once the new runway is finished. TAV's word 'second' is kept: OurAirports still lists two runways (03L/21R and 03R/21L) and Wikipedia's infobox three.",
+   "sources": [
+    {
+     "file": "tav-fy25",
+     "org": "TAV Airports (the operator, ir.tav.aero)",
+     "dated": "2026-02-17 (2025 full year investor presentation, date on its first page)",
+     "quote": [
+      "February 17, 2026",
+      "3,750 meter long second runway",
+      "Air traffic control tower & other various investments have been completed.",
+      "Ankara Esenboga Airport Investments Have Been Completed."
+     ]
+    },
+    {
+     "file": "tav-1h26",
+     "org": "TAV Airports (the operator, ir.tav.aero)",
+     "dated": "July 2026 (1H 2026 investor presentation, date on its first page)",
+     "quote": [
+      "July 2026",
+      "3,750 meter long second runway",
+      "Ankara investments completed"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": [
+      "r1_number = 03C/21C",
+      "r3_number = 03R/21L"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "Upon completion, the current runway 03R/21L will be resigned as 03C/21C"
+    }
+   ]
+  },
+  {
+   "claim": "the name comes from the village of Esenboga, from Isen Buqa, a Turkic commander in Timur's army at the Battle of Ankara in 1402, who camped here",
+   "verdict": "softened",
+   "inAfter": "The name comes from the village of Esenboğa, from Isen Buqa, a Turkic commander in Timur's army who made camp here at the Battle of Ankara in 1402.",
+   "note": "Was 'who settled his troops here'. Hurriyet's column (in Turkish) says Esenboga is a person's name, originally Isen Buga, one of Timur's generals and a ruler of the Chagatai state, one of the Turkic empires of Asia; that he fought in the 1402 battle at Ankara, near Cubuk, and set up his headquarters at the place now named after him, Esenboga being the worn-down form of his name; and that the airfield was built at the small settlement called Esenboga and given its name. 'Made camp' is the plain common ground of 'set up his headquarters' and Wikipedia's 'settled his troops'.",
+   "sources": [
+    {
+     "file": "hurriyet-bardakci",
+     "org": "Hürriyet (national newspaper; column by Murat Bardakçı)",
+     "dated": "undated on the saved page",
+     "quote": [
+      "‘‘Esenboğa’’ bir şahıs adıdır, aslı ‘‘İsen Buga’’ dır",
+      "Timur' un generallerinden birinin ismidir.",
+      "İsen Buga, Asya'daki Türk imparatorluklarından biri olan Çağatay Devleti' nin hükümdarıydı.",
+      "İsen Buga, Timur' la Osmanlı hükümdarı Yıldırım Bayezid arasında 1402'de Ankara'da, Çubuk taraflarında çıkan savaşta da bulundu.",
+      "Karargáhını bugün kendi adıyla anılan yerde, daha doğrusu adının bozulmuş şekli olan ‘‘Esenboğa’’ taraflarında kurdu.",
+      "‘‘Esenboğa’’ denilen küçük yerleşim merkezinin bulunduğu yerde... İnşaat tamamlandı ve alana bulunduğu yerin adı verildi."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "The name of the airport comes from the village of Esenboğa, which literally means \"Windflowing Bull\" or \"Serene Bull\", the modernized form of Isen Buqa, the name of a Turkic warlord in the army of Timur who settled his troops here during the Battle of Ankara in 1402."
+    }
+   ]
+  },
+  {
+   "claim": "more than 13 million passengers in 2025",
+   "verdict": "cut",
+   "wasBefore": "It carried more than 13 million passengers in 2025",
+   "why": "Understated: DHMI via TAV 13,987,298, Eurostat 13,926,576. Corrected to almost 14 million (above)."
+  },
+  {
+   "claim": "it has a good record",
+   "verdict": "cut",
+   "wasBefore": "It has a good record.",
+   "why": "Framing for an award history that is mostly cut below. The one award kept is stated plainly instead. (ACI's own lists show later passenger-survey awards; held back below.)"
+  },
+  {
+   "claim": "the ACI Europe award was in 2009",
+   "verdict": "cut",
+   "wasBefore": "ACI Europe named it the best airport in Europe in its size category in 2009",
+   "why": "The year rests on Wikipedia alone. ACI Europe's 2009 release, cited by Wikipedia, is gone (a 404 page, 23 Sep); the airport's awards page names the award and the 5 to 10 million category but no year; ACI Europe's site shows no awards archive; TAV's awards page covers 2025 and 2026 only. Softened (above)."
+  },
+  {
+   "claim": "the first such award to a Turkish airport",
+   "verdict": "cut",
+   "wasBefore": "the first such award to a Turkish airport",
+   "why": "Wikipedia alone; neither the airport nor TAV says it."
+  },
+  {
+   "claim": "ACI's judges singled out exhaust gases recycled for air conditioning, saving about 25 per cent of its energy",
+   "verdict": "cut",
+   "wasBefore": "singling out an unusual piece of environmental engineering: the terminal recycles exhaust gases to power its air conditioning, saving about 25 per cent of its energy",
+   "why": "Wikipedia's quote of ACI Europe's judges, whose release is gone. The airport's own release confirms a trigeneration plant making power, heating and cooling from natural gas, but not the judges' words or the 25 per cent."
+  },
+  {
+   "claim": "a second ACI award in 2020, in the 15 to 25 million category",
+   "verdict": "cut",
+   "wasBefore": "ACI gave it a second award in 2020 in the 15 to 25 million category.",
+   "why": "Good sources disagree. Wikipedia says ACI named it best European airport of 15 to 25 million passengers in 2020; TAV's 2023 brochure for the airport says 'Best airport in Europe 2019', rewarded by ACI Europe, with no category; and TAV's own figures put 2019 traffic at about 13.7 million (11.46 million domestic, 2.28 million international), below that band. ACI's 2020 release could not be reached (404 at the address Wikipedia cites, and a news index at the same path without /news/), and ACI's list of past winners starts at 2021. Cut rather than pick a year or category. The quotes below show the disagreement; the brochure's text is saved with the PDF's broken 'i' glyphs.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "In 2020, Esenboğa Airport was awarded as the best European airport with a capacity of 15 – 25 million passengers by Airports Council International."
+    },
+    {
+     "file": "tav-esb-brochure",
+     "org": "TAV Airports (the operator, tavairports.com)",
+     "dated": "late 2023 (the brochure gives 2022 traffic and 2023 year to date)",
+     "quote": "“Best a/i.dotrport /i.dotn Europe 2019” rewarded by ACI Europe."
+    },
+    {
+     "file": "tav-fy25",
+     "org": "TAV Airports (the operator, ir.tav.aero)",
+     "dated": "2026-02-17 (2025 full year investor presentation, date on its first page)",
+     "quote": [
+      "11,46",
+      "2,28 1,92 2,82 3,19 3,64",
+      "2019 2022 2023 2024 2025",
+      "Dom Int",
+      "Passsengers Served (m)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "October 2006, under a build, operate and transfer contract",
+   "verdict": "cut",
+   "wasBefore": "The terminal opened in October 2006 under a build, operate and transfer contract",
+   "why": "The month and the contract type rest on Wikipedia alone. TAV gives only the year, and its current results describe today's arrangement as a lease (May 2025 to May 2050), not the original contract. The DHMI page Wikipedia cites (esenboga.dhmi.gov.tr) did not resolve (one try). Softened to 2006 (above)."
+  },
+  {
+   "claim": "the general aviation terminal opened in January 2012",
+   "verdict": "cut",
+   "wasBefore": "and a separate general aviation terminal for private aircraft followed in January 2012",
+   "why": "The date rests on Wikipedia alone; the airport's release on the opening is undated on the page. Softened (above)."
+  },
+  {
+   "claim": "a second parallel runway is under construction to the east; designations will change when it opens",
+   "verdict": "cut",
+   "wasBefore": "A second parallel runway is under construction to the east, and the runway designations will change when it opens.",
+   "why": "Out of date: TAV's February and July 2026 results report the second runway completed. Corrected, attributed to TAV (above). 'Parallel', 'to the east' and the renumbering rest on Wikipedia alone."
+  },
+  {
+   "claim": "who settled his troops here",
+   "verdict": "cut",
+   "wasBefore": "who settled his troops here at the Battle of Ankara in 1402",
+   "why": "Softened to 'made camp here' (above): Hurriyet has him set up his headquarters there, Wikipedia has him settle his troops."
+  },
+  {
+   "claim": "FCDO advice for Turkey",
+   "verdict": "cut",
+   "why": "Held back: a warning that replaces nothing. The FCDO advises against all travel to within 10 km of Turkey's border with Syria (updated 21 September 2026, still current 23 September 2026), and warns that the wider Middle East situation may bring flight cancellations and short-notice airspace closures. The advice does not name Ankara.",
+   "sources": [
+    {
+     "file": "fcdo-turkey",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-09-21 (updated; still current 23 September 2026)",
+     "quote": [
+      "FCDO advises against all travel to parts of Turkey.",
+      "Still current at: 23 September 2026",
+      "Updated: 21 September 2026",
+      "FCDO advises against all travel to within 10km of the border with Syria due to fighting and a heightened risk of terrorism.",
+      "British nationals currently in the Middle East should be prepared for possible flight cancellations, periodic airspace closures, and potential travel disruptions"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "third in Turkey on domestic passengers",
+   "verdict": "cut",
+   "why": "Held back: a new ranking that replaces nothing. Eurostat's 2025 national (domestic) figures put Esenboga third in Turkey, with 10,319,166, after Sabiha Gokcen (21,193,463) and Istanbul (17,877,603); Wikipedia's lead says the same.",
+   "sources": [
+    {
+     "file": "eurostat-paoa-2025",
+     "org": "Eurostat",
+     "dated": "2025 (annual data; table updated 2026-09-17, date in the file)",
+     "quote": [
+      "\"NAT\":1",
+      "\"24305\":21193463",
+      "\"24361\":17877603",
+      "\"22793\":10319166"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "3rd in terms of domestic passenger traffic (after Istanbul Airport and Sabiha Gökçen Airport)"
+    }
+   ]
+  },
+  {
+   "claim": "ACI's passenger-survey awards for 2021, 2022 and 2024",
+   "verdict": "cut",
+   "why": "Held back: later awards that replace nothing in the text (the 2020 award they might have replaced is cut as unconfirmed). ACI World's own list of past winners names Esenboga among Europe's best airports of 5 to 15 million passengers for 2022 and 2024, and its most enjoyable airports in Europe for both years, with a hygiene award for 2021. TAV's release of March 2022 confirms the 2021 hygiene award. The owner may want one line on this in place of the 2009 award.",
+   "sources": [
+    {
+     "file": "aci-asq-past",
+     "org": "ACI World (Airports Council International)",
+     "dated": "read 2026-09-23 (ACI's list of past ASQ award winners, 2021 to 2024)",
+     "quote": [
+      "2024 Winners",
+      "Best Airports by Size and Region",
+      "5 to 15 million passengers per year",
+      "Ankara Esenboğa Airport (Ankara, Turkey)",
+      "Most Enjoyable Airport",
+      "2022 Winners",
+      "Ankara Esenboga Airport (Ankara, Turkey)",
+      "Best Hygiene Measures by Region",
+      "Ankara Esenboga Airport - Ankara, Turkey"
+     ]
+    },
+    {
+     "file": "op-asq-2022",
+     "org": "TAV Airports (the operator, esenbogaairport.com, the airport's own site)",
+     "dated": "2022-03-10 (the airport's press release, date in its listing)",
+     "quote": [
+      "Izmir Adnan Menderes, Ankara Esenboga, Medina, Tbilisi and Skopje airports received the prestigious Airport Service Quality award in their respective categories.",
+      "The two airports, along with Ankara Esenboğa, Tbilisi and Medina airports, are awarded in the \"Hygiene\" category added during the pandemic."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "AJet and Pegasus the main international airlines",
+   "verdict": "cut",
+   "why": "Held back: the old text names no airlines, so this replaces nothing. TAV says AJet and Pegasus are the main airlines in Ankara's international traffic, which rose 14 per cent in 2025, and that AJet based two new aircraft there. TAV's word alone.",
+   "sources": [
+    {
+     "file": "tav-1h26",
+     "org": "TAV Airports (the operator, ir.tav.aero)",
+     "dated": "July 2026 (1H 2026 investor presentation, date on its first page)",
+     "quote": [
+      "Ajetand Pegasus are the main airlines in Ankara international"
+     ]
+    },
+    {
+     "file": "tav-fy25",
+     "org": "TAV Airports (the operator, ir.tav.aero)",
+     "dated": "2026-02-17 (2025 full year investor presentation, date on its first page)",
+     "quote": [
+      "Ankara 2025 international traffic is 14% above 2024. Ajet has based two new aircraft in Ankara."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "terminal capacity 30 million a year",
+   "verdict": "cut",
+   "why": "Held back: a new figure that replaces nothing. TAV gives terminal capacity as 30 million passengers a year; Wikipedia's infobox has an annual passenger capacity of 30,000,000.",
+   "sources": [
+    {
+     "file": "tav-fy25",
+     "org": "TAV Airports (the operator, ir.tav.aero)",
+     "dated": "2026-02-17 (2025 full year investor presentation, date on its first page)",
+     "quote": "Terminal capacity: 30m"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": [
+      "stat1_header = Annual passenger capacity",
+      "stat1_data = 30,000,000"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Turkey's first carbon-neutral airport",
+   "verdict": "cut",
+   "why": "Held back: replaces nothing. TAV says Esenboga became Turkey's first carbon-neutral airport in 2012 and in 2026 reached Level 4+ of ACI Europe's Airport Carbon Accreditation. TAV's word alone.",
+   "sources": [
+    {
+     "file": "tav-esb",
+     "org": "TAV Airports (the operator, tavairports.com)",
+     "dated": "read 2026-09-23 (TAV's page for the airport)",
+     "quote": "It became the first ever carbon-neutral airport in T&uuml;rkiye in 2012."
+    },
+    {
+     "file": "tav-awards",
+     "org": "TAV Airports (the operator, tavairports.com)",
+     "dated": "read 2026-09-23 (TAV's awards page, entry dated 2026)",
+     "quote": "Ankara Esenbo&#x11F;a Airport received Level 4&#x2B; certification under the Airport Carbon Accreditation (ACA) program run by ACI EUROPE."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which tells you what this airport is for.",
+   "why": "The old text's framing, kept: about three quarters of its 2025 passengers were domestic (DHMI via TAV 10.3 of 14.0 million; Eurostat 10.3 of 13.9 million)."
+  }
+ ],
+ "tracerOk": {}
+}

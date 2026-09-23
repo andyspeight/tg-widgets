@@ -1,0 +1,225 @@
+{
+ "iata": "ZAD",
+ "id": "recGI8uppc3rgX4Iq",
+ "name": "Zadar Airport",
+ "country": "Croatia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Zadar_Airport",
+ "audited": "2026-09-23",
+ "before": "Zadar's airport, at Zemunik Donji 8 km from the city centre, and fourth busiest in Croatia with around 1.6 million passengers in 2025 across more than 70 destinations.\n\nIt is the only airport in the country with two runways, and it doubles as the Croatian Air Force's main training base.\n\nLow cost carriers made it what it is. Ryanair based a 737 here in April 2013 and Lauda followed with A320s and a long list of new routes, so summer capacity is much larger than the winter timetable suggests.\n\nThere is a good story attached to the site. For years it was one of the very few airports anywhere where the taxiway crossed a public road. The road was closed in April 2010 under terms negotiated during Croatia's European Union accession, and in 2020 an underpass was built so it could reopen.\n\nZadar has had commercial flights since 1936, when the city was part of the Italian province of Zara.",
+ "after": "Zadar's airport sits at Zemunik Donji, about 10 km east of the city centre. It was Croatia's fourth busiest in 2025, with around 1.6 million passengers.\n\nOf Croatia's airports with scheduled flights, it is the only one with two runways.\n\nLow cost carriers made it what it is, and Ryanair has a base here. The airport's own figures show how seasonal the traffic is: 364,473 passengers in August 2025 against 1,808 in January.",
+ "claims": [
+  {
+   "claim": "at Zemunik Donji",
+   "verdict": "confirmed",
+   "inAfter": "Zadar's airport sits at Zemunik Donji",
+   "note": "The operator's address is in Zemunik Donji, and Eurostat labels the airport ZADAR/ZEMUNIK.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Zadar Airport Ltd. (the airport operator, zadar-airport.hr)",
+     "dated": "read 2026-09-23 (the airport's about page)",
+     "quote": [
+      "Address: Zemunik Donji, Ulica I No. 2/A",
+      "City: Zadar"
+     ]
+    },
+    {
+     "file": "eurostat-hr",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat HR_LDZD ZADAR/ZEMUNIK airport: passengers carried in 2025: 1,620,417"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-29",
+     "quote": "It is located in Zemunik Donji, 8 km (5 mi) from the centre of Zadar."
+    }
+   ]
+  },
+  {
+   "claim": "about 10 km east of the city centre",
+   "verdict": "corrected",
+   "inAfter": "about 10 km east of the city centre.",
+   "note": "Was '8 km from the city centre' (Wikipedia; the operator's own page says Zadar is 7 km away), which fails the coordinates check: the airport is 10.5 km in a straight line from the GeoNames centre of Zadar, at 101 degrees, and a road cannot be shorter than the straight line. Two independent position sets agree on about 10 km: OurAirports' airport with GeoNames' centre (10.5 km), and Ryanair's own airport position (44.1083, 15.3467) with Wikipedia's coordinates for Zadar (44.1142, 15.2275), which are 9.5 km apart at about 94 degrees, also east. The 7 and 8 km figures probably measure to the edge of the city; with no source saying so, neither is used.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 10.5 km (6.5 miles)",
+      "Bearing from the city centre: 101 degrees, which is east"
+     ]
+    },
+    {
+     "file": "ryanair-zad",
+     "org": "Ryanair (its own airport data, ryanair.com)",
+     "dated": "read 2026-09-23 (live data)",
+     "quote": "\"coordinates\":{\"latitude\":44.1083,\"longitude\":15.3467}"
+    },
+    {
+     "file": "wikipedia-coords",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-06 (the Zadar article)",
+     "quote": "Wikipedia coordinates for Zadar (revision 1373514388 of 2026-09-06T11:43:50Z): 44.1142, 15.2275"
+    }
+   ]
+  },
+  {
+   "claim": "Croatia's fourth busiest in 2025, around 1.6 million passengers",
+   "verdict": "confirmed",
+   "inAfter": "It was Croatia's fourth busiest in 2025, with around 1.6 million passengers.",
+   "note": "Eurostat's 2025 table of every Croatian airport it reports: Zagreb, Split, Dubrovnik, then Zadar with 1,620,417. The airport's own table gives 1,639,601 for 2025 and Wikipedia's infobox 1,639,167.",
+   "sources": [
+    {
+     "file": "eurostat-hr",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat HR_LDDU DUBROVNIK/CILIPI airport: passengers carried in 2025: 3,075,302",
+      "Eurostat HR_LDZD ZADAR/ZEMUNIK airport: passengers carried in 2025: 1,620,417",
+      "Eurostat HR_LDPL PULA airport: passengers carried in 2025: 542,315"
+     ]
+    },
+    {
+     "file": "op-traffic",
+     "org": "Zadar Airport Ltd. (the airport operator, zadar-airport.hr)",
+     "dated": "read 2026-09-23 (the airport's traffic statistics, monthly to August 2026)",
+     "quote": [
+      "2024 2025 Index 2024 2025 Index 2024 2025 Index",
+      "TOTAL 7.864 7.804 -0.76% 1.593.996 1.639.601 +2.86%"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-29",
+     "quote": [
+      "the airport handled around 1.6 million passengers in 2025",
+      "It is the fourth busiest airport in Croatia."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the only Croatian airport with scheduled flights and two runways",
+   "verdict": "confirmed",
+   "inAfter": "Of Croatia's airports with scheduled flights, it is the only one with two runways.",
+   "note": "OurAirports lists eight Croatian airports with scheduled service; Zadar is the only one with two open runways (04/22 and 13/31). Worded for airports with scheduled flights, as that is what the data covers.",
+   "sources": [
+    {
+     "file": "ourairports-hr-runways",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "OurAirports LDZD Zadar Airport (IATA ZAD), scheduled service yes: open runways listed: 2 (04/22 2,000 m ASP; 13/31 2,500 m ASP)",
+      "OurAirports LDZA Zagreb Franjo Tuđman International Airport (IATA ZAG), scheduled service yes: open runways listed: 1 (04/22 3,252 m ASP)",
+      "OurAirports LDSP Split Saint Jerome Airport (IATA SPU), scheduled service yes: open runways listed: 1 (05/23 2,550 m ASP)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-29",
+     "quote": "It's the only airport in Croatia with 2 runways."
+    }
+   ]
+  },
+  {
+   "claim": "Ryanair has a base here",
+   "verdict": "corrected",
+   "inAfter": "and Ryanair has a base here.",
+   "note": "Was 'Ryanair based a 737 here in April 2013'. Ryanair's own airport data marks Zadar as a base today; the 2013 date and the aircraft rest on Wikipedia alone (cut below).",
+   "sources": [
+    {
+     "file": "ryanair-zad",
+     "org": "Ryanair (its own airport data, ryanair.com)",
+     "dated": "read 2026-09-23 (live data)",
+     "quote": [
+      "\"iataCode\":\"ZAD\",\"name\":\"Zadar\"",
+      "\"base\":true"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-29",
+     "quote": "In April 2013, Zadar Airport became a Ryanair base"
+    }
+   ]
+  },
+  {
+   "claim": "the airport's own figures: 364,473 passengers in August 2025, 1,808 in January",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport's own figures show how seasonal the traffic is: 364,473 passengers in August 2025 against 1,808 in January.",
+   "note": "Replaces 'so summer capacity is much larger than the winter timetable suggests' with the airport's own monthly figures for 2025: January 1,808, August 364,473, December 2,317.",
+   "sources": [
+    {
+     "file": "op-traffic",
+     "org": "Zadar Airport Ltd. (the airport operator, zadar-airport.hr)",
+     "dated": "read 2026-09-23 (the airport's traffic statistics, monthly to August 2026)",
+     "quote": [
+      "2024 2025 Index 2024 2025 Index 2024 2025 Index",
+      "January 53 59 +11.32% 1.549 1.808 +16.72%",
+      "August 1.554 1.606 +3.35% 335.687 364.473 +8.58%",
+      "December 71 69 -2.82% 2.486 2.317 -6.80%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "8 km from the city centre",
+   "verdict": "cut",
+   "wasBefore": "at Zemunik Donji 8 km from the city centre",
+   "why": "Fails the coordinates check (10.5 km in a straight line). Corrected (see above)."
+  },
+  {
+   "claim": "more than 70 destinations",
+   "verdict": "cut",
+   "wasBefore": "across more than 70 destinations.",
+   "why": "A count on Wikipedia alone; the airport's own pages read give no count, and a count could only come back as the airport's own, attributed."
+  },
+  {
+   "claim": "the Croatian Air Force's main training base",
+   "verdict": "cut",
+   "wasBefore": "and it doubles as the Croatian Air Force's main training base.",
+   "why": "Wikipedia alone. The Croatian armed forces' site links to its air force pages only through script links, and the operator's pages do not mention it."
+  },
+  {
+   "claim": "Ryanair based a 737 here in April 2013",
+   "verdict": "cut",
+   "wasBefore": "Ryanair based a 737 here in April 2013",
+   "why": "The date and the aircraft rest on Wikipedia alone: the operator's own base releases that Wikipedia cites now return 404 or survive only in the web archive, which the network policy blocks. The base itself is kept (see above)."
+  },
+  {
+   "claim": "Lauda followed with A320s and a long list of new routes",
+   "verdict": "cut",
+   "wasBefore": "and Lauda followed with A320s and a long list of new routes, so summer capacity is much larger than the winter timetable suggests.",
+   "why": "Lauda rests on Wikipedia alone. The seasonality is kept, from the airport's own monthly figures (see above)."
+  },
+  {
+   "claim": "the taxiway crossed a public road; closed in April 2010; the 2020 underpass",
+   "verdict": "cut",
+   "wasBefore": "There is a good story attached to the site. For years it was one of the very few airports anywhere where the taxiway crossed a public road. The road was closed in April 2010 under terms negotiated during Croatia's European Union accession, and in 2020 an underpass was built so it could reopen.",
+   "why": "Wikipedia alone: its 2010 source (Jutarnji list) is blocked by the network policy and the archived copy sits in the web archive, also blocked."
+  },
+  {
+   "claim": "commercial flights since 1936, under the Italian province of Zara",
+   "verdict": "cut",
+   "wasBefore": "Zadar has had commercial flights since 1936, when the city was part of the Italian province of Zara.",
+   "why": "Wikipedia alone; its source is a hobby site of old timetables, and the airport's own pages give no history."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Low cost carriers made it what it is,",
+   "why": "The old text's judgement, kept: Ryanair has a base here (sourced) and the traffic is almost all summer holiday flying (the airport's own figures)."
+  }
+ ],
+ "tracerOk": {
+  "364,473": "The operator writes it 364.473, with a dot for thousands.",
+  "1,808": "The operator writes it 1.808, with a dot for thousands.",
+  "Of Croatia's": "The tracer reads the opening word with the name; Croatia is in Eurostat's and OurAirports' data and Wikipedia."
+ }
+}
