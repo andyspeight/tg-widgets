@@ -1,0 +1,457 @@
+{
+ "iata": "PVD",
+ "id": "reczyPP1wuS6SqB1m",
+ "name": "Rhode Island T. F. Green International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Rhode_Island_T._F._Green_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Rhode Island's main airport, at Warwick 6 miles south of Providence, and the largest of the six airports run by the Rhode Island Airport Corporation. Around 7.5 million people live within roughly 90 minutes of it.\n\nThe train connection is what makes it useful beyond Rhode Island. The airport sits directly beside the Northeast Corridor and has its own station, T. F. Green Airport, on the MBTA Providence/Stoughton line, reached by an elevated walkway from the terminal. The station opened in November 2011 and has carried services to Providence and Boston, so a client can arrive here and continue by rail rather than road.\n\nThere are two concourses, North with 14 gates and South with eight. Gates 7 and 8 handle international arrivals and connect directly down to customs on the lower level.\n\nIt opened in 1931 and was the first state-owned airport in the United States. It is named after Theodore Francis Green, a Rhode Island governor and long-serving senator, and the terminal, rebuilt in 1996, is named after another governor, Bruce Sundlun.",
+ "after": "Rhode Island's main airport, at Warwick 6 miles south of Providence. It is the largest of the six airports run by the Rhode Island Airport Corporation.\n\nThe train connection is what makes it useful beyond Rhode Island. It has its own station, TF Green Airport, on the MBTA Providence/Stoughton line, reached by an elevated walkway from the terminal. Commuter trains run from there to Providence and Boston on weekdays only, so a client arriving Monday to Friday can continue by rail rather than road.\n\nThe terminal has two concourses, North and South. International arrivals clear customs on the lower level.\n\nIt opened in 1931 and was the first state-owned airport in the United States. The name honours Theodore Francis Green, a Rhode Island governor and long-serving senator, and the terminal, rebuilt in 1996, is named after another governor, Bruce Sundlun.",
+ "claims": [
+  {
+   "claim": "Rhode Island's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Rhode Island's main airport",
+   "note": "The FAA's CY2025 table lists only three Rhode Island airports with commercial service; Warwick (PVD) has about a hundred times the boardings of each of the other two.",
+   "sources": [
+    {
+     "file": "op-our-airports",
+     "org": "Rhode Island Airport Corporation (operator, flyri.com)",
+     "quote": "the state’s main commercial airport, Rhode Island T. F. Green International Airport",
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "72 NE RI PVD Warwick Rhode Island Tf Green International P S 2,117,401 1,984,916 6.67%",
+      "354 NE RI BID Block Island Block Island State P N 19,914 11,867 67.81%",
+      "356 NE RI WST Westerly Westerly State P N 19,694 12,320 59.85%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is the largest and most active airport among the six operated by the Rhode Island Airport Corporation (RIAC)."
+    }
+   ]
+  },
+  {
+   "claim": "at Warwick",
+   "verdict": "confirmed",
+   "inAfter": "at Warwick",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is a public international airport in Warwick, Rhode Island"
+    },
+    {
+     "file": "op-about-pvd",
+     "org": "Rhode Island Airport Corporation (operator, flyri.com)",
+     "quote": "is located in Warwick, Rhode Island, and is the largest airport in the state",
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "72 NE RI PVD Warwick",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "6 miles south of Providence",
+   "verdict": "confirmed",
+   "inAfter": "6 miles south of Providence",
+   "note": "Straight line 6.9 miles, so the stated 6 miles gives a ratio of 0.87, inside the gate; bearing 186 degrees, south.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "6 miles (5.2 nmi; 9.7 km) south of the state's capital and largest city of Providence"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 11.1 km (6.9 miles)",
+      "Bearing from the city centre: 186 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the largest of the six airports run by the Rhode Island Airport Corporation",
+   "verdict": "confirmed",
+   "inAfter": "It is the largest of the six airports run by the Rhode Island Airport Corporation.",
+   "note": "The operator's sentence is almost word for word Wikipedia's (or the other way round), so the FAA table is added as independent support: of RIAC's six airports only three have commercial service and PVD dwarfs the other two. The other three (Newport, North Central, Quonset) are general aviation airports, as the operator says. The opening fragment was split in two so the comma after Providence no longer reads as an Oxford comma.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is the largest and most active airport among the six operated by the Rhode Island Airport Corporation (RIAC)."
+    },
+    {
+     "file": "op-our-airports",
+     "org": "Rhode Island Airport Corporation (operator, flyri.com)",
+     "quote": [
+      "is the largest and most active airport among the six operated by Rhode Island Airport Corporation. Located in Warwick, Rhode Island",
+      "a network of five general aviation airports throughout the state: Block Island, Newport, North Central, Quonset and Westerly"
+     ],
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "72 NE RI PVD Warwick Rhode Island Tf Green International P S 2,117,401 1,984,916 6.67%",
+      "354 NE RI BID Block Island Block Island State P N 19,914 11,867 67.81%",
+      "356 NE RI WST Westerly Westerly State P N 19,694 12,320 59.85%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "its own station, TF Green Airport, on the MBTA Providence/Stoughton line",
+   "verdict": "confirmed",
+   "inAfter": "It has its own station, TF Green Airport, on the MBTA Providence/Stoughton line",
+   "note": "Reworded from 'The airport sits directly beside the Northeast Corridor and has its own station, T. F. Green Airport' (the corridor clause is cut below). The name is now written as the MBTA writes it, 'TF Green Airport'.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is connected to T. F. Green Airport station served by the MBTA on the Providence/Stoughton Line"
+    },
+    {
+     "file": "mbta-tfgreen",
+     "org": "Massachusetts Bay Transportation Authority (MBTA)",
+     "quote": [
+      "TF Green Airport",
+      "Providence/​Stoughton Line",
+      "700 Jefferson Blvd, Warwick, RI 02886"
+     ],
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "op-interlink",
+     "org": "Rhode Island Airport Corporation (operator, flyri.com)",
+     "quote": "serving MBTA commuter trains traveling between Southern Rhode Island, Warwick, Providence and Boston",
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "mbta-timetable-wkday",
+     "org": "Massachusetts Bay Transportation Authority (MBTA)",
+     "quote": [
+      "Providence/​Stoughton Line",
+      "Thursday, September 24, 2026",
+      "TF Green Airport"
+     ],
+     "dated": "2026-09-24 (timetable date on the page)"
+    }
+   ]
+  },
+  {
+   "claim": "reached by an elevated walkway from the terminal",
+   "verdict": "confirmed",
+   "inAfter": "reached by an elevated walkway from the terminal",
+   "note": "The operator calls it a skywalk.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "includes an elevated walkway to the terminal"
+    },
+    {
+     "file": "op-interlink",
+     "org": "Rhode Island Airport Corporation (operator, flyri.com)",
+     "quote": "Connecting MBTA commuter trains, a commuter parking garage, rental car services and a skywalk to the airport terminal",
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    }
+   ]
+  },
+  {
+   "claim": "trains to Providence and Boston on weekdays only",
+   "verdict": "corrected",
+   "inAfter": "Commuter trains run from there to Providence and Boston on weekdays only, so a client arriving Monday to Friday can continue by rail rather than road",
+   "note": "Was 'has carried services to Providence and Boston, so a client can arrive here and continue by rail rather than road', which reads as if trains always run. The operator, RIDOT and the MBTA all say weekdays only. The MBTA's own timetable for Thursday 24 September 2026 lists TF Green Airport with calls from 6:16 AM; its timetable for Saturday 26 September 2026 starts at Providence and has no TF Green Airport row at all.",
+   "sources": [
+    {
+     "file": "op-transit",
+     "org": "Rhode Island Airport Corporation (operator, flyri.com)",
+     "quote": [
+      "Weekday MBTA commuter rail service is available between Southern Rhode Island (Wickford Junction), Rhode Island T. F. Green International Airport and downtown Providence",
+      "Boston (Back Bay & South Stations)"
+     ],
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "op-faqs",
+     "org": "Rhode Island Airport Corporation (operator, flyri.com)",
+     "quote": "You can take one of 20 daily (weekday) MBTA commuter rail trains from the airport to Boston with stops in Providence",
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "ridot-rails",
+     "org": "Rhode Island Department of Transportation (ridetherailsri.com)",
+     "quote": "MBTA serves T.F. Green with 20 weekday stops, Monday through Friday",
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "mbta-timetable-wkday",
+     "org": "Massachusetts Bay Transportation Authority (MBTA)",
+     "quote": [
+      "Thursday, September 24, 2026",
+      "South Station",
+      "TF Green Airport",
+      "6:16 AM"
+     ],
+     "dated": "2026-09-24 (timetable date on the page)"
+    },
+    {
+     "file": "mbta-timetable-sat",
+     "org": "Massachusetts Bay Transportation Authority (MBTA)",
+     "quote": [
+      "Saturday, September 26, 2026",
+      "Providence 5:15 AM"
+     ],
+     "dated": "2026-09-26 (timetable date on the page)"
+    }
+   ]
+  },
+  {
+   "claim": "two concourses, North and South",
+   "verdict": "confirmed",
+   "inAfter": "The terminal has two concourses, North and South.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "has two concourses, North and South"
+    },
+    {
+     "file": "op-dining",
+     "org": "Rhode Island Airport Corporation (operator, flyri.com)",
+     "quote": [
+      "Delta ticket counter, North, and South Concourses",
+      "North Concourse at Gate 15",
+      "South Concourse at Gate 6"
+     ],
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "op-terminal-map-b",
+     "org": "Rhode Island Airport Corporation (operator, flyri.com)",
+     "quote": "has a single, easy to use airport terminal",
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    }
+   ]
+  },
+  {
+   "claim": "international arrivals clear customs on the lower level",
+   "verdict": "softened",
+   "inAfter": "International arrivals clear customs on the lower level.",
+   "note": "Was 'Gates 7 and 8 handle international arrivals and connect directly down to customs on the lower level'. The operator puts gates 7 and 8 in the South Concourse but does not say they are the international gates, so only the customs point is kept.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "are directly connected to customs, which is on the lower level of the concourse"
+    },
+    {
+     "file": "op-cbp",
+     "org": "Rhode Island Airport Corporation (operator, flyri.com)",
+     "quote": [
+      "International arriving passengers will proceed to U.S. Customs and Border Protection’s passport control.",
+      "All users exit U.S. Customs on the first level of the terminal"
+     ],
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "op-terminal-map-b",
+     "org": "Rhode Island Airport Corporation (operator, flyri.com)",
+     "quote": "Arrivals and baggage claim are located on the lower level",
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    }
+   ]
+  },
+  {
+   "claim": "opened in 1931",
+   "verdict": "confirmed",
+   "inAfter": "It opened in 1931",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Opened in 1931"
+    },
+    {
+     "file": "op-history",
+     "org": "Rhode Island Airport Corporation (operator, flyri.com)",
+     "quote": [
+      "1931",
+      "Rhode Island T. F. Green International Airport was originally founded as Hillsgrove State Airport"
+     ],
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    }
+   ]
+  },
+  {
+   "claim": "first state-owned airport in the United States",
+   "verdict": "confirmed",
+   "inAfter": "was the first state-owned airport in the United States",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the first state-owned airport in the United States."
+    },
+    {
+     "file": "op-history",
+     "org": "Rhode Island Airport Corporation (operator, flyri.com)",
+     "quote": "was the first state-owned and operated airport in the U.S.",
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    }
+   ]
+  },
+  {
+   "claim": "named after Theodore Francis Green, governor and long-serving senator",
+   "verdict": "confirmed",
+   "inAfter": "The name honours Theodore Francis Green, a Rhode Island governor and long-serving senator",
+   "note": "Reworded from 'It is named after' so that two sentences in a row no longer start with 'It'. NGA: governor 1933 to 1937, then four terms in the Senate, which bears out 'long-serving'.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the airport was named for former Rhode Island governor and longtime senator Theodore Francis Green"
+    },
+    {
+     "file": "op-history",
+     "org": "Rhode Island Airport Corporation (operator, flyri.com)",
+     "quote": "The airport is renamed Theodore Francis Green State Airport in honor of Green, who served as Rhode Island’s Governor and U.S. Senator.",
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "nga-green",
+     "org": "National Governors Association",
+     "quote": [
+      "Gov. Theodore Francis Green",
+      "January 3, 1933 - January 5, 1937",
+      "Green went on to win election to four terms in the U.S. Senate."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "terminal rebuilt in 1996",
+   "verdict": "confirmed",
+   "inAfter": "the terminal, rebuilt in 1996",
+   "note": "The operator's 1996 entry is the start of the expansion that developed the Bruce Sundlun Terminal Building; Wikipedia says the terminal was replaced in 1996.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Rebuilt in 1996, the renovated main terminal was named for former Rhode Island governor Bruce Sundlun."
+    },
+    {
+     "file": "op-history",
+     "org": "Rhode Island Airport Corporation (operator, flyri.com)",
+     "quote": [
+      "1996",
+      "A major airport expansion includes the development of the Bruce Sundlun Terminal Building"
+     ],
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    }
+   ]
+  },
+  {
+   "claim": "terminal named after another governor, Bruce Sundlun",
+   "verdict": "confirmed",
+   "inAfter": "is named after another governor, Bruce Sundlun",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the renovated main terminal was named for former Rhode Island governor Bruce Sundlun"
+    },
+    {
+     "file": "op-history",
+     "org": "Rhode Island Airport Corporation (operator, flyri.com)",
+     "quote": "the development of the Bruce Sundlun Terminal Building",
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "nga-sundlun",
+     "org": "National Governors Association",
+     "quote": [
+      "Gov. Bruce G. Sundlun",
+      "January 1, 1991 - January 2, 1995"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "7.5 million people within roughly 90 minutes",
+   "verdict": "cut",
+   "wasBefore": "Around 7.5 million people live within roughly 90 minutes of it.",
+   "why": "Wikipedia alone. Not on the operator's About PVD page, media guide, strategic business plan or master plan page (three tries)."
+  },
+  {
+   "claim": "sits directly beside the Northeast Corridor",
+   "verdict": "cut",
+   "wasBefore": "The airport sits directly beside the Northeast Corridor",
+   "why": "No second source names the corridor. The Providence Journal (15 January 2022) says Amtrak trains 'now pass through' the airport's Interlink station, and Wikipedia says Amtrak does not stop there, so the corridor is no use to a client at the airport; the trains that stop are the MBTA's, which the text keeps."
+  },
+  {
+   "claim": "station opened in November 2011",
+   "verdict": "cut",
+   "wasBefore": "The station opened in November 2011",
+   "why": "Probably wrong, and not worth replacing. Wikipedia contradicts itself (constructed October 2010, 'opened in November 2011', and 'Upon opening in December 2010, the station saw limited service'); the operator's own timeline says 'The InterLink Transportation Hub opens, along with a rental car facility and MBTA commuter rail service' under 2010. No second non-Wikipedia source for the 2010 date was found, and the date does not matter to a booking."
+  },
+  {
+   "claim": "North with 14 gates and South with eight",
+   "verdict": "cut",
+   "wasBefore": "North with 14 gates and South with eight",
+   "why": "Sources disagree. Wikipedia gives 14 and eight (22); the operator's live terminal map lists 20 gate numbers (1 to 12, 14 to 19, 21 and 22) under a 'Gates(18)' heading. The two concourses themselves are kept."
+  },
+  {
+   "claim": "gates 7 and 8 are the international arrival gates",
+   "verdict": "cut",
+   "wasBefore": "Gates 7 and 8 handle international arrivals and connect directly down to customs",
+   "why": "Wikipedia alone. The operator's pages put gates 7 and 8 in the South Concourse ('South Concourse by gates 7 & 8') and describe customs on the first level, but never say which gates take international arrivals. Softened to the customs point."
+  },
+  {
+   "claim": "more than 4.2 million passengers in 2025",
+   "verdict": "cut",
+   "note": "TOTAL passengers, arriving plus departing, from the operator's December 2025 traffic summary (4,281,388, up 6.7 per cent); the FAA's preliminary CY2025 table counts 2,117,401 enplanements (boardings only, about half the total), which is consistent.",
+   "sources": [
+    {
+     "file": "op-stats-dec2025",
+     "org": "Rhode Island Airport Corporation (operator, flyri.com)",
+     "quote": [
+      "Monthly Airport Traffic Summary - December 2025",
+      "Total Airport Passengers2 335,259 350,516 -4.4% -15,257 4,281,388 4,011,681 6.7% 269,707"
+     ],
+     "dated": "2025 (December 2025 summary, year to date)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "72 NE RI PVD Warwick Rhode Island Tf Green International P S 2,117,401 1,984,916 6.67%",
+     "dated": "2026-07-08"
+    }
+   ],
+   "why": "Held back: verified with two sources, but a new fact that replaces nothing in the old text (the catchment line it might have replaced is a different measure), which the sweep's rule keeps out. Andy can add it; the sources stay listed here. Would read: 'It handled more than 4.2 million passengers in 2025.'"
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The train connection is what makes it useful beyond Rhode Island.",
+   "why": "The old text's framing, kept. The facts it rests on (its own MBTA station, trains on to Providence and Boston, weekdays only) are sourced in the claims that follow."
+  }
+ ],
+ "tracerOk": {}
+}

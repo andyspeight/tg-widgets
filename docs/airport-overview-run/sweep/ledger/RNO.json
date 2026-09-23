@@ -1,0 +1,379 @@
+{
+ "iata": "RNO",
+ "id": "rec6MBGLWdh2N9MPc",
+ "name": "Reno Tahoe International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Reno%E2%80%93Tahoe_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Reno and, more usefully for a holiday itinerary, for Lake Tahoe. It is named after both, and sits three miles south east of downtown Reno. For clients heading to the Tahoe ski resorts this is far closer than flying into a larger Californian airport and driving.\n\nIt is Nevada's second busiest commercial airport after Las Vegas, with three concrete runways across 1,450 acres. The elevation is worth noting at 4,415 feet, which is high enough to affect aircraft performance on a hot day.\n\nThe traffic mix is unusually broad. Across a year the airport averaged 285 movements a day, split roughly evenly between scheduled airlines and general aviation, with air taxi and military work alongside. The Nevada Air National Guard keeps its 152nd Airlift Wing just south west of the main terminal, so military aircraft are a normal sight.",
+ "after": "The airport for Reno and, more usefully for a holiday itinerary, for Lake Tahoe. It is named after both, and sits a few miles south east of downtown Reno. For clients heading to the Tahoe ski resorts this is far closer than flying into a larger Californian airport and driving.\n\nIt is Nevada's second busiest commercial airport after Las Vegas, with three concrete runways across 1,450 acres at an elevation of 4,415 feet.\n\nThe traffic mix is broad. Airlines share the field with general aviation, air taxi and military flights. The Nevada Air National Guard's 152nd Airlift Wing is based here, so military aircraft are a normal sight.",
+ "claims": [
+  {
+   "claim": "the airport for Reno and for Lake Tahoe",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Reno and, more usefully for a holiday itinerary, for Lake Tahoe.",
+   "sources": [
+    {
+     "file": "op-authority-about",
+     "org": "Reno-Tahoe Airport Authority (operator, renoairport.com)",
+     "quote": [
+      "Located just minutes from downtown Reno",
+      "RNO is the ultimate gateway to Lake Tahoe and our entire region"
+     ],
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "op-acfr-fy2025",
+     "org": "Reno-Tahoe Airport Authority (operator, renoairport.com)",
+     "quote": [
+      "The total catchment area for RNO",
+      "also includes the Lake Tahoe area"
+     ],
+     "dated": "2025-11-26 (letter of transmittal date)"
+    },
+    {
+     "file": "palisades-travel",
+     "org": "Palisades Tahoe (ski resort)",
+     "quote": "NONSTOP FLIGHTS TO RENO TAHOE (RNO)",
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "nlt-transportation",
+     "org": "North Lake Tahoe visitor site (laketahoetravel.com)",
+     "quote": "North Lake Tahoe Express is a shuttle service between the Reno Tahoe International Airport and North Lake Tahoe regions",
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    }
+   ]
+  },
+  {
+   "claim": "named after both",
+   "verdict": "confirmed",
+   "inAfter": "It is named after both",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is named after both the City of Reno, Nevada and Lake Tahoe."
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "RENO/TAHOE INTL"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "RNO Reno Reno/Tahoe International",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "a few miles south east of downtown Reno",
+   "verdict": "softened",
+   "inAfter": "sits a few miles south east of downtown Reno",
+   "note": "Was 'three miles'. The sources disagree on the figure: Wikipedia three miles, the FAA's master record 3 nautical miles (about 3.5 statute miles), the operator's annual report four miles; the coordinates give 3.2 miles in a straight line. Softened to what every source supports. All agree on south east (131 degrees from the GeoNames centre).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is a public and military airport three miles (4.8 km) southeast of downtown Reno"
+    },
+    {
+     "file": "op-acfr-fy2025",
+     "org": "Reno-Tahoe Airport Authority (operator, renoairport.com)",
+     "quote": "RNO is located four miles southeast of Reno’s central business district.",
+     "dated": "2025-11-26 (letter of transmittal date)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "3 CBD TO AIRPORT (NM):",
+      "03 SE"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 5.2 km (3.2 miles)",
+      "Bearing from the city centre: 131 degrees, which is south east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "far closer to the Tahoe ski resorts than a larger Californian airport",
+   "verdict": "confirmed",
+   "inAfter": "For clients heading to the Tahoe ski resorts this is far closer than flying into a larger Californian airport and driving.",
+   "note": "Wikipedia does not make this point; it rests on the resort and the operator. Palisades Tahoe's own distance table puts Reno 42 miles away, Sacramento 96 and San Francisco 196, and it sends flyers to RNO; the operator puts RNO less than an hour from ski resorts and its nearest competing commercial airport 115 miles away in Sacramento. Heavenly's page gave no distances, and Sugar Bowl's site refused (405).",
+   "sources": [
+    {
+     "file": "palisades-travel",
+     "org": "Palisades Tahoe (ski resort)",
+     "quote": [
+      "Estimated Travel Distance",
+      "Reno, NV 42 miles",
+      "Sacramento, CA 96 miles",
+      "San Francisco, CA 196 miles",
+      "NONSTOP FLIGHTS TO RENO TAHOE (RNO)"
+     ],
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "op-authority-about",
+     "org": "Reno-Tahoe Airport Authority (operator, renoairport.com)",
+     "quote": "less than an hour from some of the finest ski resorts",
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "op-acfr-fy2025",
+     "org": "Reno-Tahoe Airport Authority (operator, renoairport.com)",
+     "quote": "The closest competing commercial airport is 115 miles away in Sacramento, California.",
+     "dated": "2025-11-26 (letter of transmittal date)"
+    }
+   ]
+  },
+  {
+   "claim": "Nevada's second busiest commercial airport after Las Vegas",
+   "verdict": "confirmed",
+   "inAfter": "It is Nevada's second busiest commercial airport after Las Vegas",
+   "note": "FAA CY2025: Las Vegas 26.5 million boardings, Reno 2.42 million, then Boulder City (53,813) and Elko (16,142).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is the state's second busiest commercial airport after Harry Reid International Airport in Las Vegas."
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "8 WP NV LAS Las Vegas Harry Reid International P L 26,531,765",
+      "66 WP NV RNO Reno Reno/Tahoe International P S 2,420,373 2,377,780 1.79%",
+      "277 WP NV BVU Boulder City Boulder City Municipal P N 53,813",
+      "373 WP NV EKO Elko Elko Regional P N 16,142"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "three concrete runways",
+   "verdict": "confirmed",
+   "inAfter": "with three concrete runways",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It has three concrete runways"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 08/26: 1,860 m (6,102 ft), CON",
+      "Runway 17L/35R: 2,743 m (9,000 ft), CON",
+      "Runway 17R/35L: 3,353 m (11,001 ft), CON",
+      "Runways listed: 3"
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "08/26",
+      "17L/35R",
+      "17R/35L",
+      "CONC-G",
+      "LAST INSP:",
+      "09/15/2025"
+     ],
+     "dated": "2025-09-15 (last inspection date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "across 1,450 acres",
+   "verdict": "confirmed",
+   "inAfter": "across 1,450 acres",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "covers 1,450 acres"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "22 ACREAGE:",
+      "1,450",
+      "09/15/2025"
+     ],
+     "dated": "2025-09-15 (last inspection date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "elevation 4,415 feet",
+   "verdict": "confirmed",
+   "inAfter": "at an elevation of 4,415 feet",
+   "note": "Was 'The elevation is worth noting at 4,415 feet'; the reason it was 'worth noting' is cut below.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "at an elevation of 4,415 feet"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "elevation 4,415 ft (1,346 m)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "4414.9 SURVEYED",
+      "09/15/2025"
+     ],
+     "dated": "2025-09-15 (last inspection date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "airlines share the field with general aviation, air taxi and military flights",
+   "verdict": "softened",
+   "inAfter": "Airlines share the field with general aviation, air taxi and military flights.",
+   "note": "Was 'Across a year the airport averaged 285 movements a day, split roughly evenly between scheduled airlines and general aviation, with air taxi and military work alongside', which is Wikipedia's year to June 2019. The operator's current reports confirm the four kinds of traffic but give no split (10,241 operations in December 2025, total only), so the figures are cut below.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In the year ending June 30, 2019, the airport had 104,239 aircraft operations, with an average of 285 per day: 46% airline, 41% general aviation, 11% air taxi, and 2% military."
+    },
+    {
+     "file": "op-stats-dec2025",
+     "org": "Reno-Tahoe Airport Authority (operator, renoairport.com)",
+     "quote": [
+      "A total of 10,241 operations were handled",
+      "Total operations include: Air Carrier, Air Taxi, General Aviation and Military operations as reported by the FAA."
+     ],
+     "dated": "2025-12 (December 2025 report)"
+    },
+    {
+     "file": "op-acfr-fy2025",
+     "org": "Reno-Tahoe Airport Authority (operator, renoairport.com)",
+     "quote": "RNO also has substantial cargo activity and a vibrant general aviation community",
+     "dated": "2025-11-26 (letter of transmittal date)"
+    }
+   ]
+  },
+  {
+   "claim": "the Nevada Air National Guard's 152nd Airlift Wing is based here",
+   "verdict": "softened",
+   "inAfter": "The Nevada Air National Guard's 152nd Airlift Wing is based here",
+   "note": "Was '...keeps its 152nd Airlift Wing just south west of the main terminal'; the position is cut below. The wing's own history describes its joint use of the airfield, leased to 2054, and its eight C-130s; the FAA's master record lists Air National Guard operating hours and a 152nd unit at the airport.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The Nevada Air National Guard has the 152nd Airlift Wing southwest of the airport's main terminal."
+    },
+    {
+     "file": "ang-152aw-history",
+     "org": "152nd Airlift Wing, Nevada Air National Guard (152aw.ang.af.mil)",
+     "quote": [
+      "While most Airmen in the Nevada Air National Guard fall under the 152nd Airlift Wing",
+      "Hubbard Field (now the site of Reno-Tahoe International Airport)",
+      "The Air Guard agreed to spend $1 million for a 25-year lease on 29 acres of land for joint use of the airfield.",
+      "extending the lease to the year 2054",
+      "most noticeably adorned on the tail flash of its eight C-130 aircraft",
+      "C-130 Hercules 1995-Present"
+     ],
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "ANG: ANG OPS 1430-2359Z++ MON-FRI EXC HOL AND SKED DAYS OFF",
+      "COMSEC MTRL STORAGE AVBL WITH PRIOR CDN AT 152 CF/SCXS",
+      "09/15/2025"
+     ],
+     "dated": "2025-09-15 (last inspection date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "three miles",
+   "verdict": "cut",
+   "wasBefore": "sits three miles south east of downtown Reno",
+   "why": "Sources disagree (Wikipedia three miles, the operator four, the FAA 3 nautical miles); softened to 'a few miles' (kept above). The coordinates' 3.2 miles would pass the gate, but the operator's own figure differs, so no single number is given."
+  },
+  {
+   "claim": "elevation high enough to affect aircraft performance on a hot day",
+   "verdict": "cut",
+   "wasBefore": "The elevation is worth noting at 4,415 feet, which is high enough to affect aircraft performance on a hot day.",
+   "why": "No source: not in Wikipedia, and neither the FAA master record nor the operator's pages say it. The elevation itself is kept."
+  },
+  {
+   "claim": "unusually broad",
+   "verdict": "cut",
+   "wasBefore": "The traffic mix is unusually broad.",
+   "why": "'Unusually' is a comparison no source makes; the lead-in is kept as 'The traffic mix is broad.'"
+  },
+  {
+   "claim": "285 movements a day, split roughly evenly",
+   "verdict": "cut",
+   "wasBefore": "Across a year the airport averaged 285 movements a day, split roughly evenly between scheduled airlines and general aviation",
+   "why": "Out of date: Wikipedia's year to June 2019, with no current second source. The operator's monthly reports give total operations only, and its 2025 annual report has no breakdown by kind of traffic. The kinds of traffic are kept."
+  },
+  {
+   "claim": "just south west of the main terminal",
+   "verdict": "cut",
+   "wasBefore": "just south west of the main terminal",
+   "why": "Wikipedia alone: its lead says south west of the main terminal and its body only that the base was established on the west side of the airport. The wing's own pages and the FAA record give no position."
+  },
+  {
+   "claim": "about 4.9 million passengers in 2025",
+   "verdict": "cut",
+   "note": "TOTAL passengers from the operator's December 2025 report (4,912,900 for the year; Wikipedia's infobox gives the same). The FAA's CY2025 table counts 2,420,373 enplanements (boardings only, about half), which is consistent. The operator's about page says 'approximately 4.9 million passengers a year'.",
+   "sources": [
+    {
+     "file": "op-stats-dec2025",
+     "org": "Reno-Tahoe Airport Authority (operator, renoairport.com)",
+     "quote": [
+      "Passengers and Cargo Statistics Report",
+      "December 2025",
+      "4,912,900"
+     ],
+     "dated": "2025-12 (December 2025 report)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "66 WP NV RNO Reno Reno/Tahoe International P S 2,420,373 2,377,780 1.79%",
+     "dated": "2026-07-08"
+    }
+   ],
+   "why": "Held back: verified, but a new fact that replaces nothing in the old text, which the sweep's rule keeps out. Andy can add it; the sources stay listed here. Would read: 'It handled about 4.9 million passengers in 2025.'"
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The traffic mix is broad.",
+   "why": "The old text's lead-in, kept without 'unusually': the kinds of traffic that follow are sourced."
+  },
+  {
+   "text": "so military aircraft are a normal sight",
+   "why": "Follows from the sourced base: the wing flies eight C-130s from the airfield it shares (its own history page), and the FAA record lists Air National Guard operating hours on weekdays."
+  }
+ ],
+ "tracerOk": {}
+}

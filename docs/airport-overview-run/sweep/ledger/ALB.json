@@ -1,0 +1,415 @@
+{
+ "iata": "ALB",
+ "id": "rec6koiJyMEzMo2wh",
+ "name": "Albany International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Albany_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The air centre for the Capital Region, north eastern New York and western New England, six miles north west of Albany. It is the fourth largest airport in the state.\n\nTraffic reached a record in 2025 at just under 1.6 million departing passengers, finally passing the previous high set back in 2004.\n\nThe airline mix is the useful part for pricing. Southwest holds around a third of the traffic on its own, and JetBlue, Allegiant and Avelo all serve the airport too, so this is a low cost heavy market and fares tend to reflect that.\n\nIt sits close to Interstate 87 and state routes 155 and 7, which makes onward driving into the Adirondacks or across to New England straightforward.\n\nThe site covers 1,000 acres in the town of Colonie, built on land that was once a Shaker settlement, and is owned by the Albany County Airport Authority.",
+ "after": "The air centre for the Capital Region, north eastern New York and western New England, about seven miles north west of Albany. It is the fourth largest airport in the state.\n\nTraffic reached a record in 2025 at just under 1.6 million departing passengers, finally passing the previous high set back in 2004.\n\nThe airline mix is the useful part for pricing. Southwest holds around a third of the traffic on its own, and JetBlue, Allegiant and Avelo all serve the airport too, so this is a low cost heavy market.\n\nIt sits close to Interstate 87, which makes onward driving into the Adirondacks or across to New England straightforward.\n\nThe airport is run by the Albany County Airport Authority, which leases it from Albany County. It lies in the town of Colonie, on land that was once part of a Shaker settlement.",
+ "claims": [
+  {
+   "claim": "air centre for the Capital Region, north eastern New York and western New England",
+   "verdict": "confirmed",
+   "inAfter": "The air centre for the Capital Region, north eastern New York and western New England",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Albany International Airport serves as the major air center for the Capital Region, Northeastern New York, and Western New England."
+    },
+    {
+     "file": "op-about-alb",
+     "org": "Albany County Airport Authority (operator, albanyairport.com)",
+     "quote": "As the major air center for the Capital Region, Northeastern New York, Western New England, and Southern Vermont",
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "op-acfr-2025",
+     "org": "Albany County Airport Authority (operator, albanyairport.com)",
+     "quote": "is the primary provider of commercial air transportation to the Albany area, including the northeast-central region of the State, southern Vermont and western Massachusetts",
+     "dated": "2026-03-23 (chairman's message; figures as of 31 December 2025)"
+    }
+   ]
+  },
+  {
+   "claim": "about seven miles from Albany",
+   "verdict": "corrected",
+   "inAfter": "about seven miles north west of Albany",
+   "note": "Was 'six miles'. The straight line is 7.0 miles, so six is shorter than the crow flies (a road distance cannot be); the operator's annual report says seven miles from downtown Albany, and the FAA's master record and NYSDOT's directory give 6 nautical miles (about 6.9 statute miles). Wikipedia's 'six miles (9.7 km)' looks like the nautical figure read as statute miles.",
+   "sources": [
+    {
+     "file": "op-acfr-2025",
+     "org": "Albany County Airport Authority (operator, albanyairport.com)",
+     "quote": "The Airport, located seven miles from downtown City of Albany",
+     "dated": "2026-03-23 (chairman's message; figures as of 31 December 2025)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 11.3 km (7.0 miles)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "3 CBD TO AIRPORT (NM):",
+      "06 NW"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "north west of Albany",
+   "verdict": "confirmed",
+   "inAfter": "north west of Albany",
+   "note": "The coordinates give 341 degrees (north on an 8-point rose); north west is the adjacent point, inside the tolerance, and it is what the FAA and NYSDOT records say.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is six miles (9.7 km) northwest of Albany"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "06 NW"
+    },
+    {
+     "file": "nysdot-alb",
+     "org": "New York State Department of Transportation (airport directory)",
+     "quote": "6 NW"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 341 degrees, which is north"
+    }
+   ]
+  },
+  {
+   "claim": "fourth largest airport in the state",
+   "verdict": "confirmed",
+   "inAfter": "It is the fourth largest airport in the state.",
+   "note": "FAA CY2025 boardings: JFK 30.8 million, LaGuardia 16.3 million, Buffalo 2.53 million, Albany 1.57 million, then Syracuse 1.42 million and Rochester 1.39 million.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is the fourth largest in New York State."
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "6 EA NY JFK New York John F Kennedy International P L 30,792,806",
+      "19 EA NY LGA New York Laguardia P L 16,278,532",
+      "63 EA NY BUF Buffalo Buffalo Niagara International P M 2,533,180",
+      "86 EA NY ALB Albany Albany International P S 1,573,771 1,490,673 5.57%",
+      "90 EA NY SYR Syracuse Syracuse Hancock International P S 1,415,346",
+      "94 EA NY ROC Rochester",
+      "Rochester International P S 1,385,078"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "record 2025, just under 1.6 million departing passengers, passing the 2004 high",
+   "verdict": "confirmed",
+   "inAfter": "Traffic reached a record in 2025 at just under 1.6 million departing passengers, finally passing the previous high set back in 2004.",
+   "note": "Departing passengers are enplanements (boardings), as the Times Union says. The airport's audited figure is 1,594,077 (its chairman's message says 1,595,077); the FAA's preliminary table has 1,573,771. All are just under 1.6 million and above the 2004 record of 1.56 million.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2025, the airport handled just under 1.6 million departing passengers, breaking the record of 1.56 million in 2004."
+    },
+    {
+     "file": "timesunion-record",
+     "org": "Times Union (Albany)",
+     "quote": [
+      "Jan 3, 2026",
+      "The airport estimated it saw just under 1.6 million departing passengers",
+      "in 2025, surpassing the previous record set in 2004 (1.56 million), according to unofficial airport data"
+     ],
+     "dated": "2026-01-03"
+    },
+    {
+     "file": "op-acfr-2025",
+     "org": "Albany County Airport Authority (operator, albanyairport.com)",
+     "quote": [
+      "Chairman's Message March 23, 2026",
+      "2025 was one for the record books. Enplanement levels topped out at 1,595,077 - the best year in airport history."
+     ],
+     "dated": "2026-03-23 (chairman's message; figures as of 31 December 2025)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "86 EA NY ALB Albany Albany International P S 1,573,771 1,490,673 5.57%",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "Southwest holds around a third of the traffic",
+   "verdict": "confirmed",
+   "inAfter": "Southwest holds around a third of the traffic on its own",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It holds approximately one-third of the total airline share at Albany."
+    },
+    {
+     "file": "bts-carrier-shares",
+     "org": "Bureau of Transportation Statistics (US Department of Transportation)",
+     "quote": [
+      "Albany, NY: Albany International (ALB) Scheduled Services except Freight/Mail BTS Data as of 9/23/2026",
+      "Carrier Shares for July 2025 - June 2026",
+      "Southwest 1,049 32.81%"
+     ],
+     "dated": "2026-06 (12 months to June 2026)"
+    },
+    {
+     "file": "op-acfr-2025",
+     "org": "Albany County Airport Authority (operator, albanyairport.com)",
+     "quote": "Southwest Airlines 524,892 32.9%",
+     "dated": "2026-03-23 (chairman's message; figures as of 31 December 2025)"
+    }
+   ]
+  },
+  {
+   "claim": "JetBlue, Allegiant and Avelo all serve the airport",
+   "verdict": "confirmed",
+   "inAfter": "JetBlue, Allegiant and Avelo all serve the airport too",
+   "note": "All three are on the Authority's list of airlines serving the airport as of 31 December 2025 (Avelo to Concord and Raleigh-Durham) and in the Times Union's January 2026 report. JetBlue and Allegiant are also in BTS's top five for the year to June 2026; Avelo (1.3 per cent of 2025 boardings) is too small to appear there, so no source after January 2026 names it. Breeze Airways also flies here since 2025 (not added, a new fact).",
+   "sources": [
+    {
+     "file": "op-acfr-2025",
+     "org": "Albany County Airport Authority (operator, albanyairport.com)",
+     "quote": [
+      "Airlines Serving the Albany International Airport",
+      "As of December 31, 2025",
+      "Jet Blue 135,267 8.5%",
+      "Allegiant Air 100,762 6.3%",
+      "Avelo Airlines 21,258 1.3%",
+      "Avelo Concord, NC (USA)"
+     ],
+     "dated": "2026-03-23 (chairman's message; figures as of 31 December 2025)"
+    },
+    {
+     "file": "timesunion-record",
+     "org": "Times Union (Albany)",
+     "quote": "continuing to expand service with new airlines like Breeze Airways, Allegiant Air and Avelo Airlines",
+     "dated": "2026-01-03"
+    },
+    {
+     "file": "bts-carrier-shares",
+     "org": "Bureau of Transportation Statistics (US Department of Transportation)",
+     "quote": [
+      "JetBlue 254 7.94%",
+      "Allegiant 218 6.82%"
+     ],
+     "dated": "2026-06 (12 months to June 2026)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Along with Southwest Airlines, Albany sees service with many other low-cost carriers, including JetBlue Airways, Allegiant Airlines, and Avelo Airlines."
+    }
+   ]
+  },
+  {
+   "claim": "a low cost heavy market",
+   "verdict": "confirmed",
+   "inAfter": "so this is a low cost heavy market",
+   "note": "The Authority's 2025 table: Southwest 32.9, JetBlue 8.5, Allegiant 6.3, Avelo 1.3 and Breeze 0.9 per cent of boardings, about half the airport's traffic between them.",
+   "sources": [
+    {
+     "file": "op-acfr-2025",
+     "org": "Albany County Airport Authority (operator, albanyairport.com)",
+     "quote": [
+      "Southwest Airlines 524,892 32.9%",
+      "Jet Blue 135,267 8.5%",
+      "Allegiant Air 100,762 6.3%",
+      "Avelo Airlines 21,258 1.3%",
+      "Breeze Airways 13,775 0.9%"
+     ],
+     "dated": "2026-03-23 (chairman's message; figures as of 31 December 2025)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Along with Southwest Airlines, Albany sees service with many other low-cost carriers"
+    }
+   ]
+  },
+  {
+   "claim": "close to Interstate 87",
+   "verdict": "confirmed",
+   "inAfter": "It sits close to Interstate 87",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is also located in close proximity to Interstate 87"
+    },
+    {
+     "file": "op-directions",
+     "org": "Albany County Airport Authority (operator, albanyairport.com)",
+     "quote": [
+      "I-87 North to Exit 3",
+      "Follow Signs to I-87 North (Montreal)"
+     ],
+     "dated": "read 2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "op-acfr-2025",
+     "org": "Albany County Airport Authority (operator, albanyairport.com)",
+     "quote": "accessible via U.S. Interstate 87, 88 and 90 highways",
+     "dated": "2026-03-23 (chairman's message; figures as of 31 December 2025)"
+    }
+   ]
+  },
+  {
+   "claim": "run by the Albany County Airport Authority",
+   "verdict": "confirmed",
+   "inAfter": "The airport is run by the Albany County Airport Authority",
+   "sources": [
+    {
+     "file": "op-acfr-2025",
+     "org": "Albany County Airport Authority (operator, albanyairport.com)",
+     "quote": "gave the Authority the power to operate, maintain and improve the Airport",
+     "dated": "2026-03-23 (chairman's message; figures as of 31 December 2025)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "ALBANY COUNTY ARPT AUTH"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "operator = Albany County Airport Authority"
+    }
+   ]
+  },
+  {
+   "claim": "which leases it from Albany County",
+   "verdict": "corrected",
+   "inAfter": "which leases it from Albany County",
+   "note": "Was 'is owned by the Albany County Airport Authority'. The Authority's own annual report says the County leases the airport to it (lease now running to 31 December 2049) and NYSDOT's directory calls the Authority the lessee of the owner, Albany County; Wikipedia's lead says the Authority owns it, but its infobox and history say the county owns it and leases it. The FAA's master record lists the Authority as owner; the report says the FAA approved the transfer of the airport's sponsorship from the county to the Authority in 1996, which would account for that.",
+   "sources": [
+    {
+     "file": "op-acfr-2025",
+     "org": "Albany County Airport Authority (operator, albanyairport.com)",
+     "quote": [
+      "Under the Lease Agreement the County leases to the Authority the Airport, including all lands, buildings, improvements",
+      "termination date of the lease was extended from May 16, 2036 to December 31, 2049",
+      "the transfer of the sponsorship of the Airport from the County to the Authority"
+     ],
+     "dated": "2026-03-23 (chairman's message; figures as of 31 December 2025)"
+    },
+    {
+     "file": "nysdot-alb",
+     "org": "New York State Department of Transportation (airport directory)",
+     "quote": "ALBANY COUNTY AIRPORT AUTH. IS LESSEE OF OWNER (ALBANY COUNTY, 518-242-2222)."
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "owner = Albany County, New York"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The Albany County Airport Authority was created by the county in 1993 with a 40-year lease to operate the airport in 1996."
+    }
+   ]
+  },
+  {
+   "claim": "in the town of Colonie",
+   "verdict": "confirmed",
+   "inAfter": "It lies in the town of Colonie",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is an airport of entry in the town of Colonie."
+    },
+    {
+     "file": "op-acfr-2025",
+     "org": "Albany County Airport Authority (operator, albanyairport.com)",
+     "quote": "located on approximately a 1,171 acre site in the Town of Colonie",
+     "dated": "2026-03-23 (chairman's message; figures as of 31 December 2025)"
+    }
+   ]
+  },
+  {
+   "claim": "on land that was once part of a Shaker settlement",
+   "verdict": "confirmed",
+   "inAfter": "on land that was once part of a Shaker settlement",
+   "note": "'Part of' added: the Shaker Heritage Society says the airport was made from a portion of the Church Family's fields at Watervliet, America's first Shaker settlement.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It was built on the site of the Shaker settlement"
+    },
+    {
+     "file": "shaker-history",
+     "org": "Shaker Heritage Society",
+     "quote": [
+      "AMERICA'S FIRST SHAKER SETTLEMENT",
+      "Today, the property is located within the Town of Colonie",
+      "The Town of Colonie and Albany County used a portion of the Church family agricultural fields to create the first municipal airport in the nation."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "six miles",
+   "verdict": "cut",
+   "wasBefore": "six miles north west of Albany",
+   "why": "Shorter than the 7.0-mile straight line; corrected to about seven miles (operator, coordinates, FAA 6 nautical miles)."
+  },
+  {
+   "claim": "fares tend to reflect the low cost mix",
+   "verdict": "cut",
+   "wasBefore": "and fares tend to reflect that",
+   "why": "No source: nothing saved compares Albany's fares with other airports' (BTS's airport page gives no fare data). The low cost mix itself is kept, with sources."
+  },
+  {
+   "claim": "state routes 155 and 7",
+   "verdict": "cut",
+   "wasBefore": "and state routes 155 and 7",
+   "why": "Wikipedia alone. The operator's directions and annual report give Interstates 87, 88 and 90 and exit 3 of I-87, not the state routes."
+  },
+  {
+   "claim": "1,000 acres",
+   "verdict": "cut",
+   "wasBefore": "The site covers 1,000 acres",
+   "why": "Sources disagree: Wikipedia and the FAA's master record say 1,000 acres, the operator's About page 1,200 acres and its 2025 annual report approximately 1,171 acres."
+  },
+  {
+   "claim": "owned by the Albany County Airport Authority",
+   "verdict": "cut",
+   "wasBefore": "is owned by the Albany County Airport Authority",
+   "why": "Corrected: the county owns the airport and leases it to the Authority, which runs it (kept above, with sources)."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The airline mix is the useful part for pricing.",
+   "why": "The old text's lead-in, kept: the airline shares that follow are sourced (the fare claim that went with it is cut)."
+  },
+  {
+   "text": "which makes onward driving into the Adirondacks or across to New England straightforward",
+   "why": "Advice kept from the old text. It rests on the sourced road access: I-87, which the operator's directions sign north towards Montreal, and I-90, from which the operator says the airport is reached. No source measures the drives."
+  }
+ ],
+ "tracerOk": {}
+}
