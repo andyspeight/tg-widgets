@@ -1,0 +1,312 @@
+{
+ "iata": "HAJ",
+ "id": "recPxF8yOP9yZmaKz",
+ "name": "Hannover Airport",
+ "country": "Germany",
+ "wikipedia": "https://en.wikipedia.org/wiki/Hannover_Airport",
+ "audited": "2026-09-23",
+ "before": "Hanover's airport, 11 km north of the city in Langenhagen, and ninth largest in Germany. It flies to European city and leisure destinations and is a base for Eurowings, Corendon Airlines Europe and TUI fly Deutschland.\n\nThe train is the easy way in. Hannover Flughafen station sits beneath Terminal C, with S-Bahn line S5 running to the city centre every thirty minutes for twenty two hours a day, taking about seventeen minutes. During the Hanover Fair an additional hourly S8 runs straight to the fairground, which is worth knowing for a trade client.\n\nThere are three main terminals, A, B and C. They are connected on the landside but each has its own separate airside area, so a passenger needs the right terminal from the start. A separate Terminal D to the east, once used by the Royal Air Force for British troop flights, has been back in use at peak times since July 2023.\n\nTerminals A and B date from 1973 and are admired for their compact design. Sheremetyevo in Moscow was modelled on them.",
+ "after": "Hanover's airport, 11 km north of the city in Langenhagen and eighth busiest in Germany. It flies to city and leisure destinations, and Eurowings, Corendon and TUIfly are among its airlines.\n\nThe train is the easy way in. Hannover Flughafen station sits directly beneath Terminal C, and S-Bahn line S5 reaches the main station in under 20 minutes.\n\nThere are three main terminals, A, B and C, connected on the landside. The airport says departures from A and B share the security checkpoint in Terminal A, with B a few minutes' walk beyond it, while Terminal C has its own. A passenger needs the right terminal from the start.",
+ "claims": [
+  {
+   "claim": "11 km north of the city in Langenhagen",
+   "verdict": "confirmed",
+   "inAfter": "Hanover's airport, 11 km north of the city in Langenhagen",
+   "note": "Coordinates: 10.6 km in a straight line at 342 degrees, north (ratio 1.04). The operator gives its address as Langenhagen.",
+   "sources": [
+    {
+     "file": "op-home",
+     "org": "Flughafen Hannover-Langenhagen GmbH (the airport operator, hannover-airport.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Flughafenstraße 4, 30855 Langenhagen",
+      "Flughafen Hannover-Langenhagen GmbH"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 10.6 km (6.6 miles)",
+      "Bearing from the city centre: 342 degrees, which is north"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-09",
+     "quote": "in Langenhagen, 11 kilometres (6.8 mi) north of the centre of Hanover"
+    }
+   ]
+  },
+  {
+   "claim": "eighth busiest in Germany",
+   "verdict": "corrected",
+   "inAfter": "and eighth busiest in Germany.",
+   "note": "Was 'ninth largest in Germany'. In 2025 ADV and Eurostat both put it eighth, behind Frankfurt, Munich, Berlin, Dusseldorf, Hamburg, Cologne Bonn and Stuttgart and ahead of Nuremberg. The operator's own 2025 total, 5,344,722, matches ADV exactly; it is not added to the text (the old text had no passenger figure).",
+   "sources": [
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": [
+      "Kumuliertes Gesamtaufkommen in Deutschland: Passagiere (an+ab) | Januar bis Dezember 2025",
+      "Hannover 5.344.722 +2,3 %",
+      "Stuttgart 9.585.033 +4,7 %",
+      "Nürnberg 4.508.700 +11,9 %"
+     ]
+    },
+    {
+     "file": "eurostat-de",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": [
+      "Eurostat DE_EDDS STUTTGART airport: passengers carried in 2025: 9,571,997",
+      "Eurostat DE_EDDV HANNOVER airport: passengers carried in 2025: 5,332,850",
+      "Eurostat DE_EDDN NUERNBERG airport: passengers carried in 2025: 4,487,554"
+     ]
+    },
+    {
+     "file": "op-unternehmen",
+     "org": "Flughafen Hannover-Langenhagen GmbH (the airport operator, hannover-airport.de)",
+     "dated": "read 2026-09-23 (live page, figures for 2021 to 2025)",
+     "quote": [
+      "Verkehrszahlen / Statistik",
+      "gesamt 5.344.722 5.223.745"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "city and leisure destinations",
+   "verdict": "softened",
+   "inAfter": "It flies to city and leisure destinations",
+   "note": "Was 'European city and leisure destinations'. Eurostat's 2024 routes (the latest by route) mix holiday routes (Antalya, Palma, Hurghada, the Canaries, Heraklion) with cities and hubs (Munich, Frankfurt, Istanbul, London Heathrow, Amsterdam, Vienna, Paris, Zurich); 'European' is dropped because Antalya, Hurghada and Marsa Alam are outside Europe.",
+   "sources": [
+    {
+     "file": "eurostat-routes",
+     "org": "Eurostat",
+     "dated": "2024 (annual data, the latest by route)",
+     "quote": [
+      "Eurostat DE_EDDV_TR_LTAI HANNOVER airport - ANTALYA airport: 786,898 passengers in 2024",
+      "Eurostat DE_EDDV_ES_LEPA HANNOVER airport - PALMA DE MALLORCA airport: 461,062 passengers in 2024",
+      "Eurostat DE_EDDV_DE_EDDM HANNOVER airport - MUENCHEN airport: 372,283 passengers in 2024",
+      "Eurostat DE_EDDV_UK_EGLL HANNOVER airport - LONDON HEATHROW airport: 199,220 passengers in 2024"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-09",
+     "quote": "The airport has flights to European metropolitan and leisure destinations"
+    }
+   ]
+  },
+  {
+   "claim": "Eurowings, Corendon and TUIfly among its airlines",
+   "verdict": "softened",
+   "inAfter": "and Eurowings, Corendon and TUIfly are among its airlines.",
+   "note": "Was 'a base for Eurowings, Corendon Airlines Europe and TUI fly Deutschland'. All three are on the operator's current airline list; that they base aircraft here rests on Wikipedia alone (TUIfly's site loads empty and Eurowings' answers 403 to the link lister), so the text says only that they fly here.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "Flughafen Hannover-Langenhagen GmbH (the airport operator, hannover-airport.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Corendon Airlines (XC/XR)",
+      "Eurowings (EW)",
+      "TUIfly (X3)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-09",
+     "quote": "serves as a base for Eurowings, Corendon Airlines Europe and TUI fly Deutschland"
+    }
+   ]
+  },
+  {
+   "claim": "the station directly beneath Terminal C",
+   "verdict": "confirmed",
+   "inAfter": "Hannover Flughafen station sits directly beneath Terminal C",
+   "sources": [
+    {
+     "file": "op-anreise",
+     "org": "Flughafen Hannover-Langenhagen GmbH (the airport operator, hannover-airport.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Die S-Bahn-Station befindet sich direkt unterhalb von Terminal C."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-09",
+     "quote": "Hannover Flughafen railway station is located beneath terminal C"
+    }
+   ]
+  },
+  {
+   "claim": "S5 to the main station in under 20 minutes",
+   "verdict": "corrected",
+   "inAfter": "and S-Bahn line S5 reaches the main station in under 20 minutes.",
+   "note": "Was 'running to the city centre every thirty minutes for twenty two hours a day, taking about seventeen minutes'. The operator gives about 18 minutes from the main station and Wikipedia about 17, so the text says under 20. The S-Bahn operator (Transdev) lists the S5 from the airport through Hannover Hbf. The frequency and hours rest on Wikipedia alone (cut below).",
+   "sources": [
+    {
+     "file": "op-anreise",
+     "org": "Flughafen Hannover-Langenhagen GmbH (the airport operator, hannover-airport.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Mit der S-Bahnlinie S5 fahren Sie ab Hannover Hauptbahnhof zur Station Hannover Flughafen. Die Fahrt dauert ca. 18 Minuten."
+    },
+    {
+     "file": "sbahn-linien",
+     "org": "S-Bahn Hannover (Transdev Hannover GmbH, sbahn-hannover.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "S5",
+      "Hannover Flughafen ↔ Hannover Hbf ↔ Paderborn Hbf"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-09",
+     "quote": "The service runs every 30 minutes for 22 hours a day, and takes approximately 17 minutes."
+    }
+   ]
+  },
+  {
+   "claim": "three main terminals, A, B and C, connected on the landside",
+   "verdict": "confirmed",
+   "inAfter": "There are three main terminals, A, B and C, connected on the landside.",
+   "note": "The operator's travel page has passengers walk from the station under Terminal C to Terminals A and B in a few minutes.",
+   "sources": [
+    {
+     "file": "op-anreise",
+     "org": "Flughafen Hannover-Langenhagen GmbH (the airport operator, hannover-airport.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Die Terminals A und B erreichen in nur wenigen Gehminuten."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-09",
+     "quote": "The landside areas of Hannover Airport's three passenger terminals A, B, and C (each with shops, restaurants, and travel agents) are interconnected"
+    }
+   ]
+  },
+  {
+   "claim": "departures from A and B share the checkpoint in Terminal A; Terminal C has its own",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport says departures from A and B share the security checkpoint in Terminal A, with B a few minutes' walk beyond it, while Terminal C has its own.",
+   "note": "Replaces 'each has its own separate airside area' (Wikipedia), which the operator's own security page contradicts for A and B: departures from both use the checkpoint in Terminal A, and Terminal B is a few minutes' walk after security. The airport's own statement, attributed.",
+   "sources": [
+    {
+     "file": "op-rund-ums-fliegen-hajway",
+     "org": "Flughafen Hannover-Langenhagen GmbH (the airport operator, hannover-airport.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Für Abflüge von Terminal A und B nutzen Sie HAJway in Terminal A. Terminal B ist nach der Sicherheitskontrolle in wenigen Gehminuten erreichbar.",
+      "Für Abflüge von Terminal C nutzen Sie HAJway in Terminal C."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "ninth largest in Germany",
+   "verdict": "cut",
+   "wasBefore": "and ninth largest in Germany",
+   "why": "Eighth in 2025 on both ADV and Eurostat. Corrected (see above)."
+  },
+  {
+   "claim": "European destinations; bases for three airlines",
+   "verdict": "cut",
+   "wasBefore": "It flies to European city and leisure destinations and is a base for Eurowings, Corendon Airlines Europe and TUI fly Deutschland.",
+   "why": "Softened (see above): some of the busiest routes are outside Europe, and the bases rest on Wikipedia alone."
+  },
+  {
+   "claim": "S5 every thirty minutes for twenty two hours a day, about seventeen minutes",
+   "verdict": "cut",
+   "wasBefore": "with S-Bahn line S5 running to the city centre every thirty minutes for twenty two hours a day, taking about seventeen minutes",
+   "why": "The frequency and hours rest on Wikipedia alone (the S-Bahn operator's line overview gives neither), and the operator says about 18 minutes. Corrected (see above)."
+  },
+  {
+   "claim": "an extra hourly S8 to the fairground during the Hanover Fair",
+   "verdict": "cut",
+   "wasBefore": "During the Hanover Fair an additional hourly S8 runs straight to the fairground, which is worth knowing for a trade client.",
+   "why": "The fair-only timing and frequency rest on Wikipedia alone. The S-Bahn operator lists an S8 between the airport and Hannover Messe/Laatzen without times, and the Deutsche Messe's own travel page sends visitors from the airport by S5 and U-Bahn line 8 instead, so the sentence could mislead."
+  },
+  {
+   "claim": "each terminal has its own separate airside area",
+   "verdict": "cut",
+   "wasBefore": "They are connected on the landside but each has its own separate airside area, so a passenger needs the right terminal from the start.",
+   "why": "Contradicted for Terminals A and B by the operator's security page. Corrected (see above)."
+  },
+  {
+   "claim": "Terminal D, once the RAF troop terminal, back in use at peak times since July 2023",
+   "verdict": "cut",
+   "wasBefore": "A separate Terminal D to the east, once used by the Royal Air Force for British troop flights, has been back in use at peak times since July 2023.",
+   "why": "Wikipedia alone; none of the operator's pages read tonight (travel, airlines, departures, security, company) mentions a Terminal D."
+  },
+  {
+   "claim": "Terminals A and B from 1973, admired for their compact design, the model for Sheremetyevo",
+   "verdict": "cut",
+   "wasBefore": "Terminals A and B date from 1973 and are admired for their compact design. Sheremetyevo in Moscow was modelled on them.",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "British Airways to London Heathrow",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing, though it matters to a UK agent. London Heathrow was Hanover's eighth busiest route in 2024 (Eurostat, 199,220 passengers), and the airport's live departures board on 23 Sep 2026 showed British Airways BA 895 to London-Heathrow from Terminal C.",
+   "sources": [
+    {
+     "file": "eurostat-routes",
+     "org": "Eurostat",
+     "dated": "2024 (annual data)",
+     "quote": "Eurostat DE_EDDV_UK_EGLL HANNOVER airport - LONDON HEATHROW airport: 199,220 passengers in 2024"
+    },
+    {
+     "file": "op-abflug",
+     "org": "Flughafen Hannover-Langenhagen GmbH (the airport operator, hannover-airport.de)",
+     "dated": "read 2026-09-23 (live board)",
+     "quote": [
+      "London-Heathrow",
+      "BA 895",
+      "British Airways (BA)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "5.34 million passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: a verified total (ADV and the operator 5,344,722; Eurostat 5,332,850) that replaces nothing in the old text.",
+   "sources": [
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": "Hannover 5.344.722 +2,3 %"
+    },
+    {
+     "file": "op-unternehmen",
+     "org": "Flughafen Hannover-Langenhagen GmbH (the airport operator, hannover-airport.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "gesamt 5.344.722 5.223.745"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The train is the easy way in.",
+   "why": "The old text's advice, kept; the station and line that follow are sourced."
+  },
+  {
+   "text": "A passenger needs the right terminal from the start.",
+   "why": "The old text's advice, kept: it follows from the separate checkpoint for Terminal C."
+  }
+ ],
+ "tracerOk": {}
+}
