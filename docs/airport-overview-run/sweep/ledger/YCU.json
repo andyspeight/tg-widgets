@@ -1,0 +1,210 @@
+{
+ "iata": "YCU",
+ "id": "reczlQOqPiNc5K1G4",
+ "name": "Yuncheng Yanhu International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Yuncheng_Yanhu_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Yuncheng in Shanxi province, 11 km north east of the city centre. It served more than 600,000 passengers in 2010, ranking 62nd among Chinese airports.\n\nThe terminal numbering here is genuinely confusing and worth getting right. Terminal 1 is the domestic building, but it was originally called Terminal 2 when it opened on 27 May 2012. Terminal 2 is the international building, and it was built on the site of the old Terminal 1. So the numbers were effectively swapped, and older guidance will point a client at the wrong building.\n\nTerminal 1 has six boarding bridges, 12 staffed check-in counters, 10 self-service counters and eight security checkpoints, with departures upstairs and arrivals and four baggage carousels below. Terminal 2 covers 28,000 square metres with five boarding bridges.\n\nThe runway is 3,000 metres, rated class 4D, with seven parking aprons.\n\nThe airport was formerly known as Yuncheng Zhangxiao Airport.",
+ "after": "The airport for Yuncheng in Shanxi province, 11 km north east of the city centre. It handled 2,873,454 passengers in 2025, ranking 70th among Chinese airports.\n\nIts single runway is 3,200 metres long.\n\nThe airport's current name is Yuncheng Yanhu International Airport, and it has also been called Guangong Airport.",
+ "claims": [
+  {
+   "claim": "the airport for Yuncheng",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Yuncheng",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "Civil Aviation Administration of China (CAAC, caac.gov.cn)",
+     "dated": "2025 ranking, published 26 February 2026",
+     "quote": "运城/盐湖 | 70 | 2873454"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Yuncheng (Yanhu)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "is an airport serving the city of Yuncheng"
+    }
+   ]
+  },
+  {
+   "claim": "in Shanxi province",
+   "verdict": "confirmed",
+   "inAfter": "in Shanxi province",
+   "note": "GeoNames puts Yuncheng in admin1 CN.24, Shanxi. (OurAirports' region code for the airport, CN-61, is Shaanxi's, which is wrong: GeoNames and Wikipedia agree on Shanxi.)",
+   "sources": [
+    {
+     "file": "geo-region",
+     "org": "GeoNames (computed)",
+     "quote": [
+      "Yuncheng (GeoNames 1785738), feature code PPLA2",
+      "CN.24 Shanxi Shanxi 1795912"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "in North China's Shanxi province"
+    }
+   ]
+  },
+  {
+   "claim": "11 km north east of the city centre",
+   "verdict": "confirmed",
+   "inAfter": "11 km north east of the city centre.",
+   "note": "Coordinates: 11.2 km from the GeoNames centre of Yuncheng at 20 degrees (north; north east is the adjacent point, inside the check).",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 11.2 km (7.0 miles)",
+      "Bearing from the city centre: 20 degrees, which is north"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "11 km (6.8 mi) northeast of the city center"
+    }
+   ]
+  },
+  {
+   "claim": "2,873,454 passengers in 2025, 70th among Chinese airports",
+   "verdict": "corrected",
+   "inAfter": "It handled 2,873,454 passengers in 2025, ranking 70th among Chinese airports.",
+   "note": "Replaces 'more than 600,000 passengers in 2010, ranking 62nd': a passenger total and rank replace a passenger total and rank. CAAC's 2025 table: rank 70, 2,873,454 passengers (2,545,241 in 2024, up 12.9 per cent); Wikipedia's infobox gives the same total for 2025.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "Civil Aviation Administration of China (CAAC, caac.gov.cn)",
+     "dated": "2025 ranking, published 26 February 2026",
+     "quote": [
+      "机场 | 旅客吞吐量（人次）",
+      "| 名次 | 本期完成 | 上年同期",
+      "运城/盐湖 | 70 | 2873454 | 2545241 | 12.9"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "infobox, revision of 2026-09-12",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 2,873,454"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a single runway, 3,200 metres long",
+   "verdict": "corrected",
+   "inAfter": "Its single runway is 3,200 metres long.",
+   "note": "Was 'The runway is 3,000 metres, rated class 4D, with seven parking aprons'. A new runway opened in January 2024 (Wikipedia); OurAirports lists one runway, 08/26, of 3,200 m, and Wikipedia's facilities section gives 3,200 m as of January 2025. The class and aprons rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 08/26: 3,200 m (10,499 ft), CON",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "runway number 08/26, length 3,200 meters"
+    }
+   ]
+  },
+  {
+   "claim": "its current name is Yuncheng Yanhu International Airport",
+   "verdict": "corrected",
+   "inAfter": "The airport's current name is Yuncheng Yanhu International Airport",
+   "note": "Replaces 'The airport was formerly known as Yuncheng Zhangxiao Airport' with the name in use now, which three sources give: OurAirports, CAAC's 2025 table (运城/盐湖, Yuncheng/Yanhu) and Wikipedia.",
+   "sources": [
+    {
+     "file": "ourairports-zbyc",
+     "org": "OurAirports",
+     "dated": "airports.csv, fetched 2026-09-23",
+     "quote": "\"Yuncheng Yanhu International Airport\""
+    },
+    {
+     "file": "caac-2025",
+     "org": "Civil Aviation Administration of China (CAAC, caac.gov.cn)",
+     "dated": "2025 ranking, published 26 February 2026",
+     "quote": "运城/盐湖"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "Yuncheng Yanhu International Airport (IATA: YCU, ICAO: ZBYC)"
+    }
+   ]
+  },
+  {
+   "claim": "it has also been called Guangong Airport",
+   "verdict": "corrected",
+   "inAfter": "and it has also been called Guangong Airport.",
+   "note": "OurAirports lists 'Yuncheng Guangong Airport' among its other names, and Wikipedia's history calls it 'Yuncheng Guan Gong Airport' in 2007 and 2008.",
+   "sources": [
+    {
+     "file": "ourairports-zbyc",
+     "org": "OurAirports",
+     "dated": "airports.csv, fetched 2026-09-23",
+     "quote": "\"Yuncheng Guangong Airport\""
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-12",
+     "quote": "Yuncheng Guan Gong Airport's flight area classification was upgraded from 3C to 4D"
+    }
+   ]
+  },
+  {
+   "claim": "more than 600,000 passengers in 2010, ranking 62nd",
+   "verdict": "cut",
+   "wasBefore": "It served more than 600,000 passengers in 2010, ranking 62nd among Chinese airports.",
+   "why": "Sixteen years old. Corrected with the 2025 figures (see above)."
+  },
+  {
+   "claim": "the terminal numbering was swapped",
+   "verdict": "cut",
+   "wasBefore": "The terminal numbering here is genuinely confusing and worth getting right. Terminal 1 is the domestic building, but it was originally called Terminal 2 when it opened on 27 May 2012. Terminal 2 is the international building, and it was built on the site of the old Terminal 1. So the numbers were effectively swapped, and older guidance will point a client at the wrong building.",
+   "why": "Wikipedia alone. The operator's site in the infobox (ycport.com) answers with a '404 Not Found' page, and no other readable source describes the terminals. Worth restoring if the airport's own guide can be read."
+  },
+  {
+   "claim": "Terminal 1's bridges, counters and carousels; Terminal 2's area and bridges",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 has six boarding bridges, 12 staffed check-in counters, 10 self-service counters and eight security checkpoints, with departures upstairs and arrivals and four baggage carousels below. Terminal 2 covers 28,000 square metres with five boarding bridges.",
+   "why": "Wikipedia alone (see above)."
+  },
+  {
+   "claim": "runway 3,000 metres, class 4D, seven aprons",
+   "verdict": "cut",
+   "wasBefore": "The runway is 3,000 metres, rated class 4D, with seven parking aprons.",
+   "why": "Out of date: the runway in use is 3,200 m (OurAirports; Wikipedia). Corrected (see above)."
+  },
+  {
+   "claim": "formerly Yuncheng Zhangxiao Airport",
+   "verdict": "cut",
+   "wasBefore": "The airport was formerly known as Yuncheng Zhangxiao Airport.",
+   "why": "Wikipedia alone: OurAirports' other names give Guangong, not Zhangxiao. Replaced by the current name and the Guangong name (see above)."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "Chinese": "The tracer reads 'Chinese airports'; the ranking is CAAC's national table.",
+  "Guangong": "In OurAirports' other names and, as 'Guan Gong', in Wikipedia."
+ }
+}
