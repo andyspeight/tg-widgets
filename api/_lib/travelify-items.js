@@ -228,13 +228,24 @@ export function aggregateTravellers(items) {
         if (slot === -1) {
           bucket.push(t);
           order.push(t);
-        } else if (!titled(bucket[slot]) && titled(t)) {
-          // Same person, first sighting had no title — borrow this one's,
-          // keeping the original type/position.
-          const upgraded = { ...bucket[slot], title: t.title };
-          const oi = order.indexOf(bucket[slot]);
-          bucket[slot] = upgraded;
-          if (oi !== -1) order[oi] = upgraded;
+        } else {
+          // Same person seen again. Borrow anything the first sighting lacked,
+          // keeping its type and position. A title, because the hotel record is
+          // often title-less where the airline's is not; and an AGE, because
+          // only some products state one, so a hotel guest with no age and a
+          // flight passenger with one are the same child and the age is the
+          // half that can price a search.
+          const kept = bucket[slot];
+          const borrowTitle = !titled(kept) && titled(t);
+          const borrowAge = kept.age == null && t.age != null;
+          if (borrowTitle || borrowAge) {
+            const upgraded = { ...kept };
+            if (borrowTitle) upgraded.title = t.title;
+            if (borrowAge) upgraded.age = t.age;
+            const oi = order.indexOf(kept);
+            bucket[slot] = upgraded;
+            if (oi !== -1) order[oi] = upgraded;
+          }
         }
       }
     }

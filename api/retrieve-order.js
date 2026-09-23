@@ -34,6 +34,7 @@ import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClie
 import { moneyOf, moneyOptsFromEnv } from './_lib/order-money.js';
 import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape, trimFlightSeating } from './_lib/travelify-items.js';
 import { upsellTiles, upsellUrl } from '../public/_order-upsell.js';
+import { bookingMoment } from '../public/_order-stays.js';
 import { readWidgetSettings } from './_lib/booking-email-brand.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
@@ -303,16 +304,91 @@ function safeNum(v) {
   return v;
 }
 
-// A traveller's age, when the supplier states one. Travelify usually does not,
-// which is why the upsell deep link has to assume one for a child (see
-// CHILD_AGE_WHEN_UNKNOWN in public/_order-upsell.js). Carried here so a real
-// age always beats that assumption. Coerces, because the field arrives as a
-// number on some products and a numeric string on others.
+// A traveller's age, when the supplier states one. Coerces, because the field
+// arrives as a number on some products and a numeric string on others.
 function safeAge(v) {
   if (v == null || v === '') return null;
   const n = Number(v);
   if (!Number.isFinite(n) || n < 0 || n > 120) return null;
   return Math.round(n);
+}
+
+/**
+ * How old each traveller is, however the supplier chose to say it.
+ *
+ * Travelify states an AGE on some products and a DATE OF BIRTH on others — its
+ * own order model documents the car rental driver as `Driver.DOB` — and the
+ * casing moves about the way `iataCode` and `flightNo` do elsewhere in the same
+ * JSON. So the key is matched without caring about case or which of the two
+ * spellings arrived, rather than guessed at once and got wrong.
+ *
+ * Read the two names only; anything else on the traveller is left alone.
+ */
+const AGE_KEYS = new Set(['age', 'paxage']);
+const DOB_KEYS = new Set(['dob', 'dateofbirth', 'birthdate', 'birthday']);
+function rawAgeFields(person) {
+  let age = null;
+  let dob = null;
+  for (const k of Object.keys(person || {})) {
+    const low = k.toLowerCase();
+    if (age == null && AGE_KEYS.has(low)) age = person[k];
+    else if (dob == null && DOB_KEYS.has(low)) dob = person[k];
+  }
+  return { age: safeAge(age), dob: safeStr(dob, 30) };
+}
+
+/**
+ * Whole years old ON THE DAY THEY TRAVEL, not today.
+ *
+ * A child's age decides what a search costs and whether they need a seat, and
+ * both are asked about the trip, not about the afternoon somebody opened their
+ * booking. A lap infant who turns two before departure is not a lap infant.
+ *
+ * Both dates are read as CALENDAR dates from their UTC fields, per the rule in
+ * CLAUDE.md. A local parse of "2019-04-11T00:00:00" is a day out in a British
+ * browser, and a day either side of a birthday is a whole year of age.
+ */
+function ageOnDate(dob, onDate) {
+  const born = bookingMoment(dob);
+  if (!born || Number.isNaN(born.getTime())) return null;
+  const when = bookingMoment(onDate) || new Date();
+  if (Number.isNaN(when.getTime())) return null;
+  let years = when.getUTCFullYear() - born.getUTCFullYear();
+  const monthDiff = when.getUTCMonth() - born.getUTCMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && when.getUTCDate() < born.getUTCDate())) years--;
+  if (!Number.isFinite(years) || years < 0 || years > 120) return null;
+  return years;
+}
+
+/**
+ * Turn every traveller's date of birth into an age, and drop the date of birth.
+ *
+ * One pass over the finished items rather than the rule threaded through six
+ * trimmers, and it runs before anything is sent: the age is the number every
+ * consumer actually wants, and a customer's date of birth is worth more to a
+ * stranger than it is to us, so it does not leave the server.
+ */
+function ageTravellers(items) {
+  const NODES = ['accommodation', 'flights', 'airportExtras', 'transfers', 'carRental', 'ticketsAttractions', 'extras'];
+  for (const item of (Array.isArray(items) ? items : [])) {
+    if (!item || typeof item !== 'object') continue;
+    const onDate = item.startDate || '';
+    for (const key of NODES) {
+      const node = item[key];
+      if (!node || typeof node !== 'object') continue;
+      for (const listName of ['guests', 'travellers']) {
+        const list = node[listName];
+        if (!Array.isArray(list)) continue;
+        for (const person of list) {
+          if (!person || typeof person !== 'object') continue;
+          if (person.age == null && person.dob) person.age = ageOnDate(person.dob, onDate);
+          if (person.age == null) delete person.age;
+          delete person.dob;
+        }
+      }
+    }
+  }
+  return items;
 }
 
 function sanitiseHotelDescription(text) {
@@ -454,7 +530,7 @@ function trimAccommodation(d) {
           title: safeStr(g.title, 30),
           firstname: safeStr(g.firstname, 80),
           surname: safeStr(g.surname, 80),
-          age: safeAge(g.age),
+          ...rawAgeFields(g),
         }))
       : [],
   };
@@ -586,7 +662,7 @@ function trimAirportExtras(d) {
           title: safeStr(t.title, 30),
           firstname: safeStr(t.firstname, 80),
           surname: safeStr(t.surname, 80),
-          age: safeAge(t.age),
+          ...rawAgeFields(t),
         }))
       : [],
   };
@@ -656,7 +732,7 @@ function trimTransfers(d) {
           title: safeStr(t.title, 30),
           firstname: safeStr(t.firstname, 80),
           surname: safeStr(t.surname, 80),
-          age: safeAge(t.age),
+          ...rawAgeFields(t),
         }))
       : [],
   };
@@ -819,7 +895,7 @@ function trimTicketsAttractions(d) {
           title: safeStr(g.title, 30),
           firstname: safeStr(g.firstname, 80),
           surname: safeStr(g.surname, 80),
-          age: safeAge(g.age),
+          ...rawAgeFields(g),
         }))
       : [],
   };
@@ -1037,6 +1113,11 @@ function trimOrder(raw) {
   // previously dropped entirely, so ordering them last is strictly additive.
   items.sort((a, b) => (a.__sniffed ? 1 : 0) - (b.__sniffed ? 1 : 0));
   for (const it of items) delete it.__sniffed;
+
+  // Every traveller's date of birth becomes an age at the date they travel, and
+  // the date of birth itself goes no further. Must run BEFORE aggregateTravellers
+  // below, which copies these same objects onto the summary.
+  ageTravellers(items);
 
   // Diagnostic: if any item has a product but NO detail sub-object, the detail
   // wasn't under dataObject (nor the alternate keys). Log the order + item key

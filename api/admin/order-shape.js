@@ -99,6 +99,54 @@ function moneyTrail(root, maxDepth = 8) {
 }
 
 /**
+ * What the order says about the PEOPLE, without saying who they are.
+ *
+ * Added 23 Sep 2026. The My Booking upsell searches for the party on the
+ * booking, and a child needs an age in the deep link. Andy: "you do get either
+ * the date of birth or the age of any child or infant." Travelify's own order
+ * model documents the car rental driver as `Driver.DOB`, and their JSON moves
+ * between casings, so we read the key case-insensitively rather than guess. This
+ * block is how that guess gets CHECKED against a real order: it reports which
+ * key names each traveller list carries and the counts by type.
+ *
+ * Names only, never values. No name, no date of birth, no age — a traveller's
+ * age on a report that goes in a support thread is exactly what we are trying
+ * not to hand around. A key name tells us what to read; the value tells us
+ * about a child.
+ */
+function partyShape(items) {
+  const seenKeys = new Set();
+  const types = {};
+  let lists = 0;
+  let people = 0;
+  const walk = (list) => {
+    if (!Array.isArray(list) || !list.length) return;
+    lists++;
+    for (const p of list.slice(0, 24)) {
+      if (!isPlainObject(p)) continue;
+      people++;
+      for (const k of Object.keys(p)) seenKeys.add(k);
+      const t = str(p.type, 30) || '(none)';
+      types[t] = (types[t] || 0) + 1;
+    }
+  };
+  for (const it of (Array.isArray(items) ? items : []).slice(0, 12)) {
+    const d = isPlainObject(it) && isPlainObject(it.dataObject) ? it.dataObject : it;
+    if (!isPlainObject(d)) continue;
+    walk(d.travellers);
+    walk(d.guests);
+    if (isPlainObject(d.driver)) walk([d.driver]);
+  }
+  const keys = [...seenKeys].sort();
+  return {
+    lists, people, byType: types, keys,
+    // The answer we came for, spelled out so nobody has to read the key list.
+    ageKeys: keys.filter((k) => /^(age|paxage)$/i.test(k)),
+    dobKeys: keys.filter((k) => /^(dob|dateofbirth|birthdate|birthday)$/i.test(k)),
+  };
+}
+
+/**
  * Build the money report for a raw Travelify order. Pure; no network. Codes
  * are masked before they leave; nothing personal is copied.
  */
@@ -130,6 +178,7 @@ export function buildOrderShapeReport(raw, opts) {
       index: i, product: str(it && it.product, 40), price: num(it && it.price), currency: str(it && it.currency, 10),
       status: str(it && it.status, 30), pricingFlags: isPlainObject(it) ? pricingFlags(it) : {},
     })),
+    party: partyShape(items),
     money: moneyOf(r, opts),
     deductNonGift: !!(opts && opts.deductNonGift),
     // The two containers we have never opened, as TYPES not values, plus every

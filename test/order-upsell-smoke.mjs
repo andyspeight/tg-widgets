@@ -283,9 +283,12 @@ console.log('\nthe section on the booking page');
     /if \(!Array\.isArray\(tiles\) \|\| !tiles\.length\) return ''/.test(widget));
   ok('the client can switch the whole section off',
     /c\.display\.showUpsell === false/.test(widget));
+  // The age itself is owned by test:traveller-age; what matters here is that
+  // the order carries one at all, so the tiles are not left assuming.
   const api2 = readFileSync(new URL('../api/retrieve-order.js', import.meta.url), 'utf8');
-  ok('a traveller\'s real age is carried through the order, not dropped at the trim',
-    /age: safeAge\(t\.age\)/.test(api2) && /age: safeAge\(g\.age\)/.test(api2));
+  ok('a traveller\'s age or date of birth is read off the order, not dropped at the trim',
+    (api2.match(/\.\.\.rawAgeFields\(/g) || []).length === 4);
+  ok('and it becomes an age before anything is sent', /ageTravellers\(items\);/.test(api2));
 
   const api = readFileSync(new URL('../api/retrieve-order.js', import.meta.url), 'utf8');
   ok('the API builds the tiles, so the widget has no second copy of the rules',
