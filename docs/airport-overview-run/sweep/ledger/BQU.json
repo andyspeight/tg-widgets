@@ -1,0 +1,399 @@
+{
+ "iata": "BQU",
+ "id": "recI00Nfx912SHydw",
+ "name": "J F Mitchell Airport",
+ "country": "St Vincent and the Grenadines",
+ "wikipedia": "https://en.wikipedia.org/wiki/J._F._Mitchell_Airport",
+ "audited": "2026-09-23",
+ "before": "Bequia's airport, and the reason the island is reachable at all without a boat. Until it opened in 1992 Bequia could only be reached by sea, which was the single biggest constraint on tourism here.\n\nIt is small and honest about it. This is a turboprop field for scheduled and charter work, with small private jets also using it, and there are no air bridges, so passengers walk to the aircraft. Most flights are domestic within Saint Vincent and the Grenadines, with around ten international services a week from Barbados and Saint Lucia.\n\nThe airport sits on reclaimed land at Paget Farm, built after a 1986 feasibility study recommended a runway of 850 metres with room to extend. It is the third largest airport by area in the country, behind Argyle and Canouan.\n\nIt is named after Sir James Fitz-Allen Mitchell, Premier and then Prime Minister of Saint Vincent and the Grenadines.",
+ "after": "Bequia's only airport, opened in 1992. The alternative is the ferry from Kingstown on St Vincent.\n\nIt is small, with one runway of 1,100 metres, used by small propeller aircraft on scheduled and charter flights and by private aircraft. SVG Air's scheduled flights link it with Barbados, St Vincent, Canouan, Union Island and Grenada. Charter flights also come in from St Lucia.",
+ "claims": [
+  {
+   "claim": "Bequia's only airport",
+   "verdict": "confirmed",
+   "inAfter": "Bequia's only airport",
+   "note": "Was 'Bequia's airport, and the reason the island is reachable at all without a boat'. OurAirports lists no other airport on Bequia, and the government's Airports Department names it as its Bequia airport.",
+   "sources": [
+    {
+     "file": "ourairports-vc",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": "TVSB | IATA BQU | medium_airport | J F Mitchell Airport | Bequia | scheduled service: yes"
+    },
+    {
+     "file": "govvc-airports-about",
+     "org": "Government of St Vincent and the Grenadines (Ministry of National Security, Airports Department)",
+     "dated": "page marked 'Published: 20 May 2010' but naming Argyle, which opened in 2017, so edited since",
+     "quote": [
+      "The Airports Department is responsible for the operation of four airports located in the state of Saint Vincent and the Grenadines.",
+      "J.F. Mitchell Airport, located on the Island of Bequia"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the airport serving Bequia island"
+    }
+   ]
+  },
+  {
+   "claim": "opened in 1992",
+   "verdict": "confirmed",
+   "inAfter": "opened in 1992",
+   "note": "Wikipedia's History section copies Sir James Mitchell's 2016 letter to iWitness News almost word for word, so those two count as one source here; the Bequia Tourism Association's page is independent of both. The day (15 May 1992, in the letter) is not needed.",
+   "sources": [
+    {
+     "file": "bequiatourism-gethere",
+     "org": "Bequia Tourism Association (bequiatourism.com)",
+     "dated": "read 2026-09-23 (live page; footer 2026, ferry fares 'currently (July 2025)')",
+     "quote": "Bequia's J.F. Mitchell airport was opened in 1992"
+    },
+    {
+     "file": "iwn-bequia-airport-2016",
+     "org": "iWitness News (letter from Sir James Mitchell)",
+     "dated": "2016-01-28",
+     "quote": [
+      "28 Jan 2016 05:58 AST",
+      "Six months later, on May 15, 1992, The Bequia Airport was officially opened."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The opening of the J. F. Mitchell Airport in 1992 has made the island far more accessible"
+    }
+   ]
+  },
+  {
+   "claim": "the alternative is the ferry from Kingstown on St Vincent",
+   "verdict": "confirmed",
+   "inAfter": "The alternative is the ferry from Kingstown on St Vincent.",
+   "note": "The old text's point, made concrete: without the airport the island is reached by boat. Both the island's tourism association and the national tourism authority give the ferries from Kingstown (Bequia Express and Bequia Fast Ferry, several sailings a day). Crossing times are not given, as the sources differ by boat (about an hour, or half an hour on the fast ferry).",
+   "sources": [
+    {
+     "file": "bequiatourism-gethere",
+     "org": "Bequia Tourism Association (bequiatourism.com)",
+     "dated": "read 2026-09-23 (live page; ferry fares 'currently (July 2025)')",
+     "quote": [
+      "Onward connection to Bequia is then completed by ferry",
+      "(officially known as the Grenadines Wharf) in Kingstown to catch the ferry to",
+      "Two Ferry companies currently operate from St. Vinvent to Bequia"
+     ]
+    },
+    {
+     "file": "discoversvg-ferries",
+     "org": "St Vincent and the Grenadines Tourism Authority (discoversvg.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Weekly Ferry Schedules",
+      "Bequia Express",
+      "Monday to Friday | 8:00 am, 9:30 am, 1:00 pm, 4:00 pm, 5:00 pm",
+      "Kingstown→ Bequia"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "small, with one runway of 1,100 metres",
+   "verdict": "corrected",
+   "inAfter": "It is small, with one runway of 1,100 metres",
+   "note": "Replaces 'It is small and honest about it' and the 850 metres a 1986 study recommended (cut below): the runway built is 1,100 m.",
+   "sources": [
+    {
+     "file": "ourairports-vc",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": "TVSB | IATA BQU | medium_airport | J F Mitchell Airport | Bequia | scheduled service: yes | runways: 12/30 3609 ft (1,100 m) ASP"
+    },
+    {
+     "file": "svgair-service",
+     "org": "SVG Air (flysvgair.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "RUNWAYS: 1 ( 12 / 30 ) RUNWAY",
+      "LENGTH: 3,609 ft | 1,100 meters"
+     ]
+    },
+    {
+     "file": "iwn-bequia-airport-2016",
+     "org": "iWitness News (letter from Sir James Mitchell)",
+     "dated": "2016-01-28",
+     "quote": "The Bequia airport project, complete with a 1,100-metre runway"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It has one runway designated 12/30 with an asphalt surface measuring 1,100 m"
+    }
+   ]
+  },
+  {
+   "claim": "used by small propeller aircraft on scheduled and charter flights",
+   "verdict": "softened",
+   "inAfter": "used by small propeller aircraft on scheduled and charter flights",
+   "note": "Was 'a turboprop field for scheduled and charter work'. 'Propeller' covers both aircraft SVG Air names, the Twin Otter and the BN2 Islander.",
+   "sources": [
+    {
+     "file": "svgair-home",
+     "org": "SVG Air (flysvgair.com)",
+     "dated": "read 2026-09-23 (live page; footer 2026)",
+     "quote": "we also offer private charters with our Twin Otter and BN2 Islander aircraft"
+    },
+    {
+     "file": "iwn-bequia-airport-2016",
+     "org": "iWitness News (letter from Sir James Mitchell)",
+     "dated": "2016-01-28",
+     "quote": "these aircraft, primarily the sizeable 19-seater Twin Otter, constitute the lifeline of tourism in our islands"
+    },
+    {
+     "file": "bequiatourism-gethere",
+     "org": "Bequia Tourism Association (bequiatourism.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "services daily scheduled flights to and from Barbados. Private charters and scheduled flights"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport is basically a turbo-prop center for chartered flights.",
+      "regular scheduled and charter flights from Barbados, St. Lucia and St. Vincent"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "used by private aircraft",
+   "verdict": "softened",
+   "inAfter": "and by private aircraft",
+   "note": "Was 'with small private jets also using it'. Jets are dropped because the sources disagree: Wikipedia says small private jets fly here, but Sir James Mitchell wrote in 2016 that another 100 metres of runway would 'provide accommodation for private jets'. SVG Air runs a private aircraft handling office at the airport.",
+   "sources": [
+    {
+     "file": "svgair-service",
+     "org": "SVG Air (flysvgair.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "SVG AIR Private Aircraft Services is a full-service FBO, with offices in Bequia (TVSB)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Nevertheless, small private jet aircraft also fly to this airport."
+    },
+    {
+     "file": "iwn-bequia-airport-2016",
+     "org": "iWitness News (letter from Sir James Mitchell)",
+     "dated": "2016-01-28",
+     "quote": "the addition of just 100 metres to the runway in Bequia will fulfil the original 1974 Halcrow concept and provide accommodation for private jets"
+    }
+   ]
+  },
+  {
+   "claim": "SVG Air's scheduled flights link it with Barbados, St Vincent, Canouan, Union Island and Grenada",
+   "verdict": "corrected",
+   "inAfter": "SVG Air's scheduled flights link it with Barbados, St Vincent, Canouan, Union Island and Grenada.",
+   "note": "Replaces 'Most flights are domestic ... with around ten international services a week from Barbados and Saint Lucia' (cuts below). The Bequia Tourism Association says the airport has daily scheduled flights to and from Barbados and scheduled flights to Grenada (SVG Air), Union Island, Canouan and St Vincent; SVG Air's own page lists daily flights to and from all of these places, and the association's page gives SVG Air a Barbados reservations number. The association is the island's tourism body, a lower tier than an airline or a government, but SVG Air's own page lists the same places.",
+   "sources": [
+    {
+     "file": "svgair-home",
+     "org": "SVG Air (flysvgair.com)",
+     "dated": "read 2026-09-23 (live page; footer 2026)",
+     "quote": [
+      "SVG Air offers daily flights to and from St. Vincent, Bequia, Canouan, Union Island, Barbados, Antigua and Barbuda, Montserrat, Grenada, and Carriacou.",
+      "SVG Air - YOUR WINGS TO PARADISE | 2026"
+     ]
+    },
+    {
+     "file": "bequiatourism-gethere",
+     "org": "Bequia Tourism Association (bequiatourism.com)",
+     "dated": "read 2026-09-23 (live page; footer 2026)",
+     "quote": [
+      "services daily scheduled flights to and from Barbados.",
+      "Private charters and scheduled flights to and from Grenada (SVG Air), Union Island, Canouan and St. Vincent are also available",
+      "BGI +1 (246) 228-5544",
+      "© BTA 2026"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "regular scheduled and charter flights from Barbados, St. Lucia and St. Vincent"
+    }
+   ]
+  },
+  {
+   "claim": "charter flights also come in from St Lucia",
+   "verdict": "softened",
+   "inAfter": "Charter flights also come in from St Lucia.",
+   "note": "Was part of 'around ten international services a week from Barbados and Saint Lucia'. SVG Air's list of daily flights does not include St Lucia; Mustique Airways offers charters from both St Lucia airports to Bequia, and the Bequia Tourism Association says visitors can fly direct to Bequia from St Lucia.",
+   "sources": [
+    {
+     "file": "mustiqueair-home",
+     "org": "Mustique Airways (mustique.com)",
+     "dated": "read 2026-09-23 (live page; footer 'All Rights Reserved - 2020')",
+     "quote": [
+      "Online request for private charters",
+      "From: Barbados (BGI) Bequia (BQU) Canouan (CIW) Mustique (MQS) St. Lucia (UVF - Hewanorra) St. Lucia (SLU - George F. L. Charles)"
+     ]
+    },
+    {
+     "file": "bequiatourism-gethere",
+     "org": "Bequia Tourism Association (bequiatourism.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "From Barbados or St. Lucia, visitors can choose to either:",
+      "FLY DIRECT TO BEQUIA (55 minutes)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "there are about ten international flights each week from Barbados and Saint Lucia"
+    }
+   ]
+  },
+  {
+   "claim": "the reason the island is reachable at all without a boat",
+   "verdict": "cut",
+   "wasBefore": "and the reason the island is reachable at all without a boat",
+   "why": "Reworded, not dropped: it is the island's only airport (OurAirports, the Airports Department), and the other way in is the ferry from Kingstown (the tourism association and the tourism authority)."
+  },
+  {
+   "claim": "until 1992 Bequia could only be reached by sea",
+   "verdict": "cut",
+   "wasBefore": "Until it opened in 1992 Bequia could only be reached by sea",
+   "why": "The 1992 opening is kept (two sources). 'Could only be reached by sea' before then rests on Wikipedia alone; the tourism association and Sir James Mitchell's letter do not say it."
+  },
+  {
+   "claim": "the single biggest constraint on tourism",
+   "verdict": "cut",
+   "wasBefore": "which was the single biggest constraint on tourism here",
+   "why": "Overstated. Wikipedia says the lack of an airstrip was 'a major constraint to tourism development', and Sir James Mitchell's 2016 letter that without the airport the hotel and villa investment 'would never have been attracted'; neither says single biggest."
+  },
+  {
+   "claim": "small and honest about it",
+   "verdict": "cut",
+   "wasBefore": "It is small and honest about it.",
+   "why": "A judgement with no source; replaced by the runway length, which shows how small it is."
+  },
+  {
+   "claim": "small private jets use it",
+   "verdict": "cut",
+   "wasBefore": "with small private jets also using it",
+   "why": "Disputed. Wikipedia says small private jets fly here, but Sir James Mitchell's 2016 letter says another 100 metres of runway would 'provide accommodation for private jets'. Softened to private aircraft, which SVG Air handles here."
+  },
+  {
+   "claim": "no air bridges; passengers walk to the aircraft",
+   "verdict": "cut",
+   "wasBefore": "and there are no air bridges, so passengers walk to the aircraft",
+   "why": "Wikipedia alone; no other saved source describes boarding here."
+  },
+  {
+   "claim": "most flights are domestic",
+   "verdict": "cut",
+   "wasBefore": "Most flights are domestic within Saint Vincent and the Grenadines",
+   "why": "Wikipedia alone and undated; the current sources say only which places are served, including daily Barbados flights, not the share that is domestic."
+  },
+  {
+   "claim": "around ten international services a week from Barbados and Saint Lucia",
+   "verdict": "cut",
+   "wasBefore": "with around ten international services a week from Barbados and Saint Lucia",
+   "why": "A weekly count on Wikipedia alone, undated, with no airport count to replace it (the airport has no site of its own). Barbados and St Lucia are kept, as scheduled flights and charters respectively."
+  },
+  {
+   "claim": "on reclaimed land at Paget Farm",
+   "verdict": "cut",
+   "wasBefore": "The airport sits on reclaimed land at Paget Farm",
+   "why": "Not independently confirmed. Wikipedia's lead and infobox place it on reclaimed land at Paget Farm; the only other source, Sir James Mitchell's 2016 letter, mentions a 1974 design 'for a 4,000-foot runway at Paget Farm' and 'dredged sand', but Wikipedia's History copies that letter, so the two are not clearly independent. Worth restoring if a government or survey source can be read.",
+   "sources": [
+    {
+     "file": "iwn-bequia-airport-2016",
+     "org": "iWitness News (letter from Sir James Mitchell)",
+     "dated": "2016-01-28",
+     "quote": [
+      "a design for a 4,000-foot runway at Paget Farm",
+      "The deep vibro compaction of the dredged sand was completed in November 1991"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a 1986 feasibility study recommended 850 metres with room to extend",
+   "verdict": "cut",
+   "wasBefore": "built after a 1986 feasibility study recommended a runway of 850 metres with room to extend",
+   "why": "Wikipedia alone, and out of date as a description: the runway built is 1,100 m (kept above). The 2016 letter dates the studies to 1985 (financing) and 1987 (final study)."
+  },
+  {
+   "claim": "third largest airport by area, behind Argyle and Canouan",
+   "verdict": "cut",
+   "wasBefore": "It is the third largest airport by area in the country, behind Argyle and Canouan.",
+   "why": "'By area' rests on Wikipedia alone. OurAirports' runway lengths put it third too (after Argyle and Canouan), but that is a different measure, so the runway length is given instead."
+  },
+  {
+   "claim": "named after Sir James Fitz-Allen Mitchell",
+   "verdict": "cut",
+   "wasBefore": "It is named after Sir James Fitz-Allen Mitchell, Premier and then Prime Minister of Saint Vincent and the Grenadines.",
+   "why": "Wikipedia alone, and unreferenced there. No saved source says whom the airport is named after: Sir James Mitchell's own 2016 letter about the airport does not mention its name, and the Bequia Tourism Association's history page names an earlier James Fitz Allen Mitchell, a boat-builder, without mentioning the airport. Worth restoring when a second source is found."
+  },
+  {
+   "claim": "departure tax paid at the airport on local airlines",
+   "verdict": "cut",
+   "why": "Held back: new, and on the Bequia Tourism Association's page alone, but possibly the most useful line for an agent. It says there is a national departure tax of EC$100 (about US$40), included in the ticket on major airlines out of Argyle, but paid on departure by passengers flying SVG Air, GAA or Mustique Airways out of Bequia and the other Grenadine airports.",
+   "sources": [
+    {
+     "file": "bequiatourism-gethere",
+     "org": "Bequia Tourism Association (bequiatourism.com)",
+     "dated": "read 2026-09-23 (live page; footer 2026)",
+     "quote": [
+      "There is a national departure tax of EC$100",
+      "but must be paid on departure by persons travelling on SVG Air/GAA/Mustique Airways out of AIA, Bequia or any other Grenadine island airports"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "daylight operation",
+   "verdict": "cut",
+   "why": "Held back: new, and the sources disagree on the evening limit. SVG Air gives operating hours of sunrise to 2000 local time; the Airports Department's page (published 2010) gives air traffic services from sunrise to sunset or with 24 hours' prior permission; Sir James Mitchell wrote in 2016 that night landings had stopped.",
+   "sources": [
+    {
+     "file": "svgair-service",
+     "org": "SVG Air (flysvgair.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "OPERATING HOURS: SUNRISE - 2000 LT ALL WEEK"
+    },
+    {
+     "file": "govvc-security-airports",
+     "org": "Government of St Vincent and the Grenadines (Ministry of National Security, Airports Department)",
+     "dated": "published 2010-05-20",
+     "quote": [
+      "Published: 20 May 2010",
+      "Air Traffic Services",
+      "Sunrise to sunset or 24 hour prior permission required"
+     ]
+    },
+    {
+     "file": "iwn-bequia-airport-2016",
+     "org": "iWitness News (letter from Sir James Mitchell)",
+     "dated": "2016-01-28",
+     "quote": "There is no longer night landing in Bequia as equipment was taken away to supplement Canouan."
+    }
+   ]
+  },
+  {
+   "claim": "taxis meet every arriving flight",
+   "verdict": "cut",
+   "why": "Held back: new, and on the Bequia Tourism Association's page alone.",
+   "sources": [
+    {
+     "file": "bequiatourism-gethere",
+     "org": "Bequia Tourism Association (bequiatourism.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "taxis to meet each arriving flight"
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "St Lucia": "Written without the full stop; the Bequia Tourism Association and Mustique Airways write 'St. Lucia'."
+ }
+}

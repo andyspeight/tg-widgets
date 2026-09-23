@@ -1,0 +1,464 @@
+{
+ "iata": "SVD",
+ "id": "rectkmx6y1yZgXhph",
+ "name": null,
+ "country": "St Vincent and the Grenadines",
+ "wikipedia": "https://en.wikipedia.org/wiki/Argyle_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Saint Vincent and the Grenadines' first international airport, at Argyle about 8 km from the capital Kingstown, and the country's main gateway.\n\nIt is what made long haul access possible. The airport connects directly to Atlanta, Miami, John F. Kennedy, Toronto and London Heathrow as well as other Caribbean airports.\n\nIt is also the hub for island hopping. Several airlines run an extensive network of domestic flights from Argyle to every destination in the Grenadines, and it is the primary hub for SVG Air and Mustique Airways, who together operate 17 aircraft through an alliance with bases in St Vincent, Antigua and Grenada.\n\nIt is the largest of five airports in the country. The others are J. F. Mitchell Airport on Bequia, Canouan, Mustique and Union Island, all in the Grenadines.\n\nIt is the second solar powered airport in the Caribbean after V. C. Bird International in Antigua.\n\nIt is often called Argyle Airport or simply AIA.",
+ "after": "Saint Vincent and the Grenadines' main airport, at Argyle on mainland St Vincent, about 8 km from the capital, Kingstown.\n\nVirgin Atlantic flies from London Heathrow three times a week, and says the flight touches down in Barbados for about an hour, with passengers staying on board. The country's tourism authority also lists direct flights, some of them seasonal, from Atlanta, Miami, New York JFK and Toronto. Regional airlines link it with other Caribbean islands.\n\nTwo local airlines, SVG Air and Mustique Airways, fly on from here to the Grenadines.\n\nIt is the largest of the country's five airports. The other four are on Bequia (J F Mitchell Airport), Canouan, Mustique and Union Island.\n\nIt is often called AIA.",
+ "claims": [
+  {
+   "claim": "the country's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Saint Vincent and the Grenadines' main airport",
+   "note": "Was 'the country's main gateway' (reworded; 'first international airport' is cut, below). OurAirports classes Argyle as the country's only large airport, and every long haul route on the tourism authority's current list lands here.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the largest international gateway into the country"
+    },
+    {
+     "file": "ourairports-vc",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": [
+      "TVSA | IATA SVD | large_airport | Argyle International Airport | Kingstown | scheduled service: yes",
+      "TVSC | IATA CIW | medium_airport | Canouan Airport"
+     ]
+    },
+    {
+     "file": "discoversvg-getting",
+     "org": "St Vincent and the Grenadines Tourism Authority (discoversvg.com)",
+     "dated": "read 2026-09-23 (live page; its airlift list gives Air Canada's dates to October 2026)",
+     "quote": [
+      "International Flight Offerings to St. Vincent and the Grenadines (SVG)",
+      "UK Virgin Atlantic LHR - SVD Sundays, Wednesdays, Fridays",
+      "USA Delta Air Lines ATL - SVD Saturdays Jan - Aug and Dec"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "at Argyle on mainland St Vincent",
+   "verdict": "confirmed",
+   "inAfter": "at Argyle on mainland St Vincent",
+   "sources": [
+    {
+     "file": "aia-history",
+     "org": "Argyle International Airport (operator, svg-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "recommended two alternative sites on mainland St Vincent",
+      "the other at Argyle (on the Eastern side of the country)",
+      "decision to build a new international airport at Argyle"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "is an international airport on the island of Saint Vincent",
+      "It is located in Argyle"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 8 km from the capital, Kingstown",
+   "verdict": "confirmed",
+   "inAfter": "about 8 km from the capital, Kingstown",
+   "note": "Coordinates give 8.5 km in a straight line from the GeoNames centre of Kingstown, the national capital (ratio 0.94).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is located in Argyle, about 5.17 miles (8.32 km) from the capital Kingstown"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "GeoNames class PPLC, the national capital",
+      "Straight-line distance from the city centre: 8.5 km (5.3 miles)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Virgin Atlantic flies from London Heathrow three times a week",
+   "verdict": "corrected",
+   "inAfter": "Virgin Atlantic flies from London Heathrow three times a week",
+   "note": "Was 'connects directly to ... London Heathrow'. The airline and the tourism authority agree on three flights a week (Wednesday, Friday and Sunday). The flight is not non-stop (next claim). The UK CAA's 2025 route table, which still files St Vincent under the old airport name E T JOSHUA, has only 148 passengers between Heathrow and St Vincent in 2025 (1,196 in 2024), against 482,348 between Heathrow and Bridgetown. That fits passengers on a through flight being counted against Barbados, the first stop, though the table does not say so; its St Vincent figure is therefore not used as a measure of this route.",
+   "sources": [
+    {
+     "file": "virgin-svg",
+     "org": "Virgin Atlantic (virginatlantic.com)",
+     "dated": "read 2026-09-23 (live page, titled 'Flights to Saint Vincent 2026/2027')",
+     "quote": [
+      "Flights to Saint Vincent 2026/2027",
+      "We fly to St Vincent and The Grenadines three times a week",
+      "Flights from London Heathrow* (LHR)"
+     ]
+    },
+    {
+     "file": "discoversvg-getting",
+     "org": "St Vincent and the Grenadines Tourism Authority (discoversvg.com)",
+     "dated": "read 2026-09-23 (live page; its airlift list gives Air Canada's dates to October 2026)",
+     "quote": "Virgin Atlantic operates direct flights from London Heathrow (LHR) to SVG on Sundays, Wednesdays and Fridays"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "London Heathrow Airport",
+      "Virgin Atlantic"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Virgin Atlantic says the flight touches down in Barbados for about an hour, passengers staying on board",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Virgin Atlantic",
+   "inAfter": "Virgin Atlantic flies from London Heathrow three times a week, and says the flight touches down in Barbados for about an hour, with passengers staying on board.",
+   "note": "Attributed statement: the airline describing its own flight, from its own route page. The tourism authority calls the flight 'direct' and gives an 11-hour schedule (9:35am from Heathrow, 3:30pm at St Vincent), which fits a stop but does not mention one.",
+   "sources": [
+    {
+     "file": "virgin-svg",
+     "org": "Virgin Atlantic (virginatlantic.com)",
+     "dated": "read 2026-09-23 (live page, titled 'Flights to Saint Vincent 2026/2027')",
+     "quote": [
+      "11 hour flight time, including a short touchdown in Barbados",
+      "Passengers and luggage will remain on the aircraft during 1-hour touchdown",
+      "Our flights stop in Barbados before continuing to St Vincent and the Grenadines"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the tourism authority lists direct flights, some seasonal, from Atlanta, Miami, New York JFK and Toronto",
+   "verdict": "confirmed",
+   "primary": true,
+   "attribution": "tourism authority",
+   "inAfter": "The country's tourism authority also lists direct flights, some of them seasonal, from Atlanta, Miami, New York JFK and Toronto.",
+   "note": "The four cities are in both sources; the seasons are the tourism authority's alone, so the sentence is attributed to it. Delta flies from Atlanta on Saturdays in January to August and December; American flies from Miami all year (daily October to April, five a week May to September) and from New York JFK on Saturdays December to March; Caribbean Airlines and JetBlue fly from JFK twice a week each; Air Canada Rouge flies from Toronto all year. The authority also lists American from Charlotte, Saturdays December to March, which the old text did not have (held back, below). The airport's own airline page shows airline logos only, with no text to quote.",
+   "sources": [
+    {
+     "file": "discoversvg-getting",
+     "org": "St Vincent and the Grenadines Tourism Authority (discoversvg.com)",
+     "dated": "read 2026-09-23 (live page; its airlift list gives Air Canada's dates to October 2026)",
+     "quote": [
+      "Atlanta (ATL): Delta Air Lines offers Saturday flights, January - August and December.",
+      "Miami (MIA): American Airlines provides daily service, October - April, five times weekly, May - September.",
+      "New York (JFK): American Airlines (Saturdays, December - March), Caribbean Airlines (Wednesdays and Saturdays), and JetBlue Airways (Wednesdays and Sundays).",
+      "Air Canada Rouge provides direct flights from Toronto (YYZ) to SVG.",
+      "Summer flights will operate on Wednesdays, from May 6th to October 21st, 2026."
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Hartsfield–Jackson Atlanta International Airport, Miami International Airport, John F. Kennedy International Airport, Toronto Pearson International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "regional airlines link it with other Caribbean islands",
+   "verdict": "confirmed",
+   "inAfter": "Regional airlines link it with other Caribbean islands.",
+   "note": "Was 'as well as other Caribbean airports'. SVG Air and Virgin Atlantic both fly to Barbados; the tourism authority names the islands travellers connect through.",
+   "sources": [
+    {
+     "file": "svgair-home",
+     "org": "SVG Air (flysvgair.com)",
+     "dated": "read 2026-09-23 (live page; footer 2026)",
+     "quote": "SVG Air offers daily flights to and from St. Vincent, Bequia, Canouan, Union Island, Barbados, Antigua and Barbuda, Montserrat, Grenada, and Carriacou."
+    },
+    {
+     "file": "virgin-svg",
+     "org": "Virgin Atlantic (virginatlantic.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "We fly between Barbados St Vincent and The Grenadines three times a week"
+    },
+    {
+     "file": "discoversvg-getting",
+     "org": "St Vincent and the Grenadines Tourism Authority (discoversvg.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Travelers from other international destinations may transit through Barbados, Grenada, Trinidad, St. Lucia and Martinique."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "as well as other airports in the Caribbean"
+    }
+   ]
+  },
+  {
+   "claim": "two local airlines, SVG Air and Mustique Airways, fly on from here to the Grenadines",
+   "verdict": "softened",
+   "inAfter": "Two local airlines, SVG Air and Mustique Airways, fly on from here to the Grenadines.",
+   "note": "Replaces 'several airlines run an extensive network of domestic flights from Argyle to every destination in the Grenadines' and 'the primary hub for SVG Air and Mustique Airways' (cuts below). SVG Air, with a base in St Vincent and the Grenadines, lists daily flights linking St Vincent with Bequia, Canouan and Union Island; Mustique Airways gives its address as Argyle International Airport and flies to the Grenadines, now selling private and shared charters (its page's footer says 2020, so its date is unclear). Mainland St Vincent has no other airport with scheduled flights (OurAirports lists E T Joshua as closed).",
+   "sources": [
+    {
+     "file": "svgair-home",
+     "org": "SVG Air (flysvgair.com)",
+     "dated": "read 2026-09-23 (live page; footer 2026)",
+     "quote": [
+      "SVG Air offers daily flights to and from St. Vincent, Bequia, Canouan, Union Island",
+      "with bases in St. Vincent and the Grenadines, Grenada and Carriacou and Antigua and Barbuda",
+      "SVG Air - YOUR WINGS TO PARADISE | 2026"
+     ]
+    },
+    {
+     "file": "mustiqueair-home",
+     "org": "Mustique Airways (mustique.com)",
+     "dated": "read 2026-09-23 (live page; footer 'All Rights Reserved - 2020')",
+     "quote": [
+      "Mustique Airways flies you to the Grenadines.",
+      "Mustique Airways Argyle International Airport St. Vincent and the Grenadines",
+      "From: Barbados (BGI) Bequia (BQU) Canouan (CIW) Mustique (MQS)"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport is a primary hub for SVG Air, a national airline of St. Vincent and the Grenadines, along with Mustique Airways.",
+      "several airlines operating an extensive network of direct domestic flights from AIA to all destinations in the Grenadines"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the largest of the country's five airports",
+   "verdict": "confirmed",
+   "inAfter": "It is the largest of the country's five airports.",
+   "note": "OurAirports lists five airports in the country with scheduled service, plus E T Joshua, closed. Argyle is the only one it classes as large, and its runway (9,000 ft, 2,743 m) is the longest; Canouan's is next at 5,900 ft.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the largest of five airports in the multi-island nation of St. Vincent and the Grenadines"
+    },
+    {
+     "file": "ourairports-vc",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": [
+      "TVSA | IATA SVD | large_airport | Argyle International Airport | Kingstown | scheduled service: yes | runways: 04/22 9000 ft (2,743 m) ASP",
+      "TVSB | IATA BQU | medium_airport | J F Mitchell Airport | Bequia | scheduled service: yes | runways: 12/30 3609 ft (1,100 m) ASP",
+      "TVSC | IATA CIW | medium_airport | Canouan Airport | Canouan | scheduled service: yes | runways: 13/31 5900 ft (1,798 m) ASP",
+      "TVSM | IATA MQS | medium_airport | Mustique Airport | Lovell | scheduled service: yes | runways: 09/27 3255 ft (992 m) ASP",
+      "TVSU | IATA UNI | medium_airport | Union Island International Airport | Union Island | scheduled service: yes | runways: 08/26 2467 ft (752 m) ASP",
+      "VC-0001 | IATA - | closed | E T Joshua Airport | Arnos Vale | scheduled service: no"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the other four are on Bequia (J F Mitchell Airport), Canouan, Mustique and Union Island",
+   "verdict": "confirmed",
+   "inAfter": "The other four are on Bequia (J F Mitchell Airport), Canouan, Mustique and Union Island.",
+   "note": "J F Mitchell is written without full stops, as OurAirports writes it, because the gate splits sentences at initials. 'All in the Grenadines' is dropped: the only other source naming the four as the Grenadines is the tourism authority's introduction, which shares Wikipedia's wording ('several airlines operating an extensive network of direct domestic'), so the two are one source there.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the others being J. F. Mitchell Airport in Bequia, Canouan Airport, Mustique Airport and Union Island Airport"
+    },
+    {
+     "file": "ourairports-vc",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": [
+      "TVSB | IATA BQU | medium_airport | J F Mitchell Airport | Bequia",
+      "TVSC | IATA CIW | medium_airport | Canouan Airport | Canouan",
+      "TVSM | IATA MQS | medium_airport | Mustique Airport",
+      "TVSU | IATA UNI | medium_airport | Union Island International Airport | Union Island"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "often called AIA",
+   "verdict": "softened",
+   "inAfter": "It is often called AIA.",
+   "note": "Was 'often called Argyle Airport or simply AIA'. The operator and the tourism authority both use AIA; 'Argyle Airport' is cut below.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "(often referred to as Argyle Airport or simply AIA)"
+    },
+    {
+     "file": "aia-home",
+     "org": "Argyle International Airport (operator, svg-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Airlines at AIA",
+      "AIA's 7-Year Anniversary"
+     ]
+    },
+    {
+     "file": "discoversvg-getting",
+     "org": "St Vincent and the Grenadines Tourism Authority (discoversvg.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Argyle International Airport (AIA)"
+    }
+   ]
+  },
+  {
+   "claim": "the country's first international airport",
+   "verdict": "cut",
+   "wasBefore": "Saint Vincent and the Grenadines' first international airport",
+   "why": "Wikipedia alone. The operator's own history says only that in 2005 the government decided 'to build a new international airport at Argyle', and the tourism authority calls it 'the newest international airport in the Eastern Caribbean'; neither says first. The code SVD belonged to the old E T Joshua Airport at Arnos Vale (OurAirports), now closed. Replaced by 'main airport', which two sources support."
+  },
+  {
+   "claim": "it is what made long haul access possible",
+   "verdict": "cut",
+   "wasBefore": "It is what made long haul access possible.",
+   "why": "A judgement no source makes in those words. The operator's history says E T Joshua's development was 'severely constrained, both in terms of the width and length of the runway' and that Argyle's runway was designed for 'jets as large as the Boeing 747-400s'; Wikipedia says the airport was 'expected to' attract direct flights from Canada, the US and the UK. The text now names the long haul flights instead."
+  },
+  {
+   "claim": "connects directly to Atlanta, Miami, John F. Kennedy, Toronto and London Heathrow, and other Caribbean airports",
+   "verdict": "cut",
+   "wasBefore": "The airport connects directly to Atlanta, Miami, John F. Kennedy, Toronto and London Heathrow as well as other Caribbean airports.",
+   "why": "Rewritten, not dropped. The Heathrow flight is not non-stop: Virgin Atlantic's own page says it touches down in Barbados for about an hour. The four North American cities are kept, attributed to the tourism authority with its note that some flights are seasonal, and the Caribbean links are kept as regional flights."
+  },
+  {
+   "claim": "the hub for island hopping",
+   "verdict": "cut",
+   "wasBefore": "It is also the hub for island hopping.",
+   "why": "Overstated. Wikipedia calls it 'a major gateway to the Grenadines', but SVG Air, which flies to Bequia, Canouan and Union Island, tells visitors on its own home page that 'The Easiest Way to Get to the Grenadines is via Barbados', and Mustique Airways sells a 'Shared Charter from Barbados'. The flights from here to the Grenadines are kept.",
+   "sources": [
+    {
+     "file": "svgair-home",
+     "org": "SVG Air (flysvgair.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The Easiest Way to Get to the Grenadines is via Barbados"
+    },
+    {
+     "file": "mustiqueair-home",
+     "org": "Mustique Airways (mustique.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Shared Charter from Barbados"
+    }
+   ]
+  },
+  {
+   "claim": "several airlines, an extensive network to every destination in the Grenadines",
+   "verdict": "cut",
+   "wasBefore": "Several airlines run an extensive network of domestic flights from Argyle to every destination in the Grenadines",
+   "why": "'Every destination' overstates it: besides Argyle only Bequia, Canouan, Mustique and Union Island have airports (OurAirports). The tourism authority's matching sentence shares Wikipedia's wording, so it is not a second source. Softened to the two local airlines that fly from here to the Grenadines."
+  },
+  {
+   "claim": "the primary hub for SVG Air and Mustique Airways",
+   "verdict": "cut",
+   "wasBefore": "it is the primary hub for SVG Air and Mustique Airways",
+   "why": "'Primary hub' rests on Wikipedia alone. SVG Air's own pages give bases in St Vincent and the Grenadines, Grenada and Carriacou, and Antigua and Barbuda, with no address at the airport; Mustique Airways gives its address as Argyle International Airport. Softened to 'two local airlines ... fly on from here'."
+  },
+  {
+   "claim": "17 aircraft through an alliance with bases in St Vincent, Antigua and Grenada",
+   "verdict": "cut",
+   "wasBefore": "who together operate 17 aircraft through an alliance with bases in St Vincent, Antigua and Grenada",
+   "why": "Contradicted by SVG Air's own page, which says it operates 7 aircraft with bases in St Vincent and the Grenadines, Grenada and Carriacou, and Antigua and Barbuda; neither airline's site mentions an alliance. A fleet count is of no use to an agent, so it is not replaced.",
+   "sources": [
+    {
+     "file": "svgair-home",
+     "org": "SVG Air (flysvgair.com)",
+     "dated": "read 2026-09-23 (live page; footer 2026)",
+     "quote": "we have grown to now operate 7 aircraft throughout the Caribbean with bases in St. Vincent and the Grenadines, Grenada and Carriacou and Antigua and Barbuda"
+    }
+   ]
+  },
+  {
+   "claim": "all in the Grenadines",
+   "verdict": "cut",
+   "wasBefore": "all in the Grenadines",
+   "why": "Not wrong, but the only second source that places the four airports in the Grenadines is the tourism authority's introduction, which shares Wikipedia's wording. The islands are named instead, and the airlines' Grenadines flights are kept."
+  },
+  {
+   "claim": "the second solar powered airport in the Caribbean after V. C. Bird International",
+   "verdict": "cut",
+   "wasBefore": "It is the second solar powered airport in the Caribbean after V. C. Bird International in Antigua.",
+   "why": "One source. The tourism authority's page carries Wikipedia's sentence word for word ('The airport is the second solar powered airport in the Caribbean, following V. C. Bird International Airport in Antigua'), so the two count once, and no independent source was found."
+  },
+  {
+   "claim": "also called Argyle Airport",
+   "verdict": "cut",
+   "wasBefore": "It is often called Argyle Airport or simply AIA.",
+   "why": "'Argyle Airport' rests on Wikipedia alone; the operator and the tourism authority use 'Argyle International Airport' and 'AIA'. The sentence is kept as 'It is often called AIA.'"
+  },
+  {
+   "claim": "the old airport's name and code (E T Joshua, SVD)",
+   "verdict": "cut",
+   "why": "Held back: a new fact, for Andy. Argyle replaced E T Joshua Airport at Arnos Vale on 14 February 2017 (Wikipedia) and took over its code, SVD (OurAirports lists E T Joshua as closed, with SVD among its other names). The UK CAA's 2025 route table still files St Vincent's traffic under 'E T JOSHUA' (2025, 148 passengers from Heathrow), so the old name may still turn up in some systems. A line such as 'It replaced E T Joshua Airport in 2017 and took over its code' would help an agent who meets the old name.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport commenced full operations on 14 February 2017, replacing the decommissioned E.T. Joshua Airport."
+    },
+    {
+     "file": "ourairports-vc",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": "VC-0001 | IATA - | closed | E T Joshua Airport | Arnos Vale | scheduled service: no | runways: 07/25 4595 ft (1,401 m) ASP | other names: Arnos Vale Airport, SVD, TVSV"
+    },
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2025 figures, table run 25/02/2026",
+     "quote": "SAINT VINCENT AND THE GRENADINES,1,HEATHROW,E T JOSHUA,148,148,0,1196,1196,0,-87.62542"
+    }
+   ]
+  },
+  {
+   "claim": "American Airlines from Charlotte, Saturdays December to March",
+   "verdict": "cut",
+   "why": "Held back: a new route, not in the old text, and on the tourism authority's list alone (American's own site was not tried).",
+   "sources": [
+    {
+     "file": "discoversvg-getting",
+     "org": "St Vincent and the Grenadines Tourism Authority (discoversvg.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Charlotte (CLT): American Airlines offers Saturday flights, December - March."
+    }
+   ]
+  },
+  {
+   "claim": "Virgin Atlantic: only St Vincent's entry requirements apply",
+   "verdict": "cut",
+   "why": "Held back: new, and on Virgin Atlantic's page alone, though it follows from passengers staying on board in Barbados.",
+   "sources": [
+    {
+     "file": "virgin-svg",
+     "org": "Virgin Atlantic (virginatlantic.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "you only have to meet the entry requirements for St Vincent and the Grenadines"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: taxis are not metered; agree the fare first",
+   "verdict": "cut",
+   "why": "Held back: the FCDO's advice for the whole country (updated 23 April 2026), not about the airport, and it replaces nothing in the old text.",
+   "sources": [
+    {
+     "file": "fcdo-svg-print",
+     "org": "UK Foreign, Commonwealth and Development Office (GOV.UK)",
+     "dated": "updated 2026-04-23, still current 2026-09-23",
+     "quote": [
+      "Updated: 23 April 2026",
+      "Taxis are not metered. There are set fares for most destinations. Agree the fare in local currency with the driver before you set off."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

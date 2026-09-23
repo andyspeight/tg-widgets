@@ -1,0 +1,403 @@
+{
+ "iata": "CIW",
+ "id": "recViadX84EgGq229",
+ "name": "Canouan Airport",
+ "country": "St Vincent and the Grenadines",
+ "wikipedia": "https://en.wikipedia.org/wiki/Canouan_Airport",
+ "audited": "2026-09-23",
+ "before": "Canouan's airport, and the practical way into this part of the Grenadines. It is busiest through the Caribbean winter season.\n\nThe runway is the thing that changed this island. A land reclamation and extension finished in March 2008 took it from 3,455 feet to 5,875 feet, which brought 737s and A320s within reach and opened direct access from Europe and the Americas. Before that the largest aircraft serving Canouan was an ATR 72. It is one of only two airports in Saint Vincent and the Grenadines able to take large airliners.\n\nIt handles a lot of private traffic. Luxury tourism and property drive the island's economy and Canouan is well known among private jet travellers, with a CIP lounge in the terminal.\n\nThe terminal itself is worth arriving early for. It is open air, roofed in cane palm fronds with wooden walls and columns of eucalyptus logs, built after the structures of the Taino and Arawak peoples. There are no air bridges, so boarding is on foot by airstairs.",
+ "after": "Canouan's airport, in the south west of the island.\n\nIts runway, 1,791 metres (5,875 feet) long, is the second longest in the country after Argyle's, and it can take small passenger jets. It also handles private aircraft.\n\nSVG Air's scheduled flights link it with St Vincent, Bequia and Union Island. Mustique Airways and SVG Air also fly charters here.",
+ "claims": [
+  {
+   "claim": "Canouan's airport",
+   "verdict": "confirmed",
+   "inAfter": "Canouan's airport",
+   "sources": [
+    {
+     "file": "govvc-airports-about",
+     "org": "Government of St Vincent and the Grenadines (Ministry of National Security, Airports Department)",
+     "dated": "page marked 'Published: 20 May 2010' but naming Argyle, which opened in 2017, so edited since",
+     "quote": [
+      "The Airports Department is responsible for the operation of four airports located in the state of Saint Vincent and the Grenadines.",
+      "The Canouan Airport, located on the Island of Canouan"
+     ]
+    },
+    {
+     "file": "ourairports-vc",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": "TVSC | IATA CIW | medium_airport | Canouan Airport | Canouan | scheduled service: yes"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the airport located on the island of Canouan in St. Vincent and the Grenadines"
+    }
+   ]
+  },
+  {
+   "claim": "in the south west of the island",
+   "verdict": "softened",
+   "inAfter": "in the south west of the island",
+   "note": "Replaces 'the practical way into this part of the Grenadines' (cut below) with where the airport is, which two sources give.",
+   "sources": [
+    {
+     "file": "discoversvg-canouan",
+     "org": "St Vincent and the Grenadines Tourism Authority (discoversvg.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Canouan’s airport is in the south west and has the capacity to accommodate small passenger jets."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The runway is on the southwestern end of Canouan and parallels the south shoreline."
+    }
+   ]
+  },
+  {
+   "claim": "runway 1,791 metres (5,875 feet)",
+   "verdict": "confirmed",
+   "inAfter": "Its runway, 1,791 metres (5,875 feet) long",
+   "note": "Kept from the old text's 5,875 feet, now with metres. SVG Air and Wikipedia agree exactly; OurAirports gives 5,900 ft (1,798 m), a difference of no consequence to an agent.",
+   "sources": [
+    {
+     "file": "svgair-service",
+     "org": "SVG Air (flysvgair.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "CAPITAL: CHARLESTOWN | AIRPORT: CANOUAN JET PORT | ICAO: TVSC | IATA: CIW",
+      "RUNWAYS : 1 ( 13 / 31 ) RUNWAY",
+      "LENGTH : 5,875 feet | 1,791 meters"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "at 5,875 feet (1,791 m), was located at Canouan Airport"
+    },
+    {
+     "file": "ourairports-vc",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": "TVSC | IATA CIW | medium_airport | Canouan Airport | Canouan | scheduled service: yes | runways: 13/31 5900 ft (1,798 m) ASP"
+    }
+   ]
+  },
+  {
+   "claim": "the second longest runway in the country, after Argyle's",
+   "verdict": "corrected",
+   "inAfter": "is the second longest in the country after Argyle's",
+   "note": "Replaces 'one of only two airports in Saint Vincent and the Grenadines able to take large airliners' (cut below). OurAirports lists all five airports with scheduled service: Argyle 9,000 ft, Canouan 5,900 ft, Bequia 3,609 ft, Mustique 3,255 ft, Union Island 2,467 ft. Wikipedia says Canouan had the country's longest runway before Argyle opened and is the second largest airport after it.",
+   "sources": [
+    {
+     "file": "ourairports-vc",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": [
+      "TVSA | IATA SVD | large_airport | Argyle International Airport | Kingstown | scheduled service: yes | runways: 04/22 9000 ft (2,743 m) ASP",
+      "TVSB | IATA BQU | medium_airport | J F Mitchell Airport | Bequia | scheduled service: yes | runways: 12/30 3609 ft (1,100 m) ASP",
+      "TVSC | IATA CIW | medium_airport | Canouan Airport | Canouan | scheduled service: yes | runways: 13/31 5900 ft (1,798 m) ASP",
+      "TVSM | IATA MQS | medium_airport | Mustique Airport | Lovell | scheduled service: yes | runways: 09/27 3255 ft (992 m) ASP",
+      "TVSU | IATA UNI | medium_airport | Union Island International Airport | Union Island | scheduled service: yes | runways: 08/26 2467 ft (752 m) ASP"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "It is the second largest airport in St. Vincent and the Grenadines, after Argyle International Airport.",
+      "Since the longest runway in St. Vincent and the Grenadines, at 5,875 feet (1,791 m), was located at Canouan Airport"
+     ]
+    },
+    {
+     "file": "svgair-service",
+     "org": "SVG Air (flysvgair.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "LENGTH: 3,609 ft | 1,100 meters",
+      "LENGTH : 2,467 feet | 752 meters"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "it can take small passenger jets",
+   "verdict": "softened",
+   "inAfter": "it can take small passenger jets",
+   "note": "Was 'brought 737s and A320s within reach'. The tourism authority says 'small passenger jets'; the 737 and A320 are named by Wikipedia alone, so the types are dropped.",
+   "sources": [
+    {
+     "file": "discoversvg-canouan",
+     "org": "St Vincent and the Grenadines Tourism Authority (discoversvg.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "has the capacity to accommodate small passenger jets"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "can now accommodate jets such as the Boeing 737 and Airbus A320"
+    }
+   ]
+  },
+  {
+   "claim": "it also handles private aircraft",
+   "verdict": "softened",
+   "inAfter": "It also handles private aircraft.",
+   "note": "Was 'It handles a lot of private traffic'. SVG Air runs a private aircraft handling office here, and Wikipedia names two local handling companies at the airport; 'a lot' rests on Wikipedia alone (its source, an Elite Traveler report of 123 private jets in one December, now answers 404).",
+   "sources": [
+    {
+     "file": "svgair-service",
+     "org": "SVG Air (flysvgair.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "SVG AIR Private Aircraft Services is a full-service FBO, with offices in Bequia (TVSB), Canouan (TVSC)",
+      "Lavatory Services (only available at TVSC - Canouan Island)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport is moderately busy with mostly private jet traffic.",
+      "Two locally owned Fixed-base operators based at the jetport facilities, Canouan Aviation Services and Vincy Aviation Services"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "SVG Air's scheduled flights link it with St Vincent, Bequia and Union Island",
+   "verdict": "corrected",
+   "inAfter": "SVG Air's scheduled flights link it with St Vincent, Bequia and Union Island.",
+   "note": "Replaces 'opened direct access from Europe and the Americas' (cut below) with who flies here now. SVG Air lists daily flights to and from St Vincent, Bequia, Canouan and Union Island (and Barbados, Grenada and other islands); the Bequia Tourism Association lists scheduled flights between Bequia and Canouan. Wikipedia's current list says that as of 2025 the airport has only domestic flights; that rests on Wikipedia alone and SVG Air's list includes Barbados and Grenada among its daily points, so the text does not say either way.",
+   "sources": [
+    {
+     "file": "svgair-home",
+     "org": "SVG Air (flysvgair.com)",
+     "dated": "read 2026-09-23 (live page; footer 2026)",
+     "quote": [
+      "SVG Air offers daily flights to and from St. Vincent, Bequia, Canouan, Union Island, Barbados, Antigua and Barbuda, Montserrat, Grenada, and Carriacou.",
+      "SVG Air - YOUR WINGS TO PARADISE | 2026"
+     ]
+    },
+    {
+     "file": "bequiatourism-gethere",
+     "org": "Bequia Tourism Association (bequiatourism.com)",
+     "dated": "read 2026-09-23 (live page; footer 2026)",
+     "quote": "Private charters and scheduled flights to and from Grenada (SVG Air), Union Island, Canouan and St. Vincent are also available"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Connection is maintained from the airport for several smaller airports in the Grenadines."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "As of 2025, the airport only serve domestic flights."
+    }
+   ]
+  },
+  {
+   "claim": "Mustique Airways and SVG Air also fly charters here",
+   "verdict": "confirmed",
+   "inAfter": "Mustique Airways and SVG Air also fly charters here.",
+   "note": "The charter side of the old 'It handles a lot of private traffic'. Each airline's own page offers charters, Mustique Airways' request form lists Canouan, and Wikipedia says the airport is open to charter flights.",
+   "sources": [
+    {
+     "file": "mustiqueair-home",
+     "org": "Mustique Airways (mustique.com)",
+     "dated": "read 2026-09-23 (live page; footer 'All Rights Reserved - 2020')",
+     "quote": [
+      "Online request for private charters",
+      "From: Barbados (BGI) Bequia (BQU) Canouan (CIW)"
+     ]
+    },
+    {
+     "file": "svgair-home",
+     "org": "SVG Air (flysvgair.com)",
+     "dated": "read 2026-09-23 (live page; footer 2026)",
+     "quote": "SVG Air has a variety of aircraft available to be booked for private charter."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the airport is also open for international corporate jet operations and charter flights"
+    }
+   ]
+  },
+  {
+   "claim": "the practical way into this part of the Grenadines",
+   "verdict": "cut",
+   "wasBefore": "and the practical way into this part of the Grenadines",
+   "why": "A judgement on Wikipedia alone ('the most important airport in the Grenadines'). The tourism authority's ferry timetable shows ferries from Kingstown calling at Canouan, so it is not the only way in, and no source compares the two. Replaced by where the airport is."
+  },
+  {
+   "claim": "busiest through the Caribbean winter season",
+   "verdict": "cut",
+   "wasBefore": "It is busiest through the Caribbean winter season.",
+   "why": "Wikipedia alone. Its source for the winter peak, an Elite Traveler report of a December record for private jets, answered 403 to a plain request and 404 in the browser; no other source was found."
+  },
+  {
+   "claim": "the runway changed the island",
+   "verdict": "cut",
+   "wasBefore": "The runway is the thing that changed this island.",
+   "why": "A judgement with no second source."
+  },
+  {
+   "claim": "reclamation and extension finished March 2008, 3,455 to 5,875 feet",
+   "verdict": "cut",
+   "wasBefore": "A land reclamation and extension finished in March 2008 took it from 3,455 feet to 5,875 feet",
+   "why": "The 5,875 feet is kept (SVG Air, Wikipedia). The March 2008 date, the reclamation and the 3,455 feet rest on Wikipedia alone: its sources could not be read (Searchlight's May 2008 report now opens Searchlight's front page, the paving contractor's page and the government's 2019 tender document answer 404, Canouan Aviation Services answered with an empty 202 challenge, which ends the attempt)."
+  },
+  {
+   "claim": "brought 737s and A320s within reach",
+   "verdict": "cut",
+   "wasBefore": "which brought 737s and A320s within reach",
+   "why": "Softened to 'small passenger jets', the tourism authority's words; the aircraft types rest on Wikipedia alone."
+  },
+  {
+   "claim": "opened direct access from Europe and the Americas",
+   "verdict": "cut",
+   "wasBefore": "and opened direct access from Europe and the Americas",
+   "why": "Wikipedia alone, and no current airline or tourism source lists a scheduled flight from Europe or the Americas: the tourism authority's list of international flights names only Argyle, and Wikipedia's own current list says only domestic flights as of 2025. Replaced by SVG Air's scheduled flights and the charters."
+  },
+  {
+   "claim": "before the extension the largest aircraft was an ATR 72",
+   "verdict": "cut",
+   "wasBefore": "Before that the largest aircraft serving Canouan was an ATR 72.",
+   "why": "Wikipedia alone, and history of no use to an agent."
+  },
+  {
+   "claim": "one of only two airports able to take large airliners",
+   "verdict": "cut",
+   "wasBefore": "It is one of only two airports in Saint Vincent and the Grenadines able to take large airliners.",
+   "why": "Reworded to what two sources support: the second longest runway after Argyle's, able to take small passenger jets."
+  },
+  {
+   "claim": "a lot of private traffic",
+   "verdict": "cut",
+   "wasBefore": "It handles a lot of private traffic.",
+   "why": "'A lot' rests on Wikipedia alone; softened to 'It also handles private aircraft'."
+  },
+  {
+   "claim": "luxury tourism and property drive the island's economy",
+   "verdict": "cut",
+   "wasBefore": "Luxury tourism and property drive the island's economy",
+   "why": "Wikipedia alone for the economic claim. The tourism authority describes Mandarin Oriental Canouan and the privately owned northern half of the island, but says nothing of the economy."
+  },
+  {
+   "claim": "well known among private jet travellers",
+   "verdict": "cut",
+   "wasBefore": "and Canouan is well known among private jet travellers",
+   "why": "Wikipedia alone ('popular with private jet travelers around the world')."
+  },
+  {
+   "claim": "a CIP lounge in the terminal",
+   "verdict": "cut",
+   "wasBefore": "with a CIP lounge in the terminal",
+   "why": "Wikipedia alone; no other saved source mentions a lounge."
+  },
+  {
+   "claim": "the terminal is worth arriving early for",
+   "verdict": "cut",
+   "wasBefore": "The terminal itself is worth arriving early for.",
+   "why": "Opinion, and it rested on the terminal description, which is cut."
+  },
+  {
+   "claim": "open-air terminal roofed in palm fronds, eucalyptus columns, Taino and Arawak style",
+   "verdict": "cut",
+   "wasBefore": "It is open air, roofed in cane palm fronds with wooden walls and columns of eucalyptus logs, built after the structures of the Taino and Arawak peoples.",
+   "why": "Wikipedia alone; no other saved source describes the terminal building."
+  },
+  {
+   "claim": "no air bridges; boarding by airstairs",
+   "verdict": "cut",
+   "wasBefore": "There are no air bridges, so boarding is on foot by airstairs.",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "also called Canouan Jet Port",
+   "verdict": "cut",
+   "why": "Held back: a name the old text did not use. SVG Air calls it 'Canouan Jet Port', the tourism authority 'Canouan Jetport' and 'the jetport', and Wikipedia 'the jetport of the Grenadines'. Worth adding if Andy wants the other name in the text.",
+   "sources": [
+    {
+     "file": "svgair-service",
+     "org": "SVG Air (flysvgair.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "AIRPORT: CANOUAN JET PORT"
+    },
+    {
+     "file": "discoversvg-getting",
+     "org": "St Vincent and the Grenadines Tourism Authority (discoversvg.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Canouan Jetport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "it is now the jetport of the Grenadines"
+    }
+   ]
+  },
+  {
+   "claim": "taxis wait at the airport when flights arrive",
+   "verdict": "cut",
+   "why": "Held back: new, and on the tourism authority's page alone.",
+   "sources": [
+    {
+     "file": "discoversvg-canouan",
+     "org": "St Vincent and the Grenadines Tourism Authority (discoversvg.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "There are a small number of private taxi operators on Canouan and they can usually be found at the jetport or the wharf in Charlestown when aircraft and ferry are arriving."
+    }
+   ]
+  },
+  {
+   "claim": "opening hours",
+   "verdict": "cut",
+   "why": "Held back: new, and the sources disagree. SVG Air gives 0800 to 2000 local time every day; the Airports Department's page (published 2010) gives air traffic services from sunrise to sunset or with 24 hours' prior permission; Wikipedia says the airport operates day and night.",
+   "sources": [
+    {
+     "file": "svgair-service",
+     "org": "SVG Air (flysvgair.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "OPERATING HOURS : 0800 - 2000 LT ALL WEEK"
+    },
+    {
+     "file": "govvc-canouan-airport",
+     "org": "Government of St Vincent and the Grenadines (Ministry of National Security, Airports Department)",
+     "dated": "published 2010-05-20",
+     "quote": [
+      "Canouan Airport Operational Hours",
+      "Published: 20 May 2010",
+      "Air Traffic Services/AIS Sunrise to sunset or 24 hour prior permission required"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is in operation at day and night."
+    }
+   ]
+  },
+  {
+   "claim": "ferries from Kingstown call at Canouan",
+   "verdict": "cut",
+   "why": "Held back: new, and on the tourism authority's timetable alone (the southern Grenadines ferry from Kingstown calls at Canouan, Mayreau and Union Island).",
+   "sources": [
+    {
+     "file": "discoversvg-ferries",
+     "org": "St Vincent and the Grenadines Tourism Authority (discoversvg.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Southern Grenadines",
+      "Monday | Departs Kingstown 11:30 AM",
+      "Bequia → Canouan"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
