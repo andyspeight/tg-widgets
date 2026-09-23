@@ -22,7 +22,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { upsellTiles, upsellUrl, bookedProducts, tripShape, partySize, travellerList,
-  UPSELL_PRODUCTS, NOT_DEEPLINKABLE, CHILD_AGE_WHEN_UNKNOWN } from '../public/_order-upsell.js';
+  UPSELL_PRODUCTS, UPSELL_CATALOGUE, AWAITING_PROOF, CHILD_AGE_WHEN_UNKNOWN } from '../public/_order-upsell.js';
 
 let passed = 0, failed = 0;
 const ok = (label, cond, detail) => {
@@ -61,8 +61,8 @@ console.log("Andy's example, a flight and hotel to Paris");
   ok('the two linkable additions are offered', tiles.length === 2, tiles.map((t) => t.product).join(', '));
   ok('and neither the flight nor the hotel is offered again',
     !find(tiles, 'Flights') && !find(tiles, 'Accommodation'));
-  ok('transfers and airport extras are recorded as not linkable, not forgotten',
-    !!NOT_DEEPLINKABLE.Transfers && !!NOT_DEEPLINKABLE.AirportExtras);
+  ok('transfers and airport extras are built and waiting on proof, not forgotten',
+    AWAITING_PROOF.join(',') === 'Transfers,AirportExtras');
   ok('and neither is offered as a tile',
     !find(tiles, 'Transfers') && !find(tiles, 'AirportExtras'));
 
@@ -231,10 +231,52 @@ console.log('\nthe deep link, against Travelify\'s own examples');
   ok('no tile means no link', upsellUrl(null, '474') === '');
 }
 
-// ── The shape of the list itself ─────────────────────────────────────────────
-console.log('\nthe list');
+// ── The two that are built but not yet proved ────────────────────────────────
+// Travelify's deep linking document is from 2022 and is NOT the whole list: our
+// own Event Tickets widgets book through TicketAccommodation and
+// TicketAccommodationFlight, neither of which appears in it. So transfers and
+// airport extras may well work; they are read across from Car Rental, the
+// nearest product the document does describe, and that is a reasoned shape
+// rather than a verified one.
+//
+// This prints the exact URL each tile would produce on application 474. Open
+// one: if it lands on a search, set `proved: true` in UPSELL_CATALOGUE and the
+// tile ships. If it 400s, the shape or the search type is wrong and the tile
+// stays off, because a missing button is honest and a dead one is not.
+console.log('\nbuilt, and waiting on one click against the live service');
 {
-  ok('exactly two products can be deep linked', UPSELL_PRODUCTS.length === 2);
+  const pending = upsellTiles(PARIS, { include: AWAITING_PROOF });
+  const transfer = find(pending, 'Transfers');
+  const extras = find(pending, 'AirportExtras');
+
+  ok('a transfer runs from the airport they land at',
+    transfer && transfer.pup === 'CDG' && transfer.pupt === 'Airport', JSON.stringify(transfer));
+  ok('to where they are staying, which is a real second place',
+    transfer && transfer.drp === 'Paris' && transfer.drpt === 'City');
+  ok('picked up when they land and returning when they fly home',
+    transfer && transfer.fr === '2027-04-10T09:20' && transfer.to === '2027-04-17T18:00');
+
+  // Andy's own reason for a per-product anchor: "airport parking belongs to the
+  // OUTBOUND date at the UK airport, not to the week in Paris".
+  ok('airport extras belong to the airport they fly FROM',
+    extras && extras.loc === 'LHR' && extras.loct === 'Airport', JSON.stringify(extras));
+  ok('and last from leaving to getting back, not the stay',
+    extras && extras.fr === '2027-04-10T07:00' && extras.to === '2027-04-17T18:20');
+
+  ok('neither is offered to a customer until it is proved',
+    !find(upsellTiles(PARIS), 'Transfers') && !find(upsellTiles(PARIS), 'AirportExtras'));
+
+  console.log('\n    Transfers     ' + upsellUrl(transfer, '474'));
+  console.log('    AirportExtras ' + upsellUrl(extras, '474') + '\n');
+}
+
+// ── The shape of the list itself ─────────────────────────────────────────────
+console.log('the list');
+{
+  ok('two of the four products are proved and shown', UPSELL_PRODUCTS.length === 2);
+  ok('all four are in the catalogue, so none is quietly dropped', UPSELL_CATALOGUE.length === 4);
+  ok('every one of them carries a search type, a label and a hint',
+    UPSELL_CATALOGUE.every((t) => t.st && t.label && t.hint));
   ok('none of them is the booking itself',
     !UPSELL_PRODUCTS.includes('Flights') && !UPSELL_PRODUCTS.includes('Accommodation')
     && !UPSELL_PRODUCTS.includes('Packages'));
@@ -265,7 +307,7 @@ console.log('\nthe section on the booking page');
     /tgm-action-icon/.test(widget) && /tgm-action-title/.test(widget)
     && /tgm-action-sub/.test(widget) && /svg\(IC\.arrow\)/.test(widget));
   ok('each product has its own icon', /TicketsAttractions: IC\.ticket/.test(widget) && /CarRental: IC\.car/.test(widget));
-  ok('including the two that cannot be linked yet, so they arrive drawn',
+  ok('including the two not yet proved, so they arrive drawn',
     /Transfers: IC\.van/.test(widget) && /AirportExtras: IC\.lounge/.test(widget));
   ok('an unknown product still gets an icon rather than a gap',
     /UPSELL_IC\[t\.product\] \|\| IC\.search/.test(widget));
@@ -301,7 +343,13 @@ console.log('\nthe section on the booking page');
     /let widgetConfig = \{\};/.test(api));
 
   const editor = readFileSync(new URL('../public/editor-mybooking.html', import.meta.url), 'utf8');
-  ok('the editor has a switch per product', (editor.match(/data-upsell="/g) || []).length === UPSELL_PRODUCTS.length);
+  // Tied to the proved list on purpose: flip a tile to `proved: true` without
+  // giving it a switch here and this fails, rather than shipping a tile the
+  // client cannot turn off.
+  ok('the editor has a switch per product a customer can be shown',
+    (editor.match(/data-upsell="/g) || []).length === UPSELL_PRODUCTS.length);
+  ok('and a switch for each one, by name',
+    UPSELL_PRODUCTS.every((p) => editor.includes('data-upsell="' + p + '"')));
   ok('and one for the section itself', /data-display="showUpsell"/.test(editor));
   ok('a config saved before this existed still gets the section',
     /sw\.classList\.toggle\('on', v !== false\)/.test(editor));
