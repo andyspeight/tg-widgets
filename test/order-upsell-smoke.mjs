@@ -21,7 +21,8 @@
  * Run: node test/order-upsell-smoke.mjs   (npm run test:order-upsell)
  */
 import { readFileSync } from 'node:fs';
-import { upsellTiles, upsellUrl, bookedProducts, tripShape, partySize, UPSELL_PRODUCTS, NOT_DEEPLINKABLE } from '../public/_order-upsell.js';
+import { upsellTiles, upsellUrl, bookedProducts, tripShape, partySize, travellerList,
+  UPSELL_PRODUCTS, NOT_DEEPLINKABLE, CHILD_AGE_WHEN_UNKNOWN } from '../public/_order-upsell.js';
 
 let passed = 0, failed = 0;
 const ok = (label, cond, detail) => {
@@ -42,7 +43,10 @@ const PARIS = {
       accommodation: { name: 'Hotel X', location: { city: 'Paris', country: 'FR' },
         units: [{ checkin: '2027-04-10', nights: 7 }] } },
   ],
-  travellers: [{ type: 'Adult' }, { type: 'Adult' }, { type: 'Child', age: 9 }],
+  // The REAL shape. /api/retrieve-order puts the de-duped party on the summary;
+  // no order has a top-level `travellers`, which is exactly what the first
+  // version of this module read.
+  summary: { travellers: [{ type: 'Adult' }, { type: 'Adult' }, { type: 'Child', age: 9 }] },
 };
 
 console.log('\nUpsell: what else could they book\n');
@@ -77,6 +81,55 @@ console.log("Andy's example, a flight and hotel to Paris");
     partySize(PARIS).adults === 2 && partySize(PARIS).children === 1);
 }
 
+// ── The party ────────────────────────────────────────────────────────────────
+// Andy, 23 Sep 2026: "the search should be for the correct amount of and type
+// people in the party - not hard coded". It was hard coded, and not by
+// intention: partySize read `order.travellers`, a key no real order carries, so
+// the traveller loop ran over an empty list every time and fell straight
+// through to its two-adult fallback. A family of five searched as a couple.
+console.log('\nthe party, counted rather than assumed');
+{
+  ok('the travellers are found where the API really puts them',
+    travellerList(PARIS).length === 3);
+  const party = partySize(PARIS);
+  ok('so two adults and a child are counted, not defaulted',
+    party.adults === 2 && party.children === 1 && party.counted === true);
+
+  const family = { ...PARIS, summary: { travellers: [
+    { type: 'Adult' }, { type: 'Adult' }, { type: 'Adult' },
+    { type: 'Child', age: 11 }, { type: 'Child', age: 6 }, { type: 'Infant' }] } };
+  const f = partySize(family);
+  ok('a party of six reads as three adults, two children and an infant',
+    f.adults === 3 && f.children === 2 && f.infants === 1,
+    JSON.stringify(f));
+  // An infant is its own deep link parameter, needs no age and is capped at one
+  // per adult. Counted as a child it would both overstate chd and price a babe
+  // in arms as a seated eight-year-old.
+  const url = upsellUrl(upsellTiles(family)[0], '474');
+  ok('and the link says so', /adt=3/.test(url) && /chd=2/.test(url) && /inf=1/.test(url), url);
+  ok('with an age for each child, theirs and not ours',
+    /chdage=11/.test(url) && /chdage=6/.test(url), url);
+
+  ok('a lone traveller is searched as one adult, not two',
+    partySize({ ...PARIS, summary: { travellers: [{ type: 'Adult' }] } }).adults === 1);
+  ok('an untyped traveller counts as an adult',
+    partySize({ ...PARIS, summary: { travellers: [{}, {}] } }).adults === 2);
+  ok('more infants than adults is clamped to the spec\'s one each',
+    partySize({ ...PARIS, summary: { travellers: [{ type: 'Adult' }, { type: 'Infant' }, { type: 'Infant' }] } }).infants === 1);
+  ok('a party too big for the spec is clamped, not sent out of range',
+    partySize({ ...PARIS, summary: { travellers: Array.from({ length: 14 }, () => ({ type: 'Adult' })) } }).adults === 9);
+
+  // Where the list is genuinely missing, two adults is the deep link's own
+  // default rather than a number we chose. It says so, so nobody reads it as a
+  // count.
+  const none = partySize({ items: [] });
+  ok('an order with no traveller list falls back and admits it',
+    none.adults === 2 && none.counted === false);
+  ok('a hotel guest list stands in when the summary is empty',
+    partySize({ items: [{ product: 'Accommodation',
+      accommodation: { guests: [{ type: 'Adult' }, { type: 'Adult' }, { type: 'Adult' }] } }] }).adults === 3);
+}
+
 // ── Already booked ───────────────────────────────────────────────────────────
 console.log('\nsomething they already have');
 {
@@ -108,7 +161,7 @@ console.log('\nbookings with less to go on');
     items: [{ product: 'Accommodation', startDate: '2027-04-10T00:00:00',
       accommodation: { name: 'Hotel X', location: { city: 'Paris', country: 'FR' },
         units: [{ checkin: '2027-04-10', nights: 3 }] } }],
-    travellers: [{ type: 'Adult' }],
+    summary: { travellers: [{ type: 'Adult' }] },
   };
   const tiles = upsellTiles(hotelOnly);
   ok('a hotel with no flight still gets things to do', !!find(tiles, 'TicketsAttractions'));
@@ -118,7 +171,7 @@ console.log('\nbookings with less to go on');
     items: [{ product: 'Flights', legs: [
       leg('MAN', 'ALC', '2027-06-01T06:00:00', '2027-06-01T09:30:00'),
       leg('ALC', 'MAN', '2027-06-08T20:00:00', '2027-06-08T21:40:00')] }],
-    travellers: [{ type: 'Adult' }, { type: 'Adult' }],
+    summary: { travellers: [{ type: 'Adult' }, { type: 'Adult' }] },
   };
   const f = upsellTiles(flightOnly);
   ok('a flight with no hotel gets both', f.length === 2, f.map((t) => t.product).join(', '));
@@ -157,10 +210,22 @@ console.log('\nthe deep link, against Travelify\'s own examples');
   // search is invalid, so it goes adults-only rather than being rejected.
   ok('a child with a known age is searched for',
     things.indexOf('chd=1') !== -1 && things.indexOf('chdage=9') !== -1, things);
-  const noAge = { ...PARIS, travellers: [{ type: 'Adult' }, { type: 'Child' }] };
+  // Travelify's order carries a traveller's TYPE and usually no age, and the
+  // spec will not take a child without one. Searching the right number of
+  // people at an assumed age beats searching the wrong number of people: the
+  // first version dropped every ageless child, so a family of four opened a
+  // search for two. The customer can change an age on the results page; they
+  // cannot add a child who was never in the search.
+  const noAge = { ...PARIS, summary: { travellers: [{ type: 'Adult' }, { type: 'Child' }] } };
   const bare = upsellUrl(upsellTiles(noAge)[0], '474');
-  ok('a child with no age is left out rather than sent without one',
-    bare.indexOf('chd=') === -1 && bare.indexOf('chdage') === -1, bare);
+  ok('a child with no stated age is still searched for',
+    bare.indexOf('chd=1') !== -1, bare);
+  ok('at the one assumed age, stated once so it can be found',
+    bare.indexOf('chdage=' + CHILD_AGE_WHEN_UNKNOWN) !== -1, bare);
+  ok('and a real age always beats the assumption',
+    /chdage=9/.test(upsellUrl(upsellTiles(PARIS)[0], '474')));
+  ok('nobody is invited who is not on the booking',
+    bare.indexOf('inf=') === -1, bare);
 
   ok('no application id means no link', upsellUrl(find(tiles, 'CarRental'), '') === '');
   ok('no tile means no link', upsellUrl(null, '474') === '');
@@ -189,6 +254,27 @@ console.log('\nthe section on the booking page');
     /renderAmendSection\(order, c\)\}\s*\n\s*\$\{renderUpsell\(upsell, c\)\}/.test(widget));
   ok('every link is escaped and whitelisted, not pasted in raw',
     /esc\(safeUrl\(t\.url\)\)/.test(widget));
+
+  // Andy, 23 Sep 2026: "make the tiles look a bit more like buttons" and "add a
+  // relevant icon to each box". Both are answered by making the tile the SAME
+  // button the page already uses for Download PDF and Request a change, rather
+  // than a second one that only nearly matches it.
+  ok('a tile is the page\'s own action button',
+    /<a class="tgm-action tgm-upsell-card"/.test(widget));
+  ok('with the icon chip, the title, the sub-line and the arrow that button has',
+    /tgm-action-icon/.test(widget) && /tgm-action-title/.test(widget)
+    && /tgm-action-sub/.test(widget) && /svg\(IC\.arrow\)/.test(widget));
+  ok('each product has its own icon', /TicketsAttractions: IC\.ticket/.test(widget) && /CarRental: IC\.car/.test(widget));
+  ok('including the two that cannot be linked yet, so they arrive drawn',
+    /Transfers: IC\.van/.test(widget) && /AirportExtras: IC\.lounge/.test(widget));
+  ok('an unknown product still gets an icon rather than a gap',
+    /UPSELL_IC\[t\.product\] \|\| IC\.search/.test(widget));
+
+  // Tokens only. --tgm-surface and --tgm-muted have never existed in this
+  // widget, so every use of them fell through to a light-mode fallback and the
+  // section stayed white behind a dark-theme booking.
+  ok('the section is themed from tokens this widget actually defines',
+    !/tgm-upsell[^\n]*--tgm-surface/.test(widget) && !/tgm-upsell[^\n]*--tgm-muted/.test(widget));
   ok('links open in a new tab so the booking is not lost',
     /target="_blank" rel="noopener noreferrer"/.test(widget));
   ok('the label and hint are escaped too',
@@ -197,7 +283,9 @@ console.log('\nthe section on the booking page');
     /if \(!Array\.isArray\(tiles\) \|\| !tiles\.length\) return ''/.test(widget));
   ok('the client can switch the whole section off',
     /c\.display\.showUpsell === false/.test(widget));
-  ok('it honours reduced motion', /prefers-reduced-motion: reduce\) \{ \.tgm-upsell-card/.test(widget));
+  const api2 = readFileSync(new URL('../api/retrieve-order.js', import.meta.url), 'utf8');
+  ok('a traveller\'s real age is carried through the order, not dropped at the trim',
+    /age: safeAge\(t\.age\)/.test(api2) && /age: safeAge\(g\.age\)/.test(api2));
 
   const api = readFileSync(new URL('../api/retrieve-order.js', import.meta.url), 'utf8');
   ok('the API builds the tiles, so the widget has no second copy of the rules',

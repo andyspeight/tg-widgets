@@ -2076,6 +2076,10 @@
 
 
   // ----- Inline SVG icons -----
+  // The stylesheet's own light text colour. Named so _buildOverrides can tell
+  // "the client picked this" from "nobody picked anything" — see the note there.
+  const TEXT_DEFAULT = '#0F172A';
+
   const IC = {
     mail:    'M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6L12 13 2 6',
     cal:     'M3 4h18v18H3zM3 10h18M16 2v6M8 2v6',
@@ -2111,7 +2115,7 @@
     leaf:    'M11 20A7 7 0 0 1 4 13c0-2 1-4 3-6 1-1 2-3 4-5l1 4c2-1 4 1 5 3 1 3 0 5-1 6-2 2-4 5-5 5z',
     eye:     'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
     x:       'M18 6L6 18M6 6l12 12',
-    car:     'M3 17h2l1 4h12l1-4h2v-7l-2-5H5L3 10zM7 17v2M17 17v2M5 14h14',
+    car:     'M4 16v-3l1.9-4.4A2 2 0 0 1 7.7 7.4h8.6a2 2 0 0 1 1.8 1.2L20 13v3M4 13h16M10 7.4V13M6 16a2 2 0 1 0 4 0 2 2 0 1 0-4 0M14 16a2 2 0 1 0 4 0 2 2 0 1 0-4 0',
     van:     'M3 17h18M3 17V8a1 1 0 0 1 1-1h11l4 5h1a1 1 0 0 1 1 1v4M7 17v2M17 17v2M15 7v5h5',
     ticket:  'M3 7v3a2 2 0 0 1 0 4v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 0 1 0-4V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2zM13 5v14',
     seat:    'M6 5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v7H6zM4 12h16v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM7 19v2M17 19v2',
@@ -2950,18 +2954,22 @@
     .tgm-extra-meta-item { display: inline-flex; align-items: center; gap: 6px; }
     .tgm-extra-meta-item strong { color: var(--tgm-text); font-weight: 600; }
 
-    .tgm-upsell { margin-top: 24px; padding: 20px; background: var(--tgm-surface, #fff); border: 1px solid var(--tgm-border, #E2E8F0); border-radius: var(--tgm-radius-lg); }
-    .tgm-upsell-head h3 { font-size: 16px; font-weight: 600; margin: 0 0 4px; letter-spacing: -.01em; color: var(--tgm-text, #0F172A); }
-    .tgm-upsell-head p { font-size: 13px; color: var(--tgm-muted, #64748B); margin: 0 0 14px; }
-    .tgm-upsell-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
-    .tgm-upsell-card { display: flex; flex-direction: column; gap: 3px; padding: 14px 16px; text-decoration: none;
-      background: var(--tgm-surface-2, #F8FAFC); border: 1px solid var(--tgm-border, #E2E8F0);
-      border-radius: var(--tgm-radius-md); transition: border-color .15s, transform .15s; }
-    .tgm-upsell-card:hover { border-color: var(--tgm-primary, #0891B2); transform: translateY(-1px); }
-    .tgm-upsell-card:focus-visible { outline: 2px solid var(--tgm-primary, #0891B2); outline-offset: 2px; }
-    .tgm-upsell-label { font-size: 14px; font-weight: 600; color: var(--tgm-text, #0F172A); }
-    .tgm-upsell-hint { font-size: 12.5px; color: var(--tgm-muted, #64748B); line-height: 1.45; }
-    @media (prefers-reduced-motion: reduce) { .tgm-upsell-card { transition: none; } .tgm-upsell-card:hover { transform: none; } }
+    /* The section itself. Tokens only: an earlier version reached for
+       --tgm-surface and --tgm-muted, which this widget has never defined, so
+       every one of them fell through to its light-mode fallback and the
+       section stayed white with dark text behind a dark-theme booking. */
+    .tgm-upsell { margin-top: 24px; padding: 20px; background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); }
+    .tgm-upsell-head h3 { font-size: 16px; font-weight: 600; margin: 0 0 4px; letter-spacing: -.01em; color: var(--tgm-text); }
+    .tgm-upsell-head p { font-size: 13px; color: var(--tgm-text-3); margin: 0 0 14px; }
+    /* The tiles ARE the .tgm-action button the rest of the page uses for
+       Download PDF and Request a change: same icon chip, same title and
+       sub-line, same arrow, same hover. Andy, 23 Sep 2026: "make the tiles look
+       a bit more like buttons". Making them the button we already have beats
+       inventing a second one that only nearly matches. Only the anchor's own
+       defaults and the trailing margin need saying here. */
+    .tgm-upsell .tgm-action-row { margin-bottom: 0; }
+    a.tgm-action { text-decoration: none; color: inherit; }
+    a.tgm-action:focus-visible { outline: 2px solid var(--tgm-accent); outline-offset: 2px; }
     .tgm-help { background: linear-gradient(135deg, var(--tgm-primary) 0%, var(--tgm-primary-dark) 100%); color: #fff; padding: 20px; border-radius: var(--tgm-radius-lg); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 24px; }
     .tgm-help h3 { font-size: 16px; font-weight: 600; margin: 0 0 4px; letter-spacing: -.01em; color: #fff; }
     .tgm-help p { font-size: 13px; color: rgba(248,250,252,.78); margin: 0; }
@@ -4800,7 +4808,19 @@
    *
    * Every link opens in a new tab, so a customer poking at car hire does not
    * lose the booking they came to look at.
+   *
+   * The API decides WHICH tiles; the widget decides what they look like, so the
+   * icon is chosen here from the product rather than sent down the wire. The
+   * two that cannot be deep linked yet already have theirs, so the day
+   * Travelify give us a Transfers search type the tile arrives drawn.
    */
+  const UPSELL_IC = {
+    TicketsAttractions: IC.ticket,
+    CarRental: IC.car,
+    Transfers: IC.van,
+    AirportExtras: IC.lounge,
+  };
+
   function renderUpsell(tiles, c) {
     if (!Array.isArray(tiles) || !tiles.length) return '';
     if (c.display && c.display.showUpsell === false) return '';
@@ -4812,11 +4832,15 @@
           <h3>${title}</h3>
           <p>${body}</p>
         </div>
-        <div class="tgm-upsell-grid">
+        <div class="tgm-action-row">
           ${tiles.map((t) => `
-            <a class="tgm-upsell-card" href="${esc(safeUrl(t.url))}" target="_blank" rel="noopener noreferrer">
-              <span class="tgm-upsell-label">${esc(t.label)}</span>
-              <span class="tgm-upsell-hint">${esc(t.hint)}</span>
+            <a class="tgm-action tgm-upsell-card" href="${esc(safeUrl(t.url))}" target="_blank" rel="noopener noreferrer">
+              <div class="tgm-action-icon">${svg(UPSELL_IC[t.product] || IC.search)}</div>
+              <div class="tgm-action-text">
+                <div class="tgm-action-title">${esc(t.label)}</div>
+                <div class="tgm-action-sub">${esc(t.hint)}</div>
+              </div>
+              ${svg(IC.arrow)}
             </a>`).join('')}
         </div>
       </div>`;
@@ -5570,7 +5594,7 @@
         accent:  '#00B4D8',
         success: '#10B981',
         warning: '#F59E0B',
-        text:    '#0F172A',
+        text:    TEXT_DEFAULT,
       }, merged.colors || {});
       if (typeof merged.radius !== 'number') merged.radius = 12;
       return merged;
@@ -5592,13 +5616,23 @@
         '--tgm-accent-dark': lighten(accent, -16),
         '--tgm-success': safeColorM(c.success, '#10B981'),
         '--tgm-warning': safeColorM(c.warning, '#F59E0B'),
-        '--tgm-text': safeColorM(c.text, '#0F172A'),
         '--tgm-radius-sm': Math.round(radius * 0.5) + 'px',
         '--tgm-radius-md': Math.round(radius * 0.66) + 'px',
         '--tgm-radius-lg': radius + 'px',
         '--tgm-radius-xl': Math.round(radius * 1.33) + 'px',
         '--tgm-radius-2xl': Math.round(radius * 1.66) + 'px',
       };
+      // --tgm-text is the ONE token the dark theme also owns, and an inline
+      // style beats any stylesheet rule. Writing the LIGHT default here
+      // therefore beat `.tgm-root[data-theme="dark"]`, so a dark-theme booking
+      // drew #0F172A text on a #0F172A background: every heading, card title,
+      // label and input on the page was the same colour as what was behind it.
+      // When the client has not chosen a colour of their own, leave the token
+      // to the stylesheet, which knows which theme it is in. Light mode is
+      // unchanged, because the value being written was the stylesheet's own.
+      const wantText = safeColorM(c.text, TEXT_DEFAULT);
+      if (String(wantText).toUpperCase() !== TEXT_DEFAULT) overrides['--tgm-text'] = wantText;
+
       // When fontFamily is set, override the host's hardcoded Inter stack.
       // .tgm-root inherits from the shadow host; setting font-family on the root
       // (with !important to defeat the :host rule) propagates everywhere via

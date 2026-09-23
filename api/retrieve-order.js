@@ -303,6 +303,18 @@ function safeNum(v) {
   return v;
 }
 
+// A traveller's age, when the supplier states one. Travelify usually does not,
+// which is why the upsell deep link has to assume one for a child (see
+// CHILD_AGE_WHEN_UNKNOWN in public/_order-upsell.js). Carried here so a real
+// age always beats that assumption. Coerces, because the field arrives as a
+// number on some products and a numeric string on others.
+function safeAge(v) {
+  if (v == null || v === '') return null;
+  const n = Number(v);
+  if (!Number.isFinite(n) || n < 0 || n > 120) return null;
+  return Math.round(n);
+}
+
 function sanitiseHotelDescription(text) {
   if (typeof text !== 'string') return null;
   // Strip HTML tags to be safe; widget will render as text
@@ -442,6 +454,7 @@ function trimAccommodation(d) {
           title: safeStr(g.title, 30),
           firstname: safeStr(g.firstname, 80),
           surname: safeStr(g.surname, 80),
+          age: safeAge(g.age),
         }))
       : [],
   };
@@ -573,6 +586,7 @@ function trimAirportExtras(d) {
           title: safeStr(t.title, 30),
           firstname: safeStr(t.firstname, 80),
           surname: safeStr(t.surname, 80),
+          age: safeAge(t.age),
         }))
       : [],
   };
@@ -642,6 +656,7 @@ function trimTransfers(d) {
           title: safeStr(t.title, 30),
           firstname: safeStr(t.firstname, 80),
           surname: safeStr(t.surname, 80),
+          age: safeAge(t.age),
         }))
       : [],
   };
@@ -804,6 +819,7 @@ function trimTicketsAttractions(d) {
           title: safeStr(g.title, 30),
           firstname: safeStr(g.firstname, 80),
           surname: safeStr(g.surname, 80),
+          age: safeAge(g.age),
         }))
       : [],
   };
