@@ -1,0 +1,224 @@
+{
+ "iata": "HAK",
+ "id": "recrdbSmUalVprpEB",
+ "name": "Haikou Meilan International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Haikou_Meilan_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Hainan's largest and busiest airport, 25 km south east of Haikou, handling 26,851,102 passengers in 2025 and ranking 20th among China's civil airports.\n\nThe terminal split matters. Terminal 2 handles all international flights as well as most China Southern and Hainan domestic services, with check-in islands A and B reserved for international departures. Terminal 1 takes the remaining domestic flights. The old separate International Terminal closed on 7 February 2023 when new immigration facilities opened in Terminal 2, so any guidance pointing at it is out of date.\n\nTerminal 2 has four levels and international departures clear immigration on the fourth, which is worth knowing when a client is looking for the right floor.\n\nThe runway is 3,600 metres with a Category II instrument approach on runway 09.\n\nThe airport opened in 1999, replacing the old Dayingshan Airport.",
+ "after": "Hainan's busiest airport, 25 km south east of Haikou, handling 26.9 million passengers in 2025 and ranking 20th among China's airports.\n\nThe terminal split matters. Terminal 2, opened in December 2021, handles all international flights as well as Hainan Airlines and China Southern; Terminal 1 takes the remaining domestic flights. International passengers moved from the old separate International Terminal to Terminal 2 in February 2023, so any guidance pointing at it is out of date.\n\nInternational departures check in at island A on the third floor of Terminal 2 and clear immigration on the fourth.\n\nThere are two runways, each 3,600 metres long.",
+ "claims": [
+  {
+   "claim": "Hainan's busiest airport",
+   "verdict": "softened",
+   "inAfter": "Hainan's busiest airport",
+   "note": "Was 'largest and busiest'; 'largest' is Wikipedia's alone. CAAC 2025: Haikou 26,851,102, Sanya 22,685,734, Qionghai Boao 848,808.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "Civil Aviation Administration of China",
+     "dated": "2026-02-26",
+     "quote": "passenger rank 20 in China; passengers 2025: 26,851,102"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Haikou Meilan International Airport is the largest and busiest airport in Hainan."
+    }
+   ]
+  },
+  {
+   "claim": "25 km south east of Haikou",
+   "verdict": "confirmed",
+   "inAfter": "25 km south east of Haikou",
+   "note": "Straight line 16.1 km at 133 degrees (south east); ratio 1.55, inside the tolerance.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is located 25 km (16 mi) southeast of the city center"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 16.1 km (10.0 miles)",
+      "Bearing from the city centre: 133 degrees, which is south east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "26.9 million passengers in 2025, 20th in China",
+   "verdict": "confirmed",
+   "inAfter": "handling 26.9 million passengers in 2025 and ranking 20th among China's airports.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "Civil Aviation Administration of China",
+     "dated": "2026-02-26",
+     "quote": "passenger rank 20 in China; passengers 2025: 26,851,102"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2025, the passenger throughput was 26,851,102, ranking 20th among China's civil airports."
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2 opened December 2021; handles all international flights, Hainan Airlines and China Southern; Terminal 1 the remaining domestic flights",
+   "verdict": "corrected",
+   "inAfter": "Terminal 2, opened in December 2021, handles all international flights as well as Hainan Airlines and China Southern; Terminal 1 takes the remaining domestic flights.",
+   "note": "Opening date added from the operator. The operator's 2023 notice sends Hainan Airlines, China Southern and all international and regional passengers to Terminal 2; its 2021 release puts the airport into two-terminal operation, and Wikipedia (current revision) gives Terminal 1 the remaining domestic flights. Was 'most China Southern and Hainan domestic services'; the operator sends all Hainan Airlines and China Southern passengers to Terminal 2.",
+   "sources": [
+    {
+     "file": "op-t2-2021",
+     "org": "Haikou Meilan International Airport (operator)",
+     "dated": "2021-12-02",
+     "quote": [
+      "2021年12月2日9点许",
+      "跨入“双航站楼，双跑道”全新发展时代"
+     ]
+    },
+    {
+     "file": "op-intl-2023",
+     "org": "Haikou Meilan International Airport (operator)",
+     "dated": "2023-02-07",
+     "quote": "此外，乘坐海南航空(HU)、南方航空(CZ)、国际及地区航班的旅客，在航班起飞前2-3小时前往2号航站楼办理相关手续。"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The new terminal opened on 2 December 2021.",
+      "Terminal 2 covers an area of 296,000 square meters and serves all international flights, as well as mainly China Southern and Hainan domestic flights.",
+      "serves the remaining domestic flights not accommodated by Terminal 2"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "international passengers moved from the old International Terminal to Terminal 2 in February 2023",
+   "verdict": "corrected",
+   "inAfter": "International passengers moved from the old separate International Terminal to Terminal 2 in February 2023, so any guidance pointing at it is out of date.",
+   "note": "Was 'closed on 7 February 2023'. The operator's notice gives 8 February for the move and says the old building was suspended; Wikipedia says 7 February. Only the month is stated.",
+   "sources": [
+    {
+     "file": "op-intl-2023",
+     "org": "Haikou Meilan International Airport (operator)",
+     "dated": "2023-02-07",
+     "quote": [
+      "美兰机场2号航站楼国际区域2月8日起正式投入使用。",
+      "国际及地区客运进港航班将由原国际楼转场至2号航站楼",
+      "原国际楼暂停使用"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It was closed when new immigration facilities in terminal 2 opened on 7 February 2023."
+    }
+   ]
+  },
+  {
+   "claim": "international check-in at island A on the third floor; immigration on the fourth",
+   "verdict": "corrected",
+   "inAfter": "International departures check in at island A on the third floor of Terminal 2 and clear immigration on the fourth.",
+   "note": "Was 'check-in islands A and B reserved for international departures' and 'four levels'. The operator names island A only.",
+   "sources": [
+    {
+     "file": "op-intl-2023",
+     "org": "Haikou Meilan International Airport (operator)",
+     "dated": "2023-02-07",
+     "quote": [
+      "2号航站楼3楼出发厅，前往A值机岛办理值机手续及行李托运",
+      "并由出发厅四楼完成海关、边检及安检的出境手续办理"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "There are five islands of check-in counters, with A and B dedicated to international flights.",
+      "3F: Check-in hall, domestic security, departures gates",
+      "4F: Departures immigration and customs, international security, lounges"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "two runways, each 3,600 m",
+   "verdict": "corrected",
+   "inAfter": "There are two runways, each 3,600 metres long.",
+   "note": "Was 'The runway is 3,600 metres': a second 3,600 m runway opened with Terminal 2 in December 2021.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 09/27: 3,600 m (11,811 ft), CON",
+      "Runway 10/28: 3,600 m (11,811 ft), CON",
+      "Runways listed: 2"
+     ]
+    },
+    {
+     "file": "op-t2-2021",
+     "org": "Haikou Meilan International Airport (operator)",
+     "dated": "2021-12-02",
+     "quote": "拥有一条长3600m、宽60m的跑道"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "A new 3600m x 60m runway (numbered 10/28), suitable for A380 aircraft"
+    }
+   ]
+  },
+  {
+   "claim": "largest; exact passenger figure",
+   "verdict": "cut",
+   "wasBefore": "Hainan's largest and busiest airport, 25 km south east of Haikou, handling 26,851,102 passengers in 2025 and ranking 20th among China's civil airports.",
+   "why": "Kept, with the figure rounded; 'largest' is Wikipedia's alone."
+  },
+  {
+   "claim": "check-in islands A and B for international",
+   "verdict": "cut",
+   "wasBefore": "with check-in islands A and B reserved for international departures.",
+   "why": "The operator names island A only; B rests on Wikipedia. Kept as island A."
+  },
+  {
+   "claim": "Terminal 2 has four levels; immigration on the fourth",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 has four levels and international departures clear immigration on the fourth, which is worth knowing when a client is looking for the right floor.",
+   "why": "The count of levels is Wikipedia's alone; the fourth-floor immigration is kept with both sources."
+  },
+  {
+   "claim": "old International Terminal closed on 7 February 2023",
+   "verdict": "cut",
+   "wasBefore": "The old separate International Terminal closed on 7 February 2023 when new immigration facilities opened in Terminal 2",
+   "why": "The day disagrees (operator 8 February, Wikipedia 7 February); kept as February 2023."
+  },
+  {
+   "claim": "single runway with a Category II approach on runway 09",
+   "verdict": "cut",
+   "wasBefore": "The runway is 3,600 metres with a Category II instrument approach on runway 09.",
+   "why": "Out of date: there are two runways. The Category II approach rests on Wikipedia alone and is no use to an agent."
+  },
+  {
+   "claim": "opened 1999, replacing Dayingshan Airport",
+   "verdict": "cut",
+   "wasBefore": "The airport opened in 1999, replacing the old Dayingshan Airport.",
+   "why": "Wikipedia alone; the operator's home page answered 503 and its releases do not give the history."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The terminal split matters.",
+   "why": "The old text's lead-in to the sourced terminal facts that follow."
+  }
+ ],
+ "tracerOk": {
+  "26.9": "26,851,102 rounded (CAAC, Wikipedia)"
+ }
+}
