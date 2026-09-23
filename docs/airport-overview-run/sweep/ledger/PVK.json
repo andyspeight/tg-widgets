@@ -1,0 +1,194 @@
+{
+ "iata": "PVK",
+ "id": "rec1I790MtLbLsTKf",
+ "name": "Aktion National Airport",
+ "country": "Greece",
+ "wikipedia": "https://en.wikipedia.org/wiki/Aktion_National_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Lefkada and Preveza, on the Aktion peninsula in western Greece. It is listed under both names, Aktion and Preveza, which catches people out when they are searching for flights.\n\nIt opened in 1968 and remains a shared civil and military field, used by the Hellenic Air Force Command and by NATO alongside the holiday traffic.\n\nSince autumn 2016 it has been run by the Fraport and Copelouzos joint venture, which took on Aktion and thirteen other Greek regional airports under a forty year concession signed in December 2015.",
+ "after": "The airport for Lefkada and Preveza, at Aktion. It is listed under both names, Aktion and Preveza, which catches people out when they are searching for flights.\n\nSince April 2017 it has been run by Fraport Greece, which took on Aktion and thirteen other Greek regional airports under a forty year concession signed in December 2015.",
+ "claims": [
+  {
+   "claim": "the airport for Lefkada and Preveza",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Lefkada and Preveza",
+   "note": "The airport's own page says Aktion is usually seen as Lefkada's airport and puts Preveza 15 minutes away through the undersea tunnel; the coordinates put it 3.6 km south of Preveza's centre, and OurAirports files it under Preveza with Lefkada among its keywords.",
+   "sources": [
+    {
+     "file": "op-welcome",
+     "org": "Aktion Airport (the airport operator, Fraport Greece, pvk-airport.gr)",
+     "dated": "read 2026-09-23 (the airport's 'Welcome to Aktion' page)",
+     "quote": [
+      "Of course the odds say that Lefkada is the obvious choice, and the truth is that Aktion is usually perceived as the island’s airport.",
+      "En passant to Nikopolis, which is reachable after a 15 minutes’ drive via the 3km only undersea tunnel in Greece, Preveza is not to be missed."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-16",
+     "quote": "is an airport on the Aktion Peninsula in Acarnania, Greece, serving Preveza and Lefkada"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Preveza",
+      "Straight-line distance from the city centre: 3.6 km (2.3 miles)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "at Aktion",
+   "verdict": "confirmed",
+   "inAfter": "at Aktion.",
+   "sources": [
+    {
+     "file": "fraport-ag-greece",
+     "org": "Fraport AG (fraport.com, its page on the Greek concession)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "comprises the mainland airports of Thessaloniki, Aktion and Kavala"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-16",
+     "quote": [
+      "Aktion National Airport (IATA: PVK, ICAO: LGPZ)"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-16",
+     "quote": "location = Aktion"
+    }
+   ]
+  },
+  {
+   "claim": "listed under both names, Aktion and Preveza",
+   "verdict": "confirmed",
+   "inAfter": "It is listed under both names, Aktion and Preveza",
+   "note": "Eurostat lists it as PREVEZA/AKTION and Ryanair as Preveza - Aktion; Fraport calls it Aktion, and Wikipedia gives both.",
+   "sources": [
+    {
+     "file": "eurostat-gr",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat EL_LGPZ PREVEZA/AKTION airport: passengers carried in 2025: 872,443"
+    },
+    {
+     "file": "ryanair-pvk",
+     "org": "Ryanair (its own airport data, ryanair.com)",
+     "dated": "read 2026-09-23 (live data)",
+     "quote": "\"iataCode\":\"PVK\",\"name\":\"Preveza - Aktion\""
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-16",
+     "quote": [
+      "Aktion National Airport (IATA: PVK, ICAO: LGPZ)",
+      "It is also known as Preveza Airport."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "run by Fraport Greece since April 2017; Aktion and thirteen other regional airports; a forty year concession signed in December 2015",
+   "verdict": "corrected",
+   "inAfter": "Since April 2017 it has been run by Fraport Greece, which took on Aktion and thirteen other Greek regional airports under a forty year concession signed in December 2015.",
+   "note": "Was 'Since autumn 2016 it has been run by the Fraport and Copelouzos joint venture'. Fraport AG: the concession agreements were signed on 14 December 2015 and run 40 years from the transfer of operations on 11 April 2017, for 14 airports including Aktion. Fraport Greece describes itself as established in 2017, a joint venture of Fraport AG, the Copelouzos Group and Marguerite. Wikipedia still has the older plan of autumn 2016.",
+   "sources": [
+    {
+     "file": "fraport-ag-greece",
+     "org": "Fraport AG (fraport.com, its page on the Greek concession)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "the Concession Agreements for the Upgrade, Maintenance, Management and Operation of 14 Greek Regional Airports were signed on December 14, 2015.",
+      "The concession will have a period of 40 years starting from the date of transfer of operations on April 11, 2017"
+     ]
+    },
+    {
+     "file": "fraport-company",
+     "org": "Fraport Greece (fraport-greece.com)",
+     "dated": "read 2026-09-23 (its company page)",
+     "quote": [
+      "Established in 2017, the company is a joint venture of Fraport AG Frankfurt Airport Services Worldwide, Copelouzos Group and Marguerite",
+      "Its primary focus is the management, operations and development of the 14 regional airports on the Greek mainland and islands."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-16",
+     "quote": [
+      "In December 2015, the privatisation of Aktion National Airport and 13 other regional airports of Greece was finalised",
+      "the joint venture will operate the 14 airports (including Aktion National Airport) for 40 years"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "on the Aktion peninsula in western Greece",
+   "verdict": "cut",
+   "wasBefore": "on the Aktion peninsula in western Greece.",
+   "why": "The peninsula rests on Wikipedia alone, and the region is muddled: the airport's own page places it near Vonitsa in the Region of Western Greece while OurAirports files it under Epirus (GR-D). The text keeps Aktion.",
+   "sources": [
+    {
+     "file": "op-region",
+     "org": "Aktion Airport (the airport operator, Fraport Greece, pvk-airport.gr)",
+     "dated": "read 2026-09-23 (the airport's region page)",
+     "quote": "At Aktio Airport, based near the city of Vonitsa of the Municipality of Aktio Vonitsa, in the Region of Western Greece"
+    }
+   ]
+  },
+  {
+   "claim": "opened in 1968",
+   "verdict": "cut",
+   "wasBefore": "It opened in 1968",
+   "why": "Wikipedia alone; neither Fraport's pages nor the airport's say when it opened."
+  },
+  {
+   "claim": "a shared civil and military field used by the Hellenic Air Force Command and NATO",
+   "verdict": "cut",
+   "wasBefore": "and remains a shared civil and military field, used by the Hellenic Air Force Command and by NATO alongside the holiday traffic.",
+   "why": "Wikipedia alone: NATO's AWACS site refused a plain request and the browser (403), and the airport's and Fraport's pages do not mention the military side."
+  },
+  {
+   "claim": "since autumn 2016; the Fraport and Copelouzos joint venture",
+   "verdict": "cut",
+   "wasBefore": "Since autumn 2016 it has been run by the Fraport and Copelouzos joint venture",
+   "why": "The transfer came on 11 April 2017 (Fraport AG), and the joint venture also includes Marguerite (Fraport Greece). Corrected (see above)."
+  },
+  {
+   "claim": "872,443 passengers in 2025; Lefkada 40 minutes by road; Preveza 15 minutes via the undersea tunnel",
+   "verdict": "cut",
+   "why": "Held back: new facts that replace nothing. Eurostat has 872,443 passengers for 2025; the airport's own page gives Lefkada as a 40-minute drive over the causeway and Preveza as 15 minutes through the 3 km undersea tunnel (the airport alone for the times).",
+   "sources": [
+    {
+     "file": "eurostat-gr",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat EL_LGPZ PREVEZA/AKTION airport: passengers carried in 2025: 872,443"
+    },
+    {
+     "file": "op-welcome",
+     "org": "Aktion Airport (the airport operator, Fraport Greece, pvk-airport.gr)",
+     "dated": "read 2026-09-23 (the airport's 'Welcome to Aktion' page)",
+     "quote": "the 40minutes that it takes to get there is also a road trip"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which catches people out when they are searching for flights.",
+   "why": "The old text's advice, kept: the airport really does appear as Aktion, Preveza and Preveza - Aktion (Eurostat, Ryanair, Fraport)."
+  }
+ ],
+ "tracerOk": {
+  "Since April": "A sentence opening and a month, not a name; April 2017 is on Fraport AG's page."
+ }
+}
