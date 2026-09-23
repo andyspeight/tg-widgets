@@ -1,0 +1,156 @@
+{
+ "iata": "BRE",
+ "id": "rectykHRxFs1XUB8Z",
+ "name": "Bremen Airport",
+ "country": "Germany",
+ "wikipedia": "https://en.wikipedia.org/wiki/Bremen_Airport",
+ "audited": "2026-09-23",
+ "before": "Bremen's airport, only 3.5 km south of the city, which makes it one of the easiest arrivals in northern Germany. It handled 1.81 million passengers in 2023, mostly on European city and leisure routes.\n\nThe tram is the reason to like it. Line 6 runs every 6 to 10 minutes and reaches the city centre in 11 minutes and the main station in 16.\n\nThere is a catch for Ryanair passengers. Ryanair does not use the main terminal at all. It uses Terminal E, a more basic building to the west with its own check-in counters and walk-boarding onto the apron, so point clients at the right building.\n\nThe main terminal covers Terminals 1, 2 and 3 with five jet bridge stands.\n\nInside the airport, the Bremenhalle is a small aviation and space museum displaying the Junkers W33 Bremen and the first Spacelab module. An Airbus plant next door makes aircraft flaps and works on A350 wings, served by Beluga transport flights.",
+ "after": "Bremen's airport, only 3.5 km south of the city, which makes it one of the easiest arrivals in northern Germany. It handled just under 2 million passengers in 2025, almost all on flights within Germany and Europe.\n\nThe tram is the reason to like it: line 6 runs from the airport across the city to the university. BSAG, the tram operator, says a new line 9 will run via the main station to the airport from 21 March 2027, with line 6 continuing at least every 20 minutes.",
+ "claims": [
+  {
+   "claim": "3.5 km south of the city",
+   "verdict": "confirmed",
+   "inAfter": "only 3.5 km south of the city",
+   "note": "Coordinates: 3.4 km at 200 degrees, south (ratio 1.02).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is located 3.5 km (2.2 mi) south of the city"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 3.4 km (2.1 miles)",
+      "Bearing from the city centre: 200 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "just under 2 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled just under 2 million passengers in 2025",
+   "note": "Was '1.81 million passengers in 2023' (right for 2023: Eurostat 1,806,169) but two years stale. 2025: ADV 1,992,727 (up 5.6 per cent), Eurostat 1,991,086.",
+   "sources": [
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association, adv.aero)",
+     "dated": "2025 full year (ADV monthly statistics, December 2025)",
+     "quote": [
+      "Kumulierter Linien- und Charterverkehr in Deutschland: Passagiere (an+ab) | Januar bis Dezember 2025",
+      "Bremen 1.992.727 +5,6 %"
+     ]
+    },
+    {
+     "file": "eurostat",
+     "org": "Eurostat",
+     "dated": "2026-09-23",
+     "quote": "Eurostat DE_EDDW Bremen Airport: passengers carried in 2025: 1,991,086"
+    }
+   ]
+  },
+  {
+   "claim": "almost all on flights within Germany and Europe",
+   "verdict": "softened",
+   "inAfter": "almost all on flights within Germany and Europe",
+   "note": "Was 'mostly on European city and leisure routes'. ADV for 2025: 1,989,112 scheduled and charter passengers, of whom 691,165 domestic, 1,287,826 Europe and 10,121 outside Europe. 'City and leisure' rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association, adv.aero)",
+     "dated": "2025 full year",
+     "quote": "Bremen 1.989.112 +5,6 % 691.165 +2,6 % 1.287.826 +8,2 % 679.382 +10,8 % 710.448 +9,8 % 10.121 -48,2 %"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It mainly features flights to European metropolitan and leisure destinations"
+    }
+   ]
+  },
+  {
+   "claim": "tram line 6 runs from the airport across the city to the university",
+   "verdict": "confirmed",
+   "inAfter": "line 6 runs from the airport across the city to the university",
+   "note": "BSAG's current line list names line 6 'Flughafen - Universität'; Wikipedia gives the route via Domsheide and the main station.",
+   "sources": [
+    {
+     "file": "bsag-linien",
+     "org": "BSAG (Bremer Straßenbahn AG, the tram operator, bsag.de)",
+     "dated": "2026-09-23 (live page; © 2026)",
+     "quote": "Linie 6 (Flughafen - Universität)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "to Universität Bremen via Domsheide and Hauptbahnhof"
+    }
+   ]
+  },
+  {
+   "claim": "BSAG: new line 9 via the main station to the airport from 21 March 2027; line 6 at least every 20 minutes",
+   "verdict": "confirmed",
+   "inAfter": "BSAG, the tram operator, says a new line 9 will run via the main station to the airport from 21 March 2027, with line 6 continuing at least every 20 minutes",
+   "primary": true,
+   "attribution": "BSAG",
+   "note": "Attributed to BSAG, whose news item of 21 September 2026 announces it; it replaces the old 'every 6 to 10 minutes', which no current source gives and which the change will overtake.",
+   "sources": [
+    {
+     "file": "bsag-direktlinien",
+     "org": "BSAG (Bremer Straßenbahn AG, the tram operator, bsag.de)",
+     "dated": "2026-09-21",
+     "quote": [
+      "21.09.2026",
+      "Die wichtigsten Änderungen ab dem 21. März 2027",
+      "Die neue Linie 9: Fährt von Mahndorf über den Hauptbahnhof direkt bis zum Flughafen.",
+      "Die Linie 6 fährt weiterhin als Verstärkung zwischen Universität und Flughafen (mindestens alle 20 Minuten)."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "1.81 million passengers in 2023; European city and leisure routes",
+   "verdict": "cut",
+   "wasBefore": "It handled 1.81 million passengers in 2023, mostly on European city and leisure routes.",
+   "why": "Two years stale; replaced by 2025 (ADV, Eurostat). 'City and leisure' rests on Wikipedia alone; ADV's split supports 'within Germany and Europe'."
+  },
+  {
+   "claim": "line 6 every 6 to 10 minutes; 11 minutes to the centre, 16 to the main station",
+   "verdict": "cut",
+   "wasBefore": "Line 6 runs every 6 to 10 minutes and reaches the city centre in 11 minutes and the main station in 16.",
+   "why": "The frequency and journey times rest on Wikipedia alone (BSAG's timetables are behind a journey planner), and BSAG has announced that line 6 becomes a top-up service, at least every 20 minutes, from March 2027."
+  },
+  {
+   "claim": "Ryanair uses Terminal E, a basic building to the west with its own check-in and walk-boarding",
+   "verdict": "cut",
+   "wasBefore": "There is a catch for Ryanair passengers. Ryanair does not use the main terminal at all. It uses Terminal E, a more basic building to the west with its own check-in counters and walk-boarding onto the apron, so point clients at the right building.",
+   "why": "Wikipedia alone. The airport's own site (bremen-airport.com) refused both the plain request and the browser (403), and so did the city portal (bremen.de); not retried. Ryanair's own data confirms it flies here and has a base, but says nothing of the terminal. Worth checking by hand: it is a useful tip if still true."
+  },
+  {
+   "claim": "main terminal: Terminals 1, 2 and 3 with five jet bridge stands",
+   "verdict": "cut",
+   "wasBefore": "The main terminal covers Terminals 1, 2 and 3 with five jet bridge stands.",
+   "why": "Wikipedia alone; the airport's site refused (403)."
+  },
+  {
+   "claim": "Bremenhalle museum; Airbus plant with flaps, A350 wings and Beluga flights",
+   "verdict": "cut",
+   "wasBefore": "Inside the airport, the Bremenhalle is a small aviation and space museum displaying the Junkers W33 Bremen and the first Spacelab module. An Airbus plant next door makes aircraft flaps and works on A350 wings, served by Beluga transport flights.",
+   "why": "Wikipedia alone: the airport's site refused (403) and airbus.com is behind a bot check (Imperva), so neither was tried again."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which makes it one of the easiest arrivals in northern Germany",
+   "why": "The old text's judgement, kept: it follows from the confirmed 3.5 km and the tram."
+  },
+  {
+   "text": "The tram is the reason to like it",
+   "why": "The old text's lead-in; the tram line that follows is sourced."
+  }
+ ],
+ "tracerOk": {}
+}
