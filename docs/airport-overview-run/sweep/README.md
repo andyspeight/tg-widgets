@@ -202,3 +202,5 @@ two sources is `Done`, and Done is servable. That is Andy's call, asked on
 Integrity pull, evening of 23 Sep: all 23 pushed records match their ledgers word for word, carry Verified Date 2026-09-23 and kept their Status. The other 576 Overview records are unchanged since the morning snapshot.
 
 Second integrity pull, 23 Sep, after 51 pushes: all 51 match their ledgers word for word (same record ids), carry Verified Date 2026-09-23 and kept their Status. The other 548 Overview records are unchanged since the morning snapshot.
+
+Third integrity pull, 23 Sep, after 66 pushes: all 66 match their ledgers word for word (same record ids), carry Verified Date 2026-09-23 and kept their Status. The other 533 Overview records are unchanged since the morning snapshot. This pull followed a hand-typing slip on Santander's first push ("Maliáño"), corrected from the ledger within a minute; pushes are now pasted from the ledger's printed text.
