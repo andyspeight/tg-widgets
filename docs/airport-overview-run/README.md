@@ -18,14 +18,24 @@ Wikipedia URL, Source 1, Status "Todo". They carry no Overview, and they are
 NOT part of the 599 figure above. See `world-coverage-plan.md` and
 `thirty-countries.md`.
 
-**Verified Date is blank on all 599, deliberately.** Andy chose finish-first,
-verify-after on 21 Sep. The records meet one traced source plus the three-layer
-gate; they do NOT meet the airport-spotlight skill's two-source rule. Closing
-that is the next job.
+**Correction, 23 Sep 2026: Verified Date was never blank.** This file used to
+say it was blank on all 599, and so did the Airtable project record. Measured
+on 23 Sep, every one carries an August date: the 225 `Done` records hold the
+date of their 25 to 26 Aug two-source audit (logs in `docs/airport-audits/`),
+and the 374 `In progress` records hold the 26 to 27 Aug date of the identity
+fill, which attests name and position only. So the sweep is 374 records, not
+599: the Done ones were already audited and the September run did not touch
+their Overviews. Andy chose finish-first, verify-after on 21 Sep; those 374
+Overviews meet one traced source plus the three-layer gate, not the
+airport-spotlight two-source rule. The sweep that closes it started 23 Sep, in
+`sweep/`.
 
 ## Files
 
-- `verification-backlog.md` — START HERE for the sweep. Priority order, the
+- `sweep/` — THE SWEEP ITSELF, started 23 Sep. Its README has the method,
+  the standard, the tools and progress; `sweep/ledger/` holds one verification
+  log per airport.
+- `verification-backlog.md` — what to check first in the sweep. Priority order, the
   records that most need a second source, the source self-contradictions that
   were logged rather than silently resolved, and the per-batch notes.
 - `world-coverage-plan.md` — phase 2, the 418-record import: the rule, the

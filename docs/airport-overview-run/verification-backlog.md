@@ -1,8 +1,12 @@
 # Airport Overview verification backlog
 
 Andy's decision, 15 Sep 2026: finish all 363 Overviews first, verify afterwards
-as a single sweep. `Verified Date` (fldRCo83Wz1AFZXwP) is deliberately LEFT
-BLANK on every record until that sweep runs.
+as a single sweep. The sweep started 23 Sep 2026; see `sweep/README.md`.
+
+Correction, 23 Sep: this file used to say Verified Date (fldRCo83Wz1AFZXwP) was
+blank on these records. It never was. The 374 In-progress records carry the
+26 to 27 Aug date of the identity fill, which attests name and position only,
+not the Overview. The sweep re-stamps it when an Overview passes.
 
 ## What standard these records currently meet
 - Every claim traced to ONE fetched source document per airport (Wikipedia

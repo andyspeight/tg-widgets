@@ -1,0 +1,361 @@
+{
+ "iata": "TBS",
+ "id": "reczNilQk0T5z0vFH",
+ "name": "Tbilisi International Airport",
+ "country": "Georgia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Tbilisi_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Georgia's busiest airport, 17 km south east of Tbilisi, handling 4.75 million passengers in 2024. Over 45 airlines fly from here to more than 25 countries, mainly across Europe, the Middle East and Central Asia.\n\nGrowth has been steep. Passenger numbers went from 1 million in 2010 to almost 4 million before the pandemic, on the back of Georgia's rise as a destination.\n\nOne political constraint shapes the route map. After a row in June 2019, Russia banned flights to and from Georgia from 8 July 2019, and the ban was still in force at the end of 2021. Georgian Airways ran Tbilisi to Moscow through Yerevan using Aircompany Armenia instead. Check the current position before quoting anything routing through Russia.\n\nThe airport is operated by TAV Airports, part of Groupe ADP, and is the hub for Georgian Airways as well as MyWay Airlines.\n\nIt was named after Shota Rustaveli, the medieval Georgian poet, by the Tbilisi City Assembly in 2015.",
+ "after": "Georgia's busiest airport, 17 km south east of central Tbilisi. It handled more than 5.4 million passengers in 2025, up 13.7 per cent on 2024. Sixty-three airlines fly from here to 71 destinations, and it is the base for Georgian Airways.\n\nTAV Airports, part of Groupe ADP, has run the airport since 2005, when it handled about 540,000 passengers a year. A USD 150 million expansion will take capacity past 10 million passengers a year, with work due to finish as early as 2028.\n\nRussia banned flights to and from Georgia in July 2019 after protests in Tbilisi. It lifted the ban in May 2023.\n\nIts full name is Shota Rustaveli Tbilisi International Airport.",
+ "claims": [
+  {
+   "claim": "Georgia's busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "Georgia's busiest airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the busiest international airport in Georgia"
+    },
+    {
+     "file": "georgiatoday-65m",
+     "org": "Georgia Today (Civil Aviation Agency data)",
+     "quote": [
+      "Tbilisi International Airport remained the primary hub, handling almost 4.1 million passengers",
+      "Kutaisi International Airport followed with about 1.4 million passengers"
+     ],
+     "dated": "2025"
+    }
+   ]
+  },
+  {
+   "claim": "17 km from the city centre",
+   "verdict": "confirmed",
+   "inAfter": "17 km south east of central Tbilisi",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "located 17 km (11 mi) southeast of capital Tbilisi"
+    },
+    {
+     "file": "georgiantravelguide",
+     "org": "Georgian Travel Guide",
+     "quote": "is located 17 km from the center of the Georgian capital"
+    }
+   ]
+  },
+  {
+   "claim": "south east of the centre",
+   "verdict": "confirmed",
+   "inAfter": "south east of central Tbilisi",
+   "note": "Coordinates put it at 104 degrees from the GeoNames centre, which is east on an 8-point rose and one point from south east, inside the stated tolerance. 17 km is the road distance; the straight line is about 10 km.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "southeast of capital Tbilisi"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 104 degrees, which is east"
+    }
+   ]
+  },
+  {
+   "claim": "more than 5.4 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled more than 5.4 million passengers in 2025",
+   "note": "Was 4.75 million in 2024. The operator's 2025 figure is out and is the more useful one.",
+   "sources": [
+    {
+     "file": "tav-150m",
+     "org": "TAV Airports (operator)",
+     "quote": "Tbilisi Airport surpassed the 5.4 million passenger mark in 2025",
+     "dated": "2026-01-16"
+    },
+    {
+     "file": "aviationweek-150m",
+     "org": "Aviation Week",
+     "quote": "TBS handled more than 5.4 million passengers last year, up 13.7% over 2024",
+     "dated": "2026-01"
+    }
+   ]
+  },
+  {
+   "claim": "up 13.7 per cent on 2024",
+   "verdict": "corrected",
+   "inAfter": "up 13.7 per cent on 2024",
+   "sources": [
+    {
+     "file": "tav-150m",
+     "org": "TAV Airports (operator)",
+     "quote": "representing a traffic increase of 13.7%"
+    },
+    {
+     "file": "aviationweek-150m",
+     "org": "Aviation Week",
+     "quote": "up 13.7% over 2024"
+    }
+   ]
+  },
+  {
+   "claim": "63 airlines to 71 destinations",
+   "verdict": "corrected",
+   "inAfter": "Sixty-three airlines fly from here to 71 destinations",
+   "note": "Was 'over 45 airlines to more than 25 countries'. The Wikipedia article contradicts itself on this (45 airlines in one paragraph, about 30 in another); the operator's January 2026 figure settles it.",
+   "sources": [
+    {
+     "file": "tav-150m",
+     "org": "TAV Airports (operator)",
+     "quote": "Today, 63 airlines are flying to 71 destinations"
+    },
+    {
+     "file": "aviationweek-150m",
+     "org": "Aviation Week",
+     "quote": "The airport is connected to 71 destinations by 63 airlines."
+    }
+   ]
+  },
+  {
+   "claim": "base for Georgian Airways",
+   "verdict": "confirmed",
+   "inAfter": "it is the base for Georgian Airways",
+   "note": "Every fare on the airline's own home page departs Tbilisi.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Tbilisi Airport is a hub for Georgian Airways, flag carrier of Georgia"
+    },
+    {
+     "file": "georgian-airways-home",
+     "org": "Georgian Airways",
+     "quote": [
+      "Tbilisi Rome",
+      "Tbilisi Paris",
+      "Tbilisi Tel Aviv"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "run by TAV Airports, part of Groupe ADP",
+   "verdict": "confirmed",
+   "inAfter": "TAV Airports, part of Groupe ADP, has run the airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is operated by TAV Airports Holding, making it a part of Groupe ADP."
+    },
+    {
+     "file": "tav-150m",
+     "org": "TAV Airports (operator)",
+     "quote": "TAV Airports, a member of Groupe ADP"
+    }
+   ]
+  },
+  {
+   "claim": "since 2005",
+   "verdict": "corrected",
+   "inAfter": "has run the airport since 2005",
+   "sources": [
+    {
+     "file": "tav-150m",
+     "org": "TAV Airports (operator)",
+     "quote": "TAV Airports overtook operations in 2005"
+    },
+    {
+     "file": "aviationweek-150m",
+     "org": "Aviation Week",
+     "quote": "TAV has managed the airport under contract with the Georgian government since 2005"
+    },
+    {
+     "file": "georgiantravelguide",
+     "org": "Georgian Travel Guide",
+     "quote": "under the management of TAV Georgia since October 31, 2005"
+    }
+   ]
+  },
+  {
+   "claim": "about 540,000 passengers a year in 2005",
+   "verdict": "corrected",
+   "inAfter": "when it handled about 540,000 passengers a year",
+   "note": "Replaces '1 million in 2010 to almost 4 million before the pandemic', which had no second source.",
+   "sources": [
+    {
+     "file": "tav-150m",
+     "org": "TAV Airports (operator)",
+     "quote": "from 540 thousand to more than 5.4 million"
+    },
+    {
+     "file": "aviationweek-150m",
+     "org": "Aviation Week",
+     "quote": "has risen from around 540,000 in 2005 to more than 5.4 million in 2025"
+    }
+   ]
+  },
+  {
+   "claim": "USD 150 million expansion",
+   "verdict": "corrected",
+   "inAfter": "A USD 150 million expansion",
+   "sources": [
+    {
+     "file": "tav-150m",
+     "org": "TAV Airports (operator)",
+     "quote": "The company will invest approximately USD 150 million"
+    },
+    {
+     "file": "aviationweek-150m",
+     "org": "Aviation Week",
+     "quote": "agreed to invest $150 million in a major expansion project"
+    }
+   ]
+  },
+  {
+   "claim": "capacity past 10 million a year",
+   "verdict": "corrected",
+   "inAfter": "will take capacity past 10 million passengers a year",
+   "sources": [
+    {
+     "file": "tav-150m",
+     "org": "TAV Airports (operator)",
+     "quote": "increase the annual terminal capacity to more than 10 million passengers"
+    },
+    {
+     "file": "aviationweek-150m",
+     "org": "Aviation Week",
+     "quote": "capacity will rise to more than 10 million annual passengers"
+    }
+   ]
+  },
+  {
+   "claim": "due to finish as early as 2028",
+   "verdict": "corrected",
+   "inAfter": "due to finish as early as 2028",
+   "note": "Forward-looking, so it carries the operator's own wording and a trade-press report of it.",
+   "sources": [
+    {
+     "file": "tav-150m",
+     "org": "TAV Airports (operator)",
+     "quote": "The project is planned to be completed as early as 2028."
+    },
+    {
+     "file": "aviationweek-150m",
+     "org": "Aviation Week",
+     "quote": "The project is planned to be completed as early as 2028"
+    }
+   ]
+  },
+  {
+   "claim": "Russia banned flights from July 2019 after protests in Tbilisi",
+   "verdict": "confirmed",
+   "inAfter": "Russia banned flights to and from Georgia in July 2019 after protests in Tbilisi",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Russia banned flights to and from Georgia starting 8 July 2019"
+    },
+    {
+     "file": "civilge-ban-lifted",
+     "org": "Civil Georgia",
+     "quote": "The direct air links between Russia and Georgia were cut off in July 2019, a decision taken unilaterally by Moscow following the anti-Russian protests in Tbilisi."
+    }
+   ]
+  },
+  {
+   "claim": "ban lifted in May 2023",
+   "verdict": "corrected",
+   "inAfter": "It lifted the ban in May 2023",
+   "note": "The Overview said the ban was 'still in force at the end of 2021' and told the reader to check. It was lifted from 15 May 2023.",
+   "sources": [
+    {
+     "file": "civilge-ban-lifted",
+     "org": "Civil Georgia",
+     "quote": "the ban on Russian airline flights to Georgia will be also lifted from May 15, 2023",
+     "dated": "2023-05-10"
+    },
+    {
+     "file": "rferl-ban-lifted",
+     "org": "RFE/RL",
+     "quote": [
+      "Russian President Vladimir Putin has lifted a ban on direct flights between Russia and Georgia",
+      "May 10, 2023"
+     ],
+     "dated": "2023-05-10"
+    }
+   ]
+  },
+  {
+   "claim": "full name",
+   "verdict": "confirmed",
+   "inAfter": "Its full name is Shota Rustaveli Tbilisi International Airport.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Shota Rustaveli Tbilisi International Airport"
+    },
+    {
+     "file": "businessairnews",
+     "org": "Business Air News",
+     "quote": "Shota Rustaveli Tbilisi International Airport (Tbilisi, Georgia)"
+    }
+   ]
+  },
+  {
+   "claim": "over 45 airlines to more than 25 countries",
+   "verdict": "cut",
+   "wasBefore": "Over 45 airlines fly from here to more than 25 countries",
+   "why": "Out of date and contradicted inside its own source; replaced by the operator's 63 airlines and 71 destinations."
+  },
+  {
+   "claim": "mainly Europe, the Middle East and Central Asia",
+   "verdict": "cut",
+   "wasBefore": "mainly across Europe, the Middle East and Central Asia",
+   "why": "No second source found."
+  },
+  {
+   "claim": "1 million in 2010 to almost 4 million before the pandemic",
+   "verdict": "cut",
+   "wasBefore": "Passenger numbers went from 1 million in 2010 to almost 4 million before the pandemic",
+   "why": "No second source; replaced by the operator's 2005 and 2025 figures."
+  },
+  {
+   "claim": "ban still in force at end of 2021",
+   "verdict": "cut",
+   "wasBefore": "the ban was still in force at the end of 2021",
+   "why": "Out of date. The ban was lifted in May 2023."
+  },
+  {
+   "claim": "Georgian Airways via Yerevan with Aircompany Armenia",
+   "verdict": "cut",
+   "wasBefore": "Georgian Airways ran Tbilisi to Moscow through Yerevan using Aircompany Armenia instead",
+   "why": "A workaround for the ban, which has since been lifted. No second source."
+  },
+  {
+   "claim": "check the Russia position",
+   "verdict": "cut",
+   "wasBefore": "Check the current position before quoting anything routing through Russia.",
+   "why": "Superseded by the May 2023 lifting."
+  },
+  {
+   "claim": "hub for MyWay Airlines",
+   "verdict": "cut",
+   "wasBefore": "as well as MyWay Airlines",
+   "why": "No independent source that MyWay is still flying."
+  },
+  {
+   "claim": "named by the Tbilisi City Assembly in 2015, after the medieval poet",
+   "verdict": "cut",
+   "wasBefore": "by the Tbilisi City Assembly in 2015",
+   "why": "Only Wikipedia says so. The name itself is kept, with two sources."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
