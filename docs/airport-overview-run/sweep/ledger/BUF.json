@@ -1,0 +1,239 @@
+{
+ "iata": "BUF",
+ "id": "recjLzFnS6pBvfV13",
+ "name": "Buffalo Niagara International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Buffalo_Niagara_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Buffalo's airport, 11 miles east of downtown, and third busiest in New York State. Its catchment of around 9.2 million people is the largest between New York to the east and Chicago to the west.\n\nThe reason is across the border. Buffalo is 60 miles from Toronto in a straight line and 106 by road, and it works as a significantly cheaper alternative for travellers in the southern Golden Horseshoe region of Ontario. A good share of the passengers here are Canadians driving south for the fare.\n\nIt is a compact site at 1,000 acres with two runways. The airspace above is busy, sitting close to Toronto Pearson, Billy Bishop and Hamilton.\n\nThe airport runs its own fire service, which answers all fire and medical calls in the terminal complex from a station completed in 2017, three times the size of the one it replaced.\n\nSignature Flight Support handles general aviation.",
+ "after": "Buffalo's airport, 11 miles east of downtown and the third busiest in New York state. It markets itself to Canadian travellers as a cheaper alternative to Toronto Pearson.\n\nThe site covers 1,000 acres, with two runways. It has its own fire service, the Buffalo Airport Fire Department.\n\nSignature Aviation runs the private jet terminal.",
+ "claims": [
+  {
+   "claim": "Buffalo's airport, 11 miles east of downtown",
+   "verdict": "confirmed",
+   "inAfter": "Buffalo's airport, 11 miles east of downtown",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport serves Buffalo, New York and Niagara Falls, New York in the United States",
+      "It is about 11 miles (18 km) east of Downtown Buffalo"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 13.3 km (8.3 miles)",
+      "Bearing from the city centre: 63 degrees, which is north east"
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "ASSOC CITY:",
+      "BUFFALO NIAGARA INTL",
+      "CBD TO AIRPORT (NM):",
+      "05 E"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ],
+   "note": "11 miles is the road distance: 8.3 miles in a straight line (ratio 1.33, inside the check's tolerance). The coordinates give 63 degrees, north east, one compass point from east; the FAA record gives 5 nautical miles east of the business district, so 'east' stays."
+  },
+  {
+   "claim": "third busiest in New York state",
+   "verdict": "confirmed",
+   "inAfter": "third busiest in New York state",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the third-busiest airport in the state of New York"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "July 8, 2026",
+      "6 EA NY JFK New York John F Kennedy International P L 30,792,806 31,466,102 -2.14%",
+      "19 EA NY LGA New York Laguardia P L 16,278,532 16,715,567 -2.61%",
+      "63 EA NY BUF Buffalo Buffalo Niagara International P M 2,533,180 2,499,295 1.36%",
+      "86 EA NY ALB Albany Albany International P S 1,573,771 1,490,673 5.57%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ],
+   "note": "The FAA's table is in rank order: JFK 6th, LaGuardia 19th, Buffalo 63rd with 2,533,180 boardings in 2025, then Albany 86th."
+  },
+  {
+   "claim": "markets itself to Canadian travellers as a cheaper alternative to Toronto Pearson",
+   "verdict": "softened",
+   "inAfter": "It markets itself to Canadian travellers as a cheaper alternative to Toronto Pearson.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "largely because it serves as a major, lower-cost alternative for travelers in the Southern Golden Horseshoe region of Ontario, Canada"
+    },
+    {
+     "file": "op-canadian",
+     "org": "Niagara Frontier Transportation Authority (operator, buffaloairport.com)",
+     "quote": [
+      "CANADIAN INFO",
+      "SAVE TIME AND MONEY",
+      "Many of your neighbors already benefit from flying with us",
+      "By flying out of The Buffalo Niagara International Airport, instead of Toronto Pearson, a family of four could save: $335.99 (USD) 34%.",
+      "Analysis performed on 3/6/2025"
+     ]
+    }
+   ],
+   "note": "Was 'it works as a significantly cheaper alternative for travellers in the southern Golden Horseshoe region of Ontario'. The operator's live page still makes the case to Canadians (read 23 Sep 2026), but its saving is its own sum from US Department of Transportation fares for the third quarter of 2024 (analysis dated 6 March 2025), so the text says what the airport claims rather than asserting a saving."
+  },
+  {
+   "claim": "1,000 acres, two runways",
+   "verdict": "confirmed",
+   "inAfter": "The site covers 1,000 acres, with two runways.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "The airport covers a total area of 1,000 acres (400 ha).",
+      "has two runways"
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "ACREAGE:",
+      "1,000",
+      "05/23",
+      "14/32"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 05/23: 2,691 m (8,829 ft), ASP",
+      "Runway 14/32: 2,183 m (7,161 ft), ASP",
+      "Runways listed: 2"
+     ]
+    }
+   ],
+   "note": "'Compact' is dropped as a judgement."
+  },
+  {
+   "claim": "its own fire service, the Buffalo Airport Fire Department",
+   "verdict": "confirmed",
+   "inAfter": "It has its own fire service, the Buffalo Airport Fire Department.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Buffalo Airport Fire Department responds to all fire and emergency medical aid calls in the terminal complex and adjacent property."
+    },
+    {
+     "file": "op-emergency-exercise",
+     "org": "Niagara Frontier Transportation Authority (operator, buffaloairport.com)",
+     "quote": [
+      "on Saturday, July 19, 2025",
+      "said Chief William Major, Buffalo Airport Fire Department"
+     ],
+     "dated": "2025-07-19"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "ARFF INDEX D EQUIPMENT COVERAGE PROVIDED.",
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ]
+  },
+  {
+   "claim": "Signature Aviation runs the private jet terminal",
+   "verdict": "confirmed",
+   "inAfter": "Signature Aviation runs the private jet terminal.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Signature Flight Support is the FBO for the airport."
+    },
+    {
+     "file": "signature-buf",
+     "org": "Signature Aviation",
+     "quote": [
+      "BUF / KBUF",
+      "Signature Buffalo Niagara",
+      "You've Arrived—Welcome to Signature BUF at Buffalo Niagara Int'l Airport.",
+      "our private jet terminal provides convenient access to local attractions"
+     ]
+    }
+   ],
+   "note": "Was 'Signature Flight Support handles general aviation'. The company now trades as Signature Aviation (its own page, read 23 Sep 2026). Wikipedia contradicts itself here, also saying TAC Air took over from Prior Aviation in October 2020; Signature's live page settles who runs it now."
+  },
+  {
+   "claim": "catchment of around 9.2 million, the largest between New York and Chicago",
+   "verdict": "cut",
+   "wasBefore": "Its catchment of around 9.2 million people is the largest between New York to the east and Chicago to the west.",
+   "why": "Only Wikipedia gives it. The operator's overview, about and master plan pages do not, and the master plan documents sit in the NFTA's document search, which lists nothing to a browser."
+  },
+  {
+   "claim": "the reason is across the border",
+   "verdict": "cut",
+   "wasBefore": "The reason is across the border.",
+   "why": "A lead-in to the cut catchment claim."
+  },
+  {
+   "claim": "60 miles from Toronto in a straight line and 106 by road",
+   "verdict": "cut",
+   "wasBefore": "Buffalo is 60 miles from Toronto in a straight line and 106 by road",
+   "why": "Only Wikipedia gives the figures; the operator says only that the airport is 'mere miles from the Canadian border and the QEW', and the coordinates check measures from Buffalo, not Toronto."
+  },
+  {
+   "claim": "a significantly cheaper alternative for the southern Golden Horseshoe",
+   "verdict": "cut",
+   "wasBefore": "and it works as a significantly cheaper alternative for travellers in the southern Golden Horseshoe region of Ontario",
+   "why": "Softened to what the airport itself claims (see above): the saving rests on the operator's own 2024 fare analysis."
+  },
+  {
+   "claim": "a good share of passengers are Canadians driving south for the fare",
+   "verdict": "cut",
+   "wasBefore": "A good share of the passengers here are Canadians driving south for the fare.",
+   "why": "No source from the last 12 months. The operator's page says 'almost 2 million Canadians used our airports last year' but gives no year (its fare analysis is dated March 2025), and no current NFTA figure could be found. For Andy: worth a current figure before this goes back in."
+  },
+  {
+   "claim": "a compact site",
+   "verdict": "cut",
+   "wasBefore": "It is a compact site at 1,000 acres with two runways.",
+   "why": "Reworded without the judgement 'compact'; the acreage and runways are kept."
+  },
+  {
+   "claim": "busy airspace near Toronto Pearson, Billy Bishop and Hamilton",
+   "verdict": "cut",
+   "wasBefore": "The airspace above is busy, sitting close to Toronto Pearson, Billy Bishop and Hamilton.",
+   "why": "Only Wikipedia says so; the FAA record carries no such remark."
+  },
+  {
+   "claim": "answers all fire and medical calls in the terminal complex from a station completed in 2017, three times the size",
+   "verdict": "cut",
+   "wasBefore": "The airport runs its own fire service, which answers all fire and medical calls in the terminal complex from a station completed in 2017, three times the size of the one it replaced.",
+   "why": "The fire service is kept (operator, FAA). The calls it answers and the 2017 station, its size and cost rest on Wikipedia alone; the operator's news list does not reach back to 2017."
+  },
+  {
+   "claim": "Signature Flight Support handles general aviation",
+   "verdict": "cut",
+   "wasBefore": "Signature Flight Support handles general aviation.",
+   "why": "Reworded with the company's current name (see above)."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

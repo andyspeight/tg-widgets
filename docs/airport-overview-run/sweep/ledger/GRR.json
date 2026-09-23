@@ -1,0 +1,371 @@
+{
+ "iata": "GRR",
+ "id": "recdg3Gp8lpl7Doqj",
+ "name": "Gerald R. Ford International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Gerald_R._Ford_International_Airport",
+ "audited": "2026-09-23",
+ "before": "West Michigan's airport, about 13 miles south east of Grand Rapids, and second busiest in the state after Detroit. As of September 2025 it flew to 39 airports across the United States.\n\nThe concourses split cleanly by airline. Delta, American and United use Concourse A with its 15 gates; Southwest, Sun Country, Frontier and Allegiant use Concourse B with eight. Every gate has a climate controlled jetway, which matters in a Michigan winter.\n\nThe terminal was substantially improved in September 2017, when the first phase of the Gateway Transformation added 59,000 square feet including a single consolidated security checkpoint, a new retail and dining marketplace, and business centres and lounges.\n\nThree runways serve the 3,127 acre site, two parallel and one crossing, plus a separate 5,000 foot general aviation strip.\n\nThe airport opened as Kent County Airport and was renamed in December 1999 after Gerald R. Ford, who represented the Grand Rapids area in Congress from 1949 to 1973.",
+ "after": "West Michigan's main airport, about 13 miles south east of Grand Rapids and the second busiest in the state after Detroit. Allegiant, American, Avelo, Delta, Frontier, Southwest, Sun Country and United fly nonstop from here to more than 35 destinations, all in the United States.\n\nThere are two concourses, A and B. The Gateway Transformation project brought security screening into a single checkpoint and added a new marketplace of shops and restaurants.\n\nThree runways serve the 3,127 acre site: two parallel runways running east to west, one of them 5,000 feet long, and a third running north to south.\n\nThe airport opened as Kent County Airport and was renamed in December 1999 after Gerald R. Ford, who represented the Grand Rapids area in Congress from 1949 to 1973.",
+ "claims": [
+  {
+   "claim": "West Michigan's main airport",
+   "verdict": "confirmed",
+   "inAfter": "West Michigan's main airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the primary commercial airport in West Michigan."
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "71 GL MI GRR Grand Rapids Gerald R Ford International P S 2,127,668 2,065,053 3.03%",
+      "Kalamazoo/Battle Creek",
+      "International P N 88,713 92,510 -4.10%",
+      "450 GL MI MKG Muskegon Muskegon County CS None 6,940 2,729 154.31%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "op-2025-record",
+     "org": "Gerald R. Ford International Airport Authority (operator, grr.org)",
+     "quote": "welcome guests to West Michigan with world class service",
+     "dated": "2026-01-28"
+    }
+   ],
+   "note": "Was 'West Michigan's airport'; 'main' added because Kalamazoo and Muskegon also have scheduled flights, far fewer (FAA 2025 boardings: Grand Rapids 2,127,668, Kalamazoo/Battle Creek 88,713, Muskegon 6,940)."
+  },
+  {
+   "claim": "about 13 miles south east of Grand Rapids",
+   "verdict": "confirmed",
+   "inAfter": "about 13 miles south east of Grand Rapids",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "approximately 13 miles (21 km) southeast of Grand Rapids"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 15.0 km (9.3 miles)",
+      "Bearing from the city centre: 128 degrees, which is south east"
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "CBD TO AIRPORT (NM):",
+      "06 SE"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ],
+   "note": "13 miles is the road distance: 9.3 miles in a straight line (ratio 1.40, inside the check's tolerance). The FAA record gives 6 nautical miles south east of the business district; the operator's FAQ says 'within 25 minutes of downtown Grand Rapids'."
+  },
+  {
+   "claim": "second busiest in the state after Detroit",
+   "verdict": "confirmed",
+   "inAfter": "second busiest in the state after Detroit",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the second-busiest airport in Michigan, after Detroit Metropolitan Airport."
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "18 GL MI DTW Detroit Detroit Metro Wayne County P L 16,294,768 16,110,696 1.14%",
+      "71 GL MI GRR Grand Rapids Gerald R Ford International P S 2,127,668 2,065,053 3.03%",
+      "148 GL MI TVC Traverse City Cherry Capital P N 462,251 393,108 17.59%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "op-2025-record",
+     "org": "Gerald R. Ford International Airport Authority (operator, grr.org)",
+     "quote": "The Gerald R. Ford International Airport is Michigan's second-busiest airport",
+     "dated": "2026-01-28"
+    }
+   ],
+   "note": "The FAA's table is in rank order: Detroit 18th, Grand Rapids 71st, then Traverse City 148th, the next Michigan airport."
+  },
+  {
+   "claim": "eight airlines: Allegiant, American, Avelo, Delta, Frontier, Southwest, Sun Country and United",
+   "verdict": "corrected",
+   "inAfter": "Allegiant, American, Avelo, Delta, Frontier, Southwest, Sun Country and United fly nonstop from here",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Concourse A's tenants are Delta Air Lines, American Airlines and United Airlines.",
+      "Southwest Airlines, Sun Country Airlines, Frontier Airlines and Allegiant Air occupy Concourse B."
+     ]
+    },
+    {
+     "file": "op-faq",
+     "org": "Gerald R. Ford International Airport Authority (operator, grr.org)",
+     "quote": [
+      "Gerald R. Ford International Airport is served by eight passenger airlines",
+      "Allegiant | American | Avelo | Delta | Frontier | Southwest | Sun Country | United"
+     ]
+    },
+    {
+     "file": "op-2025-record",
+     "org": "Gerald R. Ford International Airport Authority (operator, grr.org)",
+     "quote": "eight commercial airline partners offering nonstop flights to over 35 destinations",
+     "dated": "2026-01-28"
+    },
+    {
+     "file": "avelo-grr",
+     "org": "Avelo Airlines",
+     "quote": [
+      "Avelo Airlines operates from Gerald R. Ford International Airport (GRR).",
+      "Avelo Airlines operates from the main terminal, Concourse B at Gerald R. Ford International Airport (GRR)."
+     ]
+    }
+   ],
+   "note": "Replaces the old airline-by-concourse list, which named seven airlines and missed Avelo. Seven airlines rest on Wikipedia and the operator; Avelo rests on the operator's list and Avelo's own page (a weekly flight to Orlando/Lakeland, Concourse B). The operator's January 2026 release counts eight airlines."
+  },
+  {
+   "claim": "nonstop to more than 35 destinations, all in the United States",
+   "verdict": "corrected",
+   "inAfter": "to more than 35 destinations, all in the United States",
+   "sources": [
+    {
+     "file": "op-2025-record",
+     "org": "Gerald R. Ford International Airport Authority (operator, grr.org)",
+     "quote": [
+      "January 28 th 2026",
+      "nonstop flights to over 35 destinations"
+     ],
+     "dated": "2026-01-28"
+    },
+    {
+     "file": "op-routes",
+     "org": "Gerald R. Ford International Airport Authority (operator, grr.org)",
+     "quote": "fly nonstop from GRR to over 35 major cities in the U.S."
+    },
+    {
+     "file": "op-tep-open",
+     "org": "Gerald R. Ford International Airport Authority (operator, grr.org)",
+     "quote": [
+      "August 26, 2026",
+      "The addition of a federal inspection station , which will enable the Airport to offer nonstop international commercial passenger flights."
+     ],
+     "dated": "2026-08-26"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "As of September 2025, GRR had flights to 39 airports in the United States."
+    }
+   ],
+   "note": "Was 'As of September 2025 it flew to 39 airports across the United States'. The operator's current wording is 'over 35' (its release of 28 January 2026, its FAQ and its live routes page); Wikipedia's 39 airports a year ago is consistent with it. 'All in the United States': the routes page lists US cities only, and the operator's August 2026 release says the customs hall now being built 'will enable' international flights, so there are none yet."
+  },
+  {
+   "claim": "two concourses, A and B",
+   "verdict": "confirmed",
+   "inAfter": "There are two concourses, A and B.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the airport has a passenger terminal with two concourses: A has 15 gates and B has eight."
+    },
+    {
+     "file": "op-amenities",
+     "org": "Gerald R. Ford International Airport Authority (operator, grr.org)",
+     "quote": "on Concourse A next to gates A1, A4, A8, A7, and A12 and on Concourse B next to gates B2 and B6"
+    },
+    {
+     "file": "op-termmap",
+     "org": "Gerald R. Ford International Airport Authority (operator, grr.org)",
+     "quote": [
+      "Concourse B",
+      "Concourse A",
+      "Security Checkpoint"
+     ]
+    }
+   ],
+   "note": "The gate counts are cut (see below). The terminal map is the operator's April 2025 update (so named in its file name, not on the page)."
+  },
+  {
+   "claim": "Gateway Transformation brought security into a single checkpoint and added a new marketplace",
+   "verdict": "softened",
+   "inAfter": "The Gateway Transformation project brought security screening into a single checkpoint and added a new marketplace of shops and restaurants.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the opening of phase one of their Gateway Transformation, a 59,000-square-foot (5,500 m2) addition onto the passenger terminal facility that included a consolidated passenger security screening checkpoint, a new Marketplace with expanded retail and food & beverage offerings"
+    },
+    {
+     "file": "op-elevate",
+     "org": "Gerald R. Ford International Airport Authority (operator, grr.org)",
+     "quote": "the Gateway Transformation Project, which consolidated the Checkpoint and Marketplace"
+    },
+    {
+     "file": "op-amenities",
+     "org": "Gerald R. Ford International Airport Authority (operator, grr.org)",
+     "quote": "Post-security across from Starbucks in the Marketplace"
+    }
+   ],
+   "note": "Was 'The terminal was substantially improved in September 2017, when the first phase of the Gateway Transformation added 59,000 square feet including...'. The operator's own page mentions the project only in a contractor's aside, which dates it to 2018 where Wikipedia has phase one opening in September 2017, so no date is given; the floor area and the business centres and lounges rest on Wikipedia alone. For Andy (new facts, not added): the terminal has changed a good deal since, with Concourse A's eight-gate expansion in 2024, a new consolidated rental car facility in July 2026 and a $135 million ticketing and baggage project opened in August 2026 (operator release, 26 August 2026)."
+  },
+  {
+   "claim": "three runways on a 3,127 acre site: two parallel east to west, one of them 5,000 feet, and one north to south",
+   "verdict": "corrected",
+   "inAfter": "Three runways serve the 3,127 acre site: two parallel runways running east to west, one of them 5,000 feet long, and a third running north to south.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "GRR covers 3,127 acres",
+      "Gerald R. Ford International Airport has two parallel east–west runways and one north–south runway.",
+      "The airport also has a 5,000-foot (1,500 m) general aviation runway north of the main 08R/26L runway."
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "08L/26R",
+      "08R/26L",
+      "17/35",
+      "5,001",
+      "10,001",
+      "8,501",
+      "ACREAGE: 3,127",
+      "AFD EFF",
+      "AIRPORT MASTER RECORD 09/03/2026"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "op-history",
+     "org": "Gerald R. Ford International Airport Authority (operator, grr.org)",
+     "quote": [
+      "construction was completed on an extension of East-West Runway 8L-26R",
+      "In 1997, a new 8,500-foot North-South air carrier runway was added"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 08L/26R: 1,524 m (5,001 ft), CON",
+      "Runway 08R/26L: 3,048 m (10,001 ft), CON",
+      "Runway 17/35: 2,591 m (8,501 ft), CON",
+      "Runways listed: 3"
+     ]
+    }
+   ],
+   "note": "Was 'Three runways ... two parallel and one crossing, plus a separate 5,000 foot general aviation strip', which makes four. The FAA record and OurAirports list three: 08L/26R at 5,001 ft, 08R/26L at 10,001 ft and 17/35 at 8,501 ft, so the 5,000 ft runway is the northern of the two parallels, as Wikipedia's own wording ('north of the main 08R/26L runway') implies. The operator's history confirms 8L-26R runs east to west and the 8,500 ft runway north to south. 'Crossing' is dropped: no source says the runways cross."
+  },
+  {
+   "claim": "opened as Kent County Airport, renamed in December 1999 after Gerald R. Ford",
+   "verdict": "confirmed",
+   "inAfter": "The airport opened as Kent County Airport and was renamed in December 1999 after Gerald R",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The facility opened as the Kent County Airport, but later, in December 1999, the airport was renamed for Gerald R. Ford"
+    },
+    {
+     "file": "op-history",
+     "org": "Gerald R. Ford International Airport Authority (operator, grr.org)",
+     "quote": [
+      "The new Kent County Airport was formally dedicated on June 6, 1964",
+      "In December of 1999, Kent County International Airport became Gerald R. Ford International Airport in honor of Gerald R. Ford"
+     ]
+    }
+   ],
+   "note": "inAfter stops at the initial because the gate's sentence splitter breaks after 'Gerald R.'; the full name is in the text and both sources. The operator adds that it was Kent County International Airport from January 1977, when a customs office opened; the sentence stays true as written, and the 1977 step has only the operator as a source."
+  },
+  {
+   "claim": "Ford represented the Grand Rapids area in Congress from 1949 to 1973",
+   "verdict": "confirmed",
+   "inAfter": "Ford, who represented the Grand Rapids area in Congress from 1949 to 1973.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Ford represented the Grand Rapids area in the United States House of Representatives from 1949 to 1973."
+    },
+    {
+     "file": "op-history",
+     "org": "Gerald R. Ford International Airport Authority (operator, grr.org)",
+     "quote": "President Ford served West Michigan as a U.S. Congressman from 1949-1973"
+    }
+   ]
+  },
+  {
+   "claim": "West Michigan's airport",
+   "verdict": "cut",
+   "wasBefore": "West Michigan's airport,",
+   "why": "Reworded as 'West Michigan's main airport' (see above)."
+  },
+  {
+   "claim": "39 airports as of September 2025",
+   "verdict": "cut",
+   "wasBefore": "As of September 2025 it flew to 39 airports across the United States.",
+   "why": "A year old and a different measure from the operator's; replaced by the operator's current 'more than 35 destinations', with the airlines named."
+  },
+  {
+   "claim": "the concourses split cleanly by airline",
+   "verdict": "cut",
+   "wasBefore": "The concourses split cleanly by airline.",
+   "why": "No current source gives the split. The old list missed Avelo, whose own page puts it on Concourse B."
+  },
+  {
+   "claim": "Delta, American and United on Concourse A with 15 gates",
+   "verdict": "cut",
+   "wasBefore": "Delta, American and United use Concourse A with its 15 gates",
+   "why": "The split rests on Wikipedia alone (the operator's live flight board shows gates but not airline names). The gate count cannot be confirmed: the operator's April 2025 terminal map numbers 14 gates on Concourse A (A1 and A3 to A16, with no A2 or A13), against Wikipedia's 15."
+  },
+  {
+   "claim": "Southwest, Sun Country, Frontier and Allegiant on Concourse B with eight",
+   "verdict": "cut",
+   "wasBefore": "Southwest, Sun Country, Frontier and Allegiant use Concourse B with eight",
+   "why": "The split rests on Wikipedia alone and leaves out Avelo; the eight gates (B1 to B8) match the operator's map but are dropped with Concourse A's disputed count, so neither concourse gets a number."
+  },
+  {
+   "claim": "every gate has a climate controlled jetway",
+   "verdict": "cut",
+   "wasBefore": "Every gate has a climate controlled jetway, which matters in a Michigan winter.",
+   "why": "Only Wikipedia says so; the operator's FAQ, amenities, travel tips and expansion pages do not mention jetways."
+  },
+  {
+   "claim": "improved in September 2017",
+   "verdict": "cut",
+   "wasBefore": "The terminal was substantially improved in September 2017, when the first phase of the Gateway Transformation added 59,000 square feet",
+   "why": "The date is disputed (Wikipedia: phase one opened September 2017; a contractor's note on the operator's page: 2018) and the 59,000 square feet rests on Wikipedia alone. It was also not the latest change (see the kept claim's note)."
+  },
+  {
+   "claim": "business centres and lounges",
+   "verdict": "cut",
+   "wasBefore": "and business centres and lounges",
+   "why": "Only Wikipedia ties them to the Gateway Transformation."
+  },
+  {
+   "claim": "two parallel and one crossing, plus a separate 5,000 foot general aviation strip",
+   "verdict": "cut",
+   "wasBefore": "two parallel and one crossing, plus a separate 5,000 foot general aviation strip",
+   "why": "Wrong: it implies a fourth runway. The FAA record and OurAirports list three, and the 5,000 ft one is a parallel. Corrected above."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

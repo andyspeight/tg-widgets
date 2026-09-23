@@ -1,0 +1,321 @@
+{
+ "iata": "OKC",
+ "id": "recfRJXPzdn0CnRI4",
+ "name": "OKC Will Rogers World Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/OKC_Will_Rogers_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Oklahoma's busiest commercial airport, about 6 miles south west of downtown Oklahoma City. Southwest carries the most passengers here, with a market share of nearly 48 per cent as of April 2022, and the airport had its busiest year on record in 2019 at nearly 4.42 million passengers.\n\nThe important recent change: international flights only began on 8 November 2025, after a new customs facility opened earlier that year. Until then this was a domestic airport, so any older guidance about international service is out of date.\n\nThe name changed too. It was Will Rogers World Airport until 2024, the only airport anywhere to use World in its designation, and is now Will Rogers International. Locally it is still just Will Rogers.\n\nThe terminal dates from a 110 million dollar rebuild begun in 2001, which demolished the old twin concourses and replaced them with integrated concourses under high ceilings.\n\nThe naming has a sad symmetry. Will Rogers died in a plane crash in Alaska in 1935 alongside the pilot Wiley Post, and Oklahoma City's other airport is named after Post.",
+ "after": "Oklahoma's busiest commercial airport, about 6 miles south west of downtown Oklahoma City. Southwest carries the most passengers here, and the airport handled 4.6 million passengers in 2024.\n\nInternational flights are new here: American Airlines now flies a seasonal nonstop to Cancún. Any older guidance saying the airport has no international service is out of date.\n\nThe name has changed too: it was Will Rogers World Airport and is now OKC Will Rogers International. Locally it is often just Will Rogers.\n\nWill Rogers died in a plane crash in Alaska in 1935 alongside the pilot Wiley Post, and the city's Wiley Post Airport is named after Post.",
+ "claims": [
+  {
+   "claim": "Oklahoma's busiest commercial airport",
+   "verdict": "confirmed",
+   "inAfter": "Oklahoma's busiest commercial airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "OKC Will Rogers International Airport is the busiest commercial airport in the state of Oklahoma."
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "July 8, 2026",
+      "68 SW OK OKC Oklahoma City Okc Will Rogers International P S 2,242,888 2,243,575 -0.03%",
+      "84 SW OK TUL Tulsa Tulsa International P S 1,597,865 1,627,181 -1.80%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "okcgov-airports",
+     "org": "City of Oklahoma City (okc.gov)",
+     "quote": "OKC Will Rogers International Airport is the largest commercial airport in Oklahoma"
+    }
+   ],
+   "note": "The FAA's table is in rank order: Oklahoma City 68th, Tulsa 84th, then Lawton and Stillwater far behind."
+  },
+  {
+   "claim": "about 6 miles south west of downtown Oklahoma City",
+   "verdict": "confirmed",
+   "inAfter": "about 6 miles south west of downtown Oklahoma City",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "approximately 6 miles (10 km) southwest of Downtown Oklahoma City"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 11.1 km (6.9 miles)",
+      "Bearing from the city centre: 222 degrees, which is south west"
+     ]
+    }
+   ],
+   "note": "Coordinates put it 6.9 miles from the GeoNames centre in a straight line at 222 degrees, south west (ratio 0.87, inside the check's tolerance)."
+  },
+  {
+   "claim": "Southwest carries the most passengers",
+   "verdict": "confirmed",
+   "inAfter": "Southwest carries the most passengers here",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Southwest Airlines carries the most passengers at OKC Will Rogers International Airport, with a market share of nearly 48% as of April 2022."
+    },
+    {
+     "file": "bts-carrier-shares",
+     "org": "Bureau of Transportation Statistics (US DOT)",
+     "quote": [
+      "Carrier Shares for July 2025 - June 2026",
+      "Southwest 1,604 35.96%",
+      "SkyWest 917 20.56%",
+      "American 627 14.06%"
+     ],
+     "dated": "July 2025 to June 2026 (the period printed on the page)"
+    }
+   ],
+   "note": "The share is dropped: Wikipedia's 'nearly 48 per cent as of April 2022' is four years old, and BTS gives Southwest 35.96 per cent for the year to June 2026, still well ahead of SkyWest (the regional airline flying for the big carriers) at 20.56 per cent. Only BTS gives the current figure, so no number is used."
+  },
+  {
+   "claim": "4.6 million passengers in 2024",
+   "verdict": "corrected",
+   "inAfter": "the airport handled 4.6 million passengers in 2024",
+   "sources": [
+    {
+     "file": "okcgov-airports",
+     "org": "City of Oklahoma City (okc.gov)",
+     "quote": "OKC Will Rogers International Airport is the largest commercial airport in Oklahoma, serving 4.6 million passengers in 2024."
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "CY 24",
+      "68 SW OK OKC Oklahoma City Okc Will Rogers International P S 2,242,888 2,243,575 -0.03%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ],
+   "note": "Was 'the airport had its busiest year on record in 2019 at nearly 4.42 million passengers', now overtaken. The city's 4.6 million is TOTAL passengers, arriving and departing. The FAA counts 2,243,575 revenue boardings in 2024 (boardings only, about half of total passengers), in line with it, and 2,242,888 in 2025, so 2025 was about the same. The operator's own monthly reports and its 2025 review are PDFs that refuse automated reads (403, and blank in the browser). No source calls 2024 a record in words, so the text does not."
+  },
+  {
+   "claim": "international flights are new here",
+   "verdict": "softened",
+   "inAfter": "International flights are new here",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "International flights did not begin until November 8, 2025, with a new customs facility opening earlier in the year in preparation."
+    },
+    {
+     "file": "op-news",
+     "org": "Oklahoma City Department of Airports (operator, flyokc.com)",
+     "quote": [
+      "AA Offers Nonstop to Cancun",
+      "March 26, 2025"
+     ],
+     "dated": "2025-03-26"
+    }
+   ],
+   "note": "Was 'international flights only began on 8 November 2025, after a new customs facility opened earlier that year'. The operator's news list shows the Cancún nonstop announced on 26 March 2025, which fits Wikipedia's start in November 2025, but the start date and the customs facility rest on Wikipedia alone: the operator's release itself is a PDF that refuses automated reads."
+  },
+  {
+   "claim": "American Airlines flies a seasonal nonstop to Cancún",
+   "verdict": "corrected",
+   "inAfter": "American Airlines now flies a seasonal nonstop to Cancún",
+   "sources": [
+    {
+     "file": "op-yourflight",
+     "org": "Oklahoma City Department of Airports (operator, flyokc.com)",
+     "quote": [
+      "CITIES SERVED NONSTOP",
+      "Cancun (CUN) | Seasonal"
+     ]
+    },
+    {
+     "file": "op-news",
+     "org": "Oklahoma City Department of Airports (operator, flyokc.com)",
+     "quote": "AA Offers Nonstop to Cancun",
+     "dated": "2025-03-26"
+    },
+    {
+     "file": "aa-okc-cun",
+     "org": "American Airlines",
+     "quote": [
+      "American Airlines flights from Oklahoma City to Cancun",
+      "American Airlines offers flights from Oklahoma City to Cancun, with nonstop or connecting service from Will Rogers Airport (OKC) to Cancún International Airport (CUN).",
+      "OKC–CUN, 09/23/26 – 09/30/26: From $885"
+     ]
+    }
+   ],
+   "note": "New wording for the old text's international point, from the operator's live nonstop list (read 23 Sep 2026: Cancún is the only city outside the US, and seasonal) and American's own page, which sells Oklahoma City to Cancún fares from September 2026. American's page says 'nonstop or connecting'; the operator's list and release say nonstop."
+  },
+  {
+   "claim": "it was Will Rogers World Airport and is now OKC Will Rogers International",
+   "verdict": "corrected",
+   "inAfter": "it was Will Rogers World Airport and is now OKC Will Rogers International",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "OKC Will Rogers International Airport (IATA: OKC, ICAO: KOKC, FAA LID: OKC), formerly known as Will Rogers World Airport until 2024"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "AIRPORT NAME:",
+      "OKC WILL ROGERS INTL",
+      "AIRPORT MASTER RECORD 09/03/2026"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    },
+    {
+     "file": "okcgov-airports",
+     "org": "City of Oklahoma City (okc.gov)",
+     "quote": "The Oklahoma City Department of Airports is comprised of three airports: OKC Will Rogers International Airport, Wiley Post Airport and Clarence E. Page Airport."
+    },
+    {
+     "file": "op-news",
+     "org": "Oklahoma City Department of Airports (operator, flyokc.com)",
+     "quote": "stay informed about what's happening at Will Rogers World Airport, Wiley Post, and C.E. Page"
+    }
+   ],
+   "note": "Was 'It was Will Rogers World Airport until 2024 ... and is now Will Rogers International'. The current name is OKC Will Rogers International (FAA, the city, the operator's own pages); the operator's news page still uses the old name. The year of the change rests on Wikipedia alone, so it is dropped. For Andy: the record's name, 'OKC Will Rogers World Airport', is out of date."
+  },
+  {
+   "claim": "locally often just Will Rogers",
+   "verdict": "confirmed",
+   "inAfter": "Locally it is often just Will Rogers.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "it is common practice to refer to it as \"WRWA\" or \"Will Rogers\""
+    },
+    {
+     "file": "op-faq",
+     "org": "Oklahoma City Department of Airports (operator, flyokc.com)",
+     "quote": "How many people work at Will Rogers?"
+    },
+    {
+     "file": "aa-okc-cun",
+     "org": "American Airlines",
+     "quote": "from Will Rogers Airport (OKC)"
+    }
+   ],
+   "note": "The operator itself calls it 'Will Rogers' in its FAQ. Was 'still just Will Rogers'; 'often' is closer to what the sources show."
+  },
+  {
+   "claim": "Will Rogers died in a 1935 plane crash in Alaska with the pilot Wiley Post; the city's Wiley Post Airport is named after Post",
+   "verdict": "confirmed",
+   "inAfter": "Will Rogers died in a plane crash in Alaska in 1935 alongside the pilot Wiley Post, and the city's Wiley Post Airport is named after Post.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "an Oklahoma native who died in an airplane crash near Utqiagvik, Alaska, in 1935",
+      "The city's other major airport, Wiley Post Airport",
+      "named for Wiley Post, who also died in the same crash"
+     ]
+    },
+    {
+     "file": "op-wileypost",
+     "org": "Oklahoma City Department of Airports (operator, flyokc.com)",
+     "quote": [
+      "Named after the first pilot to circle the globe solo, Wiley Post Airport is one of the three airports owned and operated by the Oklahoma City Department of Airports.",
+      "Post's final flight was with his friend Will Rogers",
+      "When Post and Rogers took off for Point Barrow, Alaska, on August 15, 1935, the plane's engine stalled and the aircraft plummeted into a lake."
+     ]
+    },
+    {
+     "file": "op-who",
+     "org": "Oklahoma City Department of Airports (operator, flyokc.com)",
+     "quote": "His death was mourned by the entire world."
+    }
+   ],
+   "note": "Was 'Oklahoma City's other airport is named after Post'; the city has three airports (the city's own page), so the airport is named. 'The naming has a sad symmetry' is cut as a judgement."
+  },
+  {
+   "claim": "market share of nearly 48 per cent as of April 2022",
+   "verdict": "cut",
+   "wasBefore": "with a market share of nearly 48 per cent as of April 2022",
+   "why": "Four years old. BTS gives 35.96 per cent for the year to June 2026, with no second source for that figure, so the share is left out and Southwest's lead kept."
+  },
+  {
+   "claim": "busiest year on record in 2019 at nearly 4.42 million",
+   "verdict": "cut",
+   "wasBefore": "and the airport had its busiest year on record in 2019 at nearly 4.42 million passengers",
+   "why": "Out of date: 2024 was busier (4.6 million, the city; FAA boardings to match). Replaced above."
+  },
+  {
+   "claim": "the important recent change",
+   "verdict": "cut",
+   "wasBefore": "The important recent change:",
+   "why": "A lead-in; reworded."
+  },
+  {
+   "claim": "international flights only began on 8 November 2025 after a new customs facility opened earlier that year",
+   "verdict": "cut",
+   "wasBefore": "international flights only began on 8 November 2025, after a new customs facility opened earlier that year",
+   "why": "The date and the customs facility rest on Wikipedia alone. The operator's release and its 2025 review are PDFs on flyokc.com that answer a plain request with 403 and show no text in the browser; American's newsroom index gave nothing. Softened to 'international flights are new here', with the route both the operator and American confirm."
+  },
+  {
+   "claim": "until then a domestic airport",
+   "verdict": "cut",
+   "wasBefore": "Until then this was a domestic airport, so any older guidance about international service is out of date.",
+   "why": "The advice is kept in new words (see opinion); 'until then a domestic airport' rests on the same single-source date."
+  },
+  {
+   "claim": "World Airport until 2024",
+   "verdict": "cut",
+   "wasBefore": "It was Will Rogers World Airport until 2024",
+   "why": "The year rests on Wikipedia alone; the old and new names are kept with other sources."
+  },
+  {
+   "claim": "the only airport anywhere to use World in its designation",
+   "verdict": "cut",
+   "wasBefore": "the only airport anywhere to use World in its designation",
+   "why": "Only Wikipedia says so."
+  },
+  {
+   "claim": "locally still just Will Rogers",
+   "verdict": "cut",
+   "wasBefore": "Locally it is still just Will Rogers.",
+   "why": "Reworded as 'often just Will Rogers' (see above)."
+  },
+  {
+   "claim": "terminal from a 110 million dollar rebuild begun in 2001, old twin concourses demolished",
+   "verdict": "cut",
+   "wasBefore": "The terminal dates from a 110 million dollar rebuild begun in 2001, which demolished the old twin concourses and replaced them with integrated concourses under high ceilings.",
+   "why": "Only Wikipedia describes the rebuild. The operator's reports that might confirm it (annual reports, capital plan) are PDFs that refuse automated reads, and its web pages do not describe the terminal."
+  },
+  {
+   "claim": "the naming has a sad symmetry",
+   "verdict": "cut",
+   "wasBefore": "The naming has a sad symmetry.",
+   "why": "A judgement with no source; the facts follow in the next sentence."
+  },
+  {
+   "claim": "Oklahoma City's other airport",
+   "verdict": "cut",
+   "wasBefore": "Oklahoma City's other airport is named after Post",
+   "why": "The city runs three airports (Will Rogers, Wiley Post and Clarence E. Page, the city's own page), so the airport is now named."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Any older guidance saying the airport has no international service is out of date.",
+   "why": "The old text's advice, kept: it follows from the two claims before it (international flights are new; American flies to Cancún)."
+  }
+ ],
+ "tracerOk": {}
+}

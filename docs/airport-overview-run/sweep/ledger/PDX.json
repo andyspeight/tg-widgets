@@ -1,0 +1,370 @@
+{
+ "iata": "PDX",
+ "id": "recdYMYgq3YNJ9LtA",
+ "name": "Portland International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Portland_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Oregon's main airport, inside Portland's city limits just south of the Columbia River, and 12 miles by road north east of downtown. It carries 90 per cent of the state's air passengers and more than 95 per cent of its air cargo, and is a hub for Alaska Airlines.\n\nThe one fact every client appreciates: the Port of Portland requires every shop and restaurant in the airport to charge the same as it would off airport. No terminal mark-up.\n\nThat policy sits alongside some genuinely unusual amenities. There is a microcinema run by the Hollywood Theatre showing free short films by Portland filmmakers, a distillery in the terminal and local food carts before security.\n\nThere is one terminal with four concourses, B to E, and 60 gates. International flights use the Governor Victor G. Atiyeh International Concourse, part of Concourse D.\n\nGetting into the city is simple. The MAX Red Line light rail runs from the terminal to downtown Portland and west to Beaverton.\n\nThe Oregon Air National Guard's 142nd Wing flies F-15EX Eagle IIs from the south west of the site.",
+ "after": "Oregon's main airport, about 6 miles north east of downtown Portland as the crow flies. It is a hub for Alaska Airlines.\n\nUnder a Port of Portland street pricing policy, shops and restaurants in the airport charge the same as they would outside it.\n\nAmong the amenities is a microcinema run by the Hollywood Theatre, showing free short films about the Pacific Northwest.\n\nThere is one terminal with four concourses, B to E. International flights use a section of Concourse D.\n\nGetting into the city is simple: the MAX Red Line light rail runs from the terminal to downtown Portland.\n\nF-15EX Eagle IIs of the Oregon Air National Guard's 142nd Wing fly from a base at the airport.",
+ "claims": [
+  {
+   "claim": "Oregon's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Oregon's main airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the largest airport in the U.S. state of Oregon"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "July 8, 2026",
+      "32 NM OR PDX Portland Portland International P M 9,054,394 8,639,088 4.81%",
+      "111 NM OR EUG Eugene Mahlon Sweet Field P S 838,572 824,952 1.65%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ],
+   "note": "The FAA's table is in rank order: Portland is 32nd in the US with 9,054,394 boardings in 2025, far ahead of every other Oregon airport (Eugene 111th with 838,572, Redmond 127th, Medford 140th)."
+  },
+  {
+   "claim": "about 6 miles north east of downtown Portland as the crow flies",
+   "verdict": "corrected",
+   "inAfter": "about 6 miles north east of downtown Portland as the crow flies",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "6 miles (10 kilometers) by air and 12 mi (19 km) by highway northeast of downtown Portland"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 9.5 km (5.9 miles)",
+      "Bearing from the city centre: 40 degrees, which is north east"
+     ]
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "CBD TO AIRPORT (NM):",
+      "04 NE",
+      "AFD EFF"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ],
+   "note": "Was '12 miles by road north east of downtown', which fails the coordinates check (12 miles against 5.9 in a straight line, a ratio of 2.04), so it is replaced by the straight-line figure that Wikipedia and the coordinates agree on. The FAA record gives 4 nautical miles north east from its own business-district point. For Andy: the operator's air cargo page also says 'Located only 12 miles from downtown Portland' and its directions page says to allow 30 to 45 minutes to drive, so 12 miles is the road distance; the brief says a distance that fails the check is corrected, not kept."
+  },
+  {
+   "claim": "a hub for Alaska Airlines",
+   "verdict": "confirmed",
+   "inAfter": "It is a hub for Alaska Airlines.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is a hub for Alaska Airlines."
+    },
+    {
+     "file": "op-alaska-hangar",
+     "org": "Alaska Airlines (its release, reprinted on flypdx.com)",
+     "quote": [
+      "6/15/26",
+      "From our partner's newsroom:",
+      "A new maintenance hangar in Portland is both an investment in one of our critical hubs",
+      "Alaska Airlines has proudly served Portland since 1979 and is the city's largest carrier"
+     ],
+     "dated": "2026-06-15"
+    }
+   ],
+   "note": "Alaska's own vice president calls Portland 'one of our critical hubs' in the airline's June 2026 release, which the Port reprinted 'from our partner's newsroom'."
+  },
+  {
+   "claim": "street pricing: shops and restaurants charge the same as outside the airport",
+   "verdict": "confirmed",
+   "inAfter": "Under a Port of Portland street pricing policy, shops and restaurants in the airport charge the same as they would outside it.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "The Port of Portland requires all airport shops and restaurants to practice fair retail pricing",
+      "businesses are not allowed to charge more than at off-airport locations"
+     ]
+    },
+    {
+     "file": "op-business",
+     "org": "Port of Portland (operator, flypdx.com)",
+     "quote": "Travelers and locals alike can savor the best of our region-and pay the same as they would outside the airport, thanks to our street pricing policy."
+    },
+    {
+     "file": "op-shops-b",
+     "org": "Port of Portland (operator, flypdx.com)",
+     "quote": "Discover local favorites with great street prices - open to all!"
+    }
+   ],
+   "note": "Both operator pages are live pages, read 23 Sep 2026. 'The one fact every client appreciates' and 'No terminal mark-up' are dropped (see cuts)."
+  },
+  {
+   "claim": "a microcinema run by the Hollywood Theatre, showing free short films about the Pacific Northwest",
+   "verdict": "softened",
+   "inAfter": "a microcinema run by the Hollywood Theatre, showing free short films about the Pacific Northwest",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Unique amenities include a microcinema run by the Hollywood Theatre; it shows free short films by Portland-based filmmakers that are primarily focused on the culture of the Pacific Northwest."
+    },
+    {
+     "file": "op-art",
+     "org": "Port of Portland (operator, flypdx.com)",
+     "quote": [
+      "Located on Concourse C the Hollywood Theatre entertains travelers with short films telling stories specific to the Pacific Northwest.",
+      "Hollywood Theatre at PDX is free to travelers"
+     ]
+    },
+    {
+     "file": "op-shops-b",
+     "org": "Port of Portland (operator, flypdx.com)",
+     "quote": [
+      "Showing 70 of 70 concessions",
+      "Hollywood Theatre Service Post-Security, Concourse C More Details Open"
+     ]
+    }
+   ],
+   "note": "Was 'free short films by Portland filmmakers'. The operator says the films tell stories of the Pacific Northwest but does not say who makes them, so the text says what both sources say. The operator's live listing (read 23 Sep 2026) still has the Hollywood Theatre, after security on Concourse C; the location is not added."
+  },
+  {
+   "claim": "one terminal with four concourses, B to E",
+   "verdict": "confirmed",
+   "inAfter": "There is one terminal with four concourses, B to E.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport has one passenger terminal composed of four concourses, which are designated B, C, D, and E."
+    },
+    {
+     "file": "op-about",
+     "org": "Port of Portland (operator, flypdx.com)",
+     "quote": [
+      "Fast Facts",
+      "1 Number of terminals",
+      "4 Number of concourses"
+     ]
+    },
+    {
+     "file": "op-intl-arrivals",
+     "org": "Port of Portland (operator, flypdx.com)",
+     "quote": "making a domestic connection on the B/C/D/E gates"
+    },
+    {
+     "file": "op-complete-2026",
+     "org": "Port of Portland (operator, flypdx.com)",
+     "quote": [
+      "6/30/26",
+      "the Port of Portland celebrates the completion of Portland International Airport's (PDX) main terminal reconstruction project",
+      "2020: Concourse E extension project",
+      "2021: Concourse B redevelopment project"
+     ],
+     "dated": "2026-06-30"
+    }
+   ],
+   "note": "The fast facts and arrivals pages are live pages, read 23 Sep 2026; the June 2026 release (dated on the page) marks the end of the main terminal rebuild and lists the Concourse B and E projects. The gate count is cut (see below). Not added (new fact, for Andy): the rebuilt main terminal, a $2.15 billion project under a mass timber roof, was completed on 30 June 2026."
+  },
+  {
+   "claim": "international flights use a section of Concourse D",
+   "verdict": "softened",
+   "inAfter": "International flights use a section of Concourse D.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The international section of Concourse D"
+    },
+    {
+     "file": "op-intl-arrivals",
+     "org": "Port of Portland (operator, flypdx.com)",
+     "quote": [
+      "After arriving at PDX, international passengers will be directed to Passport Control.",
+      "If the screening checkpoint is open in the Federal Inspection Station, you will be inside concourse D after re-screening"
+     ]
+    },
+    {
+     "file": "op-shops-b",
+     "org": "Port of Portland (operator, flypdx.com)",
+     "quote": "CXI - Currency Exchange International Previous Next Service Financial Services Pre-Security & Post-Security, Baggage Claim, Concourse D"
+    }
+   ],
+   "note": "Was 'use the Governor Victor G. Atiyeh International Concourse, part of Concourse D'. The operator's arrivals page puts the federal inspection station on Concourse D (connecting passengers who re-screen there come out inside Concourse D), and its live shop list has the currency exchange and a lounge on Concourse D. The Atiyeh name rests on Wikipedia alone and is cut. Also on the operator's page, not added (new fact): arriving passengers who end their trip in Portland take a short shuttle bus from the inspection area to baggage claim."
+  },
+  {
+   "claim": "the MAX Red Line light rail runs from the terminal to downtown Portland",
+   "verdict": "confirmed",
+   "inAfter": "the MAX Red Line light rail runs from the terminal to downtown Portland",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the MAX Red Line light rail, which takes passengers between PDX and downtown Portland"
+    },
+    {
+     "file": "trimet-red",
+     "org": "TriMet (Portland transit agency)",
+     "quote": [
+      "MAX Red Line light rail service connects Portland International Airport, E/NE Portland, Portland City Center, Beaverton and Hillsboro.",
+      "The trip to/from downtown Portland takes about 40 minutes"
+     ]
+    },
+    {
+     "file": "op-trimet",
+     "org": "Port of Portland (operator, flypdx.com)",
+     "quote": [
+      "The Trimet Max/Light Rail can be found at the south end of the terminal building",
+      "The Red Line services PDX, and trains depart every 15 minutes."
+     ]
+    }
+   ],
+   "note": "TriMet's and the operator's pages are live, read 23 Sep 2026. 'And west to Beaverton' is cut: TriMet now runs the line on past Beaverton to Hillsboro ('Airport/City Center/Hillsboro'), so Beaverton read as the end of the line, and Hillsboro has no source but TriMet."
+  },
+  {
+   "claim": "F-15EX Eagle IIs of the Oregon Air National Guard's 142nd Wing fly from a base at the airport",
+   "verdict": "confirmed",
+   "inAfter": "F-15EX Eagle IIs of the Oregon Air National Guard's 142nd Wing fly from a base at the airport.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The Oregon Air National Guard has a base on the southwest portion of the airport property grounds, and is also the host unit of the 142nd Wing which operates the F-15EX Eagle II."
+    },
+    {
+     "file": "ang-142wg-news",
+     "org": "142nd Wing, Oregon Air National Guard (US Air Force site)",
+     "quote": [
+      "JULY 17, 2026",
+      "the wing's fleet of F-15EX Eagle II aircraft"
+     ],
+     "dated": "2026-07-17"
+    },
+    {
+     "file": "ang-142wg-b",
+     "org": "142nd Wing, Oregon Air National Guard (US Air Force site)",
+     "quote": "Welcome to the 142nd Wing, home to Oregon Air National Guard's Redhawks."
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "MILITARY: ANG: OREGON ANG E RAMP SUN SHADE OBST LGTS O/S.",
+      "BASE OPS OPR"
+     ],
+     "dated": "2026-09-03 (AFD effective date on the record)"
+    }
+   ],
+   "note": "The Wing's site refused a plain request (403) and was read through the browser. The FAA record confirms the Oregon Air National Guard's base operations at the airport. 'From the south west of the site' rests on Wikipedia alone and is cut."
+  },
+  {
+   "claim": "inside Portland's city limits just south of the Columbia River",
+   "verdict": "cut",
+   "wasBefore": "inside Portland's city limits just south of the Columbia River",
+   "why": "Only Wikipedia says so in words. The FAA record gives Portland as the associated city and Multnomah County, which is not the same as the city limits, and the operator's noise page says only that jet flight paths keep aircraft over the Columbia River."
+  },
+  {
+   "claim": "12 miles by road north east of downtown",
+   "verdict": "cut",
+   "wasBefore": "and 12 miles by road north east of downtown",
+   "why": "Fails the coordinates check (12 miles against 5.9 miles in a straight line, ratio 2.04). Corrected to about 6 miles as the crow flies (Wikipedia and the coordinates). The operator also gives 12 miles, the road distance: noted for Andy in the kept claim."
+  },
+  {
+   "claim": "90 per cent of the state's air passengers and more than 95 per cent of its air cargo",
+   "verdict": "cut",
+   "wasBefore": "It carries 90 per cent of the state's air passengers and more than 95 per cent of its air cargo",
+   "why": "No second source: the operator's pages, its 2025 audit report and the FAA record give no share. The FAA's preliminary 2025 boardings suggest the passenger share is out of date: Portland's 9,054,394 is about 81 per cent of the roughly 11.1 million boardings at Oregon's seven listed commercial airports (our sum of the FAA rows, not a published figure)."
+  },
+  {
+   "claim": "the one fact every client appreciates",
+   "verdict": "cut",
+   "wasBefore": "The one fact every client appreciates",
+   "why": "A judgement with no source; the policy itself is kept."
+  },
+  {
+   "claim": "the Port requires every shop and restaurant to charge the same as off airport",
+   "verdict": "cut",
+   "wasBefore": "the Port of Portland requires every shop and restaurant in the airport to charge the same as it would off airport",
+   "why": "Reworded, not removed: now carried by the street pricing sentence in the operator's own words."
+  },
+  {
+   "claim": "no terminal mark-up",
+   "verdict": "cut",
+   "wasBefore": "No terminal mark-up.",
+   "why": "Restates the pricing sentence before it."
+  },
+  {
+   "claim": "genuinely unusual amenities",
+   "verdict": "cut",
+   "wasBefore": "That policy sits alongside some genuinely unusual amenities.",
+   "why": "A judgement with no source; replaced by a plain lead-in."
+  },
+  {
+   "claim": "free short films by Portland filmmakers",
+   "verdict": "cut",
+   "wasBefore": "showing free short films by Portland filmmakers",
+   "why": "Softened to films about the Pacific Northwest: the operator describes what the films are about but not who makes them."
+  },
+  {
+   "claim": "a distillery in the terminal",
+   "verdict": "cut",
+   "wasBefore": "a distillery in the terminal",
+   "why": "Not confirmed as current. The operator's live list of all 70 shops and restaurants (read 23 Sep 2026) has no distillery, only a Freeland Spirits shop after security, and the main terminal was rebuilt in a project finished on 30 June 2026."
+  },
+  {
+   "claim": "local food carts before security",
+   "verdict": "cut",
+   "wasBefore": "local food carts before security",
+   "why": "Not confirmed as current. None of the 70 places on the operator's live list (23 Sep 2026) is a food cart; the pre-security places are in the ticket hall, the mezzanine and baggage claim."
+  },
+  {
+   "claim": "60 gates",
+   "verdict": "cut",
+   "wasBefore": "and 60 gates",
+   "why": "Only Wikipedia gives a gate count; the operator's fast facts give terminals, concourses and runways but not gates."
+  },
+  {
+   "claim": "Governor Victor G. Atiyeh International Concourse",
+   "verdict": "cut",
+   "wasBefore": "International flights use the Governor Victor G. Atiyeh International Concourse, part of Concourse D.",
+   "why": "The Atiyeh name rests on Wikipedia alone (the operator's news archive could not be read). Softened to 'a section of Concourse D', which the operator's arrivals page supports."
+  },
+  {
+   "claim": "west to Beaverton",
+   "verdict": "cut",
+   "wasBefore": "and west to Beaverton",
+   "why": "Out of date as a description of the line: TriMet now runs the Red Line through Beaverton to Hillsboro, so Beaverton read as the end of the line. Hillsboro has no source but TriMet itself (the Port's Hillsboro Airport page does not mention the train)."
+  },
+  {
+   "claim": "from the south west of the site",
+   "verdict": "cut",
+   "wasBefore": "from the south west of the site",
+   "why": "Only Wikipedia places the base in the south west of the airport; the FAA record mentions an Oregon ANG east ramp and gives no position for the base."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Getting into the city is simple",
+   "why": "The old text's framing, kept: the train station is in the terminal building, trains run every 15 minutes (operator) and the trip downtown takes about 40 minutes (TriMet)."
+  },
+  {
+   "text": "Among the amenities is",
+   "why": "A plain lead-in replacing 'genuinely unusual amenities'; the amenity itself is sourced."
+  }
+ ],
+ "tracerOk": {}
+}
