@@ -1,0 +1,377 @@
+{
+ "iata": "GRO",
+ "id": "recXjVI5maLakPupi",
+ "name": "Girona-Costa Brava Airport",
+ "country": "Spain",
+ "wikipedia": "https://en.wikipedia.org/wiki/Girona%E2%80%93Costa_Brava_Airport",
+ "audited": "2026-09-23",
+ "before": "The Costa Brava's airport, 12.5 km south west of Girona, and often sold as a Barcelona alternative. Be clear with a client on that: Barcelona city centre is 74 km away.\n\nFor the coast it is genuinely well placed. Buses run to Lloret de Mar, Blanes, Tossa de Mar, Calella and the other Maresme resorts, and a second line covers the northern Costa Brava through Figueres, Roses and Calella de Palafrugell. There are also coaches to Andorra and to Perpignan, and the French border is about forty minutes by road, which makes this a sensible arrival for the Pyrenees and Andorran ski resorts.\n\nInto Barcelona the bus takes about 75 minutes and is timed to the flights. Into Girona it is 25 minutes, hourly.\n\nThe terminal is a single two storey building with 33 check in desks downstairs and 11 gates above.\n\nThe airport was built in 1965 and stayed quiet until the early 2000s, when Ryanair made it one of its European bases and traffic grew sharply.",
+ "after": "The Costa Brava's airport, 10 km south west of Girona. It is often sold as a Barcelona alternative, and Ryanair calls it Barcelona Girona, so be clear with a client that Barcelona city centre is more than 70 km away.\n\nFor the coast it is well placed: buses run to Lloret de Mar, Tossa de Mar, Blanes and Calella. Coaches also go to Perpignan in France. The bus into Barcelona is timed to the flights, and another line runs into Girona. It is close to the Pyrenees too.\n\nThere is one terminal. The airport dates from the 1960s, and traffic grew sharply after budget airlines arrived in 2003. Ryanair lists it as one of its bases.",
+ "claims": [
+  {
+   "claim": "the Costa Brava's airport",
+   "verdict": "confirmed",
+   "inAfter": "The Costa Brava's airport",
+   "sources": [
+    {
+     "file": "aena-presentation",
+     "org": "Aena (operator, aena.es)",
+     "dated": "2026",
+     "quote": "situated close to the Costa Brava, the Pyrenees, and the cities of Girona and Barcelona"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is well connected to the Costa Brava and the Pyrenees"
+    }
+   ]
+  },
+  {
+   "claim": "10 km south west of Girona",
+   "verdict": "corrected",
+   "inAfter": "10 km south west of Girona",
+   "note": "Was 12.5 km (Wikipedia). Aena gives 10 km twice (presentation and history) and the coordinates 10.2 km in a straight line at 211 degrees, south west; Aena's history says 'south', the adjacent point.",
+   "sources": [
+    {
+     "file": "aena-presentation",
+     "org": "Aena (operator, aena.es)",
+     "dated": "2026",
+     "quote": "the cities of Girona and Barcelona (10 and 85 kilometres away, respectively)"
+    },
+    {
+     "file": "aena-history",
+     "org": "Aena (operator, aena.es)",
+     "quote": "ten kilometres south of Girona"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 10.2 km (6.3 miles)",
+      "Bearing from the city centre: 211 degrees, which is south west"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "southwest of the city of Girona"
+    }
+   ]
+  },
+  {
+   "claim": "often sold as a Barcelona alternative; Ryanair calls it Barcelona Girona",
+   "verdict": "confirmed",
+   "inAfter": "It is often sold as a Barcelona alternative, and Ryanair calls it Barcelona Girona",
+   "note": "Ryanair's own airport data names it 'Barcelona Girona' and files it under the Barcelona city code.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Girona Airport is used as an alternative airport for Barcelona as well"
+    },
+    {
+     "file": "ryanair-api",
+     "org": "Ryanair (ryanair.com airport data)",
+     "dated": "2026-09-23",
+     "quote": [
+      "\"name\":\"Barcelona Girona\"",
+      "\"macCityCode\":\"BARCELONA\""
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Barcelona city centre more than 70 km away",
+   "verdict": "corrected",
+   "inAfter": "Barcelona city centre is more than 70 km away",
+   "note": "Was '74 km'. The sources disagree: Wikipedia 74 km, Aena 85 km; the straight line from the centre of Barcelona is 76.1 km. All three are more than 70 km.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "74 km (46 mi) north of the center of Barcelona"
+    },
+    {
+     "file": "aena-presentation",
+     "org": "Aena (operator, aena.es)",
+     "dated": "2026",
+     "quote": "the cities of Girona and Barcelona (10 and 85 kilometres away, respectively)"
+    },
+    {
+     "file": "geo-barcelona",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Barcelona: 76.1 km (47.3 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "well placed for the coast",
+   "verdict": "confirmed",
+   "inAfter": "For the coast it is well placed",
+   "sources": [
+    {
+     "file": "aena-presentation",
+     "org": "Aena (operator, aena.es)",
+     "dated": "2026",
+     "quote": "situated close to the Costa Brava"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Girona Airport is convenient for the resorts along the Costa Brava"
+    }
+   ]
+  },
+  {
+   "claim": "buses to Lloret de Mar, Tossa de Mar, Blanes and Calella",
+   "verdict": "confirmed",
+   "inAfter": "buses run to Lloret de Mar, Tossa de Mar, Blanes and Calella",
+   "note": "Sagalés runs 613 (airport, Lloret de Mar, Tossa de Mar) and 605 (Canet, Calella, Blanes, airport); Aena lists Sagalés/Moventis lines to towns on the Costa Brava.",
+   "sources": [
+    {
+     "file": "sagales-girona-lines",
+     "org": "Sagalés (bus operator, sagalesairportline.com)",
+     "dated": "2026-09 (notice of changes from 21 September)",
+     "quote": [
+      "613 Aeroport de Girona - Lloret de Mar - Tossa de Mar",
+      "605 Canet - Calella - Blanes - Aeroport de Girona"
+     ]
+    },
+    {
+     "file": "aena-bus-html",
+     "org": "Aena (operator, aena.es)",
+     "dated": "2026-09-23",
+     "quote": "Lines that connect Girona-Costa Brava Airport with different towns on the Costa Brava"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "stops at Tossa de Mar, Lloret de Mar, Blanes, Malgrat de Mar, Santa Susanna, Pineda de Mar and Calella de la Costa"
+    }
+   ]
+  },
+  {
+   "claim": "coaches to Perpignan",
+   "verdict": "confirmed",
+   "inAfter": "Coaches also go to Perpignan in France.",
+   "sources": [
+    {
+     "file": "aena-bus-html",
+     "org": "Aena (operator, aena.es)",
+     "dated": "2026-09-23",
+     "quote": "Lines that connect the airport with Perpignan and other French cities"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Perpignan in France"
+    }
+   ]
+  },
+  {
+   "claim": "the Barcelona bus is timed to the flights",
+   "verdict": "confirmed",
+   "inAfter": "The bus into Barcelona is timed to the flights",
+   "sources": [
+    {
+     "file": "aena-bus",
+     "org": "Aena (operator, aena.es)",
+     "dated": "2026-09-23",
+     "quote": "Departures approximately 20-25 minutes after each flight arrives."
+    },
+    {
+     "file": "sagales-girona-lines",
+     "org": "Sagalés (bus operator, sagalesairportline.com)",
+     "quote": "All journeys on this route are coordinated with Ryanair arrivals and departures"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "departure times depend on flight schedule"
+    }
+   ]
+  },
+  {
+   "claim": "a bus line into Girona",
+   "verdict": "confirmed",
+   "inAfter": "another line runs into Girona",
+   "sources": [
+    {
+     "file": "sagales-girona-lines",
+     "org": "Sagalés (bus operator, sagalesairportline.com)",
+     "quote": "607 Girona - Aeroport de Girona"
+    },
+    {
+     "file": "aena-bus",
+     "org": "Aena (operator, aena.es)",
+     "dated": "2026-09-23",
+     "quote": "Airport - Girona"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Girona (25 minutes, one every hour)"
+    }
+   ]
+  },
+  {
+   "claim": "close to the Pyrenees",
+   "verdict": "confirmed",
+   "inAfter": "It is close to the Pyrenees too.",
+   "sources": [
+    {
+     "file": "aena-presentation",
+     "org": "Aena (operator, aena.es)",
+     "dated": "2026",
+     "quote": "situated close to the Costa Brava, the Pyrenees"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is well connected to the Costa Brava and the Pyrenees"
+    }
+   ]
+  },
+  {
+   "claim": "one terminal",
+   "verdict": "confirmed",
+   "inAfter": "There is one terminal.",
+   "sources": [
+    {
+     "file": "aena-presentation",
+     "org": "Aena (operator, aena.es)",
+     "dated": "2026",
+     "quote": "The airport has a constantly improving terminal"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport consists of one two-storey passenger terminal building"
+    }
+   ]
+  },
+  {
+   "claim": "dates from the 1960s",
+   "verdict": "corrected",
+   "inAfter": "The airport dates from the 1960s",
+   "note": "Was 'built in 1965'. Aena: the new airport had its runway in 1965 and opened to passenger flights on 3 March 1967. The decade is what both sources support.",
+   "sources": [
+    {
+     "file": "aena-history",
+     "org": "Aena (operator, aena.es)",
+     "quote": [
+      "In 1965, the new airport had a runway measuring 2,200 by 45 metres",
+      "On 3rd March 1967, Girona-Costa Brava Airport was opened to domestic and international civilian passenger and cargo flights"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport was built in 1965"
+    }
+   ]
+  },
+  {
+   "claim": "traffic grew sharply after budget airlines arrived in 2003",
+   "verdict": "confirmed",
+   "inAfter": "traffic grew sharply after budget airlines arrived in 2003",
+   "sources": [
+    {
+     "file": "aena-history",
+     "org": "Aena (operator, aena.es)",
+     "quote": "Girona Airport experienced spectacular growth with the arrival of budget airlines in 2003"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The early 2000s saw passenger numbers grow spectacularly after Ryanair chose Girona as one of its European hubs"
+    }
+   ]
+  },
+  {
+   "claim": "Ryanair lists it as one of its bases",
+   "verdict": "confirmed",
+   "inAfter": "Ryanair lists it as one of its bases.",
+   "primary": true,
+   "attribution": "Ryanair",
+   "note": "Attributed: Ryanair's own airport data marks Girona as a base. Wikipedia says Ryanair made it a base in the early 2000s but does not speak to today.",
+   "sources": [
+    {
+     "file": "ryanair-api",
+     "org": "Ryanair (ryanair.com airport data)",
+     "dated": "2026-09-23",
+     "quote": "\"base\":true"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Ryanair chose Girona as one of its European hubs"
+    }
+   ]
+  },
+  {
+   "claim": "12.5 km south west of Girona",
+   "verdict": "cut",
+   "wasBefore": "12.5 km south west of Girona",
+   "why": "Aena gives 10 km (twice) and the coordinates 10.2 km in a straight line; corrected above."
+  },
+  {
+   "claim": "Barcelona city centre is 74 km away",
+   "verdict": "cut",
+   "wasBefore": "Barcelona city centre is 74 km away",
+   "why": "Sources disagree (Wikipedia 74 km, Aena 85 km, straight line 76.1 km); softened to 'more than 70 km'."
+  },
+  {
+   "claim": "the other Maresme resorts",
+   "verdict": "cut",
+   "wasBefore": "Calella and the other Maresme resorts",
+   "why": "Sagalés's Girona Airport lines name Lloret de Mar, Tossa de Mar, Blanes, Calella and Canet; the rest of the Maresme list rests on Wikipedia."
+  },
+  {
+   "claim": "northern Costa Brava line through Figueres, Roses and Calella de Palafrugell",
+   "verdict": "cut",
+   "wasBefore": "a second line covers the northern Costa Brava through Figueres, Roses and Calella de Palafrugell",
+   "why": "Wikipedia alone. Aena lists a Costa Brava line without naming towns, and Sagalés's Figueres service (602) runs from Barcelona-El Prat through Barcelona and Girona, not from this airport."
+  },
+  {
+   "claim": "coaches to Andorra",
+   "verdict": "cut",
+   "wasBefore": "There are also coaches to Andorra and to Perpignan",
+   "why": "Andorra is not on Aena's current list of bus lines (Barcelona, Girona, the Costa Brava, Lleida, Barcelona-El Prat and France); Wikipedia alone. Perpignan is kept."
+  },
+  {
+   "claim": "French border forty minutes by road; sensible for the Pyrenees and Andorran ski resorts",
+   "verdict": "cut",
+   "wasBefore": "the French border is about forty minutes by road, which makes this a sensible arrival for the Pyrenees and Andorran ski resorts",
+   "why": "The drive time and the Andorra advice rest on Wikipedia alone. 'Close to the Pyrenees' is kept (Aena)."
+  },
+  {
+   "claim": "Barcelona bus about 75 minutes",
+   "verdict": "cut",
+   "wasBefore": "Into Barcelona the bus takes about 75 minutes and is timed to the flights.",
+   "why": "The journey time rests on Wikipedia alone; Aena and Sagalés's pages give no time. 'Timed to the flights' is kept (Aena, Sagalés)."
+  },
+  {
+   "claim": "Girona bus 25 minutes, hourly",
+   "verdict": "cut",
+   "wasBefore": "Into Girona it is 25 minutes, hourly.",
+   "why": "Wikipedia alone; the line itself is kept (Sagalés 607, Aena)."
+  },
+  {
+   "claim": "two storey terminal, 33 check in desks, 11 gates",
+   "verdict": "cut",
+   "wasBefore": "The terminal is a single two storey building with 33 check in desks downstairs and 11 gates above.",
+   "why": "The counts rest on Wikipedia alone, and Aena says it has recently added boarding gates, so 11 may be out of date. One terminal is kept."
+  },
+  {
+   "claim": "built in 1965 and stayed quiet until the early 2000s",
+   "verdict": "cut",
+   "wasBefore": "The airport was built in 1965 and stayed quiet until the early 2000s, when Ryanair made it one of its European bases and traffic grew sharply.",
+   "why": "'Stayed quiet' is wrong: Aena's own history has a surge in the 1970s from summer charter flights, falling back from 1978 and especially after 1983 (830,000 passengers that year). It also dates the passenger opening to 1967. The 2003 growth and Ryanair's base are kept, reworded."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "The Costa Brava's": "The tracer catches the possessive together with the sentence's opening 'The'; 'Costa Brava' itself is on Aena's pages and in Wikipedia."
+ }
+}
