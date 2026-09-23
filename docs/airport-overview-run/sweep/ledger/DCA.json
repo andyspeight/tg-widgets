@@ -1,0 +1,173 @@
+{
+ "iata": "DCA",
+ "id": "recIFt3wz643g8pX9",
+ "name": "Ronald Reagan Washington National Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Ronald_Reagan_Washington_National_Airport",
+ "audited": "2026-09-23",
+ "before": "The closest airport to the centre of Washington, five miles away in Arlington County, and the busiest in the metropolitan area with 26.29 million passengers in 2024. It is a hub for American Airlines and serves 108 nonstop destinations.\n\nTwo things will catch out an unprepared client. First, there are no immigration and customs facilities here at all, so the only international flights that can land are those from airports with United States preclearance, mainly in Canada and the Caribbean. Second, the two terminals are not connected once a passenger is through security, so moving between them means clearing again.\n\nThere are 59 gates with jetways, nine in Terminal 1 and fifty in Terminal 2 across concourses B to E. The numbering changed in 2022, so old gate numbers now carry a concourse letter, and Gate 33 for instance became Gate C33.\n\nThe airport opened in 1941, part of the original terminal is still Terminal 1, and it was renamed after Ronald Reagan in 1998. Its main runway is the busiest in the country.",
+ "after": "Washington's close-in airport sits just south of the city centre and is a hub for American Airlines. It handled 24.9 million passengers in 2025.\n\nIt is a short-haul airport: under the federal Perimeter Rule, nonstop flights are limited to about 1,250 miles from Washington, with some longer routes allowed as exceptions.\n\nTerminal 1, part of the original 1941 building, has nine gates; the rest are in Terminal 2, opened in 1997. The airport was renamed after Ronald Reagan in 1998.",
+ "claims": [
+  {
+   "claim": "Washington's close-in airport, just south of the city centre",
+   "verdict": "corrected",
+   "inAfter": "Washington's close-in airport sits just south of the city centre",
+   "note": "Was 'five miles away in Arlington County'. Coordinates give 3.0 miles at 181 degrees (south) from the GeoNames centre; five miles is a ratio of 1.67, outside the tolerance, so the figure goes. Wikipedia's 'southwest' is one point from south.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "The closest airport to the nation's capital, it is one of two airports owned by the federal government",
+      "The airport is located southwest of Washington, D.C."
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 4.8 km (3.0 miles)",
+      "Bearing from the city centre: 181 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "hub for American Airlines",
+   "verdict": "confirmed",
+   "inAfter": "is a hub for American Airlines",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is a hub for American Airlines."
+    },
+    {
+     "file": "mwaa-dec25",
+     "org": "Metropolitan Washington Airports Authority (operator)",
+     "dated": "2026-02-12",
+     "quote": "American, including its regional affiliates, had the largest commercial passenger market share of 53.5%"
+    }
+   ]
+  },
+  {
+   "claim": "24.9 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled 24.9 million passengers in 2025.",
+   "note": "Replaces 26.29 million in 2024 (which the same report confirms) and 'the busiest in the metropolitan area': the operator's own 2025 report puts Dulles at 29.0 million passengers against Reagan's 24.9 million.",
+   "sources": [
+    {
+     "file": "mwaa-dec25",
+     "org": "Metropolitan Washington Airports Authority (operator)",
+     "dated": "2026-02-12",
+     "quote": [
+      "Grand Total - Passengers 12,478,076 12,411,397 24,889,473 26,290,722 -5.3",
+      "2.0 2.4 4.4 24.9 29.0 53.9"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat2_data = 24,889,473",
+      "stat_year = 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "short-haul airport; Perimeter Rule about 1,250 miles, with exceptions",
+   "verdict": "corrected",
+   "inAfter": "It is a short-haul airport: under the federal Perimeter Rule, nonstop flights are limited to about 1,250 miles from Washington, with some longer routes allowed as exceptions.",
+   "note": "Replaces the customs line (no customs facilities, preclearance only), which has one source; the Perimeter Rule explains the same thing for a UK agent: nothing long-haul lands here. The operator lists the current exceptions: Denver, Las Vegas, Los Angeles, Phoenix, Salt Lake City, San Francisco, Seattle, Portland, San Diego and Austin. Not described as western routes because Wikipedia records a past exemption for San Juan.",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "Metropolitan Washington Airports Authority (operator)",
+     "quote": [
+      "Primarily serving as a \"short-haul\" airport, Reagan National offers nonstop service to destinations no further than a 1,250 mile perimeter from Washington, D.C. as part of the federally-instituted “Perimeter Rule.”",
+      "the federal government has granted exceptions to this rule, allowing daily flights to several cities beyond the perimeter"
+     ],
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Washington National Airport is subject to a federally mandated perimeter limitation to keep it a short-haul airport",
+      "Congress extended the limit in the 1980s to 1,000 miles (1,600 km) and then again to 1,250 miles (2,010 km). Congress and the United States Department of Transportation have created many \"beyond-perimeter\" exceptions that have weakened the rule."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 1, part of the original 1941 building, nine gates; rest in Terminal 2, opened 1997",
+   "verdict": "corrected",
+   "inAfter": "Terminal 1, part of the original 1941 building, has nine gates; the rest are in Terminal 2, opened in 1997.",
+   "note": "Was '59 gates, nine in Terminal 1 and fifty in Terminal 2'. The operator gives 58 (9 and 49), Wikipedia 59 (9 and 50), so only the nine is stated.",
+   "sources": [
+    {
+     "file": "op-overview",
+     "org": "Metropolitan Washington Airports Authority (operator)",
+     "quote": [
+      "Reagan National has a total of 58 gates: 9 in Terminal 1 and 49 in Terminal 2.",
+      "Historic Terminal 1 (formerly Terminal A)",
+      "When opened in 1941",
+      "Terminal 2 opened on July 27, 1997."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Part of the original terminal is still in use as Terminal 1; the much larger Terminal 2 opened in 1997.",
+      "DCA has 59 gates with jetways: 9 gates in Terminal 1 and 50 gates in Terminal 2"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "renamed after Ronald Reagan in 1998",
+   "verdict": "confirmed",
+   "inAfter": "The airport was renamed after Ronald Reagan in 1998.",
+   "sources": [
+    {
+     "file": "mwaa-facts",
+     "org": "Metropolitan Washington Airports Authority (operator)",
+     "quote": "On February 6, 1998, President William Jefferson Clinton signed into law the bill introduced and passed in Congress that changed the name of Washington National Airport to Ronald Reagan Washington National Airport."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On February 6, 1998, President Bill Clinton signed legislation changing the airport's name from Washington National Airport to Ronald Reagan Washington National Airport"
+    }
+   ]
+  },
+  {
+   "claim": "closest, five miles, Arlington County; busiest in the metro area, 26.29 million in 2024; American hub; 108 nonstop destinations",
+   "verdict": "cut",
+   "wasBefore": "The closest airport to the centre of Washington, five miles away in Arlington County, and the busiest in the metropolitan area with 26.29 million passengers in 2024. It is a hub for American Airlines and serves 108 nonstop destinations.",
+   "why": "Five miles fails the coordinates check. 'Busiest in the metropolitan area' is wrong on the operator's own figures (Dulles 29.0 million in 2025). Traffic updated to 2025; the destination count has one source."
+  },
+  {
+   "claim": "two things catch clients out: no customs; terminals not connected after security",
+   "verdict": "cut",
+   "wasBefore": "Two things will catch out an unprepared client. First, there are no immigration and customs facilities here at all, so the only international flights that can land are those from airports with United States preclearance, mainly in Canada and the Caribbean. Second, the two terminals are not connected once a passenger is through security, so moving between them means clearing again.",
+   "why": "The customs line rests on Wikipedia alone (the operator's report shows Canadian traffic but does not say why). The terminal line conflicts: Wikipedia says the terminals are not connected after security, the operator says passengers move freely between gate areas without re-screening since the November 2021 checkpoints. The operator's home page links to nothing on customs or preclearance (checked 23 Sep)."
+  },
+  {
+   "claim": "59 gates; renumbering in 2022",
+   "verdict": "cut",
+   "wasBefore": "There are 59 gates with jetways, nine in Terminal 1 and fifty in Terminal 2 across concourses B to E. The numbering changed in 2022, so old gate numbers now carry a concourse letter, and Gate 33 for instance became Gate C33.",
+   "why": "Gate totals disagree (58 or 59); the renumbering has one source."
+  },
+  {
+   "claim": "opened 1941, original terminal still T1, renamed 1998; main runway busiest in the country",
+   "verdict": "cut",
+   "wasBefore": "The airport opened in 1941, part of the original terminal is still Terminal 1, and it was renamed after Ronald Reagan in 1998. Its main runway is the busiest in the country.",
+   "why": "Reworded and kept with the operator; the runway ranking rests on Wikipedia alone."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
