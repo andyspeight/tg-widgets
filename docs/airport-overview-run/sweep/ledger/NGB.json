@@ -1,0 +1,120 @@
+{
+ "iata": "NGB",
+ "id": "recdEeTJ5JtSbziLC",
+ "name": "Ningbo Lishe International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Ningbo_Lishe_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Ningbo's airport, serving Zhejiang's second city and the southern side of the Yangtze River Delta. It handled 16.1 million passengers in 2025, thirtieth in China, and is twenty seventh for cargo.\n\nGetting into the city is easy and partly free. A free bus runs between the terminal and Lishe International Airport station every ten minutes, limousine coaches run hourly into downtown Ningbo, and less frequent services reach the wider prefectures.\n\nThe terminal opened in October 2002 with 16 departure gates and seven jetways, and the airport has been expanded repeatedly since, with a flight area expansion in 2006 and a third phase from 2015.\n\nIt has an unexpected place in aviation history. Lishe was an auxiliary base of the Nationalist Chinese Air Force and the final launching point for the Martin B-10 bombers that flew the transoceanic raid on Nagasaki and other Japanese cities on 19 and 20 May 1938.\n\nThe airport opened to the public in June 1990 as the first civil-only airport in Zhejiang and took its international name in November 2005.",
+ "after": "The airport for Ningbo, in Zhejiang. In 2025 it handled 16.1 million passengers, 30th in China, while its cargo ranked 27th.\n\nLine 2 of the Ningbo metro starts at Lishe International Airport station.",
+ "claims": [
+  {
+   "claim": "the airport for Ningbo, in Zhejiang",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Ningbo, in Zhejiang.",
+   "note": "OurAirports puts the airport in region CN-33, which its own regions table names Zhejiang Province.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport serving Ningbo, a major city in the Yangtze River Delta region and the second largest city in East China's Zhejiang Province"
+    },
+    {
+     "file": "ourairports-region",
+     "org": "OurAirports",
+     "dated": "2026-09-23",
+     "quote": [
+      "\"CN-33\",33,\"Zhejiang Province\"",
+      "\"Ningbo Lishe International Airport\"",
+      "\"CN-33\",\"Ningbo\""
+     ]
+    },
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": "Row 宁波/栎社"
+    }
+   ]
+  },
+  {
+   "claim": "16.1 million passengers in 2025, 30th; 27th for cargo",
+   "verdict": "confirmed",
+   "inAfter": "In 2025 it handled 16.1 million passengers, 30th in China, while its cargo ranked 27th.",
+   "note": "CAAC: 16,125,459 passengers (30th, up 9.4 per cent); cargo 160,124 tonnes (27th).",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "CAAC (Civil Aviation Administration of China)",
+     "dated": "2026-02-26",
+     "quote": [
+      "passenger rank 30 in China",
+      "passengers 2025: 16,125,459"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "In 2025, the airport handled 16.1 million passengers, ranking 30th in China.",
+      "It was the 27th busiest airport in China by cargo traffic in 2025."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Line 2 of the Ningbo metro starts at Lishe International Airport station",
+   "verdict": "corrected",
+   "inAfter": "Line 2 of the Ningbo metro starts at Lishe International Airport station.",
+   "note": "Ningbo Rail Transit's own first and last train table has Line 2 running from 栎社国际机场 (Lishe International Airport) to 红联 (Honglian), first train from the airport 06:00, last 22:20. It replaces the old paragraph's free shuttle and coaches, which rest on Wikipedia alone; Wikipedia names the station but not the line.",
+   "sources": [
+    {
+     "file": "nbmetro-timetable",
+     "org": "Ningbo Rail Transit (operator)",
+     "dated": "2026-09-23",
+     "quote": [
+      "2号线",
+      "起始站 栎社国际机场 终点站 红联"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Free bus service between the airport and Lishe International Airport Station is available every 10 minutes."
+    }
+   ]
+  },
+  {
+   "claim": "serving Zhejiang's second city and the southern side of the Yangtze River Delta",
+   "verdict": "cut",
+   "wasBefore": "Ningbo's airport, serving Zhejiang's second city and the southern side of the Yangtze River Delta.",
+   "why": "Reworded as 'The airport for Ningbo, in Zhejiang'. 'Second city' and the Yangtze River Delta rest on Wikipedia alone."
+  },
+  {
+   "claim": "free bus to the metro station every ten minutes; hourly limousine coaches; services to wider prefectures",
+   "verdict": "cut",
+   "wasBefore": "Getting into the city is easy and partly free. A free bus runs between the terminal and Lishe International Airport station every ten minutes, limousine coaches run hourly into downtown Ningbo, and less frequent services reach the wider prefectures.",
+   "why": "Wikipedia alone, and the article's facilities text dates from the 2002 terminal. The metro line is kept with Ningbo Rail Transit as the source; the airport's own site did not connect."
+  },
+  {
+   "claim": "terminal opened October 2002, 16 gates, seven jetways; expansions 2006 and from 2015",
+   "verdict": "cut",
+   "wasBefore": "The terminal opened in October 2002 with 16 departure gates and seven jetways, and the airport has been expanded repeatedly since, with a flight area expansion in 2006 and a third phase from 2015.",
+   "why": "Wikipedia alone, and likely out of date: the archived article breaks off at the 2015 third phase, so what that phase built is not known from it. No second source was reached."
+  },
+  {
+   "claim": "aviation history: Nationalist air base, 1938 B-10 raid on Nagasaki",
+   "verdict": "cut",
+   "wasBefore": "It has an unexpected place in aviation history. Lishe was an auxiliary base of the Nationalist Chinese Air Force and the final launching point for the Martin B-10 bombers that flew the transoceanic raid on Nagasaki and other Japanese cities on 19 and 20 May 1938.",
+   "why": "History resting on Wikipedia alone; its references cannot be read while Wikipedia blocks this session."
+  },
+  {
+   "claim": "opened June 1990 as Zhejiang's first civil-only airport; international name November 2005",
+   "verdict": "cut",
+   "wasBefore": "The airport opened to the public in June 1990 as the first civil-only airport in Zhejiang and took its international name in November 2005.",
+   "why": "Wikipedia alone."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
