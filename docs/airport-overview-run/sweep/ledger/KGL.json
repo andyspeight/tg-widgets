@@ -1,0 +1,335 @@
+{
+ "iata": "KGL",
+ "id": "rec0JVHAt1xCz2e22",
+ "name": "Kigali International Airport",
+ "country": "Rwanda",
+ "wikipedia": "https://en.wikipedia.org/wiki/Kigali_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Rwanda's way in, and a compact one. Three terminals share the site: the main two storey building, the original single storey terminal now used for VIPs, and a cargo terminal. The main terminal takes six small to mid sized aircraft at a time and can handle a 747 when one comes. Two helicopter pads sit on the south side of the runway.\n\nRwandAir has its head office on the top floor, which tells you how central this airport is to the national carrier. Three other airlines are based here: Akagera Aviation flies helicopters, Tempus Jet runs American charters and Nexus Aero is a Saudi VIP operator.\n\nThere is free Wi-Fi in the waiting area. The airport was ranked seventh best regional airport in Africa in 2014, largely on the strength of its emergency response, with a Category Nine fire service rated second best against international aviation standards. The tarmac and support systems were last upgraded in 2002.",
+ "after": "Rwanda's main way in by air. It is RwandAir's hub, and the airline has its head office on the top floor of the main building. Akagera Aviation is based here too and runs helicopter transfers within Rwanda.\n\nBetween 2014 and 2017 more than 30 million US dollars went into a new apron, three taxiways and a hangar. Works begun in September 2019 added another apron for 18 aircraft and an arrivals terminal. Its fire and rescue service is rated Category 9.",
+ "claims": [
+  {
+   "claim": "Rwanda's main way in by air",
+   "verdict": "confirmed",
+   "inAfter": "Rwanda's main way in by air.",
+   "note": "Was 'Rwanda's way in'; 'by air' added because Rwanda also has land borders. Wikipedia calls it Rwanda's principal international airport. The Rwanda Development Board's own 'Getting Here' section names this airport and no other. The Rwanda Airports Company lists one other international airport, Kamembe, near the Congo border, where the FCDO advises against all but essential travel.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "the airport continued to operate as Rwanda's principal international airport"
+    },
+    {
+     "file": "visitrwanda-practical",
+     "org": "Rwanda Development Board (Visit Rwanda, visitrwanda.com)",
+     "dated": "read 2026-09-23 (live page, copyright 2026)",
+     "quote": [
+      "Getting Here",
+      "Airlines servicing Kigali International Airport are: RwandAir, Kenya Airways, Ethiopian Airlines, Brussels Airlines, KLM, Qatar Airways and Turkish Airlines."
+     ]
+    },
+    {
+     "file": "rac-about",
+     "org": "Rwanda Airports Company (the operator, rac.co.rw)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Kigali International Airport (KIA)",
+      "The state of the art airport is located in Kigali, the capital of Rwanda.",
+      "Kamembe International Airport (KME)"
+     ]
+    },
+    {
+     "file": "fcdo-rwanda",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "4 September 2026",
+     "quote": "FCDO advises against all but essential travel to the parts of Rusizi District which are within 10km of the border with the Democratic Republic of Congo (DRC), including the Rwandan islands in Lake Kivu and Kamembe Airport."
+    }
+   ]
+  },
+  {
+   "claim": "RwandAir's hub",
+   "verdict": "corrected",
+   "inAfter": "It is RwandAir's hub",
+   "note": "Replaces the old text's judgement 'which tells you how central this airport is to the national carrier' with the fact behind it, in the airline's own words.",
+   "sources": [
+    {
+     "file": "rwandair-who",
+     "org": "RwandAir (its own site, rwandair.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Operating from Kigali as our hub at the heart of Africa"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "It is the hub for RwandAir."
+    }
+   ]
+  },
+  {
+   "claim": "RwandAir's head office is on the top floor of the main building",
+   "verdict": "confirmed",
+   "inAfter": "the airline has its head office on the top floor of the main building.",
+   "sources": [
+    {
+     "file": "rwandair-contact",
+     "org": "RwandAir (its own site, rwandair.com)",
+     "dated": "read 2026-09-23 (live contact page)",
+     "quote": [
+      "Kigali Head Office",
+      "Kigali International Airport",
+      "Main Building (top floor), P.O. Box 7275, Kigali"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "Rwandair has its head office on the top floor of the airport main building."
+    }
+   ]
+  },
+  {
+   "claim": "Akagera Aviation is based here and runs helicopter transfers within Rwanda",
+   "verdict": "confirmed",
+   "inAfter": "Akagera Aviation is based here too and runs helicopter transfers within Rwanda.",
+   "note": "Was 'Three other airlines are based here: Akagera Aviation flies helicopters, ...'. Akagera Aviation gives its address as Kigali International Airport, and the Rwanda Development Board names it for helicopter transfers within Rwanda. The other two airlines are cut (below), so the count goes.",
+   "sources": [
+    {
+     "file": "akagera-contact",
+     "org": "Akagera Aviation (akageraaviation.com)",
+     "dated": "read 2026-09-23 (live contact page, copyright 2025)",
+     "quote": [
+      "Address",
+      "Kigali International Airport"
+     ]
+    },
+    {
+     "file": "akagera-home",
+     "org": "Akagera Aviation (akageraaviation.com)",
+     "dated": "read 2026-09-23 (live page, copyright 2025)",
+     "quote": [
+      "We are a Rwanda-based aviation company specializing in helicopter services",
+      "Our premium helicopter service provides unparalleled access to every corner of Rwanda"
+     ]
+    },
+    {
+     "file": "visitrwanda-practical",
+     "org": "Rwanda Development Board (Visit Rwanda, visitrwanda.com)",
+     "dated": "read 2026-09-23 (live page, copyright 2026)",
+     "quote": "Helicopter transfers within Rwanda are available through Akagera Aviation."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "There are 4 airlines based at Kigali Airport: RwandAir, the flag carrier airline of Rwanda; Akagera Aviation, a Rwandan helicopter airline"
+    }
+   ]
+  },
+  {
+   "claim": "more than 30 million US dollars went into a new apron, three taxiways and a hangar between 2014 and 2017",
+   "verdict": "corrected",
+   "inAfter": "Between 2014 and 2017 more than 30 million US dollars went into a new apron, three taxiways and a hangar.",
+   "note": "Replaces 'The tarmac and support systems were last upgraded in 2002', which is wrong: the Ministry of Infrastructure, the operator and Wikipedia's own history section all describe the 2014 to 2017 upgrades. The operator's page says 'during the last three years' without a date; the ministry's release of 2 June 2020 and Wikipedia give 2014 to 2017.",
+   "sources": [
+    {
+     "file": "mininfra-kia-expansion",
+     "org": "Rwanda Ministry of Infrastructure (MININFRA, mininfra.gov.rw)",
+     "dated": "2 June 2020",
+     "quote": [
+      "Kigali, 2 June 2020",
+      "Over $30 million was invested in the upgrade of the airport during 2014 and 2017, allowing it to have a new apron, three taxiways, a hangar"
+     ]
+    },
+    {
+     "file": "rac-about",
+     "org": "Rwanda Airports Company (the operator, rac.co.rw)",
+     "dated": "read 2026-09-23 (live page, undated text)",
+     "quote": "With over $30 million invested during the last three years, the airport has undergone major upgrades featuring a new apron, three taxiways, a hangar"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "Between 2014 and 2017, over US$30 million was invested in upgrades, including a new apron, three taxiways, a hangar"
+    }
+   ]
+  },
+  {
+   "claim": "works begun in September 2019 added another apron for 18 aircraft and an arrivals terminal",
+   "verdict": "corrected",
+   "inAfter": "Works begun in September 2019 added another apron for 18 aircraft and an arrivals terminal.",
+   "note": "Also replaces the 2002 line. The ministry's release is dated 2 June 2020 and says the works 'kicked off in September', ahead of the Commonwealth summit then planned for 2020, which puts the start in September 2019, as Wikipedia says. The ministry also reports a newly completed arrivals terminal for domestic flights; 'for domestic flights' rests on the ministry alone, so it is not in the text.",
+   "sources": [
+    {
+     "file": "mininfra-kia-expansion",
+     "org": "Rwanda Ministry of Infrastructure (MININFRA, mininfra.gov.rw)",
+     "dated": "2 June 2020",
+     "quote": [
+      "Kigali, 2 June 2020",
+      "the expansion works of the airport kicked off in September as part of the broader efforts to prepare for CHOGM",
+      "is 53,000 square meters with capacity to accommodate 18 aircraft",
+      "Next to it, is a newly completed arrivals terminal for domestic flights"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": [
+      "A further phase of expansion began in September 2019 in preparation for the 2022 Commonwealth Heads of Government Meeting in Kigali, including a new 53,000",
+      "apron with capacity for 18 aircraft, an arrivals terminal"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "fire and rescue rated Category 9",
+   "verdict": "confirmed",
+   "inAfter": "Its fire and rescue service is rated Category 9.",
+   "note": "Kept from 'with a Category Nine fire service'; the ranking it was attached to is cut (below). The Rwanda eAIP gives firefighting category 9, around the clock.",
+   "sources": [
+    {
+     "file": "asecna-eaip-hryr",
+     "org": "Rwanda eAIP (the country's aeronautical information publication, hosted at aim.asecna.aero)",
+     "dated": "edition of 28 November 2024, as the saved page's address reads",
+     "quote": [
+      "HRYR AD 2.6 RESCUE AND FIRE FIGHTING SERVICES",
+      "AD category for fire fighting",
+      "CAT 9 - H24"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": "through its fire department (Category Nine)"
+    }
+   ]
+  },
+  {
+   "claim": "a compact one",
+   "verdict": "cut",
+   "wasBefore": "and a compact one.",
+   "why": "A judgement with nothing behind it on the saved pages. The Ministry of Infrastructure (June 2020) describes an airport whose flights had outstripped its capacity and which was being expanded."
+  },
+  {
+   "claim": "three terminals: the two storey main building, the single storey VIP terminal, a cargo terminal",
+   "verdict": "cut",
+   "wasBefore": "Three terminals share the site: the main two storey building, the original single storey terminal now used for VIPs, and a cargo terminal.",
+   "why": "Wikipedia alone. The Ministry of Infrastructure (June 2020) also describes a newly completed arrivals terminal for domestic flights, so the count of three may be out of date, and no current source lists the buildings."
+  },
+  {
+   "claim": "the main terminal takes six small to mid sized aircraft and can handle a 747",
+   "verdict": "cut",
+   "wasBefore": "The main terminal takes six small to mid sized aircraft at a time and can handle a 747 when one comes.",
+   "why": "Wikipedia alone, and overtaken: the Ministry of Infrastructure (June 2020) says the existing apron held about 26 aircraft and the new one 18 more.",
+   "sources": [
+    {
+     "file": "mininfra-kia-expansion",
+     "org": "Rwanda Ministry of Infrastructure (MININFRA, mininfra.gov.rw)",
+     "dated": "2 June 2020",
+     "quote": "The existing apron was able to accommodate about 26 aircraft, according to airport officials, but with the newly added apron, the parking capacity will increase to accommodate 44 aircraft."
+    }
+   ]
+  },
+  {
+   "claim": "two helicopter pads on the south side of the runway",
+   "verdict": "cut",
+   "wasBefore": "Two helicopter pads sit on the south side of the runway.",
+   "why": "Wikipedia alone. The Rwanda eAIP publishes no helicopter landing area for the airport (section AD 2.16 is NIL throughout).",
+   "sources": [
+    {
+     "file": "asecna-eaip-hryr",
+     "org": "Rwanda eAIP (the country's aeronautical information publication, hosted at aim.asecna.aero)",
+     "dated": "edition of 28 November 2024, as the saved page's address reads",
+     "quote": [
+      "HRYR AD 2.16 HELICOPTER LANDING AREA",
+      "Coordinates TLOF or THR of FATO"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "which tells you how central this airport is to the national carrier",
+   "verdict": "cut",
+   "wasBefore": "which tells you how central this airport is to the national carrier.",
+   "why": "A judgement, replaced by the fact behind it: RwandAir calls Kigali its hub (see above)."
+  },
+  {
+   "claim": "Tempus Jet, an American charter airline, based here",
+   "verdict": "cut",
+   "wasBefore": "Tempus Jet runs American charters",
+   "why": "Wikipedia alone. Its source is a 2013 page of the airline's site kept only in the web archive, which the network policy blocks, and tempusjets.com timed out (one try)."
+  },
+  {
+   "claim": "Nexus Aero, a Saudi VIP airline, based here",
+   "verdict": "cut",
+   "wasBefore": "Nexus Aero is a Saudi VIP operator.",
+   "why": "Wikipedia alone, from a 2013 page kept only in the web archive. The nexus.aero address now belongs to Nexus Aviation Ventures, an aircraft lessor writing from Las Vegas, with nothing on Kigali.",
+   "sources": [
+    {
+     "file": "nexus-aero",
+     "org": "Nexus Aviation Ventures (nexus.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Las Vegas, Nevada; Nexus Aviation Ventures announced that it delivered MSN 2916, an Airbus A321-200, to BBN Airlines based in Istanbul"
+    }
+   ]
+  },
+  {
+   "claim": "free Wi-Fi in the waiting area",
+   "verdict": "cut",
+   "wasBefore": "There is free Wi-Fi in the waiting area.",
+   "why": "Wikipedia alone. The operator's lounge page mentions WiFi only in the Pearl Lounge, not in the public waiting area."
+  },
+  {
+   "claim": "ranked seventh best regional airport in Africa in 2014 for its emergency response; fire service second best",
+   "verdict": "cut",
+   "wasBefore": "The airport was ranked seventh best regional airport in Africa in 2014, largely on the strength of its emergency response, with a Category Nine fire service rated second best against international aviation standards.",
+   "why": "Wikipedia alone. The operator's own undated page says only that the airport was ranked among the top ten in Africa in two consecutive years, on customer service surveys, which is a different basis. The fire category is kept (see above).",
+   "sources": [
+    {
+     "file": "rac-about",
+     "org": "Rwanda Airports Company (the operator, rac.co.rw)",
+     "dated": "read 2026-09-23 (live page, undated text)",
+     "quote": "In the last two consecutive years, KIA was ranked amongst the top ten best airports in Africa, based on customer service surveys."
+    }
+   ]
+  },
+  {
+   "claim": "the tarmac and support systems last upgraded in 2002",
+   "verdict": "cut",
+   "wasBefore": "The tarmac and support systems were last upgraded in 2002.",
+   "why": "Wrong. The Ministry of Infrastructure, the operator and Wikipedia's own history section describe upgrades from 2014 to 2017 and from September 2019. Corrected (see above)."
+  },
+  {
+   "claim": "Held back: the FCDO reports Ebola health screening at Kigali International Airport",
+   "verdict": "cut",
+   "why": "Held back: replaces nothing in the old text. The FCDO's Rwanda advice (updated 4 September 2026, still current on 23 September) says that, in response to the Ebola outbreak in the Democratic Republic of Congo, the Government of Rwanda has introduced health screening at Kigali International Airport, and that the measures may change at short notice. An attributed statement; for Andy to add if he wants it.",
+   "sources": [
+    {
+     "file": "fcdo-rwanda-entry",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "page updated 4 September 2026 (as the summary page reads)",
+     "quote": "In response to the current Ebola outbreak in DRC, the Government of Rwanda has introduced health-screening measures at Kigali International Airport and border restrictions with DRC . These measures may be subject to short notice change."
+    },
+    {
+     "file": "fcdo-rwanda",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "4 September 2026",
+     "quote": [
+      "Still current at:",
+      "23 September 2026",
+      "Updated:",
+      "4 September 2026",
+      "updated information about border measures introduced by the Rwandan Government in response to the Ebola outbreak in the Democratic Republic of Congo"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

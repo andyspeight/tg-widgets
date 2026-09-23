@@ -1,0 +1,280 @@
+{
+ "iata": "MBA",
+ "id": "rec1T8KrDR04Szigy",
+ "name": "Moi International Airport",
+ "country": "Kenya",
+ "wikipedia": "https://en.wikipedia.org/wiki/Moi_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The coast airport, and the one that matters for a Kenyan beach holiday. Mombasa is the country's second city and this is its gateway, 425 km south east of Nairobi by air, which makes a safari and beach twin centre straightforward to build.\n\nThree terminals split the work cleanly. Terminal 1 takes international services and holds immigration, customs, duty free and baggage handling. Terminal 2 handles domestic flights, and a separate general aviation terminal deals with private and charter traffic. For clients connecting from a bush strip onto an international departure, that separation is worth knowing about.\n\nTwo runways serve it, the longer at 3,350 metres with an instrument landing system fitted, the shorter at 1,260 metres.\n\nAirports Council International named it the best airport in Africa in its size category in 2020, which for a facility of this scale says something about how it is run.",
+ "after": "Mombasa's airport on the Kenyan coast, and the one that matters for a beach holiday there. Jambojet puts the flight from Nairobi at about an hour, which makes a safari and beach twin centre straightforward to build.\n\nThree terminals split the work. Terminal 1 takes international services and Terminal 2 domestic flights, while a separate general aviation terminal deals with private and charter traffic. For clients connecting from a bush strip onto an international departure, that separation is worth knowing about.\n\nTwo runways serve it, the longer at 3,350 metres.\n\nAirports Council International named it Africa's best airport with under 2 million passengers a year in 2021 and 2022, and one of the best in 2023.",
+ "claims": [
+  {
+   "claim": "Mombasa's airport, on the Kenyan coast",
+   "verdict": "softened",
+   "inAfter": "Mombasa's airport on the Kenyan coast",
+   "note": "Was 'The coast airport ... Mombasa is the country's second city and this is its gateway'. It is Mombasa's airport and on the coast, but not the only coast airport: Jambojet's airport list also has Malindi and the Ukunda airstrip for Diani. 'Second city' is cut (below).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-05",
+     "quote": "Moi International Airport serves the city of Mombasa and surrounding communities."
+    },
+    {
+     "file": "jambojet-mombasa",
+     "org": "Jambojet (jambojet.com)",
+     "dated": "read 2026-09-23 (live route page)",
+     "quote": [
+      "Discover the Coast with Jambojet",
+      "land in Kenya’s coastal paradise"
+     ]
+    },
+    {
+     "file": "mas-company-profile",
+     "org": "Mombasa Air Safari (mombasaairsafari.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Mombasa Air Safari is headquartered at Moi International Airport, Mombasa. Our coastal services operate from Mombasa, Malindi, and Diani Beach."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Mombasa"
+    }
+   ]
+  },
+  {
+   "claim": "Jambojet: the flight from Nairobi takes about an hour",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Jambojet",
+   "inAfter": "Jambojet puts the flight from Nairobi at about an hour",
+   "note": "Replaces '425 km south east of Nairobi by air', which could not be settled: Wikipedia gives 425 km by air from Jomo Kenyatta, while Jambojet's route page says 440 km between Nairobi and Mombasa, and no coordinate set independent of Wikipedia could be saved for an airport-to-airport distance with the sweep's tools. The airline's own flight time on its own route makes the old text's point better. Wikipedia names Jambojet on the Nairobi route.",
+   "sources": [
+    {
+     "file": "jambojet-mombasa",
+     "org": "Jambojet (jambojet.com)",
+     "dated": "read 2026-09-23 (live route page)",
+     "quote": [
+      "Route: Nairobi (NBO) to Mombasa (MBA)",
+      "Flight time: Approximately 1 hour",
+      "Duration: Approximately 1 hour"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-05",
+     "quote": "It is used by carriers such as Jambojet and Safarilink for connections between Mombasa and Nairobi as well as other cities in Kenya."
+    }
+   ]
+  },
+  {
+   "claim": "three terminals split the work",
+   "verdict": "softened",
+   "inAfter": "Three terminals split the work.",
+   "note": "Was 'split the work cleanly'. Wikipedia itself says some airlines, such as Kenya Airways, use Terminal 1 for domestic as well as international flights (Wikipedia alone; not checked with Kenya Airways), so 'cleanly' goes. The three are Terminal 1 and Terminal 2 (Jambojet uses both) and the General Aviation Terminal (Mombasa Air Safari's departures).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-05",
+     "quote": [
+      "Moi International Airport has three terminals.",
+      "Some airlines such as Kenya Airways use Terminal 1 for both domestic and international."
+     ]
+    },
+    {
+     "file": "jambojet-airports",
+     "org": "Jambojet (jambojet.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Jambojet operates from Terminal 2 for domestic flights and Terminal 1 for flights to Zanzibar."
+    },
+    {
+     "file": "mas-company-profile",
+     "org": "Mombasa Air Safari (mombasaairsafari.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Departures from Mombasa are handled through the General Aviation Terminal"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 1 international, Terminal 2 domestic",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 1 takes international services and Terminal 2 domestic flights",
+   "note": "Jambojet flies its domestic routes from Terminal 2 and its international route, Zanzibar, from Terminal 1.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-05",
+     "quote": "Terminal 1 is used for international services, Terminal 2 handles domestic operations"
+    },
+    {
+     "file": "jambojet-airports",
+     "org": "Jambojet (jambojet.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Jambojet operates from Terminal 2 for domestic flights and Terminal 1 for flights to Zanzibar."
+    }
+   ]
+  },
+  {
+   "claim": "a separate general aviation terminal for private and charter traffic",
+   "verdict": "confirmed",
+   "inAfter": "while a separate general aviation terminal deals with private and charter traffic.",
+   "note": "Mombasa Air Safari, which flies scheduled and private charter services from Mombasa, departs through the General Aviation Terminal.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-05",
+     "quote": "The General Aviation Terminal serves private aviation, business jets, and charter flights."
+    },
+    {
+     "file": "mas-company-profile",
+     "org": "Mombasa Air Safari (mombasaairsafari.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Departures from Mombasa are handled through the General Aviation Terminal",
+      "we offer private charter flights from Mombasa, Diani Beach, Malindi, and Nairobi to virtually any destination within East Africa"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "two runways, the longer 3,350 metres",
+   "verdict": "confirmed",
+   "inAfter": "Two runways serve it, the longer at 3,350 metres.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 03/21: 3,350 m (10,991 ft), ASP",
+      "Runways listed: 2"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-05",
+     "quote": "the airport has two runways: Runway 1 (3/21) measures 3,350 metres (10,990 ft) in length"
+    }
+   ]
+  },
+  {
+   "claim": "Airports Council International: best in Africa under 2 million passengers in 2021 and 2022, among the best in 2023",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Airports Council International",
+   "inAfter": "Airports Council International named it Africa's best airport with under 2 million passengers a year in 2021 and 2022, and one of the best in 2023.",
+   "note": "Was 'the best airport in Africa in its size category in 2020' (Wikipedia). ACI's own list of past customer experience award winners begins at 2021: it names Moi alone in Africa's under 2 million category in 2021 and 2022, and with Zanzibar and Antananarivo in 2023; Moi is not in the 2024 list. The text gives ACI's years; whether Wikipedia's 2020 is the same award counted by another year could not be settled from ACI's page.",
+   "sources": [
+    {
+     "file": "aci-asq-past",
+     "org": "Airports Council International (ACI World, aci.aero)",
+     "dated": "read 2026-09-23 (past winners, 2021 to 2024)",
+     "quote": [
+      "2021 Winners Best Airports by Size and Region Africa Under 2 million passengers per year Moi International Airport - Mombasa, Kenya",
+      "2022 Winners Best Airports by Size and Region Africa This award recognizes airports with the top 20% overall satisfaction score by size and region at departure. Under 2 million passengers per year Moi International Airport (Mombasa, Kenya)",
+      "2023 Winners Best Airports by Size and Region Africa This award recognizes airports with the top 20% overall satisfaction score by size and region at departure. Under 2 million passengers per year Abeid Amani Karume International Airport (Zanzibar, Tanzania) Ivato International Airport (Antananarivo, Madagascar) Moi International Airport (Mombasa, Kenya)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-05",
+     "quote": "In 2020, the airport was heralded as the \"Best Airport in Africa\" (with under 2 million passengers annually) by Airports Council International."
+    }
+   ]
+  },
+  {
+   "claim": "the coast airport",
+   "verdict": "cut",
+   "wasBefore": "The coast airport,",
+   "why": "Not the only one: Jambojet's airport list also has Malindi and the Ukunda airstrip for Diani. Reworded to Mombasa's airport, on the coast (see above).",
+   "sources": [
+    {
+     "file": "jambojet-airports",
+     "org": "Jambojet (jambojet.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Malindi Airport is located 2.5 Km West of Malindi Town.",
+      "Ukunda Airstrip is a feeder airstrip near Diani Beach in Kwale County."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Mombasa is Kenya's second city",
+   "verdict": "cut",
+   "wasBefore": "Mombasa is the country's second city and this is its gateway,",
+   "why": "'Second city' rests on Wikipedia alone: the county government's home page says nothing of it and the statistics bureau (knbs.or.ke) answered 502 (one try). That this is Mombasa's airport is kept (see above)."
+  },
+  {
+   "claim": "425 km south east of Nairobi by air",
+   "verdict": "cut",
+   "wasBefore": "425 km south east of Nairobi by air,",
+   "why": "Sources disagree (Wikipedia 425 km from Jomo Kenyatta; Jambojet 440 km between Nairobi and Mombasa) and no independent coordinate set could be saved for the pair. Replaced by Jambojet's flight time (see above).",
+   "sources": [
+    {
+     "file": "jambojet-mombasa",
+     "org": "Jambojet (jambojet.com)",
+     "dated": "read 2026-09-23 (live route page)",
+     "quote": "Only 440 kilometers stand between Nairobi and the white sandy beaches of Mombasa."
+    }
+   ]
+  },
+  {
+   "claim": "split the work cleanly",
+   "verdict": "cut",
+   "wasBefore": "Three terminals split the work cleanly.",
+   "why": "Wikipedia itself notes that Kenya Airways uses Terminal 1 for domestic as well as international flights. Softened (see above)."
+  },
+  {
+   "claim": "Terminal 1 holds immigration, customs, duty free and baggage handling",
+   "verdict": "cut",
+   "wasBefore": "and holds immigration, customs, duty free and baggage handling.",
+   "why": "Wikipedia alone. The airports authority's site (kaa.go.ke) refused the link lister with a 403 (one try, not retried with any other tool)."
+  },
+  {
+   "claim": "an instrument landing system on the main runway",
+   "verdict": "cut",
+   "wasBefore": "with an instrument landing system fitted,",
+   "why": "Wikipedia alone. The Kenya eAIP (eaip.kcaa.or.ke) could not be read: its landing page offers no links to either link lister, and the airports authority's site refused."
+  },
+  {
+   "claim": "the shorter runway 1,260 metres",
+   "verdict": "cut",
+   "wasBefore": "the shorter at 1,260 metres.",
+   "why": "Sources disagree: Wikipedia's text gives 1,260 m, while its own infobox and OurAirports give 1,363 m. The Kenya eAIP that would settle it could not be read.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": "Runway 15/33: 1,363 m (4,473 ft), ASP"
+    }
+   ]
+  },
+  {
+   "claim": "the award says something about how it is run",
+   "verdict": "cut",
+   "wasBefore": "which for a facility of this scale says something about how it is run.",
+   "why": "A judgement. Wikipedia's own capacity section reports criticism of the terminal (the coast tour operators in 2025 and an Auditor-General inspection), so the text gives the awards and leaves the verdict to the reader."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and the one that matters for a beach holiday there.",
+   "why": "The old text's judgement, kept: Jambojet calls it Kenya's second largest airport, with regional as well as intercontinental flights, while the other coast airports on its list are Malindi and the Ukunda airstrip (saved in jambojet-airports)."
+  },
+  {
+   "text": "which makes a safari and beach twin centre straightforward to build.",
+   "why": "The old text's judgement, kept: about an hour's flight from Nairobi (Jambojet), and Mombasa Air Safari flies from here to the Masai Mara, Amboseli and Tsavo (its own page, saved in mas-company-profile)."
+  },
+  {
+   "text": "For clients connecting from a bush strip onto an international departure, that separation is worth knowing about.",
+   "why": "The old text's advice, kept: Mombasa Air Safari's safari flights leave from the General Aviation Terminal, and international services use Terminal 1 (both sourced above)."
+  }
+ ],
+ "tracerOk": {}
+}

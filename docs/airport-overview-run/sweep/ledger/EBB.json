@@ -1,0 +1,445 @@
+{
+ "iata": "EBB",
+ "id": "recrmFjejmTqyJvMB",
+ "name": "Entebbe International Airport",
+ "country": "Uganda",
+ "wikipedia": "https://en.wikipedia.org/wiki/Entebbe_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Uganda's only international airport, on the northern shore of Lake Victoria about 6 km south west of Entebbe town and around 40 km by road south west of central Kampala.\n\nPlan for that road. Everything arriving in Uganda by air comes through here, and the capital is the better part of an hour away by the Entebbe-Kampala Expressway, so airport transfers are a real part of an itinerary rather than an afterthought.\n\nThe airport handled 1,069,224 international passengers in the first half of 2024.\n\nIt is midway through a long modernisation running from 2015 to the mid 2030s, budgeted at about 586 million dollars, covering a new passenger terminal, an upgrade to the existing one, a rebuilt main runway and a relocated cargo terminal. A Chinese-built cargo centre able to handle 100,000 tonnes began operating in 2022, doubling the old capacity.\n\nPassenger facilities include banks, cash machines, foreign exchange, restaurants, duty free and a left luggage office.",
+ "after": "Uganda's main international airport, and for now its only one, on the shore of Lake Victoria about 4 km south west of Entebbe town and around 40 km by road south west of central Kampala.\n\nPlan for that road. The Civil Aviation Authority puts a taxi to Kampala at about 40 minutes, says the expressway is quicker and warns of heavy traffic in the mornings and evenings. Airport transfers are a real part of an itinerary rather than an afterthought.\n\nThe airport handled 2,243,104 international passengers in 2024, and more in 2025.\n\nIn December 2025 the Civil Aviation Authority said a new 20,000 square metre terminal was complete and would open in phases from January 2026, raising capacity to at least 3.5 million passengers a year. A Chinese-built cargo centre for 100,000 tonnes a year opened in 2022.\n\nPassenger facilities include banks, cash machines, foreign exchange, restaurants and duty free.",
+ "claims": [
+  {
+   "claim": "Uganda's main international airport",
+   "verdict": "confirmed",
+   "inAfter": "Uganda's main international airport",
+   "note": "The Civil Aviation Authority, which runs the airport, calls it the country's primary international airport (its news page of 27 October 2025, adopted from Aviation Week).",
+   "sources": [
+    {
+     "file": "ucaa-record-growth",
+     "org": "Uganda Civil Aviation Authority (the operator, caa.go.ug)",
+     "dated": "27 October 2025 (adopted from Aviation Week Network, 21 October 2025)",
+     "quote": [
+      "October 27, 2025",
+      "the country’s primary international airport"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the only international airport in Uganda"
+    }
+   ]
+  },
+  {
+   "claim": "for now Uganda's only international airport",
+   "verdict": "softened",
+   "inAfter": "and for now its only one",
+   "note": "Was 'Uganda's only international airport'. Still true today, but a second, Kabalega International Airport at Hoima, is 'Coming Soon' on the Civil Aviation Authority's own airports menu (read 23 Sep 2026), and in December 2025 the authority said it was nearing completion and due to open in 2026. So 'for now'. Kabalega itself is not named in the text (it would add a fact that replaces nothing).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the only international airport in Uganda"
+    },
+    {
+     "file": "xinhua-cargo-2022",
+     "org": "Xinhua",
+     "dated": "19 March 2022",
+     "quote": "Entebbe International Airport, the only international airport in Uganda"
+    },
+    {
+     "file": "ucaa-kabalega",
+     "org": "Uganda Civil Aviation Authority (the operator, caa.go.ug)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Kabalega International Airport Coming Soon"
+    },
+    {
+     "file": "ucaa-sector-soars",
+     "org": "Uganda Civil Aviation Authority (the operator, caa.go.ug)",
+     "dated": "17 December 2025 (adopted from The Publicist, 16 December 2025)",
+     "quote": [
+      "December 17, 2025",
+      "Kabalega International Airport in Hoima is nearing completion and scheduled for operationalisation in 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "on the shore of Lake Victoria",
+   "verdict": "softened",
+   "inAfter": "on the shore of Lake Victoria",
+   "note": "Was 'on the northern shore'. The operator puts the airport on a peninsula in Lake Victoria; 'northern' rests on Wikipedia alone, so it goes.",
+   "sources": [
+    {
+     "file": "ucaa-ebb",
+     "org": "Uganda Civil Aviation Authority (the operator, caa.go.ug)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "the airport is part of a peninsular bordering Africa’s biggest fresh-water-lake, Victoria.",
+      "Entebbe International Airport is on a peninsular surrounded by a fresh water mass – Lake Victoria."
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "on the northern shores of Lake Victoria"
+    }
+   ]
+  },
+  {
+   "claim": "about 4 km south west of Entebbe town",
+   "verdict": "corrected",
+   "inAfter": "about 4 km south west of Entebbe town",
+   "note": "Was 'about 6 km' (Wikipedia). The operator gives the minibus trip from the airport to Entebbe town (Kitoro) as 4 km, and the coordinates put the airport 4.3 km in a straight line from the GeoNames centre of Entebbe (4 against 4.3, ratio 0.93, within the check). Wikipedia's 6 km would also pass as a road distance, but the operator's figure is the better source and fits the coordinates. The bearing is 249 degrees, west south west: Wikipedia's 'south west' is the adjacent compass point, within the check.",
+   "sources": [
+    {
+     "file": "ucaa-ebb",
+     "org": "Uganda Civil Aviation Authority (the operator, caa.go.ug)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Commuters from the airport to Entebbe (Kitoro) a 4-km journey"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Entebbe (GeoNames 233508): 4.3 km (2.7 miles), bearing 249 degrees, which is west"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "about 6 kilometres (3.7 mi) southwest of the town of Entebbe"
+    }
+   ]
+  },
+  {
+   "claim": "around 40 km by road south west of central Kampala",
+   "verdict": "confirmed",
+   "inAfter": "around 40 km by road south west of central Kampala.",
+   "note": "The operator gives 40 km south west for Entebbe and a 42 km road from Kampala. Straight line 34.1 km (ratio 1.17), south west.",
+   "sources": [
+    {
+     "file": "ucaa-ebb",
+     "org": "Uganda Civil Aviation Authority (the operator, caa.go.ug)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Entebbe is 40 Kilometers South West of Kampala City, Uganda’s Capital",
+      "The Airport is connected by a forty-two kilo meters all-weather road from Kampala."
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Kampala (GeoNames 232422): 34.1 km (21.2 miles), bearing 207 degrees, which is south west"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "approximately 40 kilometres (25 mi) by road south-west of the central business district of Kampala"
+    }
+   ]
+  },
+  {
+   "claim": "the Civil Aviation Authority: a taxi to Kampala takes about 40 minutes; heavy traffic mornings and evenings; the expressway is faster",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Civil Aviation Authority",
+   "inAfter": "The Civil Aviation Authority puts a taxi to Kampala at about 40 minutes, says the expressway is quicker and warns of heavy traffic in the mornings and evenings.",
+   "note": "Replaces 'the capital is the better part of an hour away by the Entebbe-Kampala Expressway', which had no source for the time. Now the operator's own advice, attributed. Its transport text is undated; it also gives about an hour by shared minibus. Wikipedia names the road as the Entebbe-Kampala Expressway.",
+   "sources": [
+    {
+     "file": "ucaa-ebb",
+     "org": "Uganda Civil Aviation Authority (the operator, caa.go.ug)",
+     "dated": "read 2026-09-23 (live page, undated text)",
+     "quote": [
+      "Hiring a Taxi to Kampala costs US $40 or 100,000 Uganda Shillings.",
+      "The journey takes about 40 minutes.",
+      "Heavy traffic is especially experienced in the morning and in the evening hours.",
+      "N.B: It is faster to use the Entebbe Express Highway."
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Entebbe–Kampala Expressway"
+    }
+   ]
+  },
+  {
+   "claim": "2,243,104 international passengers in 2024",
+   "verdict": "corrected",
+   "inAfter": "The airport handled 2,243,104 international passengers in 2024",
+   "note": "Was '1,069,224 international passengers in the first half of 2024'. An international passenger total replaces an international passenger figure. The operator's two news pages and SoftPower News (25 February 2026) give the same 2024 total.",
+   "sources": [
+    {
+     "file": "ucaa-record-growth",
+     "org": "Uganda Civil Aviation Authority (the operator, caa.go.ug)",
+     "dated": "27 October 2025 (adopted from Aviation Week Network, 21 October 2025)",
+     "quote": [
+      "October 27, 2025",
+      "In 2024, Entebbe handled 2,243,104 international passengers, up from 1,932,094 in 2023"
+     ]
+    },
+    {
+     "file": "softpower-2025",
+     "org": "SoftPower News (softpower.ug)",
+     "dated": "25 February 2026",
+     "quote": [
+      "February 25, 2026",
+      "Comparative statistics show continued annual expansion in passenger traffic: 2024 (2,243,104 passengers)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "more international passengers again in 2025",
+   "verdict": "confirmed",
+   "inAfter": "and more in 2025.",
+   "note": "No 2025 total is given: SoftPower News's 2,486,893 international passengers is the only full-year figure read (one source); Wikipedia's infobox gives 2,614,977 passengers for 2025, most likely counting transit passengers too; and the operator's December 2025 traffic file is an Excel workbook that grab.mjs cannot read. Both the operator (to November) and SoftPower (the full year) put 2025 above 2024.",
+   "sources": [
+    {
+     "file": "ucaa-sector-soars",
+     "org": "Uganda Civil Aviation Authority (the operator, caa.go.ug)",
+     "dated": "17 December 2025 (adopted from The Publicist, 16 December 2025)",
+     "quote": [
+      "December 17, 2025",
+      "The UCAA registered international passenger traffic of 2,247,145 from January to November 2025, which has already surpassed the entire 2024 total of 2,243,104"
+     ]
+    },
+    {
+     "file": "softpower-2025",
+     "org": "SoftPower News (softpower.ug)",
+     "dated": "25 February 2026",
+     "quote": [
+      "February 25, 2026",
+      "Throughout 2025, the airport handled a total of 2,486,893 international passengers"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the Civil Aviation Authority, December 2025: new 20,000 square metre terminal complete, opening in phases from January 2026, capacity to at least 3.5 million",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Civil Aviation Authority",
+   "inAfter": "In December 2025 the Civil Aviation Authority said a new 20,000 square metre terminal was complete and would open in phases from January 2026, raising capacity to at least 3.5 million passengers a year.",
+   "note": "Replaces 'It is midway through a long modernisation ... covering a new passenger terminal' with where the new terminal stands, in the operator's words, dated. The operator's October 2025 page (Aviation Week) also describes a second passenger terminal and a capacity of 3.5 million, and Wikipedia lists a new passenger terminal building in the programme. No 2026 source read says whether the phased opening has happened, so the sentence stays with what the authority said and when. The authority's 'from the current 2 million' is left out for length.",
+   "sources": [
+    {
+     "file": "ucaa-sector-soars",
+     "org": "Uganda Civil Aviation Authority (the operator, caa.go.ug)",
+     "dated": "17 December 2025 (adopted from The Publicist, 16 December 2025)",
+     "quote": [
+      "December 17, 2025",
+      "the newly completed 20,000-square-meter Passenger Terminal Building is set to be opened in a phased manner starting January 2026",
+      "This expansion, he noted, will boost EIA’s annual capacity from the current 2 million to at least 3.5 million passengers annually"
+     ]
+    },
+    {
+     "file": "ucaa-record-growth",
+     "org": "Uganda Civil Aviation Authority (the operator, caa.go.ug)",
+     "dated": "27 October 2025 (adopted from Aviation Week Network, 21 October 2025)",
+     "quote": [
+      "The project includes constructing a second passenger terminal and upgrading existing facilities",
+      "Upon completion, the airport’s capacity will increase to 3.5 million passengers annually"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Construction of new passenger terminal building"
+    }
+   ]
+  },
+  {
+   "claim": "a Chinese-built cargo centre for 100,000 tonnes a year opened in 2022",
+   "verdict": "confirmed",
+   "inAfter": "A Chinese-built cargo centre for 100,000 tonnes a year opened in 2022.",
+   "note": "Xinhua reported the terminal open for business on 19 March 2022, with the authority's spokesman giving 100,000 tonnes a year against the old terminal's 50,000. The Independent (April 2024) quotes the authority as having completed the 100,000 tonne terminal. One line in the operator's December 2025 page ('this will increase the capacity to 100,000 metric tonnes with the opening of the new cargo terminal') is loosely worded, but read with the other three it does not say the terminal is unopened. The old text's 'doubling the old capacity' is sourced (Xinhua: 100,000 against 50,000 tonnes; Wikipedia) but left out for length.",
+   "sources": [
+    {
+     "file": "xinhua-cargo-2022",
+     "org": "Xinhua",
+     "dated": "19 March 2022",
+     "quote": [
+      "ENTEBBE, Uganda, March 19 (Xinhua)",
+      "A newly Chinese-constructed air cargo terminal at Uganda's Entebbe International Airport is open for business",
+      "when it is fully functional, the new facility will accommodate 100,000 metric tons of cargo per year compared to the old one which had a capacity of 50,000 metric tons per year"
+     ]
+    },
+    {
+     "file": "independent-3-5m",
+     "org": "The Independent (Uganda, independent.co.ug)",
+     "dated": "20 April 2024",
+     "quote": [
+      "April 20, 2024",
+      "the Authority has completed a new 100,000-ton cargo terminal and cargo apron"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "the Chinese-built cargo center, capable of handling 100,000 metric tonnes of cargo, had begun commercial operations",
+      "This had replaced the old cargo facility with capacity of 50,000 metric tonnes"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "banks, cash machines, foreign exchange, restaurants and duty free",
+   "verdict": "confirmed",
+   "inAfter": "Passenger facilities include banks, cash machines, foreign exchange, restaurants and duty free.",
+   "sources": [
+    {
+     "file": "ucaa-ebb",
+     "org": "Uganda Civil Aviation Authority (the operator, caa.go.ug)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Commercial banking and Bureau De Change services are available at the Departures and Arrivals level.",
+      "DFCU Bank Arrivals-ATM 24 Hours",
+      "The restaurants in the Passenger Terminal Building at the Airport are 24 hours operational.",
+      "Uganda Duty Free Sales, Transit Duty Free Sales and JIT competitively operate three easily accessible shops on departure."
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Passenger facilities include a left-luggage office, banks, automated teller machines, foreign exchange bureaux, restaurants, and duty-free shops"
+    }
+   ]
+  },
+  {
+   "claim": "about 6 km south west of Entebbe town",
+   "verdict": "cut",
+   "wasBefore": "about 6 km south west of Entebbe town",
+   "why": "The operator gives 4 km, which fits the coordinates (4.3 km in a straight line). Corrected (see above)."
+  },
+  {
+   "claim": "everything arriving in Uganda by air comes through here",
+   "verdict": "cut",
+   "wasBefore": "Everything arriving in Uganda by air comes through here",
+   "why": "An absolute the sources do not state: the authority also runs domestic airfields, and a second international airport, Kabalega, is due. What is sourced, that this is for now the only international airport, is kept (see above)."
+  },
+  {
+   "claim": "the capital is the better part of an hour away by the Entebbe-Kampala Expressway",
+   "verdict": "cut",
+   "wasBefore": "and the capital is the better part of an hour away by the Entebbe-Kampala Expressway",
+   "why": "No source for the time. Replaced by the operator's own figure, attributed (see above)."
+  },
+  {
+   "claim": "1,069,224 international passengers in the first half of 2024",
+   "verdict": "cut",
+   "wasBefore": "The airport handled 1,069,224 international passengers in the first half of 2024.",
+   "why": "Superseded by the full-year 2024 total. Corrected (see above)."
+  },
+  {
+   "claim": "a modernisation from 2015 to the mid 2030s, budgeted at about 586 million dollars",
+   "verdict": "cut",
+   "wasBefore": "It is midway through a long modernisation running from 2015 to the mid 2030s, budgeted at about 586 million dollars,",
+   "why": "The span and the budget rest on Wikipedia alone, and the phases have moved on: the operator's October 2025 page describes the current work as Phase II, backed by 125 million dollars. The new terminal's status is kept (see above).",
+   "sources": [
+    {
+     "file": "ucaa-record-growth",
+     "org": "Uganda Civil Aviation Authority (the operator, caa.go.ug)",
+     "dated": "27 October 2025 (adopted from Aviation Week Network, 21 October 2025)",
+     "quote": "Phase II of the Entebbe International Airport expansion is now underway, backed by a $125 million investment."
+    }
+   ]
+  },
+  {
+   "claim": "covering an upgrade to the existing terminal, a rebuilt main runway and a relocated cargo terminal",
+   "verdict": "cut",
+   "wasBefore": "covering a new passenger terminal, an upgrade to the existing one, a rebuilt main runway and a relocated cargo terminal.",
+   "why": "The new terminal and the cargo centre are kept in their own sentences (see above). The runway line rests on Wikipedia, whose runway works were due to finish in February 2019, while The Independent (April 2024) describes resealing two runways and adding a new one; no current source settles it. The upgrade of the old terminal is sourced (the operator's October 2025 page; The Independent, April 2024) but was dropped to keep the works sentence to what has changed; it can go back if wanted.",
+   "sources": [
+    {
+     "file": "independent-3-5m",
+     "org": "The Independent (Uganda, independent.co.ug)",
+     "dated": "20 April 2024",
+     "quote": [
+      "These new terminals will be interconnected by suspended bridges to the original terminal constructed in 1971, which will be upgraded and modernized to align with current standards and technology.",
+      "These developments, including resealing two runways, adding a new one"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a left luggage office",
+   "verdict": "cut",
+   "wasBefore": "duty free and a left luggage office.",
+   "why": "Wikipedia alone. The operator's page has a heading that mentions left luggage, but the text under it describes only the lost-baggage and tracing offices.",
+   "sources": [
+    {
+     "file": "ucaa-ebb",
+     "org": "Uganda Civil Aviation Authority (the operator, caa.go.ug)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Baggage facilities/lost-found and left luggage",
+      "Baggage Tracing office is located at the Arrivals baggage claim area, ground floor and the office operates on 24 hour basis."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Held back: the FCDO on Uganda's monthly national cleaning day",
+   "verdict": "cut",
+   "why": "Held back: replaces nothing in the old text. The FCDO's Uganda advice (updated 2 September 2026, still current on 23 September) says the final Saturday of each month, 7 to 10 am, is a mandatory nationwide cleaning day with non-essential movement banned; tourists and international travellers are exempt, but it is unclear what it means for airport access. An attributed statement, relevant to transfer timing; for Andy to add if he wants it.",
+   "sources": [
+    {
+     "file": "fcdo-uganda-safety",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "page updated 2 September 2026 (as the summary page reads)",
+     "quote": [
+      "The  final Saturday of each month, between 7 and 10 am, is a mandatory and nationwide cleaning day.",
+      "There are exemptions for tourists, international travellers, medical staff, state security actors and journalists.",
+      "It is unclear how widely the restrictions are enforced and what the restrictions mean for UK travellers, including for hotel and airport access."
+     ]
+    },
+    {
+     "file": "fcdo-uganda",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2 September 2026",
+     "quote": [
+      "Still current at:",
+      "23 September 2026",
+      "Updated:",
+      "2 September 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Held back: Uganda Airlines flies to London (Gatwick since May 2025)",
+   "verdict": "cut",
+   "why": "Held back: replaces nothing in the old text, which names no airline. The operator says Uganda Airlines began direct flights to London Gatwick in May 2025, and Uganda Airlines' own 'Where we fly' list includes London (read 23 Sep 2026). Of obvious use to a UK agent; for Andy to add if he wants it.",
+   "sources": [
+    {
+     "file": "ucaa-sector-soars",
+     "org": "Uganda Civil Aviation Authority (the operator, caa.go.ug)",
+     "dated": "17 December 2025 (adopted from The Publicist, 16 December 2025)",
+     "quote": "Uganda Airlines launched its first European foray with direct flights to London Gatwick in May 2025"
+    },
+    {
+     "file": "ugandairlines-destinations",
+     "org": "Uganda Airlines (ugandairlines.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Where we fly",
+      "United Kingdom",
+      "London"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Plan for that road.",
+   "why": "The old text's advice, kept: the operator's own page tells travellers to plan the journey ('Plan your journey well if you have a flight or a friend to meet', saved in ucaa-ebb)."
+  },
+  {
+   "text": "Airport transfers are a real part of an itinerary rather than an afterthought.",
+   "why": "The old text's judgement, kept: about 40 km by road and about 40 minutes by taxi, with heavy traffic at peak times (sourced)."
+  }
+ ],
+ "tracerOk": {}
+}
