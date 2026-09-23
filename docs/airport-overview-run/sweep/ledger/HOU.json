@@ -1,0 +1,499 @@
+{
+ "iata": "HOU",
+ "id": "recW81cEAGuW52Ufo",
+ "name": "William P. Hobby Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/William_P._Hobby_Airport",
+ "audited": "2026-09-23",
+ "before": "Houston's other airport, about 7 miles from the city centre, and the older of the two. It was the city's main airport until Intercontinental opened in 1969, closed briefly, then came back as the domestic and corporate airport.\n\nSouthwest runs it in practice. This is the airline's fifth largest station and it carries the vast majority of passengers here. Southwest built its first ever international terminal at Hobby, opening the West Concourse in October 2015 for flights to Mexico, Central America and South America.\n\nThere are 30 gates in one terminal across two concourses, 25 in the Central Concourse and five in the West. A 250 million dollar expansion announced in 2022 adds another seven.\n\nHobby became the first five star airport in North America under the Skytrax ratings in 2022, and in February 2020 the first in Texas with full biometric entry and exit for international passengers.\n\nThe original art deco terminal, the first passenger airline terminal in Houston, still stands and now houses the 1940 Air Terminal Museum.",
+ "after": "Houston's other airport, south east of downtown and the older of the two. It was the city's main airport until Intercontinental opened in 1969.\n\nSouthwest runs it in practice, carrying the vast majority of the airport's 13.9 million passengers in 2025. The airline built the West Concourse, which opened in October 2015 and brought back international flights, now to Mexico, Central America and the Caribbean.\n\nThere are 30 gates across two concourses. A 470 million dollar expansion will add seven more to the West Concourse; Houston Airports expects it to finish in 2027.\n\nHobby became the first five star airport in North America under the Skytrax ratings in 2022.\n\nThe original 1940 Art Deco terminal still stands, but the 1940 Air Terminal Museum inside it closed in 2026, and the Texas Historical Commission is now deciding whether to reopen it as a state historic site.",
+ "claims": [
+  {
+   "claim": "Houston's other airport",
+   "verdict": "confirmed",
+   "inAfter": "Houston's other airport",
+   "note": "Houston Airports runs three airports, but the third, Ellington, has no airline service (military, NASA and general aviation). Of the two with airlines, Bush Intercontinental is far the bigger: FAA CY2025 enplanements 23,265,028 against Hobby's 6,790,274.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Hobby is Houston's oldest commercial airport, and was its primary airport until the Houston Intercontinental Airport",
+      "became a secondary airport for domestic airline service"
+     ]
+    },
+    {
+     "file": "op-about",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": [
+      "Comprising George Bush Intercontinental Airport (IAH), William P. Hobby Airport (HOU), and Ellington Airport (EFD)",
+      "EFD supports military, NASA and general aviation operations"
+     ],
+     "dated": "2026 (live page, gives 2025 figures)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "15 SW TX IAH Houston George Bush Intcntl/Houston P L 23,265,028 23,349,157 -0.36%",
+      "37 SW TX HOU Houston William P Hobby P M 6,790,274 7,116,967 -4.59%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "south east of downtown",
+   "verdict": "corrected",
+   "inAfter": "south east of downtown",
+   "note": "Replaces 'about 7 miles from the city centre' (cut below), which gave no direction. The FAA's master record and the coordinates (147 degrees) both say south east; the operator says 'south', the adjacent compass point.",
+   "sources": [
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "3 CBD TO AIRPORT (NM):",
+      "08 SE"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 147 degrees, which is south east"
+    },
+    {
+     "file": "op-about",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "Situated 7 miles south of Downtown Houston"
+    }
+   ]
+  },
+  {
+   "claim": "the older of Houston's two airline airports",
+   "verdict": "confirmed",
+   "inAfter": "the older of the two",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Hobby is Houston's oldest commercial airport"
+    },
+    {
+     "file": "op-expansion-nov24",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "Houston's first commercial airport",
+     "dated": "2024-11-14"
+    },
+    {
+     "file": "tsha-hobby",
+     "org": "Texas State Historical Association (Handbook of Texas)",
+     "quote": "began operating as a 600-acre landing strip in 1927"
+    }
+   ]
+  },
+  {
+   "claim": "the city's main airport until Intercontinental opened in 1969",
+   "verdict": "confirmed",
+   "inAfter": "It was the city's main airport until Intercontinental opened in 1969.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "was its primary airport until the Houston Intercontinental Airport, now known as the George Bush Intercontinental Airport, opened in 1969"
+    },
+    {
+     "file": "tsha-hobby",
+     "org": "Texas State Historical Association (Handbook of Texas)",
+     "quote": [
+      "The new Houston Intercontinental Airport (now George Bush Intercontinental Airport) opened on June 8, 1969",
+      "moved to the new airport, as did the major trunk carriers serving the city"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Southwest carries the vast majority of passengers",
+   "verdict": "confirmed",
+   "inAfter": "Southwest runs it in practice, carrying the vast majority of the airport's",
+   "note": "BTS gives Southwest 94.84 per cent of Hobby's passengers on US flights in the twelve months to June 2026; Delta is next on 2.48 per cent.",
+   "sources": [
+    {
+     "file": "bts-carrier-shares",
+     "org": "Bureau of Transportation Statistics (US Department of Transportation)",
+     "quote": [
+      "Houston, TX: William P Hobby (HOU) Scheduled Services except Freight/Mail BTS Data as of 9/23/2026",
+      "Carrier Shares for July 2025 - June 2026",
+      "Southwest 11,730 94.84%",
+      "Delta 306 2.48%"
+     ],
+     "dated": "2026-09-23 (data July 2025 to June 2026)"
+    },
+    {
+     "file": "op-acfr-fy25",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "William P. Hobby Airport is predominantly operated by Southwest Airlines",
+     "dated": "fiscal 2025 (to 30 June 2025)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "carries the vast majority of its passengers"
+    }
+   ]
+  },
+  {
+   "claim": "13.9 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "13.9 million passengers in 2025",
+   "note": "New, in place of 'the airline's fifth largest station' (cut below) as the measure of how busy it is. This is TOTAL passengers, arrivals plus departures, as the operator gives it. The FAA's preliminary CY2025 table counts 6,790,274 revenue enplanements (boardings only, about half of total passengers, down 4.59 per cent on 2024), consistent with the operator's figure. The operator's system total (62 million across the two airports) matches its Bush figure (48.7 million) plus this one.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": [
+      "HOU welcomed 13.9 million passengers in 2025",
+      "IAH served over 48.7 million passengers in 2025"
+     ],
+     "dated": "2026 (live page, gives 2025 figures)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "37 SW TX HOU Houston William P Hobby P M 6,790,274 7,116,967 -4.59%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "op-2025-close",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "Across George Bush Intercontinental Airport (IAH) and William P. Hobby Airport (HOU), Houston Airports served 62 million passengers in 2025",
+     "dated": "2026-03-02"
+    }
+   ]
+  },
+  {
+   "claim": "Southwest built the West Concourse",
+   "verdict": "confirmed",
+   "inAfter": "The airline built the West Concourse",
+   "sources": [
+    {
+     "file": "tsha-hobby",
+     "org": "Texas State Historical Association (Handbook of Texas)",
+     "quote": "The $150-million project was financed almost entirely by Southwest Airlines"
+    },
+    {
+     "file": "op-expansion-nov24",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "West Concourse -- built by Southwest Airlines in 2015",
+     "dated": "2024-11-14"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Southwest opened its first international terminal at Houston Hobby"
+    }
+   ]
+  },
+  {
+   "claim": "opened in October 2015",
+   "verdict": "confirmed",
+   "inAfter": "which opened in October 2015",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The West Concourse opened on October 15, 2015"
+    },
+    {
+     "file": "tsha-hobby",
+     "org": "Texas State Historical Association (Handbook of Texas)",
+     "quote": "Construction of a new international terminal began in 2013 and lasted until October 2015"
+    }
+   ]
+  },
+  {
+   "claim": "brought back international flights",
+   "verdict": "confirmed",
+   "inAfter": "brought back international flights",
+   "note": "The operator says for the first time in 46 years, that is since the airlines moved to Intercontinental in 1969.",
+   "sources": [
+    {
+     "file": "op-westconcourse",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "In 2015, Southwest Airlines unveiled the current West Concourse, returning international flights to HOU for the first time in 46 years."
+    },
+    {
+     "file": "tsha-hobby",
+     "org": "Texas State Historical Association (Handbook of Texas)",
+     "quote": "international air service returned to Hobby as Southwest expanded to Latin America and the Caribbean"
+    }
+   ]
+  },
+  {
+   "claim": "international flights to Mexico, Central America and the Caribbean",
+   "verdict": "corrected",
+   "inAfter": "now to Mexico, Central America and the Caribbean",
+   "note": "Was 'Mexico, Central America and South America'. Neither second source mentions South America; both say the Caribbean.",
+   "sources": [
+    {
+     "file": "op-acfr-fy25",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "operating bases for Southwest, which offers domestic and international service, including destinations in Mexico, Central America, and the Caribbean",
+     "dated": "fiscal 2025 (to 30 June 2025)"
+    },
+    {
+     "file": "tsha-hobby",
+     "org": "Texas State Historical Association (Handbook of Texas)",
+     "quote": "as Southwest expanded to Latin America and the Caribbean"
+    }
+   ]
+  },
+  {
+   "claim": "30 gates across two concourses",
+   "verdict": "confirmed",
+   "inAfter": "There are 30 gates across two concourses.",
+   "note": "The operator's table is as at 30 June 2025: 30 gates and 5 hardstands at HOU, before the seven-gate expansion.",
+   "sources": [
+    {
+     "file": "op-acfr-fy25",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": [
+      "NUMBER OF GATES/HARDSTAND POSITIONS 126/10 30/5 n/a",
+      "customer service enhancements for the HOU Central Concourse",
+      "At HOU, HAS is partnering with Southwest Airlines to expand the West Concourse"
+     ],
+     "dated": "2025-06-30"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "William P. Hobby Airport has a single terminal with two concourses (Central and West) and 30 overall gates"
+    }
+   ]
+  },
+  {
+   "claim": "a 470 million dollar expansion adding seven gates to the West Concourse",
+   "verdict": "corrected",
+   "inAfter": "A 470 million dollar expansion will add seven more to the West Concourse",
+   "note": "Was 'A 250 million dollar expansion announced in 2022 adds another seven'. The Handbook of Texas says the city council approved a 470 million dollar plan in 2023; the operator's fiscal 2025 report and its live project page give the same figure.",
+   "sources": [
+    {
+     "file": "op-westconcourse",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "The $470 million expansion, set to be completed in 2027, will introduce seven new gates capable of serving domestic and international flights",
+     "dated": "2026 (live page)"
+    },
+    {
+     "file": "op-acfr-fy25",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "The $470 million expansion of the West Concourse at HOU will support increased passenger demand by",
+     "dated": "fiscal 2025 (to 30 June 2025)"
+    },
+    {
+     "file": "tsha-hobby",
+     "org": "Texas State Historical Association (Handbook of Texas)",
+     "quote": [
+      "In 2023 Houston's city council approved a $470-million investment plan for expansion of the West Concourse of Hobby Airport",
+      "The improvement includes seven new gates for domestic and international travel"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Houston Airports expects the expansion to finish in 2027",
+   "verdict": "corrected",
+   "inAfter": "Houston Airports expects it to finish in 2027",
+   "primary": true,
+   "attribution": "Houston Airports",
+   "note": "Attributed to the operator, which gives 2027 in three places (live project page, fiscal 2025 report, November 2024 news article: 'summer of 2027'). The Handbook of Texas (2024) had a two-year build from early 2024, so the date has already slipped once; no independent source for 2027 was found, hence the attribution.",
+   "sources": [
+    {
+     "file": "op-westconcourse",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "set to be completed in 2027",
+     "dated": "2026 (live page)"
+    },
+    {
+     "file": "op-acfr-fy25",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "The West Concourse Expansion Project is projected to be complete in 2027.",
+     "dated": "fiscal 2025 (to 30 June 2025)"
+    },
+    {
+     "file": "op-expansion-nov24",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "scheduled to be completed in the summer of 2027",
+     "dated": "2024-11-14"
+    }
+   ]
+  },
+  {
+   "claim": "first five star Skytrax airport in North America, 2022",
+   "verdict": "confirmed",
+   "inAfter": "Hobby became the first five star airport in North America under the Skytrax ratings in 2022.",
+   "note": "Skytrax's own page confirms the current 5-Star certification; the year and 'first in North America' come from the operator and the Handbook of Texas.",
+   "sources": [
+    {
+     "file": "op-acfr-fy25",
+     "org": "Houston Airports (operator, fly2houston.com)",
+     "quote": "Hobby Airport became the first and only 5-Star Skytrax airport in North America in 2022."
+    },
+    {
+     "file": "tsha-hobby",
+     "org": "Texas State Historical Association (Handbook of Texas)",
+     "quote": "Skytrax (short for Skytrax World Airport Star Rating) in 2022 named Hobby the first 5-Star airport in North America"
+    },
+    {
+     "file": "skytrax",
+     "org": "Skytrax",
+     "quote": "Houston William P. Hobby Airport is Certified as a 5-Star Airport"
+    }
+   ]
+  },
+  {
+   "claim": "the original 1940 Art Deco terminal still stands",
+   "verdict": "confirmed",
+   "inAfter": "The original 1940 Art Deco terminal still stands",
+   "sources": [
+    {
+     "file": "tsha-hobby",
+     "org": "Texas State Historical Association (Handbook of Texas)",
+     "quote": "Rather than demolish the original 1940 Art Deco terminal building"
+    },
+    {
+     "file": "museum-storm",
+     "org": "1940 Air Terminal Museum (Houston Aeronautical Heritage Society)",
+     "quote": "The museum is housed in the Original Houston Municipal Airport Terminal, a streamline moderne building constructed with Public Works Administration funds in 1940, and one of the few surviving examples of classic Art Deco airport architecture from that era.",
+     "dated": "2026-03-05"
+    },
+    {
+     "file": "click2houston-museum",
+     "org": "KPRC 2 (Click2Houston)",
+     "quote": "located in the former Houston Municipal Airport terminal built in 1940",
+     "dated": "2026-07-01"
+    }
+   ]
+  },
+  {
+   "claim": "the 1940 Air Terminal Museum closed in 2026",
+   "verdict": "corrected",
+   "inAfter": "the 1940 Air Terminal Museum inside it closed in 2026",
+   "note": "The old text said the terminal 'now houses' the museum. The museum announced its closure in a post dated 5 March 2026 (money: its aircraft raffles stopped paying) and its home page now says it has ceased operations; KPRC (1 July 2026) says it shut down in May.",
+   "sources": [
+    {
+     "file": "museum",
+     "org": "1940 Air Terminal Museum (Houston Aeronautical Heritage Society)",
+     "quote": "The museum has ceased operations at this time.",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "museum-storm",
+     "org": "1940 Air Terminal Museum (Houston Aeronautical Heritage Society)",
+     "quote": "The closure of the 1940 Air Terminal Museum, an all-volunteer organization, is the result of mounting financial pressures",
+     "dated": "2026-03-05"
+    },
+    {
+     "file": "museum-news",
+     "org": "1940 Air Terminal Museum (Houston Aeronautical Heritage Society)",
+     "quote": [
+      "3/5/26",
+      "A Perfect Storm of Financial Pressures"
+     ]
+    },
+    {
+     "file": "click2houston-museum",
+     "org": "KPRC 2 (Click2Houston)",
+     "quote": "has struggled financially and shut down in May",
+     "dated": "2026-07-01"
+    }
+   ]
+  },
+  {
+   "claim": "the Texas Historical Commission is deciding whether to reopen it as a state historic site",
+   "verdict": "corrected",
+   "inAfter": "the Texas Historical Commission is now deciding whether to reopen it as a state historic site",
+   "note": "The commission took a six-month lease from 1 July 2026 to evaluate it, which runs to about the end of 2026: re-check early in 2027. Its executive director: 'no guarantee' of reopening.",
+   "sources": [
+    {
+     "file": "click2houston-museum",
+     "org": "KPRC 2 (Click2Houston)",
+     "quote": [
+      "The commission said the six-month agreement, which began July 1, is meant to buy time for a final round of evaluation to determine whether the historic airport terminal-turned-museum could eventually be folded into the state's system of historic sites.",
+      "While there is no guarantee for the 1940 Air Terminal Museum to be reopened as a state historic site"
+     ],
+     "dated": "2026-07-01"
+    },
+    {
+     "file": "museum-thc-lease",
+     "org": "1940 Air Terminal Museum (Houston Aeronautical Heritage Society)",
+     "quote": "THC has signed a 6 month lease with the City of Houston while state officials take a closer look at what it would cost to keep the property running",
+     "dated": "2026-07-03"
+    }
+   ]
+  },
+  {
+   "claim": "about 7 miles from the city centre",
+   "verdict": "cut",
+   "wasBefore": "about 7 miles from the city centre",
+   "why": "Fails the coordinates check: 15.5 km (9.7 miles) in a straight line from the centre of Houston, a ratio of 0.72. The FAA's master record gives 8 nautical miles (9.2 statute miles); the operator, Wikipedia and the Handbook of Texas say 7 miles. The sources disagree, so the figure is dropped and the direction (south east) kept."
+  },
+  {
+   "claim": "closed briefly, then came back as the domestic and corporate airport",
+   "verdict": "cut",
+   "wasBefore": "closed briefly, then came back as the domestic and corporate airport",
+   "why": "The sources disagree on 'closed': the Handbook of Texas says Hobby was made a general aviation airport for private and corporate aircraft in 1969 and some domestic airlines were back by 1971 (Southwest's own list dates its Hobby service from 14 November 1971), while Wikipedia says it closed and reopened 'after several years', which also contradicts 'briefly'. Left out for length; the return by 1971 has two sources (Handbook, Southwest) and could go back in."
+  },
+  {
+   "claim": "the airline's fifth largest station",
+   "verdict": "cut",
+   "wasBefore": "This is the airline's fifth largest station",
+   "why": "Wikipedia's figure dates from December 2017. The operator's fiscal 2025 report says Hobby ranked seventh for Southwest's seats and departures in 2024, and Southwest's own fact sheet gives no ranking. Neither rank has a second source; replaced by 2025 traffic."
+  },
+  {
+   "claim": "Southwest's first ever international terminal",
+   "verdict": "cut",
+   "wasBefore": "Southwest built its first ever international terminal at Hobby",
+   "why": "'First ever' rests on Wikipedia alone. Kept that Southwest built the West Concourse (Handbook of Texas, operator)."
+  },
+  {
+   "claim": "flights to South America",
+   "verdict": "cut",
+   "wasBefore": "for flights to Mexico, Central America and South America",
+   "why": "South America is not supported: the operator's fiscal 2025 report and the Handbook of Texas both say Mexico, Central America and the Caribbean."
+  },
+  {
+   "claim": "one terminal; 25 gates Central and five West",
+   "verdict": "cut",
+   "wasBefore": "There are 30 gates in one terminal across two concourses, 25 in the Central Concourse and five in the West",
+   "why": "The total of 30 is in the operator's current report and kept. The split rests on Wikipedia and on the Handbook's account of the 2003 to 2007 Central Concourse (25 gates); no current source gives the West's five. 'One terminal' is Wikipedia's; the Handbook calls the 2015 building a new international terminal."
+  },
+  {
+   "claim": "250 million dollar expansion announced in 2022",
+   "verdict": "cut",
+   "wasBefore": "A 250 million dollar expansion announced in 2022 adds another seven",
+   "why": "Out of date: the plan approved in 2023 is 470 million dollars (operator, Handbook of Texas), due in 2027 on the operator's word."
+  },
+  {
+   "claim": "first in Texas with full biometric entry and exit, February 2020",
+   "verdict": "cut",
+   "wasBefore": "and in February 2020 the first in Texas with full biometric entry and exit for international passengers",
+   "why": "Wikipedia alone. Not found in CBP's biometrics media releases or in the operator's fiscal 2020 annual report."
+  },
+  {
+   "claim": "the first passenger airline terminal in Houston",
+   "verdict": "cut",
+   "wasBefore": "the first passenger airline terminal in Houston",
+   "why": "Wikipedia alone, and the Handbook of Texas says the 1940 building replaced an earlier wooden terminal."
+  },
+  {
+   "claim": "now houses the 1940 Air Terminal Museum",
+   "verdict": "cut",
+   "wasBefore": "still stands and now houses the 1940 Air Terminal Museum",
+   "why": "Out of date: the museum closed in 2026 (its own site; KPRC, 1 July 2026)."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

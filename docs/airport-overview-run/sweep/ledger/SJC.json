@@ -1,0 +1,484 @@
+{
+ "iata": "SJC",
+ "id": "recVi2Un6Yb6rMEKC",
+ "name": "Mineta San Jose International Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/San_Jose_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The Bay Area's second busiest airport after San Francisco, and by some distance the most convenient. It is three miles north west of downtown San Jose, against roughly fourteen miles for San Francisco and ten for Oakland, so for a client working in Santa Clara County this is the one to price first.\n\nSouthwest dominates. In 2021 it carried 54 per cent of everyone using the airport, with Alaska Airlines second on about 19 per cent. The airport is also a United States customs port of entry.\n\nTraffic peaked at 15.7 million passengers in 2019, having passed its old 2001 record in 2018.\n\nThe closeness to town cuts both ways. The airport is hemmed in by the city with very little room to expand, and its approach paths cap how tall buildings in downtown San Jose are allowed to be under FAA rules.\n\nThere are two parallel runways, each 11,000 feet, on a 1,050 acre site. It is named after Norman Mineta, a San Jose native who was the city's mayor and later United States Secretary of Transportation and of Commerce.",
+ "after": "The Bay Area's second busiest airport after San Francisco, a few miles north west of downtown San Jose. For a client working in Santa Clara County it is the most convenient of the region's three main airports and the one to price first.\n\nSouthwest dominates, carrying more than half of all passengers. The airport is also a United States customs port of entry.\n\nIt handled about 10.7 million passengers in 2025, almost 10 per cent fewer than in 2024 and still well short of its 2019 peak of more than 15.5 million.\n\nThe closeness to town cuts both ways: the airport's flight paths limit how tall buildings in downtown San Jose can be.\n\nThere are two parallel runways, each 11,000 feet long. It is named after Norman Mineta, a San Jose native who was the city's mayor and later United States Secretary of Commerce and of Transportation.",
+ "claims": [
+  {
+   "claim": "the Bay Area's second busiest airport, after San Francisco",
+   "verdict": "confirmed",
+   "inAfter": "The Bay Area's second busiest airport after San Francisco",
+   "note": "FAA preliminary CY2025 enplanements (8 July 2026): San Francisco 26,251,850 (10th in the US), San Jose 5,257,421 (43rd), Oakland 4,532,494 (48th). San Jose fell 9.7 per cent in 2025 but Oakland fell faster (14.4 per cent), so the order holds.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "SJC is the Bay Area's second-busiest airport by passenger boarding, behind San Francisco International Airport (SFO)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "10 WP CA SFO",
+      "Airport San Francisco International P L 26,251,850 25,078,968 4.68%",
+      "43 WP CA SJC San Jose",
+      "International P M 5,257,421 5,822,019 -9.70%",
+      "48 WP CA OAK Oakland Oakland San Francisco Bay P M 4,532,494 5,292,736 -14.36%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "sjspotlight-adapts",
+     "org": "San José Spotlight",
+     "quote": "managed to keep SJC in second place ahead of Oakland in terms of ridership",
+     "dated": "2024-04-14"
+    }
+   ]
+  },
+  {
+   "claim": "a few miles from downtown San Jose",
+   "verdict": "softened",
+   "inAfter": "a few miles north west of downtown San Jose",
+   "note": "Was 'three miles'. The sources do not agree on a figure: the FAA's master record gives 2 nautical miles (2.3 statute miles) from the central business district; the coordinates give 2.5 miles in a straight line; the operator says 3 miles on its About page but 'Four miles north of downtown' in its own 2025 financial report; Wikipedia says 3 miles in one place and 'less than 4 miles' in another. As the brief directs, the figure is dropped and the direction kept. Every source puts it between two and four miles, which is 'a few'.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Located 3 mi (4.8 km) northwest of Downtown San Jose",
+      "less than 4 miles (6.4 km) from the city center"
+     ]
+    },
+    {
+     "file": "op-about",
+     "org": "City of San José (operator, flysanjose.com)",
+     "quote": "the Airport is strategically located just 3 miles (4.8 kilometers) from downtown San José"
+    },
+    {
+     "file": "op-acfr-fy25",
+     "org": "City of San José (operator, flysanjose.com)",
+     "quote": "Location: Four miles north of downtown San José",
+     "dated": "2025-06-30"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "3 CBD TO AIRPORT (NM):",
+      "02 NW"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 4.0 km (2.5 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "north west of downtown San Jose",
+   "verdict": "confirmed",
+   "inAfter": "north west of downtown San Jose",
+   "note": "The operator's financial report says 'north', the adjacent compass point; the FAA, Wikipedia and the coordinates (310 degrees) all say north west.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "northwest of Downtown San Jose"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "02 NW"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 310 degrees, which is north west"
+    }
+   ]
+  },
+  {
+   "claim": "serves Santa Clara County",
+   "verdict": "confirmed",
+   "inAfter": "For a client working in Santa Clara County",
+   "note": "The rest of the sentence ('the most convenient ... the one to price first') is the old text's advice, kept as judgement: see opinion.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the airport serves the city, Santa Clara County, and the greater Bay Area"
+    },
+    {
+     "file": "op-acfr-fy25",
+     "org": "City of San José (operator, flysanjose.com)",
+     "quote": "The Airport serves Santa Clara County, which is also the San Jose Primary Metropolitan Statistical Area",
+     "dated": "2025-06-30"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "SANTA CLARA CA"
+    }
+   ]
+  },
+  {
+   "claim": "one of the region's three main airports",
+   "verdict": "confirmed",
+   "inAfter": "the region's three main airports",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "SJC is the second-busiest of the three Bay Area airports by passenger count after SFO"
+    },
+    {
+     "file": "op-acfr-fy25",
+     "org": "City of San José (operator, flysanjose.com)",
+     "quote": "two other commercial airports serve the San Francisco/San Jose/Oakland area: San Francisco International Airport and Oakland San Francisco Bay Airport",
+     "dated": "2025-06-30"
+    }
+   ]
+  },
+  {
+   "claim": "Southwest carries more than half of all passengers",
+   "verdict": "corrected",
+   "inAfter": "Southwest dominates, carrying more than half of all passengers",
+   "note": "Was 'In 2021 it carried 54 per cent'. Two current measures, both over half: the operator's own table gives Southwest 54.1 per cent of enplanements in fiscal 2025 (July 2024 to June 2025), and BTS gives it 61.61 per cent of passengers on US flights in the twelve months to June 2026. The operator's table also confirms the 2021 figure (54.2 per cent in fiscal 2021).",
+   "sources": [
+    {
+     "file": "bts-carrier-shares",
+     "org": "Bureau of Transportation Statistics (US Department of Transportation)",
+     "quote": [
+      "San Jose, CA: Norman Y. Mineta San Jose International (SJC) Scheduled Services except Freight/Mail BTS Data as of 9/23/2026",
+      "Carrier Shares for July 2025 - June 2026",
+      "Southwest 5,790 61.61%"
+     ],
+     "dated": "2026-09-23 (data July 2025 to June 2026)"
+    },
+    {
+     "file": "op-acfr-fy25",
+     "org": "City of San José (operator, flysanjose.com)",
+     "quote": [
+      "ENPLANED COMMERCIAL PASSENGERS BY AIRLINE",
+      "Southwest Airlines 1,151,709 54.2% 2,800,739 57.0% 3,727,889 61.5% 3,512,597 58.9% 3,072,408 54.1%"
+     ],
+     "dated": "fiscal 2025 (to 30 June 2025)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In 2021, 54% of departing or arriving passengers at SJC flew on Southwest Airlines"
+    }
+   ]
+  },
+  {
+   "claim": "a US customs port of entry",
+   "verdict": "confirmed",
+   "inAfter": "The airport is also a United States customs port of entry.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the airport is also an official U.S. Customs and Border Protection international port of entry"
+    },
+    {
+     "file": "cbp-port",
+     "org": "US Customs and Border Protection",
+     "quote": [
+      "Locate a Port of Entry",
+      "San Jose International Airport, California - 2834",
+      "Port Code 2834"
+     ],
+     "dated": "2026-09-23 (live page)"
+    }
+   ]
+  },
+  {
+   "claim": "about 10.7 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled about 10.7 million passengers in 2025",
+   "note": "New, replacing the 2019 peak as the answer to how busy it is now. This is TOTAL passengers, arrivals plus departures: the operator's calendar-year 2025 report gives 10,675,167 (5,327,346 enplaned, 5,347,821 deplaned). The FAA's preliminary CY2025 table counts 5,257,421 revenue enplanements (boardings only, about half of total passengers), consistent with the operator's figure. Same pairing as the PIT and CHS ledgers.",
+   "sources": [
+    {
+     "file": "op-activity-cy2025",
+     "org": "City of San José (operator, flysanjose.com)",
+     "quote": [
+      "MONTHLY ACTIVITY REPORT FOR 12/01/2025 to 12/31/2025 (Calendar Year)",
+      "435,649 519,582 5,327,346 5,913,652Enplaned",
+      "MOVING 12 MONTH PASSENGER TOTALS (Combined)",
+      "10,675,167 11,851,270Jan thru Dec -9.9%"
+     ],
+     "dated": "2026-01-23"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "43 WP CA SJC San Jose",
+      "International P M 5,257,421 5,822,019 -9.70%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "almost 10 per cent fewer than in 2024",
+   "verdict": "corrected",
+   "inAfter": "almost 10 per cent fewer than in 2024",
+   "note": "Operator: total passengers down 9.9 per cent. FAA: enplanements down 9.70 per cent.",
+   "sources": [
+    {
+     "file": "op-activity-cy2025",
+     "org": "City of San José (operator, flysanjose.com)",
+     "quote": "10,675,167 11,851,270Jan thru Dec -9.9%",
+     "dated": "2026-01-23"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": "International P M 5,257,421 5,822,019 -9.70%",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "well short of its 2019 peak of more than 15.5 million",
+   "verdict": "softened",
+   "inAfter": "still well short of its 2019 peak of more than 15.5 million",
+   "note": "Was 'Traffic peaked at 15.7 million passengers in 2019'. Wikipedia says 15.7 million and San José Spotlight 15.6 million (twice, 2024 and 2025); both are more than 15.5 million, which is all the text now says. Both put the peak in 2019. By fiscal year the operator's own table peaks at 14.95 million in fiscal 2019 (July 2018 to June 2019), which is consistent.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "reaching a peak of 15.7 million passengers in 2019"
+    },
+    {
+     "file": "sjspotlight-adapts",
+     "org": "San José Spotlight",
+     "quote": "haven't returned to its 15.6 million peak in 2019",
+     "dated": "2024-04-14"
+    },
+    {
+     "file": "sjspotlight-spirit",
+     "org": "San José Spotlight",
+     "quote": "still under the 15.6 million it hit before the pandemic",
+     "dated": "2025-09-11"
+    }
+   ]
+  },
+  {
+   "claim": "the airport's flight paths limit building heights downtown",
+   "verdict": "softened",
+   "inAfter": "the airport's flight paths limit how tall buildings in downtown San Jose can be",
+   "note": "Was 'its approach paths cap how tall buildings in downtown San Jose are allowed to be under FAA rules'. San José Spotlight reports the height limits near the airport and the flight-safety argument over raising them in 2019, but does not itself name the FAA, so 'under FAA rules' is dropped.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The proximity to downtown limits the height of buildings in downtown San Jose, to comply with FAA rules."
+    },
+    {
+     "file": "sjspotlight-adapts",
+     "org": "San José Spotlight",
+     "quote": [
+      "When the city considered raising building height restrictions near the airport in 2019",
+      "raise the height limits without conflicting with flight safety requirements",
+      "no buildings have been constructed in downtown that would obstruct the flight path at this time"
+     ],
+     "dated": "2024-04-14"
+    }
+   ]
+  },
+  {
+   "claim": "two parallel runways, each 11,000 feet",
+   "verdict": "confirmed",
+   "inAfter": "There are two parallel runways, each 11,000 feet long.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It has two active runways: 12L/30R and 12R/30L, each 11,000 by 150 feet"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "12L/30R",
+      "12R/30L",
+      "11,000"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 12L/30R: 3,353 m (11,000 ft), CON",
+      "Runway 12R/30L: 3,353 m (11,000 ft), CON",
+      "Runways listed: 2"
+     ]
+    },
+    {
+     "file": "op-acfr-fy25",
+     "org": "City of San José (operator, flysanjose.com)",
+     "quote": [
+      "Runways: 12R/30L North/South 11,000 × 150 ft.",
+      "12L/30R North/South 11,000 × 150 ft."
+     ],
+     "dated": "2025-06-30"
+    }
+   ]
+  },
+  {
+   "claim": "named after Norman Mineta",
+   "verdict": "confirmed",
+   "inAfter": "It is named after Norman Mineta",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is named after San Jose native Norman Mineta"
+    },
+    {
+     "file": "op-mineta",
+     "org": "City of San José (operator, flysanjose.com)",
+     "quote": "Our Airport is named in honor of Norman Y. Mineta"
+    }
+   ]
+  },
+  {
+   "claim": "a San Jose native",
+   "verdict": "confirmed",
+   "inAfter": "a San Jose native",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "San Jose native Norman Mineta"
+    },
+    {
+     "file": "op-mineta",
+     "org": "City of San José (operator, flysanjose.com)",
+     "quote": [
+      "After returning to his hometown of San José in 1945",
+      "a man who was not just a son of San José"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the city's mayor",
+   "verdict": "confirmed",
+   "inAfter": "who was the city's mayor",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "who also served as Mayor of San Jose"
+    },
+    {
+     "file": "op-mineta",
+     "org": "City of San José (operator, flysanjose.com)",
+     "quote": "He was elected mayor of San José in 1971"
+    }
+   ]
+  },
+  {
+   "claim": "later US Secretary of Commerce and of Transportation",
+   "verdict": "corrected",
+   "inAfter": "later United States Secretary of Commerce and of Transportation",
+   "note": "Order put right: the old text said 'of Transportation and of Commerce'. He was appointed to Commerce in 2000 and to Transportation in 2001, serving until 2006.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "former United States Secretary of Transportation and United States Secretary of Commerce"
+    },
+    {
+     "file": "op-mineta",
+     "org": "City of San José (operator, flysanjose.com)",
+     "quote": [
+      "In 2000, President Bill Clinton appointed Mineta secretary of commerce",
+      "In 2001, President George W. Bush appointed Mineta secretary of transportation, where he served until 2006"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "by some distance the most convenient",
+   "verdict": "cut",
+   "wasBefore": "and by some distance the most convenient",
+   "why": "Reworded as the old text's own advice for clients in Santa Clara County, in the next sentence (see opinion). 'By some distance' rested on the distance comparison cut below."
+  },
+  {
+   "claim": "three miles from downtown",
+   "verdict": "cut",
+   "wasBefore": "It is three miles north west of downtown San Jose",
+   "why": "The figure is disputed: FAA 2 nautical miles, coordinates 2.5 miles in a straight line, the operator 3 miles on its About page and four miles in its 2025 financial report. Softened to 'a few miles'; the direction is kept."
+  },
+  {
+   "claim": "fourteen miles for San Francisco and ten for Oakland",
+   "verdict": "cut",
+   "wasBefore": "against roughly fourteen miles for San Francisco and ten for Oakland",
+   "why": "Wikipedia alone. It also measures each of the other airports from its own downtown, which says nothing about the drive from Santa Clara County."
+  },
+  {
+   "claim": "Southwest 54 per cent in 2021",
+   "verdict": "cut",
+   "wasBefore": "In 2021 it carried 54 per cent of everyone using the airport",
+   "why": "Five years old. Replaced by the current share, more than half on both the operator's fiscal 2025 table and BTS's twelve months to June 2026."
+  },
+  {
+   "claim": "Alaska Airlines second on about 19 per cent",
+   "verdict": "cut",
+   "wasBefore": "with Alaska Airlines second on about 19 per cent",
+   "why": "Out of date. Alaska's share has fallen from 18.6 per cent of enplanements in fiscal 2021 to 13.3 per cent in fiscal 2025 (operator, including its SkyWest and Horizon flights), and BTS puts Alaska-operated flights at 8.02 per cent in the twelve months to June 2026, behind SkyWest (8.68 per cent), which flies for several airlines. Whether Alaska is still second depends on how that regional flying is counted, so no rank is given."
+  },
+  {
+   "claim": "15.7 million in 2019 (old wording)",
+   "verdict": "cut",
+   "wasBefore": "Traffic peaked at 15.7 million passengers in 2019",
+   "why": "The two sources give 15.6 and 15.7 million; the text now says more than 15.5 million, which both support, next to the 2025 figure."
+  },
+  {
+   "claim": "passed its 2001 record in 2018",
+   "verdict": "cut",
+   "wasBefore": "having passed its old 2001 record in 2018",
+   "why": "Wikipedia alone (14.3 million in 2018 against 14.2 million in 2001). The operator's archive of activity reports online starts in 2023."
+  },
+  {
+   "claim": "hemmed in with very little room to expand",
+   "verdict": "cut",
+   "wasBefore": "The airport is hemmed in by the city with very little room to expand",
+   "why": "Wikipedia alone. San José Spotlight (April 2024) describes expansion plans as paused, not blocked, and quotes the council's airport liaison: 'There is a long term plan for the airport to expand'."
+  },
+  {
+   "claim": "under FAA rules",
+   "verdict": "cut",
+   "wasBefore": "are allowed to be under FAA rules",
+   "why": "The second source speaks of flight safety requirements and height restrictions near the airport without naming the FAA in its own text; the limit itself is kept."
+  },
+  {
+   "claim": "1,050 acre site",
+   "verdict": "cut",
+   "wasBefore": "on a 1,050 acre site",
+   "why": "Sources disagree: the FAA master record and Wikipedia say 1,050 acres, the operator's 2025 financial report 1,124 acres."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "it is the most convenient of the region's three main airports and the one to price first",
+   "why": "The old text's advice, kept: the airport is in San Jose and serves Santa Clara County (Wikipedia, the operator, the FAA), where San Francisco and Oakland are further up the bay."
+  },
+  {
+   "text": "The closeness to town cuts both ways",
+   "why": "The old text's lead-in; the height limit it introduces is sourced."
+  }
+ ],
+ "tracerOk": {}
+}

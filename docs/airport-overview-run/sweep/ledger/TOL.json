@@ -1,0 +1,454 @@
+{
+ "iata": "TOL",
+ "id": "recYnv5XuqhmMmZxS",
+ "name": "Eugene F. Kranz Toledo Express Airport",
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Toledo_Express_Airport",
+ "audited": "2026-09-23",
+ "before": "Toledo's airport, ten miles west of the city in western Lucas County, and a joint civil and military field. The Ohio Air National Guard's 180th Fighter Wing is based here.\n\nIts role is shaped by Detroit. Toledo Express works as a secondary airport for the region and is the primary diversion point when Detroit Metropolitan cannot take aircraft. That same proximity hollowed out its scheduled service: seven airlines and more than 40 flights a day in the 1990s had fallen to two airlines by 2011 as passengers drove to Detroit instead.\n\nIt has recovered since. Traffic bottomed out in 2012 and grew for six straight years to 241,299 passengers in 2018, helped by a growing Charlotte service.\n\nThere is an eight gate domestic terminal on the north side and an 81 acre cargo ramp on the south. Two runways serve the 2,345 acre site, the longer at 10,600 feet. The Ohio Turnpike is at exit 52.\n\nThe airport was renamed in September 2020 after Gene Kranz, the NASA flight director and Toledo native.",
+ "after": "Toledo's airport, west of the city in Lucas County. It is a joint civil and military field: the Ohio Air National Guard's 180th Fighter Wing is based here.\n\nIts scheduled service is small. Allegiant is now the only passenger airline, flying mainly to Florida: Orlando Sanford, Punta Gorda, St Pete-Clearwater and Sarasota. The FAA counted about 67,000 passengers boarding here in 2025. For anywhere else, look at Detroit Metropolitan, a major hub.\n\nCargo is handled on a ramp on the south side. Two runways serve the 2,345 acre site, the longer at 10,600 feet. Drivers reach it from exit 52 of the Ohio Turnpike.\n\nThe airport was renamed in 2020 after Gene Kranz, the NASA flight director and Toledo native.",
+ "claims": [
+  {
+   "claim": "Toledo's airport",
+   "verdict": "confirmed",
+   "inAfter": "Toledo's airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is a civil-military airport in Swanton and Monclova townships, 10 mi (16 km) west of Toledo in western Lucas County, Ohio, United States"
+    },
+    {
+     "file": "port-annual-2025",
+     "org": "Toledo-Lucas County Port Authority (operator)",
+     "quote": "The Eugene F. Kranz Toledo Express Airport (TOL), owned by the City of Toledo, opened its doors in 1955 and has been managed by the Toledo-Lucas County Port Authority since 1973.",
+     "dated": "2025 annual report (published 2026)"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "1 ASSOC CITY:",
+      "EUGENE F KRANZ TOLEDO EXPRESS"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "west of the city",
+   "verdict": "confirmed",
+   "inAfter": "west of the city",
+   "note": "The coordinates give 248 degrees, which is west on the 8-point rose (one point from south west); the FAA's master record says south west, the adjacent point.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "west of Toledo in western Lucas County"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 248 degrees, which is west"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "3 CBD TO AIRPORT (NM):",
+      "10 SW"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in Lucas County",
+   "verdict": "confirmed",
+   "inAfter": "in Lucas County",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "in western Lucas County, Ohio"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "5 COUNTY:",
+      "LUCAS OH"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a joint civil and military field",
+   "verdict": "confirmed",
+   "inAfter": "a joint civil and military field",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is a civil-military airport"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "MILITARY: ANG: PPR"
+    },
+    {
+     "file": "op-operations",
+     "org": "Toledo-Lucas County Port Authority (operator)",
+     "quote": "the 180th Fighter Wing, located at Toledo Express, remains a no-drone zone at all times"
+    }
+   ]
+  },
+  {
+   "claim": "the Ohio Air National Guard's 180th Fighter Wing is based here",
+   "verdict": "confirmed",
+   "inAfter": "the Ohio Air National Guard's 180th Fighter Wing is based here.",
+   "sources": [
+    {
+     "file": "port-annual-2025",
+     "org": "Toledo-Lucas County Port Authority (operator)",
+     "quote": "TOL is home to over 20 on-airport businesses including the Ohio Air National Guard's 180th Fighter Wing",
+     "dated": "2025 annual report (published 2026)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is also home to the Ohio Air National Guard's 180th Fighter Wing"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "180TH COMMAND POST"
+    }
+   ]
+  },
+  {
+   "claim": "Allegiant is now the only passenger airline",
+   "verdict": "corrected",
+   "inAfter": "Allegiant is now the only passenger airline",
+   "note": "Replaces the old picture of 'two airlines by 2011' and 'a growing Charlotte service'. BTS gives Allegiant 100 per cent of scheduled passengers in the twelve months to June 2026, with no Charlotte flights among the destinations; the operator's airlines page lists only Allegiant and offers Charlotte only as a route request.",
+   "sources": [
+    {
+     "file": "bts-carrier-shares",
+     "org": "Bureau of Transportation Statistics (US Department of Transportation)",
+     "quote": [
+      "Toledo, OH: Eugene F Kranz Toledo Express (TOL) Scheduled Services except Freight/Mail BTS Data as of 9/23/2026",
+      "Carrier Shares for July 2025 - June 2026",
+      "Allegiant 133 100.00%"
+     ],
+     "dated": "2026-09-23 (data July 2025 to June 2026)"
+    },
+    {
+     "file": "op-airlines",
+     "org": "Toledo-Lucas County Port Authority (operator)",
+     "quote": [
+      "NONSTOP TO FLORIDA",
+      "Website: www.allegiant.com",
+      "Note: Allegiant does not accept cash, checks, or money orders at any airport location."
+     ],
+     "dated": "2026 (live page)"
+    },
+    {
+     "file": "port-annual-2025",
+     "org": "Toledo-Lucas County Port Authority (operator)",
+     "quote": "TOL offers nonstop service on Allegiant to Orlando Sanford, Ft. Myers/Punta Gorda and St. Pete-Clearwater, Florida",
+     "dated": "2025 annual report (published 2026)"
+    }
+   ]
+  },
+  {
+   "claim": "flying to Orlando Sanford, Punta Gorda, St Pete-Clearwater and Sarasota",
+   "verdict": "corrected",
+   "inAfter": "flying mainly to Florida: Orlando Sanford, Punta Gorda, St Pete-Clearwater and Sarasota",
+   "note": "New, replacing the Charlotte service. The Port Authority and the operator's page call Sarasota seasonal and also list a seasonal Phoenix-Mesa route, but BTS shows no Phoenix-Mesa passengers in the twelve months to June 2026, so Phoenix is left out and 'seasonal' (one organisation) is not stated. Review, 23 Sep: 'mainly' added because the operator's live airlines page (re-fetched as recheck-airlines) still advertises 'NONSTOP TO PHOENIX/MESA, ARIZONA (AZA) - SEASONAL'. Phoenix-Mesa itself has only the operator behind it, so it is not named, but 'flying to Florida' alone would read as the whole network.",
+   "sources": [
+    {
+     "file": "port-annual-2025",
+     "org": "Toledo-Lucas County Port Authority (operator)",
+     "quote": "TOL offers nonstop service on Allegiant to Orlando Sanford, Ft. Myers/Punta Gorda and St. Pete-Clearwater, Florida, and seasonal nonstop service to Sarasota/Bradenton, Florida and Phoenix/Mesa, Arizona.",
+     "dated": "2025 annual report (published 2026)"
+    },
+    {
+     "file": "bts-carrier-shares",
+     "org": "Bureau of Transportation Statistics (US Department of Transportation)",
+     "quote": [
+      "Time Period: July 2025 - June 2026; Airport: St. Petersburg, FL:PIE; Data: 21.77",
+      "Time Period: July 2025 - June 2026; Airport: Punta Gorda, FL:PGD; Data: 20.40",
+      "Time Period: July 2025 - June 2026; Airport: Sanford, FL:SFB; Data: 17.09",
+      "Time Period: July 2025 - June 2026; Airport: Sarasota/Bradenton, FL:SRQ; Data: 7.56"
+     ],
+     "dated": "2026-09-23 (data July 2025 to June 2026)"
+    },
+    {
+     "file": "op-airlines",
+     "org": "Toledo-Lucas County Port Authority (operator)",
+     "quote": [
+      "Fort Myers/Punta Gorda, FL (PGD)",
+      "Orlando/Sanford, FL (SFB)",
+      "Tampa/St. Pete, FL (PIE)",
+      "Sarasota/Bradenton (SRQ) - SEASONAL"
+     ],
+     "dated": "2026 (live page)"
+    },
+    {
+     "file": "recheck-airlines",
+     "org": "Toledo-Lucas County Port Authority (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "NONSTOP TO FLORIDA",
+      "NONSTOP TO PHOENIX/MESA, ARIZONA (AZA) - SEASONAL"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FAA: about 67,000 passengers boarded here in 2025",
+   "verdict": "corrected",
+   "inAfter": "The FAA counted about 67,000 passengers boarding here in 2025.",
+   "primary": true,
+   "attribution": "FAA",
+   "note": "ENPLANEMENTS (boardings only), attributed to the FAA, whose own table is the source: 66,949 in CY2025, up 0.50 per cent, in the FAA's non-hub class. No operator total for 2025 was found. BTS, whose data the FAA's counts draw on, gives 67,000 scheduled departing passengers in the twelve months to June 2026. Replaces the 2018 figure of 241,299 passengers (arrivals plus departures), which the old text used to say traffic had recovered; the airport's boardings are now roughly half that 2018 level, on the FAA's count.",
+   "sources": [
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration (FAA)",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "263 GL OH TOL Toledo Eugene F Kranz Toledo Express P N 66,949 66,614 0.50%"
+     ],
+     "dated": "2026-07-08"
+    },
+    {
+     "file": "bts-carrier-shares",
+     "org": "Bureau of Transportation Statistics (US Department of Transportation)",
+     "quote": "Departure 57k 67k 17.45% 261",
+     "dated": "2026-09-23 (data July 2025 to June 2026)"
+    }
+   ]
+  },
+  {
+   "claim": "Detroit Metropolitan, a major hub",
+   "verdict": "confirmed",
+   "inAfter": "Detroit Metropolitan, a major hub",
+   "note": "The advice around it ('For anywhere else, look at') follows from Allegiant's Florida-only network: see opinion. The FAA classes Detroit as a large hub ('P L'), with 16.3 million enplanements in 2025.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Detroit Metropolitan Airport, a major hub airport"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration (FAA)",
+     "quote": "18 GL MI DTW Detroit Detroit Metro Wayne County P L 16,294,768 16,110,696 1.14%",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "a cargo ramp on the south side",
+   "verdict": "softened",
+   "inAfter": "Cargo is handled on a ramp on the south side.",
+   "note": "Was 'an 81 acre cargo ramp on the south'. The FAA's master record names the south cargo ramp; the 81 acres rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "THE SOUTH CARGO RAMP"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "81-acre air ramp on the south side of the airport used for air cargo"
+    }
+   ]
+  },
+  {
+   "claim": "two runways, 2,345 acres, the longer 10,600 feet",
+   "verdict": "confirmed",
+   "inAfter": "Two runways serve the 2,345 acre site, the longer at 10,600 feet.",
+   "sources": [
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "22 ACREAGE:",
+      "2,345",
+      "10,600",
+      "5,599"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 07/25: 3,231 m (10,600 ft), ASP",
+      "Runway 16/34: 1,707 m (5,599 ft), ASP",
+      "Runways listed: 2"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Toledo Express Airport covers 2,345 acres (949 ha) and has two runways: 7/25: 10,600 x 150 ft (3,231 x 46 m), asphalt"
+    }
+   ]
+  },
+  {
+   "claim": "exit 52 of the Ohio Turnpike",
+   "verdict": "confirmed",
+   "inAfter": "Drivers reach it from exit 52 of the Ohio Turnpike.",
+   "sources": [
+    {
+     "file": "turnpike-fares",
+     "org": "Ohio Turnpike and Infrastructure Commission",
+     "quote": "52 - Toledo Airport-Swanton",
+     "dated": "2026-09-23 (live page)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Toledo Express is near the crossing of State Route 2 and the Ohio Turnpike (Interstate 80/Interstate 90, exit 52)"
+    }
+   ]
+  },
+  {
+   "claim": "renamed in 2020 after Gene Kranz",
+   "verdict": "softened",
+   "inAfter": "The airport was renamed in 2020 after Gene Kranz",
+   "note": "Was 'in September 2020'. The operator gives 26 March 2020 for the official renaming; Wikipedia says September 2020. Both give 2020, which is all the text now says. The FAA's 2025 table uses the new name.",
+   "sources": [
+    {
+     "file": "op-kranz",
+     "org": "Toledo-Lucas County Port Authority (operator)",
+     "quote": "On March 26, 2020, Toledo Express Airport was officially renamed Eugene F. Kranz Toledo Express Airport"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport was officially renamed to honor retired NASA flight director and Toledo native Gene Kranz in September 2020"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration (FAA)",
+     "quote": "Toledo Eugene F Kranz Toledo Express",
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "the NASA flight director",
+   "verdict": "confirmed",
+   "inAfter": "the NASA flight director",
+   "sources": [
+    {
+     "file": "op-kranz",
+     "org": "Toledo-Lucas County Port Authority (operator)",
+     "quote": [
+      "acted as the flight director for the first lunar landing, Apollo 11, in 1969",
+      "He also served as the flight director for Apollo 13"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "retired NASA flight director"
+    }
+   ]
+  },
+  {
+   "claim": "Toledo native",
+   "verdict": "confirmed",
+   "inAfter": "Toledo native",
+   "sources": [
+    {
+     "file": "op-kranz",
+     "org": "Toledo-Lucas County Port Authority (operator)",
+     "quote": "Eugene F. Kranz was born in Toledo, Ohio, on August 17, 1933"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Toledo native Gene Kranz"
+    }
+   ]
+  },
+  {
+   "claim": "ten miles west",
+   "verdict": "cut",
+   "wasBefore": "ten miles west of the city",
+   "why": "Fails the coordinates check: 22.7 km (14.1 miles) from the centre of Toledo in a straight line, a ratio of 0.71. The FAA's master record gives 10 nautical miles (11.5 statute miles). The sources disagree, so the figure is dropped and the direction kept."
+  },
+  {
+   "claim": "western Lucas County",
+   "verdict": "cut",
+   "wasBefore": "in western Lucas County",
+   "why": "'Western' rests on Wikipedia alone; the FAA gives the county only. The county is kept."
+  },
+  {
+   "claim": "its role is shaped by Detroit",
+   "verdict": "cut",
+   "wasBefore": "Its role is shaped by Detroit.",
+   "why": "The lead-in to a paragraph that rests on Wikipedia alone (below). The practical point, that clients going anywhere but Florida will look at Detroit, is kept as advice."
+  },
+  {
+   "claim": "secondary airport and primary diversion point for Detroit",
+   "verdict": "cut",
+   "wasBefore": "Toledo Express works as a secondary airport for the region and is the primary diversion point when Detroit Metropolitan cannot take aircraft",
+   "why": "Wikipedia alone. Neither the operator's pages nor the Port Authority's 2025 annual report say so, and the Wayne County Airport Authority's 2017 master plan for Detroit lists Toledo Express only as a nearby airport and a possible home for cargo operators."
+  },
+  {
+   "claim": "seven airlines and 40 daily flights in the 1990s, two airlines by 2011",
+   "verdict": "cut",
+   "wasBefore": "That same proximity hollowed out its scheduled service: seven airlines and more than 40 flights a day in the 1990s had fallen to two airlines by 2011 as passengers drove to Detroit instead",
+   "why": "Wikipedia alone (no second source for the counts or the dates), and overtaken: Allegiant is now the only passenger airline."
+  },
+  {
+   "claim": "recovered since, 241,299 passengers in 2018, growing Charlotte service",
+   "verdict": "cut",
+   "wasBefore": "It has recovered since. Traffic bottomed out in 2012 and grew for six straight years to 241,299 passengers in 2018, helped by a growing Charlotte service.",
+   "why": "Out of date. The Charlotte service has gone (BTS: Allegiant 100 per cent, no Charlotte among the destinations; the operator lists Charlotte only as a route request), and the FAA counted 66,949 boardings in 2025, roughly half the 2018 level. The 2018 figure itself rests on Wikipedia alone."
+  },
+  {
+   "claim": "eight gate domestic terminal on the north side",
+   "verdict": "cut",
+   "wasBefore": "There is an eight gate domestic terminal on the north side",
+   "why": "Wikipedia alone; the operator's pages describe the terminal (second-floor food court and bar, closed overnight) but not its gates or position."
+  },
+  {
+   "claim": "81 acre cargo ramp",
+   "verdict": "cut",
+   "wasBefore": "an 81 acre cargo ramp on the south",
+   "why": "The size rests on Wikipedia alone; the south cargo ramp itself is kept (FAA master record)."
+  },
+  {
+   "claim": "The Ohio Turnpike is at exit 52 (old wording)",
+   "verdict": "cut",
+   "wasBefore": "The Ohio Turnpike is at exit 52",
+   "why": "Reworded and kept; the Ohio Turnpike names exit 52 'Toledo Airport-Swanton'."
+  },
+  {
+   "claim": "renamed in September 2020",
+   "verdict": "cut",
+   "wasBefore": "renamed in September 2020",
+   "why": "The month is disputed (operator 26 March 2020, Wikipedia September 2020); the year is kept."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Its scheduled service is small.",
+   "why": "Follows from the sourced facts after it: one airline, flying only to Florida, and about 67,000 boardings in 2025, in the FAA's non-hub class; BTS counts 434 scheduled departures in the twelve months to June 2026."
+  },
+  {
+   "text": "For anywhere else, look at",
+   "why": "Advice that follows from Allegiant's Florida-only network; Detroit Metropolitan is the nearest major hub, in place of the old text's unsourced Detroit paragraph."
+  }
+ ],
+ "tracerOk": {
+  "67,000": "66,949 enplanements rounded (FAA CY2025); BTS gives 67k departing passengers for the twelve months to June 2026. See the FAA claim.",
+  "St Pete": "The Port Authority writes 'St. Pete-Clearwater', the operator 'Tampa/St. Pete' and BTS 'St. Petersburg, FL:PIE'; house style drops the full stop."
+ }
+}

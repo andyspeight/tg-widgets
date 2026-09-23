@@ -1,0 +1,348 @@
+{
+ "iata": "ABQ",
+ "id": "recWi2eiElVToByJ6",
+ "name": null,
+ "country": "USA",
+ "wikipedia": "https://en.wikipedia.org/wiki/Albuquerque_International_Sunport",
+ "audited": "2026-09-23",
+ "before": "New Mexico's main airport, known locally as the Sunport, 3 miles south east of downtown Albuquerque between the Rio Grande and the Sandia Mountains. It handles around 5.5 million passengers and over 400 flights a day.\n\nSouthwest is the dominant airline, carrying over half of all passengers, alongside Alaska, American, Delta, JetBlue, United and Advanced Air.\n\nIt has more local character than most American airports. Alongside the national chains the concessions are full of New Mexico names: Laguna Burger, Sadie's, Indian Pueblo Kitchen, New Mexico Piñon Coffee and local craft brewers among them. The building itself is a low-lying structure rather than the usual glass box.\n\nThe airport is also the centre of the Air Route Traffic Control Center known as ZAB, which manages the airspace over most of Arizona and New Mexico and parts of Colorado, Oklahoma and Texas.\n\nIt sits directly west of Kirtland Air Force Base and Sandia National Laboratories.",
+ "after": "New Mexico's main airport, known locally as the Sunport, a few miles south east of downtown Albuquerque. It handled about 5.3 million passengers in 2025.\n\nSouthwest is the dominant airline, carrying about half of all passengers, alongside Alaska, American, Delta, JetBlue, United and Advanced Air.\n\nIt has more local character than most American airports. Alongside the national chains the concessions are full of New Mexico names: Laguna Burger, Sadie's, Indian Pueblo Kitchen, New Mexico Piñon Coffee and local craft brewers among them. The building itself is in a distinct southwestern style rather than the usual glass box.\n\nIt sits directly west of Kirtland Air Force Base.",
+ "claims": [
+  {
+   "claim": "New Mexico's main airport",
+   "verdict": "confirmed",
+   "inAfter": "New Mexico's main airport",
+   "note": "FAA CY2025: Albuquerque 2,562,028 enplanements; the next New Mexico airport, Santa Fe, 204,161.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the primary international airport serving the U.S. state of New Mexico"
+    },
+    {
+     "file": "op-facts",
+     "org": "City of Albuquerque Aviation Department (operator, abqsunport.com)",
+     "quote": "is New Mexico's largest commercial airport",
+     "dated": "2026 (live page, gives 2025 figures)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "62 SW NM ABQ Albuquerque",
+      "Sunport P M 2,562,028 2,690,218 -4.77%",
+      "193 SW NM SAF Santa Fe Santa Fe Regional P N 204,161 180,248 13.27%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "known locally as the Sunport",
+   "verdict": "confirmed",
+   "inAfter": "known locally as the Sunport",
+   "note": "Its full name is Albuquerque International Sunport; the operator calls it 'the Sunport' throughout and dates the name to 1963. The record itself has no Airport Name.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "locally known as the Sunport"
+    },
+    {
+     "file": "op-history",
+     "org": "City of Albuquerque Aviation Department (operator, abqsunport.com)",
+     "quote": [
+      "The airport was renamed Albuquerque Sunport on April 17, 1963.",
+      "In 1994 the airport's name was changed to the current designation of the Albuquerque International Sunport."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a few miles from downtown",
+   "verdict": "softened",
+   "inAfter": "a few miles south east of downtown Albuquerque",
+   "note": "Was '3 miles'. The coordinates put it 6.3 km (3.9 miles) from the centre in a straight line, so '3 miles' fails the check (ratio 0.77); the FAA's master record gives 3 nautical miles (3.5 statute miles); Wikipedia says 3 miles (5 km). The figures do not agree, so the figure is dropped and the direction kept, as the brief directs.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "3 miles (5 km) southeast of downtown"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "3 CBD TO AIRPORT (NM):",
+      "03 SE"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 6.3 km (3.9 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "south east of downtown",
+   "verdict": "confirmed",
+   "inAfter": "south east of downtown Albuquerque",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "southeast of downtown"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": "03 SE"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 142 degrees, which is south east"
+    }
+   ]
+  },
+  {
+   "claim": "about 5.3 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled about 5.3 million passengers in 2025.",
+   "note": "Was 'around 5.5 million', which matches the operator's fiscal 2024 total (5,471,678). TOTAL passengers, arrivals plus departures: the operator gives 5,274,764 for calendar 2025 (its monthly table adds up to 5,311,482; both round to 5.3 million). The FAA's preliminary CY2025 table counts 2,562,028 revenue enplanements (boardings only, about half of total passengers, down 4.77 per cent), consistent with it.",
+   "sources": [
+    {
+     "file": "op-facts",
+     "org": "City of Albuquerque Aviation Department (operator, abqsunport.com)",
+     "quote": "ABQ welcomed 5,274,764 passengers in 2025",
+     "dated": "2026 (live page, gives 2025 figures)"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "62 SW NM ABQ Albuquerque",
+      "Sunport P M 2,562,028 2,690,218 -4.77%"
+     ],
+     "dated": "2026-07-08"
+    }
+   ]
+  },
+  {
+   "claim": "Southwest dominant, carrying about half of all passengers",
+   "verdict": "corrected",
+   "inAfter": "Southwest is the dominant airline, carrying about half of all passengers",
+   "note": "Was 'over half'. BTS gives Southwest 50.25 per cent of passengers on US flights in the twelve months to June 2026, with American next on 12.62 per cent. The operator's monthly share was 53.6 per cent in December 2025 and 48.9 per cent in July 2026, so it now hovers around half. The operator's tables list airlines alphabetically with the figures in the same order (Southwest is the seventh row in both).",
+   "sources": [
+    {
+     "file": "bts-carrier-shares",
+     "org": "Bureau of Transportation Statistics (US Department of Transportation)",
+     "quote": [
+      "Albuquerque, NM: Albuquerque International Sunport (ABQ) Scheduled Services except Freight/Mail BTS Data as of 9/23/2026",
+      "Carrier Shares for July 2025 - June 2026",
+      "Southwest 2,545 50.25%",
+      "American 639 12.62%"
+     ],
+     "dated": "2026-09-23 (data July 2025 to June 2026)"
+    },
+    {
+     "file": "op-stats-jul2026",
+     "org": "City of Albuquerque Aviation Department (operator, abqsunport.com)",
+     "quote": [
+      "July 2026",
+      "119,209 114,408 233,617 121,679 120,434 242,113 -3.5% 48.9%",
+      "241,145 237,062 478,207 251,981 252,921 504,902 -5.3% 100%"
+     ],
+     "dated": "2026-09"
+    },
+    {
+     "file": "op-stats-dec2025",
+     "org": "City of Albuquerque Aviation Department (operator, abqsunport.com)",
+     "quote": [
+      "December 2025",
+      "113,453 114,832 228,285 113,023 115,372 228,395 0.0% 53.6%",
+      "Airline Market Share"
+     ],
+     "dated": "2026-02"
+    }
+   ]
+  },
+  {
+   "claim": "alongside Alaska, American, Delta, JetBlue, United and Advanced Air",
+   "verdict": "confirmed",
+   "inAfter": "alongside Alaska, American, Delta, JetBlue, United and Advanced Air",
+   "note": "All six carried passengers in July 2026 on the operator's own report (JetBlue 6,692, Advanced Air 818). JetBlue carried none in December 2024 or December 2025, so it looks seasonal. The operator also lists Contour Airlines; Spirit and Sun Country carried passengers in July 2025 but none in July 2026. JetBlue's own site refused both a plain request and the browser.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "City of Albuquerque Aviation Department (operator, abqsunport.com)",
+     "quote": [
+      "The following airlines are currently serving the Albuquerque International Sunport.",
+      "Advanced Air",
+      "Delta Air Lines",
+      "Alaska Airlines",
+      "JetBlue Airways",
+      "American Airlines",
+      "Southwest Airlines",
+      "United Airlines",
+      "© 2026, Albuquerque International Sunport/City of Albuquerque"
+     ],
+     "dated": "2026 (live page)"
+    },
+    {
+     "file": "op-facts",
+     "org": "City of Albuquerque Aviation Department (operator, abqsunport.com)",
+     "quote": "ABQ is served by 6 major airlines: Alaska Airlines , American , Delta , jetBlue , Southwest , and United . It also receives regular service from commuter airlines Advanced and Contour."
+    },
+    {
+     "file": "op-stats-jul2026",
+     "org": "City of Albuquerque Aviation Department (operator, abqsunport.com)",
+     "quote": "2,885 3,807 6,692 3,779 4,555 8,334 -19.7% 1.4%",
+     "dated": "2026-09"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is served by several other major airlines, including Advanced Air, Alaska, American, Delta, JetBlue, and United"
+    }
+   ]
+  },
+  {
+   "claim": "concessions full of New Mexico names alongside national chains",
+   "verdict": "confirmed",
+   "inAfter": "Alongside the national chains the concessions are full of New Mexico names: Laguna Burger, Sadie's, Indian Pueblo Kitchen, New Mexico Piñon Coffee and local craft brewers among them.",
+   "note": "Every name is on the operator's live shops and restaurants page. The craft brewers are Steel Bender Brewyard and Burque Brews (the latter marked temporarily closed); the national chains include Dunkin' and Panda Express.",
+   "sources": [
+    {
+     "file": "op-dining",
+     "org": "City of Albuquerque Aviation Department (operator, abqsunport.com)",
+     "quote": [
+      "Laguna Burger",
+      "Sadie's of New Mexico is a cherished local institution",
+      "Indian Pueblo Kitchen brings their rich culinary heritage of Native American cuisine to the Sunport",
+      "New Mexico Piñon Coffee brings its signature piñon-infused blends to the Sunport",
+      "Steel Bender Brewyard, founded by the Chant family in 2017, has become a North Valley favorite, blending New Mexico heritage with innovative craft beer",
+      "Burque Brews - Temporarily Closed",
+      "Dunkin' Express brings its signature coffee and baked goods to the Sunport",
+      "Panda Express, the largest Asian dining concept in the U.S."
+     ],
+     "dated": "2026 (live page)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "including national brands such as Dunkin' and Panda Express",
+      "local craft beverage makers such as Black Mesa Coffee, Burque Brews",
+      "Indian Pueblo Kitchen, Laguna Burger, New Mexico Piñon Coffee, Rush of Prana, Sadie's, Steel Bender"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the building is in a distinct southwestern style",
+   "verdict": "softened",
+   "inAfter": "The building itself is in a distinct southwestern style",
+   "note": "Was 'a low-lying structure'. The operator describes 'distinct southwestern architecture'; Wikipedia says 'low-lying structure and Pueblo Revival architecture'. 'Low-lying' rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "op-facts",
+     "org": "City of Albuquerque Aviation Department (operator, abqsunport.com)",
+     "quote": "known for its distinct southwestern architecture and cultural décor"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The Sunport is unique for its low-lying structure and Pueblo Revival architecture"
+    }
+   ]
+  },
+  {
+   "claim": "directly west of Kirtland Air Force Base",
+   "verdict": "confirmed",
+   "inAfter": "It sits directly west of Kirtland Air Force Base.",
+   "note": "The operator's history says the Army Air Base that became Kirtland was built to the east of the airport in the early 1940s; its facts page adds that the two share the runways. The FAA master record lists Kirtland's airfield management and US Air Force fire and rescue cover at the airport.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "directly to the west of Sandia National Laboratories and Kirtland Air Force Base"
+    },
+    {
+     "file": "op-history",
+     "org": "City of Albuquerque Aviation Department (operator, abqsunport.com)",
+     "quote": "Within two years after the airport opened, the Albuquerque Army Air Base was constructed to the east. This facility later became Kirtland Air Force Base and still shares the runways and other facilities with the commercial operations of the airport today."
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "quote": [
+      "ARFF PRVDD BY USAF.",
+      "AF - KIRTLAND AFB AFLD MGMNT OPR"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "3 miles from downtown",
+   "verdict": "cut",
+   "wasBefore": "3 miles south east of downtown Albuquerque",
+   "why": "Fails the coordinates check (3.9 miles in a straight line, ratio 0.77); the FAA says 3 nautical miles (3.5 statute miles). Softened to 'a few miles'; the direction is kept."
+  },
+  {
+   "claim": "between the Rio Grande and the Sandia Mountains",
+   "verdict": "cut",
+   "wasBefore": "between the Rio Grande and the Sandia Mountains",
+   "why": "Wikipedia alone; no second source places the airport this way, and it describes most of the city rather than the airport."
+  },
+  {
+   "claim": "around 5.5 million passengers",
+   "verdict": "cut",
+   "wasBefore": "It handles around 5.5 million passengers",
+   "why": "Out of date: 5.5 million matches fiscal 2024; calendar 2025 was about 5.3 million (operator, FAA)."
+  },
+  {
+   "claim": "over 400 flights a day",
+   "verdict": "cut",
+   "wasBefore": "and over 400 flights a day",
+   "why": "Misleading. The operator's 427 a day in 2025 counts every take-off and landing including general aviation and military, and Wikipedia gives only 29 per cent of them as scheduled commercial."
+  },
+  {
+   "claim": "Southwest over half",
+   "verdict": "cut",
+   "wasBefore": "carrying over half of all passengers",
+   "why": "Southwest's share now sits either side of half (48.9 per cent in July 2026, 53.6 per cent in December 2025, 50.25 per cent over the twelve months to June 2026), so 'about half'."
+  },
+  {
+   "claim": "a low-lying structure",
+   "verdict": "cut",
+   "wasBefore": "The building itself is a low-lying structure",
+   "why": "'Low-lying' rests on Wikipedia alone; the operator's 'distinct southwestern architecture' is kept."
+  },
+  {
+   "claim": "centre of the ZAB air route traffic control center",
+   "verdict": "cut",
+   "wasBefore": "The airport is also the centre of the Air Route Traffic Control Center known as ZAB, which manages the airspace over most of Arizona and New Mexico and parts of Colorado, Oklahoma and Texas.",
+   "why": "Wikipedia alone, and doubtful as worded: the operator's own list of federal facilities at the airport names the control tower and the Flight Standards District Office, not the en-route centre. Of no use to a travel agent either way."
+  },
+  {
+   "claim": "west of Sandia National Laboratories",
+   "verdict": "cut",
+   "wasBefore": "and Sandia National Laboratories",
+   "why": "Wikipedia alone; Sandia's own locations page says only that its main site is in Albuquerque. Kirtland's own site refused the request (403)."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "It has more local character than most American airports.",
+   "why": "The old text's judgement, kept: it follows from the operator's concessions programme, built around local and New Mexico businesses, and from the list that follows."
+  },
+  {
+   "text": "rather than the usual glass box",
+   "why": "The old text's comparison, kept as colour; the southwestern style it contrasts is sourced."
+  }
+ ],
+ "tracerOk": {}
+}
