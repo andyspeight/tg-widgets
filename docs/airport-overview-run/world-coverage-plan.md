@@ -90,19 +90,23 @@ The 22 Sep import left 39 countries with scheduled service and no airport. Nine
 were genuinely small. The other 30 had no Wikidata passenger figure at all, so the
 rule could not judge them. Andy: "do the 30 countries."
 
-Each was sourced by hand against the same rule. **18 airports were added** (table
-now 1,036 records, 213 of 234 countries covered) and **12 countries were left out**,
-most because they are genuinely small. Full evidence, source by source, with the
-flagged calls and the Greenland decision, is in `thirty-countries.md`.
+Each was sourced by hand against the same rule. 18 airports were added on 23 Sep;
+the same day Andy had the eight whose evidence rested on one publisher or was
+indirect pulled again ("pull all of those airports"). **10 airports remain** (table
+1,028 records, 205 of 234 countries covered). Full evidence, source by source,
+including the eight pulled, is in `thirty-countries.md`.
 
-Added: UBN Mongolia, VTE Laos, MJI Libya, BWN Brunei, BJL Gambia, LLW Malawi,
-FNA Sierra Leone, ROB Liberia, RAR Cook Islands, TBU Tonga, AXA Anguilla,
-GOH Greenland, MGQ Somalia, KBL Afghanistan, HIR Solomon Islands, JUB South Sudan,
-PBH Bhutan, TMS Sao Tome & Principe.
+Kept: UBN Mongolia, VTE Laos, MJI Libya, BWN Brunei, BJL Gambia, LLW Malawi,
+FNA Sierra Leone, ROB Liberia, RAR Cook Islands, TBU Tonga. Banjul (BJL) rests on
+one publisher too and is an open question for Andy.
 
-Still without an airport (21 countries): the nine small ones listed below, plus
-Tuvalu, Niue, Micronesia, Kiribati, Lesotho, Eswatini, the Falklands, Monaco,
-the Marshall Islands, Nauru, Eritrea and North Korea.
+Pulled 23 Sep: MGQ Somalia, AXA Anguilla, GOH Greenland, KBL Afghanistan,
+HIR Solomon Islands, JUB South Sudan, PBH Bhutan, TMS Sao Tome & Principe.
+
+Still without an airport (29 countries): the nine small ones listed below; the
+eight countries whose airports were pulled; and Tuvalu, Niue, Micronesia, Kiribati,
+Lesotho, Eswatini, the Falklands, Monaco, the Marshall Islands, Nauru, Eritrea and
+North Korea.
 
 The genuinely small nine, for the record: Guinea-Bissau (83,616), Norfolk
 Island (67,959), Wallis & Futuna (45,093), St Pierre & Miquelon (38,808),

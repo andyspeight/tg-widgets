@@ -9,10 +9,11 @@ session scratchpad, which does not survive.
 The one blank is MPC, a small airport in Bengkulu that Andy has said to ignore.
 Do not reopen it and do not count it as a gap.
 
-**The table now holds 1,036 records.** 418 were imported on 22 Sep under the
+**The table now holds 1,028 records.** 418 were imported on 22 Sep under the
 traffic rule Andy set (peak passengers >= 1m, or busiest in its country with at
-least 100k), and 18 more were hand-sourced on 23 Sep for countries with no
-Wikidata traffic figure. All 436 are thin by design: name, IATA, country, lat/lng,
+least 100k), and 10 more were hand-sourced on 23 Sep for countries with no
+Wikidata traffic figure (18 were added; Andy had the eight resting on one
+publisher or indirect evidence pulled the same day). All 428 are thin by design: name, IATA, country, lat/lng,
 Wikipedia URL, Source 1, Status "Todo". They carry no Overview, and they are
 NOT part of the 599 figure above. See `world-coverage-plan.md` and
 `thirty-countries.md`.

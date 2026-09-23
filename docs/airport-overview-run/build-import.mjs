@@ -19,12 +19,11 @@
  * Andy's locked rule applies: no made-up data. Every field below is copied
  * from a fetched source or left blank.
  *
- * It will NOT reproduce the 18 airports added by hand on 23 Sep 2026 (UBN VTE
- * MJI BWN BJL LLW FNA ROB RAR TBU AXA GOH MGQ KBL HIR JUB PBH TMS). Their
- * countries have no Wikidata passenger figure, so their traffic was sourced
- * from national statistics and the WFP Logistics Cluster instead. See
- * thirty-countries.md. When reconciling a re-run against the table, expect them
- * as extra records, not strays.
+ * It will NOT reproduce the 10 airports added by hand on 23 Sep 2026 (UBN VTE
+ * MJI BWN BJL LLW FNA ROB RAR TBU). Their countries have no Wikidata passenger
+ * figure, so their traffic was sourced from national statistics, operators and
+ * the WFP Logistics Cluster instead. See thirty-countries.md. When reconciling a
+ * re-run against the table, expect them as extra records, not strays.
  */
 
 const AIRPORTS_CSV = 'https://davidmegginson.github.io/ourairports-data/airports.csv';

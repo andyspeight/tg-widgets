@@ -9,10 +9,13 @@ one was sourced by hand and put through the same rule as everything else:
 > peak annual passengers since 2015 of at least 1m, OR busiest airport in its
 > country with at least 100k.
 
-**Result: 18 airports added, 12 countries left out.** The table went from 1,018 to
-1,036 records and now covers 213 of the 234 countries with scheduled service.
+**Result: 10 airports kept, 20 countries left out.** 18 airports were added on
+23 Sep; later that day Andy had the eight flagged ones pulled ("pull all of those
+airports"), keeping only what two independent publishers support, plus Banjul (see
+the open question below). The table went from 1,018 to 1,036 and back to 1,028
+records, and covers 205 of the 234 countries with scheduled service.
 
-The 18 records have the same thin shape as the 418: Name, IATA, Country, Lat, Lng,
+The 10 kept records have the same thin shape as the 418: Name, IATA, Country, Lat, Lng,
 Wikipedia URL and Source 1 from OurAirports, Status Todo. No Overview, City Served,
 Airport Type, Airport Role or Verified Date. Every record was also checked against
 its Wikipedia article: the IATA code appears in the article and the coordinates agree
@@ -24,11 +27,13 @@ Passengers through the AIRPORT (arrivals plus departures, domestic and
 international). Not "passengers carried" by a country's airlines, which is a
 different series and was the most common trap here (see below).
 
-## Added (18)
+## Added and kept (10), then added and pulled (8)
 
 Strength: **double** means two independent publishers each put it over the
 threshold. **Flagged** means the call rests on one publisher or on indirect
-evidence; each is named so it can be pulled with one instruction.
+evidence. The eight flagged rows were deleted from the table on 23 Sep on Andy's
+instruction (Airtable action act4Ssq0svu9yULZ4). Their evidence stays below so any
+of them can be re-added quickly if a second source turns up.
 
 | Country | Airport | Deciding evidence | Strength |
 |---|---|---|---|
@@ -41,15 +46,15 @@ evidence; each is named so it can be pulled with one instruction.
 | Liberia | ROB Roberts | Liberia Civil Aviation Authority: "more than 228,000 ... annually". WFP Logistics Cluster: "more than 450,000 ... annually" | Double |
 | Cook Islands | RAR Rarotonga | WFP Logistics Cluster: 348,017 in 2017. Cook Islands News (30 Jan 2024): arrivals alone "more than 170,000 in 2019" | Double |
 | Tonga | TBU Fua'amotu | JICA study (Jul 2025): 213,296 international passengers in 2019. Tonga Statistics Department: 136,059 arrivals and 139,527 departures in 2019 (all ports) | Double |
-| Gambia | BJL Banjul | Gambia Bureau of Statistics, Transport Statistics Summary Report 2023: 477,512 in 2019, 418,807 in 2023 | Official, one publisher |
-| Somalia | MGQ Aden Adde | National Bureau of Statistics, Facts and Figures 2021, table 1.19: 278,012 international passengers (Feb to Dec 2021), Garowe 16,689 | Flagged: one publisher |
-| Anguilla | AXA Clayton J. Lloyd | Anguilla Statistics Department monthly reports, summed: 57,718 in 2019, 114,433 in 2024, 118,186 in 2025 | Flagged: one publisher |
-| Greenland | GOH Nuuk | Statistics Greenland (bank.stat.gl): 259,449 in 2025 (see the Greenland call below) | Flagged: one publisher, judgement call |
-| Afghanistan | KBL Kabul | Ministry of Finance (16 May 2020): "handles an average of 2 million passengers per annum". Ministry of Transport via DID Press (3 Aug 2026): 1,570,896 through all the country's airports | Flagged: one airport-level source |
-| Solomon Islands | HIR Honiara | National Statistics Office: 56,438 international arrivals in 2018 (mainly Honiara; departures and domestic not counted). World Bank SIRAP2 (2025): about 249,000 passengers at Honiara and Munda, from the airport company's data | Flagged: indirect |
-| South Sudan | JUB Juba | WFP Logistics Cluster: "an average of 1300 passengers per day arriving and departing" (about 475,000 a year) | Flagged: one source, undated |
-| Bhutan | PBH Paro | No airport-level figure since 2015 could be reached (the statistics bureau and tourism council sites refuse connections; Kuensel links are dead). 181,659 in 2012 (Kuensel); Bhutan's airlines carried 189,878 in 2023 and Paro is their only international base | Flagged: indirect |
-| Sao Tome & Principe | TMS Sao Tome | INAC data in a UAB thesis: 109,721 in 2017 (92,014 international + 17,707 domestic). A union leader quoted 67,000 for 2023 without saying what it counts | Flagged: one source, 10% over the floor |
+| Gambia | BJL Banjul | Gambia Bureau of Statistics, Transport Statistics Summary Report 2023: 477,512 in 2019, 418,807 in 2023 | KEPT, but one publisher: see open question |
+| Somalia | MGQ Aden Adde | National Bureau of Statistics, Facts and Figures 2021, table 1.19: 278,012 international passengers (Feb to Dec 2021), Garowe 16,689 | PULLED 23 Sep (Flagged: one publisher) |
+| Anguilla | AXA Clayton J. Lloyd | Anguilla Statistics Department monthly reports, summed: 57,718 in 2019, 114,433 in 2024, 118,186 in 2025 | PULLED 23 Sep (Flagged: one publisher) |
+| Greenland | GOH Nuuk | Statistics Greenland (bank.stat.gl): 259,449 in 2025 (see the Greenland call below) | PULLED 23 Sep (Flagged: one publisher, judgement call) |
+| Afghanistan | KBL Kabul | Ministry of Finance (16 May 2020): "handles an average of 2 million passengers per annum". Ministry of Transport via DID Press (3 Aug 2026): 1,570,896 through all the country's airports | PULLED 23 Sep (Flagged: one airport-level source) |
+| Solomon Islands | HIR Honiara | National Statistics Office: 56,438 international arrivals in 2018 (mainly Honiara; departures and domestic not counted). World Bank SIRAP2 (2025): about 249,000 passengers at Honiara and Munda, from the airport company's data | PULLED 23 Sep (Flagged: indirect) |
+| South Sudan | JUB Juba | WFP Logistics Cluster: "an average of 1300 passengers per day arriving and departing" (about 475,000 a year) | PULLED 23 Sep (Flagged: one source, undated) |
+| Bhutan | PBH Paro | No airport-level figure since 2015 could be reached (the statistics bureau and tourism council sites refuse connections; Kuensel links are dead). 181,659 in 2012 (Kuensel); Bhutan's airlines carried 189,878 in 2023 and Paro is their only international base | PULLED 23 Sep (Flagged: indirect) |
+| Sao Tome & Principe | TMS Sao Tome | INAC data in a UAB thesis: 109,721 in 2017 (92,014 international + 17,707 domestic). A union leader quoted 67,000 for 2023 without saying what it counts | PULLED 23 Sep (Flagged: one source, 10% over the floor) |
 
 **Libya note.** Every airport page on the Libyan Airports Authority site prints
 identical traffic blocks under both 2022 and 2021, so one year is a copy error on
@@ -72,7 +77,7 @@ their site. The figure is an annual total for 2021 or 2022 either way.
 | Eritrea | No verifiable figure since 2015 (Wikipedia's 136,526 is from 2004). Asmara is plainly the country's airport; Andy's call whether to add it without one |
 | North Korea | No verifiable figure |
 
-## Within the 18 countries, also left out
+## Within the 18 countries first added, also left out
 
 - **LPQ Luang Prabang.** WFP says "around 1 million"; HVS's airport chart says
   224,543 in 2018. A fourfold disagreement cannot show it clears 1m.
@@ -89,8 +94,19 @@ a peak of 261,582 in 2023 and Nuuk 259,449 in 2025. Read literally, the peak rul
 picks Kangerlussuaq by 0.8%. But Kangerlussuaq handed its international flights to
 Nuuk in November 2024 and fell to about 31,000 passengers in 2025, while Nuuk's
 international traffic for January to July 2026 is 12.5% ahead of the same months of
-2025 (59,722 against 53,094). Nuuk was added as Greenland's airport. Kangerlussuaq
-was not.
+2025 (59,722 against 53,094). Nuuk was added as Greenland's airport and Kangerlussuaq
+was not. Nuuk was then pulled with the other flagged airports, because Statistics
+Greenland is its only publisher, so Greenland currently has no airport. If it is
+re-added, this reasoning still decides which one.
+
+## Open question for Andy
+
+**Banjul (BJL) rests on one publisher too.** The Gambia Bureau of Statistics is its
+only source: an official series, 418,807 to 477,512 a year and so about four times
+over the floor, which is why it was grouped with the double-sourced airports rather
+than the flagged eight. No independent second source could be found on 23 Sep. Under
+the strict standard applied to the eight it would be pulled as well. Kept until
+Andy decides.
 
 ## Traps worth knowing (they will bite the next person)
 
