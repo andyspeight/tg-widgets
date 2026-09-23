@@ -1,0 +1,174 @@
+{
+ "iata": "HET",
+ "id": "rec6kx70laVI5EjvC",
+ "name": "Hohhot Baita International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Hohhot_Baita_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Inner Mongolia's largest airport, 14.3 km east of downtown Hohhot, handling just over 12.7 million passengers in 2025. A metro station on Line 1 serves the terminal, which keeps the transfer into the city simple.\n\nThe network is broader than the passenger figure suggests. For 2025 the airport planned 139 routes serving 92 cities, of which 83 are nonstop and six are international or regional, so connections across northern China are good even though long haul is limited.\n\nIt also does a serious amount of freight. Cargo passed 60,000 tonnes for the first time in 2025, and the mix says a lot about the region: more than 6,000 tonnes of that was fresh meat, with cold chain veterinary pharmaceuticals up by almost a third on the year.\n\nBaita means White Pagoda, after the Wanbu Huayanjing Pagoda a few kilometres south east of the airport, which is one of the sights of Hohhot.",
+ "after": "Inner Mongolia's largest airport, 14.3 km east of downtown Hohhot, handling just over 12.7 million passengers in 2025. Line 1 of the Hohhot Metro runs to the airport, which keeps the transfer into the city simple.\n\nA new airport for the city, Hohhot Shengle International, is being prepared: in July 2026 the airport group was letting commercial space in its transport interchange. Check which airport a client's flight uses once Shengle opens.\n\nCargo passed 60,000 tonnes in 2025.",
+ "claims": [
+  {
+   "claim": "Inner Mongolia's largest airport",
+   "verdict": "confirmed",
+   "inAfter": "Inner Mongolia's largest airport",
+   "note": "CAAC 2025: Hohhot 12,722,692; next Hulunbuir (Hailar) 3,239,067 and Ordos 3,201,398.",
+   "sources": [
+    {
+     "file": "caac-2025-nmg",
+     "org": "Civil Aviation Administration of China",
+     "dated": "2026-02-26",
+     "quote": [
+      "呼和浩特/白塔 | 36 | 12722692",
+      "呼伦贝尔/海拉尔 | 61 | 3239067",
+      "鄂尔多斯/伊金霍洛 | 62 | 3201398"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is the largest airport in Inner Mongolia"
+    }
+   ]
+  },
+  {
+   "claim": "14.3 km east of downtown Hohhot",
+   "verdict": "confirmed",
+   "inAfter": "14.3 km east of downtown Hohhot",
+   "note": "Straight line 15.1 km at 73 degrees (east); ratio 0.94.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "lies 14.3 km (8.9 mi) east of downtown Hohhot"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 15.1 km (9.4 miles)",
+      "Bearing from the city centre: 73 degrees, which is east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "just over 12.7 million passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "handling just over 12.7 million passengers in 2025.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "Civil Aviation Administration of China",
+     "dated": "2026-02-26",
+     "quote": "passengers 2025: 12,722,692"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2025 it served 12,722,692 passengers."
+    }
+   ]
+  },
+  {
+   "claim": "Metro Line 1 runs to the airport",
+   "verdict": "confirmed",
+   "inAfter": "Line 1 of the Hohhot Metro runs to the airport",
+   "note": "The operator adds that the stop is about 240 metres from the terminal.",
+   "sources": [
+    {
+     "file": "op-city-transport",
+     "org": "Hohhot Baita International Airport (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "通往呼和浩特白塔机场的地铁：1号线。",
+      "机场候车点距离候机楼约240米。"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is served by Bayan (Airport) station on Line 1 of Hohhot Metro."
+    }
+   ]
+  },
+  {
+   "claim": "new airport Hohhot Shengle International being prepared; July 2026 commercial letting",
+   "verdict": "corrected",
+   "inAfter": "A new airport for the city, Hohhot Shengle International, is being prepared: in July 2026 the airport group was letting commercial space in its transport interchange.",
+   "note": "New in the text: the old one did not mention it. The same notice board (8 July 2026) was still letting space in Baita's own terminal, so Baita was operating then. Wikipedia says Baita will close once Shengle opens; with one source, that is not stated, and no opening date is given.",
+   "sources": [
+    {
+     "file": "op-shengle-gtc",
+     "org": "Inner Mongolia airport group (notice on the Hohhot Baita operator site)",
+     "dated": "2026-07-08",
+     "quote": [
+      "呼和浩特盛乐国际机场交通换乘中心（GTC）三期商业资源招商项目公告",
+      "发布时间： 2026年07月08日"
+     ]
+    },
+    {
+     "file": "op-baita-2026",
+     "org": "Hohhot Baita International Airport (operator)",
+     "dated": "2026-07-08",
+     "quote": "2026年呼和浩特白塔国际机场航站楼第七期商业资源直接洽商评审结果公示"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The Hohhot Shengle International Airport is being constructed in Horinger County which will replace Baita Airport"
+    }
+   ]
+  },
+  {
+   "claim": "cargo passed 60,000 tonnes in 2025",
+   "verdict": "softened",
+   "inAfter": "Cargo passed 60,000 tonnes in 2025.",
+   "note": "CAAC: 59,180.555 t in 2024, 60,227.758 t in 2025. 'For the first time' dropped (needs every earlier year); the fresh meat and veterinary medicine detail rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "caac-2025-nmg",
+     "org": "Civil Aviation Administration of China",
+     "quote": "60227.758000000002 | 59180.555"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "handled 60,200 tons of cargo and mail, surpassing the 60,000‑ton mark for the first time"
+    }
+   ]
+  },
+  {
+   "claim": "2025 plan: 139 routes, 92 cities, 83 nonstop, six international or regional",
+   "verdict": "cut",
+   "wasBefore": "The network is broader than the passenger figure suggests. For 2025 the airport planned 139 routes serving 92 cities, of which 83 are nonstop and six are international or regional, so connections across northern China are good even though long haul is limited.",
+   "why": "A 2025 plan from one source (Wikipedia, citing WeChat)."
+  },
+  {
+   "claim": "cargo first time; 6,000 t fresh meat; cold chain pharmaceuticals up almost a third",
+   "verdict": "cut",
+   "wasBefore": "It also does a serious amount of freight. Cargo passed 60,000 tonnes for the first time in 2025, and the mix says a lot about the region: more than 6,000 tonnes of that was fresh meat, with cold chain veterinary pharmaceuticals up by almost a third on the year.",
+   "why": "The 60,000 tonnes is kept with CAAC; the rest rests on Wikipedia alone."
+  },
+  {
+   "claim": "Baita means White Pagoda, after the Wanbu Huayanjing Pagoda",
+   "verdict": "cut",
+   "wasBefore": "Baita means White Pagoda, after the Wanbu Huayanjing Pagoda a few kilometres south east of the airport, which is one of the sights of Hohhot.",
+   "why": "Wikipedia alone; the operator's history page shows the name but does not explain it."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "which keeps the transfer into the city simple",
+   "why": "The old text's view, following from the sourced metro line."
+  },
+  {
+   "text": "Check which airport a client's flight uses once Shengle opens.",
+   "why": "Advice following from the sourced new airport."
+  }
+ ],
+ "tracerOk": {
+  "12.7": "12,722,692 rounded (CAAC, Wikipedia)",
+  "Inner Mongolia's": "possessive of Inner Mongolia, which is in the sources (Wikipedia, CAAC rows)"
+ }
+}
