@@ -1,0 +1,286 @@
+{
+ "iata": "CNF",
+ "id": "recsj2tbXxUaO9CR5",
+ "name": "Tancredo Neves International Airport",
+ "country": "Brazil",
+ "wikipedia": "https://en.wikipedia.org/wiki/Belo_Horizonte_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The main international airport for Belo Horizonte, in the municipality of Confins, 44 km north of downtown. It is operated by BH Airport.\n\nThat distance shaped the airport's whole history. Confins opened in 1984 to relieve the city's original airport at Pampulha, but the journey into town and an expensive taxi ride meant almost nobody used it, and Pampulha stayed the airport of choice. It took 22 years to pass a million passengers. In March 2005 the state government restricted Pampulha to aircraft carrying up to 50 passengers, which forced 130 flights across to Confins and lifted traffic from 350,000 to around 3 million in a single year.\n\nThe road in has since been improved, and buses, taxis and executive shuttles all serve the airport, with a transfer available onto the Belo Horizonte metro.\n\nCurrent capacity is 22 million passengers a year.\n\nIt has been named after Tancredo Neves, the president-elect who died in 1985, since September 1986.",
+ "after": "The main international airport for Belo Horizonte, in the municipality of Confins, 44 km north of the city centre. It is operated by BH Airport. Traffic reached 13.3 million passengers in 2025.\n\nPampulha, the city's original airport, was once the main airport of Minas Gerais. Executive and standard coaches link Confins with central Belo Horizonte.\n\nIt is named after Tancredo Neves, the president-elect who died in 1985.",
+ "claims": [
+  {
+   "claim": "main international airport for Belo Horizonte",
+   "verdict": "confirmed",
+   "inAfter": "The main international airport for Belo Horizonte",
+   "note": "Estado de Minas (4 September 2026) counts its international links (Santiago, Buenos Aires, Montevideo, Lisbon, Orlando and Panama City, with seasonal Bariloche and Curaçao and Punta del Este from December); Agência Brasil (2020) says Pampulha, the other city airport, has few flights beyond Minas Gerais.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the primary international airport serving Belo Horizonte"
+    },
+    {
+     "file": "em-setembro-2026",
+     "org": "Estado de Minas (Belo Horizonte newspaper)",
+     "quote": [
+      "A nova rota se junta às ligações já existentes com Santiago, Buenos Aires, Montevidéu, Lisboa, Orlando e Cidade do Panamá",
+      "04/09/2026 14:05"
+     ],
+     "dated": "2026-09-04"
+    },
+    {
+     "file": "aisweb-sbcf",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": [
+      "Tancredo Neves (SBCF) Belo Horizonte/MG",
+      "INTL"
+     ],
+     "dated": "2026-09-23 (live page, no date on page)"
+    }
+   ]
+  },
+  {
+   "claim": "in the municipality of Confins",
+   "verdict": "confirmed",
+   "inAfter": "in the municipality of Confins",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "located in the municipality of Confins, in the state of Minas Gerais"
+    },
+    {
+     "file": "em-vendidos-asur",
+     "org": "Estado de Minas (Belo Horizonte newspaper)",
+     "quote": "o Aeroporto Internacional de Belo Horizonte, em Confins",
+     "dated": "2025-11-19"
+    },
+    {
+     "file": "agbr-concessao-2014",
+     "org": "Agência Brasil (state news agency)",
+     "quote": "Aeroporto Internacional Tancredo Neves - Confins",
+     "dated": "2014-04-07"
+    }
+   ]
+  },
+  {
+   "claim": "44 km north of the city centre",
+   "verdict": "confirmed",
+   "inAfter": "44 km north of the city centre",
+   "note": "Was '44 km north of downtown'. The coordinates give 31.9 km in a straight line at 355 degrees (north); 44 km by road is a ratio of 1.38, inside the tolerance.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is located 44 km (27 mi) north of downtown Belo Horizonte."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 31.9 km",
+      "Bearing from the city centre: 355 degrees, which is north"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "13.3 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "Traffic reached 13.3 million passengers in 2025.",
+   "note": "Replaces the old text's stale traffic figures (a million passengers only after 22 years; about 3 million in 2005), which rest on Wikipedia alone. 13,312 thousand in 2025, up 7.8 per cent on 2024, from Motiva's traffic notice for December 2025 (Motiva was then the leading private shareholder) and Panrotas.",
+   "sources": [
+    {
+     "file": "motiva-mov-dez2025",
+     "org": "Motiva (seller, formerly CCR)",
+     "quote": [
+      "Total de Passageiros (em milhares)",
+      "BH Airport 1.084 1.118 3,1% 12.348 13.312 7,8%"
+     ],
+     "dated": "period January to December 2025 (the notice gives jan - dez/25; no publication date on it)"
+    },
+    {
+     "file": "panrotas-motiva-2025",
+     "org": "Panrotas (trade press, Motiva figures)",
+     "quote": [
+      "O Aeroporto Internacional de Belo Horizonte, administrado pela Motiva por meio do consórcio BH Airport, registrou aumento de 7,8% na comparação com o ano anterior, totalizando 13,3 milhões de viajantes.",
+      "02/02/2026"
+     ],
+     "dated": "2026-02-02"
+    }
+   ]
+  },
+  {
+   "claim": "operated by BH Airport",
+   "verdict": "confirmed",
+   "inAfter": "It is operated by BH Airport.",
+   "note": "Kept word for word. DECEA's live entry names BH Airport as operator, and Panrotas (February 2026) says Motiva ran the airport through the BH Airport consortium. BH Airport's own site could not be read (the old address answered 502 and 503; the new one fails to load in a browser).",
+   "sources": [
+    {
+     "file": "aisweb-sbcf",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": "BH AIRPORT",
+     "dated": "2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "panrotas-motiva-2025",
+     "org": "Panrotas (trade press, Motiva figures)",
+     "quote": "administrado pela Motiva por meio do consórcio BH Airport",
+     "dated": "2026-02-02"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is operated by BH Airport S.A."
+    }
+   ]
+  },
+  {
+   "claim": "Pampulha, the city's original airport, was once the main airport of Minas Gerais",
+   "verdict": "softened",
+   "inAfter": "Pampulha, the city's original airport, was once the main airport of Minas Gerais.",
+   "note": "Replaces the history of how Confins took over from Pampulha (the 1984 opening, the 2005 limit on Pampulha, the traffic figures), which rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "the city's original airport, Pampulha Airport",
+      "The over-crowded Pampulha Airport remained the airport of choice."
+     ]
+    },
+    {
+     "file": "agbr-pampulha-2020",
+     "org": "Agência Brasil (state news agency)",
+     "quote": [
+      "a transferência do aeroporto da Pampulha, em Belo Horizonte, da União para o estado de Minas Gerais",
+      "O local, que já chegou a ser o principal aeroporto do estado"
+     ],
+     "dated": "2020-06-17"
+    }
+   ]
+  },
+  {
+   "claim": "executive and standard coaches to central Belo Horizonte",
+   "verdict": "softened",
+   "inAfter": "Executive and standard coaches link Confins with central Belo Horizonte.",
+   "note": "Was 'buses, taxis and executive shuttles all serve the airport, with a transfer available onto the Belo Horizonte metro'. The coach company runs an executive line from the airport to Avenida Álvares Cabral (Lourdes) and a conventional line to the central bus station (2026 pages). Taxis and the metro transfer rest on Wikipedia alone (BH Airport's site could not be read).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is regularly served by buses, taxis and Executive Airport Shuttle Buses."
+    },
+    {
+     "file": "conexao-5240",
+     "org": "Conexão Aeroporto (coach operator)",
+     "quote": [
+      "Linha 5240 – Executivo – Partida Aeroporto de Confins",
+      "Região Centro Sul - Av. Alvares Cabral, 387 - Lourdes - Belo Horizonte"
+     ],
+     "dated": "2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "conexao-5250",
+     "org": "Conexão Aeroporto (coach operator)",
+     "quote": [
+      "Linha 5250 – Convencional – Partida Aeroporto de Confins",
+      "Praça Rio Branco, 100 - Centro, Belo Horizonte - Plataforma H2"
+     ],
+     "dated": "2026-09-23 (live page, no date on page)"
+    }
+   ]
+  },
+  {
+   "claim": "named after Tancredo Neves",
+   "verdict": "confirmed",
+   "inAfter": "It is named after Tancredo Neves",
+   "sources": [
+    {
+     "file": "aisweb-sbcf",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": "Tancredo Neves (SBCF) Belo Horizonte/MG",
+     "dated": "2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "agbr-concessao-2014",
+     "org": "Agência Brasil (state news agency)",
+     "quote": "Aeroporto Internacional Tancredo Neves - Confins",
+     "dated": "2014-04-07"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the airport is named after Tancredo de Almeida Neves (1910–1985), President-elect of Brazil"
+    }
+   ]
+  },
+  {
+   "claim": "the president-elect who died in 1985",
+   "verdict": "confirmed",
+   "inAfter": "the president-elect who died in 1985",
+   "note": "Elected on 15 January 1985, taken ill on the eve of his inauguration and died on 21 April 1985 (Agência Brasil).",
+   "sources": [
+    {
+     "file": "agbr-tancredo-30anos",
+     "org": "Agência Brasil (state news agency)",
+     "quote": [
+      "Em 15 de janeiro de 1985, o ex-governador de Minas Gerais Tancredo Neves venceu",
+      "O problema de saúde do presidente eleito foi comunicado na véspera de sua posse.",
+      "quando oficialmente foi anunciada sua morte"
+     ],
+     "dated": "2015-04-21"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Tancredo de Almeida Neves (1910–1985), President-elect of Brazil"
+    }
+   ]
+  },
+  {
+   "claim": "downtown",
+   "verdict": "cut",
+   "wasBefore": "44 km north of downtown",
+   "why": "Reworded to 'the city centre'; the distance and direction are kept."
+  },
+  {
+   "claim": "distance shaped the airport's history; 1984 opening; nobody used it; Pampulha the airport of choice",
+   "verdict": "cut",
+   "wasBefore": "That distance shaped the airport's whole history. Confins opened in 1984 to relieve the city's original airport at Pampulha, but the journey into town and an expensive taxi ride meant almost nobody used it, and Pampulha stayed the airport of choice.",
+   "why": "Wikipedia alone (BH Airport's site and Infraero could not be read). Pampulha's former role is kept, from Wikipedia and Agência Brasil."
+  },
+  {
+   "claim": "22 years to pass a million passengers",
+   "verdict": "cut",
+   "wasBefore": "It took 22 years to pass a million passengers.",
+   "why": "Wikipedia alone, and it contradicts itself: the same article has traffic reaching about 3 million in 2005, 21 years after opening."
+  },
+  {
+   "claim": "2005 limit on Pampulha: 50 seats, 130 flights moved, 350,000 to 3 million",
+   "verdict": "cut",
+   "wasBefore": "In March 2005 the state government restricted Pampulha to aircraft carrying up to 50 passengers, which forced 130 flights across to Confins and lifted traffic from 350,000 to around 3 million in a single year.",
+   "why": "Wikipedia alone; no second source could be read."
+  },
+  {
+   "claim": "road improved; buses, taxis, shuttles; metro transfer",
+   "verdict": "cut",
+   "wasBefore": "The road in has since been improved, and buses, taxis and executive shuttles all serve the airport, with a transfer available onto the Belo Horizonte metro.",
+   "why": "The road works, taxis and the metro transfer rest on Wikipedia alone; the coaches are kept, from the coach company's own pages."
+  },
+  {
+   "claim": "capacity 22 million a year",
+   "verdict": "cut",
+   "wasBefore": "Current capacity is 22 million passengers a year.",
+   "why": "Wikipedia alone; BH Airport's own site could not be read."
+  },
+  {
+   "claim": "since September 1986",
+   "verdict": "cut",
+   "wasBefore": "since September 1986",
+   "why": "The date rests on Wikipedia alone; the naming law could not be found on the Presidency's site."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

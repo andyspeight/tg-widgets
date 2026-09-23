@@ -1,0 +1,209 @@
+{
+ "iata": "REC",
+ "id": "recoXKlHGYVMH2dpo",
+ "name": "Recife/Guararapes - Gilberto Freyre International Airport",
+ "country": "Brazil",
+ "wikipedia": "https://en.wikipedia.org/wiki/Recife/Guararapes_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Recife, 14 km from downtown, and one of the easiest arrivals in Brazil for a client without a transfer booked.\n\nThe metro connection is the reason. Recife's metro has a station a few metres from the terminal, reached by a covered walkway, so there is no shuttle and no weather to contend with. Buses also serve Boa Viagem and Cidade Universitária in Recife and Piedade in Jaboatão dos Guararapes.\n\nThe airport has been run by AENA Brasil since 2019. A new passenger terminal in 2004 lifted capacity from 1.5 million to 9 million passengers a year.\n\nThe runway was once 3,300 metres, but a modernisation in late 2023 added safety zones at both ends.\n\nIt began life in the Second World War and was a refuelling stop on the route from South America to Europe. Since December 2001 it has been named after Gilberto Freyre, the Recife-born anthropologist and sociologist.",
+ "after": "The airport for Recife, 11 km from the city centre. It is an easy arrival for a client without a transfer booked.\n\nThe metro connection is the reason: the Airport station, on the South Line, is the nearest station to the terminal.\n\nAena Brasil has run the airport since 2020.\n\nIt has been named after Gilberto Freyre, the Recife-born sociologist, since December 2001.",
+ "claims": [
+  {
+   "claim": "the airport for Recife",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Recife",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport serving Recife, Brazil"
+    },
+    {
+     "file": "aisweb-sbrf",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": "Guararapes - Gilberto Freyre (SBRF) Recife/PE",
+     "dated": "2026-09-23 (live page, no date on page)"
+    }
+   ]
+  },
+  {
+   "claim": "11 km from the city centre",
+   "verdict": "corrected",
+   "inAfter": "11 km from the city centre",
+   "note": "Was '14 km from downtown'. The operator gives 11 km; the coordinates give 9.4 km in a straight line (209 degrees, south west), so 11 km is a ratio of 1.17 and Wikipedia's 14 km a ratio of 1.49. Both pass the tolerance; the operator's figure is used and Wikipedia's is dropped.",
+   "sources": [
+    {
+     "file": "aena-caracteristicas-b",
+     "org": "Aena Brasil (operator)",
+     "quote": "Localizado a 11 quilômetros do centro do município",
+     "dated": "2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 9.4 km"
+    }
+   ]
+  },
+  {
+   "claim": "Aena Brasil has run it since 2020",
+   "verdict": "corrected",
+   "inAfter": "Aena Brasil has run the airport since 2020.",
+   "note": "Was 'run by AENA Brasil since 2019'. 2019 was the auction (15 March 2019, won by Aena Desarrollo Internacional: Agência Brasil); Aena says it has run the airport since March 2020, and Wikipedia's own traffic table switches from Infraero to AENA reports in 2020. DECEA's live entry names Aena Brasil as operator.",
+   "sources": [
+    {
+     "file": "aena-history-en",
+     "org": "Aena Brasil (operator)",
+     "quote": "Administered by Aena Brasil since March 2020, after the company won the concession auction of the National Civil Aviation Agency (Anac) held in 2019",
+     "dated": "2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "agbr-leilao-2019",
+     "org": "Agência Brasil (state news agency)",
+     "quote": "O maior lance foi do grupo espanhol Aena Desarrollo Internacional",
+     "dated": "2019-03-15"
+    },
+    {
+     "file": "aisweb-sbrf",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": [
+      "PUB/MIL",
+      "AENA BRASIL"
+     ],
+     "dated": "2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "according to Infraero (2007–2019) and AENA (2020–2025) reports"
+    }
+   ]
+  },
+  {
+   "claim": "metro Airport station on the South Line is the nearest",
+   "verdict": "softened",
+   "inAfter": "the Airport station, on the South Line, is the nearest station to the terminal",
+   "note": "Was 'Recife's metro has a station a few metres from the terminal, reached by a covered walkway'. Aena names the Airport station on the South Line as the nearest and gives trains from 5am to 11pm; 'a few metres' and the covered walkway rest on Wikipedia alone, and the metro operator's pages sit on gov.br, which served this session a bot check.",
+   "sources": [
+    {
+     "file": "aena-como-chegar",
+     "org": "Aena Brasil (operator)",
+     "quote": "A Estação do Aeroporto (Linha Sul) é a mais próxima.",
+     "dated": "2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The Recife International Airport has a direct connection to the Recife Metro via the Airport Station"
+    }
+   ]
+  },
+  {
+   "claim": "named after Gilberto Freyre since December 2001",
+   "verdict": "confirmed",
+   "inAfter": "It has been named after Gilberto Freyre, the Recife-born sociologist, since December 2001.",
+   "sources": [
+    {
+     "file": "planalto-lei-10361",
+     "org": "Presidency of Brazil (Law 10,361)",
+     "quote": [
+      "LEI N o 10.361, DE 27 DE DEZEMBRO DE 2001.",
+      "O Aeroporto Internacional dos Guararapes, localizado na cidade do Recife, Estado de Pernambuco, passa a denominar-se"
+     ],
+     "dated": "2001-12-27"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Since 27 December 2001 it is named after the Recife-born Anthropologist and Sociologist Gilberto de Mello Freyre (1900–1987)."
+    }
+   ]
+  },
+  {
+   "claim": "Freyre, the Recife-born sociologist",
+   "verdict": "softened",
+   "inAfter": "the Recife-born sociologist",
+   "note": "Was 'the Recife-born anthropologist and sociologist'. Aena calls him one of the most important sociologists of the 20th century, from Recife; 'anthropologist' rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "aena-history-en",
+     "org": "Aena Brasil (operator)",
+     "quote": "It also pays homage to Gilberto Freyre, from Recife, one of the most important sociologists of the 20th century",
+     "dated": "2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the Recife-born Anthropologist and Sociologist Gilberto de Mello Freyre"
+    }
+   ]
+  },
+  {
+   "claim": "14 km from downtown",
+   "verdict": "cut",
+   "wasBefore": "14 km from downtown",
+   "why": "Replaced by the operator's 11 km, which the coordinates fit better."
+  },
+  {
+   "claim": "one of the easiest arrivals in Brazil",
+   "verdict": "cut",
+   "wasBefore": "one of the easiest arrivals in Brazil for a client without a transfer booked",
+   "why": "'One of the easiest in Brazil' is a ranking no source makes; softened to an opinion that it is an easy arrival, resting on the metro."
+  },
+  {
+   "claim": "station a few metres away by covered walkway; no shuttle, no weather",
+   "verdict": "cut",
+   "wasBefore": "Recife's metro has a station a few metres from the terminal, reached by a covered walkway, so there is no shuttle and no weather to contend with.",
+   "why": "The distance and the walkway rest on Wikipedia alone; softened to Aena's 'nearest station'."
+  },
+  {
+   "claim": "buses to Boa Viagem, Cidade Universitária and Piedade",
+   "verdict": "cut",
+   "wasBefore": "Buses also serve Boa Viagem and Cidade Universitária in Recife and Piedade in Jaboatão dos Guararapes.",
+   "why": "Wikipedia alone; Aena's transport page lists only taxis and the metro."
+  },
+  {
+   "claim": "run by AENA Brasil since 2019",
+   "verdict": "cut",
+   "wasBefore": "The airport has been run by AENA Brasil since 2019.",
+   "why": "2019 was the auction; Aena has run it since March 2020. Corrected."
+  },
+  {
+   "claim": "2004 terminal lifted capacity from 1.5 to 9 million",
+   "verdict": "cut",
+   "wasBefore": "A new passenger terminal in 2004 lifted capacity from 1.5 million to 9 million passengers a year.",
+   "why": "Wikipedia alone, and at odds with the operator, which gives today's capacity as 8.7 million a year and dates the terminal building to 1958."
+  },
+  {
+   "claim": "runway once 3,300 m; safety zones added in late 2023",
+   "verdict": "cut",
+   "wasBefore": "The runway was once 3,300 metres, but a modernisation in late 2023 added safety zones at both ends.",
+   "why": "The history rests on Wikipedia alone. Aena and DECEA give 2,751 m today (DECEA's declared distances run from 2,751 to 2,937 m), which is of no use to an agent."
+  },
+  {
+   "claim": "began in the Second World War as a refuelling stop to Europe",
+   "verdict": "cut",
+   "wasBefore": "It began life in the Second World War and was a refuelling stop on the route from South America to Europe.",
+   "why": "Wikipedia alone; the Air Force's site refused automated reads (403) and Aena's history does not mention it."
+  },
+  {
+   "claim": "anthropologist",
+   "verdict": "cut",
+   "wasBefore": "the Recife-born anthropologist and sociologist",
+   "why": "'Anthropologist' rests on Wikipedia alone; Aena calls him a sociologist."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "It is an easy arrival for a client without a transfer booked.",
+   "why": "Judgement kept in softened form from the old text ('one of the easiest arrivals in Brazil'); it rests on the metro station serving the airport (Aena, Wikipedia), which follows."
+  },
+  {
+   "text": "The metro connection is the reason",
+   "why": "Lead-in kept word for word from the old text; the metro station that follows is sourced."
+  }
+ ],
+ "tracerOk": {
+  "South Line": "English for Linha Sul, as Aena names the line (Estação do Aeroporto, Linha Sul). See the metro claim."
+ }
+}

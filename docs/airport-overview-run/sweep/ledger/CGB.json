@@ -1,0 +1,246 @@
+{
+ "iata": "CGB",
+ "id": "recjjIPFrA58ePIdu",
+ "name": "Várzea Grande–Marechal Rondon International Airport",
+ "country": "Brazil",
+ "wikipedia": "https://en.wikipedia.org/wiki/Marechal_Rondon_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Cuiabá, 10 km from downtown in the neighbouring municipality of Várzea Grande, and the practical arrival for Mato Grosso.\n\nCapacity has been a problem here. An Infraero assessment in 2011 listed Cuiabá as critically saturated, running above 85 per cent of capacity, which is the worst category on that list. A new terminal was built in phases from 2006 and further money went in ahead of the 2014 World Cup, when Cuiabá was a host city, covering the terminal, parking and access roads.\n\nAeroeste has run the airport under a 30-year concession since March 2019, taking over from Infraero.\n\nIt was inaugurated in 1956 but worked in fairly rough conditions until the first proper passenger terminal was finished in 1964, and it only gained international status in 1996.\n\nIt is named after Marshal Cândido Rondon, the Brazilian explorer.",
+ "after": "The airport for Cuiabá, 10 km from the city centre in the neighbouring municipality of Várzea Grande, and the practical arrival for Mato Grosso.\n\nCentro-Oeste Airports, part of the Socicam group, took over from Infraero in December 2019. The terminal has since been enlarged and modernised, with up to 50 per cent more space.\n\nIt is named after Marshal Cândido Rondon, the Brazilian explorer.",
+ "claims": [
+  {
+   "claim": "the airport for Cuiabá",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Cuiabá",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the airport serving Cuiabá, located in the municipality of Várzea Grande"
+    },
+    {
+     "file": "aisweb-sbcy",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": "Marechal Rondon (SBCY) Cuiabá/MT",
+     "dated": "2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "socicam-melhor-2026",
+     "org": "Socicam (operator group)",
+     "quote": "O Aeroporto Internacional de Cuiabá, administrado pela Centro-Oeste Airports (COA)",
+     "dated": "2026-08-03"
+    }
+   ]
+  },
+  {
+   "claim": "10 km from the city centre",
+   "verdict": "confirmed",
+   "inAfter": "10 km from the city centre",
+   "note": "Was '10 km from downtown'. The coordinates give 6.7 km in a straight line (199 degrees, south); 10 km by road is a ratio of 1.49, inside the tolerance of 1.6 but near its top, and no second written distance was found.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is located 10 km (6 mi) from downtown Cuiabá."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 6.7 km"
+    }
+   ]
+  },
+  {
+   "claim": "in the neighbouring municipality of Várzea Grande",
+   "verdict": "confirmed",
+   "inAfter": "in the neighbouring municipality of Várzea Grande",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "located in the municipality of Várzea Grande, in the state of Mato Grosso"
+    },
+    {
+     "file": "rdnews-argentina-b",
+     "org": "RD News (Cuiabá news)",
+     "quote": "o Aeroporto Internacional Marechal Rondon, localizado em Várzea Grande",
+     "dated": "2026-09-08"
+    },
+    {
+     "file": "rdnews-pesquisa",
+     "org": "RD News (Cuiabá news)",
+     "quote": "O Aeroporto Internacional Marechal Rondon, em Várzea Grande",
+     "dated": "2026-05-11"
+    }
+   ]
+  },
+  {
+   "claim": "run by Centro-Oeste Airports, part of the Socicam group",
+   "verdict": "corrected",
+   "inAfter": "Centro-Oeste Airports, part of the Socicam group",
+   "note": "Was 'Aeroeste has run the airport'. Aeroeste was the consortium of Socicam and Sinart that won the Mato Grosso block, Cuiabá included, in 2019 (Agência Brasil, September 2019); the airport is run today under the name Centro-Oeste Airports, which DECEA's live entry gives as operator and Socicam calls a Socicam group company.",
+   "sources": [
+    {
+     "file": "aisweb-sbcy",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": "Centro-Oeste Airports",
+     "dated": "2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "socicam-melhor-2026",
+     "org": "Socicam (operator group)",
+     "quote": "administrado pela Centro-Oeste Airports (COA), empresa do grupo Socicam",
+     "dated": "2026-08-03"
+    },
+    {
+     "file": "rdnews-pesquisa",
+     "org": "RD News (Cuiabá news)",
+     "quote": "Sob gestão da Centro-Oeste Airports (COA)",
+     "dated": "2026-05-11"
+    },
+    {
+     "file": "agbr-assinatura-2019",
+     "org": "Agência Brasil (state news agency)",
+     "quote": [
+      "O bloco Centro-Oeste, formado pelos aeroportos de Cuiabá, Rondonópolis, Sinop e Alta Floresta, em Mato Grosso, foi concedido ao Consórcio Aeroeste",
+      "O consórcio é formado pelas empresas brasileiras Socicam Terminais Rodoviários e Sinart"
+     ],
+     "dated": "2019-09-06"
+    }
+   ]
+  },
+  {
+   "claim": "took over from Infraero in December 2019",
+   "verdict": "corrected",
+   "inAfter": "took over from Infraero in December 2019",
+   "note": "Was 'under a 30-year concession since March 2019'. March 2019 was the auction (Wikipedia: won on 15 March 2019); the operator took charge in December 2019 (Socicam, and RD News reporting the operator's figures), and Wikipedia's traffic table switches from Infraero to COA reports in 2020, which fits. The 30-year term rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "socicam-melhor-2026",
+     "org": "Socicam (operator group)",
+     "quote": "Desde o início da gestão do empreendimento, em dezembro de 2019, a Centro-Oeste Airports investiu",
+     "dated": "2026-08-03"
+    },
+    {
+     "file": "rdnews-pesquisa",
+     "org": "RD News (Cuiabá news)",
+     "quote": "Desde dezembro de 2019, a concessionária investiu cerca de R$ 280 milhões na ampliação e modernização do terminal.",
+     "dated": "2026-05-11"
+    },
+    {
+     "file": "rdnews-internacional-anac",
+     "org": "RD News (Cuiabá news)",
+     "quote": "O Marechal Rondon é administrado pela empresa Centro Oeste Airports (COA) desde 2019, quando saiu da gestão da Empresa Brasileira de Infraestrutura Aeroportuária (Infraero).",
+     "dated": "2024-12-02"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "On 15 March 2019, Aeroeste won a 30-year concession to operate the airport.",
+      "according to Infraero (2007–2019) and COA (2020–2024) reports"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "terminal enlarged and modernised, up to 50 per cent more space",
+   "verdict": "corrected",
+   "inAfter": "The terminal has since been enlarged and modernised, with up to 50 per cent more space.",
+   "note": "Replaces the old terminal and capacity paragraph (the 2011 saturation list and the 2006 to 2014 terminal works), which the concessionaire's works have overtaken. About R$280 million since December 2019; the departure lounge is about 39 per cent bigger and the hall 21 per cent (both sources). The works were still unfinished in April 2023 (Socicam).",
+   "sources": [
+    {
+     "file": "socicam-melhor-2026",
+     "org": "Socicam (operator group)",
+     "quote": "investiu cerca de R$ 280 milhões nas obras de ampliação e modernização do terminal de passageiros, que passou a disponibilizar espaços até 50% maiores",
+     "dated": "2026-08-03"
+    },
+    {
+     "file": "rdnews-pesquisa",
+     "org": "RD News (Cuiabá news)",
+     "quote": "As obras aumentaram em até 50% os espaços do aeroporto.",
+     "dated": "2026-05-11"
+    }
+   ]
+  },
+  {
+   "claim": "named after Marshal Cândido Rondon, the Brazilian explorer",
+   "verdict": "confirmed",
+   "inAfter": "It is named after Marshal Cândido Rondon, the Brazilian explorer.",
+   "note": "The airport is Marechal Rondon to DECEA and its operator; the Brazilian Army's page on Cândido Mariano da Silva Rondon records his rank of marshal (1955) and calls him the explorer who went deepest into tropical lands.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is named after Marshall Cândido Mariano da Silva Rondon (1865–1958), a Brazilian explorer."
+    },
+    {
+     "file": "aisweb-sbcy",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": "Marechal Rondon (SBCY)",
+     "dated": "2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "eb-patrono-comunicacoes",
+     "org": "Brazilian Army (Exército Brasileiro)",
+     "quote": [
+      "Cândido Mariano da Silva Rondon nasceu a 5 de maio de 1865",
+      "como o explorador que penetrou mais profundamente em terras tropicais",
+      "Rondon recebeu as insígnias do posto de marechal"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "downtown",
+   "verdict": "cut",
+   "wasBefore": "10 km from downtown",
+   "why": "Reworded to 'the city centre'; the distance is kept."
+  },
+  {
+   "claim": "capacity has been a problem",
+   "verdict": "cut",
+   "wasBefore": "Capacity has been a problem here.",
+   "why": "Out of date: the terminal has since been enlarged (up to 50 per cent more space, Socicam and RD News)."
+  },
+  {
+   "claim": "2011 Infraero list: critically saturated, above 85 per cent, worst category",
+   "verdict": "cut",
+   "wasBefore": "An Infraero assessment in 2011 listed Cuiabá as critically saturated, running above 85 per cent of capacity, which is the worst category on that list.",
+   "why": "Fifteen years old and overtaken by the 2019 to 2023 enlargement; the figures rest on Wikipedia alone and 'the worst category' was not in any source."
+  },
+  {
+   "claim": "terminal built in phases from 2006; World Cup money for terminal, parking and access",
+   "verdict": "cut",
+   "wasBefore": "A new terminal was built in phases from 2006 and further money went in ahead of the 2014 World Cup, when Cuiabá was a host city, covering the terminal, parking and access roads.",
+   "why": "Wikipedia alone (Infraero's own site answered 'Request Rejected'), and overtaken by the concessionaire's enlargement."
+  },
+  {
+   "claim": "Aeroeste, 30-year concession since March 2019",
+   "verdict": "cut",
+   "wasBefore": "Aeroeste has run the airport under a 30-year concession since March 2019, taking over from Infraero.",
+   "why": "March 2019 was the auction: the Aeroeste consortium (Socicam and Sinart) won the Mato Grosso block (Agência Brasil). Centro-Oeste Airports, the Socicam company named by DECEA and Socicam, took over in December 2019, which the text now says. The 30-year term rests on Wikipedia and Agência Brasil's figure for all three 2019 blocks together, so it is not repeated."
+  },
+  {
+   "claim": "inaugurated 1956, rough conditions until the 1964 terminal",
+   "verdict": "cut",
+   "wasBefore": "It was inaugurated in 1956 but worked in fairly rough conditions until the first proper passenger terminal was finished in 1964",
+   "why": "Wikipedia alone; Infraero's site answered 'Request Rejected' and no other history of the airport was found."
+  },
+  {
+   "claim": "international status in 1996",
+   "verdict": "cut",
+   "wasBefore": "and it only gained international status in 1996",
+   "why": "The 1996 date rests on Wikipedia alone and misleads: RD News says the airport was international in name only, with no regular commercial international flights for 26 years, until an ANAC ordinance of December 2024 cleared it for regular international flights (DECEA and Socicam confirm the clearance, not the date). Not replaced, because 'cleared for international flights' alone would suggest flights that do not yet run; see the report for the owner."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "and the practical arrival for Mato Grosso",
+   "why": "Judgement kept from the old text: it serves Cuiabá, the state capital (GeoNames), and the concessionaire's own 2025 figures put Sinop, the next busiest, second in Mato Grosso (RD News, January 2026)."
+  }
+ ],
+ "tracerOk": {
+  "Marshal Cândido Rondon": "English for Marechal Cândido Mariano da Silva Rondon (Army page, Wikipedia); DECEA and the operator name the airport Marechal Rondon. See the naming claim."
+ }
+}

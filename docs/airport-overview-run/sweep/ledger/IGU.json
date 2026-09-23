@@ -1,0 +1,376 @@
+{
+ "iata": "IGU",
+ "id": "recgyBk7rAwb5GPuj",
+ "name": null,
+ "country": "Brazil",
+ "wikipedia": "https://en.wikipedia.org/wiki/Foz_do_Igua%C3%A7u_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for the Iguazu Falls, 13 km from downtown Foz do Iguaçu, and named after the falls themselves. It is the arrival point for Iguaçu National Park and for the Itaipu Dam.\n\nThe operator has changed twice in quick succession, which is worth knowing if an older contact list is being used. Infraero ran it until CCR won a 30-year concession in April 2021. CCR rebranded as Motiva in April 2025, then sold its entire airport portfolio to the Mexican operator ASUR in November 2025, with the transaction completing on 31 August 2026. ASUR runs it now.\n\nA regular bus service connects the airport to the city.\n\nIt opened on 7 January 1974, replacing an older airfield inside the national park that sat closer to town and closed when this one opened.",
+ "after": "The airport for the Iguazu Falls, 13 km from the centre of Foz do Iguaçu, and named after the falls themselves. It is the arrival point for Iguaçu National Park and for the Itaipu Dam.\n\nThe operator has changed name and owner in quick succession, worth knowing for older contact lists. CCR took over from Infraero in 2022. Motiva, as CCR is now called, agreed in November 2025 to sell its airports to the Mexican operator ASUR. ASUR took over on 1 September 2026.\n\nA regular bus service connects the airport to the city.\n\nIt opened in 1974, replacing an older airfield.",
+ "claims": [
+  {
+   "claim": "the airport for the Iguazu Falls",
+   "verdict": "confirmed",
+   "inAfter": "The airport for the Iguazu Falls",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "provides air-connections to the falls located at Iguaçu National Park"
+    },
+    {
+     "file": "op-recorde-set2026",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": "Porta de entrada aérea para as Cataratas do Iguaçu",
+     "dated": "2026-09-21"
+    }
+   ]
+  },
+  {
+   "claim": "13 km from the centre of Foz do Iguaçu",
+   "verdict": "confirmed",
+   "inAfter": "13 km from the centre of Foz do Iguaçu",
+   "note": "Was '13 km from downtown'. The coordinates give 11.2 km in a straight line (118 degrees, south east); 13 km by road is a ratio of 1.16, inside the tolerance. No written source gives the direction, so none is added.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is located 13 km (8 mi) from Foz do Iguaçu downtown."
+    },
+    {
+     "file": "op-como-chegar",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": "Localizado a 13km do centro de Foz do Iguaçu",
+     "dated": "2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 11.2 km"
+    }
+   ]
+  },
+  {
+   "claim": "named after the falls",
+   "verdict": "confirmed",
+   "inAfter": "named after the falls themselves",
+   "note": "The airport's formal name ends in Cataratas (operator, DECEA), the word the operator itself uses for the falls (Cataratas do Iguaçu).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is named after the Iguazu Falls (Portuguese: Cataratas do Iguaçu)"
+    },
+    {
+     "file": "op-sobre",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": "Aeroporto Internacional de Foz do Iguaçu - Cataratas",
+     "dated": "2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "aisweb-sbfi",
+     "org": "DECEA (AISWEB aerodrome entry)",
+     "quote": "Cataratas (SBFI) Foz do Iguaçu/PR",
+     "dated": "2026-09-23 (live page, no date on page)"
+    }
+   ]
+  },
+  {
+   "claim": "arrival point for Iguaçu National Park and the Itaipu Dam",
+   "verdict": "confirmed",
+   "inAfter": "It is the arrival point for Iguaçu National Park and for the Itaipu Dam.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "provides air-connections to the falls located at Iguaçu National Park, and to Itaipu Dam"
+    },
+    {
+     "file": "op-recorde-set2026",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": "o aeroporto também atende passageiros que visitam atrativos como o Parque das Aves, a Usina Hidrelétrica de Itaipu",
+     "dated": "2026-09-21"
+    },
+    {
+     "file": "op-turismo",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": [
+      "Parque Nacional do Iguaçu",
+      "3 Km do aeroporto"
+     ],
+     "dated": "2026-09-23 (live page, no date on page)"
+    }
+   ]
+  },
+  {
+   "claim": "CCR took over from Infraero in 2022",
+   "verdict": "corrected",
+   "inAfter": "CCR took over from Infraero in 2022.",
+   "note": "Was 'Infraero ran it until CCR won a 30-year concession in April 2021'. CCR won the Southern block, Foz included, in the 6th federal concession round in 2021 but began operating in 2022 (operator's history); Wikipedia's CCR figures for 2022 start in March, which fits. The 30-year term and the April date rest on Wikipedia alone (ANAC's site served a bot check to a link-finding request, so it was not read).",
+   "sources": [
+    {
+     "file": "op-sobre",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": [
+      "na qual o Grupo a CCR arrematou os aeroportos dos Blocos Sul e Central, incluindo o Aeroporto Internacional de Foz do Iguaçu",
+      "2022 Início da operação da CCR Aeroportos.",
+      "passou à responsabilidade da Infraero"
+     ],
+     "dated": "2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Previously operated by Infraero, on April 7, 2021, CCR won a 30-year concession to operate the airport.",
+      "2022 series provided by CCR is incomplete, lacking data for the months of January, February and part of March"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Motiva is CCR's new name",
+   "verdict": "softened",
+   "inAfter": "Motiva, as CCR is now called",
+   "note": "Was 'CCR rebranded as Motiva in April 2025'. Motiva's own page calls CCR its former name; the April 2025 date rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "motiva-sobre",
+     "org": "Motiva (seller, formerly CCR)",
+     "quote": "O Grupo CCR, nosso antigo nome, marcou história. Agora, como Motiva",
+     "dated": "2026-09-23 (live page, no date on page)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "On April 26, 2025 CCR was rebranded as Motiva."
+    }
+   ]
+  },
+  {
+   "claim": "agreed in November 2025 to sell its airports to ASUR",
+   "verdict": "corrected",
+   "inAfter": "agreed in November 2025 to sell its airports to the Mexican operator ASUR",
+   "note": "Was 'sold its entire airport portfolio ... in November 2025'. On 18 November 2025 Motiva signed the agreement to sell CPC, the holding with all its airport stakes, to an ASUR subsidiary; the sale itself completed on 1 September 2026.",
+   "sources": [
+    {
+     "file": "motiva-fato-transacao",
+     "org": "Motiva (seller, formerly CCR)",
+     "quote": [
+      "contrato de compra e venda de ações pelo qual ASUR obrigou-se a comprar",
+      "A CPC é uma holding que engloba a totalidade das participações da Companhia em seus ativos aeroportuários no Brasil e no exterior.",
+      "São Paulo/SP, 18 de novembro de 2025."
+     ],
+     "dated": "2025-11-18"
+    },
+    {
+     "file": "asur-closing-pdf",
+     "org": "ASUR (buyer)",
+     "quote": "under the agreement entered into on November 18, 2025",
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "On November 18, 2025 the entire airports portfolio of Motiva was sold to the Mexican airport operator ASUR."
+    }
+   ]
+  },
+  {
+   "claim": "ASUR is a Mexican airport operator",
+   "verdict": "confirmed",
+   "inAfter": "the Mexican operator ASUR",
+   "sources": [
+    {
+     "file": "asur-closing-pdf",
+     "org": "ASUR (buyer)",
+     "quote": [
+      "Mexico City, September 1, 2026",
+      "is a leading international airport operator"
+     ],
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "h2foz-asur",
+     "org": "H2FOZ (Foz do Iguaçu news)",
+     "quote": "Fundada em 1998, a companhia tem sede no México.",
+     "dated": "2026-09-03"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the Mexican airport operator ASUR"
+    }
+   ],
+   "note": "Kept from the old text ('the Mexican operator ASUR'). ASUR is based in Mexico City and describes itself as an international airport operator (it runs Cancún among nine airports in south-east Mexico)."
+  },
+  {
+   "claim": "ASUR took over on 1 September 2026",
+   "verdict": "corrected",
+   "inAfter": "ASUR took over on 1 September 2026.",
+   "note": "Was 'with the transaction completing on 31 August 2026. ASUR runs it now.' Buyer and seller both announced the completion on 1 September 2026 ('announced today', 'nesta data', 'concluiu hoje'), and the airport operator's own release of that day says ASUR takes over the Brazilian operations 'from today'. H2FOZ reports it as Tuesday 1 September. Wikipedia's 31 August is contradicted by all of them. DECEA's live entry still names CCR Aeroportos as the aerodrome's operator and the airport's website still carries the Motiva name: the concession company is unchanged, its owner is ASUR.",
+   "sources": [
+    {
+     "file": "asur-closing-pdf",
+     "org": "ASUR (buyer)",
+     "quote": [
+      "Mexico City, September 1, 2026",
+      "announced today that, following the satisfaction of all conditions precedent"
+     ],
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "motiva-fato-conclusao",
+     "org": "Motiva (seller, formerly CCR)",
+     "quote": [
+      "foi concluída, nesta data, a alienação da totalidade das ações",
+      "São Paulo, 1 de setembro de 2026."
+     ],
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "motiva-conclui-venda",
+     "org": "Motiva (seller, formerly CCR)",
+     "quote": "concluiu hoje a venda de 100% da sua plataforma de aeroportos",
+     "dated": "2026-09-01"
+    },
+    {
+     "file": "h2foz-asur",
+     "org": "H2FOZ (Foz do Iguaçu news)",
+     "quote": "informou, na última terça-feira (1.º), que concluiu a aquisição da Motiva Aeroportos, administradora do Aeroporto Internacional de Foz do Iguaçu",
+     "dated": "2026-09-03"
+    },
+    {
+     "file": "motiva-asur-consolida",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": [
+      "A partir de hoje, a ASUR assume as operações previstas na transação no Brasil",
+      "Foz do Iguaçu (PR) — Aeroporto Internacional de Foz do Iguaçu — IGU"
+     ],
+     "dated": "2026-09-01"
+    }
+   ]
+  },
+  {
+   "claim": "a regular bus service to the city",
+   "verdict": "confirmed",
+   "inAfter": "A regular bus service connects the airport to the city.",
+   "note": "The operator recommends city bus line 120 (Parque Nacional), which stops at the kerb; the line number rests on the operator alone, so it is not given.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "A regular bus service connects the airport to the city."
+    },
+    {
+     "file": "op-como-chegar",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": [
+      "A linha 120 Parque Nacional é a mais recomendada para chegar e sair do aeroporto.",
+      "A parada de ônibus está localizada no meio fio do aeroporto."
+     ],
+     "dated": "2026-09-23 (live page, no date on page)"
+    }
+   ]
+  },
+  {
+   "claim": "opened in 1974",
+   "verdict": "softened",
+   "inAfter": "It opened in 1974",
+   "note": "Was 'opened on 7 January 1974'. The operator counts 52 years of operation in September 2026, which puts the opening between September 1973 and September 1974; its history page says only 'the early 1970s' and that Infraero took charge in 1974. The day rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport was opened on January 7, 1974"
+    },
+    {
+     "file": "op-recorde-set2026",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": "o terminal superou a maior marca já registrada em seus 52 anos de operação",
+     "dated": "2026-09-21"
+    }
+   ]
+  },
+  {
+   "claim": "replacing an older airfield",
+   "verdict": "softened",
+   "inAfter": "replacing an older airfield",
+   "note": "The operator describes the old field as a small dirt strip that could not grow or take bigger aircraft.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "replacing the older Iguassú National Park Airport"
+    },
+    {
+     "file": "op-sobre",
+     "org": "Airport operator (Motiva Aeroportos, owned by ASUR since 1 Sep 2026)",
+     "quote": "O pequeno campo de pouso com pista de terra não tinha condições de crescer ou receber aeronaves de maior porte.",
+     "dated": "2026-09-23 (live page, no date on page)"
+    }
+   ]
+  },
+  {
+   "claim": "downtown",
+   "verdict": "cut",
+   "wasBefore": "13 km from downtown Foz do Iguaçu",
+   "why": "Reworded to 'the centre', the operator's word (centro); the distance is kept."
+  },
+  {
+   "claim": "Infraero until CCR won a 30-year concession in April 2021",
+   "verdict": "cut",
+   "wasBefore": "Infraero ran it until CCR won a 30-year concession in April 2021",
+   "why": "Infraero ran it until CCR began operating in 2022 (operator), not until the 2021 award; the 30-year term and the April date rest on Wikipedia alone. Replaced by the 2022 takeover."
+  },
+  {
+   "claim": "CCR rebranded as Motiva in April 2025",
+   "verdict": "cut",
+   "wasBefore": "CCR rebranded as Motiva in April 2025",
+   "why": "The April 2025 date rests on Wikipedia alone; softened to 'as CCR is now called' (Motiva's own page)."
+  },
+  {
+   "claim": "sold its entire portfolio in November 2025",
+   "verdict": "cut",
+   "wasBefore": "then sold its entire airport portfolio to the Mexican operator ASUR in November 2025",
+   "why": "November 2025 was the agreement, not the sale (Motiva, ASUR). Corrected: the sale completed on 1 September 2026."
+  },
+  {
+   "claim": "transaction completed on 31 August 2026",
+   "verdict": "cut",
+   "wasBefore": "with the transaction completing on 31 August 2026",
+   "why": "Wrong date: ASUR, Motiva and H2FOZ all date the completion to 1 September 2026."
+  },
+  {
+   "claim": "ASUR runs it now",
+   "verdict": "cut",
+   "wasBefore": "ASUR runs it now.",
+   "why": "Replaced by the dated takeover (1 September 2026)."
+  },
+  {
+   "claim": "operator changed twice in quick succession",
+   "verdict": "cut",
+   "wasBefore": "The operator has changed twice in quick succession, which is worth knowing if an older contact list is being used.",
+   "why": "Reworded: the owner changed once (Motiva to ASUR) and the name once (CCR to Motiva) in under 18 months, while Infraero handed over in 2022. The new lead-in is listed as opinion."
+  },
+  {
+   "claim": "opened on 7 January 1974",
+   "verdict": "cut",
+   "wasBefore": "It opened on 7 January 1974",
+   "why": "The day rests on Wikipedia alone; the year is kept (operator's 52 years of operation)."
+  },
+  {
+   "claim": "old airfield inside the national park, closer to town, closed when this opened",
+   "verdict": "cut",
+   "wasBefore": "inside the national park that sat closer to town and closed when this one opened",
+   "why": "Wikipedia gives only the old field's name (Iguassú National Park Airport), not that it was inside the park; 'closer to town' and its closing rest on Wikipedia alone."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The operator has changed name and owner in quick succession, worth knowing for older contact lists.",
+   "why": "Lead-in kept in spirit from the old text; the changes that follow (CCR from Infraero in 2022, the Motiva name, ASUR from 1 September 2026) are each sourced."
+  }
+ ],
+ "tracerOk": {}
+}
