@@ -1,0 +1,237 @@
+{
+ "iata": "SAH",
+ "id": "recIXrgMiDsT7qg8t",
+ "name": "Sanaa International Airport",
+ "country": "Yemen",
+ "wikipedia": "https://en.wikipedia.org/wiki/Sanaa_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Yemen's principal international airport, in Sanaa, serving the capital and the whole of the northern provinces. Before the war it carried about 1.7 million passengers a year, 80 per cent of all air travel in Yemen, on an average of 38 flights a day.\n\nVery little of that holds now, and anyone looking at this airport needs current information rather than a description. Civilian flights stopped in March 2015 when a no-fly zone was imposed over the country. The runway and terminal were severely damaged by bombardment in April 2015, and the airport was bombed again in November 2017 and December 2021. It has been closed and reopened repeatedly, at times only for humanitarian aid and United Nations medical flights, with commercial flights resuming in May 2022.\n\nThe airport itself is a single 3,200 metre runway shared with the Al-Dailami air base, an apron with 27 stands and a passenger terminal dating from the 1970s.\n\nTreat any schedule for this airport as provisional and verify it before booking.",
+ "after": "The airport for Yemen's capital, Sanaa, which is held by the Houthis. The FCDO advises against all travel to Yemen.\n\nCommercial flights resumed in May 2022 after six years, but the airport has been struck repeatedly since. Israeli air strikes hit it in December 2024 and again in May 2025, when they destroyed the last civilian plane Yemenia was flying from Sanaa. On 13 July 2026, forces of Yemen's internationally recognised government bombed the runway to stop a plane from Iran landing.\n\nIt has a single runway. Treat any schedule as provisional and verify it before booking.",
+ "claims": [
+  {
+   "claim": "the airport for Yemen's capital, Sanaa",
+   "verdict": "softened",
+   "inAfter": "The airport for Yemen's capital, Sanaa",
+   "note": "Was 'Yemen's principal international airport ... serving the whole of the northern provinces', which rested on 2007 traffic.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Sanaa International Airport"
+    },
+    {
+     "file": "aljazeera-jul2026",
+     "org": "Al Jazeera",
+     "quote": "The Yemeni capital Sanaa",
+     "dated": "2026-07-13"
+    },
+    {
+     "file": "geo",
+     "org": "GeoNames",
+     "quote": "GeoNames class PPLC, the national capital"
+    }
+   ]
+  },
+  {
+   "claim": "Sanaa is held by the Houthis",
+   "verdict": "corrected",
+   "inAfter": "which is held by the Houthis",
+   "sources": [
+    {
+     "file": "aljazeera-jul2026",
+     "org": "Al Jazeera",
+     "quote": "is controlled by Houthi ⁠⁠rebels aligned with Iran",
+     "dated": "2026-07-13"
+    },
+    {
+     "file": "france24-2022",
+     "org": "France 24 (AFP, Reuters)",
+     "quote": "took off from Yemen’s rebel-held capital on Monday"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO advises against all travel to Yemen",
+   "verdict": "corrected",
+   "inAfter": "The FCDO advises against all travel to Yemen.",
+   "primary": true,
+   "attribution": "FCDO",
+   "note": "Attributed statement, checked against the FCDO page itself (updated 31 July 2026, still current 23 September 2026).",
+   "sources": [
+    {
+     "file": "fcdo-yemen",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": [
+      "FCDO advises against all travel to Yemen.",
+      "23 September 2026"
+     ],
+     "dated": "2026-07-31"
+    }
+   ]
+  },
+  {
+   "claim": "commercial flights resumed May 2022 after six years",
+   "verdict": "confirmed",
+   "inAfter": "Commercial flights resumed in May 2022 after six years",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On 16 May 2022, commercial flights from the airport resumed after six years."
+    },
+    {
+     "file": "france24-2022",
+     "org": "France 24 (AFP, Reuters)",
+     "quote": "The first commercial flight in six years took off from Yemen’s rebel-held capital on Monday",
+     "dated": "2022-05-16"
+    }
+   ]
+  },
+  {
+   "claim": "struck repeatedly since",
+   "verdict": "corrected",
+   "inAfter": "but the airport has been struck repeatedly since",
+   "note": "Summary of the three dated strikes that follow, each with two sources.",
+   "sources": [
+    {
+     "file": "aljazeera-dec2024",
+     "org": "Al Jazeera",
+     "quote": "Israel strikes Yemen’s Sanaa airport, Hodeidah power plant"
+    },
+    {
+     "file": "aljazeera-may2025",
+     "org": "Al Jazeera",
+     "quote": "Israel says it has launched air strikes on Yemen’s main airport in the capital, Sanaa"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The Israeli Air Force conducted airstrikes on Sanaa International Airport twice"
+    }
+   ]
+  },
+  {
+   "claim": "Israeli strikes December 2024",
+   "verdict": "corrected",
+   "inAfter": "Israeli air strikes hit it in December 2024",
+   "note": "Missing from the old text, which stopped at May 2022.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "was conducted on 26 December 2024"
+    },
+    {
+     "file": "aljazeera-dec2024",
+     "org": "Al Jazeera",
+     "quote": "Israel strikes Yemen’s Sanaa airport, Hodeidah power plant",
+     "dated": "2024-12-26"
+    }
+   ]
+  },
+  {
+   "claim": "May 2025 strike destroyed Yemenia's last civilian plane at Sanaa",
+   "verdict": "corrected",
+   "inAfter": "and again in May 2025, when they destroyed the last civilian plane Yemenia was flying from Sanaa",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On 28 May, another Israeli airstrike destroyed"
+    },
+    {
+     "file": "aljazeera-may2025",
+     "org": "Al Jazeera",
+     "quote": "the strike had completely destroyed the last of the civilian planes that Yemenia Airways was operating from the airport",
+     "dated": "2025-05-28"
+    }
+   ]
+  },
+  {
+   "claim": "13 July 2026 government forces bombed the runway to stop a plane from Iran",
+   "verdict": "corrected",
+   "inAfter": "On 13 July 2026, forces of Yemen's internationally recognised government bombed the runway to stop a plane from Iran landing.",
+   "note": "Al Jazeera dates it Monday, which was 13 July 2026.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On 13 July 2026, the Presidential Leadership Council (the internationally recognized government of Yemen) and Saudi Arabia struck the airport, allegedly to prevent an Iranian plane from landing."
+    },
+    {
+     "file": "aljazeera-jul2026",
+     "org": "Al Jazeera",
+     "quote": "The government forces bombed the runway at the airport on Monday to prevent the landing of a plane carrying a delegation of Houthis arriving from Iran.",
+     "dated": "2026-07-13"
+    }
+   ]
+  },
+  {
+   "claim": "single runway",
+   "verdict": "confirmed",
+   "inAfter": "It has a single runway.",
+   "note": "Length dropped: Wikipedia says 3,200 m, OurAirports 3,252 m.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport has one 3,200-meter-long runway"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "Runways listed: 1"
+    }
+   ]
+  },
+  {
+   "claim": "1.7 million passengers, 80 per cent, 38 flights a day",
+   "verdict": "cut",
+   "wasBefore": "Before the war it carried about 1.7 million passengers a year, 80 per cent of all air travel in Yemen, on an average of 38 flights a day.",
+   "why": "2007 figures from one source; of no use now."
+  },
+  {
+   "claim": "principal airport, whole of the north",
+   "verdict": "cut",
+   "wasBefore": "Yemen's principal international airport, in Sanaa, serving the capital and the whole of the northern provinces",
+   "why": "Softened, as above."
+  },
+  {
+   "claim": "needs current information",
+   "verdict": "cut",
+   "wasBefore": "Very little of that holds now, and anyone looking at this airport needs current information rather than a description.",
+   "why": "The new text gives the current position instead."
+  },
+  {
+   "claim": "no-fly zone March 2015; bombing 2015, 2017, 2021; closed and reopened",
+   "verdict": "cut",
+   "wasBefore": "Civilian flights stopped in March 2015 when a no-fly zone was imposed over the country.",
+   "why": "Older history, one source for most of it; replaced by the 2022 restart and the strikes since."
+  },
+  {
+   "claim": "runway and terminal damaged April 2015",
+   "verdict": "cut",
+   "wasBefore": "The runway and terminal were severely damaged by bombardment in April 2015",
+   "why": "As above."
+  },
+  {
+   "claim": "UN flights only at times",
+   "verdict": "cut",
+   "wasBefore": "at times only for humanitarian aid and United Nations medical flights",
+   "why": "As above."
+  },
+  {
+   "claim": "3,200 m runway shared with Al-Dailami air base, 27 stands, 1970s terminal",
+   "verdict": "cut",
+   "wasBefore": "The airport itself is a single 3,200 metre runway shared with the Al-Dailami air base, an apron with 27 stands and a passenger terminal dating from the 1970s.",
+   "why": "Runway kept; the rest has one source."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Treat any schedule as provisional and verify it before booking.",
+   "why": "Advice that follows from the sourced strikes and the FCDO's warning that airports and airspace can close at short notice."
+  }
+ ],
+ "tracerOk": {}
+}

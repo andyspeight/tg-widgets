@@ -6,8 +6,334 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Shenzhen_Bao'an_International_Airport",
  "audited": "2026-09-23",
  "before": "One of the three big Pearl River Delta airports, alongside Hong Kong and Guangzhou Baiyun. It is on the east bank of the Pearl River in Bao'an District, 32 km north west of central Shenzhen, and it is a hub for Shenzhen Airlines, China Southern and Donghai Airlines, with UPS running its Asia Pacific cargo hub here.\n\nThe detail most people miss is the ferry. There are direct sailings to Hong Kong International Airport and passengers transit without clearing immigration and customs, which can turn an awkward two airport itinerary into a simple one.\n\nOn land the Ground Transportation Centre sits a short walk from baggage reclaim. Long distance and local buses use the first floor, taxis and the Airport Express 330 the second, and the underground level connects to Airport Station on Metro Line 11, which runs east to Futian for high speed rail.\n\nCapacity keeps growing. A second runway opened in 2011, a new terminal in 2013 and a third runway in November 2025.",
- "after": "One of the three big Pearl River Delta airports, alongside Hong Kong and Guangzhou Baiyun. It is on the east bank of the Pearl River in Bao'an District, 32 km north west of central Shenzhen, and it is a hub for Shenzhen Airlines, China Southern and Donghai Airlines, with UPS running its Asia Pacific cargo hub here.\n\nThe detail most people miss is the ferry. There are direct sailings to Hong Kong International Airport and passengers transit without clearing immigration and customs, which can turn an awkward two airport itinerary into a simple one.\n\nOn land the Ground Transportation Centre sits a short walk from baggage reclaim. Long distance and local buses use the first floor, taxis and the Airport Express 330 the second, and the underground level connects to Airport Station on Metro Line 11, which runs east to Futian for high speed rail.\n\nCapacity keeps growing. A second runway opened in 2011, a new terminal in 2013 and a third runway in November 2025.",
- "claims": [],
+ "after": "One of the three big Pearl River Delta airports, alongside Hong Kong and Guangzhou Baiyun. It is in Bao'an District, 32 km north west of central Shenzhen.\n\nShenzhen Airlines has its hub here and Donghai Airlines its main base. China Southern also has a big presence, and UPS runs a cargo hub.\n\nBuses leave from the Ground Transportation Centre, and Metro Line 11 stops at the airport.\n\nA second runway opened in 2011, a new terminal in 2013 and a third runway in November 2025.",
+ "claims": [
+  {
+   "claim": "one of the three big Pearl River Delta airports",
+   "verdict": "confirmed",
+   "inAfter": "One of the three big Pearl River Delta airports, alongside Hong Kong and Guangzhou Baiyun.",
+   "note": "Shenzhen was fourth busiest in mainland China in 2025 (CAAC: 66,485,213). The Overview carries no traffic figure; the owner may want one added.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is one of the three largest airports serving the Pearl River Delta, alongside Hong Kong International Airport and Guangzhou Baiyun International Airport."
+    },
+    {
+     "file": "newsgd-3rwy",
+     "org": "INFO Guangdong (Guangdong provincial news portal, from Southern Daily)",
+     "quote": "The three major airports—in Guangzhou, Shenzhen, and Hong Kong—shoulder distinct divisions of labor",
+     "dated": "2025-12-06"
+    }
+   ]
+  },
+  {
+   "claim": "in Bao'an District",
+   "verdict": "confirmed",
+   "inAfter": "It is in Bao'an District",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "in Bao'an District"
+    },
+    {
+     "file": "szairport-ar2025",
+     "org": "Shenzhen Airport Co. (operator), 2025 annual report",
+     "quote": "注册地址 深圳市宝安区宝安机场 T3 商务区配套写字楼 A 栋",
+     "dated": "2026-04-22"
+    }
+   ]
+  },
+  {
+   "claim": "32 km north west of central Shenzhen",
+   "verdict": "confirmed",
+   "inAfter": "32 km north west of central Shenzhen",
+   "note": "Coordinates give 29.1 km in a straight line at 291 degrees from the GeoNames centre: west on an 8-point rose, one point from north west and inside the tolerance. Ratio 1.10.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "32 km (20 mi) northwest of the city centre"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 29.1 km (18.1 miles)",
+      "Bearing from the city centre: 291 degrees, which is west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "hub for Shenzhen Airlines",
+   "verdict": "confirmed",
+   "inAfter": "Shenzhen Airlines has its hub here",
+   "note": "Star Alliance's profile is dated 'as of December 2025'. The operator's 2025 report shows Shenzhen Airlines as its largest customer.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is a hub for Shenzhen Airlines"
+    },
+    {
+     "file": "staralliance-zh",
+     "org": "Star Alliance",
+     "quote": [
+      "HUB AIRPORT(S) Shenzhen",
+      "As of December 2025, Shenzhen Airlines operates 8 branch companies, 6 bases"
+     ]
+    },
+    {
+     "file": "szairport-ar2025",
+     "org": "Shenzhen Airport Co. (operator), 2025 annual report",
+     "quote": "1 深圳航空有限责任公司 655,489,756.08 12.78%",
+     "dated": "2026-04-22"
+    }
+   ]
+  },
+  {
+   "claim": "main base of Donghai Airlines",
+   "verdict": "confirmed",
+   "inAfter": "Donghai Airlines its main base",
+   "note": "The airline's own recruitment document, presented in January 2026, gives its main base as Bao'an, Shenzhen. Parts of that text are older (it mentions pandemic suspensions).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is a hub for Shenzhen Airlines, China Southern Airlines and Donghai Airlines"
+    },
+    {
+     "file": "donghai-recruit-2026",
+     "org": "Donghai Airlines (recruitment document)",
+     "quote": [
+      "东海航空主基地位于深圳市宝安区",
+      "以深圳为主运营基地",
+      "宣讲时间：2026年01月08日 14:00"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "China Southern has a big presence",
+   "verdict": "softened",
+   "inAfter": "China Southern also has a big presence",
+   "note": "Was 'a hub for ... China Southern'. No second source calls Shenzhen a China Southern hub (its own profile pages could not be reached). The operator's 2025 report shows China Southern as its second-largest customer, close behind Shenzhen Airlines.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is a hub for Shenzhen Airlines, China Southern Airlines and Donghai Airlines"
+    },
+    {
+     "file": "szairport-ar2025",
+     "org": "Shenzhen Airport Co. (operator), 2025 annual report",
+     "quote": "2 中国南方航空股份有限公司 619,799,421.73 12.09%",
+     "dated": "2026-04-22"
+    }
+   ]
+  },
+  {
+   "claim": "UPS runs a cargo hub",
+   "verdict": "softened",
+   "inAfter": "UPS runs a cargo hub",
+   "note": "Was 'its Asia Pacific cargo hub'. UPS itself calls Shenzhen its intra-Asia hub (September 2025); FreightWaves (April 2026) confirms it is still operating.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport also serves as an Asian-Pacific cargo hub for UPS Airlines."
+    },
+    {
+     "file": "ups-intra-asia",
+     "org": "UPS",
+     "quote": "its intra-Asia hub in Shenzhen, China",
+     "dated": "2025-09-16"
+    },
+    {
+     "file": "freightwaves-ups",
+     "org": "FreightWaves",
+     "quote": "which also operates a large terminal at nearby Shenzhen airport in China",
+     "dated": "2026-04-16"
+    }
+   ]
+  },
+  {
+   "claim": "buses leave from the Ground Transportation Centre",
+   "verdict": "softened",
+   "inAfter": "Buses leave from the Ground Transportation Centre",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "where passengers can take buses, taxis and Shenzhen Metro trains"
+    },
+    {
+     "file": "hkia-hkszlink",
+     "org": "Hong Kong International Airport (Airport Authority Hong Kong)",
+     "quote": "Passengers arriving at SZIA proceed to the Ground Transportation Centre and take a free shuttle bus to Shenzhen Fuyong Pier"
+    }
+   ]
+  },
+  {
+   "claim": "Metro Line 11 stops at the airport",
+   "verdict": "confirmed",
+   "inAfter": "Metro Line 11 stops at the airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The underground floor connects with Airport Station on Metro Line 11."
+    },
+    {
+     "file": "bendibao-pier-2026",
+     "org": "Shenzhen Bendibao",
+     "quote": "旅客可搭乘地铁11号线在“深圳机场”换乘M590专线前往机场码头",
+     "dated": "2026-06-25"
+    }
+   ]
+  },
+  {
+   "claim": "second runway 2011",
+   "verdict": "confirmed",
+   "inAfter": "A second runway opened in 2011",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "with a second runway opening in 2011"
+    },
+    {
+     "file": "sznews-3rwy",
+     "org": "Shenzhen News (sznews.com)",
+     "quote": "二跑道于 2011年 建成投用",
+     "dated": "2025-12-02"
+    }
+   ]
+  },
+  {
+   "claim": "new terminal 2013",
+   "verdict": "confirmed",
+   "inAfter": "a new terminal in 2013",
+   "note": "Terminal 3 opened at 06:00 on 28 November 2013 and is still the only passenger terminal.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The terminal was opened on 28 November 2013"
+    },
+    {
+     "file": "caac-t3-2013",
+     "org": "CAAC (regulator)",
+     "quote": "11月28日早上6时，深圳机场新航站楼正式启用",
+     "dated": "2013-12-03"
+    },
+    {
+     "file": "sztb-airport",
+     "org": "Shenzhen Municipal Transport Bureau",
+     "quote": "T3航站楼于2013年投入使用"
+    }
+   ]
+  },
+  {
+   "claim": "third runway November 2025",
+   "verdict": "confirmed",
+   "inAfter": "a third runway in November 2025",
+   "note": "Settled: it opened on 29 November 2025. It is 3,600 m long.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On 29 November 2025, a third runway officially opened."
+    },
+    {
+     "file": "sznews-3rwy",
+     "org": "Shenzhen News (sznews.com)",
+     "quote": "2025年11月29日，深圳机场三跑道正式投运",
+     "dated": "2025-12-02"
+    },
+    {
+     "file": "caac-zn-3rwy",
+     "org": "CAAC Central and Southern Regional Administration",
+     "quote": "11月29日，深圳机场三跑道正式投运",
+     "dated": "2026-01-06"
+    },
+    {
+     "file": "newsgd-3rwy",
+     "org": "INFO Guangdong (Guangdong provincial news portal, from Southern Daily)",
+     "quote": "On November 29, the third runway of Shenzhen Airport officially commenced operations.",
+     "dated": "2025-12-06"
+    }
+   ]
+  },
+  {
+   "claim": "east bank of the Pearl River",
+   "verdict": "cut",
+   "wasBefore": "on the east bank of the Pearl River",
+   "why": "No second source found before the session's search budget ran out. Location is still given by district, distance and bearing."
+  },
+  {
+   "claim": "hub for China Southern",
+   "verdict": "cut",
+   "wasBefore": "it is a hub for Shenzhen Airlines, China Southern and Donghai Airlines",
+   "why": "Reworded: Shenzhen Airlines' hub and Donghai's main base are confirmed; a China Southern hub is not, so it is softened to 'a big presence'."
+  },
+  {
+   "claim": "UPS Asia Pacific cargo hub",
+   "verdict": "cut",
+   "wasBefore": "with UPS running its Asia Pacific cargo hub here",
+   "why": "Reworded to 'a cargo hub'; UPS's own label is 'intra-Asia hub'."
+  },
+  {
+   "claim": "the ferry is the detail most people miss",
+   "verdict": "cut",
+   "wasBefore": "The detail most people miss is the ferry.",
+   "why": "Opinion, and the ferry claim it introduced could not be confirmed."
+  },
+  {
+   "claim": "direct ferries to HKIA, transit without immigration",
+   "verdict": "cut",
+   "wasBefore": "There are direct sailings to Hong Kong International Airport and passengers transit without clearing immigration and customs",
+   "why": "Sources conflict on whether it still runs. HKIA's own page still lists Shenzhen Fuyong among its SkyPier ports, but Shenzhen Bendibao's June 2026 timetable lists only Macau Taipa, Guishan and Dong'ao from the airport pier, and search results quote the operator's timetable page as suspending the Hong Kong airport sailings from 16 March 2026 (that page could not be saved). The wording was also loose: passengers do clear Chinese immigration and customs, once, at Fuyong."
+  },
+  {
+   "claim": "turns a two-airport itinerary into a simple one",
+   "verdict": "cut",
+   "wasBefore": "which can turn an awkward two airport itinerary into a simple one",
+   "why": "Opinion tied to the ferry, which is cut."
+  },
+  {
+   "claim": "GTC a short walk from baggage reclaim",
+   "verdict": "cut",
+   "wasBefore": "On land the Ground Transportation Centre sits a short walk from baggage reclaim.",
+   "why": "The 'short walk' has only Wikipedia; the Centre itself is kept with two sources."
+  },
+  {
+   "claim": "bus, taxi and Airport Express 330 floors",
+   "verdict": "cut",
+   "wasBefore": "Long distance and local buses use the first floor, taxis and the Airport Express 330 the second",
+   "why": "No second source; bus route numbers and floor layouts are time-sensitive."
+  },
+  {
+   "claim": "underground level to Airport Station",
+   "verdict": "cut",
+   "wasBefore": "the underground level connects to Airport Station on Metro Line 11",
+   "why": "Reworded to 'Metro Line 11 stops at the airport'; the level detail had only one source."
+  },
+  {
+   "claim": "Line 11 east to Futian for high speed rail",
+   "verdict": "cut",
+   "wasBefore": "which runs east to Futian for high speed rail",
+   "why": "No second source found before the search budget ran out."
+  },
+  {
+   "claim": "capacity keeps growing",
+   "verdict": "cut",
+   "wasBefore": "Capacity keeps growing.",
+   "why": "Opinion; the dated expansions that follow say it plainly."
+  }
+ ],
  "opinion": [],
  "tracerOk": {}
 }

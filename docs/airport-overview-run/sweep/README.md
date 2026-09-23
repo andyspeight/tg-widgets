@@ -59,6 +59,13 @@ recent change. For each one:
    attempts), it is cut, or softened to something two sources do support.
    Never split the difference between two sources and never guess.
 
+**Attributed statements** are the one exception to the two-source rule. A
+sentence that names who says something ("The FCDO advises against all travel to
+Yemen") is checked against that body's own page, because nobody is better placed
+to confirm what the FCDO advises than the FCDO. The gate allows one source only
+when the claim is marked `primary`, the text names the body (`attribution`), and
+the source is that body. The facts behind the advice still need two sources.
+
 Location claims have their own check. `geo.mjs` computes the straight-line
 distance and bearing from the GeoNames city centre to the OurAirports position,
 data that owes nothing to Wikipedia. A stated bearing passes when it is the
@@ -81,6 +88,7 @@ committed, in the ledgers.
 | `grab.mjs <IATA> <label> <url> [regex]` | Saves one source page as text, with its URL and fetch time, and prints the matching lines |
 | `grabb.mjs <IATA> <label> <url> [regex]` | The same through a real Chromium browser, for the many official and news sites that answer a plain request with 403. Certificate checking stays on: the session's proxy CA was added to Chromium's trust store (`certutil`, 23 Sep), never bypassed |
 | `show.mjs <IATA>` | Prints a ledger for the human reviewer, flagging low-tier sources and undated time-sensitive claims |
+| `refs.mjs <IATA> [regex]` | Lists the external sources the Wikipedia article cites, grouped by publisher, so the original publisher can be opened without a search engine |
 | `check.mjs <IATA>` | The gate. Every quote on its saved page, two organisations per kept claim, every sentence of the new text carried by a checked claim, tracer, bearings, house style |
 
 ## Bulk second sources, fetched once for many airports
@@ -137,3 +145,6 @@ two sources is `Done`, and Done is servable. That is Andy's call, asked on
 | 23 Sep 2026 | MEM Memphis (helper) | Verified and pushed. Renaming of 11 Aug 2026 confirmed three ways; MEM code unchanged; FedEx daily flight count cut because good sources disagree (400, 250, 165) |
 | 23 Sep 2026 | KWI Kuwait (helper) | Verified and pushed. Caught: airspace shut 28 Feb to 26 Apr 2026 in the Iran war, Terminal 1 closed since an air strike on 3 June, a third runway of 4,580 m. Re-checked independently against the FCDO page |
 | 23 Sep 2026 | HRB Harbin (helper) | Verified and pushed. Caught: "terminals a mile apart" is out of date since July 2024; international moved into a rebuilt T1 joined to T2 |
+| 23 Sep 2026 | SYZ Shiraz (helper) | Verified and pushed. Caught: nothing on the 2026 war; Iran shut its airspace after the 28 Feb strikes, Shiraz reopened by late April, EASA says do not overfly, FCDO says do not travel. Now mostly a travel warning |
+| 23 Sep 2026 | CCS Caracas (helper) | Verified and pushed. Caught: city direction wrong (the airport is north of Caracas, not east of it); earthquakes on 24 Jun 2026 shut the terminal; reopened 1 Sep at about a quarter of capacity |
+| 23 Sep 2026 | SAH Sanaa | Verified and pushed. Caught: the text stopped at May 2022; Israeli strikes Dec 2024 and May 2025 (Yemenia's last plane destroyed), the government bombed the runway 13 Jul 2026. FCDO: against all travel |

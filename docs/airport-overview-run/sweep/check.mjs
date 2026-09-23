@@ -81,7 +81,15 @@ for (const code of process.argv.slice(2).map(s => s.toUpperCase())) {
         for (const q of quotes) if (!q || !e.n.includes(norm(q))) bad.push(`${s.file}: quote NOT on page: "${String(q).slice(0, 90)}"`);
         orgs.add(s.org);
       }
-      if (orgs.size < 2) bad.push(`only ${orgs.size} independent organisation(s): ${[...orgs].join(', ')}`);
+      // Attributed statements ("the FCDO advises...") are checked against the
+      // body the sentence names; that page is the primary source and nobody
+      // is better placed to confirm what it says. Allowed only when the text
+      // itself names the body and the one source is that body.
+      const attributed = c.primary && c.attribution &&
+        nAfter.includes(norm(c.inAfter)) && norm(c.inAfter).includes(norm(c.attribution)) &&
+        (c.sources || []).some(s => norm(s.org).includes(norm(c.attribution)));
+      if (c.primary && !attributed) bad.push('marked primary, but the text does not name the body it quotes, or no source is that body');
+      if (orgs.size < 2 && !attributed) bad.push(`only ${orgs.size} independent organisation(s): ${[...orgs].join(', ')}`);
     }
     if (bad.length) { errs.push(tag); console.log('  FAIL ' + tag + '\n       ' + bad.join('\n       ')); }
     else console.log('  ok   ' + tag + (c.verdict === 'cut' ? '' : '  <- ' + (c.sources || []).map(s => s.org).join(' + ')));
