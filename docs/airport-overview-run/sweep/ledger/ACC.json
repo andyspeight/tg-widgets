@@ -1,0 +1,382 @@
+{
+ "iata": "ACC",
+ "id": "recLDiM2vG2RCbgrx",
+ "name": null,
+ "country": "Ghana",
+ "wikipedia": "https://en.wikipedia.org/wiki/Accra_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Ghana's main airport and, for a long time, its only international one. It handled a record 3.62 million passengers in 2025, up from 1.2 million in the pandemic year of 2020, and it has been named Best Airport in Africa in its size band three years running by Airports Council International.\n\nTerminals are simple to explain. Terminal 3 takes regional, international and long haul flights and can handle aircraft as large as an A380. Terminal 2 is domestic only. Terminal 1 is closed and is to be redeveloped as a private aviation terminal.\n\nIt is a hub for Africa World Airlines and a base for Passion Air, so onward regional connections are good. Freight is substantial too, with Cargolux, DHL, Emirates SkyCargo, Ethiopian, Qatar and Turkish all flying cargo in.\n\nWorth knowing for a business client: Airport City Accra has grown up around the terminals, with the Marina Mall, the Accra Marriott, ibis Styles and a Holiday Inn all on the doorstep.\n\nThe airport was formerly called Kotoka International, a name still in wide use.",
+ "after": "Ghana's main airport, which handled a record 3.62 million passengers in 2025.\n\nInternational flights use Terminal 3 and domestic flights Terminal 2. Terminal 2 is being refitted to take some international flights as well, so check which terminal a client's flight uses.\n\nIt is the base for Africa World Airlines, which flies within Ghana and across West Africa, and PassionAir also flies domestic routes from here. For business clients, Airport City Accra has grown up around the airport, with offices and the Marina Mall.\n\nIts name changed from Kotoka International back to Accra International Airport on 23 February 2026, the name it had until 1969. The code is still ACC, and older material may still say Kotoka.",
+ "claims": [
+  {
+   "claim": "Ghana's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Ghana's main airport",
+   "note": "The regulator's domestic passenger statistics are kept as traffic to and from Accra, the centre of the network.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "AIA, for a long time, was the sole international airport in Ghana"
+    },
+    {
+     "file": "mj-t2-facelift-mar2026",
+     "org": "MyJoyOnline (Multimedia Group)",
+     "dated": "2026-03-12",
+     "quote": "passenger traffic through Ghana's main international gateway continues to grow"
+    },
+    {
+     "file": "gcaa-dom-2010-2025",
+     "org": "Ghana Civil Aviation Authority (regulator)",
+     "dated": "2026-03",
+     "quote": "STATISTICS - DOMESTIC PASSENGERS (TO/FROM ACCRA)"
+    }
+   ]
+  },
+  {
+   "claim": "a record 3.62 million passengers in 2025",
+   "verdict": "confirmed",
+   "inAfter": "which handled a record 3.62 million passengers in 2025",
+   "note": "JUDGEMENT CALL, flagged for the owner. The regulator publishes the parts, not the total: 2,539,034 international passengers plus 181,826 transit (its international table) plus 903,227 domestic passengers to and from Accra (its domestic table) makes 3,624,087, exactly Wikipedia's infobox figure. The same sums give about 3.40 million for 2024 and lower totals for every year back to 2010, so 2025 is the highest in the regulator's series. The international table is national, though Accra carries almost all of it.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2025, the airport served a record 3.62 million passengers"
+    },
+    {
+     "file": "gcaa-intl-2010-2025",
+     "org": "Ghana Civil Aviation Authority (regulator)",
+     "dated": "2026-03",
+     "quote": [
+      "GENERAL STATISTICS - INTERNATIONAL",
+      "TRANSIT ENROUTE",
+      "2025 13,531 13,531 27,062 1,238,220 1,300,814 2,539,034 18,144 28,228 46,372 181,826 61,046",
+      "2024 13,509 13,510 27,019 1,150,097 1,198,927 2,349,024 18,630 24,137 42,767 189,463 59,901"
+     ]
+    },
+    {
+     "file": "gcaa-dom-2010-2025",
+     "org": "Ghana Civil Aviation Authority (regulator)",
+     "dated": "2026-03",
+     "quote": [
+      "STATISTICS - DOMESTIC PASSENGERS (TO/FROM ACCRA)",
+      "2025 486,859 217,899 36,163 133,069 24,970 0 4,267 903,227",
+      "2024 453,475 219,770 36,632 124,068 23,852 0 4,930 862,727"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "international flights use Terminal 3 and domestic flights Terminal 2",
+   "verdict": "confirmed",
+   "inAfter": "International flights use Terminal 3 and domestic flights Terminal 2.",
+   "note": "Terminal allocation confirmed by the operator on 10 April 2026 (the release itself is undated; the operator's site lists it under that date, and it answers a petition reported on 9 April 2026).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Terminal 2 handles only domestic flights, while Terminal 3 serves regional, international, and long-haul flights."
+    },
+    {
+     "file": "gacl-t2-works",
+     "org": "Ghana Airports Company Limited (operator)",
+     "dated": "2026-04-10",
+     "quote": [
+      "Following the completion of Terminal 3, international operations were migrated to Terminal 3, while domestic operations moved from Terminal 1 to Terminal 2.",
+      "Terminal 2 is being transformed from a domestic-only terminal into a dual-use facility (domestic and international)."
+     ]
+    },
+    {
+     "file": "gacl-awards",
+     "org": "Ghana Airports Company Limited (operator)",
+     "dated": "2026-09-08",
+     "quote": [
+      "April 10, 2026",
+      "GACL Corrects False information about petition to halt Terminal 2 works"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2 being refitted to take some international flights as well",
+   "verdict": "corrected",
+   "inAfter": "Terminal 2 is being refitted to take some international flights as well",
+   "note": "Was 'Terminal 2 is domestic only'. The transport minister (12 March 2026) targeted completion by July 2026; the operator (10 April 2026) describes the works as ongoing, and nothing later confirms they are finished, so no completion date is given.",
+   "sources": [
+    {
+     "file": "gacl-t2-works",
+     "org": "Ghana Airports Company Limited (operator)",
+     "dated": "2026-04-10",
+     "quote": [
+      "Terminal 2 is being transformed from a domestic-only terminal into a dual-use facility (domestic and international).",
+      "Under the ongoing repurposing works"
+     ]
+    },
+    {
+     "file": "mj-t2-facelift-mar2026",
+     "org": "MyJoyOnline (Multimedia Group)",
+     "dated": "2026-03-12",
+     "quote": [
+      "The refurbished terminal is expected to play a dual role, handling both domestic and some international flights",
+      "12 March 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "base for Africa World Airlines",
+   "verdict": "softened",
+   "inAfter": "It is the base for Africa World Airlines",
+   "note": "Was 'a hub for Africa World Airlines'. The airline's own pages give its head office in Airport City, Accra and a network run from Accra.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It presently serves as a hub for domestic and regional operator Africa World Airlines"
+    },
+    {
+     "file": "awa-contact",
+     "org": "Africa World Airlines",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Head Office (Accra)",
+      "Airport By-Pass Road, Airport City, Accra"
+     ]
+    },
+    {
+     "file": "mj-awa-abidjan-sep2026",
+     "org": "MyJoyOnline (Multimedia Group)",
+     "dated": "2026-09",
+     "quote": "A relaunch ceremony was organised at the Accra International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "Africa World Airlines flies within Ghana and across West Africa",
+   "verdict": "corrected",
+   "inAfter": "which flies within Ghana and across West Africa",
+   "note": "Replaces 'so onward regional connections are good'. Abidjan resumed in September 2026, after the airline's own route list was written.",
+   "sources": [
+    {
+     "file": "awa-about",
+     "org": "Africa World Airlines",
+     "dated": "2026-09-23 (live page)",
+     "quote": "The airline operates routes to various key destinations in West Africa, including Kumasi, Tamale, and Takoradi in Ghana, Ouagadougou in Burkina Faso, as well as Lagos and Abuja in Nigeria."
+    },
+    {
+     "file": "mj-awa-abidjan-sep2026",
+     "org": "MyJoyOnline (Multimedia Group)",
+     "dated": "2026-09",
+     "quote": [
+      "Africa World Airlines (AWA) has resumed direct flights between Accra and Abidjan",
+      "as the airline pushes to improve connectivity across West Africa"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "PassionAir flies domestic routes from here",
+   "verdict": "softened",
+   "inAfter": "and PassionAir also flies domestic routes from here",
+   "note": "Was 'a base for Passion Air'. Only Wikipedia calls it a base (PassionAir's site could not be reached), so the text says only that it flies domestic routes from Accra.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "a base for domestic operator Passion Air"
+    },
+    {
+     "file": "mj-passionair-mar2026",
+     "org": "MyJoyOnline (Multimedia Group)",
+     "dated": "2026-03-12",
+     "quote": "flight disruptions on its Kumasi route and delays across parts of its domestic network"
+    },
+    {
+     "file": "mj-passionair-apr2026",
+     "org": "MyJoyOnline (Multimedia Group)",
+     "dated": "2026-04-01",
+     "quote": "PassionAir assures passengers after Kumasi–Accra flight encounters turbulence"
+    }
+   ]
+  },
+  {
+   "claim": "Airport City Accra grown up around the airport, with offices and the Marina Mall",
+   "verdict": "softened",
+   "inAfter": "Airport City Accra has grown up around the airport, with offices and the Marina Mall",
+   "note": "The named hotels (Accra Marriott, ibis Styles, Holiday Inn) rest on Wikipedia alone: the hotel sites refused the fetcher or redirected.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Airport City Accra is an urban development centred around Accra International Airport.",
+      "retail outlets such as Marina Mall",
+      "corporate offices for companies such as Africa World Airlines and Vodafone Ghana"
+     ]
+    },
+    {
+     "file": "mj-marina-nov2025",
+     "org": "MyJoyOnline (Multimedia Group)",
+     "dated": "2025-11-20",
+     "quote": "Why Marina Mall, Airport City is quietly winning Black Friday in Accra"
+    },
+    {
+     "file": "awa-contact",
+     "org": "Africa World Airlines",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Airport By-Pass Road, Airport City, Accra"
+    }
+   ]
+  },
+  {
+   "claim": "renamed from Kotoka International back to Accra International Airport on 23 February 2026",
+   "verdict": "corrected",
+   "inAfter": "Its name changed from Kotoka International back to Accra International Airport on 23 February 2026",
+   "note": "Was 'formerly called Kotoka International'. The record has no Name at all; Accra International Airport is the name to use (owner to decide).",
+   "sources": [
+    {
+     "file": "graphic-rename",
+     "org": "Graphic Online (Graphic Communications Group)",
+     "dated": "2026-02-23",
+     "quote": [
+      "The government has officially reverted the name of Kotoka International Airport to its former designation, Accra International Airport",
+      "Feb - 23 - 2026"
+     ]
+    },
+    {
+     "file": "mj-renamed-feb2026",
+     "org": "MyJoyOnline (Multimedia Group)",
+     "dated": "2026-02-23",
+     "quote": [
+      "Government has reverted the name of the national airport, Kotoka International Airport, to Accra International Airport.",
+      "23 February 2026"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "On 23 February 2026, the airport's designation was officially changed back to Accra International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "the name it had until 1969",
+   "verdict": "confirmed",
+   "inAfter": "the name it had until 1969",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 1969, the Accra International Airport was renamed Kotoka International Airport"
+    },
+    {
+     "file": "gacl-history",
+     "org": "Ghana Airports Company Limited (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "In 1969, the Accra International Airport was renamed Kotoka International Airport in memory of the late Lt. General E.K. Kotoka."
+    }
+   ]
+  },
+  {
+   "claim": "the code is still ACC",
+   "verdict": "confirmed",
+   "inAfter": "The code is still ACC",
+   "sources": [
+    {
+     "file": "graphic-rename",
+     "org": "Graphic Online (Graphic Communications Group)",
+     "dated": "2026-02-23",
+     "quote": "the airport code has remained \"ACC\""
+    },
+    {
+     "file": "mj-renamed-feb2026",
+     "org": "MyJoyOnline (Multimedia Group)",
+     "dated": "2026-02-23",
+     "quote": "It further noted that the airport code, \"ACC,\" as registered with the International Civil Aviation Organisation (ICAO), has always remained the same and will continue to be used."
+    }
+   ]
+  },
+  {
+   "claim": "Ghana's main airport and for a long time its only international one",
+   "verdict": "cut",
+   "wasBefore": "Ghana's main airport and, for a long time, its only international one.",
+   "why": "Main airport kept. 'For a long time its only international one' rests on Wikipedia alone."
+  },
+  {
+   "claim": "handled a record 3.62 million passengers in 2025 (sentence)",
+   "verdict": "cut",
+   "wasBefore": "It handled a record 3.62 million passengers in 2025",
+   "why": "Reworded into the opening sentence; the figure is kept."
+  },
+  {
+   "claim": "up from 1.2 million in 2020",
+   "verdict": "cut",
+   "wasBefore": "up from 1.2 million in the pandemic year of 2020",
+   "why": "The regulator's figures for 2020 add up to about 1.12 million, not 1.2 million, so the sources disagree."
+  },
+  {
+   "claim": "Best Airport in Africa in its size band three years running",
+   "verdict": "cut",
+   "wasBefore": "and it has been named Best Airport in Africa in its size band three years running by Airports Council International",
+   "why": "Those awards were for 2019 to 2021 and read as current. The operator reports a newer ACI award (Best Airport at Departures, Africa, 2 to 5 million passengers, September 2026), but only on its own site."
+  },
+  {
+   "claim": "terminals simple to explain; Terminal 3 regional, international and long haul; A380",
+   "verdict": "cut",
+   "wasBefore": "Terminals are simple to explain. Terminal 3 takes regional, international and long haul flights and can handle aircraft as large as an A380.",
+   "why": "No longer simple: Terminal 2 is being converted to take international flights too. Terminal 3 for international flights is kept with the operator's 2026 statement; the A380 capability rests on Wikipedia alone."
+  },
+  {
+   "claim": "Terminal 2 domestic only",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 is domestic only.",
+   "why": "Out of date: the operator and the transport minister say it is being refitted to take some international flights as well (2026)."
+  },
+  {
+   "claim": "Terminal 1 closed, to be redeveloped as private aviation terminal",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 is closed and is to be redeveloped as a private aviation terminal.",
+   "why": "Wrong on the operator's own account: McDan Aviation ran private jet (FBO) services in Terminal 1 from 2022 until the operator ended the agreement on 16 January 2026 and locked the terminal on 9 February 2026 (MyJoyOnline, 12 March 2026, quoting the operator). Its use now is in dispute and of no use to a travel agent."
+  },
+  {
+   "claim": "hub for AWA and base for Passion Air, so regional connections good",
+   "verdict": "cut",
+   "wasBefore": "It is a hub for Africa World Airlines and a base for Passion Air, so onward regional connections are good.",
+   "why": "Reworded: 'base for Africa World Airlines' and PassionAir's domestic routes are kept with two sources each; the judgement about connections is replaced by where the airline flies."
+  },
+  {
+   "claim": "freight airlines",
+   "verdict": "cut",
+   "wasBefore": "Freight is substantial too, with Cargolux, DHL, Emirates SkyCargo, Ethiopian, Qatar and Turkish all flying cargo in.",
+   "why": "The operator's cargo airline list matches Wikipedia but carries no date (site footer 2023), so nothing from the last 12 months confirms it; of little use to a travel agent."
+  },
+  {
+   "claim": "Airport City with named hotels on the doorstep",
+   "verdict": "cut",
+   "wasBefore": "Worth knowing for a business client: Airport City Accra has grown up around the terminals, with the Marina Mall, the Accra Marriott, ibis Styles and a Holiday Inn all on the doorstep.",
+   "why": "Airport City and the Marina Mall kept; the named hotels rest on Wikipedia alone."
+  },
+  {
+   "claim": "formerly called Kotoka International, still in wide use",
+   "verdict": "cut",
+   "wasBefore": "The airport was formerly called Kotoka International, a name still in wide use.",
+   "why": "Reworded with the date of the change (23 February 2026) and the unchanged code."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so check which terminal a client's flight uses.",
+   "why": "Advice that follows from the Terminal 2 conversion now under way."
+  },
+  {
+   "text": "For business clients,",
+   "why": "Framing kept from the old text; the facts in the sentence are claims."
+  },
+  {
+   "text": "and older material may still say Kotoka.",
+   "why": "Advice: the name changed only in February 2026 (MyJoyOnline was still writing 'Kotoka International Airport' in May 2026)."
+  }
+ ],
+ "tracerOk": {}
+}

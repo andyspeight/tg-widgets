@@ -1,0 +1,288 @@
+{
+ "iata": "DAR",
+ "id": "recOyOoFD8qrmpU1l",
+ "name": "Julius Nyerere International Airport",
+ "country": "Tanzania",
+ "wikipedia": "https://en.wikipedia.org/wiki/Julius_Nyerere_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Tanzania's main international airport, in the Kipawa ward of Dar es Salaam, with flights across Africa and out to Asia, Europe and the Middle East.\n\nThere are three terminals and it pays to know which one. Terminal 3, opened in August 2019, handles all international flights and holds 58 shops and services. Terminal 2 takes domestic and regional scheduled flights and is rated for 1.5 million passengers. Terminal 1 is for private, charter and small aircraft, and a separate VIP terminal for state and high profile passengers was built in January 2026.\n\nTerminal 2 is due a major rebuild, announced in 2024, to turn it into a national hub for Air Tanzania handling up to 3.5 million passengers, so expect the domestic side to change.\n\nA rail shuttle from the airport into the city has been proposed and coaches were bought, but check whether it is running before relying on it.\n\nThe airport was renamed after Julius Nyerere, Tanzania's first president, in stages between 2005 and 2006.",
+ "after": "The international airport for Dar es Salaam, Tanzania's largest city, with flights across Africa and out to Asia, Europe and the Middle East.\n\nThere are three terminals, so check which one a client's flight uses. Terminal 3, the newest, opened in 2019. A new VIP terminal for state guests opened at Terminal 1 in January 2026. Terminal 2 is due to be modernised and expanded, so expect changes there.\n\nIt is named after Julius Nyerere, Tanzania's first president.",
+ "claims": [
+  {
+   "claim": "the international airport for Dar es Salaam, Tanzania's largest city",
+   "verdict": "softened",
+   "inAfter": "The international airport for Dar es Salaam, Tanzania's largest city",
+   "note": "Was 'Tanzania's main international airport'. Only the operator calls it the largest and busiest (TAA, October 2024), and a July 2025 count of daily flights put Zanzibar ahead of it, so the ranking is not stated.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the international airport of Dar es Salaam, the largest city in Tanzania"
+    },
+    {
+     "file": "taa-interview",
+     "org": "Tanzania Airports Authority (operator)",
+     "dated": "2024-10-21",
+     "quote": "located in Dar es Salaam, the largest and fast-growing city in Tanzania"
+    },
+    {
+     "file": "pw-dar",
+     "org": "Precision Air",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "As Tanzania's Largest City And Primary Travel Hub, Dar Es Salaam",
+      "Dar Es Salaam (Julius Nyerere International Airport) Is Our Main Hub"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "flights across Africa and out to Asia, Europe and the Middle East",
+   "verdict": "confirmed",
+   "inAfter": "with flights across Africa and out to Asia, Europe and the Middle East",
+   "note": "The ministry's table of international airlines at JNIA (May 2026) has Amsterdam and Istanbul (Europe), Dubai, Doha and Muscat (Middle East), Mumbai and Guangzhou on Air Tanzania (Asia) and a long list of African routes. Middle East flights were suspended from 28 February 2026 in the Iran war; the ministry's May table and Emirates' own live page show them running again.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport has flights to destinations in Africa, Asia, Europe, and the Middle East."
+    },
+    {
+     "file": "mot-hotuba-2026",
+     "org": "Ministry of Transport, Tanzania (2026/27 budget speech to Parliament)",
+     "dated": "2026-05",
+     "quote": [
+      "MWAKA WA FEDHA 2026/27",
+      "Kiwanja cha Ndege cha Kimataifa cha Julius Nyerere (JNIA)",
+      "Emirates (EK) DXB 7",
+      "Royal Dutch Air (KL) AMS 7",
+      "Qatar Airways (QR) DOH 10",
+      "Turkish Air (TK) IST 13",
+      "BOM/CAN/NBO/NLA/DXB",
+      "Ethiopian Airline (ET) ADD 27",
+      "Kenya Airways (KQ) NAIROBI 24"
+     ]
+    },
+    {
+     "file": "atcl-destinations",
+     "org": "Air Tanzania",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Guangzhou",
+      "Mumbai",
+      "Johannesburg",
+      "Lagos"
+     ]
+    },
+    {
+     "file": "emirates-dar",
+     "org": "Emirates",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Fly Emirates to Dar Es Salaam (DAR)"
+    }
+   ]
+  },
+  {
+   "claim": "there are three terminals",
+   "verdict": "confirmed",
+   "inAfter": "There are three terminals",
+   "note": "The ministry's 2026/27 budget names all three (Terminal I, Terminal Building II, TB III). Which flights use which terminal is not confirmed by any source from the last 12 months (see the cut lines), so the text tells the agent to check.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "There are three terminals at Dar es Salaam airport."
+    },
+    {
+     "file": "mot-hotuba-2026",
+     "org": "Ministry of Transport, Tanzania (2026/27 budget speech to Parliament)",
+     "dated": "2026-05",
+     "quote": [
+      "Julius Nyerere (JNIA ) Terminal I ambapo",
+      "Nyerere International Airport Terminal Building II",
+      "of TB III"
+     ]
+    },
+    {
+     "file": "taa-interview",
+     "org": "Tanzania Airports Authority (operator)",
+     "dated": "2024-10-21",
+     "quote": [
+      "with a capacity of 500,000 passengers per year at its Terminal 1. In 1984, Terminal 2 was opened",
+      "the construction of a state-of-the-art Terminal 3"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 3, the newest, opened in 2019",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 3, the newest, opened in 2019.",
+   "note": "Wikipedia gives August 2019; the operator says only that it was completed in 2019, so the month is not stated. Terminal 3 is in use in 2026 (Plaza Premium and Air Tanzania lounges).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Terminal 3 is the newest terminal that opened in August 2019."
+    },
+    {
+     "file": "taa-interview",
+     "org": "Tanzania Airports Authority (operator)",
+     "dated": "2024-10-21",
+     "quote": [
+      "the construction of a state-of-the-art Terminal 3",
+      "completed in 2019"
+     ]
+    },
+    {
+     "file": "dn-plaza-aug2026",
+     "org": "Daily News (Tanzania Standard Newspapers)",
+     "dated": "2026-08-03",
+     "quote": "Plaza Premium Lounge at JNIA Terminal 3"
+    }
+   ]
+  },
+  {
+   "claim": "new VIP terminal for state guests opened at Terminal 1 in January 2026",
+   "verdict": "corrected",
+   "inAfter": "A new VIP terminal for state guests opened at Terminal 1 in January 2026.",
+   "note": "Was 'a separate VIP terminal ... was built in January 2026'. It was inaugurated by the Vice President on 16 January 2026, and The Citizen places it at Terminal One.",
+   "sources": [
+    {
+     "file": "citizen-vip",
+     "org": "The Citizen (Mwananchi Communications)",
+     "dated": "2026-01-15",
+     "quote": [
+      "the VIP terminal building at Julius Nyerere International Airport (Terminal One)",
+      "new and modern VIP terminal designed to serve leaders of presidential rank",
+      "Thursday, January 15, 2026",
+      "the inauguration scheduled for tomorrow"
+     ]
+    },
+    {
+     "file": "dn-vip-jan2026",
+     "org": "Daily News (Tanzania Standard Newspapers)",
+     "dated": "2026-01-16",
+     "quote": "made the remarks today, January 16, 2026, during the inauguration of the VIP Terminal at the Julius Nyerere International Airport (JNIA)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In January 2026, a new VIP terminal was mainly built to serve high-profile and state passengers."
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2 due to be modernised and expanded",
+   "verdict": "corrected",
+   "inAfter": "Terminal 2 is due to be modernised and expanded",
+   "note": "The 2024 plan (TAA and Wikipedia) was a rebuild as a national hub for Air Tanzania for up to 3.5 million passengers. The 2026/27 budget funds 'Modernization and Expansion of Julius Nyerere International Airport Terminal Building II' (TZS 26.75 billion) but gives neither the hub role nor a capacity, so those details are dropped. ch-aviation (18 May 2026) reported a new 2.5 million passenger terminal 'at Dar es Salaam' from the same budget, but the speech puts that terminal at Mwanza, so ch-aviation is not used.",
+   "sources": [
+    {
+     "file": "mot-hotuba-2026",
+     "org": "Ministry of Transport, Tanzania (2026/27 budget speech to Parliament)",
+     "dated": "2026-05",
+     "quote": [
+      "Modernization and Expansion of Julius",
+      "Nyerere International Airport Terminal Building II",
+      "Uboreshaji na ujenzi wa majengo ya abiria"
+     ]
+    },
+    {
+     "file": "taa-interview",
+     "org": "Tanzania Airports Authority (operator)",
+     "dated": "2024-10-21",
+     "quote": "Further expansion is planned, with the major upcoming project being the renovation of Terminal 2."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2024, it was announced that the terminal is set for major renovation"
+    }
+   ]
+  },
+  {
+   "claim": "named after Julius Nyerere, Tanzania's first president",
+   "verdict": "confirmed",
+   "inAfter": "It is named after Julius Nyerere, Tanzania's first president.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is named after Julius Nyerere (1922-1999), the nation's first president."
+    },
+    {
+     "file": "taa-interview",
+     "org": "Tanzania Airports Authority (operator)",
+     "dated": "2024-10-21",
+     "quote": "Named after Tanzania's first president, Julius Nyerere International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "Tanzania's main international airport",
+   "verdict": "cut",
+   "wasBefore": "Tanzania's main international airport",
+   "why": "Softened to the international airport for Dar es Salaam, Tanzania's largest city: only the operator ranks it, and Zanzibar had more daily flights in July 2025 (Daily News, citing FlightsFrom.com)."
+  },
+  {
+   "claim": "in the Kipawa ward",
+   "verdict": "cut",
+   "wasBefore": "in the Kipawa ward of Dar es Salaam",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "three terminals and it pays to know which one",
+   "verdict": "cut",
+   "wasBefore": "There are three terminals and it pays to know which one.",
+   "why": "Reworded as 'There are three terminals, so check which one a client's flight uses.'"
+  },
+  {
+   "claim": "Terminal 3 opened August 2019, all international flights, 58 shops and services",
+   "verdict": "cut",
+   "wasBefore": "Terminal 3, opened in August 2019, handles all international flights and holds 58 shops and services.",
+   "why": "The 2019 opening is kept. No source from the last 12 months says Terminal 3 takes all international flights (the operator said so in October 2024), so the allocation is not stated. The 58 businesses rest on Wikipedia alone."
+  },
+  {
+   "claim": "Terminal 2 domestic and regional, 1.5 million capacity",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 takes domestic and regional scheduled flights and is rated for 1.5 million passengers.",
+   "why": "Allocation not confirmed by any source from the last 12 months, and the terminal is due to be modernised and expanded; the old capacity figure is dropped with it."
+  },
+  {
+   "claim": "Terminal 1 private, charter and small aircraft; VIP terminal built January 2026",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1 is for private, charter and small aircraft, and a separate VIP terminal for state and high profile passengers was built in January 2026.",
+   "why": "Terminal 1's use for private, charter and small aircraft rests on Wikipedia alone. The VIP terminal is kept, corrected: it opened (was inaugurated) on 16 January 2026, at Terminal 1."
+  },
+  {
+   "claim": "Terminal 2 rebuild announced 2024 as Air Tanzania hub for 3.5 million; domestic side to change",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 is due a major rebuild, announced in 2024, to turn it into a national hub for Air Tanzania handling up to 3.5 million passengers, so expect the domestic side to change.",
+   "why": "The works are kept with the 2026/27 budget. The hub role and 3.5 million figure come from 2024 and are not repeated in any source from the last 12 months; 'the domestic side' assumes an allocation that is not confirmed."
+  },
+  {
+   "claim": "rail shuttle proposed, coaches bought",
+   "verdict": "cut",
+   "wasBefore": "A rail shuttle from the airport into the city has been proposed and coaches were bought, but check whether it is running before relying on it.",
+   "why": "A 2014 position from Wikipedia. Nothing current confirms a rail shuttle; the airports authority and the railway signed a general agreement on linking air and rail in September 2025, which names no airport service."
+  },
+  {
+   "claim": "renamed in stages 2005 to 2006",
+   "verdict": "cut",
+   "wasBefore": "The airport was renamed after Julius Nyerere, Tanzania's first president, in stages between 2005 and 2006.",
+   "why": "The namesake is kept with the operator. The 2005 and 2006 dates rest on Wikipedia alone: the Guardian (IPP Media) reports it cites could not be fetched (security check; archive copies blocked)."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so check which one a client's flight uses.",
+   "why": "Advice: no source from the last 12 months says which flights use which terminal."
+  },
+  {
+   "text": "so expect changes there.",
+   "why": "Advice that follows from the funded modernisation and expansion of Terminal 2."
+  }
+ ],
+ "tracerOk": {}
+}

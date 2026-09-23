@@ -1,0 +1,284 @@
+{
+ "iata": "ZNZ",
+ "id": "recFxSknfX3KmpCN5",
+ "name": "Abeid Amani Karume International Airport",
+ "country": "Tanzania",
+ "wikipedia": "https://en.wikipedia.org/wiki/Abeid_Amani_Karume_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Zanzibar's airport, on Unguja Island about 5 km south of Zanzibar City, with flights across East Africa and out to Europe and the Middle East.\n\nWhich terminal a client uses is worth checking. Terminal 3 handles international flights and Terminal 2 takes domestic plus some international, so a connecting passenger may have to move between buildings. Terminal 1, the small one from the British protectorate era, is no longer used for flights and is now the airport office.\n\nTerminal 3 was a long time coming. Work started in January 2011, it was expected in 2014, and financial and technical delays pushed the opening to September 2020, with flights from early 2021. It came with a new apron of 100,000 square metres, replacing one of 21,000, and lifted capacity to 1.5 million passengers a year.\n\nThe airport was previously called Kisauni and then Zanzibar International, and was renamed in 2010 after Abeid Amani Karume, the island's first president.",
+ "after": "Zanzibar's main airport, on Unguja Island south of Zanzibar City, with flights across East Africa and out to Europe and the Middle East.\n\nCheck which terminal a client's flight uses, particularly for a connection. Terminal 3 is the international terminal. A new Terminal 2 was nearly finished in August 2026, and a bridge between the terminal buildings is being built. Terminal 1 has been refurbished for VIP and private flights.\n\nThe airport is named after Abeid Amani Karume, Zanzibar's first president.",
+ "claims": [
+  {
+   "claim": "Zanzibar's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Zanzibar's main airport",
+   "note": "The Daily News piece is about the Zanzibar government's airport works, so 'the country' there is Zanzibar. ZAA's own background page says 'the main airport in the Zanzibar Archipelago' too, but that page copies Wikipedia word for word and is not counted.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the main airport in the Zanzibar Archipelago"
+    },
+    {
+     "file": "dn-bridge-apr2026",
+     "org": "Daily News (Tanzania Standard Newspapers)",
+     "dated": "2026-04-20",
+     "quote": [
+      "The project, overseen by the Zanzibar Airports Authority (ZAA)",
+      "elevate the overall travel experience at the country's main gateway"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "on Unguja Island",
+   "verdict": "confirmed",
+   "inAfter": "on Unguja Island",
+   "note": "Daily News reports the airport visit as part of a tour of projects in Unguja.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "located on Unguja Island"
+    },
+    {
+     "file": "dn-projects-jul2026",
+     "org": "Daily News (Tanzania Standard Newspapers)",
+     "dated": "2026-07-08",
+     "quote": [
+      "Speaking during an inspection tour of development projects in Unguja",
+      "At the Abeid Amani Karume International Airport (AAKIA)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "south of Zanzibar City",
+   "verdict": "softened",
+   "inAfter": "south of Zanzibar City",
+   "note": "The distance is dropped. Coordinates put the airport 7.1 km in a straight line from the GeoNames centre at 155 degrees (south east, one point from south, inside the tolerance), so the stated 5 km fails the ratio check (0.70). The only other page giving 5 km is ZAA's background page, which copies Wikipedia word for word.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is approximately 5 kilometres (3.1 mi) south of Zanzibar City"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 7.1 km (4.4 miles)",
+      "Bearing from the city centre: 155 degrees, which is south east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "flights across East Africa and out to Europe and the Middle East",
+   "verdict": "confirmed",
+   "inAfter": "with flights across East Africa and out to Europe and the Middle East",
+   "note": "The operator's live departures board for 23 and 24 September 2026 lists Nairobi, Kigali, Addis Ababa, Mombasa, Dar es Salaam and Kilimanjaro; Warsaw, Katowice, Istanbul and Moscow; Muscat, Dubai, Abu Dhabi and Tel Aviv. It also lists Johannesburg (Airlink, since June 2026), which the text does not add.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "has flights to East Africa, Europe, and the Middle East"
+    },
+    {
+     "file": "zaa-departures",
+     "org": "Zanzibar Airports Authority (operator), live departures board",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Nairobi J. Kenyatta International",
+      "Gregoire Kayibanda",
+      "Addis Abeba Bole Intl Airport",
+      "Warschau (Frederic Chopin)",
+      "Istanbul",
+      "Dubai International Airport",
+      "Abu Dhabi Intl",
+      "Seeb Intl"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 3 is the international terminal",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 3 is the international terminal.",
+   "note": "Terminal allocation, so it needs a source from the last 12 months: Airlink's first Johannesburg flight was received at Terminal III in June 2026. Wikipedia also says Terminal 2 takes some international flights, so the text does not say 'all'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Terminal 3 serves international flights"
+    },
+    {
+     "file": "dn-upgrades-jun2026",
+     "org": "Daily News (Tanzania Standard Newspapers)",
+     "dated": "2026-06-06",
+     "quote": [
+      "Speaking after receiving Airlink's inaugural international flight at AAKIA Terminal III",
+      "Issa Yusuf June 6, 2026"
+     ]
+    },
+    {
+     "file": "dn-fourth-terminal",
+     "org": "Daily News (Tanzania Standard Newspapers)",
+     "dated": "2022-11-22",
+     "quote": "dnata oversees the operations of AAKIA newly built international terminal (T3)"
+    }
+   ]
+  },
+  {
+   "claim": "new Terminal 2 nearly finished in August 2026",
+   "verdict": "corrected",
+   "inAfter": "A new Terminal 2 was nearly finished in August 2026",
+   "note": "Replaces 'Terminal 2 takes domestic plus some international'. The operator (22 August 2026, in Swahili) says the new Terminal 2 passenger building, about USD 34 million and 1.4 million passengers a year, was 90 per cent done and due to finish on 30 August 2026; Daily News had it nearly complete in early July. Whether it has opened, and which flights it takes, is not confirmed, hence the advice to check.",
+   "sources": [
+    {
+     "file": "zaa-bodi-aug2026",
+     "org": "Zanzibar Airports Authority (operator)",
+     "dated": "2026-08-22",
+     "quote": [
+      "Bodi imetembelea mradi wa ujenzi wa Jengo jipya la Abiria la Terminal 2",
+      "umefikia asilimia 90 na unatarajiwa kukamilika Agosti 30, 2026"
+     ]
+    },
+    {
+     "file": "dn-projects-jul2026",
+     "org": "Daily News (Tanzania Standard Newspapers)",
+     "dated": "2026-07-08",
+     "quote": [
+      "he inspected the nearly completed Terminal II and its commercial complex",
+      "ISSA YUSSUF July 8, 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a bridge between the terminal buildings is being built",
+   "verdict": "corrected",
+   "inAfter": "and a bridge between the terminal buildings is being built",
+   "note": "Replaces 'a connecting passenger may have to move between buildings'. The operator names it the link bridge between Terminals 2 and 3, 55 per cent done on 22 August 2026 and due on 15 December 2026; the due date rests on the operator alone, so it is not given.",
+   "sources": [
+    {
+     "file": "zaa-bodi-aug2026",
+     "org": "Zanzibar Airports Authority (operator)",
+     "dated": "2026-08-22",
+     "quote": "mradi wa Daraja la Kuunganisha Terminal 2 na Terminal 3 (Link Bridge) ambao umefikia asilimia 55"
+    },
+    {
+     "file": "dn-bridge-apr2026",
+     "org": "Daily News (Tanzania Standard Newspapers)",
+     "dated": "2026-04-20",
+     "quote": [
+      "steady progress recorded in the construction of a passenger connecting bridge at Abeid Amani Karume International Airport (AAKIA)",
+      "is designed to improve passenger movement between terminal buildings"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 1 refurbished for VIP and private flights",
+   "verdict": "corrected",
+   "inAfter": "Terminal 1 has been refurbished for VIP and private flights.",
+   "note": "Was 'no longer used for flights and is now the airport office'. The operator (22 August 2026) lists the Terminal 1 refurbishment for state leaders, distinguished guests and private aircraft as 100 per cent complete. Daily News reported the plan for Terminal 1 in 2022 and the VVIP and private jet terminal works (due October 2025) in September 2025.",
+   "sources": [
+    {
+     "file": "zaa-bodi-aug2026",
+     "org": "Zanzibar Airports Authority (operator)",
+     "dated": "2026-08-22",
+     "quote": [
+      "miradi ambayo tayari imekamilika kwa asilimia 100",
+      "ukarabati wa Jengo la Terminal 1 kwa ajili ya kuhudumia viongozi wakuu wa nchi, wageni mashuhuri na huduma za ndege binafsi"
+     ]
+    },
+    {
+     "file": "dn-zaa-5yrs-sep2025",
+     "org": "Daily News (Tanzania Standard Newspapers)",
+     "dated": "2025-09-17",
+     "quote": "VVIP & Private Jet Terminal Renovation - Ongoing since May 2024, expected completion in October 2025"
+    },
+    {
+     "file": "dn-fourth-terminal",
+     "org": "Daily News (Tanzania Standard Newspapers)",
+     "dated": "2022-11-22",
+     "quote": "terminal one of AAKIA will be improved to serve as VIP lounge and private jet"
+    }
+   ]
+  },
+  {
+   "claim": "named after Abeid Amani Karume, Zanzibar's first president",
+   "verdict": "confirmed",
+   "inAfter": "The airport is named after Abeid Amani Karume, Zanzibar's first president.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It was renamed in 2010 in honour of Abeid Amani Karume (1905-1972), the island's first president."
+    },
+    {
+     "file": "dn-fatma-karume-sep2026",
+     "org": "Daily News (Tanzania Standard Newspapers)",
+     "dated": "2026-09-22",
+     "quote": "the late Sheikh Abeid Amani Karume, Zanzibar's first President"
+    }
+   ]
+  },
+  {
+   "claim": "about 5 km from Zanzibar City",
+   "verdict": "cut",
+   "wasBefore": "on Unguja Island about 5 km south of Zanzibar City",
+   "why": "Fails the coordinates check (7.1 km in a straight line, ratio 0.70) and the only other page giving 5 km, ZAA's background page, copies Wikipedia word for word. Island and direction kept."
+  },
+  {
+   "claim": "which terminal is worth checking",
+   "verdict": "cut",
+   "wasBefore": "Which terminal a client uses is worth checking.",
+   "why": "Reworded as the opening advice of the terminal paragraph."
+  },
+  {
+   "claim": "Terminal 3 international, Terminal 2 domestic plus some international, connecting passengers move between buildings",
+   "verdict": "cut",
+   "wasBefore": "Terminal 3 handles international flights and Terminal 2 takes domestic plus some international, so a connecting passenger may have to move between buildings.",
+   "why": "Terminal 3 as the international terminal is kept with a 2026 source. Terminal 2 is being replaced by a new building, and nothing from the last 12 months says which flights use it now, so the text tells the agent to check."
+  },
+  {
+   "claim": "Terminal 1 from the protectorate era, unused, now the airport office",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1, the small one from the British protectorate era, is no longer used for flights and is now the airport office.",
+   "why": "Out of date: the operator says Terminal 1 has been refurbished for VIP and private flights (August 2026). The protectorate-era history rests on Wikipedia alone."
+  },
+  {
+   "claim": "Terminal 3 was a long time coming",
+   "verdict": "cut",
+   "wasBefore": "Terminal 3 was a long time coming.",
+   "why": "Goes with the construction history below."
+  },
+  {
+   "claim": "work began January 2011, expected 2014, opened September 2020, flights early 2021",
+   "verdict": "cut",
+   "wasBefore": "Work started in January 2011, it was expected in 2014, and financial and technical delays pushed the opening to September 2020, with flights from early 2021.",
+   "why": "Wikipedia alone, and a Daily News report of 22 November 2022 dates the official opening to about eight months earlier, so the opening date is disputed."
+  },
+  {
+   "claim": "apron 100,000 square metres replacing 21,000; capacity 1.5 million",
+   "verdict": "cut",
+   "wasBefore": "It came with a new apron of 100,000 square metres, replacing one of 21,000, and lifted capacity to 1.5 million passengers a year.",
+   "why": "The apron figures rest on Wikipedia alone; the capacity disagrees (Daily News 2022: about 1.6 million) and is stale, as the airport now handles well over 2 million a year and a further new apron is under construction (operator: due 2028)."
+  },
+  {
+   "claim": "previously Kisauni and Zanzibar International; renamed in 2010",
+   "verdict": "cut",
+   "wasBefore": "The airport was previously called Kisauni and then Zanzibar International, and was renamed in 2010",
+   "why": "Wikipedia alone. ZAA's background page repeats it, but that page copies Wikipedia word for word, so it is not a second source. The namesake is kept with Daily News."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Check which terminal a client's flight uses, particularly for a connection.",
+   "why": "Advice: the new Terminal 2 was nearly finished in August 2026 and no source from the last 12 months says which flights use Terminal 2, so the domestic and connecting arrangements need checking."
+  }
+ ],
+ "tracerOk": {}
+}

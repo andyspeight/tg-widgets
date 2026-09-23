@@ -1,0 +1,234 @@
+{
+ "iata": "EIS",
+ "id": "recPxA9M4dSwHwOlO",
+ "name": "Terrance B. Lettsome International Airport",
+ "country": "British Virgin Islands",
+ "wikipedia": "https://en.wikipedia.org/wiki/Terrance_B._Lettsome_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The main airport for the British Virgin Islands, and the arrival point for almost every island in the territory. Most clients land here and take a ferry onward to the smaller islands, so factor the boat into the transfer.\n\nIt is not on Tortola itself. The airport sits on Beef Island, a small island joined to Tortola by the Queen Elizabeth II Bridge.\n\nJet service is a recent and hard won thing. A single jet route to Miami ran briefly in 1986, a later attempt never flew at all, and it was June 2023 before American Airlines began non-stop Embraer 175 flights to Miami. That started as one seasonal daily service and has since grown to several a day.\n\nThe airport was rebuilt in 2004 in a 55 million dollar programme, the largest capital project the territory had undertaken at the time, which dredged and extended the runway by 3,700 feet and added a 46,000 square foot terminal, a new control tower and 150 parking spaces.\n\nThere is a 20 dollar departure tax for everyone over the age of five.",
+ "after": "The main airport for the British Virgin Islands. Many clients land here and take a ferry onward to the smaller islands, so factor the boat into the transfer.\n\nThe airport is on Beef Island and serves Tortola.\n\nAmerican Airlines has flown non-stop from Miami since June 2023.\n\nPassengers flying out pay 50 US dollars in departure charges: a 15 dollar departure tax, a 5 dollar security fee and a 30 dollar airport development fee. These are usually included in the ticket price.",
+ "claims": [
+  {
+   "claim": "the main airport for the British Virgin Islands",
+   "verdict": "confirmed",
+   "inAfter": "The main airport for the British Virgin Islands.",
+   "note": "The airports authority's own page says the same, but its first three paragraphs copy Wikipedia word for word, so it is not counted.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the main airport serving the British Virgin Islands"
+    },
+    {
+     "file": "bvitourism-air",
+     "org": "BVI Tourism (official tourist board)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "the British Virgin Islands' main airport (Tortola's Terrence B. Lettsome Airport, a.k.a. EIS)"
+    },
+    {
+     "file": "bvitourism-other",
+     "org": "BVI Tourism (official tourist board)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Beef Island — The site of Terrance B. Lettsome International Airport (the primary point of entry for BVI)."
+    }
+   ]
+  },
+  {
+   "claim": "many clients land here and take a ferry onward to the smaller islands",
+   "verdict": "softened",
+   "inAfter": "Many clients land here and take a ferry onward to the smaller islands",
+   "note": "Was 'Most clients'. Wikipedia says 'many'; the tourist board names ferries and charter flights onward to Virgin Gorda, Anegada, Peter Island and Jost Van Dyke.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Many travellers fly into Beef Island, with the intention of taking a ferry to the other smaller British Virgin Islands."
+    },
+    {
+     "file": "bvitourism-air",
+     "org": "BVI Tourism (official tourist board)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "If you plan to continue on to Virgin Gorda (VIJ), Anegada, Peter Island, or Jost van Dyke, we recommend that you check with your hotel, resort, or villa to make sure that charter flights or ferry service will be available"
+    }
+   ]
+  },
+  {
+   "claim": "on Beef Island",
+   "verdict": "confirmed",
+   "inAfter": "The airport is on Beef Island",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is located on Beef Island"
+    },
+    {
+     "file": "bvitourism-other",
+     "org": "BVI Tourism (official tourist board)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Beef Island — The site of Terrance B. Lettsome International Airport"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports",
+     "quote": "OurAirports municipality: Beef Island"
+    }
+   ]
+  },
+  {
+   "claim": "serves Tortola",
+   "verdict": "softened",
+   "inAfter": "and serves Tortola",
+   "note": "Was 'It is not on Tortola itself ... joined to Tortola by the Queen Elizabeth II Bridge'. The bridge rests on Wikipedia and on the airports authority's copy of Wikipedia only, so it is not named; the tourist board and Tradewind both treat the airport as Tortola's.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "a small island off the main island of Tortola"
+    },
+    {
+     "file": "bvitourism-air",
+     "org": "BVI Tourism (official tourist board)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Tortola's Terrence B. Lettsome Airport"
+    },
+    {
+     "file": "tradewind-tortola",
+     "org": "Tradewind Aviation",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Tradewind scheduled service flights are available to Tortola from San Juan (SJU)"
+    }
+   ]
+  },
+  {
+   "claim": "American Airlines non-stop from Miami since June 2023",
+   "verdict": "confirmed",
+   "inAfter": "American Airlines has flown non-stop from Miami since June 2023.",
+   "note": "Current: the tourist board's live page names the American Airlines Miami flight as the most direct route from North America. 'Several a day, year-round' and the Embraer 175 rest on Wikipedia alone (the BVI Beacon report it cites refused the fetcher), so they are not stated.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "American Airlines began nonstop jet service between Tortola and Miami in June 2023"
+    },
+    {
+     "file": "bvitourism-air",
+     "org": "BVI Tourism (official tourist board)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "DIRECT flights from Miami to Beef Island, BVI starting June, 1st, 2023 with American Airlines",
+      "The most direct flight from North America to BVI is Miami, FL to Beef Island, BVI on American Airlines."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "departure charges of 50 US dollars: 15 departure tax, 5 security, 30 airport development",
+   "verdict": "corrected",
+   "inAfter": "Passengers flying out pay 50 US dollars in departure charges: a 15 dollar departure tax, a 5 dollar security fee and a 30 dollar airport development fee.",
+   "note": "Was 'a 20 dollar departure tax for everyone over the age of five' (Wikipedia). The airports authority and the FCDO agree on 50 US dollars in three parts. The fee section of the authority's page is its own text, not the Wikipedia copy above it (Wikipedia gives 20 dollars). The authority's site footer says 2022, but the FCDO page (updated 3 November 2025, still current 23 September 2026) gives the same figures. Neither mentions an age exemption, so none is stated.",
+   "sources": [
+    {
+     "file": "bviaa-lettsome",
+     "org": "BVI Airports Authority (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Passengers travelling by air from the Terrance B. Lettsome International Airport incur the following fees totaling $50.00 on departure.",
+      "Departure Tax - $15.00",
+      "Security Fee - $5.00",
+      "Airport Development Fee - $30.00"
+     ]
+    },
+    {
+     "file": "fcdo-bvi-entry",
+     "org": "UK Foreign, Commonwealth and Development Office (FCDO)",
+     "dated": "2025-11-03",
+     "quote": [
+      "There is a departure tax of 50 US dollars for all passengers, to be paid when leaving the BVI by air. This consists of:",
+      "15 dollars departure tax",
+      "5 dollars security charge departure tax",
+      "30 dollars airport development fee"
+     ]
+    },
+    {
+     "file": "fcdo-bvi",
+     "org": "UK Foreign, Commonwealth and Development Office (FCDO)",
+     "quote": [
+      "Still current at:",
+      "23 September 2026",
+      "3 November 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "usually included in the ticket price",
+   "verdict": "corrected",
+   "inAfter": "These are usually included in the ticket price.",
+   "note": "The authority adds that passengers on charter operators not registered with IATA pay at the cashier's window; that rests on the authority alone, so the text says only 'usually'.",
+   "sources": [
+    {
+     "file": "bviaa-lettsome",
+     "org": "BVI Airports Authority (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Said fees are generally included in the ticket price of the airlines registered with IATA."
+    },
+    {
+     "file": "fcdo-bvi-entry",
+     "org": "UK Foreign, Commonwealth and Development Office (FCDO)",
+     "dated": "2025-11-03",
+     "quote": "The tax is generally included in the ticket price."
+    }
+   ]
+  },
+  {
+   "claim": "arrival point for almost every island",
+   "verdict": "cut",
+   "wasBefore": "The main airport for the British Virgin Islands, and the arrival point for almost every island in the territory.",
+   "why": "Main airport kept. 'Arrival point for almost every island' rests on Wikipedia alone; the authority's page repeats it word for word from Wikipedia."
+  },
+  {
+   "claim": "most clients land here and take a ferry",
+   "verdict": "cut",
+   "wasBefore": "Most clients land here and take a ferry onward to the smaller islands",
+   "why": "Softened to 'many', as Wikipedia has it."
+  },
+  {
+   "claim": "not on Tortola itself; Beef Island joined by the Queen Elizabeth II Bridge",
+   "verdict": "cut",
+   "wasBefore": "It is not on Tortola itself. The airport sits on Beef Island, a small island joined to Tortola by the Queen Elizabeth II Bridge.",
+   "why": "Beef Island kept. The bridge rests on Wikipedia alone (the authority's page copies Wikipedia); no other fetchable page names it."
+  },
+  {
+   "claim": "jet service history: 1986 Miami route, later attempt never flew",
+   "verdict": "cut",
+   "wasBefore": "Jet service is a recent and hard won thing. A single jet route to Miami ran briefly in 1986, a later attempt never flew at all, and it was June 2023 before American Airlines began non-stop Embraer 175 flights to Miami.",
+   "why": "The June 2023 start of American Airlines' Miami flights is kept. The 1986 route, the failed later attempt and the aircraft type rest on Wikipedia alone."
+  },
+  {
+   "claim": "one seasonal daily service grown to several a day",
+   "verdict": "cut",
+   "wasBefore": "That started as one seasonal daily service and has since grown to several a day.",
+   "why": "Wikipedia alone; the BVI Beacon report it cites could not be fetched (security check)."
+  },
+  {
+   "claim": "2004 rebuild: 55 million dollars, largest capital project, runway extended 3,700 feet, 46,000 sq ft terminal, control tower, 150 parking spaces",
+   "verdict": "cut",
+   "wasBefore": "The airport was rebuilt in 2004 in a 55 million dollar programme, the largest capital project the territory had undertaken at the time, which dredged and extended the runway by 3,700 feet and added a 46,000 square foot terminal, a new control tower and 150 parking spaces.",
+   "why": "Wikipedia alone; the authority's 'highlights' repeat Wikipedia's terminal figure. History of no use for booking."
+  },
+  {
+   "claim": "20 dollar departure tax for everyone over five",
+   "verdict": "cut",
+   "wasBefore": "There is a 20 dollar departure tax for everyone over the age of five.",
+   "why": "Out of date: the airports authority and the FCDO both give 50 US dollars in departure charges, usually included in the ticket. No source repeats the age exemption."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so factor the boat into the transfer.",
+   "why": "Advice kept from the old text."
+  }
+ ],
+ "tracerOk": {}
+}
