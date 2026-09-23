@@ -1,0 +1,144 @@
+{
+ "iata": "CGO",
+ "id": "recS5w7ONyAyxf3kI",
+ "name": "Zhengzhou Xinzheng International Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Zhengzhou_Xinzheng_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Henan's main airport and the gateway to the central plain, in Xinzheng 37 km south east of downtown Zhengzhou. It handled 29,191,990 passengers in 2025, seventeenth in mainland China, and is sixth in the country for cargo. Cargolux runs a hub here.\n\nTerminal 2 is the one to head for. It is the only terminal currently in operation, opened in December 2015 and laid out in an X shape with four piers, meant to read as open arms. The north west pier handles international flights and the others are domestic. Terminal 1 has been closed and used as an exhibition hall.\n\nThe ground transport centre next to Terminal 2 is genuinely useful. It has an intercity train station and a metro station on its underground floors alongside taxis and intercity coaches, all connected to the arrivals hall by three corridors, so onward travel across the region does not need a road transfer.\n\nThe code CGO comes from Chengchow, the old romanisation of Zhengzhou.",
+ "after": "Henan's main airport, 37 km south east of downtown Zhengzhou. It handled 29.2 million passengers in 2025, seventeenth in mainland China. For cargo it ranked sixth in the country.\n\nXinzheng Airport station is on the metro's Chengjiao line, which runs into Zhengzhou.",
+ "claims": [
+  {
+   "claim": "Henan's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Henan's main airport",
+   "note": "CAAC 2025: Zhengzhou 29,191,990 passengers; the next Henan airport, Nanyang, 1,036,774.",
+   "sources": [
+    {
+     "file": "caac-2025-henan",
+     "org": "Civil Aviation Administration of China",
+     "dated": "2026-02-26",
+     "quote": [
+      "郑州/新郑 | 17 | 29191990",
+      "南阳/姜营 | 107 | 1036774",
+      "洛阳/北郊 | 112 | 954917"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is the largest international airport in Henan and serves as a main gateway for the province and the central plain area."
+    }
+   ]
+  },
+  {
+   "claim": "37 km south east of downtown Zhengzhou",
+   "verdict": "confirmed",
+   "inAfter": "37 km south east of downtown Zhengzhou",
+   "note": "Straight line 31.6 km at 144 degrees; 37 km is a ratio of 1.17, inside the tolerance for a road distance. 'In Xinzheng' dropped: Wikipedia alone, and the airport now sits in the Zhengzhou Airport Economy Zone.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport is located in Xinzheng, 37 kilometres (23 mi) southeast of downtown Zhengzhou."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 31.6 km (19.6 miles)",
+      "Bearing from the city centre: 144 degrees, which is south east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "29.2 million passengers in 2025, seventeenth in mainland China",
+   "verdict": "confirmed",
+   "inAfter": "It handled 29.2 million passengers in 2025, seventeenth in mainland China.",
+   "sources": [
+    {
+     "file": "caac-2025",
+     "org": "Civil Aviation Administration of China",
+     "dated": "2026-02-26",
+     "quote": "passenger rank 17 in China; passengers 2025: 29,191,990"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "In 2025, it is the 17th-busiest airport by passenger traffic in mainland China with 29,191,990 passengers"
+    }
+   ]
+  },
+  {
+   "claim": "sixth in China for cargo",
+   "verdict": "confirmed",
+   "inAfter": "For cargo it ranked sixth in the country.",
+   "note": "CAAC: 1,033,397 tonnes of cargo and mail in 2025, up 25.2 per cent.",
+   "sources": [
+    {
+     "file": "caac-2025-cargo",
+     "org": "Civil Aviation Administration of China",
+     "dated": "2026-02-26",
+     "quote": "郑州/新郑 | 17 | 29191990 | 28510891 | 2.4 | 6 | 1033397.254"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "and the sixth busiest airport in terms of cargo traffic nationwide"
+    }
+   ]
+  },
+  {
+   "claim": "metro: Xinzheng Airport station on the Chengjiao line into Zhengzhou",
+   "verdict": "corrected",
+   "inAfter": "Xinzheng Airport station is on the metro's Chengjiao line, which runs into Zhengzhou.",
+   "note": "Replaces the ground transport centre paragraph. The metro's own page lists the station on the Chengjiao line, which begins at Nansihuan (South Fourth Ring Road) station in Zhengzhou, and times trains through from Jiahe and Liuzhuang (the Line 2 termini). The intercity train rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "zzmetro-airport",
+     "org": "Zhengzhou Metro (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "南四环站",
+      "新郑机场站",
+      "城郊线 （贾河/刘庄 → 郑州航空港站【下行】）"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Trains of the Chengjiao Line of the Zhengzhou Metro connects the airport to downtown Zhengzhou using through services via Line 2."
+    }
+   ]
+  },
+  {
+   "claim": "gateway to the central plain; in Xinzheng; exact passenger figure; Cargolux hub",
+   "verdict": "cut",
+   "wasBefore": "Henan's main airport and the gateway to the central plain, in Xinzheng 37 km south east of downtown Zhengzhou. It handled 29,191,990 passengers in 2025, seventeenth in mainland China, and is sixth in the country for cargo. Cargolux runs a hub here.",
+   "why": "Kept, rounded and tightened. 'Gateway to the central plain' and 'in Xinzheng' are Wikipedia alone. Cargolux's own about and network pages do not mention Zhengzhou; a 2016 NetEase report confirms Cargolux's Zhengzhou to Luxembourg flights and its 2014 tie-up with Henan, but not a hub, and it is ten years old."
+  },
+  {
+   "claim": "Terminal 2 only terminal in use; opened December 2015; X shape, four piers; north west pier international; Terminal 1 closed, exhibition hall",
+   "verdict": "cut",
+   "wasBefore": "Terminal 2 is the one to head for. It is the only terminal currently in operation, opened in December 2015 and laid out in an X shape with four piers, meant to read as open arms. The north west pier handles international flights and the others are domestic. Terminal 1 has been closed and used as an exhibition hall.",
+   "why": "No current second source for the terminal layout, and there is a reason to doubt it: the metro's own line page (23 Sep 2026) lists a 'Terminal 3' station (3号航站楼站) on the Chengjiao line, next to Xinzheng Airport station. Whether a third terminal is open could not be checked (the operator's sites answered 503). The pier layout and the exhibition hall are Wikipedia alone; an airport advertising site (zhengzhou-airport.com) says Terminal 1 closed on 30 March 2016 when all flights moved to Terminal 2, but it is undated."
+  },
+  {
+   "claim": "ground transport centre: intercity train and metro underground, taxis, coaches, three corridors",
+   "verdict": "cut",
+   "wasBefore": "The ground transport centre next to Terminal 2 is genuinely useful. It has an intercity train station and a metro station on its underground floors alongside taxis and intercity coaches, all connected to the arrivals hall by three corridors, so onward travel across the region does not need a road transfer.",
+   "why": "Wikipedia alone apart from the metro, which the metro's own site confirms and the new text keeps."
+  },
+  {
+   "claim": "CGO from Chengchow",
+   "verdict": "cut",
+   "wasBefore": "The code CGO comes from Chengchow, the old romanisation of Zhengzhou.",
+   "why": "Wikipedia alone."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "29.2": "29,191,990 rounded (CAAC, Wikipedia)"
+ }
+}
