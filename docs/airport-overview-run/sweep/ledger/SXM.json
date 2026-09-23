@@ -1,0 +1,410 @@
+{
+ "iata": "SXM",
+ "id": "recxQeQj45aL132AQ",
+ "name": "Princess Juliana International Airport",
+ "country": "Sint Maarten",
+ "wikipedia": "https://en.wikipedia.org/wiki/Princess_Juliana_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The main airport for Saint Martin, on the Dutch side of the island in Sint Maarten beside Simpson Bay Lagoon. It is the hub for Winair and the main gateway to the smaller Leeward Islands, including Anguilla, Saba, Saint Barthélemy and Sint Eustatius.\n\nIt is famous for the approach over Maho Beach, where arriving aircraft on the final approach to Runway 10 pass very low overhead. It is one of the world's favourite spots for plane spotters.\n\nIt is also genuinely dangerous and worth a warning. In 2017 a New Zealand woman died from injuries caused by jet blast from a departing aircraft, and tourists are frequently criticised for behaving recklessly on the beach. A client planning to watch should be told to stay well clear of the fence at the runway end.\n\nThe single runway is 2,300 metres. There is a second, smaller airport on the French side of the island, Grand Case-Espérance.\n\nIt is named after Queen Juliana of the Netherlands, who landed here in 1944 as heir presumptive, the year after the airport opened.",
+ "after": "The main airport for Saint Martin, on the Dutch side of the island in Sint Maarten, at Simpson Bay. It is the hub for Winair and the main connecting airport for the smaller islands nearby, including Anguilla, Saba, Saint Barthélemy and Sint Eustatius.\n\nMost arriving aircraft pass very low over Maho Beach, one of the world's favourite spots for plane spotters.\n\nIt is also dangerous and worth a warning. In 2017 a New Zealand woman died after being knocked over by jet blast from a departing aircraft. Tell a client planning to watch to stay well clear of the fence at the runway end.\n\nThe single runway is 2,300 metres. There is a second, smaller airport on the French side of the island, Grand Case-Espérance.\n\nIt is named after Queen Juliana of the Netherlands, who landed here in 1944 as heir presumptive, the year after the first commercial flight.",
+ "claims": [
+  {
+   "claim": "the main airport for Saint Martin",
+   "verdict": "confirmed",
+   "inAfter": "The main airport for Saint Martin",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the main airport on the Caribbean island of Saint Martin"
+    },
+    {
+     "file": "sxmairport-about",
+     "org": "Princess Juliana International Airport (operator, sxmairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Princess Juliana International Airport (SXM) is the main gateway to the island of St. Maarten"
+    }
+   ]
+  },
+  {
+   "claim": "on the Dutch side of the island in Sint Maarten",
+   "verdict": "confirmed",
+   "inAfter": "on the Dutch side of the island in Sint Maarten",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is located on the Dutch side of the island, in the country of Sint Maarten"
+    },
+    {
+     "file": "sxmairport-about",
+     "org": "Princess Juliana International Airport (operator, sxmairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "located on the Dutch side near the famous Maho Beach",
+      "Airport Rd, Simpson Bay, Sint Maarten"
+     ]
+    },
+    {
+     "file": "govuk-stmartin-print",
+     "org": "UK Foreign, Commonwealth and Development Office (GOV.UK)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "There is no physical border between the French and Dutch territories on the island of St Martin."
+    }
+   ]
+  },
+  {
+   "claim": "at Simpson Bay",
+   "verdict": "softened",
+   "inAfter": "at Simpson Bay",
+   "note": "Was 'beside Simpson Bay Lagoon'. The lagoon rests on Wikipedia alone; the operator's address and its press datelines are Simpson Bay.",
+   "sources": [
+    {
+     "file": "sxmairport-about",
+     "org": "Princess Juliana International Airport (operator, sxmairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Airport Rd, Simpson Bay, Sint Maarten"
+    },
+    {
+     "file": "sxmairport-2025",
+     "org": "Princess Juliana International Airport (operator, sxmairport.com)",
+     "dated": "2026-02-09",
+     "quote": "Simpson Bay, St. Maarten, February 9th, 2026"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "close to the shore of Simpson Bay Lagoon"
+    }
+   ]
+  },
+  {
+   "claim": "the hub for Winair",
+   "verdict": "confirmed",
+   "inAfter": "It is the hub for Winair",
+   "note": "The operator lists Winair as its hub-and-spoke carrier and, in February 2026, calls it the airport's regional carrier for onward connections. Winair's own site sells its flights from St Maarten.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport serves as a hub for Winair"
+    },
+    {
+     "file": "sxmairport-flights",
+     "org": "Princess Juliana International Airport (operator, sxmairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Win Air (Hub & Spoke)"
+    },
+    {
+     "file": "sxmairport-2025",
+     "org": "Princess Juliana International Airport (operator, sxmairport.com)",
+     "dated": "2026-02-09",
+     "quote": "Convenient onward connections through Winair, our professionally operated and trusted regional carrier"
+    },
+    {
+     "file": "winair-home",
+     "org": "Winair (Windward Islands Airways International, winair.sx)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Easily hop over to or from Saba & St. Eustatius (Statia).",
+      "Windward Islands Airways International N.V."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the main connecting airport for the smaller islands nearby, including Anguilla, Saba, Saint Barthélemy and Sint Eustatius",
+   "verdict": "confirmed",
+   "inAfter": "the main connecting airport for the smaller islands nearby, including Anguilla, Saba, Saint Barthélemy and Sint Eustatius",
+   "note": "Reworded from 'the main gateway to the smaller Leeward Islands': 'gateway to' is a banned phrase and 'Leeward' has no second source. The operator's own list of the islands it connects names all four; Winair flies to Saba, St Barth and St Eustatius (not Anguilla, which the operator lists with Axa Air Services and Trans Anguilla among its airlines).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the major gateway for the smaller Leeward Islands, including Anguilla, Saba, Saint Barthélemy and Sint Eustatius"
+    },
+    {
+     "file": "sxmairport-flights",
+     "org": "Princess Juliana International Airport (operator, sxmairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Gateway to the Caribbean",
+      "Clayton J. Lloyd International Airport (AXA) services the island.",
+      "Saba is serviced by Juancho E. Yrausquin Airport (SAB)",
+      "is serviced by Gustaf III Airport",
+      "is serviced by F. D. Roosevelt Airport"
+     ]
+    },
+    {
+     "file": "sxmairport-2025",
+     "org": "Princess Juliana International Airport (operator, sxmairport.com)",
+     "dated": "2026-02-09",
+     "quote": "further enhance SXM Airport’s position as the gateway to the Northeastern Caribbean and beyond"
+    },
+    {
+     "file": "winair-home",
+     "org": "Winair (Windward Islands Airways International, winair.sx)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "St. Barth — St. Maarten roundtrip",
+      "Easily hop over to or from Saba & St. Eustatius (Statia)."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "most arriving aircraft pass very low over Maho Beach",
+   "verdict": "confirmed",
+   "inAfter": "Most arriving aircraft pass very low over Maho Beach",
+   "note": "The operator says most arriving flights fly directly over the shore, hence 'most'.",
+   "sources": [
+    {
+     "file": "sxmairport-about",
+     "org": "Princess Juliana International Airport (operator, sxmairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "near the famous Maho Beach, where aircraft land dramatically close to the shore",
+      "Thanks to its low-altitude flyover, Maho Beach is famous for its excellent plane spotting, as most flights arriving at SXM fly directly over the shore."
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "flying low over the famous Maho Beach"
+    }
+   ]
+  },
+  {
+   "claim": "one of the world's favourite spots for plane spotters",
+   "verdict": "confirmed",
+   "inAfter": "one of the world's favourite spots for plane spotters",
+   "note": "The operator says Maho Beach is famous for plane spotting; Stuff calls the airport world famous and the beach an attraction for tourists from around the world.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "one of the world's favorite places among planespotters"
+    },
+    {
+     "file": "sxmairport-about",
+     "org": "Princess Juliana International Airport (operator, sxmairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Maho Beach is famous for its excellent plane spotting"
+    },
+    {
+     "file": "stuff-irma",
+     "org": "Stuff (New Zealand news)",
+     "dated": "2017-09-06",
+     "quote": [
+      "World famous St Maarten airport destroyed by Hurricane Irma",
+      "The proximity of the runway at Princess Juliana International Airport to Maho Beach is an attraction for tourists from around the world."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in 2017 a New Zealand woman died after being knocked over by jet blast from a departing aircraft",
+   "verdict": "confirmed",
+   "inAfter": "In 2017 a New Zealand woman died after being knocked over by jet blast from a departing aircraft.",
+   "note": "Stuff, writing in September 2017, dates it to that July. 'Knocked over' is Stuff's wording; the Guardian report Wikipedia cites is blocked by the session's egress policy.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "In 2017 a New Zealand woman died from injuries sustained by jet blast from a departing aircraft."
+    },
+    {
+     "file": "stuff-irma",
+     "org": "Stuff (New Zealand news)",
+     "dated": "2017-09-06",
+     "quote": [
+      "September 6, 2017",
+      "In July New Zealander Gayleen McEwan was killed after being knocked over by the blast from a jetliner.",
+      "Kiwi woman killed watching plane take off on Caribbean island"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the single runway is 2,300 metres",
+   "verdict": "confirmed",
+   "inAfter": "The single runway is 2,300 metres.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 10/28: 2,300 m (7,546 ft), ASP",
+      "Runways listed: 1"
+     ],
+     "dated": "OurAirports data fetched 2026-09-23 (as the saved file states)"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport has a single runway numbered 10/28, measuring 7,546 by 148 feet"
+    }
+   ]
+  },
+  {
+   "claim": "a second, smaller airport on the French side of the island, Grand Case-Espérance",
+   "verdict": "confirmed",
+   "inAfter": "There is a second, smaller airport on the French side of the island, Grand Case-Espérance.",
+   "note": "The OurAirports extract is computed from OurAirports' own rows (country code MF is Saint Martin, the French part). It puts Grand Case-l'Espérance 9.2 km from Princess Juliana, with scheduled service and a 1,200 m runway against 2,300 m here, so 'smaller' holds.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "there is also a smaller public-use airport on the French side, in the French Collectivity of Saint Martin, called Grand Case-Espérance Airport"
+    },
+    {
+     "file": "ourairports-nearby",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Princess Juliana International Airport (OurAirports TNCM, IATA SXM, SX, large airport, municipality Sint Maarten) at 18.0410, -63.1089; longest runway 10/28 2,300 m (7,546 ft)",
+      "Grand Case-l'Espérance Airport (OurAirports TFFG, IATA SFG, MF, medium airport, municipality Grand Case): 9.2 km from Princess Juliana International Airport; scheduled service: yes; longest runway 12/30 1,200 m (3,937 ft)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after Queen Juliana of the Netherlands",
+   "verdict": "confirmed",
+   "inAfter": "It is named after Queen Juliana of the Netherlands",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is named after Queen Juliana of the Netherlands"
+    },
+    {
+     "file": "sxmairport-about",
+     "org": "Princess Juliana International Airport (operator, sxmairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "In 1944, the future Queen Juliana of the Netherlands landed at the airport, which was eventually named after her."
+    }
+   ]
+  },
+  {
+   "claim": "who landed here in 1944 as heir presumptive",
+   "verdict": "confirmed",
+   "inAfter": "who landed here in 1944 as heir presumptive",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "who landed there while she was heir presumptive in 1944"
+    },
+    {
+     "file": "sxmairport-about",
+     "org": "Princess Juliana International Airport (operator, sxmairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "In 1944, the future Queen Juliana of the Netherlands landed at the airport"
+    }
+   ]
+  },
+  {
+   "claim": "the year after the first commercial flight (1943)",
+   "verdict": "corrected",
+   "inAfter": "the year after the first commercial flight",
+   "note": "Was 'the year after the airport opened'. The operator says it first opened in 1942 as a wartime airstrip, took its first commercial flight in 1943 and was officially opened as a civilian airport by Juliana herself in 1944, so 'opened' has three possible dates. The first commercial flight in 1943 is what both sources give.",
+   "sources": [
+    {
+     "file": "sxmairport-about",
+     "org": "Princess Juliana International Airport (operator, sxmairport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "welcomed its first commercial flight in 1943",
+      "Princess Juliana International Airport first opened in 1942 as an airstrip during World War II.",
+      "Officially opened as a civilian airport by Princess Juliana of the Netherlands in 1944"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "The following year, the first commercial flight landed on 3 December 1943."
+    }
+   ]
+  },
+  {
+   "claim": "beside Simpson Bay Lagoon",
+   "verdict": "cut",
+   "wasBefore": "beside Simpson Bay Lagoon",
+   "why": "The lagoon rests on Wikipedia alone. Softened to 'at Simpson Bay', the operator's address (see above)."
+  },
+  {
+   "claim": "the main gateway to the smaller Leeward Islands",
+   "verdict": "cut",
+   "wasBefore": "the main gateway to the smaller Leeward Islands",
+   "why": "'Gateway to' is a banned phrase and 'Leeward' has no second source. Reworded as the main connecting airport for the smaller islands nearby (see above)."
+  },
+  {
+   "claim": "arriving aircraft on the final approach to Runway 10",
+   "verdict": "cut",
+   "wasBefore": "It is famous for the approach over Maho Beach, where arriving aircraft on the final approach to Runway 10 pass very low overhead.",
+   "why": "The runway number of the approach rests on Wikipedia alone; the operator says most arriving flights cross the beach, which the new text keeps."
+  },
+  {
+   "claim": "tourists frequently criticised for reckless behaviour on the beach",
+   "verdict": "cut",
+   "wasBefore": "and tourists are frequently criticised for behaving recklessly on the beach",
+   "why": "Wikipedia alone. The Guardian and Nine (Australia) reports it cites are blocked by the session's egress policy; Stuff (September 2017) shows people holding on to the fence but reports no criticism. The advice to keep clear of the fence stays."
+  },
+  {
+   "claim": "the year after the airport opened",
+   "verdict": "cut",
+   "wasBefore": "the year after the airport opened",
+   "why": "Ambiguous on the operator's own history (airstrip 1942, first commercial flight 1943, official civilian opening by Juliana in 1944). Corrected to the first commercial flight (see above)."
+  },
+  {
+   "claim": "1.8 million passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: the operator's 2025 traffic (1.8 million passengers, up from 1.6 million in 2024; 64,610 aircraft movements) replaces nothing in the old text, which gave no traffic figure. Operator only; no second source for 2025 was sought.",
+   "sources": [
+    {
+     "file": "sxmairport-2025",
+     "org": "Princess Juliana International Airport (operator, sxmairport.com)",
+     "dated": "2026-02-09",
+     "quote": [
+      "total passenger traffic grew from 1.6 million passengers in 2024 to 1.8 million passengers in 2025",
+      "Total aircraft movements increased from 59,858 movements in 2024 to 64,610 movements in 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "terminal rebuilt after Hurricane Irma (check-in January 2024, arrivals hall October 2024)",
+   "verdict": "cut",
+   "why": "Held back: the terminal, wrecked by Irma in 2017, was rebuilt in stages, with the check-in area reopening in January 2024 and the arrivals hall on 15 October 2024 (Wikipedia); the operator refers to the terminal's reopening. The old text said nothing about the terminal, so nothing is replaced.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": [
+      "The reconstructed check-in area opened in January 2024.",
+      "On 15 October 2024 the new arrival hall has been reopened"
+     ]
+    },
+    {
+     "file": "sxmairport-2025",
+     "org": "Princess Juliana International Airport (operator, sxmairport.com)",
+     "dated": "2026-02-09",
+     "quote": "Following the reopening of the terminal"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "It is also dangerous and worth a warning.",
+   "why": "Judgement from the sourced 2017 death (Stuff and Wikipedia) and Stuff's description of people holding on to the fence between the runway end and the road as jets take off."
+  },
+  {
+   "text": "Tell a client planning to watch to stay well clear of the fence at the runway end.",
+   "why": "Advice kept from the old text. Stuff (September 2017) places a chain link fence between the end of the runway and the road, where people hold on as jets depart; the jet blast that killed a visitor in 2017 hits there."
+  }
+ ],
+ "tracerOk": {}
+}

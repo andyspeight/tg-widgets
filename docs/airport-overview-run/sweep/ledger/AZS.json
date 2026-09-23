@@ -1,0 +1,278 @@
+{
+ "iata": "AZS",
+ "id": "recuH1vYfODam9f82",
+ "name": "Samaná El Catey International Airport",
+ "country": "Dominican Republic",
+ "wikipedia": "https://en.wikipedia.org/wiki/Saman%C3%A1_El_Catey_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for the Samaná peninsula in the Dominican Republic, near the village of El Catey, 8 km west of Sánchez.\n\nTransfer times are the useful part. Las Terrenas is a 30 minute drive, the provincial capital Santa Bárbara de Samaná about 40 minutes, and Las Galeras roughly an hour.\n\nIt is a small operation with a big runway. Just over 122,000 passengers used it in 2023, making it sixth busiest in the country, but the 3,000 metre runway is rated for a 747 and the terminal can take four of them at once. The bottleneck is people rather than aircraft: peak flow is 600 passengers an hour.\n\nThe airport opened on 6 November 2006 and is also called Aeropuerto Internacional Presidente Juan Bosch, so both names appear in supplier systems.",
+ "after": "The airport for the Samaná peninsula in the Dominican Republic, near El Catey.\n\nIt is a small airport with a 3,000 metre runway. On the civil aviation board's figures it handled about 93,000 international passengers in 2025, 8 per cent fewer than in 2024, which makes it the sixth busiest in the country.\n\nIt is also called Aeropuerto Internacional Profesor Juan Bosch, so both names appear in supplier systems.",
+ "claims": [
+  {
+   "claim": "the airport for the Samaná peninsula",
+   "verdict": "confirmed",
+   "inAfter": "The airport for the Samaná peninsula in the Dominican Republic",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "serving the province of Samaná in the Dominican Republic",
+      "at the base of the mountainous peninsula Cape Samaná"
+     ]
+    },
+    {
+     "file": "mitur-samana",
+     "org": "Dominican Republic Ministry of Tourism (godominicanrepublic.com)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "El Catey International Airport (AZS), is the gateway to the Samaná Peninsula."
+    }
+   ]
+  },
+  {
+   "claim": "near El Catey",
+   "verdict": "confirmed",
+   "inAfter": "near El Catey",
+   "note": "Was 'near the village of El Catey'; the airport's own page puts it on the El Catey road and JAC's glossary 'in El Catey'.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is located near the village of El Catey"
+    },
+    {
+     "file": "samana-ubicacion",
+     "org": "Aeropuerto Internacional de Samaná (the airport's own site, run by Aerodom)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Está ubicado en la carretera El Catey"
+    },
+    {
+     "file": "jac-informe-2025",
+     "org": "Dominican Republic civil aviation board (Junta de Aviación Civil, JAC)",
+     "dated": "report for January to December 2025, published March 2026",
+     "quote": "AZS: Aeropuerto Internacional Profesor Juan Bosch, ubicado en El Catey, Samaná, R.D."
+    }
+   ]
+  },
+  {
+   "claim": "a 3,000 metre runway",
+   "verdict": "confirmed",
+   "inAfter": "a 3,000 metre runway",
+   "note": "Kept from 'the 3,000 metre runway is rated for a 747' (the 747 rating is cut). OurAirports lists one runway, 07/25, 3,000 m; only Punta Cana's, Puerto Plata's and Las Américas' main runway are longer among Dominican airports with scheduled flights (file ourairports-do-runways in the SDQ folder).",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-14",
+     "quote": [
+      "r1_number = 07/25",
+      "r1_length_m = 3,000"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 07/25: 3,000 m (9,843 ft), asphalt",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 93,000 international passengers in 2025, 8 per cent fewer than in 2024 (civil aviation board)",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "civil aviation board",
+   "inAfter": "On the civil aviation board's figures it handled about 93,000 international passengers in 2025, 8 per cent fewer than in 2024",
+   "note": "Was 'Just over 122,000 passengers used it in 2023'. A passenger total replaces a passenger total. JAC's report covers international commercial traffic, which is all this airport has. JAC's 2024 figure, 101,555, is exactly the 2024 total in Wikipedia's current infobox, a cross-check; no second source for 2025 was read, so the 2025 figure is attributed.",
+   "sources": [
+    {
+     "file": "jac-informe-2025",
+     "org": "Dominican Republic civil aviation board (Junta de Aviación Civil, JAC)",
+     "dated": "report for January to December 2025, published March 2026",
+     "quote": [
+      "el transporte aerocomercial internacional de la República Dominicana en el año 2025",
+      "El Catey Airport 2024 2025 Var. Abs. Var. Rel.",
+      "Total 101,555 93,259 -8,296 -8%"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-14",
+     "quote": [
+      "stat_year = 2024",
+      "stat1_data = 101,555"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "sixth busiest in the country",
+   "verdict": "confirmed",
+   "inAfter": "which makes it the sixth busiest in the country",
+   "note": "JAC's report covers seven airports; by monthly average in 2025 El Catey (7,772) is sixth, behind Punta Cana, Las Américas, Santiago, Puerto Plata and La Romana (20,082) and ahead of La Isabela (3,455). Wikipedia gives the same rank for 2023.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "it's the Dominican Republic's sixth busiest airport"
+    },
+    {
+     "file": "jac-informe-2025",
+     "org": "Dominican Republic civil aviation board (Junta de Aviación Civil, JAC)",
+     "dated": "report for January to December 2025, published March 2026",
+     "quote": [
+      "La Romana 1,2,3,7,8 27,589 5,9,10,11 11,497 20,082 Estacionalidad alta",
+      "Samaná - El Catey 1,2,3,4,12 12,033 5,6,7,9,11 3,580 7,772 Estacionalidad alta",
+      "Santo Domingo - El Higüero 8,12 4,145 2 2,773 3,455 Estacionalidad baja"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "also called Aeropuerto Internacional Profesor Juan Bosch",
+   "verdict": "corrected",
+   "inAfter": "It is also called Aeropuerto Internacional Profesor Juan Bosch",
+   "note": "Was 'Presidente Juan Bosch', from Wikipedia's lead. Wikipedia contradicts itself: its infobox says Profesor Juan Bosch, as does the civil aviation board's 2025 report, twice. The airport's own site calls itself Aeropuerto Internacional de Samaná El Catey.",
+   "sources": [
+    {
+     "file": "jac-informe-2025",
+     "org": "Dominican Republic civil aviation board (Junta de Aviación Civil, JAC)",
+     "dated": "report for January to December 2025, published March 2026",
+     "quote": [
+      "Aeropuerto Internacional Profesor Juan Bosch, El Catey, Samaná MDCY – AZS, 2024-2025",
+      "AZS: Aeropuerto Internacional Profesor Juan Bosch"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-14",
+     "quote": "name = Profesor Juan Bosch ; International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "8 km west of Sánchez",
+   "verdict": "cut",
+   "wasBefore": ", 8 km west of Sánchez",
+   "why": "Wikipedia alone. Sánchez is not in the GeoNames file the coordinates check uses, so the distance and bearing cannot be computed, and the airport's own location page gives no distance."
+  },
+  {
+   "claim": "transfer times are the useful part",
+   "verdict": "cut",
+   "wasBefore": "Transfer times are the useful part.",
+   "why": "Goes with the drive times, which are cut (below)."
+  },
+  {
+   "claim": "Las Terrenas 30 minutes, Santa Bárbara de Samaná about 40 minutes, Las Galeras about an hour",
+   "verdict": "cut",
+   "wasBefore": "Las Terrenas is a 30 minute drive, the provincial capital Santa Bárbara de Samaná about 40 minutes, and Las Galeras roughly an hour.",
+   "why": "Wikipedia alone, after three tries: the airport's location page says only that it is 'a few minutes' from the town of Samaná, which does not square with 40 minutes, and its taxi page gives no times; the tourism ministry's Samaná and Las Terrenas pages give road times from Santo Domingo and Punta Cana, not from the airport; Air Transat's home page links to no Samaná page. None of the three towns is in the GeoNames file, so no distance could be computed. The old text called these the useful part, so they are worth restoring once a second source is read."
+  },
+  {
+   "claim": "a small operation with a big runway",
+   "verdict": "cut",
+   "wasBefore": "It is a small operation with a big runway.",
+   "why": "Reworded as 'a small airport with a 3,000 metre runway' (see the runway claim and the opinion note)."
+  },
+  {
+   "claim": "just over 122,000 passengers in 2023",
+   "verdict": "cut",
+   "wasBefore": "Just over 122,000 passengers used it in 2023",
+   "why": "Superseded by JAC's 2025 figure (see above)."
+  },
+  {
+   "claim": "runway rated for a 747",
+   "verdict": "cut",
+   "wasBefore": "is rated for a 747",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "terminal can take four 747s at once",
+   "verdict": "cut",
+   "wasBefore": "the terminal can take four of them at once",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "peak flow 600 passengers an hour",
+   "verdict": "cut",
+   "wasBefore": "The bottleneck is people rather than aircraft: peak flow is 600 passengers an hour.",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "opened on 6 November 2006",
+   "verdict": "cut",
+   "wasBefore": "The airport opened on 6 November 2006",
+   "why": "Wikipedia alone. The government's airports department (departamentoaeroportuario.gob.do) would not connect, and neither the airport's site nor JAC gives an opening date."
+  },
+  {
+   "claim": "also called Presidente Juan Bosch",
+   "verdict": "cut",
+   "wasBefore": "is also called Aeropuerto Internacional Presidente Juan Bosch",
+   "why": "Corrected to Profesor Juan Bosch, the name in the civil aviation board's report and in Wikipedia's own infobox (see above)."
+  },
+  {
+   "claim": "Held back: who flies here, and when",
+   "verdict": "cut",
+   "why": "Held back: new facts that replace nothing in the old text, though they are what an agent most needs. JAC's 2025 figures: Air Transat carried 56,178 and Air Canada Rouge 20,213 of about 93,000 passengers; Montreal and Toronto made up about 84 per cent of traffic, with Lisbon (Iberojet, 7,931) and Québec (5,758) next, and 343 passengers to Paris Orly on Air Caraïbes' new flights; traffic is strong in winter and very limited in the low season. The airport's own home page lists Air Transat and Air Canada, to Montreal, Toronto and Québec. Recommended for Andy as a replacement for the cut transfer paragraph.",
+   "sources": [
+    {
+     "file": "jac-informe-2025",
+     "org": "Dominican Republic civil aviation board (Junta de Aviación Civil, JAC)",
+     "dated": "report for January to December 2025, published March 2026",
+     "quote": [
+      "Air Transat At, Inc. 74,611 56,178 -18,433 -25%",
+      "Air Canada Rouge 12,985 20,213 7,228 56%",
+      "Montreal y Toronto representaron aproximadamente el 84 % del tráfico total",
+      "Fuerte desempeño en invierno y actividad muy limitada en temporada baja."
+     ]
+    },
+    {
+     "file": "samana-home",
+     "org": "Aeropuerto Internacional de Samaná (the airport's own site, run by Aerodom)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Air Transat",
+      "Air Canada",
+      "Viaja a Montreal desde Samaná."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Held back: no flights between the UK and Samaná in 2025",
+   "verdict": "cut",
+   "why": "Held back: the UK CAA's 2025 route table has no row for Samaná or El Catey (it has Punta Cana and La Romana), so UK clients connect or drive. The tourism ministry puts Samaná 2.5 to 3 hours by road from Santo Domingo. One source each.",
+   "sources": [
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2025 (table run 25 February 2026)",
+     "quote": "CENTRAL AMERICA,DOMINICAN REPUBLIC,1,GATWICK,PUNTA CANA,206051,95181,110870,200314,97676,102638,2.864"
+    },
+    {
+     "file": "mitur-samana",
+     "org": "Dominican Republic Ministry of Tourism (godominicanrepublic.com)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "El Catey International Airport (AZS) or 2.5–3 hours from Santo Domingo"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "It is a small airport",
+   "why": "The old text's framing ('a small operation'), borne out by the 93,000 passengers of 2025, sixth of the seven airports JAC covers."
+  },
+  {
+   "text": "so both names appear in supplier systems.",
+   "why": "Advice kept from the old text; both names are in use (JAC uses Profesor Juan Bosch, the airport calls itself Samaná El Catey)."
+  }
+ ],
+ "tracerOk": {
+  "93,000": "Rounded from 93,259 (JAC)."
+ }
+}

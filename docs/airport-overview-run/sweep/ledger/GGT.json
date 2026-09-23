@@ -1,0 +1,267 @@
+{
+ "iata": "GGT",
+ "id": "rec7fG2if2GZL0fBR",
+ "name": "Exuma International Airport",
+ "country": "Bahamas",
+ "wikipedia": "https://en.wikipedia.org/wiki/Exuma_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Great Exuma, near Moss Town and north west of George Town, and the practical way into the Exumas for a client who does not want a long boat transfer.\n\nIt is small. One terminal, one boarding area, and a single 2,149 metre runway that takes light aircraft and regional jets from the United States, Canada and elsewhere in the Bahamas. Odyssey Aviation runs a fixed base operation with direct ramp access for private traffic.\n\nThe Bahamian government has designated it an important part of the country's tourism economy and committed a development budget of 44 million dollars covering a new terminal, a fire and rescue building, retail space and government offices, along with work on the runway, aprons and a new taxiway. Progress is worth checking before quoting facilities, since the plans were drawn up several years ago.",
+ "after": "The airport for Great Exuma, near Moss Town and north west of George Town. According to the Bahamas tourism ministry, it is the main way into the Exumas.\n\nIt has a single 2,149 metre runway, with flights from the United States, Canada and elsewhere in the Bahamas.\n\nThe government has long planned to upgrade it, with work on the runway, aprons and a new taxiway, so check progress before quoting facilities.",
+ "claims": [
+  {
+   "claim": "the airport for Great Exuma",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Great Exuma",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "is a public airport serving the island of Great Exuma in the Bahamas"
+    },
+    {
+     "file": "bahamas-exumas",
+     "org": "The Bahamas tourism ministry (Ministry of Tourism, bahamas.com)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Great Exuma is where you’ll find most large hotels & resorts, as well as the Exuma International Airport and the capital city of George Town."
+    }
+   ]
+  },
+  {
+   "claim": "near Moss Town",
+   "verdict": "confirmed",
+   "inAfter": "near Moss Town",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "It is located near Moss Town, northwest of George Town."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Moss Town"
+    }
+   ]
+  },
+  {
+   "claim": "north west of George Town",
+   "verdict": "confirmed",
+   "inAfter": "north west of George Town",
+   "note": "George Town is not in the GeoNames file, so the coordinates check had no town centre. OurAirports' row for the closed George Town Airport (municipality George Town) serves as a second position: Exuma International lies 14.5 km from it, bearing 317 degrees, north west. The tourism ministry puts the airport 'just a few miles' from George Town; the unofficial exumaairport.com says about 15 miles and is not used. No distance is given in the text.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "It is located near Moss Town, northwest of George Town."
+    },
+    {
+     "file": "geo-georgetown",
+     "org": "OurAirports (computed)",
+     "quote": "Straight-line distance from George Town Airport (George Town) to Exuma International Airport: 14.5 km (9.0 miles), bearing 317 degrees, which is north west"
+    },
+    {
+     "file": "bahamas-exumas",
+     "org": "The Bahamas tourism ministry (Ministry of Tourism, bahamas.com)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Exuma International Airport is located on Great Exuma, just a few miles from its main settlement of George Town"
+    }
+   ]
+  },
+  {
+   "claim": "the tourism ministry: the main way into the Exumas",
+   "verdict": "softened",
+   "primary": true,
+   "attribution": "tourism ministry",
+   "inAfter": "According to the Bahamas tourism ministry, it is the main way into the Exumas.",
+   "note": "Was 'the practical way into the Exumas for a client who does not want a long boat transfer'. The ministry's own words are 'the primary gateway into The Exumas'; nothing compares boat transfers, and the ministry also lists daily scheduled flights to Staniel Cay, so 'main' is attributed rather than asserted.",
+   "sources": [
+    {
+     "file": "bahamas-exumas",
+     "org": "The Bahamas tourism ministry (Ministry of Tourism, bahamas.com)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Exuma International Airport",
+      "The primary gateway into The Exumas, Exuma International Airport is located on Great Exuma",
+      "Domestic and international flights arrive on a daily basis."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a single 2,149 metre runway",
+   "verdict": "confirmed",
+   "inAfter": "It has a single 2,149 metre runway",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": [
+      "r1_number = 12/30",
+      "r1_length_m = 2,149"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 12/30: 2,149 m (7,051 ft), ASP",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "flights from the United States, Canada and elsewhere in the Bahamas",
+   "verdict": "softened",
+   "inAfter": "with flights from the United States, Canada and elsewhere in the Bahamas",
+   "note": "Was 'takes light aircraft and regional jets from the United States, Canada and elsewhere in the Bahamas'. The ministry's live flight tables for The Exumas list American Airlines daily from Charlotte and Miami, Delta daily from Atlanta, Air Canada on Sundays from Toronto (the table gives Staniel Cay's code, TYM, for 'Georgetown, Great Exuma', an error on the page), Aztec Airways and Bahamasair from Fort Lauderdale, and Bahamasair and Western Air from Nassau. That is more than light aircraft and regional jets, so the aircraft types are dropped. The tables are undated and still list Sunwing at Freeport, so they may lag; only the three regions are stated.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "The airport services mainly light aircraft and regional jets from the United States, Canada, and The Bahamas."
+    },
+    {
+     "file": "bahamas-flying",
+     "org": "The Bahamas tourism ministry (Ministry of Tourism, bahamas.com)",
+     "dated": "2026-09-23 (live page, undated tables)",
+     "quote": [
+      "Charlotte, NC (CLT) George Town, Great Exuma (GGT) Daily International",
+      "Atlanta, GA (ATL) George Town, Great Exuma (GGT) Daily International",
+      "Toronto, Canada (YYZ) Georgetown, Great Exuma (TYM) Su International",
+      "Nassau, Nassau & Paradise Island (NAS) Georgetown, Great Exuma (GGT) Daily Domestic"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the government has long planned to upgrade it",
+   "verdict": "softened",
+   "inAfter": "The government has long planned to upgrade it",
+   "note": "Replaces 'The Bahamian government has designated it an important part of the country's tourism economy'. Wikipedia describes a plan with construction expected to start in the first quarter of 2021; in 2023 the tourism ministry's acting aviation director said there had 'always' been plans to develop it on the airside and the landside.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "made plans to further develop the airport with a budget of $44 million"
+    },
+    {
+     "file": "tribune-2023",
+     "org": "The Tribune (Nassau)",
+     "dated": "2023-02-07",
+     "quote": "there have always been “very aggressive” plans to ensure it is properly developed both on the airside and the landside"
+    }
+   ]
+  },
+  {
+   "claim": "work planned on the runway, aprons and a new taxiway",
+   "verdict": "confirmed",
+   "inAfter": "with work on the runway, aprons and a new taxiway",
+   "note": "Review (23 Sep): the text had 'In February 2023 a contract was awarded for work on the runway, aprons and taxiways, including a new taxiway'. The contract and its date rest on the Tribune alone, so the text now keeps only the scope of the works, which both sources give and the old text already had ('work on the runway, aprons and a new taxiway'). Recorded here only: the Tribune reports the Ministry of Works' contract of 6 February 2023 with Bahamas Hot Mix, 34.245 million dollars for the airside works, financed by an Inter-American Development Bank loan. No later report was readable (EWNews answered 429, the government portal 403), which is why the text keeps the advice to check progress.",
+   "sources": [
+    {
+     "file": "tribune-2023",
+     "org": "The Tribune (Nassau)",
+     "dated": "2023-02-07",
+     "quote": [
+      "As of Tuesday, February 7, 2023",
+      "Ministry of Works yesterday awarded Bahamas Hot Mix (BHM) a $34.245m contract for airside construction works at the airport, which includes rehabilitation works for aircraft aprons, taxiways and the runway; new taxiway installation"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-07",
+     "quote": "Renovation of the airport will also include the runway, aprons and a new taxiway."
+    }
+   ]
+  },
+  {
+   "claim": "the practical way in for a client who does not want a long boat transfer",
+   "verdict": "cut",
+   "wasBefore": "and the practical way into the Exumas for a client who does not want a long boat transfer",
+   "why": "No source compares the airport with boat transfers. Softened to the tourism ministry's own description, attributed."
+  },
+  {
+   "claim": "it is small",
+   "verdict": "cut",
+   "wasBefore": "It is small.",
+   "why": "No source gives a current size or traffic figure; the one-terminal description behind it is cut (below)."
+  },
+  {
+   "claim": "one terminal, one boarding area",
+   "verdict": "cut",
+   "wasBefore": "One terminal, one boarding area",
+   "why": "Wikipedia alone, and dated 'as of May 2020'. With building work contracted since, it cannot be confirmed as current."
+  },
+  {
+   "claim": "light aircraft and regional jets",
+   "verdict": "cut",
+   "wasBefore": "that takes light aircraft and regional jets",
+   "why": "Wikipedia alone; the tourism ministry's tables show American, Delta and Air Canada flying in, so the description undersells it. The regions are kept."
+  },
+  {
+   "claim": "Odyssey Aviation FBO with direct ramp access",
+   "verdict": "cut",
+   "wasBefore": "Odyssey Aviation runs a fixed base operation with direct ramp access for private traffic.",
+   "why": "Wikipedia alone. Odyssey Aviation's own Exuma page answered with an empty 202 challenge (a bot check, not retried), and the tourism ministry's private-aviation page names no operator at Exuma."
+  },
+  {
+   "claim": "designated an important part of the tourism economy",
+   "verdict": "cut",
+   "wasBefore": "The Bahamian government has designated it an important part of the country's tourism economy",
+   "why": "Wikipedia alone for a 'designation'. Softened to the government's long-standing plans to upgrade it (see above)."
+  },
+  {
+   "claim": "44 million dollar budget covering a new terminal, fire and rescue building, retail space and government offices",
+   "verdict": "cut",
+   "wasBefore": "committed a development budget of 44 million dollars covering a new terminal, a fire and rescue building, retail space and government offices, along with work on the runway, aprons and a new taxiway.",
+   "why": "The 44 million dollars and the building list rest on Wikipedia (its source, EWNews, answered 429). The only readable report, the Tribune of February 2023, gives a 34.245 million dollar contract for the airside works alone, and the unofficial exumaairport.com (not usable as a source) says a 65 million dollar new airport was begun in 2021, so the figures disagree and none is current. The planned works and the advice to check progress are kept (see above)."
+  },
+  {
+   "claim": "progress worth checking since the plans are several years old",
+   "verdict": "cut",
+   "wasBefore": "Progress is worth checking before quoting facilities, since the plans were drawn up several years ago.",
+   "why": "Kept as advice in new words ('so check progress before quoting facilities')."
+  },
+  {
+   "claim": "Held back: no UK flights to Exuma in 2025",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing in the old text. The UK CAA's 2025 route table has no Exuma row; the UK route into the Bahamas is Heathrow to Nassau (87,960 passengers in 2025, down 35 per cent), and the tourism ministry lists daily Western Air flights and Bahamasair flights from Nassau to Great Exuma.",
+   "sources": [
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2025 (table run 25 February 2026)",
+     "quote": "CARIBBEAN AREA,BAHAMAS,1,HEATHROW,NASSAU,87960,87960,0,136067,136067,0,-35.35538"
+    }
+   ]
+  },
+  {
+   "claim": "Held back: FCDO Ebola screening on arrival in the Bahamas",
+   "verdict": "cut",
+   "why": "Held back: FCDO entry advice that replaces nothing in the old text. The FCDO's Bahamas guide (still current at 24 September 2026) was last updated on 28 May 2026 with 'new information about Ebola screening when arriving in country'. Only the summary page was read.",
+   "sources": [
+    {
+     "file": "fcdo-bahamas",
+     "org": "UK Foreign, Commonwealth and Development Office (GOV.UK)",
+     "dated": "updated 2026-05-28",
+     "quote": "New information about Ebola screening when arriving in country"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so check progress before quoting facilities.",
+   "why": "The old text's own advice, kept: no report of the works' progress from the last twelve months could be read."
+  }
+ ],
+ "tracerOk": {}
+}

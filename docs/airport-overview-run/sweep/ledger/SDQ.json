@@ -1,0 +1,416 @@
+{
+ "iata": "SDQ",
+ "id": "recQHFuL4ZIh5knHB",
+ "name": "Las Américas International Airport",
+ "country": "Dominican Republic",
+ "wikipedia": "https://en.wikipedia.org/wiki/Las_Am%C3%A9ricas_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Santo Domingo's international airport, at Punta Caucedo between the capital and Boca Chica. It is second busiest in the Dominican Republic after Punta Cana, handling 5.49 million passengers in 2023, and one of the largest airports in the Caribbean.\n\nIt is also the busiest cargo hub in the Caribbean and Central America, moving 355 million pounds of freight in 2019.\n\nThe runway is the largest in the country at 3,355 metres and takes a 747, which is why long haul, mid haul and short haul aircraft all come in here. Santo Domingo's other airport, La Isabela, only takes small aircraft.\n\nThere are two terminals with nine gates between them, plus a remote stand. Terminal B has a Copa Club run jointly by Copa Airlines and United. Between 68 and 84 flights come and go on an average day, and JetBlue is the largest airline.\n\nA 250 million dollar terminal expansion began in June 2025 and is due at the end of 2028.",
+ "after": "Santo Domingo's international airport, between the capital and Boca Chica. It is the second busiest in the Dominican Republic after Punta Cana: the civil aviation board counted about 5.2 million international passengers in 2025, 6 per cent fewer than in 2024.\n\nThe main runway, at 3,353 metres, is the longest in the country. On the board's figures, its busiest routes in 2025 were to New York, Miami and Madrid. Santo Domingo's other airport, La Isabela, is much smaller.\n\nThere are two terminals, and Terminal B has a Copa Club. JetBlue is the largest airline.\n\nAerodom, which runs the airport, began work on a new 250 million dollar passenger terminal in June 2025, due to be finished in 2028. The airport says the building work is under way and has opened remote car parks with a free shuttle bus in the meantime.",
+ "claims": [
+  {
+   "claim": "Santo Domingo's international airport",
+   "verdict": "confirmed",
+   "inAfter": "Santo Domingo's international airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "is an international airport located in Punta Caucedo, near Santo Domingo and Boca Chica in the Dominican Republic"
+    },
+    {
+     "file": "jac-informe-2025",
+     "org": "Dominican Republic civil aviation board (Junta de Aviación Civil, JAC)",
+     "dated": "report for January to December 2025, published March 2026",
+     "quote": "SDQ: Aeropuerto Internacional de Las Américas, Dr. José Francisco Peña Gómez, ubicado Santo Domingo"
+    }
+   ]
+  },
+  {
+   "claim": "between the capital and Boca Chica",
+   "verdict": "confirmed",
+   "inAfter": "between the capital and Boca Chica",
+   "note": "The coordinates put the airport 24.0 km east of Santo Domingo's centre and 7.6 km west of Boca Chica, almost on the line between them.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "near Santo Domingo and Boca Chica"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 24.0 km (14.9 miles)",
+      "Bearing from the city centre: 101 degrees, which is east"
+     ]
+    },
+    {
+     "file": "geo-bocachica",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Boca Chica (GeoNames 3511336, 18.4500, -69.6000, population 46,300) to Las Américas International Airport (MDSD, IATA SDQ): 7.6 km, bearing from Boca Chica 253 degrees, which is west"
+    }
+   ]
+  },
+  {
+   "claim": "second busiest in the Dominican Republic after Punta Cana",
+   "verdict": "confirmed",
+   "inAfter": "It is the second busiest in the Dominican Republic after Punta Cana",
+   "note": "JAC's 2025 figures: Punta Cana 11,006,110, Las Américas 5,212,378, Santiago third.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "The airport is the second-busiest in the country, after Punta Cana International Airport"
+    },
+    {
+     "file": "jac-informe-2025",
+     "org": "Dominican Republic civil aviation board (Junta de Aviación Civil, JAC)",
+     "dated": "report for January to December 2025, published March 2026",
+     "quote": "Los aeropuertos de Punta Cana (11,006,110 pasajeros) y Las Américas (5,212,378 pasajeros) registraron los más altos niveles de tráfico de pasajeros."
+    }
+   ]
+  },
+  {
+   "claim": "about 5.2 million international passengers in 2025, 6 per cent fewer than in 2024 (civil aviation board)",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "civil aviation board",
+   "inAfter": "the civil aviation board counted about 5.2 million international passengers in 2025, 6 per cent fewer than in 2024",
+   "note": "Was 'handling 5.49 million passengers in 2023' (Wikipedia's lead). A passenger total replaces a passenger total. JAC's report covers international commercial traffic, so the text says international passengers; Las Américas has almost no domestic scheduled flying. JAC's 2024 figure, 5,534,893, is exactly the 2024 total in Wikipedia's infobox (sourced there to the Central Bank), a good cross-check, but no second source for 2025 was read, so the 2025 figure is attributed. JAC puts the fall mainly down to Arajet moving a large part of its flying to Punta Cana.",
+   "sources": [
+    {
+     "file": "jac-informe-2025",
+     "org": "Dominican Republic civil aviation board (Junta de Aviación Civil, JAC)",
+     "dated": "report for January to December 2025, published March 2026",
+     "quote": [
+      "el transporte aerocomercial internacional de la República Dominicana en el año 2025",
+      "Total 5,534,893 5,212,378 322,515- -6%"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": [
+      "stat_year = 2024",
+      "stat1_data = 5,534,893"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "main runway 3,353 m, the longest in the country",
+   "verdict": "corrected",
+   "inAfter": "The main runway, at 3,353 metres, is the longest in the country.",
+   "note": "Was 'The runway is the largest in the country at 3,355 metres'. Wikipedia's text says 3,355 m but its own infobox and OurAirports give 3,353 m (11,000 ft). OurAirports' runway data for every Dominican airport with scheduled flights puts it first, ahead of Punta Cana's two 3,100 m runways. 'Main' because OurAirports also lists a second, unlit strip, 18/36 (2,991 m), which Wikipedia describes as the parallel taxiway used as a runway during the 2008 resurfacing. Review (23 Sep): the helper's ranking covers airports with scheduled service only; re-run over every Dominican airport in OurAirports (runways.csv, open runways), Las Américas' 11,000 ft runway is still the longest.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "This runway is the largest in the country"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "r1_length_m = 3353"
+    },
+    {
+     "file": "ourairports-do-runways",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "MDSD SDQ Las Américas International Airport 17/35 11000 ft 3353 m",
+      "MDPC PUJ Punta Cana International Airport 08/26 10171 ft 3100 m"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "busiest routes in 2025 New York, Miami and Madrid (civil aviation board)",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "board",
+   "inAfter": "On the board's figures, its busiest routes in 2025 were to New York, Miami and Madrid.",
+   "note": "Replaces 'which is why long haul, mid haul and short haul aircraft all come in here' (Wikipedia alone): the routes show the mix itself, with Madrid the one long-haul route in the top three. JAC's 2025 table: New York 973,180, Miami 621,709, Madrid 544,610, then Newark and Panama City. Attributed to JAC, the one source read for route figures.",
+   "sources": [
+    {
+     "file": "jac-informe-2025",
+     "org": "Dominican Republic civil aviation board (Junta de Aviación Civil, JAC)",
+     "dated": "report for January to December 2025, published March 2026",
+     "quote": [
+      "New York 989,045 973,180 -15,865 -2%",
+      "Miami Intl 598,292 621,709 23,417 4%",
+      "Madrid - Barajas 519,536 544,610 25,074 5%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "La Isabela is much smaller",
+   "verdict": "softened",
+   "inAfter": "Santo Domingo's other airport, La Isabela, is much smaller.",
+   "note": "Was 'only takes small aircraft'. JAC counted 41,459 passengers at La Isabela in 2025 against 5.2 million here, and OurAirports gives it the shortest runway of any Dominican airport with scheduled flights (1,650 m). What aircraft it can take is not stated by a second source, so the text keeps to size.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "Santo Domingo's other airport, La Isabela, is much smaller and used by smaller aircraft only."
+    },
+    {
+     "file": "jac-informe-2025",
+     "org": "Dominican Republic civil aviation board (Junta de Aviación Civil, JAC)",
+     "dated": "report for January to December 2025, published March 2026",
+     "quote": "El tráfico total de pasajeros para el año 2025 alcanzó los 41,459"
+    },
+    {
+     "file": "ourairports-do-runways",
+     "org": "OurAirports (computed)",
+     "quote": "MDJB JBQ La Isabela International Airport 01/19 5412 ft 1650 m"
+    }
+   ]
+  },
+  {
+   "claim": "two terminals",
+   "verdict": "confirmed",
+   "inAfter": "There are two terminals",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "The airport has two terminals (A and B)."
+    },
+    {
+     "file": "lasamericas-salas-vip",
+     "org": "Aeropuerto Las Américas (the airport's own site, run by Aerodom)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "ubicado en el 2do. Nivel de la Terminal A",
+      "Ubicado en el 2do. Nivel de la Terminal B"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Terminal B has a Copa Club",
+   "verdict": "softened",
+   "inAfter": "Terminal B has a Copa Club",
+   "note": "Was 'a Copa Club run jointly by Copa Airlines and United'. The airport's lounge page puts the Copa Club on the second level of Terminal B and says it is for Copa Airlines passengers; only Wikipedia says United runs it too (cut below).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "Terminal B now features a co-branded Copa Club"
+    },
+    {
+     "file": "lasamericas-salas-vip",
+     "org": "Aeropuerto Las Américas (the airport's own site, run by Aerodom)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Copa Club",
+      "Ubicado en el 2do. Nivel de la Terminal B. Esta sala es exclusiva para pasajeros de Copa Airlines"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "JetBlue is the largest airline",
+   "verdict": "confirmed",
+   "inAfter": "JetBlue is the largest airline.",
+   "note": "JAC 2025: JetBlue 1,358,164 passengers, about 26 per cent, more than twice Arajet's 640,718.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "JetBlue is the largest airline operating at Las Américas."
+    },
+    {
+     "file": "jac-informe-2025",
+     "org": "Dominican Republic civil aviation board (Junta de Aviación Civil, JAC)",
+     "dated": "report for January to December 2025, published March 2026",
+     "quote": [
+      "JetBlue Airways fue la aerolínea con mayor volumen de pasajeros en el Aeropuerto Internacional de Las Américas en 2025",
+      "Jetblue Airways Corporation 1,370,209 1,358,164 -12,045 -1%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Aerodom runs the airport",
+   "verdict": "confirmed",
+   "inAfter": "Aerodom, which runs the airport",
+   "note": "Added to name who is building the terminal. Aerodom is part of VINCI Airports (Hoy; the airport's site links to VINCI Airports).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "The airport is run by Aeropuertos Dominicanos Siglo XXI (AERODOM)"
+    },
+    {
+     "file": "lasamericas-ubicacion",
+     "org": "Aeropuerto Las Américas (the airport's own site, run by Aerodom)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "AERODOM ha habilitado lotes de estacionamiento remotos"
+    },
+    {
+     "file": "hoy-nueva-terminal",
+     "org": "Hoy (Santo Domingo daily newspaper)",
+     "dated": "2025-06-03",
+     "quote": "Aerodom dio inicio a las demoliciones de una serie de edificaciones como parte del ambicioso proyecto de construcción de una nueva terminal de pasajeros en el Aeropuerto Internacional de Las Américas"
+    }
+   ]
+  },
+  {
+   "claim": "new 250 million dollar terminal begun June 2025, due in 2028",
+   "verdict": "corrected",
+   "inAfter": "began work on a new 250 million dollar passenger terminal in June 2025, due to be finished in 2028",
+   "note": "Was 'A 250 million dollar terminal expansion began in June 2025 and is due at the end of 2028'. Hoy carries Aerodom's announcement of 3 June 2025: demolitions begun, US$250 million, a terminal for 4 million passengers a year, building to finish in 2028 and to run alongside the existing terminal. Wikipedia says the end of 2028; the announcement says only 2028, so the text says 2028. Both sources date from or rest on June 2025; the airport's live page (next claim) shows the work is still going on.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "The construction of a new terminal expansion started in June 2025 and expected to be inaugurated on the end of 2028 with a cost of US$250 million."
+    },
+    {
+     "file": "hoy-nueva-terminal",
+     "org": "Hoy (Santo Domingo daily newspaper)",
+     "dated": "2025-06-03",
+     "quote": [
+      "03.06.2025 | 16:54",
+      "USD$250 millones de inversión para una nueva terminal con capacidad para 4 millones de pasajeros al año.",
+      "La construcción del nuevo edificio terminal concluirá en 2028"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the airport says building work is under way, with remote car parks and a free shuttle",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport says the building work is under way and has opened remote car parks with a free shuttle bus in the meantime.",
+   "note": "Attributed statement from the airport's own live location page: Aerodom has opened remote car parks and a free shuttle while the building work is carried out. It is the one source dated within the last twelve months for the works, and the practical consequence for a client leaving a car, as Providenciales' 'allow extra time' followed its terminal works.",
+   "sources": [
+    {
+     "file": "lasamericas-ubicacion",
+     "org": "Aeropuerto Las Américas (the airport's own site, run by Aerodom)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "AERODOM ha habilitado lotes de estacionamiento remotos y un servicio de transporte shuttle libre de costo mientras se realizan los trabajos de construcción."
+    }
+   ]
+  },
+  {
+   "claim": "at Punta Caucedo",
+   "verdict": "cut",
+   "wasBefore": "at Punta Caucedo",
+   "why": "The sources name different places: Wikipedia says Punta Caucedo, the airport's own location page says Route 66 in La Caleta. Neither name has a second source, so neither is given; 'between the capital and Boca Chica' is kept."
+  },
+  {
+   "claim": "5.49 million passengers in 2023",
+   "verdict": "cut",
+   "wasBefore": "handling 5.49 million passengers in 2023",
+   "why": "Superseded by JAC's 2025 figure (see above)."
+  },
+  {
+   "claim": "one of the largest airports in the Caribbean",
+   "verdict": "cut",
+   "wasBefore": "and one of the largest airports in the Caribbean",
+   "why": "Wikipedia alone; JAC compares Dominican airports only."
+  },
+  {
+   "claim": "busiest cargo hub in the Caribbean and Central America, 355 million pounds in 2019",
+   "verdict": "cut",
+   "wasBefore": "It is also the busiest cargo hub in the Caribbean and Central America, moving 355 million pounds of freight in 2019.",
+   "why": "Wikipedia alone, and the figure is seven years old. JAC's 2025 report covers passengers only, and aerodom.com answered 502, so no current cargo figure or ranking was found."
+  },
+  {
+   "claim": "runway largest at 3,355 metres",
+   "verdict": "cut",
+   "wasBefore": "The runway is the largest in the country at 3,355 metres",
+   "why": "Corrected to 3,353 m (Wikipedia's own infobox and OurAirports), the longest in the country (see above)."
+  },
+  {
+   "claim": "takes a 747",
+   "verdict": "cut",
+   "wasBefore": "and takes a 747",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "long, mid and short haul aircraft all come in here",
+   "verdict": "cut",
+   "wasBefore": "which is why long haul, mid haul and short haul aircraft all come in here",
+   "why": "Wikipedia alone. Replaced by JAC's busiest routes, which show the mix (New York, Miami, Madrid)."
+  },
+  {
+   "claim": "La Isabela only takes small aircraft",
+   "verdict": "cut",
+   "wasBefore": "only takes small aircraft",
+   "why": "Softened to 'much smaller' (see above): only Wikipedia states what aircraft it takes."
+  },
+  {
+   "claim": "nine gates plus a remote stand",
+   "verdict": "cut",
+   "wasBefore": "with nine gates between them, plus a remote stand",
+   "why": "Wikipedia alone; a count, and the airport's own pages give none."
+  },
+  {
+   "claim": "Copa Club run jointly by Copa Airlines and United",
+   "verdict": "cut",
+   "wasBefore": "run jointly by Copa Airlines and United",
+   "why": "Wikipedia alone. The airport's lounge page says the Copa Club is exclusive to Copa Airlines passengers and does not mention United."
+  },
+  {
+   "claim": "between 68 and 84 flights a day",
+   "verdict": "cut",
+   "wasBefore": "Between 68 and 84 flights come and go on an average day",
+   "why": "Wikipedia alone, undated, and a count of flights with no current figure from the airport. Wikipedia's own infobox gives 43,258 aircraft operations in 2024, about 118 a day, which does not square with it."
+  },
+  {
+   "claim": "due at the end of 2028",
+   "verdict": "cut",
+   "wasBefore": "is due at the end of 2028",
+   "why": "Aerodom's announcement (Hoy, 3 June 2025) says the building will be finished in 2028, not the end of 2028; the text says 2028."
+  },
+  {
+   "claim": "Held back: no flights between the UK and Santo Domingo in 2025",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing in the old text. The UK CAA's 2025 route table has rows for Gatwick, Birmingham, Manchester, Glasgow and Newcastle to Punta Cana and La Romana but none for Santo Domingo, so UK clients connect (JAC's top routes suggest Madrid, New York or Miami). One source, and an absence rather than a statement.",
+   "sources": [
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2025 (table run 25 February 2026)",
+     "quote": [
+      "CENTRAL AMERICA,DOMINICAN REPUBLIC,1,GATWICK,PUNTA CANA,206051,95181,110870,200314,97676,102638,2.864",
+      "CENTRAL AMERICA,DOMINICAN REPUBLIC,2,MANCHESTER,PUNTA CANA,114214,0,114214,113368,336,113032,0.74624"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Held back: Arajet moved much of its flying to Punta Cana",
+   "verdict": "cut",
+   "why": "Held back: JAC gives it as the main reason Las Américas lost passengers from November 2024 to October 2025, with a recovery in the last two months of 2025. One source, and the old text did not mention Arajet.",
+   "sources": [
+    {
+     "file": "jac-informe-2025",
+     "org": "Dominican Republic civil aviation board (Junta de Aviación Civil, JAC)",
+     "dated": "report for January to December 2025, published March 2026",
+     "quote": "destacándose el traslado de una parte significativa de las operaciones de Arajet al Aeropuerto Internacional de Punta Cana"
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

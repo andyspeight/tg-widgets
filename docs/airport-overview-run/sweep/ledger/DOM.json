@@ -1,0 +1,397 @@
+{
+ "iata": "DOM",
+ "id": "recPvG4ASNFa53IX5",
+ "name": "Douglas-Charles Airport",
+ "country": "Dominica",
+ "wikipedia": "https://en.wikipedia.org/wiki/Douglas%E2%80%93Charles_Airport",
+ "audited": "2026-09-23",
+ "before": "Dominica's main airport, on the north east coast 2 miles from Marigot, and one of only two on the island. The other is Canefield, near Roseau.\n\nDistances matter here more than the size of the airport. Portsmouth, the island's second town, is about an hour away by road, so build a real transfer into any itinerary.\n\nThe terminal is small and straightforward: ten check in counters and two ground level gates, with no air bridges. Gate 1 is used by American and American Eagle, and Gate 2 by United on Saturdays.\n\nThe addition worth mentioning to a client is the Executive Lounge, which is open to both arriving and departing passengers. It includes seating, Wi-Fi, complimentary food and drink, cultural exhibits, private rest rooms and, usefully, assistance through immigration and customs, baggage help and taxi arrangements.\n\nThe airport was formerly called Melville Hall, a name still in circulation.",
+ "after": "Dominica's main airport, on the north east side of the island near Marigot, and one of only two on Dominica. The other is Canefield, near Roseau.\n\nDistances matter here more than the size of the airport. Roseau, the capital, is about an hour away by road, so build a real transfer into any itinerary.\n\nAmerican Airlines flies here direct from Miami.\n\nThe feature worth mentioning to a client is the Executive Lounge, open to departing passengers, with Wi-Fi and drinks.\n\nIts former name, Melville Hall, is still in circulation.",
+ "claims": [
+  {
+   "claim": "Dominica's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Dominica's main airport",
+   "note": "The tourism authority says most visitors arrive here and that it is the larger of the two airports; the operator calls it the primary commercial facility.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "The Melville Hall area was chosen as the site for Dominica's main airport in 1944"
+    },
+    {
+     "file": "discoverdominica-air",
+     "org": "Discover Dominica Authority (discoverdominica.com, official tourism site)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Welcome to Dominica's Official Airline Information Page!",
+      "Most visitors to Dominica will arrive through Douglas-Charles, the larger of the two airports."
+     ]
+    },
+    {
+     "file": "daspa-canefield",
+     "org": "Dominica Air and Sea Ports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "with Douglas-Charles Airport operating as the primary commercial facility"
+    }
+   ]
+  },
+  {
+   "claim": "on the north east side of the island",
+   "verdict": "softened",
+   "inAfter": "on the north east side of the island",
+   "note": "Was 'on the north east coast'. The tourism authority says the north-eastern side; Wikipedia's 'northeast coast' is repeated on the operator's page in Wikipedia's own words, so that page does not count as a second source for it.",
+   "sources": [
+    {
+     "file": "discoverdominica-air",
+     "org": "Discover Dominica Authority (discoverdominica.com, official tourism site)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Douglas-Charles, located on the northeastern side of the island"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "is an airport located on the northeast coast of Dominica"
+    }
+   ]
+  },
+  {
+   "claim": "near Marigot",
+   "verdict": "softened",
+   "inAfter": "near Marigot",
+   "note": "Was '2 miles from Marigot'. The distance rests on Wikipedia alone (Marigot is not in the GeoNames file, so the coordinates check cannot test it, and the operator's page drops the figure). OurAirports gives Marigot as the airport's municipality and the lounge listing gives a Marigot address.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "2 mi (3.2 km) northwest of Marigot"
+    },
+    {
+     "file": "ourairports-dm",
+     "org": "OurAirports (computed)",
+     "quote": "Douglas-Charles Airport (OurAirports TDPD, IATA DOM, DM, medium airport, municipality Marigot; scheduled service: yes; keywords: Melville Hall; longest runway 09/27 1,936 m): 28.8 km from Roseau, bearing 19 degrees, which is north"
+    },
+    {
+     "file": "gln-lounge",
+     "org": "Global Lounge Network (the lounge's listing, linked from the operator's page)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "GMWX+CJH Aeropuerto Douglas-Charles, Melville Hall Road, Marigot, Dominica"
+    }
+   ]
+  },
+  {
+   "claim": "one of only two airports on Dominica",
+   "verdict": "confirmed",
+   "inAfter": "one of only two on Dominica",
+   "note": "True today. OurAirports also lists a third site, Dominica International Airport, under construction at Wesley (held back below).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "It is one of only two airports in the island nation of Dominica, the other being Canefield Airport located three miles (5 km) northeast of Roseau."
+    },
+    {
+     "file": "discoverdominica-air",
+     "org": "Discover Dominica Authority (discoverdominica.com, official tourism site)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Dominica is served by two airports: Douglas-Charles (DOM), formerly known as Melville Hall, and Canefield (DCF) Airports."
+    },
+    {
+     "file": "daspa-dca",
+     "org": "Dominica Air and Sea Ports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Airport Facilities",
+      "Canefield Airport (CFA)",
+      "Douglas-Charles Airport (DOM)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the other is Canefield, near Roseau",
+   "verdict": "confirmed",
+   "inAfter": "The other is Canefield, near Roseau.",
+   "note": "OurAirports' position for Canefield is 3.9 km north of the GeoNames centre of Roseau.",
+   "sources": [
+    {
+     "file": "discoverdominica-air",
+     "org": "Discover Dominica Authority (discoverdominica.com, official tourism site)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Canefield Airport is 15 minutes from the capital city of Roseau"
+    },
+    {
+     "file": "daspa-canefield",
+     "org": "Dominica Air and Sea Ports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Canefield Airport is 5 km north of Roseau, the capital."
+    },
+    {
+     "file": "ourairports-dm",
+     "org": "OurAirports (computed)",
+     "quote": "Canefield Airport (OurAirports TDCF, IATA DCF, DM, medium airport, municipality Canefield; scheduled service: yes; keywords: -; longest runway 01/19 954 m): 3.9 km from Roseau, bearing 354 degrees, which is north"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "the other being Canefield Airport located three miles (5 km) northeast of Roseau"
+    }
+   ]
+  },
+  {
+   "claim": "Roseau, the capital, is about an hour away by road",
+   "verdict": "corrected",
+   "inAfter": "Roseau, the capital, is about an hour away by road",
+   "note": "Replaces 'Portsmouth, the island's second town, is about an hour away by road', which rests on Wikipedia alone. The operator and the tourism authority both give about an hour to Roseau, where the transfer matters to most visitors; the straight line is 28.8 km and the operator gives 45.9 km by road.",
+   "sources": [
+    {
+     "file": "daspa-dca",
+     "org": "Dominica Air and Sea Ports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "1 hour taxi drive to Roseau (capital)",
+      "(distance 45.9 km from Roseau)"
+     ]
+    },
+    {
+     "file": "discoverdominica-air",
+     "org": "Discover Dominica Authority (discoverdominica.com, official tourism site)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "approximately one hour from the city"
+    }
+   ]
+  },
+  {
+   "claim": "American Airlines flies here direct from Miami",
+   "verdict": "corrected",
+   "inAfter": "American Airlines flies here direct from Miami.",
+   "note": "Replaces the gate sentence, which named American, American Eagle and United (see the cuts). Wikipedia gives the Miami service as daily since April 2022, flown by the American Eagle affiliate.",
+   "sources": [
+    {
+     "file": "discoverdominica-air",
+     "org": "Discover Dominica Authority (discoverdominica.com, official tourism site)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Take a direct American Airlines flight from Miami International Airport to Douglas-Charles Airport in Dominica."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": [
+      "American Airlines announced a new, twice-weekly nonstop jet service between Miami and Dominica",
+      "As of 5 April 2022, flights now operate once daily."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the Executive Lounge, open to departing passengers",
+   "verdict": "softened",
+   "inAfter": "the Executive Lounge, open to departing passengers",
+   "note": "Was 'open to both arriving and departing passengers'. The operator's page carries an Executive Lounge item and links to the lounge's listing on Global Lounge Network, which admits holders of a boarding pass for same-day travel (landside, east side of the terminal, 6am to 8pm, day pass USD 38). Nothing but Wikipedia mentions arrival services.",
+   "sources": [
+    {
+     "file": "daspa-dca",
+     "org": "Dominica Air and Sea Ports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Executive Lounge"
+    },
+    {
+     "file": "gln-lounge",
+     "org": "Global Lounge Network (the lounge's listing, linked from the operator's page)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "DOM- The Lounge Dominica/Marigot Douglas–Charles",
+      "All Cardholders and guests are required to show a Boarding Pass with confirmed same-day travel for access to the lounge"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "an Executive Lounge that all arriving and departing passengers can utilize"
+    }
+   ]
+  },
+  {
+   "claim": "with Wi-Fi and drinks",
+   "verdict": "confirmed",
+   "inAfter": "with Wi-Fi and drinks",
+   "sources": [
+    {
+     "file": "gln-lounge",
+     "org": "Global Lounge Network (the lounge's listing, linked from the operator's page)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Free WiFi",
+      "Alcohol Drinks",
+      "Soft Drinks"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": [
+      "Complimentary Wi-Fi",
+      "Complimentary beverages"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "formerly Melville Hall",
+   "verdict": "confirmed",
+   "inAfter": "Its former name, Melville Hall",
+   "note": "Renamed Douglas-Charles on 27 October 2014 (Wikipedia); the date is not stated.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": "The airport was renamed from Melville Hall Airport to Douglas–Charles Airport on 27 October 2014"
+    },
+    {
+     "file": "discoverdominica-air",
+     "org": "Discover Dominica Authority (discoverdominica.com, official tourism site)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Douglas-Charles (DOM), formerly known as Melville Hall"
+    }
+   ]
+  },
+  {
+   "claim": "the old name is still in circulation",
+   "verdict": "confirmed",
+   "inAfter": "is still in circulation",
+   "note": "Judgement from use: the tourism authority still gives the old name to help visitors, OurAirports carries 'Melville Hall' as an alternative name, and the operator's own address for the airport is Melville Hall.",
+   "sources": [
+    {
+     "file": "discoverdominica-air",
+     "org": "Discover Dominica Authority (discoverdominica.com, official tourism site)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "formerly known as Melville Hall"
+    },
+    {
+     "file": "ourairports-dm",
+     "org": "OurAirports (computed)",
+     "quote": "municipality Marigot; scheduled service: yes; keywords: Melville Hall"
+    },
+    {
+     "file": "daspa-dca",
+     "org": "Dominica Air and Sea Ports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Douglas-Charles Airport, Melville Hall, Dominica"
+    }
+   ]
+  },
+  {
+   "claim": "on the north east coast 2 miles from Marigot",
+   "verdict": "cut",
+   "wasBefore": "on the north east coast 2 miles from Marigot",
+   "why": "The 2 miles rests on Wikipedia alone; the operator's lead paragraph repeats Wikipedia's words and drops the figure. Softened to 'on the north east side of the island near Marigot' (see above)."
+  },
+  {
+   "claim": "Portsmouth, the island's second town, about an hour away by road",
+   "verdict": "cut",
+   "wasBefore": "Portsmouth, the island's second town, is about an hour away by road",
+   "why": "Wikipedia alone. Replaced by the hour to Roseau, which the operator and the tourism authority both give."
+  },
+  {
+   "claim": "ten check-in counters, two ground-level gates, no air bridges",
+   "verdict": "cut",
+   "wasBefore": "The terminal is small and straightforward: ten check in counters and two ground level gates, with no air bridges.",
+   "why": "Wikipedia alone, and Wikipedia contradicts itself (two ground-level gates in one section, a Gate 3 for United in the next). Neither the operator nor the tourism authority gives counts; the tourism authority calls the terminal updated."
+  },
+  {
+   "claim": "Gate 1 American and American Eagle; Gate 2 United on Saturdays",
+   "verdict": "cut",
+   "wasBefore": "Gate 1 is used by American and American Eagle, and Gate 2 by United on Saturdays.",
+   "why": "Gate assignments rest on Wikipedia alone (and it gives United Gate 2 in one place and Gate 3 in another). United's Newark service also rests on Wikipedia alone here: the tourism authority lists United only among airlines for connections, and the operator's press page lists nothing. American's Miami service is kept (see above)."
+  },
+  {
+   "claim": "Executive Lounge open to arriving passengers",
+   "verdict": "cut",
+   "wasBefore": "The addition worth mentioning to a client is the Executive Lounge, which is open to both arriving and departing passengers.",
+   "why": "Arrival access rests on Wikipedia alone; the lounge's own listing admits passengers with a same-day boarding pass. Softened to departing passengers (see above)."
+  },
+  {
+   "claim": "lounge includes seating, food, cultural exhibits, private rest rooms, immigration and customs assistance, baggage help, taxi arrangements",
+   "verdict": "cut",
+   "wasBefore": "It includes seating, Wi-Fi, complimentary food and drink, cultural exhibits, private rest rooms and, usefully, assistance through immigration and customs, baggage help and taxi arrangements.",
+   "why": "Wikipedia alone, apart from the Wi-Fi and drinks, which the lounge's listing confirms and the new text keeps."
+  },
+  {
+   "claim": "The airport was formerly called Melville Hall",
+   "verdict": "cut",
+   "wasBefore": "The airport was formerly called Melville Hall",
+   "why": "Reworded only ('Its former name, Melville Hall'), so that two sentences in a row do not start with 'The'."
+  },
+  {
+   "claim": "a new international airport is being built nearby",
+   "verdict": "cut",
+   "why": "Held back: Dominica's first international airport has been under construction at Wesley, a few kilometres north, since mobilisation in June 2023 (the development company; OurAirports lists the site). No opening date is published, and the old text said nothing that it replaces. When it opens, 'one of only two' will change.",
+   "sources": [
+    {
+     "file": "iadc-home",
+     "org": "International Airport Development Company (Dominica)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Discover the vision behind Dominica’s first international airport",
+      "Mobilization began in June 2023 with the arrival of heavy machinery"
+     ]
+    },
+    {
+     "file": "ourairports-dm",
+     "org": "OurAirports (computed)",
+     "quote": "Dominica International Airport (Under Construction) (OurAirports DM-0001, DM, closed, municipality Wesley; scheduled service: no; keywords: -; no runway listed): 31.2 km from Roseau, bearing 15 degrees, which is north"
+    }
+   ]
+  },
+  {
+   "claim": "all travellers must complete an electronic immigration form before the trip",
+   "verdict": "cut",
+   "why": "Held back: an entry step that would catch a traveller out, but it is new and rests on the tourism authority alone; the FCDO's entry page does not mention it.",
+   "sources": [
+    {
+     "file": "discoverdominica-air",
+     "org": "Discover Dominica Authority (discoverdominica.com, official tourism site)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "All travelers must complete the online/electronic form in advance of their trip."
+    }
+   ]
+  },
+  {
+   "claim": "no direct flights from Europe; connections through Antigua, Barbados, Martinique, St Maarten, San Juan, Guadeloupe or Trinidad",
+   "verdict": "cut",
+   "why": "Held back: useful to a UK agent, but new and from the tourism authority alone.",
+   "sources": [
+    {
+     "file": "discoverdominica-air",
+     "org": "Discover Dominica Authority (discoverdominica.com, official tourism site)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "International flights from Europe are connected to the island through hubs in Antigua (ANU), Barbados (BGI), Martinique (FDF), St. Maarten (SXM), Puerto Rico (SJU), Guadeloupe (PTP), and Trinidad (POS)."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Distances matter here more than the size of the airport.",
+   "why": "The old text's framing, kept: the airport is on the far side of the island from the capital, about an hour by road (sourced)."
+  },
+  {
+   "text": "so build a real transfer into any itinerary.",
+   "why": "Advice kept from the old text; it follows from the sourced hour's drive to Roseau."
+  },
+  {
+   "text": "The feature worth mentioning to a client is",
+   "why": "Signpost for the lounge, which is sourced."
+  }
+ ],
+ "tracerOk": {}
+}

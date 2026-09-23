@@ -1,0 +1,347 @@
+{
+ "iata": "STT",
+ "id": "reclGkq9ss38AShmF",
+ "name": "Cyril E. King Airport",
+ "country": "US Virgin Islands",
+ "wikipedia": "https://en.wikipedia.org/wiki/Cyril_E._King_Airport",
+ "audited": "2026-09-23",
+ "before": "The busiest airport in the US Virgin Islands and one of the busiest in the eastern Caribbean, two miles west of Charlotte Amalie on St Thomas. It handles arrivals for St John as well, and a good number of passengers heading on to the British Virgin Islands use it.\n\nOne runway and eleven gates do all the work, and the traffic mix is unusual. Across a twelve month period the airport recorded an average of 167 movements a day, of which well over half were air taxi and only fourteen per cent scheduled commercial. Small aircraft are part of the everyday picture here in a way they are not at most Caribbean gateways.\n\nThe detail worth passing on is the departure procedure. US citizens travelling to the US Virgin Islands from other US jurisdictions do not need a passport, but every passenger flying to the continental United States or Puerto Rico clears US Customs and Border Protection before boarding rather than on arrival. Build the extra time into the return.",
+ "after": "The busiest airport in the US Virgin Islands and one of the busiest in the eastern Caribbean, two miles west of Charlotte Amalie on St Thomas. It handles arrivals for St John as well, and a good number of passengers heading on to the British Virgin Islands use it.\n\nOne runway and eleven gates do all the work.\n\nFor departures, the Virgin Islands Port Authority says airline ticketing and federal services, including US Customs and TSA, may close earlier than the terminal, so build extra time into the return.",
+ "claims": [
+  {
+   "claim": "the busiest airport in the US Virgin Islands",
+   "verdict": "confirmed",
+   "inAfter": "The busiest airport in the US Virgin Islands",
+   "note": "The FAA's CY2025 table lists only two Virgin Islands airports: St Thomas with 802,734 boardings and St Croix (Henry E. Rohlsen) with 264,630. Boardings are roughly half of total passengers.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-30",
+     "quote": "It is currently the busiest airport in the United States Virgin Islands"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "US Federal Aviation Administration (FAA)",
+     "dated": "2026-07-08 (preliminary CY2025 table)",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "July 8, 2026",
+      "113 SO VI STT Charlotte Amalie Cyril E King P S 802,734 821,945 -2.34%",
+      "183 SO VI STX Christiansted Henry E Rohlsen P N 264,630 265,243 -0.23%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "one of the busiest in the eastern Caribbean",
+   "verdict": "confirmed",
+   "inAfter": "one of the busiest in the eastern Caribbean",
+   "note": "The operator's own description; not a ranking.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-30",
+     "quote": "and one of the busiest in the eastern Caribbean"
+    },
+    {
+     "file": "vipa-stt",
+     "org": "Virgin Islands Port Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "is a key transportation hub in the U.S. Virgin Islands and one of the busiest airports in the eastern Caribbean"
+    }
+   ]
+  },
+  {
+   "claim": "two miles west of Charlotte Amalie",
+   "verdict": "confirmed",
+   "inAfter": "two miles west of Charlotte Amalie",
+   "note": "The coordinates check puts the airport 4.9 km (3.1 miles) in a straight line from the GeoNames centre of Charlotte Amalie, a ratio of 0.65, which fails the distance check; so the figure rests on two written sources beyond Wikipedia: the operator ('just two miles west') and the FAA master record (2 nautical miles west of the central business district). The bearing, west, agrees.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-30",
+     "quote": "located two miles (3 km) west of the central business district in the town of Charlotte Amalie"
+    },
+    {
+     "file": "vipa-stt",
+     "org": "Virgin Islands Port Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Located just two miles west of Charlotte Amalie"
+    },
+    {
+     "file": "gcr-5010",
+     "org": "FAA Airport Master Record (Form 5010), printed by GCR",
+     "dated": "master record effective 09/03/2026",
+     "quote": [
+      "CHARLOTTE AMALIE",
+      "3 CBD TO AIRPORT (NM):",
+      "02 W"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 264 degrees, which is west"
+    }
+   ]
+  },
+  {
+   "claim": "on St Thomas",
+   "verdict": "confirmed",
+   "inAfter": "on St Thomas",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-30",
+     "quote": "on the island of St. Thomas in the United States Virgin Islands"
+    },
+    {
+     "file": "vipa-stt",
+     "org": "Virgin Islands Port Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Cyril E. King Airport - St. Thomas | Virgin Islands Port Authority"
+    }
+   ]
+  },
+  {
+   "claim": "handles arrivals for St John",
+   "verdict": "confirmed",
+   "inAfter": "It handles arrivals for St John as well",
+   "note": "The National Park Service (Virgin Islands National Park covers much of St John) tells visitors there is no airport on St John and to fly to St Thomas, then take a taxi to Red Hook for the ferry.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-30",
+     "quote": "The airport also serves the island of St. John"
+    },
+    {
+     "file": "nps-viis-directions",
+     "org": "US National Park Service (Virgin Islands National Park)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "There are no airports on St. John so you must fly to St. Thomas Cyril E. King Airport (code STT) and travel from there."
+    }
+   ]
+  },
+  {
+   "claim": "a good number of passengers heading on to the BVI use it",
+   "verdict": "confirmed",
+   "inAfter": "a good number of passengers heading on to the British Virgin Islands use it",
+   "note": "The BVI Tourist Board names St Thomas among the connecting airports for the BVI and says many travellers take the ferries from Charlotte Amalie or Red Hook. It also says travellers from the UK may find Antigua easiest.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-30",
+     "quote": "is additionally often used by those travelling to the nearby British Virgin Islands"
+    },
+    {
+     "file": "bvitourism-air",
+     "org": "BVI Tourist Board (bvitourism.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "All flights to the BVI connect through another Caribbean island airport (such as Puerto Rico, St. Thomas, Antigua, or St. Maarten).",
+      "Many  travellers opt to take one of the frequent ferries that travel between downtown Charlotte Amalie or Red Hook, St. Thomas and the BVI."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "one runway",
+   "verdict": "confirmed",
+   "inAfter": "One runway",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-30",
+     "quote": "The airport operates one main runway"
+    },
+    {
+     "file": "vipa-stt",
+     "org": "Virgin Islands Port Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "the single runway at the Cyril E. King Airport (STT)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 10/28: 2,134 m (7,000 ft), ASP",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "eleven gates",
+   "verdict": "confirmed",
+   "inAfter": "eleven gates do all the work",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-30",
+     "quote": "The terminal operates 11 gates."
+    },
+    {
+     "file": "vipa-stt",
+     "org": "Virgin Islands Port Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "First Floor: 190,000 sq. ft. with 11 gates"
+    }
+   ]
+  },
+  {
+   "claim": "Port Authority: airline ticketing and federal services, including US Customs and TSA, may close earlier than the terminal",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Port Authority",
+   "inAfter": "the Virgin Islands Port Authority says airline ticketing and federal services, including US Customs and TSA, may close earlier than the terminal",
+   "note": "Attributed statement, checked against the operator's own airport page. Replaces the claim that every passenger to the US mainland or Puerto Rico clears US Customs and Border Protection before boarding, which rests on Wikipedia alone (see the cut); the operator's note keeps the practical point, that departure formalities here include US Customs and can close early, without the detail no second source states. The terminal is open 6am to 11pm on the same page.",
+   "sources": [
+    {
+     "file": "vipa-stt",
+     "org": "Virgin Islands Port Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Open daily from 6:00 a.m. to 11:00 p.m.",
+      "Airline ticketing and federal services (including U.S. Customs and TSA) may close earlier than the terminal"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the traffic mix is unusual",
+   "verdict": "cut",
+   "wasBefore": "and the traffic mix is unusual",
+   "why": "Rested on the 2017 movement figures cut below."
+  },
+  {
+   "claim": "167 movements a day over twelve months, well over half air taxi, 14 per cent scheduled commercial",
+   "verdict": "cut",
+   "wasBefore": "Across a twelve month period the airport recorded an average of 167 movements a day, of which well over half were air taxi and only fourteen per cent scheduled commercial.",
+   "why": "Stale: Wikipedia gives these for the twelve months ending 30 September 2017. The FAA master record no longer carries operations counts (it refers readers to the FAA's ASPM system), and the operator publishes no current count, so under the like-for-like rule a count of flights is cut rather than replaced."
+  },
+  {
+   "claim": "small aircraft part of the everyday picture, unlike most Caribbean gateways",
+   "verdict": "cut",
+   "wasBefore": "Small aircraft are part of the everyday picture here in a way they are not at most Caribbean gateways.",
+   "why": "The comparison with other Caribbean airports has no source, and the point rested on the 2017 traffic mix. The operator's airline list does include small regional and seaplane operators (held back below)."
+  },
+  {
+   "claim": "US citizens from other US jurisdictions do not need a passport",
+   "verdict": "cut",
+   "wasBefore": "US citizens travelling to the US Virgin Islands from other US jurisdictions do not need a passport",
+   "why": "Wikipedia alone in those words; the operator's travel FAQ lists the ID the TSA accepts but does not say it. It concerns US citizens only and is of no use to UK clients."
+  },
+  {
+   "claim": "every passenger to the continental US or Puerto Rico clears CBP before boarding",
+   "verdict": "cut",
+   "wasBefore": "every passenger flying to the continental United States or Puerto Rico clears US Customs and Border Protection before boarding rather than on arrival",
+   "why": "Wikipedia alone (its citation is a letter to the editor). Tried: the operator's travel FAQ and airlines page (no such statement), CBP's Know Before You Go, ports and US-citizen pages (nothing on the Virgin Islands; the port pages are drawn by script), the USVI Department of Tourism site (refused the request, 403) and the FCDO's USA entry page (no mention of the territories). Replaced by the operator's own note on departure services, attributed. Very likely true; worth restoring if a CBP or airline page can be saved.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-30",
+     "quote": "all passengers bound for the continental United States and Puerto Rico must pass through U.S. Customs and Border Protection screening before boarding their flight"
+    }
+   ]
+  },
+  {
+   "claim": "The detail worth passing on is the departure procedure.",
+   "verdict": "cut",
+   "wasBefore": "The detail worth passing on is the departure procedure.",
+   "why": "Signpost for the cut customs detail; folded into the new departure sentence."
+  },
+  {
+   "claim": "Build the extra time into the return.",
+   "verdict": "cut",
+   "wasBefore": "Build the extra time into the return.",
+   "why": "Kept as advice in the new departure sentence ('so build extra time into the return')."
+  },
+  {
+   "claim": "runway closed nightly 10pm to 5am, 1 December 2025 to 31 December 2026, for boring and then resurfacing",
+   "verdict": "cut",
+   "why": "Held back: a current operator notice that will catch late-night travellers out, but it replaces nothing in the old text, so under the like-for-like rule it stays out. Operator only; the FAA NOTAM it links to was not read. The owner may want it added as an attributed sentence.",
+   "sources": [
+    {
+     "file": "vipa-stt",
+     "org": "Virgin Islands Port Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "01 Dec 2025 - 31 Dec 2026",
+      "Beginning December 1, 2025, the single runway at the Cyril E. King Airport (STT) will be closed nightly from 10 p.m. to 5 a.m. as VIPA completes pavement boring operations.",
+      "VIPA will then transition into an extensive runway resurfacing project commencing in January 2026."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "802,734 boardings in 2025 (FAA, preliminary)",
+   "verdict": "cut",
+   "why": "Held back: a current traffic figure (2.34 per cent down on 2024; boardings, roughly half of total passengers), but the old text gave no passenger figure to replace.",
+   "sources": [
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "US Federal Aviation Administration (FAA)",
+     "dated": "2026-07-08 (preliminary CY2025 table)",
+     "quote": "113 SO VI STT Charlotte Amalie Cyril E King P S 802,734 821,945 -2.34%"
+    }
+   ]
+  },
+  {
+   "claim": "airlines: American, Delta, jetBlue, Southwest, Sun Country and United from the US; Cape Air, Contour and seaplane operators in the region",
+   "verdict": "cut",
+   "why": "Held back: the operator's own airline list (Contour adds St Maarten from 5 October 2026), but the old text named no airlines, and this is one source. Note the BVI Tourist Board says Cape Air and Seaborne fly on to Tortola and Virgin Gorda, while the operator lists neither for the BVI.",
+   "sources": [
+    {
+     "file": "vipa-airlines",
+     "org": "Virgin Islands Port Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Direct flights from New York, Boston, Miami, San Juan",
+      "Nonstop flights from Atlanta and New York (JFK);",
+      "Direct flights from Orlando and Baltimore",
+      "Direct flights from Chicago, Dulles, Newark;",
+      "STT to St. Maarten (starting Oct. 5, 2026)"
+     ]
+    },
+    {
+     "file": "bvitourism-air",
+     "org": "BVI Tourist Board (bvitourism.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "If you choose to arrive via St. Thomas, you can catch regular flights to Tortola and Virgin Gorda on Cape Air and Seaborne Airlines."
+    }
+   ]
+  },
+  {
+   "claim": "ferries from St Thomas to the BVI run only in daylight; last ferry around 4.30 to 5pm",
+   "verdict": "cut",
+   "why": "Held back: useful to anyone connecting to the BVI by ferry, but new, and one source (the BVI Tourist Board).",
+   "sources": [
+    {
+     "file": "bvitourism-air",
+     "org": "BVI Tourist Board (bvitourism.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "only operate during daylight hours",
+      "The last ferry is usually around 4:30/5pm."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so build extra time into the return.",
+   "why": "Advice kept from the old text; it follows from the operator's note that check-in and federal services, US Customs included, can close before the terminal does."
+  }
+ ],
+ "tracerOk": {}
+}

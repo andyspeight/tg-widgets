@@ -1,0 +1,425 @@
+{
+ "iata": "GDT",
+ "id": "recQ8BAMclQCePWko",
+ "name": "JAGS McCartney International Airport",
+ "country": "Turks and Caicos Islands",
+ "wikipedia": "https://en.wikipedia.org/wiki/JAGS_McCartney_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Grand Turk's airport, a mile south of Cockburn Town, and the second largest in the Turks and Caicos after Providenciales.\n\nIt is classed as international but in practice most of what flies here is domestic, chiefly the hop to Providenciales where the international jet services connect. International and charter flights do come in directly during the peak season, and the runway can take aircraft as large as a 757 or an A321.\n\nPlan the ground side carefully. There is no public transport anywhere on the island, so a client needs a hire car or a pre-booked transfer. The airport itself has a restaurant, car hire desks and free parking.\n\nIt is named after James Alexander George Smith McCartney, the territory's first Chief Minister, who died in a plane crash in New Jersey in 1980.",
+ "after": "Grand Turk's airport, a mile south of Cockburn Town.\n\nIt is classed as international but in practice most of what flies here is domestic, chiefly the hop to Providenciales where the international jet services connect.\n\nThere is no public transport anywhere on the island, but taxis usually wait outside the terminal and hire cars are collected there too. The airport itself has a small café and restaurant and free parking.\n\nIt is named after James Alexander George Smith McCartney, the territory's first Chief Minister, who died in a plane crash in New Jersey in 1980.",
+ "claims": [
+  {
+   "claim": "Grand Turk's airport",
+   "verdict": "confirmed",
+   "inAfter": "Grand Turk's airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "is an airport located 1 mile (1.6 km) south of Cockburn Town on Grand Turk in the Turks and Caicos Islands"
+    },
+    {
+     "file": "tciaa-gdt",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "JAGS McCartney International Airport (Grand Turk) | TCIAA",
+      "GDT | MBGT"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a mile south of Cockburn Town",
+   "verdict": "confirmed",
+   "inAfter": "a mile south of Cockburn Town",
+   "note": "Coordinates give 1.9 km (1.2 miles) in a straight line from the GeoNames centre of Cockburn Town, bearing 181 degrees, south; 'a mile' (1.6 km) is a ratio of 0.84, inside the check. The operator gives the road distance to central Cockburn Town as about 2 miles (3.2 km), which is why the text stays at 'a mile south' rather than any closer figure.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "located 1 mile (1.6 km) south of Cockburn Town"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Cockburn Town",
+      "Straight-line distance from the city centre: 1.9 km (1.2 miles)",
+      "Bearing from the city centre: 181 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "classed as international",
+   "verdict": "confirmed",
+   "inAfter": "It is classed as international",
+   "note": "The operator names it an international airport and keeps customs and immigration there.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "The airport is classified as international, but it mainly serves domestic flights."
+    },
+    {
+     "file": "tciaa-gdt",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "JAGS McCartney International Airport [Grand Turk]",
+      "Customs & Immigration: 6 am – 8 pm"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "most of what flies here is domestic",
+   "verdict": "confirmed",
+   "inAfter": "in practice most of what flies here is domestic",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "it mainly serves domestic flights"
+    },
+    {
+     "file": "tciaa-gdt",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The vast majority of flights to this airport are domestic island hops by the local interCaribbean and Caicos Express airlines flying between Providenciales, South Caicos and Salt Cay."
+    }
+   ]
+  },
+  {
+   "claim": "chiefly the hop to Providenciales",
+   "verdict": "confirmed",
+   "inAfter": "chiefly the hop to Providenciales",
+   "note": "Wikipedia says the domestic flights go primarily to Providenciales. The operator lists Providenciales, South Caicos and Salt Cay without ranking them; Caicos Express's own page names daily scheduled flights between Providenciales and Grand Turk, while its Salt Cay service runs from Providenciales.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "domestic flights within the Turks and Caicos Islands primarily to Providenciales International Airport (PLS)"
+    },
+    {
+     "file": "caicosexpress-home",
+     "org": "Caicos Express Airways",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "daily scheduled flights between Providenciales and Grand Turk"
+    },
+    {
+     "file": "tciaa-gdt",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "domestic island hops by the local interCaribbean and Caicos Express airlines flying between Providenciales, South Caicos and Salt Cay"
+    }
+   ]
+  },
+  {
+   "claim": "international jet services connect at Providenciales",
+   "verdict": "confirmed",
+   "inAfter": "where the international jet services connect",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "where scheduled international passenger jet service operated by a number of airlines is available"
+    },
+    {
+     "file": "tciaa-pls",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "All international flights to the Turks and Caicos Islands arrive at the Providenciales International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "no public transport anywhere on the island",
+   "verdict": "confirmed",
+   "inAfter": "There is no public transport anywhere on the island",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "There is no public transportation on the island."
+    },
+    {
+     "file": "tciaa-gdt",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "There is no public transport or bus service on Grand Turk."
+    }
+   ]
+  },
+  {
+   "claim": "taxis usually wait outside the terminal",
+   "verdict": "corrected",
+   "inAfter": "but taxis usually wait outside the terminal",
+   "note": "Replaces 'so a client needs a hire car or a pre-booked transfer', which left out the taxis. The operator says taxis typically wait outside the terminal; the islands' tourism site says taxis are available at all the islands' airports; the FCDO confirms licensed taxis with standard fares.",
+   "sources": [
+    {
+     "file": "tciaa-gdt",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Taxis can typically be found waiting outside the airport terminal to take you to your destination."
+    },
+    {
+     "file": "tctourism-transport",
+     "org": "Experience Turks and Caicos Islands (turksandcaicostourism.com, the islands' tourism site)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Taxi Service is available at all our airports and seaports, as well as throughout the islands."
+    },
+    {
+     "file": "govuk-tci-safety",
+     "org": "UK Foreign, Commonwealth and Development Office (GOV.UK)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Only use licenced taxis.",
+      "There are standard taxi fares for most destinations on the main islands."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "hire cars are collected at the terminal",
+   "verdict": "softened",
+   "inAfter": "hire cars are collected there too",
+   "note": "Was 'car hire desks'. The operator describes rental car pick-up outside the terminal, not desks inside it.",
+   "sources": [
+    {
+     "file": "tciaa-gdt",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Rental car pick up is typically conducted here outside the terminal."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "The airport also houses a restaurant, rental car facilities, and free parking facilities."
+    }
+   ]
+  },
+  {
+   "claim": "a small café and restaurant",
+   "verdict": "confirmed",
+   "inAfter": "The airport itself has a small café and restaurant",
+   "sources": [
+    {
+     "file": "tciaa-gdt",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The airport facilities include the Cockpit Lounge (a small cafe and restaurant) and restrooms."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "The airport also houses a restaurant"
+    }
+   ]
+  },
+  {
+   "claim": "free parking",
+   "verdict": "confirmed",
+   "inAfter": "and free parking",
+   "sources": [
+    {
+     "file": "tciaa-gdt",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Complimentary and ample parking is available directly outside the terminal."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "free parking facilities"
+    }
+   ]
+  },
+  {
+   "claim": "named after James Alexander George Smith McCartney",
+   "verdict": "confirmed",
+   "inAfter": "It is named after James Alexander George Smith McCartney",
+   "note": "Wikipedia states the naming. The operator's name for the airport is JAGS McCartney International, and two Turks and Caicos papers spell out JAGS as James Alexander George Smith McCartney.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "The airport is named for James Alexander George Smith McCartney"
+    },
+    {
+     "file": "tciaa-gdt",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "JAGS McCartney International Airport [Grand Turk]"
+    },
+    {
+     "file": "magnetic-jags",
+     "org": "Magnetic Media (Turks and Caicos news)",
+     "dated": "2024-05-31",
+     "quote": "His Excellency James Alexander George Smith (JAGS) McCartney"
+    },
+    {
+     "file": "tcweekly-jags",
+     "org": "Turks and Caicos Weekly News",
+     "quote": "James Alexander George Smith (JAGS) McCartney was not only a visionary who dreamed big"
+    }
+   ]
+  },
+  {
+   "claim": "the territory's first Chief Minister",
+   "verdict": "confirmed",
+   "inAfter": "the territory's first Chief Minister",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "the territory's first Chief Minister"
+    },
+    {
+     "file": "tcweekly-jags",
+     "org": "Turks and Caicos Weekly News",
+     "quote": "McCartney, the territory's first chief minister died tragically in an aeroplane crash"
+    },
+    {
+     "file": "magnetic-jags",
+     "org": "Magnetic Media (Turks and Caicos news)",
+     "dated": "2024-05-31",
+     "quote": "The Turks and Caicos Islands’ (TCI) first Chief Minister"
+    }
+   ]
+  },
+  {
+   "claim": "died in a plane crash in New Jersey in 1980",
+   "verdict": "confirmed",
+   "inAfter": "who died in a plane crash in New Jersey in 1980",
+   "note": "Magnetic Media gives the date as 9 May 1980.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "who died in a plane crash in New Jersey, United States in 1980"
+    },
+    {
+     "file": "magnetic-jags",
+     "org": "Magnetic Media (Turks and Caicos news)",
+     "dated": "2024-05-31",
+     "quote": [
+      "#TurksandCaicos, May 31, 2024",
+      "served as Chief Minister from August 1976 until May 9th, 1980, when he died in a plane crash, in New Jersey"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the second largest in the Turks and Caicos after Providenciales",
+   "verdict": "cut",
+   "wasBefore": "and the second largest in the Turks and Caicos after Providenciales",
+   "why": "Wikipedia alone. The operator lists its six public airports without ranking them and publishes no traffic figures by airport; the tourism site's Grand Turk page does not mention the airport. On the operator's own description the airport mostly handles local flights and small planes."
+  },
+  {
+   "claim": "international and charter flights come in directly during the peak season",
+   "verdict": "cut",
+   "wasBefore": "International and charter flights do come in directly during the peak season",
+   "why": "Wikipedia alone. The operator says the airport typically handles only local flights and small planes, and that all international flights to the islands arrive at Providenciales; its page welcomes private planes but says nothing of seasonal charters."
+  },
+  {
+   "claim": "the runway can take aircraft as large as a 757 or an A321",
+   "verdict": "cut",
+   "wasBefore": "the runway can take aircraft as large as a 757 or an A321",
+   "why": "Wikipedia alone. The operator's page gives the runway (11/29, 6,335 ft by 150 ft) but names no aircraft types, and neither does its airline investment page. Of little use to an agent with no jet services here."
+  },
+  {
+   "claim": "a client needs a hire car or a pre-booked transfer",
+   "verdict": "cut",
+   "wasBefore": "so a client needs a hire car or a pre-booked transfer",
+   "why": "Incomplete: taxis wait at the terminal (operator, tourism site, FCDO). Corrected (see above)."
+  },
+  {
+   "claim": "car hire desks",
+   "verdict": "cut",
+   "wasBefore": "car hire desks",
+   "why": "The operator describes rental car pick-up outside the terminal, not desks. Softened (see above)."
+  },
+  {
+   "claim": "Plan the ground side carefully.",
+   "verdict": "cut",
+   "wasBefore": "Plan the ground side carefully.",
+   "why": "Signpost for the old advice; with taxis waiting at the terminal it overstated the difficulty."
+  },
+  {
+   "claim": "FCDO: Providenciales and Grand Turk have higher levels of serious crime than other islands",
+   "verdict": "cut",
+   "why": "Held back: a current FCDO warning that names Grand Turk, but it replaces nothing in the old text, so under the like-for-like rule it stays out. The owner may want it added as an attributed sentence.",
+   "sources": [
+    {
+     "file": "govuk-tci-safety",
+     "org": "UK Foreign, Commonwealth and Development Office (GOV.UK)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Providenciales and Grand Turk have seen higher levels of serious crime than other islands, including gang-related crime involving guns and robbery.",
+      "While risks are generally lower in tourist areas, some of these incidents have taken place in populated and public areas."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "driving is on the left but most hire cars are left-hand drive; livestock on the roads, especially on Grand Turk",
+   "verdict": "cut",
+   "why": "Held back: useful to a client hiring a car, but it replaces nothing in the old text. Driving on the left is on both the FCDO page and the tourism site; the left-hand-drive cars and the livestock are on the FCDO page only.",
+   "sources": [
+    {
+     "file": "govuk-tci-safety",
+     "org": "UK Foreign, Commonwealth and Development Office (GOV.UK)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Driving is on the left, but be aware that most rental cars are left-hand drive.",
+      "Take care when driving as livestock – goats, cows, donkeys and horses – regularly wander on to the road, especially on Grand Turk."
+     ]
+    },
+    {
+     "file": "tctourism-transport",
+     "org": "Experience Turks and Caicos Islands (turksandcaicostourism.com, the islands' tourism site)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "In Turks and Caicos we drive on the LEFT SIDE of the road"
+    }
+   ]
+  },
+  {
+   "claim": "also known as Grand Turk International Airport",
+   "verdict": "cut",
+   "why": "Held back: the operator uses both names, so a client may see either, but the old text did not mention the second name and nothing it replaces.",
+   "sources": [
+    {
+     "file": "tciaa-about",
+     "org": "Turks and Caicos Islands Airports Authority (operator)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The JAGS McCartney International Airport / Grand Turk International Airport (MBGT)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-12",
+     "quote": "also known as Grand Turk International Airport"
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "Grand Turk's": "A possessive; 'Grand Turk' is on the operator's page and in Wikipedia."
+ }
+}

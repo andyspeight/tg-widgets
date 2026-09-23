@@ -1,0 +1,328 @@
+{
+ "iata": "POS",
+ "id": "rec4DVOyGci7jnDbH",
+ "name": "Piarco International Airport",
+ "country": "Trinidad and Tobago",
+ "wikipedia": "https://en.wikipedia.org/wiki/Piarco_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Trinidad's airport and the base for Caribbean Airlines, the largest carrier in the region, which makes it the natural hub for moving between the southern Caribbean islands.\n\nIt is 30 km east of Port of Spain in the town of Piarco, so the transfer into the city is longer than at most Caribbean gateways. Build in the time.\n\nThe terminal is built for volume rather than charm. There are 82 ticket counter positions, a computerised immigration system rated for 1,500 passengers in a peak hour and four carousels in the customs hall. The whole building is air conditioned and smoke free.\n\nAirside it is equipped for large aircraft, with high speed taxiways built to the ICAO code that covers the biggest types now flying.\n\nIt is one of two international airports in Trinidad and Tobago, the other serving Tobago.",
+ "after": "Trinidad's airport and the base for Caribbean Airlines, whose domestic flights to Tobago leave from here.\n\nIt is 30 km east of Port of Spain, in Piarco, so build in time for the transfer into the city.\n\nPassenger flights use the North Terminal, and the airports authority lists 41 check-in counters for international and domestic flights. The South Terminal handles cargo, helicopter and general aviation flights.\n\nIts single runway is 3,200 metres long.\n\nIt is one of two international airports in Trinidad and Tobago, the other serving Tobago.",
+ "claims": [
+  {
+   "claim": "Trinidad's airport",
+   "verdict": "confirmed",
+   "inAfter": "Trinidad's airport",
+   "note": "Caribbean Airlines' page for Port of Spain, the capital of Trinidad and Tobago, names Piarco International as the city's airport; the page is about Trinidad (Maracas, 'Trinidad's most popular beach').",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "is an international airport serving the island of Trinidad"
+    },
+    {
+     "file": "cal-port-of-spain",
+     "org": "Caribbean Airlines",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "To Port-of-Spain",
+      "Port of Spain, the Trinidad and Tobago capital",
+      "Airport Piarco International"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the base for Caribbean Airlines",
+   "verdict": "confirmed",
+   "inAfter": "the base for Caribbean Airlines",
+   "note": "Caribbean Airlines' own About page puts its headquarters in Trinidad and Tobago (its other operational base is in Jamaica), and Piarco is the only airport on Trinidad the airports authority runs; its route pages show its New York, Toronto, Miami and Tobago flights all serving Port of Spain. No page read names the head office's street address: the airline's contact directory gives only telephone numbers, and its April 2026 Piarco release is an image with no text.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "The airport is the primary hub and operating base for the country's national airline, as well as the Caribbean's largest airline, Caribbean Airlines."
+    },
+    {
+     "file": "cal-about",
+     "org": "Caribbean Airlines",
+     "dated": "2026-09-23 (live page)",
+     "quote": "headquartered in Trinidad and Tobago, and with an operational base in Jamaica"
+    },
+    {
+     "file": "cal-port-of-spain",
+     "org": "Caribbean Airlines",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "New York (JFK) to Port-of-Spain (POS)",
+      "Toronto (YYZ) to Port-of-Spain (POS)",
+      "Miami (MIA) to Port-of-Spain (POS)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Caribbean Airlines' domestic flights to Tobago leave from here",
+   "verdict": "corrected",
+   "inAfter": "whose domestic flights to Tobago leave from here",
+   "note": "Replaces 'which makes it the natural hub for moving between the southern Caribbean islands' (cut below), as Providenciales' 'Caicos Express flies daily to Grand Turk' replaced an unsourced island-hopping line. The Tobago flights are the one inter-island route every source here names: Caribbean Airlines sells Tobago to Port of Spain on its own route page, the airports authority keeps separate domestic check-in counters, and Wikipedia describes the Tobago concourse.",
+   "sources": [
+    {
+     "file": "cal-port-of-spain",
+     "org": "Caribbean Airlines",
+     "dated": "2026-09-23 (live page, fares for October 2026)",
+     "quote": [
+      "Scarborough (TAB) to Port-of-Spain (POS)",
+      "Scarborough - Port-of-Spain"
+     ]
+    },
+    {
+     "file": "aatt-checkin",
+     "org": "Airports Authority of Trinidad and Tobago (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Domestic flights check-in between counters 38 to 41."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": [
+      "The Tobago concourse strictly serves domestic flights to Tobago",
+      "Caribbean Airlines occupies the eastern extreme desks and the western extreme desks (designated for Tobago)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "30 km east of Port of Spain",
+   "verdict": "confirmed",
+   "inAfter": "It is 30 km east of Port of Spain",
+   "note": "Coordinates give 21.3 km in a straight line, bearing 112 degrees (east), a ratio of 1.41, inside the allowance for a road distance.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "The airport is 30 km (19 mi) east of Downtown Port of Spain, in the suburban town of Piarco."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 21.3 km (13.3 miles)",
+      "Bearing from the city centre: 112 degrees, which is east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in Piarco",
+   "verdict": "confirmed",
+   "inAfter": "in Piarco",
+   "note": "Was 'in the town of Piarco'; the operator's own address for the airport is Golden Grove Road, Piarco.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "in the suburban town of Piarco"
+    },
+    {
+     "file": "aatt-contact",
+     "org": "Airports Authority of Trinidad and Tobago (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "Piarco International Airport Golden Grove Road Piarco"
+    }
+   ]
+  },
+  {
+   "claim": "passenger flights use the North Terminal",
+   "verdict": "corrected",
+   "inAfter": "Passenger flights use the North Terminal",
+   "note": "The old paragraph described 'the terminal' from Wikipedia's facility list for the 2001 building (cut below). The operator's live airport profile describes its two terminals, which this and the South Terminal sentence follow.",
+   "sources": [
+    {
+     "file": "aatt-piarco",
+     "org": "Airports Authority of Trinidad and Tobago (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "North Terminal commercial passenger operations"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "The North terminal is the main passenger terminal. It handles all the commercial passenger airline traffic."
+    }
+   ]
+  },
+  {
+   "claim": "the airports authority lists 41 check-in counters",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airports authority",
+   "inAfter": "the airports authority lists 41 check-in counters for international and domestic flights",
+   "note": "Replaces '82 ticket counter positions' (Wikipedia, from the 2001 terminal's specification). The operator's own current check-in page says 41 counters for international and domestic passengers; 82 may count two positions a counter, but no source says so, so the operator's count is given and attributed, as the like-for-like rule asks for counts.",
+   "sources": [
+    {
+     "file": "aatt-checkin",
+     "org": "Airports Authority of Trinidad and Tobago (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "There are 41 check-in counters at the Piarco International Airport to facilitate both international and domestic passengers."
+    }
+   ]
+  },
+  {
+   "claim": "the South Terminal handles cargo, helicopter and general aviation flights",
+   "verdict": "corrected",
+   "inAfter": "The South Terminal handles cargo, helicopter and general aviation flights.",
+   "note": "Part of the operator's own two-terminal description that replaces the old facility list; it tells an agent that a private or helicopter flight does not use the passenger building.",
+   "sources": [
+    {
+     "file": "aatt-piarco",
+     "org": "Airports Authority of Trinidad and Tobago (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "South Terminal cargo, helicopter, and GA (general aviation) operations"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "The south terminal now serves general aviation, cargo and helicopter flights."
+    }
+   ]
+  },
+  {
+   "claim": "a single runway, 3,200 metres",
+   "verdict": "softened",
+   "inAfter": "Its single runway is 3,200 metres long.",
+   "note": "Replaces 'Airside it is equipped for large aircraft, with high speed taxiways built to the ICAO code that covers the biggest types now flying' (cut below): the runway is what two sources confirm. The operator's profile has a runway-length figure, but it is filled in by script and reads 0 in the saved copy.",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": [
+      "r1_number = 10/28",
+      "r1_length_m = 3,200"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 10/28: 3,200 m (10,500 ft), ASP",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "one of two international airports in Trinidad and Tobago, the other serving Tobago",
+   "verdict": "confirmed",
+   "inAfter": "It is one of two international airports in Trinidad and Tobago, the other serving Tobago.",
+   "note": "The airports authority runs exactly these two airports, Piarco and A.N.R. Robinson on Tobago, as in the Tobago ledger.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "is one of two international airports in Trinidad and Tobago"
+    },
+    {
+     "file": "aatt-authority",
+     "org": "Airports Authority of Trinidad and Tobago (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "We manage and operate Piarco International Airport (POS) and A.N.R. Robinson International Airport (TAB)"
+    }
+   ]
+  },
+  {
+   "claim": "Caribbean Airlines the largest carrier in the region",
+   "verdict": "cut",
+   "wasBefore": "the largest carrier in the region",
+   "why": "Wikipedia alone. Caribbean Airlines' own About page makes no size claim (it gives more than 600 weekly flights, headquarters in Trinidad and Tobago and an operational base in Jamaica), and no other source read ranks it."
+  },
+  {
+   "claim": "the natural hub for moving between the southern Caribbean islands",
+   "verdict": "cut",
+   "wasBefore": "which makes it the natural hub for moving between the southern Caribbean islands",
+   "why": "An inference with no second source. Caribbean Airlines' route pages list itineraries (Paris among them), not which flights leave Piarco nonstop, the operator's departures board was empty even in a browser, and the airline has been trimming its regional network: on 22 May 2026 it announced the end of its Dominica, St Kitts and Ogle to Suriname flights (file cal-network-may2026). Replaced by the Tobago flights, which three sources confirm."
+  },
+  {
+   "claim": "the transfer into the city is longer than at most Caribbean gateways",
+   "verdict": "cut",
+   "wasBefore": "so the transfer into the city is longer than at most Caribbean gateways",
+   "why": "No source compares transfer times across Caribbean airports. The advice to allow time is kept, tied to the 30 km (see opinion)."
+  },
+  {
+   "claim": "the terminal is built for volume rather than charm",
+   "verdict": "cut",
+   "wasBefore": "The terminal is built for volume rather than charm.",
+   "why": "A judgement with no source. The paragraph now describes the two terminals from the operator's own profile."
+  },
+  {
+   "claim": "82 ticket counter positions",
+   "verdict": "cut",
+   "wasBefore": "There are 82 ticket counter positions",
+   "why": "Wikipedia's figure for the 2001 terminal; the operator's current check-in page says 41 check-in counters. Corrected to the operator's count, attributed (see above)."
+  },
+  {
+   "claim": "computerised immigration system rated for 1,500 passengers in a peak hour",
+   "verdict": "cut",
+   "wasBefore": "a computerised immigration system rated for 1,500 passengers in a peak hour",
+   "why": "Wikipedia alone, from the 2001 terminal's specification. The operator's customs and immigration page (file aatt-customs) gives contact numbers and forms but no capacity."
+  },
+  {
+   "claim": "four carousels in the customs hall",
+   "verdict": "cut",
+   "wasBefore": "four carousels in the customs hall",
+   "why": "Wikipedia alone. The operator's customs page places the baggage claim area after the duty free area but gives no carousel count."
+  },
+  {
+   "claim": "the whole building is air conditioned and smoke free",
+   "verdict": "cut",
+   "wasBefore": "The whole building is air conditioned and smoke free.",
+   "why": "Wikipedia alone, and of little use to an agent."
+  },
+  {
+   "claim": "equipped for large aircraft, high speed taxiways to ICAO Code F",
+   "verdict": "cut",
+   "wasBefore": "Airside it is equipped for large aircraft, with high speed taxiways built to the ICAO code that covers the biggest types now flying.",
+   "why": "Wikipedia alone (two high-speed taxiways, 'ICAO Code F for new large aircraft', and its list of widebody types). The operator's profile figures are filled in by script and read 0 in the saved copy. Softened to the runway, which Wikipedia and OurAirports both give."
+  },
+  {
+   "claim": "Held back: Gatwick to Port of Spain carried 72,099 scheduled passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing in the old text. The UK CAA's 2025 route table has 72,099 scheduled passengers between Gatwick and Port of Spain in 2025, down 18 per cent on 87,971 in 2024 (and 15,689 Gatwick to Tobago). The table does not name the airline, so no airline is given. One source only.",
+   "sources": [
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2025 (table run 25 February 2026)",
+     "quote": "CARIBBEAN AREA,TRINIDAD AND TOBAGO,1,GATWICK,PORT OF SPAIN,72099,72099,0,87971,87971,0,-18.04231"
+    }
+   ]
+  },
+  {
+   "claim": "Held back: FCDO on drink-driving accidents on the highway to and from the airport",
+   "verdict": "cut",
+   "why": "Held back: FCDO safety advice that replaces nothing in the old text. The FCDO's Trinidad and Tobago safety page (read 23 September 2026) says there have been drink-driving accidents on the Beetham-Churchill Roosevelt Highway to and from the airport.",
+   "sources": [
+    {
+     "file": "fcdo-tt-safety",
+     "org": "UK Foreign, Commonwealth and Development Office (GOV.UK)",
+     "dated": "read 2026-09-23",
+     "quote": "There have been accidents caused by drink-driving, including on the Beetham-Churchill Roosevelt Highway to and from the airport."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so build in time for the transfer into the city.",
+   "why": "The old text's own advice ('Build in the time'), kept and tied to the confirmed 30 km (21.3 km in a straight line); the comparison with other Caribbean airports is cut."
+  }
+ ],
+ "tracerOk": {}
+}
