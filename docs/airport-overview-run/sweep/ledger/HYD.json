@@ -1,0 +1,465 @@
+{
+ "iata": "HYD",
+ "id": "recZ4yoq7cCUvIxLF",
+ "name": "Rajiv Gandhi International Airport",
+ "country": "India",
+ "wikipedia": "https://en.wikipedia.org/wiki/Rajiv_Gandhi_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Telangana's airport, at Shamshabad about 24 km south of Hyderabad, and fourth busiest in India with over 29 million passengers in the year to March 2025. It also handled more than 167,660 tonnes of cargo.\n\nIt was India's first greenfield airport built as a public private partnership, and at 2,200 hectares it is the largest in the country by area. Only about a third of that is developed, with the rest held for expansion, and the operator has said no further land will be acquired.\n\nIt has a record of going first on technology. It was the first airport in India to launch domestic e-boarding, in December 2015, and added international e-boarding in October 2020. AirHelp has ranked it among the top ten airports in the world.\n\nThere are two runways. The primary one is 4,260 metres, ILS equipped and long enough for an A380. The second, inaugurated in February 2012 and converted from a taxiway, takes aircraft up to an A340 or 747 and is used mainly when the main runway is being maintained.\n\nIt opened in March 2008, replacing Begumpet, and is named after Rajiv Gandhi.",
+ "after": "Telangana's airport, at Shamshabad about 24 km south of Hyderabad, and fourth busiest in India with more than 30 million passengers in the year to March 2026. That year it also handled more than 180,000 tonnes of cargo.\n\nIt was built as a greenfield airport under a public private partnership, and was the first airport in India to introduce e-boarding.\n\nThere are two runways. At 4,260 metres, the main one is long enough for an A380. The second is the parallel taxiway, which serves as the standby runway.\n\nIt opened in March 2008 and is named after Rajiv Gandhi.",
+ "claims": [
+  {
+   "claim": "Telangana's airport",
+   "verdict": "confirmed",
+   "inAfter": "Telangana's airport",
+   "note": "AAI's state table for April 2025 to March 2026 gives Telangana 30,494,254 passengers; Rajiv Gandhi International carried 30,483,885 of them and the old Begumpet airport the other 10,369.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport that serves Hyderabad, the capital of the Indian state of Telangana"
+    },
+    {
+     "file": "aai-mar2026-states",
+     "org": "Airports Authority of India",
+     "dated": "April 2025 to March 2026 (Traffic News, March 2026 annexure VI)",
+     "quote": [
+      "April to March 2025 - 2026",
+      "TELANGANA 32062 178766 210828 5463102 25031152 30494254"
+     ]
+    },
+    {
+     "file": "aai-mar2026-pax",
+     "org": "Airports Authority of India",
+     "dated": "April 2025 to March 2026 (Traffic News, March 2026 annexure III)",
+     "quote": [
+      "HYDERABAD (GHIAL) 2288274 2599325 -12.0% 30483885 29482396 3.4%",
+      "HYDERABAD (BEGUMPET) 996 1376 -27.6% 10369 15840 -34.5%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "at Shamshabad",
+   "verdict": "confirmed",
+   "inAfter": "at Shamshabad",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is located in Shamshabad"
+    },
+    {
+     "file": "op-company",
+     "org": "GMR Hyderabad International Airport Ltd (the operator, hyderabad.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Rajiv Gandhi International Airport",
+      "Shamshabad, Hyderabad - 500 108"
+     ]
+    },
+    {
+     "file": "pib-5722",
+     "org": "Press Information Bureau (Ministry of Civil Aviation)",
+     "dated": "15 December 2004",
+     "quote": "a Greenfield airport at Shamshabad near Hyderabad"
+    }
+   ]
+  },
+  {
+   "claim": "about 24 km south of Hyderabad",
+   "verdict": "confirmed",
+   "inAfter": "about 24 km south of Hyderabad",
+   "note": "The coordinates put it 17.2 km in a straight line, due south (189 degrees); 24 km is the road figure (ratio 1.39, inside the check's tolerance).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "about 24 kilometres (15 mi) south of Hyderabad"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 17.2 km (10.7 miles)",
+      "Bearing from the city centre: 189 degrees, which is south"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "fourth busiest in India",
+   "verdict": "confirmed",
+   "inAfter": "fourth busiest in India",
+   "note": "AAI's full-year table for April 2025 to March 2026 puts it behind Delhi (78.7 million), Mumbai (55.3 million) and Bengaluru (44.5 million), and ahead of Chennai (23.0 million). The operator says the same.",
+   "sources": [
+    {
+     "file": "aai-mar2026-pax",
+     "org": "Airports Authority of India",
+     "dated": "April 2025 to March 2026 (Traffic News, March 2026 annexure III)",
+     "quote": [
+      "Total Passengers(Domestic+International)",
+      "DELHI 7001938 7016092 -0.2% 78701971 79259890 -0.7%",
+      "MUMBAI (MIAL) 4337575 4622535 -6.2% 55290095 55122422 0.3%",
+      "BENGALURU (BIAL) 3649460 3638080 0.3% 44470035 41875620 6.2%",
+      "HYDERABAD (GHIAL) 2288274 2599325 -12.0% 30483885 29482396 3.4%",
+      "CHENNAI 1775631 1909441 -7.0% 23017324 22411290 2.7%"
+     ]
+    },
+    {
+     "file": "op-company",
+     "org": "GMR Hyderabad International Airport Ltd (the operator, hyderabad.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Hyderabad has emerged as the 4th busiest airport in India."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The fourth-busiest airport in India by passenger traffic"
+    }
+   ]
+  },
+  {
+   "claim": "more than 30 million passengers in the year to March 2026",
+   "verdict": "corrected",
+   "inAfter": "with more than 30 million passengers in the year to March 2026",
+   "note": "Was 'over 29 million in the year to March 2025'. That was right (AAI: 29,482,396 for 2024-25), but the 2025-26 total is out: 30,483,885 on AAI's table, 'over 30 million' in FY 2025-26 on the operator's own page. India's financial year runs April to March.",
+   "sources": [
+    {
+     "file": "aai-mar2026-pax",
+     "org": "Airports Authority of India",
+     "dated": "April 2025 to March 2026 (Traffic News, March 2026 annexure III)",
+     "quote": [
+      "Total Passengers(Domestic+International)",
+      "Change 2025-2026 2024-2025",
+      "HYDERABAD (GHIAL) 2288274 2599325 -12.0% 30483885 29482396 3.4%"
+     ]
+    },
+    {
+     "file": "op-masterplan",
+     "org": "GMR Hyderabad International Airport Ltd (the operator, hyderabad.aero)",
+     "dated": "FY 2025-26 (live page read 2026-09-23)",
+     "quote": "In FY 2025-26, we had a footfall of over 30 million passengers"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": [
+      "stat1_data = 3,04,83,885",
+      "stat_year = April 2025 – March 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "more than 180,000 tonnes of cargo in the year to March 2026",
+   "verdict": "corrected",
+   "inAfter": "That year it also handled more than 180,000 tonnes of cargo.",
+   "note": "Was 'more than 167,660 tonnes' (2024-25). AAI's March 2026 table gives 182,440.0 tonnes for 2025-26, and 165,868.3 for 2024-25, so the old figure was also a little above AAI's revised count. The operator's page says 'around 193,850 tons of cargo annually' without a period; the two do not agree on the exact figure, so the text gives only the floor both support.",
+   "sources": [
+    {
+     "file": "aai-mar2026-freight",
+     "org": "Airports Authority of India",
+     "dated": "April 2025 to March 2026 (Traffic News, March 2026 annexure IV)",
+     "quote": [
+      "Total Freight(Domestic+International)",
+      "Freight (In MT )",
+      "HYDERABAD (GHIAL) 15840.1 16571.0 -4.4% 182440.0 165868.3 10.0%"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": [
+      "stat3_data = 1,82,440",
+      "stat_year = April 2025 – March 2026"
+     ]
+    },
+    {
+     "file": "op-company",
+     "org": "GMR Hyderabad International Airport Ltd (the operator, hyderabad.aero)",
+     "dated": "read 2026-09-23 (live page, period not stated)",
+     "quote": "Currently Hyderabad Airport handles over 30 million passengers and around 193,850 tons of cargo annually"
+    }
+   ]
+  },
+  {
+   "claim": "built as a greenfield airport under a public private partnership",
+   "verdict": "softened",
+   "inAfter": "It was built as a greenfield airport under a public private partnership",
+   "note": "Was 'India's first greenfield airport built as a public private partnership'. The operator and the 2004 cabinet release both describe a greenfield airport built with private partners; neither says it was the first, so 'India's first' is dropped.",
+   "sources": [
+    {
+     "file": "op-company",
+     "org": "GMR Hyderabad International Airport Ltd (the operator, hyderabad.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "GHIAL was mandated to design, finance, build and operate Rajiv Gandhi International Airport (RGIA), Hyderabad as a world class Greenfield airport on the Public Private Partnership (PPP) model."
+    },
+    {
+     "file": "pib-5722",
+     "org": "Press Information Bureau (Ministry of Civil Aviation)",
+     "dated": "15 December 2004",
+     "quote": "to promote a Greenfield airport at Shamshabad near Hyderabad under joint venture with private sector participation"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is India's first greenfield airport built under a public-private partnership model."
+    }
+   ]
+  },
+  {
+   "claim": "the first airport in India to introduce e-boarding",
+   "verdict": "confirmed",
+   "inAfter": "was the first airport in India to introduce e-boarding",
+   "note": "The dates of the domestic (December 2015) and international (October 2020) launches are cut: see below.",
+   "sources": [
+    {
+     "file": "op-company",
+     "org": "GMR Hyderabad International Airport Ltd (the operator, hyderabad.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "As the first airport in India to introduce a unique e-boarding solution"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It was the first airport in India to launch domestic e-boarding facility"
+    }
+   ]
+  },
+  {
+   "claim": "two runways",
+   "verdict": "confirmed",
+   "inAfter": "There are two runways.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 09L/27R: 3,707 m (12,162 ft), ASP",
+      "Runway 09R/27L: 4,260 m (13,976 ft), ASP",
+      "Runways listed: 2"
+     ]
+    },
+    {
+     "file": "op-masterplan",
+     "org": "GMR Hyderabad International Airport Ltd (the operator, hyderabad.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "RGIA's primary aircraft landing strip",
+      "which functions as secondary/standby runway"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport has two runways"
+    }
+   ]
+  },
+  {
+   "claim": "the main runway is 4,260 metres and takes the A380",
+   "verdict": "confirmed",
+   "inAfter": "At 4,260 metres, the main one is long enough for an A380.",
+   "sources": [
+    {
+     "file": "op-masterplan",
+     "org": "GMR Hyderabad International Airport Ltd (the operator, hyderabad.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "RGIA's primary aircraft landing strip with 4260m length is the 2nd longest in India.",
+      "It is a fully Code-F compliant runway that provides the landing platform for the largest of aircrafts in the world including Airbus A380."
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": "Runway 09R/27L: 4,260 m (13,976 ft), ASP"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Runway 09R/27L: 4,260 by 60 metres",
+      "Runway 09R/27L, the original and primary runway, is long enough to be able to receive the Airbus A380"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the second runway is the parallel taxiway, used as the standby",
+   "verdict": "softened",
+   "inAfter": "The second is the parallel taxiway, which serves as the standby runway.",
+   "note": "The operator's own description. Wikipedia agrees it began as a taxiway and is used mainly when the main runway is being maintained. Its opening date and the aircraft it takes are cut (see below).",
+   "sources": [
+    {
+     "file": "op-masterplan",
+     "org": "GMR Hyderabad International Airport Ltd (the operator, hyderabad.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The Full parallel Taxiway is designed as a Code-E compatible parallel Runway, which functions as secondary/standby runway"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Originally a taxiway, runway 09L/27R was inaugurated in February 2012.",
+      "It is mainly used when runway 09R/27L is undergoing maintenance"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "opened in March 2008",
+   "verdict": "confirmed",
+   "inAfter": "It opened in March 2008",
+   "note": "Inaugurated on 14 March 2008 (operator); first commercial flights on 23 March 2008 (Wikipedia). Both are March 2008.",
+   "sources": [
+    {
+     "file": "op-company",
+     "org": "GMR Hyderabad International Airport Ltd (the operator, hyderabad.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "inaugurated on March 14, 2008"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "it was opened on 23 March 2008"
+    }
+   ]
+  },
+  {
+   "claim": "named after Rajiv Gandhi",
+   "verdict": "confirmed",
+   "inAfter": "is named after Rajiv Gandhi",
+   "note": "The operator uses the official name; Wikipedia names the former prime minister it honours.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It was named after Rajiv Gandhi, the former Prime Minister of India."
+    },
+    {
+     "file": "op-company",
+     "org": "GMR Hyderabad International Airport Ltd (the operator, hyderabad.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Rajiv Gandhi International Airport (RGIA), Hyderabad"
+    }
+   ]
+  },
+  {
+   "claim": "over 29 million passengers in the year to March 2025",
+   "verdict": "cut",
+   "wasBefore": "with over 29 million passengers in the year to March 2025",
+   "why": "Replaced by the 2025-26 total (see above). AAI's March 2026 table confirms 29,482,396 for 2024-25."
+  },
+  {
+   "claim": "more than 167,660 tonnes of cargo",
+   "verdict": "cut",
+   "wasBefore": "It also handled more than 167,660 tonnes of cargo.",
+   "why": "Replaced by the 2025-26 figure (see above). AAI's revised 2024-25 figure is 165,868.3 tonnes, below the old one."
+  },
+  {
+   "claim": "India's first greenfield PPP airport",
+   "verdict": "cut",
+   "wasBefore": "It was India's first greenfield airport built as a public private partnership",
+   "why": "'First' rests on Wikipedia alone; the operator and the 2004 cabinet release say greenfield and private partnership but not first. Softened (see above)."
+  },
+  {
+   "claim": "2,200 hectares, the largest airport in India by area",
+   "verdict": "cut",
+   "wasBefore": "and at 2,200 hectares it is the largest in the country by area",
+   "why": "Wikipedia alone, which cites a 2012 blog for the ranking; the operator's pages read give no total area. New Indian Express, cited for the land, is blocked by the egress policy."
+  },
+  {
+   "claim": "about a third developed, the rest held for expansion",
+   "verdict": "cut",
+   "wasBefore": "Only about a third of that is developed, with the rest held for expansion",
+   "why": "Wikipedia alone. The operator's current master plan page gives an ultimate capacity, not the land split."
+  },
+  {
+   "claim": "the operator says no further land will be acquired",
+   "verdict": "cut",
+   "wasBefore": "and the operator has said no further land will be acquired",
+   "why": "Wikipedia alone. The operator's master plan page (the page Wikipedia cites, now at a new address) no longer says it."
+  },
+  {
+   "claim": "a record of going first on technology",
+   "verdict": "cut",
+   "wasBefore": "It has a record of going first on technology.",
+   "why": "A summary judgement resting on the operator's own claims. The one first that two sources support (e-boarding) is kept."
+  },
+  {
+   "claim": "domestic e-boarding in December 2015",
+   "verdict": "cut",
+   "wasBefore": "It was the first airport in India to launch domestic e-boarding, in December 2015",
+   "why": "The date rests on Wikipedia alone; India Today, which it cites (and dates July 2015), is blocked by the egress policy. The first is kept without the date."
+  },
+  {
+   "claim": "international e-boarding in October 2020",
+   "verdict": "cut",
+   "wasBefore": "and added international e-boarding in October 2020",
+   "why": "Wikipedia alone; The Hindu and News18, which it cites, are blocked by the egress policy."
+  },
+  {
+   "claim": "AirHelp top ten",
+   "verdict": "cut",
+   "wasBefore": "AirHelp has ranked it among the top ten airports in the world.",
+   "why": "Out of date as worded: AirHelp's own 2026 ranking has no Indian airport in its top ten (Panama City to Billund). The 2019 placing Wikipedia cites rests on Livemint, which is blocked by the egress policy."
+  },
+  {
+   "claim": "main runway ILS equipped",
+   "verdict": "cut",
+   "wasBefore": "ILS equipped",
+   "why": "Wikipedia alone; the operator's runway description does not mention it."
+  },
+  {
+   "claim": "second runway inaugurated in February 2012",
+   "verdict": "cut",
+   "wasBefore": "inaugurated in February 2012",
+   "why": "Wikipedia alone; The Hindu, which it cites, is blocked by the egress policy, and the operator's milestones page shows only its 1999 entry to a plain reader."
+  },
+  {
+   "claim": "second runway takes up to an A340 or 747",
+   "verdict": "cut",
+   "wasBefore": "takes aircraft up to an A340 or 747",
+   "why": "Wikipedia alone; the operator says only that it is Code E compatible."
+  },
+  {
+   "claim": "second runway used mainly during maintenance",
+   "verdict": "cut",
+   "wasBefore": "is used mainly when the main runway is being maintained",
+   "why": "Softened to the operator's own word, standby (see above); the maintenance detail rests on Wikipedia."
+  },
+  {
+   "claim": "replacing Begumpet",
+   "verdict": "cut",
+   "wasBefore": "replacing Begumpet",
+   "why": "Wikipedia alone. The Hindu and BusinessLine, which it cites, are blocked by the egress policy, and Outlook's 2008 report is gone (HTTP 410)."
+  },
+  {
+   "claim": "terminal expanded to 40 million passengers a year",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing in the old text. The operator says RGIA 'has embarked on a large-scale expansion to increase its capacity to 40 MPPA'; Wikipedia (2026-09-23) says the terminal was expanded east in November 2023 and west in September 2024, raising capacity to 40 million a year. The two differ on whether the work is finished.",
+   "sources": [
+    {
+     "file": "op-company",
+     "org": "GMR Hyderabad International Airport Ltd (the operator, hyderabad.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "RGIA has embarked on a large-scale expansion to increase its capacity to 40 MPPA"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-23",
+     "quote": "With the expanded terminal, the passenger capacity has been increased to 40 million passengers per annum."
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "180,000": "Rounded down from AAI's 182,440.0 tonnes for April 2025 to March 2026 (Wikipedia's infobox gives the same); the operator gives around 193,850 tons a year. See the cargo claim."
+ }
+}

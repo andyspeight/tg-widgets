@@ -1,0 +1,301 @@
+{
+ "iata": "CCU",
+ "id": "recZaVg63CdfzuQkG",
+ "name": "Netaji Subhash Chandra Bose International Airport",
+ "country": "India",
+ "wikipedia": "https://en.wikipedia.org/wiki/Netaji_Subhas_Chandra_Bose_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Kolkata's airport and the main aviation hub for eastern and north eastern India, at Dum Dum about 16 km from Dalhousie Square. It handled around 22 million passengers in the year to March 2025, sixth busiest in the country.\n\nIts real value is the reach into places other Indian airports do not serve well. This is a major centre for flights into north east India, Bangladesh and Bhutan, as well as Southeast Asia and the Gulf cities of Dubai, Doha and Abu Dhabi.\n\nCapacity has just improved. The primary runway handles about 35 flights an hour and the secondary, normally used as a taxiway, another 15. Work through 2025 lifted the airport's operating capacity from 35 to 45 flights an hour by September.\n\nThe integrated Terminal 2 covers 233,000 square metres.\n\nOpened in 1924, this is one of the oldest airports in India. The code CCU comes from Calcutta, the city's name until 2001, and the airport was renamed in 1995 after Subhas Chandra Bose.",
+ "after": "Kolkata's airport, at Dum Dum about 16 km from Dalhousie Square, and the busiest in eastern and north eastern India. It handled about 21.1 million passengers in the year to March 2026, sixth busiest in the country.\n\nInternational flights serve Bangladesh and Bhutan as well as Dubai.\n\nThe airport is named after Subhas Chandra Bose.",
+ "claims": [
+  {
+   "claim": "Kolkata's airport",
+   "verdict": "confirmed",
+   "inAfter": "Kolkata's airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the international airport serving the city of Kolkata and the Kolkata metropolitan area"
+    },
+    {
+     "file": "aai-kolkata",
+     "org": "Airports Authority of India (the operator, aai.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Kolkata Netaji Subhash Chandra Bose International Airport Kolkata–The City of Joy"
+    }
+   ]
+  },
+  {
+   "claim": "at Dum Dum",
+   "verdict": "confirmed",
+   "inAfter": "at Dum Dum",
+   "note": "The North 24 Parganas district administration (Government of West Bengal) calls it Dum Dum Airport in the same page that names it Netaji Subhas Chandra Bose International Airport.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is located in Dum Dum"
+    },
+    {
+     "file": "n24pgs-how-to-reach",
+     "org": "North 24 Parganas district administration (Government of West Bengal)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": [
+      "Netaji Subhas Chandra Bose International Airport is about 11 kilometres from Barasat city.",
+      "Barasat can be reached from Dum Dum Airport by car in 30 minutes."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 16 km from Dalhousie Square",
+   "verdict": "confirmed",
+   "inAfter": "about 16 km from Dalhousie Square",
+   "note": "The coordinates give 13.4 km in a straight line from the GeoNames centre of Kolkata, which sits close to Dalhousie Square (ratio 1.19, inside the check's tolerance for a road distance). AAI's 2024 noise study gives 17 km north east of the city centre.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "approximately 16 km (9.9 mi) from Dalhousie Square"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 13.4 km (8.3 miles)",
+      "Bearing from the city centre: 41 degrees, which is north east"
+     ]
+    },
+    {
+     "file": "aai-noise-map-2024",
+     "org": "Airports Authority of India (noise mapping study, June 2024)",
+     "dated": "June 2024 (report NM_CCU_Jun24_RevC)",
+     "quote": "Location: 10.5 miles (17 km) northeast of Kolkata city center"
+    }
+   ]
+  },
+  {
+   "claim": "the busiest airport in eastern and north eastern India",
+   "verdict": "softened",
+   "inAfter": "the busiest in eastern and north eastern India",
+   "note": "Was 'the main aviation hub for eastern and north eastern India'. AAI's full-year table for April 2025 to March 2026 has Kolkata at 21.1 million, far ahead of the next airports in the region: Guwahati 6.6 million, Bhubaneswar 5.1 million, Patna 4.4 million, Bagdogra 3.7 million. 'Hub', in the sense of connecting traffic, is not supported, so the text says busiest.",
+   "sources": [
+    {
+     "file": "aai-mar2026-pax",
+     "org": "Airports Authority of India",
+     "dated": "April 2025 to March 2026 (Traffic News, March 2026 annexure III)",
+     "quote": [
+      "Total Passengers(Domestic+International)",
+      "KOLKATA 1793004 1927598 -7.0% 21102741 21831118 -3.3%",
+      "GUWAHATI 548775 588484 -6.7% 6622784 6160157 7.5%",
+      "BHUBANESWAR 423985 460337 -7.9% 5130834 4838751 6.0%",
+      "PATNA 362962 381528 -4.9% 4386376 3819477 14.8%",
+      "BAGDOGRA 322889 282647 14.2% 3657078 3219410 13.6%"
+     ]
+    },
+    {
+     "file": "aai-noise-map-2024",
+     "org": "Airports Authority of India (noise mapping study, June 2024)",
+     "dated": "June 2024 (report NM_CCU_Jun24_RevC)",
+     "quote": "The airport is the largest in eastern India"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "It is the primary aviation hub for eastern and northeastern India.",
+      "the airport is the largest hub for air traffic in the eastern part of the country"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 21.1 million passengers in the year to March 2026",
+   "verdict": "corrected",
+   "inAfter": "It handled about 21.1 million passengers in the year to March 2026",
+   "note": "Was 'around 22 million in the year to March 2025', which AAI's table bears out (21,831,118). The 2025-26 total is 21,102,741, down 3.3 per cent. AAI runs the airport and publishes the national figures.",
+   "sources": [
+    {
+     "file": "aai-mar2026-pax",
+     "org": "Airports Authority of India",
+     "dated": "April 2025 to March 2026 (Traffic News, March 2026 annexure III)",
+     "quote": [
+      "Total Passengers(Domestic+International)",
+      "Change 2025-2026 2024-2025",
+      "KOLKATA 1793004 1927598 -7.0% 21102741 21831118 -3.3%"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-18",
+     "quote": [
+      "stat1_data = 21,102,741",
+      "stat_year = April 2025 - March 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "sixth busiest in India",
+   "verdict": "confirmed",
+   "inAfter": "sixth busiest in the country",
+   "note": "Behind Delhi, Mumbai, Bengaluru, Hyderabad and Chennai in AAI's 2025-26 table, as in 2024-25; Ahmedabad follows at 13.8 million.",
+   "sources": [
+    {
+     "file": "aai-mar2026-pax",
+     "org": "Airports Authority of India",
+     "dated": "April 2025 to March 2026 (Traffic News, March 2026 annexure III)",
+     "quote": [
+      "DELHI 7001938 7016092 -0.2% 78701971 79259890 -0.7%",
+      "MUMBAI (MIAL) 4337575 4622535 -6.2% 55290095 55122422 0.3%",
+      "BENGALURU (BIAL) 3649460 3638080 0.3% 44470035 41875620 6.2%",
+      "HYDERABAD (GHIAL) 2288274 2599325 -12.0% 30483885 29482396 3.4%",
+      "CHENNAI 1775631 1909441 -7.0% 23017324 22411290 2.7%",
+      "KOLKATA 1793004 1927598 -7.0% 21102741 21831118 -3.3%",
+      "AHMEDABAD 1105726 1211034 -8.7% 13822287 13427697 2.9%"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "making it the sixth-busiest airport in India in terms of passenger traffic, after Delhi, Mumbai, Bengaluru, Hyderabad and Chennai airports"
+    }
+   ]
+  },
+  {
+   "claim": "international flights to Bangladesh, Bhutan and Dubai",
+   "verdict": "softened",
+   "inAfter": "International flights serve Bangladesh and Bhutan as well as Dubai.",
+   "note": "Each place checked against the airline's own current page: Drukair's September 2026 schedule has Paro to Kolkata and Gelephu to Kolkata; US-Bangla's live network page lists Kolkata among its destinations from Dhaka; Emirates' UK site sells flights to Kolkata and lists Dubai as the most popular destination from it. North east India, Southeast Asia, Doha and Abu Dhabi are cut (see below).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is also a major centre for flights to northeast India, Bangladesh, Bhutan, Southeast Asia and the Middle Eastern cities of Dubai, Doha and Abu Dhabi."
+    },
+    {
+     "file": "drukair-sep2026",
+     "org": "Drukair (Royal Bhutan Airlines)",
+     "dated": "September 2026 schedule",
+     "quote": [
+      "SCHEDULE FOR PERIOD SEPTEMBER 2026",
+      "KB210 PARO-KOLKATA",
+      "KB211 KOLKATA-PARO",
+      "GELEPHU-KOLKATA"
+     ]
+    },
+    {
+     "file": "usbangla-asia-b",
+     "org": "US-Bangla Airlines",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Destination from Dhaka Bangladesh Book Your Flight to the City of Mosque Kolkata Doha Singapore Bangkok"
+    },
+    {
+     "file": "emirates-kolkata",
+     "org": "Emirates",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Flights to Kolkata (CCU)",
+      "Most popular destinations from Kolkata (CCU)",
+      "Flights to Dubai"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after Subhas Chandra Bose",
+   "verdict": "confirmed",
+   "inAfter": "The airport is named after Subhas Chandra Bose.",
+   "note": "AAI spells the official name Subhash; Wikipedia and the district page use Subhas.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "renamed in 1995 after Subhas Chandra Bose, one of the most prominent leaders of the Indian independence movement"
+    },
+    {
+     "file": "aai-kolkata",
+     "org": "Airports Authority of India (the operator, aai.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Netaji Subhash Chandra Bose International Airport"
+    },
+    {
+     "file": "n24pgs-how-to-reach",
+     "org": "North 24 Parganas district administration (Government of West Bengal)",
+     "dated": "read 2026-09-23 (live page, undated)",
+     "quote": "Netaji Subhas Chandra Bose International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "the main aviation hub for eastern and north eastern India",
+   "verdict": "cut",
+   "wasBefore": "and the main aviation hub for eastern and north eastern India",
+   "why": "Softened to the busiest in the region, which AAI's figures show (see above); 'hub' in the connecting sense rests on Wikipedia."
+  },
+  {
+   "claim": "around 22 million passengers in the year to March 2025",
+   "verdict": "cut",
+   "wasBefore": "It handled around 22 million passengers in the year to March 2025",
+   "why": "Replaced by the 2025-26 total (see above). AAI's March 2026 table confirms 21,831,118 for 2024-25."
+  },
+  {
+   "claim": "its real value is its reach",
+   "verdict": "cut",
+   "wasBefore": "Its real value is the reach into places other Indian airports do not serve well.",
+   "why": "A judgement no source makes."
+  },
+  {
+   "claim": "a major centre for flights to north east India, Southeast Asia, Doha and Abu Dhabi",
+   "verdict": "cut",
+   "wasBefore": "This is a major centre for flights into north east India, Bangladesh and Bhutan, as well as Southeast Asia and the Gulf cities of Dubai, Doha and Abu Dhabi.",
+   "why": "Softened to the places a current airline page confirms (see above). No source from the last 12 months could be read for the rest: Qatar Airways, Etihad and IndiGo reset the connection, Thai Airways' page loads only its home page, Khaleej Times' report of Etihad's Abu Dhabi to Kolkata flights dates from 2023, and CAPA's note of IndiGo's Kolkata to Siem Reap plan (2 October 2025) is a headline only. 'Major centre' rests on Wikipedia."
+  },
+  {
+   "claim": "capacity has just improved",
+   "verdict": "cut",
+   "wasBefore": "Capacity has just improved.",
+   "why": "Rests on the runway claims below, which could not be confirmed."
+  },
+  {
+   "claim": "primary runway 35 flights an hour, secondary 15 and normally a taxiway",
+   "verdict": "cut",
+   "wasBefore": "The primary runway handles about 35 flights an hour and the secondary, normally used as a taxiway, another 15.",
+   "why": "Wikipedia alone. The Times of India, which it cites for the runway work, is blocked by the egress policy."
+  },
+  {
+   "claim": "operating capacity raised from 35 to 45 flights an hour by September 2025",
+   "verdict": "cut",
+   "wasBefore": "Work through 2025 lifted the airport's operating capacity from 35 to 45 flights an hour by September.",
+   "why": "Wikipedia alone. The Times of India, The Telegraph and The Indian Express are blocked by the egress policy, and AAI's Kolkata news page carries nothing on it."
+  },
+  {
+   "claim": "Terminal 2 covers 233,000 square metres",
+   "verdict": "cut",
+   "wasBefore": "The integrated Terminal 2 covers 233,000 square metres.",
+   "why": "Wikipedia alone, and the one official figure found differs: the 2008 cabinet approval (PIB) planned a building of 1,80,000 square metres. anna.aero's 2013 opening report could not be reached."
+  },
+  {
+   "claim": "opened in 1924, one of the oldest airports in India",
+   "verdict": "cut",
+   "wasBefore": "Opened in 1924, this is one of the oldest airports in India.",
+   "why": "Wikipedia alone. The airport's own site (nscbiairport.com) timed out, and its old history pages that Wikipedia cites survive only in the web archive, which the network policy blocks."
+  },
+  {
+   "claim": "CCU from Calcutta, the city's name until 2001",
+   "verdict": "cut",
+   "wasBefore": "The code CCU comes from Calcutta, the city's name until 2001",
+   "why": "Wikipedia alone; Britannica answered with a Cloudflare check and was not retried."
+  },
+  {
+   "claim": "renamed in 1995",
+   "verdict": "cut",
+   "wasBefore": "the airport was renamed in 1995 after Subhas Chandra Bose",
+   "why": "The year rests on Wikipedia alone. The name itself is kept (see above)."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

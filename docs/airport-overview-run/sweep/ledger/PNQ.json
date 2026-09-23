@@ -1,0 +1,252 @@
+{
+ "iata": "PNQ",
+ "id": "recqzVumb56VS87i3",
+ "name": "Pune International Airport",
+ "country": "India",
+ "wikipedia": "https://en.wikipedia.org/wiki/Pune_Airport",
+ "audited": "2026-09-23",
+ "before": "Pune's airport, about 11 km north east of the historic centre, serving Pune and Pimpri Chinchwad. It is ninth busiest in India and handled over 10.4 million passengers in the 2024-25 financial year.\n\nThe quality is better than the size suggests. In 2025 Airports Council International ranked it first among Indian airports for service quality in its size band, scoring 4.96 out of 5.\n\nThe constraint is that it is not really a civil airport. It is a civil enclave on the western side of Lohagaon Air Force Station, and air traffic control is run by the Indian Air Force. That causes recurring friction over flight schedules and night landings. Night landings for civil flights are currently allowed, but the arrangement is described as a working compromise rather than a settled one, so late arrivals carry more schedule risk here than elsewhere.\n\nThe single runway is 2,540 metres. Pune Metro reaches Ramwadi station about 3 km from the terminal, with feeder buses connecting the two.\n\nA renaming to Jagadguru Sant Tukaram Maharaj Airport has been approved by the state government.",
+ "after": "Pune's airport, about 11 km north east of the historic centre. It is ninth busiest in India and handled just over 11 million passengers in the 2025-26 financial year.\n\nThe airport is a civil enclave run by the Airports Authority of India, while the Indian Air Force runs air traffic control and approves flight slots.\n\nPune Metro does not reach the airport, but PMPML city buses serve it.",
+ "claims": [
+  {
+   "claim": "Pune's airport",
+   "verdict": "confirmed",
+   "inAfter": "Pune's airport",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "serving the city of Pune and Pimpri Chinchwad, Maharashtra, India"
+    },
+    {
+     "file": "aai-pune",
+     "org": "Airports Authority of India (the operator, aai.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Airports Authority of India Civil Enclave Pune Airport, Lohegaon"
+    }
+   ]
+  },
+  {
+   "claim": "about 11 km north east of the historic centre",
+   "verdict": "confirmed",
+   "inAfter": "about 11 km north east of the historic centre",
+   "note": "Coordinates: 9.7 km in a straight line at 44 degrees from the GeoNames centre of Pune (ratio 1.13, bearing off by 1 degree), so 11 km reads as the road distance.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "approximately 11 km (6.8 mi) northeast of the historic centre of Pune"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 9.7 km (6.0 miles)",
+      "Bearing from the city centre: 44 degrees, which is north east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "ninth busiest in India",
+   "verdict": "confirmed",
+   "inAfter": "It is ninth busiest in India",
+   "note": "AAI's 2025-26 table has eight airports ahead, the closest being Kochi at 11.3 million; the next behind is Guwahati at 6.6 million. Pune was ninth in 2024-25 too.",
+   "sources": [
+    {
+     "file": "aai-mar2026-pax",
+     "org": "Airports Authority of India",
+     "dated": "April 2025 to March 2026 (Traffic News, March 2026 annexure III)",
+     "quote": [
+      "Total Passengers(Domestic+International)",
+      "DELHI 7001938 7016092 -0.2% 78701971 79259890 -0.7%",
+      "MUMBAI (MIAL) 4337575 4622535 -6.2% 55290095 55122422 0.3%",
+      "BENGALURU (BIAL) 3649460 3638080 0.3% 44470035 41875620 6.2%",
+      "HYDERABAD (GHIAL) 2288274 2599325 -12.0% 30483885 29482396 3.4%",
+      "CHENNAI 1775631 1909441 -7.0% 23017324 22411290 2.7%",
+      "KOLKATA 1793004 1927598 -7.0% 21102741 21831118 -3.3%",
+      "AHMEDABAD 1105726 1211034 -8.7% 13822287 13427697 2.9%",
+      "KOCHI 740281 842371 -12.1% 11302552 11140778 1.5%",
+      "PUNE 925085 855298 8.2% 11005988 10457694 5.2%",
+      "GUWAHATI 548775 588484 -6.7% 6622784 6160157 7.5%"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is the ninth-busiest airport by passenger traffic in India."
+    }
+   ]
+  },
+  {
+   "claim": "just over 11 million passengers in 2025-26",
+   "verdict": "corrected",
+   "inAfter": "handled just over 11 million passengers in the 2025-26 financial year",
+   "note": "Was 'over 10.4 million in the 2024-25 financial year', which AAI bears out (10,457,694). The 2025-26 total is 11,005,988, up 5.2 per cent.",
+   "sources": [
+    {
+     "file": "aai-mar2026-pax",
+     "org": "Airports Authority of India",
+     "dated": "April 2025 to March 2026 (Traffic News, March 2026 annexure III)",
+     "quote": [
+      "Total Passengers(Domestic+International)",
+      "Change 2025-2026 2024-2025",
+      "PUNE 925085 855298 8.2% 11005988 10457694 5.2%"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-11",
+     "quote": [
+      "stat1_data = 11,005,988",
+      "stat_year = April 2025 - March 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a civil enclave run by the Airports Authority of India",
+   "verdict": "confirmed",
+   "inAfter": "The airport is a civil enclave run by the Airports Authority of India",
+   "sources": [
+    {
+     "file": "aai-pune",
+     "org": "Airports Authority of India (the operator, aai.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Airports Authority of India Civil Enclave Pune Airport, Lohegaon"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is a civil enclave operated by the Airports Authority of India at the western side of Lohagaon Air Force Station."
+    }
+   ]
+  },
+  {
+   "claim": "the Indian Air Force runs air traffic control and approves flight slots",
+   "verdict": "confirmed",
+   "inAfter": "while the Indian Air Force runs air traffic control and approves flight slots",
+   "note": "AAI's own procedure for non-scheduled flights at Pune (26 August 2025) sends operators to IAF air traffic control for a slot and notes 15 more slots approved by the IAF. The friction over schedules and night landings that the old text described rests on Wikipedia alone and is cut.",
+   "sources": [
+    {
+     "file": "aai-pune-nsop-sop",
+     "org": "Airports Authority of India (the operator, aai.aero)",
+     "dated": "26.08.2025 (date on the saved page)",
+     "quote": [
+      "26.08.2025",
+      "slots have been approved by IAF which will lead to further increase in",
+      "Operators must obtain prior approval/slot from IAF ATC"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "an Indian Air Force (IAF) base (called Lohagaon Air Force Station)",
+      "As Pune's air traffic control is operated by the IAF, there is often friction between the AAI and the IAF over flight schedules and night landings."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the metro does not reach the airport; PMPML city buses serve it",
+   "verdict": "softened",
+   "inAfter": "Pune Metro does not reach the airport, but PMPML city buses serve it.",
+   "note": "Was 'Pune Metro reaches Ramwadi station about 3 km from the terminal, with feeder buses connecting the two'. AAI's transport table lists no metro and PMPML city buses; Pune Metro's own page confirms Ramwadi is where the line now ends (an extension to Wagholi is planned). The 3 km and the Ramwadi feeder rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "aai-pune-transport",
+     "org": "Airports Authority of India (the operator, aai.aero)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Metro Rail System Not Available",
+      "City Bus Service Available By PMPML"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "Pune Metro operates to Ramwadi Metro Station which is around 3 km from the terminal building.",
+      "PMPML, which is Pune's public transport bus provider, operates feeder services connecting the terminal to Ramwadi Metro Station."
+     ]
+    },
+    {
+     "file": "punemetro-line2ab",
+     "org": "Maharashtra Metro Rail Corporation (Pune Metro)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Line 2B Ramwadi to Wagholi/Vitthalwadi Corridor"
+    }
+   ]
+  },
+  {
+   "claim": "serving Pune and Pimpri Chinchwad",
+   "verdict": "cut",
+   "wasBefore": "serving Pune and Pimpri Chinchwad",
+   "why": "Pimpri Chinchwad rests on Wikipedia alone; no second source names it."
+  },
+  {
+   "claim": "over 10.4 million passengers in 2024-25",
+   "verdict": "cut",
+   "wasBefore": "handled over 10.4 million passengers in the 2024-25 financial year",
+   "why": "Replaced by the 2025-26 total (see above). AAI's March 2026 table confirms 10,457,694 for 2024-25."
+  },
+  {
+   "claim": "quality better than the size suggests",
+   "verdict": "cut",
+   "wasBefore": "The quality is better than the size suggests.",
+   "why": "A judgement resting on the service-quality ranking below, which could not be confirmed."
+  },
+  {
+   "claim": "ACI service quality: first among Indian airports in its size band in 2025, 4.96 out of 5",
+   "verdict": "cut",
+   "wasBefore": "In 2025 Airports Council International ranked it first among Indian airports for service quality in its size band, scoring 4.96 out of 5.",
+   "why": "Wikipedia alone. The Times of India and The Indian Express, which it cites, are blocked by the egress policy, and AAI's Pune achievement and news pages carry nothing on it."
+  },
+  {
+   "claim": "not really a civil airport",
+   "verdict": "cut",
+   "wasBefore": "The constraint is that it is not really a civil airport.",
+   "why": "Framing; the facts behind it (civil enclave, IAF air traffic control and slots) are kept with two sources."
+  },
+  {
+   "claim": "on the western side of Lohagaon Air Force Station",
+   "verdict": "cut",
+   "wasBefore": "It is a civil enclave on the western side of Lohagaon Air Force Station",
+   "why": "The civil enclave is kept (AAI, Wikipedia). Its position on the western side and the station's name rest on Wikipedia alone; AAI's address says only Civil Enclave Pune Airport, Lohegaon."
+  },
+  {
+   "claim": "recurring friction over schedules and night landings",
+   "verdict": "cut",
+   "wasBefore": "That causes recurring friction over flight schedules and night landings.",
+   "why": "Wikipedia alone, undated and unreferenced there."
+  },
+  {
+   "claim": "night landings a working compromise, so late arrivals carry more schedule risk",
+   "verdict": "cut",
+   "wasBefore": "Night landings for civil flights are currently allowed, but the arrangement is described as a working compromise rather than a settled one, so late arrivals carry more schedule risk here than elsewhere.",
+   "why": "Wikipedia alone and undated; the schedule-risk conclusion is ours, not a source's. AAI's 2025 procedure bars night parking only for non-scheduled aircraft."
+  },
+  {
+   "claim": "single runway of 2,540 metres",
+   "verdict": "cut",
+   "wasBefore": "The single runway is 2,540 metres.",
+   "why": "Sources disagree: Wikipedia gives 2,540 m in its text and 2,539 m in its infobox and calls the old second runway a taxiway, while OurAirports lists two runways, 10/28 at 3,048 m and 14/32 at 1,796 m. India's eAIP could not be opened to settle it (its menu page answered 404)."
+  },
+  {
+   "claim": "Ramwadi station about 3 km away, with feeder buses",
+   "verdict": "cut",
+   "wasBefore": "Pune Metro reaches Ramwadi station about 3 km from the terminal, with feeder buses connecting the two.",
+   "why": "Softened (see above): the distance and the Ramwadi feeder rest on Wikipedia alone."
+  },
+  {
+   "claim": "renaming to Jagadguru Sant Tukaram Maharaj Airport approved by the state",
+   "verdict": "cut",
+   "wasBefore": "A renaming to Jagadguru Sant Tukaram Maharaj Airport has been approved by the state government.",
+   "why": "Wikipedia alone. Its source, a Times of India report of September 2024, is blocked by the egress policy and is over a year old, and nothing from the last 12 months on the renaming's progress was found."
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
