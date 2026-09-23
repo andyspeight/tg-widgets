@@ -1,0 +1,430 @@
+{
+ "iata": "LOP",
+ "id": "rec9wP5NBjjZCfF93",
+ "name": null,
+ "country": "Indonesia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Lombok_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The only fully working airport on Lombok, and the way in for the Gili Islands, Mandalika and Mount Rinjani. It is at Tanak Awu in Central Lombok, about 6 km from Praya and 27 km from Mataram, so transfer times depend a good deal on which end of the island a client is staying.\n\nIt opened in 2011, replacing Selaparang Airport at Ampenan on the west coast. The runway is 2,750 metres and takes wide bodies up to an A330 or a 767.\n\nThe terminal was rebuilt for the 2022 MotoGP at Mandalika and is now a different proposition: 43,501 square metres against 24,123 before, with capacity lifted from 3.25 million passengers a year to 7 million. There are 46 check in counters and seven boarding gates, five of them with jet bridges.\n\nFlights run to Jakarta, Denpasar and Surabaya, with international services to Malaysia and Singapore. It is also known as Zainuddin Abdul Madjid International Airport, so both names turn up in supplier systems.",
+ "after": "Lombok's only fully working airport, serving the Gili Islands, Mandalika and Mount Rinjani. It is at Tanak Awu in Central Lombok, near Praya and about 27 km from Mataram, so transfer times depend a good deal on which end of the island a client is staying.\n\nOpened in 2011, it replaced Selaparang Airport in Mataram. The runway is now 3,300 metres, long enough for wide bodies up to a Boeing 777.\n\nIts terminal was enlarged for the MotoGP races at Mandalika, from 24,123 to 43,501 square metres, with room for about 7 million passengers a year.\n\nFlights run to Jakarta, Denpasar and Surabaya, with international services to Malaysia and Singapore. It is also known as Zainuddin Abdul Madjid International Airport, so both names turn up in supplier systems.",
+ "claims": [
+  {
+   "claim": "Lombok's only fully working airport",
+   "verdict": "confirmed",
+   "inAfter": "Lombok's only fully working airport",
+   "note": "Bisnis (June 2023): the old Selaparang airport in Mataram was closed to civil flights, all civil flights moved to Lombok International at Praya, and the old site has been idle since (it now hosts a motocross circuit).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "It is the island's only fully operational airport"
+    },
+    {
+     "file": "bisnis-selaparang",
+     "org": "Bisnis Indonesia (bisnis.com)",
+     "dated": "2023-06-30 (the article quotes the governor on Friday 30 June 2023)",
+     "quote": [
+      "Jumat (30/6/2023)",
+      "seluruh penerbangan sipil kini dipindah ke Bandara Internasional Lombok Praya",
+      "Sejak ditutup, aktivitas di Bandara Selaparang vakum total."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "serving the Gili Islands, Mandalika and Mount Rinjani",
+   "verdict": "confirmed",
+   "inAfter": "serving the Gili Islands, Mandalika and Mount Rinjani",
+   "note": "Was 'the way in for'; it serves them as the island's only working airport. The operator's own tourist guide lists Gunung Rinjani and Gili Trawangan; the airport was enlarged for the MotoGP at Mandalika (Investor Daily, 2021, which also quotes the tourism minister on visitors spread from Mandalika to Rinjani).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "serves as one of the primary gateway to Lombok and its surrounding tourist destinations, including the Gili Islands, Mandalika, and Mount Rinjani"
+    },
+    {
+     "file": "op-wisata",
+     "org": "Lombok International Airport (InJourney Airports, lombok-airport.co.id)",
+     "dated": "read 2026-09-23 (live tourist guide page)",
+     "quote": [
+      "Gunung Rinjani",
+      "Pulau Gili Trawangan"
+     ]
+    },
+    {
+     "file": "investor-terminal",
+     "org": "Investor Daily (investor.id)",
+     "dated": "January 2021 (the visit it reports was on Friday 15 January 2021)",
+     "quote": [
+      "kesiapan Bandara Lombok dalam menyambut gelaran MotoGP",
+      "tidak hanya di sekitar Mandalika, tapi juga tersebar di Rinjani, Senggigi sampai Sumbawa"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "at Tanak Awu in Central Lombok",
+   "verdict": "confirmed",
+   "inAfter": "It is at Tanak Awu in Central Lombok",
+   "note": "The regulator gives the village as Tanak Awu, Pujut district, Central Lombok Regency; Antara's report of the 2011 inauguration says the same village and district.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page, with 2025 traffic)",
+     "quote": [
+      "Kabupaten / Kota KABUPATEN LOMBOK TENGAH",
+      "Kelurahan / Desa Tanak Awu"
+     ]
+    },
+    {
+     "file": "antara-en-2011",
+     "org": "Antara (national news agency, antaranews.com)",
+     "dated": "2011-10-20",
+     "quote": "located at Tanak Awu village in Central Lombok district"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "The airport is situated in Tanak Awu, Central Lombok Regency"
+    }
+   ]
+  },
+  {
+   "claim": "near Praya",
+   "verdict": "softened",
+   "inAfter": "near Praya",
+   "note": "Was 'about 6 km from Praya', which rests on Wikipedia alone (the coordinates check measures only from Mataram). The regulator's address is Jl. Raya Tanak Awu Praya, and Bisnis and Investor Daily both call it Lombok Praya airport.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": "Jl. Raya Tanak Awu Praya, Lombok Tengah"
+    },
+    {
+     "file": "bisnis-selaparang",
+     "org": "Bisnis Indonesia (bisnis.com)",
+     "dated": "2023-06-30",
+     "quote": "Bandara Internasional Lombok Praya, kabupaten Lombok Tengah"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "approximately 6 kilometers (3.7 miles) from Praya, the regency capital"
+    }
+   ]
+  },
+  {
+   "claim": "about 27 km from Mataram",
+   "verdict": "confirmed",
+   "inAfter": "about 27 km from Mataram",
+   "note": "Coordinates: 26.5 km in a straight line from the centre of Mataram (bearing 138 degrees, south east), so 27 km gives a ratio of 1.02, inside the check.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "City centre: Mataram (GeoNames 1635882)",
+      "Straight-line distance from the city centre: 26.5 km (16.5 miles)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "27 kilometers (16.8 miles) from Mataram, the provincial capital"
+    }
+   ]
+  },
+  {
+   "claim": "opened in 2011",
+   "verdict": "confirmed",
+   "inAfter": "Opened in 2011",
+   "note": "Antara: the president inaugurated it on 20 October 2011; Wikipedia gives the first landing, and the start of operations, as 1 October 2011.",
+   "sources": [
+    {
+     "file": "antara-en-2011",
+     "org": "Antara (national news agency, antaranews.com)",
+     "dated": "2011-10-20",
+     "quote": [
+      "October 20, 2011 10:38 GMT+700",
+      "President Susilo Bambang Yudhoyono dedicated the new Lombok International Airport (BIL) in West Nusa Tenggara (NTB) on Thursday."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "The new facility was officially inaugurated by the president of Indonesia, Susilo Bambang Yudhoyono, on 20 October 2011."
+    }
+   ]
+  },
+  {
+   "claim": "it replaced Selaparang Airport in Mataram",
+   "verdict": "softened",
+   "inAfter": "it replaced Selaparang Airport in Mataram",
+   "note": "Was 'replacing Selaparang Airport at Ampenan on the west coast'. Bisnis places the former Selaparang airport in Mataram city and says all civil flights moved to Lombok International; Wikipedia's history puts Ampenan in Mataram. 'On the west coast' rests on Wikipedia alone. (Bisnis dates Selaparang's closure to civil flights to 31 December 2011, while Wikipedia has the new airport operating from 1 October 2011, so no closing date is given.)",
+   "sources": [
+    {
+     "file": "bisnis-selaparang",
+     "org": "Bisnis Indonesia (bisnis.com)",
+     "dated": "2023-06-30",
+     "quote": [
+      "Eks Bandara Selaparang , kota Mataram kini bergeliat kembali setelah vakum tanpa aktivitas karena sejak beroperasinya Bandara Internasional Lombok Praya, kabupaten Lombok Tengah.",
+      "seluruh penerbangan sipil kini dipindah ke Bandara Internasional Lombok Praya"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": [
+      "It replaced Selaparang Airport, the island's previous sole operational airport",
+      "a new airfield in Ampenan, located in Mataram"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the runway is now 3,300 metres, long enough for wide bodies up to a Boeing 777",
+   "verdict": "corrected",
+   "inAfter": "The runway is now 3,300 metres, long enough for wide bodies up to a Boeing 777.",
+   "note": "Was 'The runway is 2,750 metres and takes wide bodies up to an A330 or a 767', which was the airport as opened (Antara, 2011). Investor Daily (January 2021) reports the operator lengthening it from 2,750 to 3,300 m so that it can take wide bodies of the Boeing 777 class; the regulator lists the runway at 3,300 by 45 m and the 777-300ER as its critical aircraft; OurAirports also gives 3,300 m.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Critical Aircraft BOEING 777-300ER",
+      "Dimensi Terverifikasi 3.300,00 x 45,00 m"
+     ]
+    },
+    {
+     "file": "investor-terminal",
+     "org": "Investor Daily (investor.id)",
+     "dated": "January 2021",
+     "quote": [
+      "perpanjangan dan pengerasan landas pacu (runway) Bandara Internasional Lombok dari 2.750 meter menjadi 3.300 meter",
+      "dapat mendukung operasional pesawat berbadan lebar (wide body) sekelas B777"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runway 13/31: 3,300 m (10,826 ft), Asphalt"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "The runway has been extended from 2,750 meters to 3,300 meters, enabling it to support wide-body aircraft such as the Boeing 777."
+    }
+   ]
+  },
+  {
+   "claim": "the terminal was enlarged for the MotoGP races at Mandalika, from 24,123 to 43,501 square metres, with room for about 7 million passengers a year",
+   "verdict": "corrected",
+   "inAfter": "Its terminal was enlarged for the MotoGP races at Mandalika, from 24,123 to 43,501 square metres, with room for about 7 million passengers a year.",
+   "note": "Was 'rebuilt for the 2022 MotoGP at Mandalika and is now a different proposition'. It was an enlargement: Investor Daily (January 2021) quotes the operator's chief executive on the terminal growing from 24,123 to 43,501 m2 with capacity for about 7 million a year, to be ready for the MotoGP then expected that year; Wikipedia dates the expansion to 2021 and 2022 for the 2022 MotoGP, so the year is left out. The regulator lists the terminal at 43,501 m2 today.",
+   "sources": [
+    {
+     "file": "investor-terminal",
+     "org": "Investor Daily (investor.id)",
+     "dated": "January 2021",
+     "quote": [
+      "Jumat (15/1/2021)",
+      "total luas terminal penumpang menjadi 43.501 meter persegi dengan kapasitas sekitar 7 juta penumpang per tahun, bertambah 19.378 meter persegi dari luas eksisting yang hanya 24.123 meter persegi"
+     ]
+    },
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": "Gedung Terminal Luas 43.501,00 m 2 Kategori Domestik"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": [
+      "Following a major expansion between 2021 and 2022 in preparation for the 2022 MotoGP event held in Lombok",
+      "the passenger terminal at Lombok International Airport was enlarged to 43,501 square meters, increasing its capacity to 7 million passengers per year from the previous 24,123 square meters"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "flights run to Jakarta, Denpasar and Surabaya",
+   "verdict": "confirmed",
+   "inAfter": "Flights run to Jakarta, Denpasar and Surabaya",
+   "note": "The operator's live departures board for 24 September 2026 lists flights to Jakarta, Denpasar and Surabaya among others (Yogyakarta, Balikpapan, Labuan Bajo, Bima, Sumbawa, Waingapu); the regulator's route list has Soekarno-Hatta, I Gusti Ngurah Rai and Juanda.",
+   "sources": [
+    {
+     "file": "op-departures",
+     "org": "Lombok International Airport (InJourney Airports, lombok-airport.co.id)",
+     "dated": "2026-09-24 (live departures board)",
+     "quote": [
+      "GA-431 JAKARTA 2026-09-24 11:15:00",
+      "IW-1855 DENPASAR 2026-09-24 09:55:00",
+      "IU-719 SURABAYA 2026-09-24 09:45:00"
+     ]
+    },
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Soekarno Hatta Garuda Indonesia",
+      "I Gusti Ngurah Rai Wings Air",
+      "Juanda Lion Air"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "The airport is connected to several major cities in Indonesia, such as Jakarta, Denpasar, and Surabaya"
+    }
+   ]
+  },
+  {
+   "claim": "international services to Malaysia and Singapore",
+   "verdict": "confirmed",
+   "inAfter": "with international services to Malaysia and Singapore",
+   "note": "The regulator's live list has four airlines to Kuala Lumpur (AirAsia, Indonesia AirAsia, Super Air Jet and Batik Air Malaysia) and Scoot to Singapore Changi. Wikipedia reports a TransNusa route to Darwin announced for late February 2026; it is not in the regulator's list, TransNusa's own route list has no Darwin page, and the local report of the plan (ekbisntb.com) answered 429, so it is not added.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Daftar Rute Internasional",
+      "Kuala Lumpur International Airport AirAsia Berhad",
+      "Kuala Lumpur International Airport Batik Air Malaysia",
+      "Changi International Airport Scoot"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "also offers international flights to Malaysia and Singapore"
+    }
+   ]
+  },
+  {
+   "claim": "also known as Zainuddin Abdul Madjid International Airport",
+   "verdict": "confirmed",
+   "inAfter": "It is also known as Zainuddin Abdul Madjid International Airport",
+   "note": "The regulator lists it under Zainuddin Abdul Madjid; the operator uses both names, Bandara Lombok and Bandara Internasional Zainuddin Abdul Madjid, in its own releases. Wikipedia dates the renaming to 2018.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": "Bandar Udara: Zainuddin Abdul Madjid - Hubud Kemenhub"
+    },
+    {
+     "file": "op-berita-p1",
+     "org": "Lombok International Airport (InJourney Airports, lombok-airport.co.id)",
+     "dated": "2025-05-16 and 2025-07-03 (release summaries on the news index)",
+     "quote": [
+      "Praya, 16 Mei 2025 - PT Angkasa Pura Indonesia Kantor Cabang Bandara Internasional Zainuddin Abdu",
+      "Bandara Lombok Buka Rute Baru Lombok Ke Labuan Bajo"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-13",
+     "quote": "also known as Zainuddin Abdul Madjid International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "about 6 km from Praya",
+   "verdict": "cut",
+   "wasBefore": "about 6 km from Praya",
+   "why": "Wikipedia alone (the coordinates check measures only from Mataram). Softened to 'near Praya' (see above)."
+  },
+  {
+   "claim": "Selaparang at Ampenan on the west coast",
+   "verdict": "cut",
+   "wasBefore": "replacing Selaparang Airport at Ampenan on the west coast",
+   "why": "'Ampenan on the west coast' rests on Wikipedia alone; Bisnis places the old airport in Mataram city. Reworded (see above)."
+  },
+  {
+   "claim": "runway 2,750 metres, wide bodies up to an A330 or a 767",
+   "verdict": "cut",
+   "wasBefore": "The runway is 2,750 metres and takes wide bodies up to an A330 or a 767.",
+   "why": "Out of date: that was the airport as opened in 2011 (Antara), before the runway was lengthened to 3,300 m. Corrected (see above).",
+   "sources": [
+    {
+     "file": "antara-en-2011",
+     "org": "Antara (national news agency, antaranews.com)",
+     "dated": "2011-10-20",
+     "quote": "the new Lombok airport has the runway of 2,750 meters and is capable to accommodate wide-body high capacity Airbus 330, Boeing 767 airliners"
+    }
+   ]
+  },
+  {
+   "claim": "rebuilt for the 2022 MotoGP and now a different proposition",
+   "verdict": "cut",
+   "wasBefore": "The terminal was rebuilt for the 2022 MotoGP at Mandalika and is now a different proposition: 43,501 square metres against 24,123 before",
+   "why": "It was an enlargement, planned for a MotoGP first expected in 2021 (Investor Daily), which Wikipedia calls the 2022 MotoGP, so neither 'rebuilt' nor the year is kept. Reworded with the areas (see above)."
+  },
+  {
+   "claim": "capacity lifted from 3.25 million passengers a year to 7 million",
+   "verdict": "cut",
+   "wasBefore": "with capacity lifted from 3.25 million passengers a year to 7 million",
+   "why": "The old capacity is disputed: Wikipedia says 3.25 million, the operator's chief executive (Investor Daily, 2021) 3.5 million. The 7 million both give is kept (see above).",
+   "sources": [
+    {
+     "file": "investor-terminal",
+     "org": "Investor Daily (investor.id)",
+     "dated": "January 2021",
+     "quote": "dengan kapasitas yang hanya dapat menampung 3,5 juta penumpang per tahun"
+    }
+   ]
+  },
+  {
+   "claim": "46 check-in counters, seven gates, five with jet bridges",
+   "verdict": "cut",
+   "wasBefore": "There are 46 check in counters and seven boarding gates, five of them with jet bridges.",
+   "why": "Wikipedia alone. Its source for the 2022 expansion (Tribun Lombok) answered with a robot check and was not tried again; Investor Daily and the regulator give no counter or gate counts."
+  },
+  {
+   "claim": "FCDO: high reported rates of rape and sexual assault in Bali and Lombok; drink spiking in Lombok and the Gili Islands",
+   "verdict": "cut",
+   "why": "Held back: the FCDO's current Indonesia advice (read 23 September 2026) says reported cases of rape and sexual assault are high in Bali and Lombok and that there have been reports of drink spiking linked to sexual assault in Bali, Lombok and the Gili Islands. It replaces nothing in the old text, so it stays out; for Andy to decide whether Lombok's Overview should carry it, as an attributed FCDO sentence.",
+   "sources": [
+    {
+     "file": "fcdo-safety",
+     "org": "FCDO (gov.uk foreign travel advice, Indonesia: safety and security)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Reported cases of rape and sexual assault are high in Bali and Lombok.",
+      "There have been reports of drink spiking linked to sexual assault in Bali, Lombok and the Gili Islands."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so transfer times depend a good deal on which end of the island a client is staying",
+   "why": "The old text's advice, kept; it follows from the airport's position near Praya, about 27 km from Mataram (sourced)."
+  },
+  {
+   "text": "so both names turn up in supplier systems",
+   "why": "Follows from the two names in use (the regulator's Zainuddin Abdul Madjid, the operator's Lombok), both sourced."
+  }
+ ],
+ "tracerOk": {}
+}

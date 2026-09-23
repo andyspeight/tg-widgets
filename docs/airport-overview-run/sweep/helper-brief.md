@@ -36,8 +36,12 @@ finished, passing example). Follow both exactly.
      UK FCDO page at https://www.gov.uk/foreign-travel-advice/<country-slug>.
    - `node links.mjs <url> [regex]` lists the links on a page through a real
      browser: use it on an operator's news or press-release index to find
-     the release you need. WebFetch may also be used to read a page and FIND
-     a link on it. Neither is evidence.
+     the release you need. It is not evidence. Do not use WebFetch or
+     WebSearch at all, and do not load either through ToolSearch (tightened
+     23 Sep night: an older line here let WebFetch find links, the helper
+     prompts banned it, and one helper used it on a site that had already
+     refused the link lister). Once links.mjs is refused on a site, do not
+     try plainlinks.mjs or grab.mjs there either.
    Save each page with
    `node grab.mjs <IATA> <short-label> "<url>" "<regex of words to show>"`.
    If that gets a plain 403, an empty page or a timeout, try

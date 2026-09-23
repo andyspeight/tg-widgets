@@ -1,0 +1,477 @@
+{
+ "iata": "SUB",
+ "id": "recS87Txmv5gBhIgl",
+ "name": "Juanda International Airport",
+ "country": "Indonesia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Juanda_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Indonesia's third busiest airport after Jakarta and Bali, about 12 km from central Surabaya in Sedati District. It is the hub for Batik Air and Citilink, a focus city for Garuda Indonesia and an operating base for Lion Air and Super Air Jet.\n\nOne unusual thing about it: the land belongs entirely to the Indonesian Navy, and the passenger terminal is a civil enclave inside a naval air station. The airport shares its facilities with the Navy's Naval Aviation Center and with an air force base, so military movements are routine.\n\nTerminal 1 opened in November 2006 and covers 51,500 square metres across three floors with eleven jet bridges. It was funded partly by a Japanese loan, and its roof design takes its shape from the traditional high hat roofs of Sumba.\n\nIn 2019 the airport was handling around 500 aircraft a day.\n\nIt is named after Djuanda Kartawidjaja, the last Prime Minister of Indonesia, who proposed building it.",
+ "after": "Surabaya's airport, about 20 km south of the city in Sedati District, Sidoarjo Regency. Batik Air, Citilink, Garuda Indonesia, Lion Air and Super Air Jet all fly from here.\n\nOne unusual thing about it: the land belongs to the Indonesian Navy, and the airport is also a naval air base, so military movements are routine.\n\nTerminal 1 opened in November 2006, paid for partly by a Japanese loan. International flights use Terminal 2, a separate terminal that opened in 2014, so check which one a client needs.\n\nIt is named after Djuanda Kartawidjaja, whom President Sukarno sent to rescue its construction from a financial crisis.",
+ "claims": [
+  {
+   "claim": "Surabaya's airport",
+   "verdict": "confirmed",
+   "inAfter": "Surabaya's airport",
+   "note": "The old opening ('Indonesia's third busiest airport') is cut below; what stays is which city it serves. InJourney Airports, the operator, calls it Juanda Surabaya in its September 2026 release on the Anak Krakatau closures.",
+   "sources": [
+    {
+     "file": "ij-news-c1d2",
+     "org": "InJourney Airports (PT Angkasa Pura Indonesia, the operator, injourneyairports.id)",
+     "dated": "September 2026 (the release gives the Jakarta closures 'hingga 7 September 2026')",
+     "quote": [
+      "Juanda Surabaya sebagai bandara alternatif",
+      "hingga 7 September 2026 pukul 23.59 WIB"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "is a joint-use international airport serving Surabaya"
+    },
+    {
+     "file": "airporttech",
+     "org": "Airport Technology (GlobalData, airport-technology.com)",
+     "dated": "2014-08-04",
+     "quote": "Juanda International Airport acts as the main international hub for Surabaya, the capital city of East Java."
+    }
+   ]
+  },
+  {
+   "claim": "about 20 km south of the city",
+   "verdict": "corrected",
+   "inAfter": "about 20 km south of the city",
+   "note": "Was 'about 12 km from central Surabaya' (Wikipedia), which fails the coordinates check: 15.1 km in a straight line, so 12 km gives a ratio of 0.79, under the 0.8 floor. Airport Technology gives 20 km south of Surabaya, a ratio of 1.32 for a road distance, and the bearing (165 degrees) is south. The sources disagree (12 or 20 km); the one that passes the coordinates is kept.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Surabaya",
+      "Straight-line distance from the city centre: 15.1 km (9.4 miles)",
+      "Bearing from the city centre: 165 degrees, which is south"
+     ]
+    },
+    {
+     "file": "airporttech",
+     "org": "Airport Technology (GlobalData, airport-technology.com)",
+     "dated": "2014-08-04",
+     "quote": [
+      "August 4 2014",
+      "Located 20km south of Surabaya"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in Sedati District, Sidoarjo Regency",
+   "verdict": "confirmed",
+   "inAfter": "in Sedati District, Sidoarjo Regency",
+   "note": "The Directorate General of Civil Aviation's airport page gives the district (kecamatan) as Sedati and the regency (kabupaten) as Sidoarjo, village Betro. So the airport is outside Surabaya's city limits.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page, with 2025 traffic)",
+     "quote": [
+      "Kabupaten / Kota KABUPATEN SIDOARJO",
+      "Kecamatan Sedati"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "It is located in Sedati District, Sidoarjo."
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "location = Sedati, Sidoarjo Regency, Indonesia"
+    }
+   ]
+  },
+  {
+   "claim": "Batik Air, Citilink, Garuda Indonesia, Lion Air and Super Air Jet all fly from here",
+   "verdict": "softened",
+   "inAfter": "Batik Air, Citilink, Garuda Indonesia, Lion Air and Super Air Jet all fly from here.",
+   "note": "Was 'the hub for Batik Air and Citilink, a focus city for Garuda Indonesia and an operating base for Lion Air and Super Air Jet'. The hub, focus-city and base labels rest on Wikipedia alone (no airline page naming Surabaya as a hub was reached), so the text now says only that all five fly from here. Antara (19 March 2026) quotes the airport's general manager naming all five on the Surabaya to Bali flights stopped for Nyepi; the regulator's route list for Juanda has all five. InJourney's September 2026 release also names Lion Air and Citilink adding flights at Juanda, and Antara (12 February 2026) Lion Air and Garuda Indonesia operating its umrah flights in 2025.",
+   "sources": [
+    {
+     "file": "antara-lebaran-2026",
+     "org": "Antara (national news agency, jatim.antaranews.com)",
+     "dated": "2026-03-19",
+     "quote": [
+      "Kamis, 19 Maret 2026 20:59 WIB",
+      "penerbangan dari Surabaya ke Bali ditutup selama 24 jam",
+      "maskapai Super Air Jet, Citilink, Lion Air, Batik Air, dan Garuda Indonesia"
+     ]
+    },
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Daftar Rute Domestik",
+      "Soekarno Hatta Garuda Indonesia",
+      "Soekarno Hatta Citilink",
+      "Soekarno Hatta Batik Air",
+      "Soekarno Hatta Lion Air",
+      "I Gusti Ngurah Rai Super Air Jet"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "Currently, Juanda International Airport is the hub of Batik Air and Citilink, focus city of Garuda Indonesia, and the operating base of Lion Air and Super Air Jet"
+    }
+   ]
+  },
+  {
+   "claim": "the land belongs to the Indonesian Navy",
+   "verdict": "softened",
+   "inAfter": "the land belongs to the Indonesian Navy",
+   "note": "Was 'the land belongs entirely to the Indonesian Navy'. Antara (2006) reports the operator saying the old airport area would go straight back to the Navy as the owner of the land, and Antara (2016) speaks of the Navy's land asset at Juanda. 'Entirely' rests on Wikipedia's 'fully owned' alone, so it goes.",
+   "sources": [
+    {
+     "file": "antara-2006-terminal",
+     "org": "Antara (national news agency, antaranews.com)",
+     "dated": "2006-09-12",
+     "quote": [
+      "Selasa, 12 September 2006",
+      "TNI Angkatan Laut, sebagai pemilik lahan"
+     ]
+    },
+    {
+     "file": "antara-jatim-pangkalan",
+     "org": "Antara (national news agency, jatim.antaranews.com)",
+     "dated": "2016-04-13",
+     "quote": [
+      "Rabu, 13 April 2016 13:00 WIB",
+      "lahan aset milik TNI AL di Juanda"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "the land remains fully owned by the Indonesian Navy"
+    }
+   ]
+  },
+  {
+   "claim": "the airport is also a naval air base",
+   "verdict": "softened",
+   "inAfter": "the airport is also a naval air base",
+   "note": "Was 'the passenger terminal is a civil enclave inside a naval air station'. Airport Technology says it was built as a naval base; Antara (2016) quotes the East Java police calling the area a military base under military procedure, with the Navy there; the operator's June 2026 release lists Lanudal Juanda (the naval air base) among the agencies it works with. 'Civil enclave' is Wikipedia's term alone.",
+   "sources": [
+    {
+     "file": "antara-jatim-pangkalan",
+     "org": "Antara (national news agency, jatim.antaranews.com)",
+     "dated": "2016-04-13",
+     "quote": [
+      "kawasan itu merupakan pangkalan militer",
+      "memahami Bandara Juanda sebagai pangkalan militer, namun pelayanan publik juga tetap berjalan"
+     ]
+    },
+    {
+     "file": "airporttech",
+     "org": "Airport Technology (GlobalData, airport-technology.com)",
+     "dated": "2014-08-04",
+     "quote": "Originally built as a naval base in February 1964, Juanda International Airport was also used to serve civilian aircraft."
+    },
+    {
+     "file": "op-haji-2026",
+     "org": "Juanda International Airport (InJourney Airports, juanda-airport.com)",
+     "dated": "2026-06-01",
+     "quote": [
+      "Sidoarjo, 1 Juni 2026",
+      "Koordinasi dan kerjasama antar instansi terkait seperti Lanudal Juanda"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "The airport shares its facilities with Naval Air Station Juanda"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 1 opened in November 2006",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 1 opened in November 2006",
+   "note": "detik (8 November 2006): the new Juanda opened officially on 7 November 2006; Wikipedia gives the same day. Airport Technology says November 2006.",
+   "sources": [
+    {
+     "file": "detik-2006-terminal",
+     "org": "detikcom (news.detik.com)",
+     "dated": "2006-11-08",
+     "quote": [
+      "Rabu, 08 Nov 2006 19:11 WIB",
+      "Bandar Udara (bandara) Juanda Surabaya yang baru resmi dioperasikan 7 November 2006."
+     ]
+    },
+    {
+     "file": "airporttech",
+     "org": "Airport Technology (GlobalData, airport-technology.com)",
+     "dated": "2014-08-04",
+     "quote": "A new terminal building with a capacity to handle eight million passengers per year was opened at the airport in November 2006"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "Terminal 1 was officially inaugurated on 7 November 2006"
+    }
+   ]
+  },
+  {
+   "claim": "paid for partly by a Japanese loan",
+   "verdict": "confirmed",
+   "inAfter": "paid for partly by a Japanese loan",
+   "note": "Antara (2006): a 23.2 billion yen loan from the Japan Bank for International Cooperation plus Rp236.4 billion from the state budget.",
+   "sources": [
+    {
+     "file": "antara-2006-terminal",
+     "org": "Antara (national news agency, antaranews.com)",
+     "dated": "2006-09-12",
+     "quote": "didanai pinjaman dari Jepang melalui Japan Bank for International Cooperation (JBIC) sebesar 23,2 miliar Yen dan Rp236,4 miliar dari APBN sebagai dana pendamping"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "loan provided by the Japan Bank for International Cooperation (JBIC)"
+    }
+   ]
+  },
+  {
+   "claim": "international flights use Terminal 2",
+   "verdict": "corrected",
+   "inAfter": "International flights use Terminal 2",
+   "note": "Replaces the out-of-date description of Terminal 1's size (cut below): the old text described Terminal 1 as if it were the only terminal. The regulator's live airport page lists two terminal buildings, one categorised domestic (103,487 m2) and one international (49,738 m2); the operator's own terminal maps title Terminal 1 'Terminal Domestik' and Terminal 2 'Terminal International'; Wikipedia says Terminal 2 handles all international flights.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Luas 103.487,00 m 2 Kategori Domestik",
+      "Luas 49.738,00 m 2 Kategori Internasional"
+     ]
+    },
+    {
+     "file": "op-terminal2",
+     "org": "Juanda International Airport (InJourney Airports, juanda-airport.com)",
+     "dated": "read 2026-09-23 (live terminal map page)",
+     "quote": [
+      "Beranda Terminal International",
+      "Peta Terminal Bandara Menu Terminal 2"
+     ]
+    },
+    {
+     "file": "op-terminal1",
+     "org": "Juanda International Airport (InJourney Airports, juanda-airport.com)",
+     "dated": "read 2026-09-23 (live terminal map page)",
+     "quote": "Terminal Domestik"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "Terminal 2 currently handles all international flights."
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2 is a separate terminal that opened in 2014",
+   "verdict": "confirmed",
+   "inAfter": "a separate terminal that opened in 2014",
+   "note": "Liputan6 (2019): Terminal 2 opened on 14 February 2014 for international airlines; Airport Technology: operational in February 2014, built to replace the old terminal. Wikipedia places it south of Terminal 1 across the runway (not repeated: one source).",
+   "sources": [
+    {
+     "file": "liputan6-sejarah",
+     "org": "Liputan6 (liputan6.com)",
+     "dated": "2019-08-09",
+     "quote": [
+      "Diterbitkan 09 Agustus 2019",
+      "pada 14 Februari 2014, bandara ini mendapat sarana baru yaitu dibukanya Terminal 2 (T2) untuk jalur maskapai internasional"
+     ]
+    },
+    {
+     "file": "airporttech",
+     "org": "Airport Technology (GlobalData, airport-technology.com)",
+     "dated": "2014-08-04",
+     "quote": "Terminal 2 (T2), built to replace the old Juanda terminal, became operational in February 2014"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": [
+      "Terminal 2 officially opened on 14 February 2014.",
+      "Located to the south of Terminal 1 and across the runway"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after Djuanda Kartawidjaja, whom President Sukarno sent to rescue its construction from a financial crisis",
+   "verdict": "corrected",
+   "inAfter": "It is named after Djuanda Kartawidjaja, whom President Sukarno sent to rescue its construction from a financial crisis.",
+   "note": "Was 'the last Prime Minister of Indonesia, who proposed building it'. Both detailed accounts say that when the French contractor threatened to pull out over money, Sukarno gave Djuanda a mandate to resolve the crisis and see the project finished, and the base was named after him for that; neither says he proposed it (Liputan6 dates the idea to the Navy's aviation bureau, founded in 1956). Only Wikipedia's lead says he proposed it. Liputan6 draws on the book Surabaya Punya Cerita.",
+   "sources": [
+    {
+     "file": "liputan6-sejarah",
+     "org": "Liputan6 (liputan6.com)",
+     "dated": "2019-08-09",
+     "quote": [
+      "Penanganan masalah ini pun terdengar hingga ke Presiden Sukarno.",
+      "Sukarno kemudian membuat mandat kepada Ir. Djoeanda Kartawidjaja",
+      "Djoeanda diberi mandat untuk mengatasi masalah tersebut hingga proyek ini selesai.",
+      "Untuk mengenang jasa beliau, pangkalan udara baru tersebut pun dinamakan"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": [
+      "Sukarno issued a mandate to Djoeanda Kartawidjaja",
+      "Djoeanda was tasked with resolving the financial crisis and ensuring the successful completion of the project.",
+      "in recognition of his contribution, the airbase was named",
+      "The airport takes its name after Djuanda Kartawidjaja"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Indonesia's third busiest airport after Jakarta and Bali",
+   "verdict": "cut",
+   "wasBefore": "Indonesia's third busiest airport after Jakarta and Bali",
+   "why": "No national ranking dated within 12 months could be read. Airport Technology's 'third busiest' is for 2011. Statistics Indonesia (bps.go.id) refused both a plain request and the browser (403); the regulator's yearly air transport statistics are released only through a request form, and its 2019 book is seven years old; InJourney's annual report page offers no file. The regulator's own Juanda page gives 7,427,121 passengers for 2025, about half the 14,033,162 that Wikipedia takes from the same regulator for 2024, so the page's count is not a full-year total and was not used to rank. Wikipedia alone is not enough."
+  },
+  {
+   "claim": "about 12 km from central Surabaya",
+   "verdict": "cut",
+   "wasBefore": "about 12 km from central Surabaya",
+   "why": "Fails the coordinates check (15.1 km in a straight line, ratio 0.79). Corrected to about 20 km south (see above)."
+  },
+  {
+   "claim": "hub for Batik Air and Citilink, focus city for Garuda Indonesia, base for Lion Air and Super Air Jet",
+   "verdict": "cut",
+   "wasBefore": "It is the hub for Batik Air and Citilink, a focus city for Garuda Indonesia and an operating base for Lion Air and Super Air Jet.",
+   "why": "The labels rest on Wikipedia alone. Softened to 'all fly from here' (see above)."
+  },
+  {
+   "claim": "the land belongs entirely to the Navy",
+   "verdict": "cut",
+   "wasBefore": "the land belongs entirely to the Indonesian Navy",
+   "why": "'Entirely' rests on Wikipedia alone. Softened (see above)."
+  },
+  {
+   "claim": "the passenger terminal is a civil enclave inside a naval air station",
+   "verdict": "cut",
+   "wasBefore": "and the passenger terminal is a civil enclave inside a naval air station",
+   "why": "Softened to 'the airport is also a naval air base' (see above); 'civil enclave' is Wikipedia's term alone."
+  },
+  {
+   "claim": "shares its facilities with the Navy's Naval Aviation Center and with an air force base",
+   "verdict": "cut",
+   "wasBefore": "The airport shares its facilities with the Navy's Naval Aviation Center and with an air force base",
+   "why": "Wikipedia alone. Its source for the Naval Aviation Center (indonesiadefense.com) answered with a Cloudflare check and was not tried again; the Navy's site (tnial.mil.id) answered 503; the Air Force's home page (tni-au.mil.id) has no link to a Muljono base. The naval air base itself is kept (see above)."
+  },
+  {
+   "claim": "Terminal 1 covers 51,500 square metres across three floors with eleven jet bridges",
+   "verdict": "cut",
+   "wasBefore": "and covers 51,500 square metres across three floors with eleven jet bridges",
+   "why": "The 51,500 m2 and 11 jet bridges were the building as opened (Antara, 2006), and it has since been enlarged: Wikipedia has an expansion completed in October 2021 to 91,700 m2, while the regulator's page lists a domestic terminal of 103,487 m2, so the current size is disputed. Three floors rests on Wikipedia alone. Replaced by the terminal split (see above).",
+   "sources": [
+    {
+     "file": "antara-2006-terminal",
+     "org": "Antara (national news agency, antaranews.com)",
+     "dated": "2006-09-12",
+     "quote": "terminal penumpang seluas 51.500 meter persegi dengan 11 garbarata"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "The terminal's total area was expanded to 91,700 square meters"
+    },
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23",
+     "quote": "Luas 103.487,00 m 2 Kategori Domestik"
+    }
+   ]
+  },
+  {
+   "claim": "roof design from the traditional high hat roofs of Sumba",
+   "verdict": "cut",
+   "wasBefore": "and its roof design takes its shape from the traditional high hat roofs of Sumba",
+   "why": "Wikipedia alone. detik's opening report (8 November 2006) instead quotes the operator saying the design followed Singapore's Changi; Antara and Airport Technology do not mention the roof.",
+   "sources": [
+    {
+     "file": "detik-2006-terminal",
+     "org": "detikcom (news.detik.com)",
+     "dated": "2006-11-08",
+     "quote": "desain bandara baru meniru Bandara Changi, Singapura"
+    }
+   ]
+  },
+  {
+   "claim": "in 2019 around 500 aircraft a day",
+   "verdict": "cut",
+   "wasBefore": "In 2019 the airport was handling around 500 aircraft a day.",
+   "why": "Seven years old, and a count of flights is replaced only by the airport's own current count. The nearest is the general manager's average of 301 movements a day over the Lebaran week of March 2026 (Antara), a holiday week and so not like for like.",
+   "sources": [
+    {
+     "file": "antara-lebaran-2026",
+     "org": "Antara (national news agency, jatim.antaranews.com)",
+     "dated": "2026-03-19",
+     "quote": "Rata-rata jumlah penumpang sekitar 44 ribu penumpang per hari dengan rata-rata penerbangan 301 pergerakan"
+    }
+   ]
+  },
+  {
+   "claim": "the last Prime Minister of Indonesia",
+   "verdict": "cut",
+   "wasBefore": "the last Prime Minister of Indonesia",
+   "why": "Wikipedia's lead alone. Liputan6 gives his post at the time as first minister (menteri pertama) of the Guided Democracy era, and Wikipedia's own history section says he was serving as Prime Minister, so the title is left out.",
+   "sources": [
+    {
+     "file": "liputan6-sejarah",
+     "org": "Liputan6 (liputan6.com)",
+     "dated": "2019-08-09",
+     "quote": "Saat itu ia sedang menjabat sebagai menteri pertama pada saat era Demokrasi Terpimpin."
+    }
+   ]
+  },
+  {
+   "claim": "who proposed building it",
+   "verdict": "cut",
+   "wasBefore": "who proposed building it",
+   "why": "Contradicted by both detailed accounts, which say he was sent to rescue the project from a financial crisis. Corrected (see above)."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "One unusual thing about it:",
+   "why": "Framing carried over from the old text; the Navy land and the naval air base that follow are sourced."
+  },
+  {
+   "text": "so military movements are routine",
+   "why": "The old text's inference, kept; it follows from the confirmed naval air base."
+  },
+  {
+   "text": "so check which one a client needs",
+   "why": "Advice following from the confirmed terminal split."
+  }
+ ],
+ "tracerOk": {}
+}

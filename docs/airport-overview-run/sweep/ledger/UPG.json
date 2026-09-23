@@ -1,0 +1,404 @@
+{
+ "iata": "UPG",
+ "id": "recQLbHj8c1nVJIrS",
+ "name": "Sultan Hasanuddin International Airport",
+ "country": "Indonesia",
+ "wikipedia": "https://en.wikipedia.org/wiki/Sultan_Hasanuddin_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The main gateway to eastern Indonesia, and the largest airport in that half of the country. It sits on the boundary between Makassar and Maros, about 20 km and fifteen minutes from the city centre by tollway, or 23 km and twenty minutes on the ordinary road.\n\nIts value is as a connecting point. Flights run west to Jakarta, Surabaya, Denpasar and Balikpapan and east to Ambon, Ternate, Sorong and Jayapura, with international services to Singapore and Malaysia. It is also one of the main departure points for Hajj pilgrims from eastern Indonesia, with seasonal flights to Jeddah and Medina, so those weeks are busy.\n\nThe current terminal opened in August 2008 about 2 km south of the old one, built alongside an 11.47 km extension of the Ujung Pandang Tollway that improved access to both the city and the Port of Makassar.\n\nIt is also a major air force base, home to four Indonesian Air Force squadrons, so military aircraft are a normal sight.\n\nThe airport is named after Sultan Hasanuddin, the Sultan of Gowa who resisted the Dutch East India Company in the 1660s.",
+ "after": "Makassar's airport and a major connecting point between western and eastern Indonesia. It sits in Maros Regency on the boundary with Makassar, about 20 km from the city centre.\n\nFlights run west to Jakarta, Surabaya, Denpasar and Balikpapan and east to Ambon, Ternate, Sorong and Jayapura, with international flights to Singapore, Kuala Lumpur and Jeddah. It is also the Hajj departure point for pilgrims from much of Sulawesi and Maluku, so the pilgrimage weeks are busy.\n\nIts current terminal, about 2 km from the old one, opened in August 2008 and was greatly enlarged in June 2024.\n\nMilitary aircraft are a normal sight: the Indonesian Air Force also flies from here, Sukhoi fighters included.\n\nThe airport is named after Sultan Hasanuddin.",
+ "claims": [
+  {
+   "claim": "Makassar's airport and a major connecting point between western and eastern Indonesia",
+   "verdict": "softened",
+   "inAfter": "Makassar's airport and a major connecting point between western and eastern Indonesia.",
+   "note": "Was 'The main gateway to eastern Indonesia' ('gateway to' is also a banned phrase). Wikipedia calls it a key hub connecting western and eastern Indonesia; Antara's report of the 2008 opening calls it the connecting gate to the other cities of eastern Indonesia. For the network today, the regulator's live route list for the airport has flights west to Soekarno-Hatta (Jakarta), Juanda (Surabaya) and I Gusti Ngurah Rai (Bali) and east to Pattimura (Ambon), Sentani (Jayapura), Domine Eduard Osok (Sorong), Mozes Kilangin (Timika) and many more.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": [
+      "is an international airport serving Makassar, South Sulawesi, Indonesia",
+      "The airport serves as a key hub connecting western and eastern Indonesia"
+     ]
+    },
+    {
+     "file": "antara-2008-resmi",
+     "org": "Antara (national news agency, antaranews.com)",
+     "dated": "2008-09-26",
+     "quote": [
+      "Jumat, 26 September 2008 11:28 WIB",
+      "merupakan gerbang penghubung menuju kota-kota lain di Indonesia Timur"
+     ]
+    },
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page, with 2025 traffic)",
+     "quote": [
+      "Daftar Rute Domestik",
+      "Soekarno Hatta Batik Air",
+      "Pattimura Lion Air",
+      "Sentani Batik Air",
+      "Mozes Kilangin Batik Air"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "in Maros Regency on the boundary with Makassar",
+   "verdict": "corrected",
+   "inAfter": "It sits in Maros Regency on the boundary with Makassar",
+   "note": "Was 'on the boundary between Makassar and Maros'. The regulator places the airport in Mandai district of Maros Regency, and Antara's August 2026 reports put it in Maros Regency; Maros News says most of the airport is in Mandai, Maros, with only a small part inside Makassar city. So it is in Maros, on the Makassar boundary.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Kabupaten / Kota KABUPATEN MAROS",
+      "Kecamatan Mandai"
+     ]
+    },
+    {
+     "file": "marosnews-nama",
+     "org": "Maros News (marosnews.com, local news)",
+     "dated": "2023-12-04",
+     "quote": "sebagian besar wilayah Bandara Internasional Sultan Hasanuddin berada di Kecamatan Mandai Kabupaten Maros, hanya sebagian kecil masuk wilayah Kota Makassar"
+    },
+    {
+     "file": "antara-sukhoi",
+     "org": "Antara (national news agency, makassar.antaranews.com)",
+     "dated": "2026-08-24",
+     "quote": "Bandara Internasional Sultan Hasanuddin, Kabupaten Maros, Sulawesi Selatan"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "The airport is located on the border between Makassar and Maros"
+    }
+   ]
+  },
+  {
+   "claim": "about 20 km from the city centre",
+   "verdict": "confirmed",
+   "inAfter": "about 20 km from the city centre",
+   "note": "Coordinates: 15.7 km in a straight line from the centre of Makassar, so 20 km gives a ratio of 1.27, inside the 0.8 to 1.6 allowance for a road distance. Wikipedia gives 20 km by the toll road and 23 km by the ordinary road; Antara (2008) gives 22 km from the city. The old text's two routes and their times are simplified to one figure (the times are cut below).",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Makassar",
+      "Straight-line distance from the city centre: 15.7 km (9.8 miles)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "approximately 20 km (12 mi) or 15 minutes from Makassar city center via the freeway/tollway"
+    },
+    {
+     "file": "antara-2008-resmi",
+     "org": "Antara (national news agency, antaranews.com)",
+     "dated": "2008-09-26",
+     "quote": "Bandara internasional Sultan Hasanuddin berjarak 22 kilometer dari Kota Makassar"
+    }
+   ]
+  },
+  {
+   "claim": "flights west to Jakarta, Surabaya, Denpasar and Balikpapan and east to Ambon, Ternate, Sorong and Jayapura",
+   "verdict": "confirmed",
+   "inAfter": "Flights run west to Jakarta, Surabaya, Denpasar and Balikpapan and east to Ambon, Ternate, Sorong and Jayapura",
+   "note": "The regulator's live route list names the airports: Soekarno-Hatta (Jakarta), Juanda (Surabaya), I Gusti Ngurah Rai (Denpasar), Sultan Aji Muhammad Sulaiman (Balikpapan), Pattimura (Ambon), Sultan Babullah (Ternate), Domine Eduard Osok (Sorong) and Sentani (Jayapura). Wikipedia names the same eight cities. The operator's own site (hasanuddin-airport.co.id) answered 503 and was not tried again.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Soekarno Hatta Lion Air",
+      "Juanda Citilink",
+      "I Gusti Ngurah Rai Garuda Indonesia",
+      "Sultan Aji Muhammad Sulaiman Citilink",
+      "Pattimura Lion Air",
+      "Sultan Babullah Lion Air",
+      "Domine Eduard Osok Lion Air",
+      "Sentani Lion Air"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "offering domestic flights to major cities in western Indonesia such as Jakarta, Surabaya, Denpasar, and Balikpapan, as well as destinations in eastern Indonesia, including Ambon, Ternate, Sorong, and Jayapura"
+    }
+   ]
+  },
+  {
+   "claim": "international flights to Singapore, Kuala Lumpur and Jeddah",
+   "verdict": "corrected",
+   "inAfter": "with international flights to Singapore, Kuala Lumpur and Jeddah",
+   "note": "Was 'international services to Singapore and Malaysia', with Jeddah and Medina given only as seasonal Hajj flights. Jeddah is now a regular route: Antara (13 November 2025) reports flyadeal's first Makassar to Jeddah flight, a regular weekly service, making six airlines on international routes (AirAsia, Malaysia Airlines, Garuda Indonesia, Lion Air, Scoot and flyadeal), and the regulator's live list has Lion Air to King Abdulaziz (Jeddah) as well as Scoot to Changi (Singapore) and AirAsia and Malaysia Airlines to Kuala Lumpur. Medina is not in the regulator's list, so it goes.",
+   "sources": [
+    {
+     "file": "dgca-bandara",
+     "org": "Directorate General of Civil Aviation, Ministry of Transportation (hubud.kemenhub.go.id)",
+     "dated": "read 2026-09-23 (live airport page)",
+     "quote": [
+      "Daftar Rute Internasional",
+      "Changi International Airport Scoot",
+      "King Abdulaziz International Airport Lion Air",
+      "Kuala Lumpur International Airport AirAsia Berhad",
+      "Kuala Lumpur International Airport Malaysia Airlines"
+     ]
+    },
+    {
+     "file": "antara-flyadeal",
+     "org": "Antara (national news agency, makassar.antaranews.com)",
+     "dated": "2025-11-13",
+     "quote": [
+      "Kamis, 13 November 2025 21:15 WIB",
+      "melepas penerbangan perdana maskapai Flyadeal rute Makassar-Jeddah",
+      "Ini penerbangan reguler dari Makassar ke Jeddah",
+      "total jumlah maskapai yang melayani penerbangan internasional menjadi enam maskapai yaitu Air Asia, Malaysia Airline, Garuda Indonesia, Lion Air, Scoot dan Flyadeal Airline"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "It also provides international connections to destinations such as Singapore and Malaysia."
+    }
+   ]
+  },
+  {
+   "claim": "the Hajj departure point for pilgrims from much of Sulawesi and Maluku",
+   "verdict": "corrected",
+   "inAfter": "It is also the Hajj departure point for pilgrims from much of Sulawesi and Maluku",
+   "note": "Was 'one of the main departure points for Hajj pilgrims from eastern Indonesia, with seasonal flights to Jeddah and Medina'. Antara (2 June 2026): the Makassar embarkation planned to send 16,728 pilgrims and staff in 2026, with pilgrims from South, West and Southeast Sulawesi, North Maluku and Maluku, and they came home through this airport. The flight destinations are dropped because Jeddah is now year-round (above) and the 2026 report does not name them.",
+   "sources": [
+    {
+     "file": "antara-haji-2026",
+     "org": "Antara (national news agency, makassar.antaranews.com)",
+     "dated": "2026-06-02",
+     "quote": [
+      "Selasa, 2 Juni 2026 12:15 WIB",
+      "telah tiba di tanah air melalui Bandara Internasional Sultan Hasanuddin Makassar",
+      "Embarkasi Makassar awalnya merencanakan memberangkatkan 16.728 calon haji dan petugas",
+      "terdiri atas 11 haji asal Sulawesi Selatan, satu (Sulawesi Barat), dua (Sulawesi Tenggara), satu (Maluku Utara), dan satu (Maluku)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "the airport is one of the primary embarkation points for Hajj pilgrims from eastern Indonesia, with seasonal flights to Jeddah and Medina"
+    }
+   ]
+  },
+  {
+   "claim": "the current terminal opened in August 2008, about 2 km from the old one",
+   "verdict": "confirmed",
+   "inAfter": "current terminal, about 2 km from the old one, opened in August 2008",
+   "note": "detik (4 August 2008): the operator moved all its work to the new airport that morning, about 2 km from the old one. Antara: fully in operation since 4 August 2008, inaugurated by the president on 26 September 2008. Wikipedia's 'south' of the old one rests on it alone, so the direction goes.",
+   "sources": [
+    {
+     "file": "detik-2008-pindah",
+     "org": "detikcom (news.detik.com)",
+     "dated": "2008-08-04",
+     "quote": [
+      "Senin, 04 Agu 2008 14:05 WIB",
+      "memulai semua aktifitasnya di bandara tersebut sejak pukul 06.00 Wita, Senin (4/8/2008)",
+      "Bandara ini berjarak sekitar 2 km dari Bandara Hasanuddin yang lama."
+     ]
+    },
+    {
+     "file": "antara-2008-resmi",
+     "org": "Antara (national news agency, antaranews.com)",
+     "dated": "2008-09-26",
+     "quote": "mulai beroperasi penuh sejak 4 Agustus 2008"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "The current terminal, located approximately 2 kilometers south of the old facility, began operations on 4 August 2008"
+    }
+   ]
+  },
+  {
+   "claim": "the terminal was greatly enlarged in June 2024",
+   "verdict": "corrected",
+   "inAfter": "and was greatly enlarged in June 2024",
+   "note": "The old text stopped at 2008. Wikipedia: the expansion, to triple the terminal from 50,000 to 150,000 m2, opened on 26 June 2024. detik (25 June 2024): the operator was moving departures from the old terminal into the new one from 26 June. Which parts of the building each flow uses now is not in any source from the last 12 months, so the text does not say.",
+   "sources": [
+    {
+     "file": "detik-terminal-2024",
+     "org": "detikcom (detik.com, detikSulsel)",
+     "dated": "2024-06-25",
+     "quote": [
+      "Selasa, 25 Jun 2024 10:39 WIB",
+      "Mulai 26 Juni mendatang, Manajemen AP1 Bandara Internasional Sultan Hasanuddin Makassar akan mulai memindahkan layanan keberangkatan dari terminal lama ke terminal baru"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": [
+      "to triple the terminal's size from 50,000 to 150,000 square meters",
+      "The expanded terminal was completed and officially opened to the public on 26 June 2024."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the Indonesian Air Force also flies from here, Sukhoi fighters included",
+   "verdict": "softened",
+   "inAfter": "the Indonesian Air Force also flies from here, Sukhoi fighters included",
+   "note": "Was 'a major air force base, home to four Indonesian Air Force squadrons'. Antara (24 August 2026): an Air Force Sukhoi Su-30MK2 overran runway 13 on a test flight after an overhaul, and commercial flights carried on using runway 03/21; Antara's 2008 report has the president landing at the Sultan Hasanuddin Air Force base (Pangkalan TNI AU). The four squadrons rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "antara-sukhoi",
+     "org": "Antara (national news agency, makassar.antaranews.com)",
+     "dated": "2026-08-24",
+     "quote": [
+      "Senin, 24 Agustus 2026 18:57 WIB",
+      "Pesawat tempur Sukhoi milik TNI Angkatan Udara yang mengalami insiden tergelincir di Bandara Internasional Sultan Hasanuddin, Kabupaten Maros, Sulawesi Selatan"
+     ]
+    },
+    {
+     "file": "antara-en-tniau",
+     "org": "Antara (national news agency, en.antaranews.com)",
+     "dated": "2026-08-24",
+     "quote": [
+      "August 24, 2026 23:17 GMT+700",
+      "the crew of a Sukhoi Su-30MK2 fighter jet is safe after the aircraft overran the western runway at Sultan Hasanuddin International Airport"
+     ]
+    },
+    {
+     "file": "antara-2008-resmi",
+     "org": "Antara (national news agency, antaranews.com)",
+     "dated": "2008-09-26",
+     "quote": "mendarat di Pangkalan TNI AU Sultan Hasanuddin"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": [
+      "also hosts the Sultan Hasanuddin Air Force Base, a Type-A facility operated by the Indonesian Air Force",
+      "the 11th Combat Squadron, equipped with Sukhoi Su-27 and Su-30 fighter jets"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after Sultan Hasanuddin",
+   "verdict": "confirmed",
+   "inAfter": "The airport is named after Sultan Hasanuddin.",
+   "note": "detik (2008) reports the proposal to put 'Sultan' before Hasanuddin in the new airport's name, Sultan Hasanuddin being the icon of Makassar; Maros News dates the name Hasanuddin to 1980; Wikipedia gives the renaming in 1980 in his honour.",
+   "sources": [
+    {
+     "file": "detik-2008-pindah",
+     "org": "detikcom (news.detik.com)",
+     "dated": "2008-08-04",
+     "quote": "Termasuk juga mengusulkan kata Sultan di depan nama Hasanuddin. Sultan Hasanuddin adalah ikon Makassar"
+    },
+    {
+     "file": "marosnews-nama",
+     "org": "Maros News (marosnews.com, local news)",
+     "dated": "2023-12-04",
+     "quote": "berubah nama lagi menjadi Air Port Hasanuddin tahun 1980"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "In 1980, the airport was renamed to its present name in honor of Sultan Hasanuddin"
+    }
+   ]
+  },
+  {
+   "claim": "the main gateway to eastern Indonesia",
+   "verdict": "cut",
+   "wasBefore": "The main gateway to eastern Indonesia",
+   "why": "'Gateway to' is a banned phrase, and 'main' rests on Wikipedia alone. Softened to 'a major connecting point between western and eastern Indonesia' (see above)."
+  },
+  {
+   "claim": "the largest airport in eastern Indonesia",
+   "verdict": "cut",
+   "wasBefore": "and the largest airport in that half of the country",
+   "why": "Wikipedia alone. No ranking of eastern Indonesia's airports could be read: Statistics Indonesia (bps.go.id) refused both a plain request and the browser, and the regulator's yearly statistics are released only on request. BPS South Sulawesi (via Antara, February 2026) shows only that it carried about 99 per cent of the province's domestic passengers in December 2025."
+  },
+  {
+   "claim": "on the boundary between Makassar and Maros",
+   "verdict": "cut",
+   "wasBefore": "It sits on the boundary between Makassar and Maros",
+   "why": "Made precise: in Maros Regency, on the Makassar boundary (see above)."
+  },
+  {
+   "claim": "fifteen minutes by tollway, 23 km and twenty minutes on the ordinary road",
+   "verdict": "cut",
+   "wasBefore": "about 20 km and fifteen minutes from the city centre by tollway, or 23 km and twenty minutes on the ordinary road",
+   "why": "The journey times rest on Wikipedia alone; the distance is kept as about 20 km (see above)."
+  },
+  {
+   "claim": "its value is as a connecting point",
+   "verdict": "cut",
+   "wasBefore": "Its value is as a connecting point.",
+   "why": "Folded into the opening sentence, now a checked claim (see above)."
+  },
+  {
+   "claim": "international services to Singapore and Malaysia",
+   "verdict": "cut",
+   "wasBefore": "with international services to Singapore and Malaysia",
+   "why": "Incomplete: Jeddah is now a regular route. Corrected (see above)."
+  },
+  {
+   "claim": "one of the main Hajj departure points for eastern Indonesia, with seasonal flights to Jeddah and Medina",
+   "verdict": "cut",
+   "wasBefore": "It is also one of the main departure points for Hajj pilgrims from eastern Indonesia, with seasonal flights to Jeddah and Medina, so those weeks are busy.",
+   "why": "'One of the main' rests on Wikipedia alone and Jeddah is no longer only seasonal. Corrected to the provinces the 2026 embarkation served (see above)."
+  },
+  {
+   "claim": "the current terminal is 2 km south of the old one",
+   "verdict": "cut",
+   "wasBefore": "The current terminal opened in August 2008 about 2 km south of the old one",
+   "why": "The direction rests on Wikipedia alone (detik gives only the distance). Reworded (see above)."
+  },
+  {
+   "claim": "built alongside an 11.47 km extension of the Ujung Pandang Tollway serving the city and the Port of Makassar",
+   "verdict": "cut",
+   "wasBefore": "built alongside an 11.47 km extension of the Ujung Pandang Tollway that improved access to both the city and the Port of Makassar.",
+   "why": "Wikipedia alone. Antara's and detik's 2008 reports of the opening do not mention the toll road, and Kompas, which Wikipedia cites for the joint opening of the airport and toll road, answers with a robot check (seen on kompas.com in the SUB work) so was not tried."
+  },
+  {
+   "claim": "a major air force base, home to four squadrons",
+   "verdict": "cut",
+   "wasBefore": "It is also a major air force base, home to four Indonesian Air Force squadrons, so military aircraft are a normal sight.",
+   "why": "The four squadrons and 'major' rest on Wikipedia alone. Softened to the Air Force flying from here, Sukhoi fighters included (see above)."
+  },
+  {
+   "claim": "the Sultan of Gowa who resisted the Dutch East India Company in the 1660s",
+   "verdict": "cut",
+   "wasBefore": "the Sultan of Gowa who resisted the Dutch East India Company in the 1660s",
+   "why": "Wikipedia alone. Britannica answered with a Cloudflare check and was not tried again; the Gowa regency's site listed no history page; the 2008 news reports call him the icon of Makassar and nothing more. The name itself is kept (see above)."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so the pilgrimage weeks are busy",
+   "why": "The old text's inference, kept; it follows from the 16,728 pilgrims of 2026 (sourced)."
+  },
+  {
+   "text": "Military aircraft are a normal sight:",
+   "why": "The old text's inference, kept; it follows from the Air Force flying from the airport (sourced)."
+  }
+ ],
+ "tracerOk": {}
+}
