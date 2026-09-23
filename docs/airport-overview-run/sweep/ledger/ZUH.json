@@ -1,0 +1,167 @@
+{
+ "iata": "ZUH",
+ "id": "recmrB6kED30RlIUy",
+ "name": "Zhuhai Jinwan Airport",
+ "country": "China",
+ "wikipedia": "https://en.wikipedia.org/wiki/Zhuhai_Jinwan_Airport",
+ "audited": "2026-09-23",
+ "before": "One of the five major airports in the Pearl River Delta, about 50 km south west of central Zhuhai and 25 km south west of Macau.\n\nThe important thing to know before booking: despite having facilities for international flights, the airport currently serves only Chinese domestic routes. An international client cannot arrive here directly.\n\nAccess improved sharply in February 2024, when the Zhuhai to Zhuhai Airport intercity railway began running to a station at the airport. Four airport express bus routes also serve the city centre and the hotels at Xiangzhou, Gongbei, Jida and Tangjiawan, with connections to the Guangzhou-Zhuhai intercity railway, the Jiuzhou ferry port for Hong Kong and the Gongbei border crossing. Intercity coaches reach Macau, Zhongshan and Jiangmen.\n\nThe airport hosts the China International Aviation and Aerospace Exhibition, the largest airshow in mainland China.\n\nThe terminal was expanded to 122,000 square metres in 2018, with a further new terminal and runway planned. The China Coast Guard also operates from the site.",
+ "after": "Zhuhai's airport, about 50 km south west of central Zhuhai and 25 km south west of Macau.\n\nThe important thing to know before booking: the airport currently serves only Chinese domestic routes, so an international client cannot arrive here directly.\n\nAirport express coaches run to Zhuhai, Macau, Zhongshan and Jiangmen.\n\nZhuhai hosts the China International Aviation and Aerospace Exhibition, held every two years since 1996.",
+ "claims": [
+  {
+   "claim": "Zhuhai's airport",
+   "verdict": "softened",
+   "inAfter": "Zhuhai's airport",
+   "note": "Was 'one of the five major airports in the Pearl River Delta', which only Wikipedia says.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is the primary airport serving the city of Zhuhai in China's Guangdong province."
+    },
+    {
+     "file": "op-home",
+     "org": "Zhuhai Airport (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": "ZHUHAI AIRPORT"
+    }
+   ]
+  },
+  {
+   "claim": "about 50 km south west of central Zhuhai and 25 km south west of Macau",
+   "verdict": "confirmed",
+   "inAfter": "about 50 km south west of central Zhuhai and 25 km south west of Macau.",
+   "note": "Straight lines 36.0 km (ratio 1.39) and 27.8 km (ratio 0.90), both south west.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "It is located some 50 kilometres (31 mi) southwest of the Zhuhai city center in Sanzao Town, Jinwan District, and 25 kilometres (16 mi) southwest of Macau."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from Zhuhai (GeoNames 1790437): 36.0 km (22.4 miles), bearing 213 degrees, which is south west",
+      "Straight-line distance from Macau (GeoNames 1821274): 27.8 km (17.3 miles), bearing 219 degrees, which is south west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "only Chinese domestic routes; no direct international arrival",
+   "verdict": "confirmed",
+   "inAfter": "the airport currently serves only Chinese domestic routes, so an international client cannot arrive here directly.",
+   "note": "The operator's live timetable (23 Sep 2026) is grouped by mainland region (North, East, North East, North West, South West China) and lists no foreign, Hong Kong, Macau or Taiwan city. 'Despite having facilities for international flights' dropped: Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport currently serves only Chinese domestic flights despite having facilities for international flights."
+    },
+    {
+     "file": "op-flights",
+     "org": "Zhuhai Airport (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "航班时刻表",
+      "华北 北京首都",
+      "华东 上海虹桥"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "airport express coaches to Zhuhai, Macau, Zhongshan and Jiangmen",
+   "verdict": "softened",
+   "inAfter": "Airport express coaches run to Zhuhai, Macau, Zhongshan and Jiangmen.",
+   "note": "The operator's page lists the four; the hotel stops and onward links (Xiangzhou, Gongbei, Jida, Tangjiawan, Jiuzhou ferry port) rest on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "op-express",
+     "org": "Zhuhai Airport (operator)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "机场快线",
+      "澳门 （点击了解线路及班次）",
+      "珠海市 （点击了解线路及班次）",
+      "中山市 （点击了解线路及班次）",
+      "江门市 （点击了解线路及班次）"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "There are four airport express bus routes connecting the airport and Zhuhai city centre",
+      "Other intercity lines connect hotels, city lounges or bus terminals of Macau, Zhongshan and Jiangmen with the airport."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Zhuhai hosts the China International Aviation and Aerospace Exhibition, every two years since 1996",
+   "verdict": "softened",
+   "inAfter": "Zhuhai hosts the China International Aviation and Aerospace Exhibition, held every two years since 1996.",
+   "note": "Was 'the airport hosts ... the largest airshow in mainland China'. The size ranking is Wikipedia's alone (Macau Daily says one of the world's five biggest airshows); the two newspapers confirm the show, Zhuhai and 1996, and the Southern Daily calls it biennial.",
+   "sources": [
+    {
+     "file": "nfnews",
+     "org": "Southern Daily (Nanfang Plus)",
+     "quote": [
+      "1996年的秋天，人们期待已久的首届中国国际航空航天博览会开幕。",
+      "两年一届的珠海航展"
+     ]
+    },
+    {
+     "file": "houkong",
+     "org": "Macao Daily News",
+     "dated": "2024-01-30",
+     "quote": "據悉，中國國際航空航天博覽會首屆展會於1996年在珠海舉辦。"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport hosts the largest airshow in mainland China, the China International Aviation & Aerospace Exhibition."
+    }
+   ]
+  },
+  {
+   "claim": "one of the five major airports in the Pearl River Delta",
+   "verdict": "cut",
+   "wasBefore": "One of the five major airports in the Pearl River Delta,",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "despite having facilities for international flights",
+   "verdict": "cut",
+   "wasBefore": "despite having facilities for international flights,",
+   "why": "Wikipedia alone; the domestic-only point is kept with the operator's timetable."
+  },
+  {
+   "claim": "Zhuhai to Zhuhai Airport intercity railway since February 2024",
+   "verdict": "cut",
+   "wasBefore": "Access improved sharply in February 2024, when the Zhuhai to Zhuhai Airport intercity railway began running to a station at the airport.",
+   "why": "Wikipedia alone. The operator's transport pages list coaches and city buses but not the railway, and the Zhuhai news report Wikipedia cites (hizh.cn) answered 503. Restore with a second source."
+  },
+  {
+   "claim": "four express routes to hotels at Xiangzhou, Gongbei, Jida and Tangjiawan; links to the Guangzhou-Zhuhai intercity railway, Jiuzhou ferry port and Gongbei border; intercity coaches to Macau, Zhongshan and Jiangmen",
+   "verdict": "cut",
+   "wasBefore": "Four airport express bus routes also serve the city centre and the hotels at Xiangzhou, Gongbei, Jida and Tangjiawan, with connections to the Guangzhou-Zhuhai intercity railway, the Jiuzhou ferry port for Hong Kong and the Gongbei border crossing. Intercity coaches reach Macau, Zhongshan and Jiangmen.",
+   "why": "Shortened to what the operator's page confirms; the stops and connections rest on Wikipedia alone."
+  },
+  {
+   "claim": "the largest airshow in mainland China, hosted by the airport",
+   "verdict": "cut",
+   "wasBefore": "The airport hosts the China International Aviation and Aerospace Exhibition, the largest airshow in mainland China.",
+   "why": "The ranking and 'at the airport' are Wikipedia's alone; softened to the show, the city and the dates two newspapers confirm."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The important thing to know before booking",
+   "why": "The old text's lead-in to the domestic-only warning, which is sourced."
+  }
+ ],
+ "tracerOk": {}
+}
