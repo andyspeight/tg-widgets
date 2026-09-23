@@ -1,0 +1,325 @@
+{
+ "iata": "MFM",
+ "id": "recoGrLjFEAP8WtBF",
+ "name": "Macau International Airport",
+ "country": "Macau",
+ "wikipedia": "https://en.wikipedia.org/wiki/Macau_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Macau's airport, at the eastern end of Taipa island and partly on the water beside it. It opened on 9 November 1995, while Macau was still under Portuguese administration.\n\nThe border arrangement is what makes it unusually useful. A \"two customs, one checkpoint\" service lets passengers take a shuttle bus straight from the airport to the New Macau Ferry Terminal or the Taipa Ferry Terminal without clearing Macau immigration at all, which matters for anyone routing on to Hong Kong or the mainland. The same service works at the Hengqin border.\n\nIt has long been a transfer point between mainland China and Taiwan, and a hub for mainland and Southeast Asian routes.\n\nCapacity is the pressure point. The terminal was designed for 6 million passengers a year and handled 7,165,803 in 2017. The airport's stated design capacity is 10 million a year, or up to 2,300 passengers an hour.\n\nThe Macau Light Rail Transit Taipa Line has a station at the airport, and cross-border coaches run to Guangzhou, Dongguan, Gongbei and Hengqin.",
+ "after": "Macau's airport, at the eastern end of Taipa island. It opened in November 1995.\n\nConnections are what make it useful. The airport's Express Link bus takes departing passengers from the Outer Harbour and Taipa ferry terminals straight into its restricted area. It also runs from the airport's check-in centre at the Macau port of the Hong Kong-Zhuhai-Macao Bridge, which mainly serves tour groups and passengers with bookings.\n\nThe terminal was first built for six million passengers a year. Extensions on its north and south sides, in use from 2018 and 2022, lifted capacity to 10 million a year, according to the aviation authority. In 2025 the airport counted about 7.5 million passengers.\n\nThe Macau Light Rail Transit has a station at the airport, and cross-border coaches run to Guangzhou, Dongguan, Gongbei and Hengqin.",
+ "claims": [
+  {
+   "claim": "at the eastern end of Taipa island",
+   "verdict": "confirmed",
+   "inAfter": "Macau's airport, at the eastern end of Taipa island.",
+   "note": "Coordinates: 3.7 km east of the GeoNames point for Taipa, at 101 degrees.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "City centre: Taipa (GeoNames 1821263) at 22.1558, 113.5569",
+      "Straight-line distance from the city centre: 3.7 km (2.3 miles)",
+      "Bearing from the city centre: 101 degrees, which is east"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-25",
+     "quote": "situated at the eastern end of Taipa island and neighbouring waters"
+    }
+   ]
+  },
+  {
+   "claim": "opened in November 1995",
+   "verdict": "corrected",
+   "inAfter": "It opened in November 1995.",
+   "note": "Was 'It opened on 9 November 1995'. The airport's own history page gives the month; the day rests on Wikipedia alone, so it is dropped.",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "Macau International Airport (CAM, the airport company, macau-airport.com)",
+     "dated": "read 2026-09-23 (the airport's history page)",
+     "quote": "Macau International Airport commenced operation in November1995."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-25",
+     "quote": "It opened for commercial operations on 9 November 1995"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "infobox, revision of 2026-08-25",
+     "quote": "opened = {{start date and age|1995|11|09|df=yes}}"
+    }
+   ]
+  },
+  {
+   "claim": "the airport's Express Link bus takes departing passengers from the Outer Harbour and Taipa ferry terminals into its restricted area",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "The airport's Express Link bus takes departing passengers from the Outer Harbour and Taipa ferry terminals straight into its restricted area.",
+   "note": "Replaces the 'two customs, one checkpoint' shuttle 'straight from the airport to the New Macau Ferry Terminal or the Taipa Ferry Terminal without clearing Macau immigration at all' (Wikipedia alone). The airport's own pages describe the service in the departing direction only: pick-up points at the two ferry terminals, taking passengers into the airport's restricted area. Its transfer page covers only air-to-air transfers. Attributed.",
+   "sources": [
+    {
+     "file": "op-express-link",
+     "org": "Macau International Airport (CAM, the airport company, macau-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "bus service has been established the pick-up points at the Macau Outer Harbour Ferry Terminal and Taipa Ferry Terminal, making it convenient to transport passengers from different ports to the restricted area of MIA.",
+      "Group tourists holding valid ticket for the flight departing from MIA on the same day"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "it also runs from the airport's check-in centre at the Macau port of the Hong Kong-Zhuhai-Macao Bridge, mainly for tour groups and booked passengers",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "It also runs from the airport's check-in centre at the Macau port of the Hong Kong-Zhuhai-Macao Bridge, which mainly serves tour groups and passengers with bookings.",
+   "note": "Replaces 'The same service works at the Hengqin border' (Wikipedia alone): the other place the airport's own page runs the service from. The centre opened in late September 2023. Attributed.",
+   "sources": [
+    {
+     "file": "op-express-link",
+     "org": "Macau International Airport (CAM, the airport company, macau-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "the Macau International Airport Check-In Centre located on the ground floor at the Macau Frontier Port of Hong Kong-Zhuhai-Macao Bridge (HZMB) officially opened in late September 2023",
+      "In the first phase, it primarily serves group tourists from the Mainland of China and Hong Kong, as well as the passengers with reservations who travel from Hong Kong by HZM Bus or self-driving to the East Car Park of HZMB Macau Port.",
+      "bus service directly transit to the restricted area of MIA after completing the check-in procedures at the Check-In Centre."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the terminal was first built for six million passengers a year",
+   "verdict": "corrected",
+   "inAfter": "The terminal was first built for six million passengers a year.",
+   "note": "Was 'The terminal was designed for 6 million passengers a year'. The airport's history page gives six million for phase one; Wikipedia gives the terminal's original design. Tense changed, since the terminal has been extended since.",
+   "sources": [
+    {
+     "file": "op-history",
+     "org": "Macau International Airport (CAM, the airport company, macau-airport.com)",
+     "dated": "read 2026-09-23 (the airport's history page)",
+     "quote": "Phase one of the airport is equipped with a full range of passenger and cargo facilities designed to handlesix million passengers and 165,000 metric tons of freight a year."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-25",
+     "quote": "the 6 million passengers per year the terminal was originally designed for"
+    }
+   ]
+  },
+  {
+   "claim": "extensions on the north and south sides in 2018 and 2022 lifted capacity to 10 million a year",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "authority",
+   "inAfter": "Extensions on its north and south sides, in use from 2018 and 2022, lifted capacity to 10 million a year, according to the aviation authority.",
+   "note": "Was 'The airport's stated design capacity is 10 million a year'. The 10 million is on the airport's own capacity page too; the two extension years rest on the aviation authority alone, so the sentence is attributed to it.",
+   "sources": [
+    {
+     "file": "aacm-25-years",
+     "org": "Civil Aviation Authority of Macao (AACM, the regulator, aacm.gov.mo)",
+     "dated": "30 Sep 2024",
+     "quote": "The expansion of the passenger terminal on the north and south sides were in operation in 2018 and 2022 respectively, with the handling capacity of the airport increased to 10 million passengers per year."
+    },
+    {
+     "file": "op-capacity",
+     "org": "Macau International Airport (CAM, the airport company, macau-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Capacity",
+      "10 million Passengers / Year"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 7.5 million passengers in 2025",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "In 2025 the airport counted about 7.5 million passengers.",
+   "note": "Replaces 'handled 7,165,803 in 2017': a passenger total replaces a passenger total. The airport company's table gives 7,521,344 for 2025. Its 2024 total, 7,641,495, is the figure in Wikipedia's infobox, which ties the table to independent reporting; the 2025 figure is the airport's own, attributed.",
+   "sources": [
+    {
+     "file": "cam-passengers",
+     "org": "Macau International Airport (CAM, the airport company, camacau.com)",
+     "dated": "monthly passenger table to June 2026 (read 2026-09-23)",
+     "quote": [
+      "2025 676,235 572,761 588,948 604,970 590,412 579,021 633,302 698,102 555,700 660,031 642,825 719,037 7,521,344",
+      "2024 587,296 604,703 607,153 670,280 634,542 626,380 728,541 749,876 534,792 600,865 613,790 683,277 7,641,495"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "infobox, revision of 2026-08-25",
+     "quote": [
+      "stat1_data = 7,641,495",
+      "stat_year = 2024"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a Macau Light Rail Transit station at the airport",
+   "verdict": "corrected",
+   "inAfter": "The Macau Light Rail Transit has a station at the airport",
+   "note": "Was 'The Macau Light Rail Transit Taipa Line has a station at the airport'. The line's name rests on Wikipedia alone; the airport names the Airport Station on Avenida Wai Long, by the terminal's north exit.",
+   "sources": [
+    {
+     "file": "op-public-transport",
+     "org": "Macau International Airport (CAM, the airport company, macau-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The LRT Airport Station located on Avenida Wai Long, connects to the Macao International Airport Passenger Terminal Building North Exit."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-25",
+     "quote": "The airport is served by the Airport Station of the Macau Light Rail Transit"
+    }
+   ]
+  },
+  {
+   "claim": "cross-border coaches to Guangzhou, Dongguan, Gongbei and Hengqin",
+   "verdict": "confirmed",
+   "inAfter": "cross-border coaches run to Guangzhou, Dongguan, Gongbei and Hengqin.",
+   "sources": [
+    {
+     "file": "op-transport-connection",
+     "org": "Macau International Airport (CAM, the airport company, macau-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Coach companies offer direct bus services from Macau International Airport to major cities in Guangdong province.",
+      "Guangzhou、Jiangmen、Shenzhen、Foshan/Guicheng、Dongguan",
+      "Hengqin Border, Gongbei Border"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-25",
+     "quote": "Cross-border coaches connect Macau International Airport with mainland locations like Huadu, Guangzhou, Panyu, Dongguan, Gongbei Port of Entry and Hengqin Border."
+    }
+   ]
+  },
+  {
+   "claim": "partly on the water beside Taipa",
+   "verdict": "cut",
+   "wasBefore": "and partly on the water beside it",
+   "why": "Rests on Wikipedia alone ('and neighbouring waters'; 'constructed on reclaimed land')."
+  },
+  {
+   "claim": "the day it opened, 9 November",
+   "verdict": "cut",
+   "wasBefore": "It opened on 9 November 1995",
+   "why": "The airport gives the month only; the day rests on Wikipedia alone. Corrected (see above)."
+  },
+  {
+   "claim": "while Macau was still under Portuguese administration",
+   "verdict": "cut",
+   "wasBefore": "while Macau was still under Portuguese administration",
+   "why": "Rests on Wikipedia alone in the saved sources."
+  },
+  {
+   "claim": "the border arrangement makes it unusually useful",
+   "verdict": "cut",
+   "wasBefore": "The border arrangement is what makes it unusually useful.",
+   "why": "The arrangement it introduced is corrected below and above; the judgement is kept in a plainer form ('Connections are what make it useful')."
+  },
+  {
+   "claim": "'two customs, one checkpoint': a shuttle from the airport to the ferry terminals without clearing Macau immigration",
+   "verdict": "cut",
+   "wasBefore": "A \"two customs, one checkpoint\" service lets passengers take a shuttle bus straight from the airport to the New Macau Ferry Terminal or the Taipa Ferry Terminal without clearing Macau immigration at all, which matters for anyone routing on to Hong Kong or the mainland.",
+   "why": "Rests on Wikipedia alone. The airport's own Express Link page describes the service in the departing direction only, into its restricted area, and its transfer page covers only air-to-air transfers. Corrected (see above).",
+   "sources": [
+    {
+     "file": "op-transfer",
+     "org": "Macau International Airport (CAM, the airport company, macau-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Upon arrival at Macau International Airport, transit and transfer passengers will be directed by ground staff to the departure hall located on the first floor of the terminal."
+    }
+   ]
+  },
+  {
+   "claim": "the same service at the Hengqin border",
+   "verdict": "cut",
+   "wasBefore": "The same service works at the Hengqin border.",
+   "why": "Rests on Wikipedia alone; the airport's page names the Hong Kong-Zhuhai-Macao Bridge port instead. Corrected (see above)."
+  },
+  {
+   "claim": "a transfer point between mainland China and Taiwan; a hub for mainland and Southeast Asian routes",
+   "verdict": "cut",
+   "wasBefore": "It has long been a transfer point between mainland China and Taiwan, and a hub for mainland and Southeast Asian routes.",
+   "why": "Rests on Wikipedia alone."
+  },
+  {
+   "claim": "capacity is the pressure point",
+   "verdict": "cut",
+   "wasBefore": "Capacity is the pressure point.",
+   "why": "No longer true on the sources: the extensions of 2018 and 2022 took capacity to 10 million a year (the aviation authority), and the airport counted 7,521,344 passengers in 2025.",
+   "sources": [
+    {
+     "file": "aacm-25-years",
+     "org": "Civil Aviation Authority of Macao (AACM, the regulator, aacm.gov.mo)",
+     "dated": "30 Sep 2024",
+     "quote": "with the handling capacity of the airport increased to 10 million passengers per year."
+    },
+    {
+     "file": "cam-passengers",
+     "org": "Macau International Airport (CAM, the airport company, camacau.com)",
+     "dated": "monthly passenger table to June 2026 (read 2026-09-23)",
+     "quote": "7,521,344"
+    }
+   ]
+  },
+  {
+   "claim": "designed for 6 million; 7,165,803 in 2017",
+   "verdict": "cut",
+   "wasBefore": "The terminal was designed for 6 million passengers a year and handled 7,165,803 in 2017.",
+   "why": "Superseded by the 2025 figure and the extensions. Corrected (see above)."
+  },
+  {
+   "claim": "the design capacity of up to 2,300 passengers an hour",
+   "verdict": "cut",
+   "wasBefore": "The airport's stated design capacity is 10 million a year, or up to 2,300 passengers an hour.",
+   "why": "The 10 million is kept, with the authority's account of the extensions (see above). The airport's 2,300 is its design hour for one direction, not an hourly total for the terminal, so it is trimmed.",
+   "sources": [
+    {
+     "file": "op-capacity",
+     "org": "Macau International Airport (CAM, the airport company, macau-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Design Hour",
+      "2,300 Passengers (1 way)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the Taipa Line",
+   "verdict": "cut",
+   "wasBefore": "The Macau Light Rail Transit Taipa Line has a station at the airport",
+   "why": "The line's name rests on Wikipedia alone. Corrected (see above)."
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Connections are what make it useful.",
+   "why": "The old text's judgement ('The border arrangement is what makes it unusually useful'), kept in a plainer form; the bus links that follow are sourced."
+  }
+ ],
+ "tracerOk": {
+  "Macau's airport": "The tracer reads the opening possessive; the airport is Macau International Airport, on every source.",
+  "In 2025": "A sentence opener; the year is in the airport company's table."
+ }
+}
