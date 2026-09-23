@@ -1,0 +1,283 @@
+{
+ "iata": "HHN",
+ "id": "recXWQH5l8boKT0Yi",
+ "name": "Frankfurt-Hahn Airport",
+ "country": "Germany",
+ "wikipedia": "https://en.wikipedia.org/wiki/Hahn_Airport",
+ "audited": "2026-09-23",
+ "before": "Despite the name, this airport sits nowhere near Frankfurt. It is out in the hills of Rhineland-Palatinate, in the municipality of Hahn, roughly 120km by road from Frankfurt and the same distance again from Luxembourg. Koblenz is the closest major city at about 70km, with Mainz around 90km away. Kirchberg is the nearest town, some 10km up the road, and Simmern and Traben-Trarbach are both about 20km out.\n\nRyanair and Wizz Air run most of the passenger flights, and it was Ryanair that asked for the Frankfurt prefix back in 2001. The Triwo Travvex Group took over in 2023 and reverted the name to Hahn Airport, though German air traffic control still lists it as Frankfurt-Hahn. Either way, clients should expect a transfer rather than a quick hop into the city.\n\nIt is a working cargo hub as much as a passenger terminal, helped by a 24-hour operating licence that keeps freight moving through the night. The scale is modest and the setting rural, so it feels closer to a regional airfield than an international gateway. Worth flagging journey times to clients at the booking stage.",
+ "after": "Despite the name, this airport sits nowhere near Frankfurt. It is out in the hills of Rhineland-Palatinate, in the municipality of Hahn, roughly 120 km by road from Frankfurt and the same distance again from Luxembourg. Koblenz is about 70 km away, with Mainz around 90 km.\n\nRyanair and Wizz Air run its passenger flights. The airport has called itself Hahn Airport again since Triwo bought it in May 2023, but expect to see the Frankfurt-Hahn name too. Either way, clients should expect a transfer rather than a quick hop into the city.\n\nIt is a working cargo hub as much as a passenger terminal, helped by a 24-hour operating licence that keeps freight moving through the night. The scale is modest and the setting rural, so it feels closer to a regional airfield than a big international airport. Worth flagging journey times to clients at the booking stage.",
+ "claims": [
+  {
+   "claim": "in the hills of Rhineland-Palatinate, in the municipality of Hahn",
+   "verdict": "confirmed",
+   "inAfter": "It is out in the hills of Rhineland-Palatinate, in the municipality of Hahn",
+   "note": "The operator calls it the Hunsruck-based airport in Rhineland-Palatinate and gives its address as 55483 Hahn-Flughafen; OurAirports puts it at 503 m above sea level.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "TRIWO Hahn Airport GmbH (the airport operator, hahn-airport.de)",
+     "dated": "read 2026-09-23 (live page, figures for 2025)",
+     "quote": [
+      "passengers pass through the international airport in Rhineland-Palatinate in 2025",
+      "the Hunsrück-based airport scores points"
+     ]
+    },
+    {
+     "file": "op-airport-data",
+     "org": "TRIWO Hahn Airport GmbH (the airport operator, hahn-airport.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "TRIWO Hahn Airport GmbH",
+      "55483 Hahn-Flughafen"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "is an international airport in the municipality of Hahn, Rhineland-Palatinate, Germany."
+    }
+   ]
+  },
+  {
+   "claim": "roughly 120 km by road from Frankfurt and from Luxembourg",
+   "verdict": "confirmed",
+   "inAfter": "roughly 120 km by road from Frankfurt and the same distance again from Luxembourg.",
+   "note": "Straight lines: 103.3 km to Frankfurt (ratio 1.16) and 89.3 km to Luxembourg (ratio 1.34), both inside the check for a road distance.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "The airport is equidistant between Frankfurt and Luxembourg – about 120 km (75 mi) to each city by road."
+    },
+    {
+     "file": "geo-cities",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from Frankfurt am Main (GeoNames 2925533, 50.1155, 8.6842): 103.3 km",
+      "Straight-line distance from Luxembourg (GeoNames 2960316, 49.6098, 6.1327): 89.3 km"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Koblenz about 70 km, Mainz about 90 km",
+   "verdict": "softened",
+   "inAfter": "Koblenz is about 70 km away, with Mainz around 90 km.",
+   "note": "Was 'Koblenz is the closest major city at about 70km'. Straight lines: Koblenz 50.6 km (ratio 1.38) and Mainz 72.9 km (ratio 1.23), both inside the check. 'Closest major city' is dropped: Trier, a city of about 100,000, is about as close in a straight line (49.4 km).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "The closest major cities are Koblenz at about 70 km (43 mi) and Mainz at about 90 km (56 mi)."
+    },
+    {
+     "file": "geo-cities",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from Koblenz (GeoNames 2886946, 50.3536, 7.5788): 50.6 km",
+      "Straight-line distance from Mainz (GeoNames 2874225, 49.9819, 8.2801): 72.9 km",
+      "Straight-line distance from Trier (GeoNames 2821164, 49.7557, 6.6394, population 100,129): 49.4 km"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Ryanair and Wizz Air run its passenger flights",
+   "verdict": "corrected",
+   "inAfter": "Ryanair and Wizz Air run its passenger flights.",
+   "note": "Was 'run most of the passenger flights'. The operator's airline page lists only these two.",
+   "sources": [
+    {
+     "file": "op-airlines",
+     "org": "TRIWO Hahn Airport GmbH (the airport operator, hahn-airport.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Airlines & Tour Operators",
+      "Ryanair",
+      "www.ryanair.com",
+      "Wizz Air",
+      "www.wizzair.com"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "The primary operators of flights to/from the airport are Ryanair and Wizz Air."
+    }
+   ]
+  },
+  {
+   "claim": "called Hahn Airport again since Triwo bought it in May 2023",
+   "verdict": "corrected",
+   "inAfter": "The airport has called itself Hahn Airport again since Triwo bought it in May 2023",
+   "note": "Was 'The Triwo Travvex Group took over in 2023 and reverted the name to Hahn Airport'. The operator names the owner as TRIWO AG, through TRIWO Hahn Airport GmbH, since May 2023, and uses the name Hahn Airport.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "TRIWO Hahn Airport GmbH (the airport operator, hahn-airport.de)",
+     "dated": "read 2026-09-23 (live page, figures for 2025)",
+     "quote": [
+      "Since May 2023, TRIWO AG is the owner of the airport company TRIWO Hahn Airport GmbH.",
+      "Hahn Airport is the tenth largest passenger airport in Germany"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": [
+      "In May 2023, after a sale to SWIFT CONJOY fell through",
+      "the airport was sold to TRIWO Hahn Airport GmbH, an affiliate of Triwo AG",
+      "when the name was changed back to Hahn Airport"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the Frankfurt-Hahn name still in use",
+   "verdict": "softened",
+   "inAfter": "but expect to see the Frankfurt-Hahn name too.",
+   "note": "Was 'though German air traffic control still lists it as Frankfurt-Hahn', which rests on Wikipedia alone (the DFS publication was not read). Eurostat's statistics and OurAirports still use Frankfurt-Hahn.",
+   "sources": [
+    {
+     "file": "eurostat-de",
+     "org": "Eurostat",
+     "dated": "2025 (annual data)",
+     "quote": "Eurostat DE_EDFH FRANKFURT-HAHN airport: passengers carried in 2025: 2,153,699"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": "Airport: Frankfurt-Hahn Airport (OurAirports EDFH, IATA HHN)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "However, according to the German air navigation services provider Deutsche Flugsicherung, its official name is still Frankfurt-Hahn Airport."
+    }
+   ]
+  },
+  {
+   "claim": "a cargo hub as much as a passenger airport, helped by a 24-hour operating licence",
+   "verdict": "confirmed",
+   "inAfter": "It is a working cargo hub as much as a passenger terminal, helped by a 24-hour operating licence that keeps freight moving through the night.",
+   "note": "The operator: passengers and air freight are its two pillars, it is one of the few German airports with unrestricted 24-hour operations, and it handled more than 106,600 tonnes of freight in 2025 (ADV: 106,640, fifth in Germany).",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "TRIWO Hahn Airport GmbH (the airport operator, hahn-airport.de)",
+     "dated": "read 2026-09-23 (live page, figures for 2025)",
+     "quote": [
+      "Its business model is firmly rooted on the two major pillars of passenger traffic and air freight.",
+      "At the same time, Hahn is one of only a few international airports in Germany with unrestricted 24-hour operations."
+     ]
+    },
+    {
+     "file": "op-airport-data",
+     "org": "TRIWO Hahn Airport GmbH (the airport operator, hahn-airport.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Operating hours: 24 hours a day (cargo, passage, OPS, tower, customs, police etc.)"
+    },
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025 (January to December 2025, December 2025 issue)",
+     "quote": [
+      "Kumuliertes Gesamtaufkommen in Deutschland: Cargo-Aufkommen (an+ab) | Januar bis Dezember 2025",
+      "Hahn 106.640 +1,3 %"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "It is also a prominent cargo airport as a result of its location and 24-hour operating licence."
+    }
+   ]
+  },
+  {
+   "claim": "Kirchberg 10 km; Simmern and Traben-Trarbach 20 km",
+   "verdict": "cut",
+   "wasBefore": "Kirchberg is the nearest town, some 10km up the road, and Simmern and Traben-Trarbach are both about 20km out.",
+   "why": "Wikipedia alone, and none of the three towns is in the GeoNames file the coordinates check uses, so the distances cannot be checked."
+  },
+  {
+   "claim": "Koblenz the closest major city",
+   "verdict": "cut",
+   "wasBefore": "Koblenz is the closest major city at about 70km",
+   "why": "Trier is about as close in a straight line (about 49 km against Koblenz 50.6 km). The distances are kept (see above)."
+  },
+  {
+   "claim": "Ryanair and Wizz Air run most of the flights",
+   "verdict": "cut",
+   "wasBefore": "Ryanair and Wizz Air run most of the passenger flights",
+   "why": "The operator lists only these two airlines. Corrected (see above)."
+  },
+  {
+   "claim": "Ryanair asked for the Frankfurt prefix in 2001",
+   "verdict": "cut",
+   "wasBefore": "and it was Ryanair that asked for the Frankfurt prefix back in 2001",
+   "why": "Wikipedia alone, and the dates conflict: Wikipedia has Ryanair arriving in 2001, the operator has its first flight landing on 22 April 1999."
+  },
+  {
+   "claim": "the Triwo Travvex Group; German air traffic control still lists Frankfurt-Hahn",
+   "verdict": "cut",
+   "wasBefore": "The Triwo Travvex Group took over in 2023 and reverted the name to Hahn Airport, though German air traffic control still lists it as Frankfurt-Hahn.",
+   "why": "The operator names the owner as TRIWO AG; the DFS listing rests on Wikipedia alone. Corrected and softened (see above)."
+  },
+  {
+   "claim": "than an international gateway",
+   "verdict": "cut",
+   "wasBefore": "than an international gateway",
+   "why": "House style: reworded to 'a big international airport' to avoid the gateway cliche."
+  },
+  {
+   "claim": "2.2 million passengers in 2025; buses to Frankfurt, Mainz, Koblenz, Luxembourg and Berlin",
+   "verdict": "cut",
+   "why": "Held back: new facts that replace nothing. ADV has 2,196,229 passengers for 2025 (the operator the same; Eurostat 2,153,699), and the operator's bus page lists coaches to Frankfurt (via Frankfurt Airport), Mainz, Koblenz, Luxembourg and Berlin, among others.",
+   "sources": [
+    {
+     "file": "adv-dec2025",
+     "org": "ADV (German Airports Association)",
+     "dated": "2025",
+     "quote": "Hahn 2.196.229 +17,8 %"
+    },
+    {
+     "file": "op-bus",
+     "org": "TRIWO Hahn Airport GmbH (the airport operator, hahn-airport.de)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Several bus lines connect the airport with cities in the Hunsrück as well as metropolises.",
+      "via Frankfurt Airport",
+      "Luxembourg"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Despite the name, this airport sits nowhere near Frankfurt.",
+   "why": "The old text's framing, kept: 103 km in a straight line from Frankfurt (see the distances)."
+  },
+  {
+   "text": "Either way, clients should expect a transfer rather than a quick hop into the city.",
+   "why": "The old text's advice, kept."
+  },
+  {
+   "text": "The scale is modest and the setting rural, so it feels closer to a regional airfield than a big international airport.",
+   "why": "The old text's judgement, kept (reworded to avoid 'gateway')."
+  },
+  {
+   "text": "Worth flagging journey times to clients at the booking stage.",
+   "why": "The old text's advice, kept."
+  }
+ ],
+ "tracerOk": {}
+}
