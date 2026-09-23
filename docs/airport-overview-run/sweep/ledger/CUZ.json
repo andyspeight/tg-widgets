@@ -1,0 +1,438 @@
+{
+ "iata": "CUZ",
+ "id": "recZSi4lCCy8IHJNh",
+ "name": "Alejandro Velasco Astete International Airport",
+ "country": "Peru",
+ "wikipedia": "https://en.wikipedia.org/wiki/Alejandro_Velasco_Astete_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Cusco's airport, and the arrival point for Machu Picchu and the wider Cusco Region. It is Peru's second most important air terminal, handling 3,004,412 passengers in 2023, and sits only 3.7 km from the historic centre.\n\nThat closeness is also the problem. The airport is hemmed in near the middle of the city and operates at limited capacity as a result. The runway is 3,400 metres, which is long for the traffic, but it needs to be: the thin air at this altitude means aircraft need more room to get airborne.\n\nGround arrangements are well organised. Authorised taxi firms have counters inside the arrivals hall, and three shuttle operators work the airport, two of them door to door. Sixt, Thrifty, Dollar and Hertz all have offices opposite the main entrance.\n\nOne thing to flag. PeruRail sells tickets to Machu Picchu Pueblo and Puno from an office inside the airport, but there is no station at the airport, so a client still needs a taxi or shuttle out to Wanchaq, San Pedro or Poroy to board.\n\nIt was the first airport in Peru to use jetways, in May 2000, and is named after Alejandro Velasco Astete, the first pilot to fly across the Andes in 1925.",
+ "after": "Cusco's airport, and the arrival point for Machu Picchu and the wider Cusco Region. CORPAC, which runs it, said in June 2026 that it handles about 11,000 passengers a day. It sits only 3.7 km from the historic centre.\n\nThat closeness is also the problem. The airport is small and hemmed in near the middle of the city. Its runway is about 3,400 metres long, and the airport is 3,310 metres above sea level.\n\nShuttle companies work the airport, some with hotel pick-up and drop-off.\n\nOne thing to flag. PeruRail sells tickets to Machu Picchu Pueblo and Puno from an office at the airport, but there is no station there, so a client still has to get to Wanchaq, San Pedro or Poroy to board.\n\nIt is named after Alejandro Velasco Astete, who made the first flight from Lima to Cusco in 1925.",
+ "claims": [
+  {
+   "claim": "Cusco's airport, the arrival point for Machu Picchu and the wider Cusco Region",
+   "verdict": "confirmed",
+   "inAfter": "Cusco's airport, and the arrival point for Machu Picchu and the wider Cusco Region.",
+   "note": "CORPAC (June 2026) calls it the way in to the country's main tourist destination; the tourism ministry (September 2026) says the new São Paulo flight will bring Cusco and Machu Picchu closer to travellers; the Smithsonian (2021) calls it a hub for most visitors to Machu Picchu.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": [
+      "is an international airport located in the city of Cusco",
+      "Passengers have various transportation options to reach the city center and other tourist destinations in the Cusco Region."
+     ]
+    },
+    {
+     "file": "corpac-mantenimiento-pista",
+     "org": "CORPAC (the operator, gob.pe/corpac)",
+     "dated": "2026-06-30",
+     "quote": [
+      "30 de junio de 2026",
+      "en el Aeropuerto Internacional Alejandro Velasco Astete de Cusco, puerta de ingreso al principal destino turístico del país"
+     ]
+    },
+    {
+     "file": "mincetur-sao-paulo-cusco",
+     "org": "Mincetur (Peru's trade and tourism ministry, gob.pe)",
+     "dated": "2026-09-08",
+     "quote": [
+      "8 de setiembre de 2026",
+      "esta nueva conexión permitirá acercar Cusco y Machu Picchu a millones de potenciales viajeros"
+     ]
+    },
+    {
+     "file": "smithsonian-chinchero",
+     "org": "Smithsonian Magazine",
+     "dated": "2021-02-24",
+     "quote": [
+      "Travel | February 24, 2021",
+      "which serves as a hub for most visitors to Machu Picchu"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "CORPAC runs it",
+   "verdict": "confirmed",
+   "inAfter": "CORPAC, which runs it",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "operator = CORPAC S.A."
+    },
+    {
+     "file": "corpac-mant-correctivo",
+     "org": "CORPAC (the operator, gob.pe/corpac)",
+     "dated": "2026-08-14",
+     "quote": [
+      "14 de agosto de 2026",
+      "La Corporación Peruana de Aeropuertos y Aviación Comercial (CORPAC) informa que en el Aeropuerto Internacional Alejandro Velasco Astete (AIVA) del Cusco se vienen realizando trabajos de mantenimiento correctivo"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "CORPAC: about 11,000 passengers a day",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "CORPAC",
+   "inAfter": "CORPAC, which runs it, said in June 2026 that it handles about 11,000 passengers a day",
+   "note": "Replaces '3,004,412 passengers in 2023', a passenger figure for a passenger figure. No 2025 total for Cusco could be read: CORPAC publishes airport-by-airport figures only as spreadsheet downloads, which the sweep's tools cannot save as text, and its news items give national totals (44.7 million in 2025). The operator's own figure (note of 30 June 2026) is given as the operator's. The same note says more than 50 flights a day; that count is not added.",
+   "sources": [
+    {
+     "file": "corpac-mantenimiento-pista",
+     "org": "CORPAC (the operator, gob.pe/corpac)",
+     "dated": "2026-06-30",
+     "quote": [
+      "30 de junio de 2026",
+      "El Aeropuerto Alejandro Velasco Astete, recibe más de 50 operaciones aéreas y atiende a 11 mil pasajeros por día"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "3.7 km from the historic centre",
+   "verdict": "confirmed",
+   "inAfter": "it sits only 3.7 km from the historic centre",
+   "note": "The coordinates put the airport 3.1 km in a straight line from the GeoNames centre of Cusco; 3.7 km gives a ratio of 1.19, inside the check's range for a road distance.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": "The airport is located approximately 3.7 km from the historic center of Cusco."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 3.1 km (1.9 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "small and hemmed in near the middle of the city",
+   "verdict": "softened",
+   "inAfter": "The airport is small and hemmed in near the middle of the city.",
+   "note": "Was 'hemmed in near the middle of the city and operates at limited capacity as a result'. The Smithsonian calls it small and outdated, in the middle of Cusco; Wikipedia gives the location near the centre as the reason for limited capacity. The capacity clause is cut (below).",
+   "sources": [
+    {
+     "file": "smithsonian-chinchero",
+     "org": "Smithsonian Magazine",
+     "dated": "2021-02-24",
+     "quote": "the small, outdated Alejandro Velasco Astete International Airport in the middle of Cusco"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": "It operates at limited capacity due to its precarious location near the city's center."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 3.1 km (1.9 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "runway about 3,400 metres long",
+   "verdict": "confirmed",
+   "inAfter": "Its runway is about 3,400 metres long",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": "The runway is paved and is 3,400 meters (11,200 feet) long"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 10/28: 3,397 m (11,146 ft), ASP",
+      "Runways listed: 1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the airport sits 3,310 metres above sea level",
+   "verdict": "corrected",
+   "inAfter": "the airport is 3,310 metres above sea level",
+   "note": "Gives the altitude the old text only alluded to ('at this altitude'), in place of its explanation of why the runway is long (cut below).",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "elevation_m = 3,310"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "elevation 10,860 ft (3,310 m)"
+    }
+   ]
+  },
+  {
+   "claim": "shuttle companies work the airport, some with hotel pick-up and drop-off",
+   "verdict": "softened",
+   "inAfter": "Shuttle companies work the airport, some with hotel pick-up and drop-off.",
+   "note": "Was 'three shuttle operators work the airport, two of them door to door'. Wikipedia names three and says the other two are door to door, but Aeroexpreso's own site now offers free pick-up and drop-off at most hotels, and no source shows the list is complete, so neither number is kept.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": "A number of established companies offer ground transportation including Aeroexpreso Airport Shuttle, Cusco Airport Shuttle and Cusco Shuttle. The latter two provide door-to-door transfers."
+    },
+    {
+     "file": "aeroexpreso",
+     "org": "Aeroexpreso (airport shuttle company, aeroexpreso.com.pe)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Aeroexpreso offers free pickup and drop-off service at most hotels",
+      "Cusco (CUZ)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "PeruRail sells tickets from an office at the airport, but there is no station there; trains leave from Wanchaq, San Pedro or Poroy",
+   "verdict": "confirmed",
+   "inAfter": "PeruRail sells tickets to Machu Picchu Pueblo and Puno from an office at the airport, but there is no station there, so a client still has to get to Wanchaq, San Pedro or Poroy to board.",
+   "note": "PeruRail's own page (holiday hours for December 2025 and January 2026) lists a point of sale at the airport, open 06:00 to 20:00, and its Cusco boarding stations as San Pedro and Poroy (Vistadome and Expedition, to Machu Picchu Pueblo) and Wánchaq (Titicaca, to Puno); none is at the airport. 'Inside' became 'at' and 'a taxi or shuttle' was dropped, as PeruRail says neither.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": [
+      "PeruRail has a sales office inside the airport offering tickets to Machu Picchu Pueblo and Puno.",
+      "However, the airport does not have a nearby train station."
+     ]
+    },
+    {
+     "file": "perurail-find-us",
+     "org": "PeruRail (railway operator, perurail.com)",
+     "dated": "read 2026-09-23 (live page, with holiday hours for 24 December 2025 to 1 January 2026)",
+     "quote": [
+      "Here you can buy your train tickets.",
+      "Alejandro Velasco Astete International Airport",
+      "Address: Av. Velasco Astete s/n, Cusco",
+      "Opening hours: Monday to Sunday and holidays from 06:00 hrs to 20:00 hrs.",
+      "24, 25 and 31 December 2025 , and 1 January 2026",
+      "San Pedro Station",
+      "Address: Calle Cascaparo S/N Cusco.",
+      "Train services departing from this station: PeruRail Titicaca and Vistadome Observatory.",
+      "Poroy Station",
+      "Address: (Located within the Poroy Station itself) Calle Roldan s/n, District of Poroy, Cusco.",
+      "Machu Picchu Pueblo Station",
+      "Puno Station"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after Alejandro Velasco Astete, who made the first flight from Lima to Cusco in 1925",
+   "verdict": "corrected",
+   "inAfter": "It is named after Alejandro Velasco Astete, who made the first flight from Lima to Cusco in 1925.",
+   "note": "Was 'the first pilot to fly across the Andes in 1925'. CORPAC (3 September 2026) describes the feat as the first air crossing between Lima and Cusco, 101 years earlier (so 1925, as Wikipedia also says), and says the airport bears his name. 'First across the Andes' is Wikipedia's wording alone and claims more than the flight itself.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": [
+      "It was named in honor of the Peruvian pilot Alejandro Velasco Astete who was the first aeroplane pilot to cross the Andes in 1925.",
+      "This first flight was from Lima directly to Cusco."
+     ]
+    },
+    {
+     "file": "corpac-velasco-101",
+     "org": "CORPAC (the operator, gob.pe/corpac)",
+     "dated": "2026-09-03",
+     "quote": [
+      "3 de setiembre de 2026",
+      "Hace 101 años, el aviador cusqueño Alejandro Velasco Astete hizo historia al realizar la primera travesía aérea entre Lima y Cusco",
+      "al aeropuerto que lleva su nombre"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Peru's second most important air terminal",
+   "verdict": "cut",
+   "wasBefore": "It is Peru's second most important air terminal",
+   "why": "Wikipedia alone, on 2023 figures. No current ranking could be read: CORPAC's airport-by-airport tables are spreadsheet downloads only, and its news items read (June to September 2026) give national totals."
+  },
+  {
+   "claim": "3,004,412 passengers in 2023",
+   "verdict": "cut",
+   "wasBefore": "handling 3,004,412 passengers in 2023",
+   "why": "Out of date (2023). Replaced by CORPAC's own current daily figure, attributed (above)."
+  },
+  {
+   "claim": "operates at limited capacity as a result",
+   "verdict": "cut",
+   "wasBefore": "and operates at limited capacity as a result",
+   "why": "Wikipedia alone in those words; the Smithsonian's 'small, outdated' is kept (above). The new airport being built at Chinchero is held back (below)."
+  },
+  {
+   "claim": "the runway is long because thin air means aircraft need more room to get airborne",
+   "verdict": "cut",
+   "wasBefore": "which is long for the traffic, but it needs to be: the thin air at this altitude means aircraft need more room to get airborne",
+   "why": "Wikipedia alone. The length and the altitude are kept as facts (above)."
+  },
+  {
+   "claim": "ground arrangements are well organised",
+   "verdict": "cut",
+   "wasBefore": "Ground arrangements are well organised.",
+   "why": "A judgement no source makes, and most of what it introduced is cut."
+  },
+  {
+   "claim": "authorised taxi firms have counters inside the arrivals hall",
+   "verdict": "cut",
+   "wasBefore": "Authorised taxi firms have counters inside the arrivals hall",
+   "why": "Wikipedia alone. The FCDO's advice on official taxi desks outside the baggage hall is about Lima's Jorge Chávez airport, not Cusco."
+  },
+  {
+   "claim": "three shuttle operators, two of them door to door",
+   "verdict": "cut",
+   "wasBefore": "three shuttle operators work the airport, two of them door to door",
+   "why": "Softened (above): Aeroexpreso, the one Wikipedia does not call door to door, now offers hotel pick-up itself, and no source shows the list of three is complete."
+  },
+  {
+   "claim": "Sixt, Thrifty, Dollar and Hertz opposite the main entrance",
+   "verdict": "cut",
+   "wasBefore": "Sixt, Thrifty, Dollar and Hertz all have offices opposite the main entrance.",
+   "why": "Wikipedia alone; no car hire company's own branch page was read."
+  },
+  {
+   "claim": "a taxi or shuttle out to the stations; the office is inside the airport",
+   "verdict": "cut",
+   "wasBefore": "so a client still needs a taxi or shuttle out to Wanchaq, San Pedro or Poroy to board",
+   "why": "Reworded (above): PeruRail's page gives the stations and the airport point of sale but says nothing of how to get between them or where in the building the office is."
+  },
+  {
+   "claim": "first airport in Peru to use jetways, May 2000",
+   "verdict": "cut",
+   "wasBefore": "It was the first airport in Peru to use jetways, in May 2000",
+   "why": "Wikipedia alone, with no citation; nothing from CORPAC read mentions it."
+  },
+  {
+   "claim": "the first pilot to fly across the Andes",
+   "verdict": "cut",
+   "wasBefore": "the first pilot to fly across the Andes in 1925",
+   "why": "Corrected to CORPAC's description, the first flight from Lima to Cusco (above)."
+  },
+  {
+   "claim": "the new Chinchero International Airport",
+   "verdict": "cut",
+   "why": "Held back: a new international airport is being built at Chinchero to replace this one (Smithsonian, 2021; Wikipedia says ground was broken in November 2021), and the transport ministry reported on 17 September 2026 that the design of the Cusco to Chinchero to Urubamba highway, planned to link the city with it, is in its last stage. No current source gives an opening date, and nothing in the old text refers to it. For Andy to decide: it matters to agents once a date is set.",
+   "sources": [
+    {
+     "file": "mtc-cusco-proyectos",
+     "org": "MTC (Peru's transport ministry, gob.pe)",
+     "dated": "2026-09-17",
+     "quote": [
+      "17 de setiembre de 2026",
+      "La vía está proyectada para conectar la ciudad del Cusco con el nuevo Aeropuerto Internacional de Chinchero."
+     ]
+    },
+    {
+     "file": "smithsonian-chinchero",
+     "org": "Smithsonian Magazine",
+     "dated": "2021-02-24",
+     "quote": "The International Airport of Chinchero-Cusco is being built to replace the small, outdated Alejandro Velasco Astete International Airport in the middle of Cusco"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-22",
+     "quote": "The new airport broke ground in November 2021."
+    }
+   ]
+  },
+  {
+   "claim": "international routes now, and LATAM's São Paulo route from March 2027",
+   "verdict": "cut",
+   "why": "Held back: CORPAC (8 September 2026) says Cusco's international flights link it with Santiago de Chile, Bogotá and La Paz, and that LATAM starts São Paulo, four times a week, on 29 March 2027 (the tourism ministry confirms the start). The old text named no routes. For Andy to decide.",
+   "sources": [
+    {
+     "file": "corpac-nuevo-vuelo-intl",
+     "org": "CORPAC (the operator, gob.pe/corpac)",
+     "dated": "2026-09-08",
+     "quote": [
+      "8 de setiembre de 2026",
+      "Esta nueva conexión se sumará a los vuelos internacionales que actualmente enlazan al Cusco con Santiago de Chile, Bogotá (Colombia) y La Paz (Bolivia)",
+      "La ruta São Paulo–Cusco–São Paulo comenzará a operar el 29 de marzo de 2027, con cuatro frecuencias semanales."
+     ]
+    },
+    {
+     "file": "mincetur-sao-paulo-cusco",
+     "org": "Mincetur (Peru's trade and tourism ministry, gob.pe)",
+     "dated": "2026-09-08",
+     "quote": "que iniciará operaciones el 29 de marzo de 2027, con cuatro frecuencias semanales operadas por LATAM Airlines"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: protests can disrupt trains to Machu Picchu; no advice against travel to Cusco",
+   "verdict": "cut",
+   "why": "Held back, for the record: the FCDO says train services to and from Machu Picchu are occasionally suspended or disrupted by protests, and lists Cusco among regions with recent protests. Its advice against all but essential travel covers the Peru and Colombia border strip and the VRAEM valleys and does not name Cusco or Machu Picchu. Nothing in the old text to replace.",
+   "sources": [
+    {
+     "file": "fcdo-peru-safety",
+     "org": "UK FCDO",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Some train services in the south, including those to and from Machu Picchu, are occasionally suspended or disrupted because of protests.",
+      "Other regions that have seen recent protests include Arequipa, Ayacucho, Cusco, La Libertad, Madre de Dios and Puno."
+     ]
+    },
+    {
+     "file": "fcdo-peru-warnings",
+     "org": "UK FCDO",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "FCDO advises against all but essential travel to the Valley of the Apurímac, Ene, and Mantaro Rivers, also known as the VRAEM region."
+    }
+   ]
+  },
+  {
+   "claim": "runway closures for repairs in 2026",
+   "verdict": "cut",
+   "why": "Held back, for the record: CORPAC closed the runway until about 10:00 on 14 August 2026 for corrective repairs and told passengers with morning flights to check with their airline; its larger resurfacing programme (announced 30 June 2026) is done at night. One-off events, nothing in the old text to replace.",
+   "sources": [
+    {
+     "file": "corpac-mant-correctivo",
+     "org": "CORPAC (the operator, gob.pe/corpac)",
+     "dated": "2026-08-14",
+     "quote": "dado que la pista permanecerá cerrada hasta aproximadamente las 10:00 a. m. de hoy, viernes 14 de agosto"
+    },
+    {
+     "file": "corpac-mantenimiento-pista",
+     "org": "CORPAC (the operator, gob.pe/corpac)",
+     "dated": "2026-06-30",
+     "quote": "los trabajos se realizarán en horas de la noche, sin afectar el flujo de los más de 50 vuelos diarios"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "That closeness is also the problem.",
+   "why": "A signpost kept from the old text; the sourced description that follows (small and hemmed in near the middle of the city) is what it points to."
+  },
+  {
+   "text": "One thing to flag.",
+   "why": "A signpost kept from the old text; the sourced PeruRail point follows."
+  }
+ ],
+ "tracerOk": {
+  "11,000": "CORPAC writes '11 mil pasajeros por día' (11 thousand) in its note of 30 June 2026, quoted in the claim"
+ }
+}

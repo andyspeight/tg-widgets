@@ -1,0 +1,537 @@
+{
+ "iata": "SCL",
+ "id": "recEejF9F9ihfz6qa",
+ "name": "Comodoro Arturo Merino Benítez International Airport",
+ "country": "Chile",
+ "wikipedia": "https://en.wikipedia.org/wiki/Arturo_Merino_Ben%C3%ADtez_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Chile's main airport, in Pudahuel 15 km north west of central Santiago, and the busiest international gateway in the country. LATAM accounts for around 82 per cent of commercial operations and keeps its main hub and maintenance base here, as does Sky Airline.\n\nTwo things make it strategically useful. It is the longest non-stop destination for most European carriers, with Iberia, Air France and British Airways flying in from Madrid, Paris and Heathrow. And it is Latin America's main gateway to Oceania, with scheduled services to Sydney, Melbourne, Auckland and Easter Island.\n\nThe terminal reads across four levels. Arrivals, baggage reclaim, duty free, ground transport and the hotel are on the ground floor. Departures, check in, shops and the gates are on the second, with restaurants and the LATAM VIP check in above.\n\nIt is state owned but has been run since October 2015 by Nuevo Pudahuel, a consortium of Aéroports de Paris, Vinci Airports and Astaldi. It is also a joint civil and military field, home to the Chilean Air Force 2nd Air Brigade.",
+ "after": "Chile's main airport, in Pudahuel 15 km north west of central Santiago, and the country's principal international gateway. LATAM is by far the biggest airline here.\n\nTwo things make it strategically useful. Europe is a direct flight away: Air France flies from Paris, and there are routes from Madrid and London Heathrow. It also reaches across the Pacific, with LATAM flights to Melbourne and Auckland, and flights to Easter Island leave from here.\n\nInternational flights have used Terminal 2 since it opened in February 2022, while the original terminal, now Terminal 1, handles domestic flights.\n\nIt is state owned but has been run since October 2015 by Nuevo Pudahuel, a consortium of Groupe ADP, Vinci Airports and Gestione Concessioni.",
+ "claims": [
+  {
+   "claim": "Chile's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Chile's main airport",
+   "note": "start.mjs found no archived copy of the article the Overview was drafted from, so wikipedia-now (revision of 2026-09-14) is source 1 throughout this ledger. The public works ministry, which grants the concession, calls it the country's main airport.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "is Chile's largest aviation facility and busiest international airport"
+    },
+    {
+     "file": "mop-concesion-amb",
+     "org": "MOP (Chile's Ministry of Public Works, concessions directorate, concesiones.mop.gob.cl)",
+     "dated": "read 2026-09-23 (live page, with executive reports to June 2026)",
+     "quote": "El proyecto considera una mejora considerable del principal aeropuerto del país"
+    },
+    {
+     "file": "vinci-santiago",
+     "org": "VINCI Airports (shareholder in the operator, vinci-airports.com)",
+     "dated": "read 2026-09-23 (live page, © 2026, with 2025 traffic)",
+     "quote": "Santiago Airport is the main gateway to Chile."
+    }
+   ]
+  },
+  {
+   "claim": "in Pudahuel",
+   "verdict": "confirmed",
+   "inAfter": "in Pudahuel",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "located in Pudahuel"
+    },
+    {
+     "file": "mop-informe-jun2026",
+     "org": "MOP (Chile's Ministry of Public Works, concessions directorate, concesiones.mop.gob.cl)",
+     "dated": "executive report for June 2026",
+     "quote": [
+      "JUNIO 2026",
+      "Comuna Pudahuel",
+      "en la comuna de Pudahuel"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "15 km north west of central Santiago",
+   "verdict": "confirmed",
+   "inAfter": "15 km north west of central Santiago",
+   "note": "The coordinates put the airport 14.6 km from the GeoNames centre of Santiago at 299 degrees, north west. The ministry's report gives 17 km north west of the city, which also passes the check (ratio 1.16).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "15 km (9.3 mi) north-west of central Santiago"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 14.6 km (9.1 miles)",
+      "Bearing from the city centre: 299 degrees, which is north west"
+     ]
+    },
+    {
+     "file": "mop-informe-jun2026",
+     "org": "MOP (Chile's Ministry of Public Works, concessions directorate, concesiones.mop.gob.cl)",
+     "dated": "executive report for June 2026",
+     "quote": "ubicado a 17 km al noroeste de la ciudad de Santiago, en la Región"
+    }
+   ]
+  },
+  {
+   "claim": "the country's principal international gateway",
+   "verdict": "softened",
+   "inAfter": "the country's principal international gateway",
+   "note": "Was 'the busiest international gateway in the country'. The ministry calls it the country's main entry point and VINCI Airports the main gateway to Chile; no table comparing Chile's airports could be read (the civil aviation board's site answered 502), so the superlative is put in their words.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "is Chile's largest aviation facility and busiest international airport"
+    },
+    {
+     "file": "mop-concesion-amb",
+     "org": "MOP (Chile's Ministry of Public Works, concessions directorate, concesiones.mop.gob.cl)",
+     "dated": "read 2026-09-23 (live page, with executive reports to June 2026)",
+     "quote": "mejorar el estándar de la principal puerta de entrada al país"
+    },
+    {
+     "file": "vinci-santiago",
+     "org": "VINCI Airports (shareholder in the operator, vinci-airports.com)",
+     "dated": "read 2026-09-23 (live page, © 2026, with 2025 traffic)",
+     "quote": "Santiago Airport is the main gateway to Chile."
+    }
+   ]
+  },
+  {
+   "claim": "LATAM is by far the biggest airline here",
+   "verdict": "corrected",
+   "inAfter": "LATAM is by far the biggest airline here.",
+   "note": "Replaces 'around 82 per cent of commercial operations' (cut below), which no current source supports. Cirium's schedules for January 2026, as reported by Aviacionline, give LATAM 59 per cent of the seats at Santiago, SKY Airline 18 and JetSMART 10; OAG's Megahubs 2024 gives LATAM 58 per cent of flights. Both put LATAM far ahead, so the text says that without a share.",
+   "sources": [
+    {
+     "file": "avl-cirium-2025",
+     "org": "Aviacionline (Latin American aviation trade press), reporting Cirium schedule data",
+     "dated": "2026-01-02",
+     "quote": [
+      "viernes 2 de enero de 2026",
+      "LATAM Airlines (59%), seguida por SKY Airline (18%) y JetSMART (10%)"
+     ]
+    },
+    {
+     "file": "oag-megahubs-2024",
+     "org": "OAG (flight data company, oag.com)",
+     "dated": "2024 (OAG Megahubs 2024 report)",
+     "quote": [
+      "Share of flights (%) operated by the dominant carrier.",
+      "7 SCL Chile LATAM Airlines Group 58%"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "LATAM Airlines accounts for approximately 82% of the airport's total commercial operations."
+    }
+   ]
+  },
+  {
+   "claim": "direct flights to Europe: Air France from Paris, and routes from Madrid and London Heathrow",
+   "verdict": "corrected",
+   "inAfter": "Europe is a direct flight away: Air France flies from Paris, and there are routes from Madrid and London Heathrow.",
+   "note": "Was 'Iberia, Air France and British Airways flying in from Madrid, Paris and Heathrow'. All three routes are current: Air France is going to ten flights a week to Paris (Aviacionline, April 2026); Madrid was the busiest route to Europe in 2025 with 658,041 passengers (Aviacionline, from the airport's figures); the UK CAA counted 68,342 scheduled passengers between Heathrow and Santiago in 2025, the only UK route to Chile in its table. Iberia and British Airways are named only by Wikipedia in what could be read (ba.com shows a holding page other helpers treated as a bot check, and no Iberia page was read), so they are not named.",
+   "sources": [
+    {
+     "file": "avl-q1-2026",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-04-16",
+     "quote": [
+      "jueves 16 de abril de 2026",
+      "Air France operará 10 frecuencias hacia París"
+     ]
+    },
+    {
+     "file": "avl-destinos-2025",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2025-12-31",
+     "quote": [
+      "miércoles 31 de diciembre de 2025",
+      "Madrid destacó como la principal puerta de entrada a Europa con 658.041 usuarios"
+     ]
+    },
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2025 (table run 25/02/2026)",
+     "quote": "25/02/2026 16:41,2025,90,SOUTH AMERICA,CHILE,1,HEATHROW,SANTIAGO DE CHILE,68342,68342,0,79964,79964,0,-14.53404"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "including Iberia, Air France, and British Airways from their respective hubs in Madrid–Barajas Airport, Paris–Charles de Gaulle, and London–Heathrow Airport."
+    }
+   ]
+  },
+  {
+   "claim": "LATAM flies to Melbourne and Auckland",
+   "verdict": "corrected",
+   "inAfter": "It also reaches across the Pacific, with LATAM flights to Melbourne and Auckland",
+   "note": "Was 'Latin America's main gateway to Oceania, with scheduled services to Sydney, Melbourne, Auckland and Easter Island'. Aviacionline (April 2026): LATAM is going to six flights a week to Melbourne and five to Auckland. Sydney is cut (below).",
+   "sources": [
+    {
+     "file": "avl-q1-2026",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-04-16",
+     "quote": [
+      "jueves 16 de abril de 2026",
+      "LATAM incrementará su operación a Melbourne con seis frecuencias semanales, a Auckland con cinco"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "with scheduled flights to Sydney, Melbourne, Auckland, and Easter Island."
+    }
+   ]
+  },
+  {
+   "claim": "flights to Easter Island leave from here",
+   "verdict": "confirmed",
+   "inAfter": "and flights to Easter Island leave from here",
+   "note": "Chile's official tourism site says the direct flight to Rapa Nui departs only from Santiago, about 5 hours 30 minutes.",
+   "sources": [
+    {
+     "file": "chiletravel-rapa-nui",
+     "org": "Chile Travel (Chile's official tourism site, chile.travel)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "The only access is via Mataveri International Airport of Rapa Nui (IPC).",
+      "You must take a direct flight that departs exclusively from Santiago (SCL)."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "with scheduled flights to Sydney, Melbourne, Auckland, and Easter Island."
+    }
+   ]
+  },
+  {
+   "claim": "international flights use Terminal 2, opened in February 2022",
+   "verdict": "corrected",
+   "inAfter": "International flights have used Terminal 2 since it opened in February 2022",
+   "note": "Replaces the old text's single four-level terminal (cut below), which is Terminal 1 as it was before 2022. Groupe ADP: the president inaugurated the international terminal on 26 February 2022 and it took its first passengers on 28 February. The ministry's June 2026 report and Aviacionline (April 2026) describe the international terminal (T2) and the domestic one (T1) as in use.",
+   "sources": [
+    {
+     "file": "adp-t2-commissioning",
+     "org": "Groupe ADP (shareholder in the operator, presse.groupeadp.fr)",
+     "dated": "2022-02-28",
+     "quote": [
+      "February 2022, 28th",
+      "inaugurated, on February 26th, Santiago airport’s new international terminal, that started serving its first passengers on February 28th."
+     ]
+    },
+    {
+     "file": "mop-informe-jun2026",
+     "org": "MOP (Chile's Ministry of Public Works, concessions directorate, concesiones.mop.gob.cl)",
+     "dated": "executive report for June 2026",
+     "quote": "Un Nuevo Terminal de Pasajeros, el que quedará destinado a la atención de vuelos internacionales"
+    },
+    {
+     "file": "avl-q1-2026",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-04-16",
+     "quote": "17 destinos internos a través del Terminal Nacional (T1) y con 50 destinos en el extranjero mediante el Terminal Internacional (T2)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "The new Terminal 2 was opened in 2022."
+    }
+   ]
+  },
+  {
+   "claim": "the original terminal, now Terminal 1, handles domestic flights",
+   "verdict": "corrected",
+   "inAfter": "the original terminal, now Terminal 1, handles domestic flights",
+   "sources": [
+    {
+     "file": "adp-t2-commissioning",
+     "org": "Groupe ADP (shareholder in the operator, presse.groupeadp.fr)",
+     "dated": "2022-02-28",
+     "quote": "With the extension of the existing terminal, now reassigned to domestic traffic"
+    },
+    {
+     "file": "mop-informe-jun2026",
+     "org": "MOP (Chile's Ministry of Public Works, concessions directorate, concesiones.mop.gob.cl)",
+     "dated": "executive report for June 2026",
+     "quote": "Edificio Terminal de Pasajeros existente, el que quedará destinado a la atención de vuelos domésticos o nacionales"
+    },
+    {
+     "file": "avl-q1-2026",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-04-16",
+     "quote": "17 destinos internos a través del Terminal Nacional (T1)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "Terminal 1 – domestic flights"
+    }
+   ]
+  },
+  {
+   "claim": "state owned",
+   "verdict": "confirmed",
+   "inAfter": "It is state owned",
+   "note": "The ministry's report describes a concession over public property; Groupe ADP says the airport is operated under a 20-year concession.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "The airport is owned by the Chilean government"
+    },
+    {
+     "file": "mop-informe-jun2026",
+     "org": "MOP (Chile's Ministry of Public Works, concessions directorate, concesiones.mop.gob.cl)",
+     "dated": "executive report for June 2026",
+     "quote": "El uso y goce sobre bienes nacionales de uso público o fiscales en los que se desarrolle la obra entregada en concesión."
+    },
+    {
+     "file": "adp-t2-commissioning",
+     "org": "Groupe ADP (shareholder in the operator, presse.groupeadp.fr)",
+     "dated": "2022-02-28",
+     "quote": "Santiago Airport is operated under a 20-year concession, won in February 2015, by Nuevo Pudahuel consortium"
+    }
+   ]
+  },
+  {
+   "claim": "run since October 2015 by Nuevo Pudahuel",
+   "verdict": "confirmed",
+   "inAfter": "has been run since October 2015 by Nuevo Pudahuel",
+   "note": "The ministry's project page gives the start of the concession term as 1 October 2015; its report dates the concession itself from 21 April 2015, when the award was published.",
+   "sources": [
+    {
+     "file": "mop-concesion-amb",
+     "org": "MOP (Chile's Ministry of Public Works, concessions directorate, concesiones.mop.gob.cl)",
+     "dated": "read 2026-09-23 (live page, with executive reports to June 2026)",
+     "quote": [
+      "Sociedad Concesionaria Nuevo Pudahuel S.A.",
+      "Inicio Plazo Concesión: 1 de octubre de 2015"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "has been operated since October 2015 by Nuevo Pudahuel"
+    }
+   ]
+  },
+  {
+   "claim": "a consortium of Groupe ADP, Vinci Airports and Gestione Concessioni",
+   "verdict": "corrected",
+   "inAfter": "a consortium of Groupe ADP, Vinci Airports and Gestione Concessioni",
+   "note": "Was 'Aéroports de Paris, Vinci Airports and Astaldi'. The ministry's June 2026 report lists the shareholders as Groupe ADP (45 per cent), Vinci Airports (40) and Gestione Concessioni S.R.L (15), and Aviacionline (April 2026) names the same three (spelling it Gestioni). Groupe ADP's 2022 release named Astaldi Concessioni for the 15 per cent, and VINCI Airports' own page still says Astaldi; the grantor's current report is followed. Aéroports de Paris has traded as Groupe ADP since before the 2022 release.",
+   "sources": [
+    {
+     "file": "mop-informe-jun2026",
+     "org": "MOP (Chile's Ministry of Public Works, concessions directorate, concesiones.mop.gob.cl)",
+     "dated": "executive report for June 2026",
+     "quote": [
+      "Accionistas del Concesionario",
+      "Groupe ADP (45%)",
+      "Vinci Airports S.A.S (40%)",
+      "Gestione Concessioni S.R.L (15%)"
+     ]
+    },
+    {
+     "file": "avl-q1-2026",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2026-04-16",
+     "quote": "La sociedad concesionaria, integrada por Groupe ADP , VINCI Airports y Gestioni Concessioni"
+    },
+    {
+     "file": "vinci-santiago",
+     "org": "VINCI Airports (shareholder in the operator, vinci-airports.com)",
+     "dated": "read 2026-09-23 (live page, © 2026, with 2025 traffic)",
+     "quote": "40% VINCI Airports - 45% ADP - 15% Astaldi"
+    }
+   ]
+  },
+  {
+   "claim": "the busiest international gateway in the country (wording)",
+   "verdict": "cut",
+   "wasBefore": "and the busiest international gateway in the country",
+   "why": "Reworded to the ministry's and VINCI Airports' 'main gateway' (above): no table comparing Chile's airports could be read."
+  },
+  {
+   "claim": "LATAM around 82 per cent of commercial operations",
+   "verdict": "cut",
+   "wasBefore": "LATAM accounts for around 82 per cent of commercial operations",
+   "why": "Contradicted and undated: Cirium (January 2026, via Aviacionline) gives LATAM 59 per cent of seats and OAG (2024) 58 per cent of flights. Wikipedia's 82 per cent carries no year. Replaced by 'by far the biggest airline' (above)."
+  },
+  {
+   "claim": "LATAM's main hub and maintenance base, and Sky Airline's",
+   "verdict": "cut",
+   "wasBefore": "and keeps its main hub and maintenance base here, as does Sky Airline",
+   "why": "Wikipedia alone. LATAM's corporate site (latamairlinesgroup.net) answered with Cloudflare's 'Just a moment...' check (not tried again), and Sky's own 'about us' page gives only its head office in Santiago. Cirium's January 2026 seat shares (via Aviacionline) put SKY Airline second at 18 per cent and JetSMART third at 10 per cent, one source only."
+  },
+  {
+   "claim": "longest non-stop destination for most European carriers",
+   "verdict": "cut",
+   "wasBefore": "It is the longest non-stop destination for most European carriers",
+   "why": "A superlative on Wikipedia alone; no airline's route data was read."
+  },
+  {
+   "claim": "Iberia and British Airways named",
+   "verdict": "cut",
+   "wasBefore": "with Iberia, Air France and British Airways flying in from Madrid, Paris and Heathrow",
+   "why": "The routes and Air France are kept (above). Iberia and British Airways rest on Wikipedia alone: the UK CAA's table and Aviacionline's figures do not name airlines, and adnradio.cl, which had a May 2026 report on a Madrid flight, is blocked by the egress policy (not tried again)."
+  },
+  {
+   "claim": "Latin America's main gateway to Oceania",
+   "verdict": "cut",
+   "wasBefore": "And it is Latin America's main gateway to Oceania",
+   "why": "A superlative on Wikipedia alone (and the phrase 'gateway to' is barred by house style). The routes are kept (above)."
+  },
+  {
+   "claim": "scheduled services to Sydney",
+   "verdict": "cut",
+   "wasBefore": "with scheduled services to Sydney, Melbourne, Auckland and Easter Island",
+   "why": "Sydney rests on Wikipedia alone: Aviacionline's April 2026 schedule report names Melbourne and Auckland only, and LATAM's own site is behind a bot check. Melbourne, Auckland and Easter Island are kept (above)."
+  },
+  {
+   "claim": "the terminal's four levels",
+   "verdict": "cut",
+   "wasBefore": "The terminal reads across four levels.",
+   "why": "Out of date as a description of 'the terminal': since February 2022 international flights use the new Terminal 2, and the four-level building described is Terminal 1, now domestic only (above). The layout itself rests on Wikipedia alone; the operator's site answers only a real browser and its maps page could not be found (the link listers and WebFetch were refused with 403)."
+  },
+  {
+   "claim": "ground floor layout",
+   "verdict": "cut",
+   "wasBefore": "Arrivals, baggage reclaim, duty free, ground transport and the hotel are on the ground floor.",
+   "why": "Terminal 1's layout before 2022, on Wikipedia alone (see above)."
+  },
+  {
+   "claim": "second and upper floor layout",
+   "verdict": "cut",
+   "wasBefore": "Departures, check in, shops and the gates are on the second, with restaurants and the LATAM VIP check in above.",
+   "why": "Terminal 1's layout before 2022, on Wikipedia alone (see above)."
+  },
+  {
+   "claim": "consortium of Aéroports de Paris, Vinci Airports and Astaldi",
+   "verdict": "cut",
+   "wasBefore": "a consortium of Aéroports de Paris, Vinci Airports and Astaldi",
+   "why": "Corrected to the shareholders in the ministry's June 2026 report (above)."
+  },
+  {
+   "claim": "joint civil and military field, home to the Air Force 2nd Air Brigade",
+   "verdict": "cut",
+   "wasBefore": "It is also a joint civil and military field, home to the Chilean Air Force 2nd Air Brigade.",
+   "why": "Wikipedia alone. The Chilean Air Force's site (fach.mil.cl) answered 403 to both link listers, so no unit page could be found. The FIDAE air show's history page places the show at 'Base Aérea Pudahuel' since 2006, but does not say the base shares the airport's runways.",
+   "sources": [
+    {
+     "file": "fidae-historia",
+     "org": "FIDAE (the Chilean Air Force's air show, fidae.cl)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "la Base Aérea Pudahuel, lugar donde se materializa en la actualidad."
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: taxi scams and theft at Santiago airport",
+   "verdict": "cut",
+   "why": "Held back: the FCDO (page still current at 23 September 2026) warns that many visitors have been scammed by unlicensed taxi drivers at Santiago airport, some charging millions of pesos by adding digits, that fake drivers work inside the arrivals hall, and that luggage is stolen; it advises paying in advance at one of the two official taxi booths just after customs. The airport introduced a prepaid system for taxis in December 2025 (Aviacionline). Important for UK clients, but nothing in the old text to replace. For Andy to decide.",
+   "sources": [
+    {
+     "file": "fcdo-chile-safety",
+     "org": "UK FCDO",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Many foreign visitors have been scammed for large amounts of money by unlicensed taxi drivers, including in airport taxis.",
+      "To reduce the risk of being overcharged you can insist on paying in advance for your journey at one of the two official taxi booths in the arrivals at Santiago’s international airport, immediately after customs and just before you head through to the public area of arrivals.",
+      "Theft of belongings at Santiago airport: This includes luggage stolen both before check-in at the airport terminal and from the baggage carousel after arrival."
+     ]
+    },
+    {
+     "file": "fcdo-chile-main",
+     "org": "UK FCDO",
+     "dated": "2026-09-23",
+     "quote": [
+      "Still current at:",
+      "23 September 2026"
+     ]
+    },
+    {
+     "file": "avl-pago-anticipado",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2025-12-16",
+     "quote": [
+      "martes 16 de diciembre de 2025",
+      "El Aeropuerto de Santiago implementó el sistema VOT para el pago anticipado de taxis."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "26.5 million passengers in 2025, a record",
+   "verdict": "cut",
+   "why": "Held back: the airport handled a record 26,517,871 passengers in 2025, 1 per cent up on 2024, 12.5 million of them international (Aviacionline, from the airport's figures); VINCI Airports gives 26.5 million. The old text gave no passenger figure, so nothing to replace. For Andy to decide.",
+   "sources": [
+    {
+     "file": "avl-destinos-2025",
+     "org": "Aviacionline (Latin American aviation trade press)",
+     "dated": "2025-12-31",
+     "quote": [
+      "miércoles 31 de diciembre de 2025",
+      "El Aeropuerto Santiago de Chile cierra 2025 con un flujo histórico de 26.517.871 pasajeros"
+     ]
+    },
+    {
+     "file": "vinci-santiago",
+     "org": "VINCI Airports (shareholder in the operator, vinci-airports.com)",
+     "dated": "read 2026-09-23 (live page, © 2026)",
+     "quote": [
+      "Passengers in 2025",
+      "26.5M"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "concession extended to September 2038",
+   "verdict": "cut",
+   "why": "Held back, for the record: the ministry's June 2026 report gives the end of the concession as 30 September 2038, under a decree of 13 January 2026 (VINCI Airports' page still says 2035). One source, and nothing in the old text to replace.",
+   "sources": [
+    {
+     "file": "mop-informe-jun2026",
+     "org": "MOP (Chile's Ministry of Public Works, concessions directorate, concesiones.mop.gob.cl)",
+     "dated": "executive report for June 2026",
+     "quote": "Término de la Concesión 30 de Septiembre de 203 8, Decreto Supremo MOP N°3, de fecha 13.01.2026"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Two things make it strategically useful.",
+   "why": "A signpost kept from the old text; the two sourced points follow (direct flights to Europe, flights across the Pacific and to Easter Island)."
+  }
+ ],
+ "tracerOk": {}
+}

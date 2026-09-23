@@ -1,0 +1,581 @@
+{
+ "iata": "LIM",
+ "id": "reccrJVqzsOxaqb3l",
+ "name": "Jorge Chávez International Airport",
+ "country": "Peru",
+ "wikipedia": "https://en.wikipedia.org/wiki/Jorge_Ch%C3%A1vez_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Peru's main airport and one of the largest in South America, in Callao 11 km north west of the historic centre of Lima and 17 km from Miraflores. It handled 22,876,785 passengers in 2023.\n\nThis airport has changed completely and recently, so older guidance is unreliable. A second runway and a new control tower came into service in April 2023, and an entirely new passenger terminal opened on 1 June 2025, replacing the old one. The old terminal was going to become a logistics centre, but as of July 2025 the government was weighing reopening it to add capacity.\n\nThere are two Wyndham hotels on site. The new Wyndham Grand Costa del Sol sits in front of the new terminal, opened in June 2025, its design drawn from the textile patterns of the Paracas culture. The original Costa del Sol, built with noise cancelling panels in 2007, stays open by the old terminal.\n\nThe airport is owned by Fraport and run by Lima Airport Partners. It is named after Jorge Chávez, the Peruvian aviator.",
+ "after": "Peru's main airport and one of the largest in South America, in Callao 11 km north west of the historic centre of Lima. It handled more than 25 million passengers in 2025.\n\nThis airport has changed completely and recently, so older guidance is unreliable. A second runway and a new control tower came into service in April 2023, and a new passenger terminal opened on 1 June 2025, replacing the old one.\n\nOf the two Costa del Sol Wyndham hotels, the new Wyndham Grand sits in front of the new terminal. The original stays open by the old terminal, and Costa del Sol says it is 5.3 km from the new one, with a free shuttle every 30 minutes.\n\nLima Airport Partners runs the airport under a state concession, and Fraport owns 80.01 per cent of that company. It is named after Jorge Chávez, a pioneer of Peruvian aviation.",
+ "claims": [
+  {
+   "claim": "Peru's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Peru's main airport",
+   "note": "Fraport, which owns most of the operator, calls it Peru's leading airport in its 2025 annual report (dated 13 March 2026); Wikipedia calls it the busiest in Peru.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": [
+      "is the main international airport serving Lima, the capital of Peru",
+      "It is among the busiest and largest airports in South America and the busiest in Peru."
+     ]
+    },
+    {
+     "file": "fraport-ar2025",
+     "org": "Fraport AG (majority owner of the operator), Annual Report 2025",
+     "dated": "2026-03-13",
+     "quote": [
+      "The Jorge Chávez Airport in Lima is Peru’s leading airport and one of the largest airports in South America.",
+      "Frankfurt/Main, March 13, 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "one of the largest in South America",
+   "verdict": "confirmed",
+   "inAfter": "one of the largest in South America",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": "It is among the busiest and largest airports in South America and the busiest in Peru."
+    },
+    {
+     "file": "fraport-ar2025",
+     "org": "Fraport AG (majority owner of the operator), Annual Report 2025",
+     "dated": "2026-03-13",
+     "quote": "The Jorge Chávez Airport in Lima is Peru’s leading airport and one of the largest airports in South America."
+    }
+   ]
+  },
+  {
+   "claim": "in Callao",
+   "verdict": "confirmed",
+   "inAfter": "in Callao",
+   "note": "The operator dates its releases from Callao, and the hotel group gives its Wyndham Grand, which it places inside the airport, an address on Avenida Morales Duárez, Callao (the avenue Infobae names as the new terminal's).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": "It is located in Callao"
+    },
+    {
+     "file": "lap-357-conectividad",
+     "org": "Lima Airport Partners (the operator, lima-airport.com)",
+     "dated": "2026-06-03",
+     "quote": "Callao, 03 de junio del 2026"
+    },
+    {
+     "file": "cds-wyndham-grand",
+     "org": "Costa del Sol Wyndham Hoteles (hotel group, costadelsolperu.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Av Morales Duarez S/N, Callao, Perú, 15018",
+      "El hotel está situado dentro del Aeropuerto Internacional Jorge Chávez en Lima, Perú"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "11 km north west of the historic centre of Lima",
+   "verdict": "confirmed",
+   "inAfter": "11 km north west of the historic centre of Lima",
+   "note": "The coordinates put the airport 9.7 km from the GeoNames centre of Lima at 284 degrees (west); 11 km gives a ratio of 1.14 and north west is the adjacent compass point, so both pass the coordinates check.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": "11 kilometers (6.8 mi) northwest of the Historic Centre of Lima"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 9.7 km (6.0 miles)",
+      "Bearing from the city centre: 284 degrees, which is west"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "more than 25 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled more than 25 million passengers in 2025.",
+   "note": "Replaces the 2023 figure (22,876,785). Good sources disagree on the 2025 total, so the text gives the floor both support. Fraport's 2025 annual report counts 25,496,109 (commercial traffic only, in, out and transit), a record, up 4.1 per cent on 2024's 24,495,815. Wikipedia's infobox gives 27,420,159 for 2025, citing CORPAC; CORPAC's own national tables say they include regular, non-regular, general aviation and military flights, which may explain the gap. CORPAC's per-airport figures are only in a spreadsheet download that the sweep's tools cannot save as text. Both figures are above 25 million. For Andy: the 25.5 million record could go in, attributed to Fraport.",
+   "sources": [
+    {
+     "file": "fraport-ar2025",
+     "org": "Fraport AG (majority owner of the operator), Annual Report 2025",
+     "dated": "2026-03-13",
+     "quote": [
+      "With around 25.5 million passengers, Lima Airport reached a new record level in 2025",
+      "Lima 80.01 25,496,109 +4.1 267,153 +16.7 199,303 +5.2",
+      "1) Commercial traffic only, in + out + transit.",
+      "Frankfurt/Main, March 13, 2026"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 27,420,159",
+      "footnotes = Source: Corporación Peruana de Aeropuertos y Aviación Comercial"
+     ]
+    },
+    {
+     "file": "corpac-pax-mensual-2021-2025",
+     "org": "CORPAC (Peru's airports and commercial aviation corporation, gob.pe)",
+     "dated": "2025 tables (national totals only)",
+     "quote": "Nota: Se incluye información disponible acerca de vuelos regulares, no regulares, aviación general y militares."
+    }
+   ]
+  },
+  {
+   "claim": "a second runway and a new control tower came into service in April 2023",
+   "verdict": "confirmed",
+   "inAfter": "A second runway and a new control tower came into service in April 2023",
+   "note": "Fraport's 2023 annual report: the first commercial flight used the new runway on 3 April 2023, when the new control tower was also inaugurated. The operator's project page lists both as finished.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": "On 3 April 2023, a second runway and a new control tower came into operation"
+    },
+    {
+     "file": "fraport-ar2023",
+     "org": "Fraport AG (majority owner of the operator), Annual Report 2023",
+     "dated": "2023 annual report",
+     "quote": [
+      "The second runway and the air traffic control tower started operations in April 2023.",
+      "With the take-off of the first commercial flight on April 3, the new runway at Lima´s international airport"
+     ]
+    },
+    {
+     "file": "lap-ampliacion",
+     "org": "Lima Airport Partners (the operator, lima-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Construcción de la nueva torre de control, base de rescate y otros edificios. Terminado",
+      "Construcción de la segunda pista de aterrizaje y despegue, calles de rodaje. Terminado"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a new passenger terminal opened on 1 June 2025",
+   "verdict": "confirmed",
+   "inAfter": "a new passenger terminal opened on 1 June 2025",
+   "note": "Fraport's 2025 report gives 1 June 2025 in its risk report but 'July 1, 2025' in two other places, a slip against its own 'opening of the new terminal building in Lima in June 2025'. Infobae (19 May 2025) gave 1 June as the start of operations, and the operator's release of 3 June 2026 counts the first year from June 2025. Wikipedia adds that the president inaugurated it on 30 May.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": "On 1 June 2025, a new passenger terminal was opened"
+    },
+    {
+     "file": "fraport-ar2025",
+     "org": "Fraport AG (majority owner of the operator), Annual Report 2025",
+     "dated": "2026-03-13",
+     "quote": [
+      "The new passenger terminal was inaugurated on June 1, 2025",
+      "the opening of the new terminal building in Lima in June 2025"
+     ]
+    },
+    {
+     "file": "infobae-antiguo-terminal",
+     "org": "Infobae (news, infobae.com)",
+     "dated": "2025-05-19",
+     "quote": [
+      "19 May, 2025",
+      "Este 1 de junio, el nuevo Aeropuerto Internacional Jorge Chávez , situado en la avenida Morales Duárez, comenzará sus operaciones"
+     ]
+    },
+    {
+     "file": "lap-357-conectividad",
+     "org": "Lima Airport Partners (the operator, lima-airport.com)",
+     "dated": "2026-06-03",
+     "quote": [
+      "Callao, 03 de junio del 2026",
+      "De junio de 2025 a mayo de 2026, el nuevo Jorge Ch&aacute;vez ha fortalecido la conectividad del pa&iacute;s"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the new terminal replaced the old one",
+   "verdict": "confirmed",
+   "inAfter": "replacing the old one",
+   "note": "Infobae: the old terminal stopped operating as the main terminal at 11:59 pm on 31 May 2025. The operator (June 2026) calls the new terminal three times the size of the previous one. Nothing read from the last twelve months says the old terminal has taken passengers since.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": "replacing the old terminal"
+    },
+    {
+     "file": "infobae-antiguo-terminal",
+     "org": "Infobae (news, infobae.com)",
+     "dated": "2025-05-19",
+     "quote": "sus operaciones como terminal principal a las 11:59 p.m. del sábado 31 de mayo"
+    },
+    {
+     "file": "lap-357-conectividad",
+     "org": "Lima Airport Partners (the operator, lima-airport.com)",
+     "dated": "2026-06-03",
+     "quote": "El nuevo terminal, tres veces m&aacute;s grande que el anterior"
+    }
+   ]
+  },
+  {
+   "claim": "two Costa del Sol Wyndham hotels at the airport",
+   "verdict": "corrected",
+   "inAfter": "Of the two Costa del Sol Wyndham hotels",
+   "note": "Was 'two Wyndham hotels on site'. The hotel group offers two hotels for the airport, but places only the new one inside it; the original is 'near the airport', 5.3 km from the new terminal (below).",
+   "sources": [
+    {
+     "file": "cds-hoteles-aeropuerto",
+     "org": "Costa del Sol Wyndham Hoteles (hotel group, costadelsolperu.com)",
+     "dated": "read 2026-09-23 (live page, © 2026)",
+     "quote": [
+      "Dos opciones de hoteles en el Aeropuerto Jorge Chávez de Lima",
+      "&copy; 2026 Costa del Sol Wyndham Hoteles."
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": [
+      "The airport hosts the Wyndham Grand Costa del Sol hotel",
+      "The old Wyndham Costa del Sol hotel is located at the old terminal"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the new Wyndham Grand sits in front of the new terminal",
+   "verdict": "confirmed",
+   "inAfter": "the new Wyndham Grand sits in front of the new terminal",
+   "note": "The hotel group puts it inside the airport, 60 metres from the departures terminal.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": "The airport hosts the Wyndham Grand Costa del Sol hotel, which is located in front of the new terminal by the central boulevard."
+    },
+    {
+     "file": "cds-wyndham-grand",
+     "org": "Costa del Sol Wyndham Hoteles (hotel group, costadelsolperu.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "El hotel está situado dentro del Aeropuerto Internacional Jorge Chávez en Lima, Perú, a 60 metros de la terminal de salidas."
+    },
+    {
+     "file": "cds-hoteles-aeropuerto",
+     "org": "Costa del Sol Wyndham Hoteles (hotel group, costadelsolperu.com)",
+     "dated": "read 2026-09-23 (live page, © 2026)",
+     "quote": "Ubicado a 60 metros caminando de la nueva terminal"
+    }
+   ]
+  },
+  {
+   "claim": "the original hotel stays open by the old terminal",
+   "verdict": "confirmed",
+   "inAfter": "The original stays open by the old terminal",
+   "note": "La República (May 2025) reported the hotel group's word that the hotel would stay open at the old terminal; the group's live page (2026) still sells it, as a hotel 'near the airport'.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": [
+      "The old Wyndham Costa del Sol hotel is located at the old terminal",
+      "It will remain in operation after the new terminal is opened."
+     ]
+    },
+    {
+     "file": "larepublica-hotel-cds",
+     "org": "La República (Peruvian newspaper, larepublica.pe)",
+     "dated": "2025-05-31 (as shown on the page)",
+     "quote": [
+      "Sábado 31 de Mayo del 2025",
+      "Hotel Costa del Sol seguirá operativo en el antiguo terminal y conectará con el nuevo Jorge Chávez"
+     ]
+    },
+    {
+     "file": "cds-hoteles-aeropuerto",
+     "org": "Costa del Sol Wyndham Hoteles (hotel group, costadelsolperu.com)",
+     "dated": "read 2026-09-23 (live page, © 2026)",
+     "quote": [
+      "Costa del Sol Wyndham Lima Airport",
+      "Cerca del aeropuerto"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Costa del Sol: the original hotel is 5.3 km from the new terminal, with a free shuttle every 30 minutes",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Costa del Sol",
+   "inAfter": "Costa del Sol says it is 5.3 km from the new one, with a free shuttle every 30 minutes",
+   "note": "New, and the reason 'on site' no longer holds: the original hotel is by the old terminal, not the one flights now use. The distance is the hotel group's alone, so it is named as theirs. The shuttle is also reported by La República (May 2025), from the group's statement.",
+   "sources": [
+    {
+     "file": "cds-hoteles-aeropuerto",
+     "org": "Costa del Sol Wyndham Hoteles (hotel group, costadelsolperu.com)",
+     "dated": "read 2026-09-23 (live page, © 2026)",
+     "quote": [
+      "Ubicado a 5.3 km de la nueva terminal",
+      "Shuttle gratuito cada 30 minutos"
+     ]
+    },
+    {
+     "file": "cds-wyndham-grand",
+     "org": "Costa del Sol Wyndham Hoteles (hotel group, costadelsolperu.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Costa del Sol Wyndham Lima Airport ofrece un servicio de transporte gratuito, de uso compartido entre el hotel y el aeropuerto, disponible cada 30 minutos"
+    },
+    {
+     "file": "larepublica-hotel-cds",
+     "org": "La República (Peruvian newspaper, larepublica.pe)",
+     "dated": "2025-05-31 (as shown on the page)",
+     "quote": "implementó un servicio gratuito de traslado que permite la conexión con el nuevo terminal cada media hora"
+    }
+   ]
+  },
+  {
+   "claim": "Lima Airport Partners runs the airport under a state concession",
+   "verdict": "corrected",
+   "inAfter": "Lima Airport Partners runs the airport under a state concession",
+   "note": "The concession was signed on 14 February 2001 with the Peruvian government as grantor (Fraport); in June 2026 the transport ministry and the operator signed a ninth addendum to it (operator's release).",
+   "sources": [
+    {
+     "file": "lap-acerca",
+     "org": "Lima Airport Partners (the operator, lima-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Lima Airport Partners (LAP), es la empresa concesionaria que opera el Aeropuerto Internacional Jorge Chavez (AIJC) desde el 14 de febrero del 2001."
+    },
+    {
+     "file": "fraport-ar2025",
+     "org": "Fraport AG (majority owner of the operator), Annual Report 2025",
+     "dated": "2026-03-13",
+     "quote": "On February 14, 2001, LAP (operator) and the Peruvian government (grantor) signed the concession agreement for Jorge Chavez"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "By decision of the Government of Peru, in 2001, it was awarded a concession to the company Lima Airport Partners (LAP)"
+    },
+    {
+     "file": "lap-357-conectividad",
+     "org": "Lima Airport Partners (the operator, lima-airport.com)",
+     "dated": "2026-06-03",
+     "quote": [
+      "Lima Airport, operador del Aeropuerto Internacional Jorge Ch&aacute;vez",
+      "firmaron la Adenda N.&ordm; 9 al contrato de concesi&oacute;n"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Fraport owns 80.01 per cent of Lima Airport Partners",
+   "verdict": "corrected",
+   "inAfter": "Fraport owns 80.01 per cent of that company",
+   "note": "Was 'The airport is owned by Fraport'. The airport is held under a concession from the state, which gets the infrastructure back when the concession ends (Fraport's report); Fraport owns 80.01 per cent of the concession company and the International Finance Corporation 19.99 per cent (the operator).",
+   "sources": [
+    {
+     "file": "lap-acerca",
+     "org": "Lima Airport Partners (the operator, lima-airport.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Actualmente LAP está formada por el grupo Alemán Fraport AG, con el 80.01% del capital social"
+    },
+    {
+     "file": "fraport-ar2025",
+     "org": "Fraport AG (majority owner of the operator), Annual Report 2025",
+     "dated": "2026-03-13",
+     "quote": [
+      "Peru Lima Lima Airport Partners S.R.L. 80.01 2001",
+      "At the end of the concession term, the infrastructure pursuant to the contract that is essential for airport operations must be"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after Jorge Chávez, a pioneer of Peruvian aviation",
+   "verdict": "confirmed",
+   "inAfter": "It is named after Jorge Chávez, a pioneer of Peruvian aviation.",
+   "note": "Reworded from 'the Peruvian aviator' to the Peruvian Air Force's own description of him (23 September 2026, the national aviation day). The Air Force item does not mention the airport; the name link is Wikipedia's and the airport's own name.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "archived copy the Overview was drafted from (September 2026)",
+     "quote": "The airport was named after Peruvian aviator Jorge Chávez (1887–1910)."
+    },
+    {
+     "file": "fap-jorge-chavez",
+     "org": "Fuerza Aérea del Perú (Peruvian Air Force, gob.pe)",
+     "dated": "2026-09-23",
+     "quote": [
+      "23 de setiembre de 2026",
+      "recordando la histórica hazaña del pionero de la aviación nacional Jorge Chávez Dartnell"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "17 km from Miraflores",
+   "verdict": "cut",
+   "wasBefore": "and 17 km from Miraflores",
+   "why": "Wikipedia alone; its citation is a hotel blog held in the web archive (blocked). The coordinates check measures only from the city centre, and PromPerú's Lima page (saved) gives no distance to Miraflores."
+  },
+  {
+   "claim": "22,876,785 passengers in 2023",
+   "verdict": "cut",
+   "wasBefore": "It handled 22,876,785 passengers in 2023.",
+   "why": "Out of date: replaced by the 2025 total (above). Fraport counts 24,495,815 for 2024 and 25,496,109 for 2025.",
+   "sources": [
+    {
+     "file": "fraport-ar2025",
+     "org": "Fraport AG (majority owner of the operator), Annual Report 2025",
+     "dated": "2026-03-13",
+     "quote": "Lima 25,496,109 Substantial traffic increases compared to the previous year  24,495,815 23,578,600"
+    }
+   ]
+  },
+  {
+   "claim": "an entirely new terminal (wording)",
+   "verdict": "cut",
+   "wasBefore": "and an entirely new passenger terminal opened",
+   "why": "Shortened to 'a new passenger terminal' for length; the fact is kept (above)."
+  },
+  {
+   "claim": "old terminal plans: logistics centre, and the government weighing reopening it as of July 2025",
+   "verdict": "cut",
+   "wasBefore": "The old terminal was going to become a logistics centre, but as of July 2025 the government was weighing reopening it to add capacity.",
+   "why": "Out of date: it describes plans of May to July 2025, more than twelve months ago, and nothing newer was found. The operator's releases since April 2026, Fraport's 2025 annual report and its half-year report to June 2026 say nothing on the old terminal's future. Infobae (May 2025) quoted the operator's general manager on aircraft maintenance and long-stay parking there, with offices, logistics and other uses being explored.",
+   "sources": [
+    {
+     "file": "infobae-antiguo-terminal",
+     "org": "Infobae (news, infobae.com)",
+     "dated": "2025-05-19",
+     "quote": "Áreas como la terminal de aeronaves seguirán siendo utilizadas para mantenimiento y para aviones que requieran estacionamiento prolongado."
+    }
+   ]
+  },
+  {
+   "claim": "two Wyndham hotels on site",
+   "verdict": "cut",
+   "wasBefore": "There are two Wyndham hotels on site.",
+   "why": "Corrected (above): the hotel group places only the new Wyndham Grand inside the airport; the original is by the old terminal, 5.3 km from the new one."
+  },
+  {
+   "claim": "the Wyndham Grand opened in June 2025",
+   "verdict": "cut",
+   "wasBefore": "opened in June 2025",
+   "why": "Wikipedia alone. La República (May 2025) said only that the group planned to open it during 2025, and the group's pages give no opening date."
+  },
+  {
+   "claim": "its design is drawn from Paracas textile patterns",
+   "verdict": "cut",
+   "wasBefore": "its design drawn from the textile patterns of the Paracas culture",
+   "why": "Wikipedia's sentence is a word-for-word translation of La República's, so the two are one source (as at Mashhad), and the hotel group's own pages do not mention it.",
+   "sources": [
+    {
+     "file": "larepublica-hotel-cds",
+     "org": "La República (Peruvian newspaper, larepublica.pe)",
+     "dated": "2025-05-31 (as shown on the page)",
+     "quote": "El diseño del hotel está inspirado en la iconografía textil de la cultura Paracas, alineado al concepto de identidad cultural promovido en la nueva infraestructura aeroportuaria."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The design of the hotel is inspired by the textile iconography of the Paracas culture, aligned with the concept of cultural identity promoted in the new airport infrastructure."
+    }
+   ]
+  },
+  {
+   "claim": "the original hotel was built with noise cancelling panels in 2007",
+   "verdict": "cut",
+   "wasBefore": "built with noise cancelling panels in 2007",
+   "why": "The 2007 opening rests on Wikipedia alone. The hotel group lists soundproofed rooms but no year; the detail is dropped for length."
+  },
+  {
+   "claim": "the airport is owned by Fraport",
+   "verdict": "cut",
+   "wasBefore": "The airport is owned by Fraport and run by Lima Airport Partners.",
+   "why": "Imprecise: the airport is run under a concession from the Peruvian state, and Fraport owns 80.01 per cent of the concession company (above)."
+  },
+  {
+   "claim": "the Peruvian aviator (wording)",
+   "verdict": "cut",
+   "wasBefore": "the Peruvian aviator",
+   "why": "Reworded to the Peruvian Air Force's description, 'a pioneer of Peruvian aviation' (above)."
+  },
+  {
+   "claim": "FCDO: fake taxi drivers at Jorge Chávez airport",
+   "verdict": "cut",
+   "why": "Held back: the FCDO (page still current at 23 September 2026) warns of robbery by criminals posing as taxi drivers, especially at Jorge Chávez airport, and advises using the official taxi companies at desks directly outside the baggage hall. Useful to an agent, but nothing in the old text to replace. For Andy to decide.",
+   "sources": [
+    {
+     "file": "fcdo-peru-safety",
+     "org": "UK FCDO",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "There is a risk of robbery by criminals posing as taxi drivers, especially at Jorge Chavez International Airport and bus terminals.",
+      "use one of the official taxi companies at the airport , located at desks directly outside the baggage hall"
+     ]
+    },
+    {
+     "file": "fcdo-peru-main",
+     "org": "UK FCDO",
+     "dated": "2026-09-23",
+     "quote": [
+      "Still current at:",
+      "23 September 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "airlines and destinations now",
+   "verdict": "cut",
+   "why": "Held back: the operator says 23 airlines link Lima with 68 domestic and international destinations (June 2026), and Fraport says the LATAM group has the largest share of flights and passengers, with SKY Airline and JetSMART the largest low-cost airlines. The old text named no airlines, so nothing to replace. For Andy to decide.",
+   "sources": [
+    {
+     "file": "lap-357-conectividad",
+     "org": "Lima Airport Partners (the operator, lima-airport.com)",
+     "dated": "2026-06-03",
+     "quote": "Actualmente, 23 aerol&iacute;neas conectan Lima con 68 destinos nacionales e internacionales."
+    },
+    {
+     "file": "fraport-ar2025",
+     "org": "Fraport AG (majority owner of the operator), Annual Report 2025",
+     "dated": "2026-03-13",
+     "quote": "Airlines Group has the lar gest share of aircraft movements and passengers at Lima Airport."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "This airport has changed completely and recently, so older guidance is unreliable.",
+   "why": "A signpost kept from the old text; the changes it points to (second runway and tower in 2023, new terminal on 1 June 2025, the original hotel now away from the terminal in use) follow and are sourced."
+  }
+ ],
+ "tracerOk": {}
+}
