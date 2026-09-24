@@ -73,7 +73,7 @@ export const EMAIL_BLOCKS = [
   { type: 'greeting',   kind: 'data',  label: 'Greeting',              hint: 'The confirmed badge, "Hi Sarah," and one line of welcome.' },
   { type: 'summary',    kind: 'data',  label: 'Booking summary',       hint: 'Everything we know, in one card: reference, travellers, stay, flights and the rest.' },
   { type: 'reference',  kind: 'data',  label: 'Booking reference',     hint: 'The reference on its own, with ATOL protection where it applies.' },
-  { type: 'travellers', kind: 'data',  label: 'Travellers',            hint: 'Who is going.' },
+  { type: 'travellers', kind: 'data',  label: "Who's travelling",      hint: 'Everyone on the booking, with each child and infant\'s age.' },
   { type: 'stay',       kind: 'data',  label: 'Accommodation',         hint: 'Destination, property and dates. Every property on a multi-centre trip.' },
   { type: 'flights',    kind: 'data',  label: 'Flights',               hint: 'Outbound and return.' },
   { type: 'transfers',  kind: 'data',  label: 'Transfers',             hint: 'Pick-up, drop-off and times.' },
@@ -122,13 +122,18 @@ export const EMAIL_BLOCKS = [
  *
  * What still holds, and `test:confirmation-blocks` checks it: on a booking with
  * nothing to offer, which is any booking whose application sells no upsells or
- * whose client has switched "Add to your trip" off, the block draws nothing
- * and the email is the one we have always sent.
+ * whose client has switched "Add to your trip" off, the block draws nothing.
+ *
+ * Later the same day Andy asked for "a section for passengers, and list them
+ * all, including ages", so "Who's travelling" follows the summary card, and the
+ * summary drops its own "+2 others" line rather than say it twice.
  */
 export const DEFAULT_EMAIL_LAYOUT = [
   { type: 'greeting' },
   { type: 'message' },
   { type: 'summary' },
+  // Andy, 24 Sep 2026: every passenger listed, with ages.
+  { type: 'travellers' },
   { type: 'documents' },
   { type: 'payment' },
   { type: 'pdfnote' },
@@ -166,6 +171,7 @@ export const EMAIL_STYLES = [
       { type: 'greeting' },
       { type: 'message' },
       { type: 'summary' },
+      { type: 'travellers' },
       { type: 'documents' },
       { type: 'payment' },
       { type: 'pdfnote' },
@@ -395,6 +401,50 @@ function buildTravellerList(order) {
 }
 
 /**
+ * Everyone on the booking, for the "Who's travelling" section: a name, and what
+ * they are, with a child's or an infant's age where the booking gives one.
+ *
+ * Andy, 24 Sep 2026: "the email should have a section for passengers, and list
+ * them all, including ages". The age is the one /api/retrieve-order has already
+ * worked out (from the supplier's age, or its date of birth counted to the day
+ * they travel, the date of birth itself never sent), so this only prints it.
+ * An adult's age is not shown: an airline or hotel confirmation does not, and a
+ * grown-up's age in an email is personal for no reason.
+ *
+ * The words match the booking page's "Who's travelling" section: the first
+ * grown-up is the "Lead guest".
+ */
+function buildParty(order) {
+  const accItem = order.items?.find(i => i.product === 'Accommodation' || i.product === 'Packages');
+  const people = order.summary?.travellers?.length
+    ? order.summary.travellers
+    : (accItem?.accommodation?.guests || []);
+  const out = [];
+  for (const g of people) {
+    if (!g || typeof g !== 'object') continue;
+    const name = [g.title, g.firstname, g.surname].map(s => String(s || '').trim()).filter(Boolean).join(' ');
+    if (!name) continue;
+    out.push({ name, kind: partyKind(g, out.length === 0) });
+  }
+  if (out.length) return out;
+  const fallback = [order.customerTitle, order.customerFirstname, order.customerSurname]
+    .map(s => String(s || '').trim()).filter(Boolean).join(' ');
+  return fallback ? [{ name: fallback, kind: 'Lead guest' }] : [];
+}
+
+/** "Lead guest", "Adult", "Child, aged 9", "Infant, under 1". */
+function partyKind(g, isFirst) {
+  const type = String(g.type || '').toLowerCase();
+  const n = (g.age == null || g.age === '') ? NaN : Number(g.age);
+  const age = Number.isFinite(n) && n >= 0 && n < 18 ? Math.floor(n) : null;
+  const aged = age === 0 ? 'under 1' : `aged ${age}`;
+  if (type.indexOf('infant') !== -1) return age != null ? `Infant, ${aged}` : 'Infant';
+  if (type.indexOf('child') !== -1) return age != null ? `Child, ${aged}` : 'Child';
+  if (type.indexOf('lead') !== -1 || isFirst) return 'Lead guest';
+  return 'Adult';
+}
+
+/**
  * Single-line flight summary: "LGW 06:30 → FAO 10:00 (Direct)".
  */
 function buildFlightLine(route) {
@@ -545,6 +595,11 @@ export function renderBookingEmail(opts) {
   const checkout = (checkin && nights) ? addDays(checkin, nights) : '';
 
   const travellers = buildTravellerList(order || {});
+  const party = buildParty(order || {});
+  const partyRows = party.map(p => ({ label: p.kind, value: p.name }));
+  // When the layout carries the full "Who's travelling" section, the summary
+  // card does not also say "Mr Luke Livsey +2 others" above it.
+  const layoutHasParty = normaliseLayout(layout).some(b => b && b.type === 'travellers');
   const payment = buildPaymentInfo(order || {});
 
   const subjectParts = [];
@@ -1132,8 +1187,11 @@ export function renderBookingEmail(opts) {
     '',
     '─── Booking summary ───',
     '',
-    ...summaryRows.map(r => `${r.label}: ${r.value}`),
+    ...summaryRows.filter(r => !(party.length && r.group === 'travellers')).map(r => `${r.label}: ${r.value}`),
   ];
+  if (party.length) {
+    textParts.push('', "─── Who's travelling ───", '', ...party.map(p => `${p.name} (${p.kind})`));
+  }
 
   if (payment) {
     textParts.push('', '─── Payment ───', '');
@@ -1596,9 +1654,9 @@ export function renderBookingEmail(opts) {
     whatson:    () => whatsOnHtml(),
     thingstodo: () => thingsToDoHtml(),
     message:    () => messageHtml,
-    summary:    () => summaryCard(summaryRows, 'Your booking'),
+    summary:    () => summaryCard(layoutHasParty ? summaryRows.filter(r => r.group !== 'travellers') : summaryRows, 'Your booking'),
     reference:  () => summaryCard(rowsIn('reference'), 'Your booking'),
-    travellers: () => summaryCard(rowsIn('travellers'), 'Travellers'),
+    travellers: () => summaryCard(partyRows, "Who's travelling"),
     stay:       () => summaryCard(rowsIn('stay'), 'Your stay'),
     flights:    () => summaryCard(rowsIn('flights'), 'Flights'),
     transfers:  () => summaryCard(rowsIn('transfers'), 'Transfers'),
