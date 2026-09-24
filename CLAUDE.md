@@ -44,6 +44,12 @@ Owner: Andy Speight, CEO, Travelgenix.
   `api/v1/booking-webhook.js`, `api/cron/booking-confirmations.js` or the block
   vocabulary in `public/_booking-email-template.js`.
 
+- **Acting as a client (staff) and Control's "View as client"**:
+  `docs/act-as-scoping-spec.md`. Read it before touching `api/_lib/auth/actas.js`,
+  `/api/auth/act-as/start`, `/api/auth/switch-client`, `staff-switcher.js` or the
+  launchpad's `?viewAs=` preview. A preview uses the per-tab scoped grant and
+  never the old whole-login switch. Airtable record `receBpWj20KhsBPQ6`.
+
 - **Travelify widget platform integration** (the two read APIs and the SSO deep
   link that merge our widgets into Travelify's own Widget Directory and My
   Widgets): `docs/travelify-widget-integration.md`. Read it before touching
