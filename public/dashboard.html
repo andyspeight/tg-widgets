@@ -53,6 +53,29 @@
       font-weight: 700; font-size: 18px; color: var(--tg-primary);
     }
     [data-theme="dark"] .logo { color: var(--tg-accent-light); }
+
+    /* "View as client" preview bar (24 Sep 2026). Amber, like the staff
+       switcher's act-as banner, so "you are not looking at your own account"
+       reads the same wherever it appears. */
+    :root { --tg-preview-bg: #FEF3C7; --tg-preview-ink: #78350F; --tg-preview-edge: #FCD34D; }
+    [data-theme="dark"] { --tg-preview-bg: #3B2A08; --tg-preview-ink: #FDE68A; --tg-preview-edge: #92400E; }
+    .preview-bar {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      padding: 10px var(--space-6); background: var(--tg-preview-bg); color: var(--tg-preview-ink);
+      border-bottom: 1px solid var(--tg-preview-edge); font-size: 14px; line-height: 1.45;
+    }
+    .preview-bar[hidden] { display: none; }
+    .preview-bar svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .preview-bar .preview-text { flex: 1 1 320px; min-width: 0; }
+    .preview-bar strong { font-weight: 600; }
+    .preview-bar button {
+      font: inherit; font-weight: 600; font-size: 13px; color: var(--tg-preview-ink);
+      background: transparent; border: 1px solid var(--tg-preview-edge); border-radius: var(--radius-md);
+      padding: 6px 12px; cursor: pointer;
+    }
+    .preview-bar button:hover { background: var(--tg-preview-edge); }
+    .preview-bar button:focus-visible { outline: 2px solid var(--tg-preview-ink); outline-offset: 2px; }
+    .product-tile.is-preview { cursor: default; }
     .logo-mark {
       width: 32px; height: 32px; border-radius: var(--radius-sm);
       background: linear-gradient(135deg, var(--tg-primary), var(--tg-accent));
@@ -542,6 +565,7 @@
       <button class="signout-btn" id="signout-btn" type="button">Sign out</button>
     </div>
   </header>
+  <div class="preview-bar" id="preview-bar" role="status" hidden></div>
 
   <div class="container">
     <div id="content">
@@ -625,17 +649,108 @@
       } catch { return 'Never'; }
     }
 
-    async function load() {
+    // ─── "View as client" preview (24 Sep 2026) ────────────────────────────
+    // Andy, from Control's client list: "I would like a button that takes me to
+    // their logged-in control screen so I can be sure the correct things are
+    // showing." Control opens this page as /dashboard.html?viewAs=<client id>.
+    //
+    // It uses the SCOPED act-as grant (docs/act-as-scoping-spec.md), never the
+    // old /api/auth/switch-client, which re-mints the shared session cookie and
+    // flips every tool at once (the July 2026 calendar incident). The grant is
+    // asked for here, by this tab, kept in THIS TAB's sessionStorage, and sent
+    // only on this page's own request for its tiles. Every other tab and tool,
+    // Control included, stays as the real staff member.
+    //
+    // The server does the gatekeeping: /api/auth/act-as/start is staff only,
+    // origin checked, rate limited and audited, and requireAuth ignores a grant
+    // that is not the caller's own. A client who types ?viewAs= gets a refusal
+    // and their own launchpad.
+    const PREVIEW_KEY = 'tg_viewas';
+    const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
+    const EYE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+
+    function readPreview() {
       try {
-        const r = await fetch('/api/dashboard/me-products', { credentials: 'include' });
+        const p = JSON.parse(sessionStorage.getItem(PREVIEW_KEY) || 'null');
+        return (p && REC_ID_RE.test(p.clientId) && typeof p.grant === 'string') ? p : null;
+      } catch { return null; }
+    }
+    function clearPreview() { try { sessionStorage.removeItem(PREVIEW_KEY); } catch {} }
+
+    async function startPreview(clientId) {
+      const r = await fetch('/api/auth/act-as/start', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ clientId }),
+      });
+      const d = await r.json().catch(() => null);
+      if (!r.ok || !d || typeof d.grant !== 'string') {
+        clearPreview();
+        throw new Error((d && d.error) || ('the preview was refused (' + r.status + ')'));
+      }
+      const p = { clientId, grant: d.grant, exp: Date.now() + (Number(d.ttlMs) || 30 * 60 * 1000),
+        name: (d.client && d.client.clientName) || '' };
+      try { sessionStorage.setItem(PREVIEW_KEY, JSON.stringify(p)); } catch {}
+      return p;
+    }
+
+    // Which client, if any, this tab is previewing. The ?viewAs= in the address
+    // is read once and taken out of it, so a bookmark or a copied link does not
+    // carry it; a reload keeps previewing from sessionStorage. A grant has half
+    // an hour, so one near its end is renewed rather than left to lapse into a
+    // silent switch back to the staff member's own tiles.
+    async function resolvePreview() {
+      const url = new URL(location.href);
+      const asked = url.searchParams.get('viewAs');
+      if (asked !== null) {
+        url.searchParams.delete('viewAs');
+        history.replaceState(null, '', url.pathname + url.search + url.hash);
+      }
+      const held = readPreview();
+      if (asked && REC_ID_RE.test(asked) && (!held || held.clientId !== asked)) return startPreview(asked);
+      if (held && held.exp - Date.now() < 2 * 60 * 1000) return startPreview(held.clientId);
+      return held;
+    }
+
+    function showPreviewBar(html) {
+      const bar = document.getElementById('preview-bar');
+      bar.innerHTML = html;
+      bar.hidden = false;
+      const stop = document.getElementById('preview-stop');
+      if (stop) stop.addEventListener('click', () => { clearPreview(); location.replace('/dashboard.html'); });
+    }
+
+    async function load() {
+      let preview = null;
+      try {
+        preview = await resolvePreview();
+      } catch (err) {
+        preview = null;
+        showPreviewBar(EYE_ICON + '<div class="preview-text"><strong>The preview did not open.</strong> '
+          + escapeHtml(String(err && err.message || 'Unknown error')) + '. You are looking at your own launchpad.</div>');
+      }
+      try {
+        const headers = { Accept: 'application/json' };
+        if (preview) headers['X-TG-Act-As'] = preview.grant;
+        const r = await fetch('/api/dashboard/me-products', { credentials: 'include', headers });
         if (r.status === 401) {
           window.location.href = '/signin.html?redirect=/dashboard.html';
           return;
         }
         if (!r.ok) throw new Error('me-products failed: ' + r.status);
         const data = await r.json();
-        render(data);
-        loadCompanies();
+        render(data, preview);
+        if (preview) {
+          const name = (data.client && data.client.clientName) || preview.name || 'this client';
+          showPreviewBar(EYE_ICON + '<div class="preview-text"><strong>Previewing ' + escapeHtml(name)
+            + '.</strong> This is their launchpad exactly as their team sees it. It is only in this tab: everywhere else, you are still you. Tiles do not open from a preview.</div>'
+            + '<button type="button" id="preview-stop">Stop previewing</button>');
+        } else {
+          // The company switcher is the staff member's OWN list of companies; in
+          // a preview it would offer to switch the shared session, so it stays
+          // hidden there.
+          loadCompanies();
+        }
       } catch (err) {
         console.error('[dashboard] load failed', err);
         document.getElementById('content').innerHTML = `
@@ -646,7 +761,7 @@
       }
     }
 
-    function render(data) {
+    function render(data, preview) {
       const u = data.user || {};
       const c = data.client || {};
       const products = Array.isArray(data.products) ? data.products : [];
@@ -693,6 +808,16 @@
         </section>
       `;
 
+      if (products.length === 0 && preview && data._resolvedFrom === 'preview_no_entitlements') {
+        document.getElementById('content').innerHTML = headerHtml + `
+          <div class="empty-state">
+            <h2>Nothing is switched on for this client</h2>
+            <p>They have no products turned on in Control, so their team only see apps granted to them person by person, if any. A preview cannot show those. Turn products on in their Entitlements tab and this page will show them.</p>
+          </div>
+        `;
+        return;
+      }
+
       if (products.length === 0) {
         document.getElementById('content').innerHTML = headerHtml + `
           <div class="empty-state">
@@ -713,9 +838,14 @@
         // products with a temporary preview URL open for staff in a new tab
         // with a "Preview" badge; those with no URL yet stay non-clickable
         // with a "Coming soon" badge.
-        const tag = hasUrl ? 'a' : 'div';
-        const hrefAttr = hasUrl ? ` href="${escapeHtml(p.url)}"` : '';
-        const targetAttr = (soon && hasUrl) ? ' target="_blank" rel="noopener noreferrer"' : '';
+        // In a "View as client" preview a tile does not open. The grant is
+        // scoped to THIS page, so a product opened from here would open as the
+        // staff member, not the client, and show the wrong account under the
+        // client's tile.
+        const linked = hasUrl && !preview;
+        const tag = linked ? 'a' : 'div';
+        const hrefAttr = linked ? ` href="${escapeHtml(p.url)}"` : '';
+        const targetAttr = (soon && linked) ? ' target="_blank" rel="noopener noreferrer"' : '';
         const openArrow = `<span class="open-arrow">Open
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
               </span>`;
@@ -731,7 +861,7 @@
             </div>`;
         }
         return `
-          <${tag} class="product-tile${soon && !hasUrl ? ' is-coming-soon' : ''}"${hrefAttr}${targetAttr} data-slug="${escapeHtml(p.slug)}" data-staff="${p.staff ? 'true' : 'false'}">
+          <${tag} class="product-tile${soon && !hasUrl ? ' is-coming-soon' : ''}${preview ? ' is-preview' : ''}"${hrefAttr}${targetAttr} data-slug="${escapeHtml(p.slug)}" data-staff="${p.staff ? 'true' : 'false'}">
             <div class="tile-header">
               <div class="product-icon" data-slug="${escapeHtml(p.slug)}">${ICONS[p.slug] || ICONS.tool_hub}</div>
               <div class="tile-header-body">

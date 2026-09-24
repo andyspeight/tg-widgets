@@ -170,8 +170,13 @@ export default async function handler(req, res) {
     const linkedClientIds = (userRec?.fields?.[USERS.fields.client] || [])
       .map((x) => (typeof x === 'string' ? x : x && x.id))
       .filter(Boolean);
-    const impersonating =
-      !!ctx.clientRecordId && !linkedClientIds.includes(ctx.clientRecordId);
+    // A per-tab act-as grant (ctx.actingAs, see api/_lib/auth/actas.js) is
+    // ALWAYS a preview, including of a client this staff member is also linked
+    // to: "View as client" in Control opens the launchpad with one, and the
+    // point is to see exactly what that client's people see, not the full
+    // internal view that the linked-client check below would otherwise give.
+    const impersonating = !!ctx.actingAs
+      || (!!ctx.clientRecordId && !linkedClientIds.includes(ctx.clientRecordId));
 
     // Decide which product slugs are visible.
     let visibleSlugs;
@@ -199,6 +204,14 @@ export default async function handler(req, res) {
       if (enabledSlugs.size > 0) {
         visibleSlugs = enabledSlugs;
         resolvedFrom = 'entitlements';
+      } else if (ctx.actingAs) {
+        // A "View as client" preview of a client with nothing switched on.
+        // The fallback below reads the CALLER's own per-user permissions, and
+        // in a preview the caller is the staff member, so it would put their
+        // tiles under the client's name: a false "all correct" on the one
+        // screen whose job is to check. Show nothing and say why instead.
+        visibleSlugs = new Set();
+        resolvedFrom = 'preview_no_entitlements';
       } else {
         // SAFETY NET: no entitlements seeded for this client yet. Fall back to
         // the legacy per-user Permissions tiles so the launchpad isn't blank.

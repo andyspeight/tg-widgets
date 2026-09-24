@@ -49,6 +49,8 @@
     }
     .breadcrumb a:hover { color: var(--tg-text-primary); }
 
+    .btn.view-as { text-decoration: none; }
+    .btn.view-as svg { flex-shrink: 0; }
     .detail-header {
       display: flex; align-items: flex-end; justify-content: space-between;
       gap: var(--space-4);
@@ -644,6 +646,22 @@
       }
     }
 
+    // "View as client" (24 Sep 2026). Andy: "I would like a button that takes
+    // me to their logged-in control screen so I can be sure the correct things
+    // are showing." Opens their launchpad in a NEW TAB previewing this client
+    // (see the preview block in /dashboard.html): that tab asks for a scoped,
+    // staff-only act-as grant for itself, so this Control tab and every other
+    // tool stay as you. rel=noopener so the new tab starts with a clean
+    // sessionStorage rather than a copy of this one's. A suspended client is
+    // refused by the server, so the button is not offered for one.
+    const EYE_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+    function viewAsButton(c) {
+      if (!c || !/^rec[A-Za-z0-9]{14}$/.test(String(c.id || ''))) return '';
+      if (String(c.status || '').toLowerCase() === 'suspended') return '';
+      return `<a class="btn view-as" href="/dashboard.html?viewAs=${encodeURIComponent(c.id)}" target="_blank" rel="noopener"
+        title="Open their launchpad in a new tab, exactly as their team sees it">${EYE_ICON}View as client</a>`;
+    }
+
     function renderHeader() {
       const c = clientData.client;
       const pkg = clientData.package;
@@ -661,6 +679,7 @@
               ${pkg ? `<span class="pkg-pill" data-pkg="${escapeHtml(pkg.name)}">${escapeHtml(pkg.name)}</span>` : ''}
             </div>
           </div>
+          ${viewAsButton(c)}
         </div>
 
         <div class="sub-tabs" role="tablist">
