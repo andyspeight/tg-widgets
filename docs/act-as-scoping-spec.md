@@ -220,7 +220,7 @@ repo answer above.
   shows an honest empty state rather than the staff member's own permission
   tiles. Tiles do not open from a preview, because the products themselves do
   not send the header yet (that is still phases 2 and 3). Covered by
-  `npm run test:view-as-client` (32 checks, real browser).
+  `npm run test:view-as-client` (34 checks, real browser).
 - Phase 2: switch `staff-switcher.js` and the shell to the per-tab grant. Keep
   the global switch for genuine members only.
 - Phase 3: roll the header attach and banner into each other tool that shares

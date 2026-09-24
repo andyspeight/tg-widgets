@@ -162,6 +162,11 @@ if (!chromium || !existsSync(exe)) {
       ok('the address no longer carries ?viewAs', !page.url().includes('viewAs'));
       ok('tiles do not open during a preview, since a product would open as you',
         (await page.locator('a.product-tile').count()) === 0 && (await page.locator('div.product-tile.is-preview').count()) === 1);
+      ok('and none of them says "Open", since none of them will',
+        (await page.locator('.product-tile .open-arrow').count()) === 0
+          && (await page.locator('.product-tile .preview-note').innerText()) === 'Opens for their team');
+      ok('and no role pill, since the role would be the staff member\'s, not theirs',
+        (await page.locator('.product-tile .role-pill').count()) === 0);
       ok('the staff member\'s own company switcher is not loaded', !calls.some((c) => c.path === '/api/auth/companies'));
       ok('and the old whole-login switch is never called, so no other tool changes',
         !calls.some((c) => c.path === '/api/auth/switch-client'));
@@ -193,7 +198,8 @@ if (!chromium || !existsSync(exe)) {
       ok('"Stop previewing" puts this tab back to you',
         calls.find((c) => c.path === '/api/dashboard/me-products').grant === ''
           && await page.locator('#preview-bar').isHidden()
-          && (await page.locator('a.product-tile').count()) > 0);
+          && (await page.locator('a.product-tile').count()) > 0
+          && (await page.locator('a.product-tile .open-arrow').count()) > 0);
       ok('and forgets the grant', await page.evaluate(() => sessionStorage.getItem('tg_viewas')) === null);
       await page.close();
     }

@@ -76,6 +76,15 @@
     .preview-bar button:hover { background: var(--tg-preview-edge); }
     .preview-bar button:focus-visible { outline: 2px solid var(--tg-preview-ink); outline-offset: 2px; }
     .product-tile.is-preview { cursor: default; }
+    /* A preview tile does not open, so it must not look as if it will: no
+       lift on hover, and the "Open" arrow gives way to a quiet note. */
+    .product-tile.is-preview:hover {
+      border-color: var(--tg-border);
+      box-shadow: var(--shadow-sm);
+      transform: none;
+    }
+    .product-tile.is-preview:hover::after { opacity: 0; }
+    .preview-note { font-size: 12px; color: var(--tg-text-secondary); }
     .logo-mark {
       width: 32px; height: 32px; border-radius: var(--radius-sm);
       background: linear-gradient(135deg, var(--tg-primary), var(--tg-accent));
@@ -846,7 +855,9 @@
         const tag = linked ? 'a' : 'div';
         const hrefAttr = linked ? ` href="${escapeHtml(p.url)}"` : '';
         const targetAttr = (soon && linked) ? ' target="_blank" rel="noopener noreferrer"' : '';
-        const openArrow = `<span class="open-arrow">Open
+        const openArrow = preview
+          ? `<span class="preview-note">Opens for their team</span>`
+          : `<span class="open-arrow">Open
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
               </span>`;
         let footer;
@@ -855,8 +866,11 @@
             ? `<div class="product-footer"><span class="soon-pill">Preview</span>${openArrow}</div>`
             : `<div class="product-footer"><span class="soon-pill">Coming soon</span></div>`;
         } else {
+          // The role pill is the VIEWER's role. In a preview that is the staff
+          // member's, not the client's people's (theirs differ person to
+          // person), so it is left off rather than shown as theirs.
           footer = `<div class="product-footer">
-              <span class="role-pill">${escapeHtml(p.roleLabel)}</span>
+              ${preview ? '<span></span>' : `<span class="role-pill">${escapeHtml(p.roleLabel)}</span>`}
               ${openArrow}
             </div>`;
         }
