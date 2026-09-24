@@ -89,7 +89,9 @@ console.log('\nThe weather endpoint answers\n');
   let asked = '';
   globalThis.fetch = async (url) => {
     asked = String(url);
-    return { ok: true, json: async () => ({ current: { temperature_2m: 27.4, apparent_temperature: 29.1, weather_code: 1, wind_speed_10m: 12.2, relative_humidity_2m: 58, is_day: 1 } }) };
+    return { ok: true, headers: { get: () => null }, json: async () => ({ properties: { meta: { updated_at: '2026-09-24T12:00:00Z' }, timeseries: [
+      { time: new Date().toISOString(), data: { instant: { details: { air_temperature: 27.4, relative_humidity: 58, wind_speed: 3.4 } }, next_1_hours: { summary: { symbol_code: 'fair_day' } } } },
+    ] } }) };
   };
   try {
     ok('a preflight is answered', (await call('OPTIONS', {})).statusCode === 204);
@@ -97,7 +99,7 @@ console.log('\nThe weather endpoint answers\n');
     ok('nonsense coordinates are refused', (await call('GET', { lat: '999', lng: 'x' })).statusCode === 400);
     const r = await call('GET', { lat: '35.3728', lng: '25.75', units: 'c' });
     ok('a real place gets the weather', r.statusCode === 200 && r.body.ok === true && r.body.temp === 27 && r.body.desc === 'Mainly clear' && r.body.isDay === true, JSON.stringify(r.body));
-    ok('from Open-Meteo, with only the two coordinates we checked', asked.startsWith('https://api.open-meteo.com/v1/forecast?') && /latitude=35\.3728/.test(asked) && /longitude=25\.75/.test(asked));
+    ok('from MET Norway, with only the two coordinates we checked', asked.startsWith('https://api.met.no/weatherapi/locationforecast/2.0/compact?') && /lat=35\.3728/.test(asked) && /lon=25\.75/.test(asked));
     ok('cached at the edge for 15 minutes', /s-maxage=900/.test(r.headers['cache-control'] || ''));
     globalThis.fetch = async () => ({ ok: false, json: async () => ({}) });
     const bad = await call('GET', { lat: '51.5', lng: '-0.12' });

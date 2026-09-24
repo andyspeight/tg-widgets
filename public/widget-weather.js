@@ -1,5 +1,5 @@
 /**
- * Travelgenix Weather Widget v1.1.1
+ * Travelgenix Weather Widget v1.2.0
  * Self-contained, embeddable destination weather widget.
  * Zero dependencies. Shadow DOM isolation. Works on any website via a single script tag.
  *
@@ -15,9 +15,18 @@
  *   - Optional CTA (agent-brandable, protocol-validated URL)
  *   - Three layouts: compact, standard, wide (switchable by config)
  *
- * Phase 2 (future): Open-Meteo-powered live "Today" strip above the climate
- *   chart, with graceful fallback to climatology when lat/lng or the proxy
- *   are unavailable. The widget has hooks (config.showLiveWeather) for it.
+ * Live "Right now" strip (1.2.0, 24 Sep 2026): the current temperature,
+ *   conditions, feels-like, wind and humidity for the destination, from
+ *   /api/weather-current (MET Norway behind our edge cache; free for
+ *   commercial use, credited on the strip as its licence asks). It sits under the
+ *   header, is on by default as `sections.live` and needs the coordinates
+ *   /api/destination-content now returns as `geo`. No coordinates, a slow or
+ *   failed answer, or the section switched off: the strip is simply not
+ *   drawn and the climatology widget is exactly as before. A country's
+ *   coordinates are its main city (Athens for Greece), so that is the weather
+ *   a country widget shows. The old `showLiveWeather` key is retired and
+ *   ignored: the editor saved it as false on every widget while it was a
+ *   placeholder, so it records nobody's choice.
  *
  * Usage (remote config, default):
  *   <div data-tg-widget="weather" data-tg-id="YOUR_WIDGET_ID"></div>
@@ -27,8 +36,9 @@
  *   <div data-tg-widget="weather" data-tg-config='{...}'></div>
  *   <script src="https://tg-widgets.vercel.app/widget-weather.js"></script>
  *
- * Inline config may also pass `destinationData` to bypass the live fetch.
- * The editor uses this for the preview iframe.
+ * Inline config may also pass `destinationData` to bypass the live fetch, and
+ * `liveData` (the /api/weather-current answer) to bypass the weather fetch.
+ * The editor uses both for the preview iframe.
  */
 (function () {
   'use strict';
@@ -86,7 +96,87 @@
     } catch (e) { /* fall through */ }
     return '/api/destination-content';
   })();
-  const VERSION = '1.1.1';
+  const VERSION = '1.2.0';
+
+  // /api/weather-current on the same host as the config API, for the live
+  // "Right now" strip. window.__TG_WEATHER_API__ overrides, like the others.
+  const WEATHER_API = (function () {
+    if (typeof window === 'undefined') return '/api/weather-current';
+    if (window.__TG_WEATHER_API__) return window.__TG_WEATHER_API__;
+    const m = /^(.*)\/api\/widget-config$/.exec(API_BASE);
+    if (m) return m[1] + '/api/weather-current';
+    try { return new URL(API_BASE, window.location.href).origin + '/api/weather-current'; } catch (e) { return '/api/weather-current'; }
+  })();
+
+  // Only what the strip draws, each value checked: the answer is remote data.
+  // Temperatures arrive in Celsius (we always ask for c, so every site shares
+  // one cached answer per place) and are converted here when the reader
+  // picks F.
+  function shapeLive(j) {
+    if (!j || j.ok !== true) return null;
+    const num = (v) => (v == null || v === '' ? null : (Number.isFinite(Number(v)) ? Number(v) : null));
+    const temp = num(j.temp);
+    if (temp === null || temp < -90 || temp > 70) return null;
+    const feels = num(j.feels);
+    const wind = num(j.wind);
+    const humidity = num(j.humidity);
+    const code = num(j.code);
+    return {
+      temp: temp,
+      feels: feels !== null && feels >= -100 && feels <= 80 ? feels : null,
+      wind: wind !== null && wind >= 0 && wind < 500 ? wind : null,
+      humidity: humidity !== null && humidity >= 0 && humidity <= 100 ? Math.round(humidity) : null,
+      code: code !== null ? Math.round(code) : null,
+      isDay: j.isDay !== false,
+    };
+  }
+
+  // One request per place per page, shared by every widget showing it, kept
+  // for ten minutes; a failure is not kept, so a later render may try again.
+  const LIVE_TTL_MS = 10 * 60 * 1000;
+  const liveCache = new Map();
+  function fetchLive(lat, lng) {
+    const key = lat + ',' + lng;
+    const hit = liveCache.get(key);
+    if (hit && Date.now() - hit.at < LIVE_TTL_MS) return hit.promise;
+    const url = WEATHER_API + '?lat=' + encodeURIComponent(lat) + '&lng=' + encodeURIComponent(lng) + '&units=c';
+    const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 6000) : null;
+    const p = fetch(url, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(shapeLive)
+      .catch(function () { return null; })
+      .then(function (w) {
+        if (timer) clearTimeout(timer);
+        if (!w) liveCache.delete(key);
+        return w;
+      });
+    liveCache.set(key, { at: Date.now(), promise: p });
+    return p;
+  }
+
+  // WMO weather code (what /api/weather-current answers with) to an icon family and the
+  // message key for its words. Translated here rather than taking the API's
+  // English description, so the strip reads in the widget's language.
+  const WMO_LIVE = {
+    0: ['clear', 'wxClear'], 1: ['partly', 'wxMainlyClear'], 2: ['partly', 'wxPartlyCloudy'], 3: ['cloud', 'wxOvercast'],
+    45: ['fog', 'wxFog'], 48: ['fog', 'wxFog'],
+    51: ['drizzle', 'wxDrizzle'], 53: ['drizzle', 'wxDrizzle'], 55: ['drizzle', 'wxDrizzle'],
+    56: ['drizzle', 'wxFreezingDrizzle'], 57: ['drizzle', 'wxFreezingDrizzle'],
+    61: ['rain', 'wxLightRain'], 63: ['rain', 'wxRain'], 65: ['rain', 'wxHeavyRain'],
+    66: ['rain', 'wxFreezingRain'], 67: ['rain', 'wxFreezingRain'],
+    71: ['snow', 'wxLightSnow'], 73: ['snow', 'wxSnow'], 75: ['snow', 'wxHeavySnow'], 77: ['snow', 'wxSnow'],
+    68: ['rain', 'wxSleet'], 69: ['rain', 'wxSleet'],
+    80: ['rain', 'wxShowers'], 81: ['rain', 'wxShowers'], 82: ['rain', 'wxHeavyShowers'],
+    83: ['rain', 'wxSleetShowers'], 84: ['rain', 'wxSleetShowers'],
+    85: ['snow', 'wxSnowShowers'], 86: ['snow', 'wxSnowShowers'],
+    95: ['storm', 'wxThunder'], 96: ['storm', 'wxThunderHail'], 99: ['storm', 'wxThunderHail'],
+  };
+  function liveIconName(family, isDay) {
+    if (family === 'clear') return isDay ? 'sun' : 'moon';
+    if (family === 'partly' || !family) return isDay ? 'cloudSun' : 'cloudMoon';
+    return { cloud: 'cloud', fog: 'fog', drizzle: 'drizzle', rain: 'rain', snow: 'cloudSnow', storm: 'storm' }[family] || 'cloud';
+  }
 
   // Start a content fetch early (in parallel with the config fetch) so the two
   // requests don't wait on each other; the load method consumes it. Carries its
@@ -108,9 +198,9 @@
   // season callout phrasing, the legend, the level eyebrow, and the empty /
   // error notices. English is the source + fallback. Author content (the
   // section headings and CTA text in config) and live API data (the
-  // destination name, region, country) are NOT translated here. There is no
-  // live weather-condition text in this Phase-1 climatology widget, so none
-  // of these strings come from a weather API.
+  // destination name, region, country) are NOT translated here. The live
+  // strip's conditions are translated from the WMO code (WMO_LIVE), never
+  // taken as English text from the weather API.
   const MESSAGES = {
     en: {
       monthsShort: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
@@ -131,6 +221,16 @@
       enquire: 'Enquire',
       noDataTitle: 'Weather data not available',
       noDataBody: 'Please check the page configuration. This widget is looking for a destination with climate data that has not yet been populated.',
+      liveNow: 'Right now', liveLabel: 'Current weather', liveFeels: 'Feels like {temp}°',
+      liveWind: 'Wind {speed} {unit}', liveHumidity: 'Humidity {pct}%', liveCredit: 'Data by',
+      liveCreditLabel: 'Weather data by MET Norway (opens in a new tab)',
+      wxSleet: 'Sleet', wxSleetShowers: 'Sleet showers',
+      wxClear: 'Clear sky', wxMainlyClear: 'Mainly clear', wxPartlyCloudy: 'Partly cloudy', wxOvercast: 'Overcast',
+      wxFog: 'Fog', wxDrizzle: 'Drizzle', wxFreezingDrizzle: 'Freezing drizzle',
+      wxLightRain: 'Light rain', wxRain: 'Rain', wxHeavyRain: 'Heavy rain', wxFreezingRain: 'Freezing rain',
+      wxLightSnow: 'Light snow', wxSnow: 'Snow', wxHeavySnow: 'Heavy snow',
+      wxShowers: 'Showers', wxHeavyShowers: 'Heavy showers', wxSnowShowers: 'Snow showers',
+      wxThunder: 'Thunderstorms', wxThunderHail: 'Thunderstorms with hail',
       errorTitle: 'Unable to load weather',
       errorBody: 'The climate data is temporarily unavailable. Please try again in a moment.',
     },
@@ -153,6 +253,16 @@
       enquire: 'Demander',
       noDataTitle: 'Données météo non disponibles',
       noDataBody: 'Veuillez vérifier la configuration de la page. Ce widget recherche une destination dont les données climatiques ne sont pas encore renseignées.',
+      liveNow: 'En ce moment', liveLabel: 'Météo actuelle', liveFeels: 'Ressenti {temp}°',
+      liveWind: 'Vent {speed} {unit}', liveHumidity: 'Humidité {pct} %', liveCredit: 'Données',
+      liveCreditLabel: 'Données météo MET Norway (nouvel onglet)',
+      wxSleet: 'Neige fondue', wxSleetShowers: 'Averses de neige fondue',
+      wxClear: 'Ciel dégagé', wxMainlyClear: 'Plutôt dégagé', wxPartlyCloudy: 'Partiellement nuageux', wxOvercast: 'Couvert',
+      wxFog: 'Brouillard', wxDrizzle: 'Bruine', wxFreezingDrizzle: 'Bruine verglaçante',
+      wxLightRain: 'Pluie faible', wxRain: 'Pluie', wxHeavyRain: 'Forte pluie', wxFreezingRain: 'Pluie verglaçante',
+      wxLightSnow: 'Neige faible', wxSnow: 'Neige', wxHeavySnow: 'Fortes chutes de neige',
+      wxShowers: 'Averses', wxHeavyShowers: 'Fortes averses', wxSnowShowers: 'Averses de neige',
+      wxThunder: 'Orages', wxThunderHail: 'Orages avec grêle',
       errorTitle: 'Impossible de charger la météo',
       errorBody: 'Les données climatiques sont temporairement indisponibles. Veuillez réessayer dans un instant.',
     },
@@ -175,6 +285,16 @@
       enquire: 'Anfragen',
       noDataTitle: 'Wetterdaten nicht verfügbar',
       noDataBody: 'Bitte prüfen Sie die Seitenkonfiguration. Dieses Widget sucht ein Reiseziel mit Klimadaten, die noch nicht hinterlegt sind.',
+      liveNow: 'Aktuell', liveLabel: 'Aktuelles Wetter', liveFeels: 'Gefühlt {temp}°',
+      liveWind: 'Wind {speed} {unit}', liveHumidity: 'Luftfeuchtigkeit {pct} %', liveCredit: 'Daten von',
+      liveCreditLabel: 'Wetterdaten von MET Norway (öffnet in neuem Tab)',
+      wxSleet: 'Schneeregen', wxSleetShowers: 'Schneeregenschauer',
+      wxClear: 'Klarer Himmel', wxMainlyClear: 'Überwiegend klar', wxPartlyCloudy: 'Teilweise bewölkt', wxOvercast: 'Bedeckt',
+      wxFog: 'Nebel', wxDrizzle: 'Nieselregen', wxFreezingDrizzle: 'Gefrierender Nieselregen',
+      wxLightRain: 'Leichter Regen', wxRain: 'Regen', wxHeavyRain: 'Starker Regen', wxFreezingRain: 'Gefrierender Regen',
+      wxLightSnow: 'Leichter Schneefall', wxSnow: 'Schnee', wxHeavySnow: 'Starker Schneefall',
+      wxShowers: 'Schauer', wxHeavyShowers: 'Starke Schauer', wxSnowShowers: 'Schneeschauer',
+      wxThunder: 'Gewitter', wxThunderHail: 'Gewitter mit Hagel',
       errorTitle: 'Wetter kann nicht geladen werden',
       errorBody: 'Die Klimadaten sind vorübergehend nicht verfügbar. Bitte versuchen Sie es gleich erneut.',
     },
@@ -197,6 +317,16 @@
       enquire: 'Consultar',
       noDataTitle: 'Datos meteorológicos no disponibles',
       noDataBody: 'Compruebe la configuración de la página. Este widget busca un destino con datos climáticos que aún no se han cargado.',
+      liveNow: 'Ahora mismo', liveLabel: 'Tiempo actual', liveFeels: 'Sensación {temp}°',
+      liveWind: 'Viento {speed} {unit}', liveHumidity: 'Humedad {pct} %', liveCredit: 'Datos de',
+      liveCreditLabel: 'Datos meteorológicos de MET Norway (se abre en una pestaña nueva)',
+      wxSleet: 'Aguanieve', wxSleetShowers: 'Chubascos de aguanieve',
+      wxClear: 'Cielo despejado', wxMainlyClear: 'Mayormente despejado', wxPartlyCloudy: 'Parcialmente nublado', wxOvercast: 'Cubierto',
+      wxFog: 'Niebla', wxDrizzle: 'Llovizna', wxFreezingDrizzle: 'Llovizna helada',
+      wxLightRain: 'Lluvia ligera', wxRain: 'Lluvia', wxHeavyRain: 'Lluvia intensa', wxFreezingRain: 'Lluvia helada',
+      wxLightSnow: 'Nevada ligera', wxSnow: 'Nieve', wxHeavySnow: 'Nevada intensa',
+      wxShowers: 'Chubascos', wxHeavyShowers: 'Chubascos fuertes', wxSnowShowers: 'Chubascos de nieve',
+      wxThunder: 'Tormentas', wxThunderHail: 'Tormentas con granizo',
       errorTitle: 'No se puede cargar la meteorología',
       errorBody: 'Los datos climáticos no están disponibles temporalmente. Inténtelo de nuevo en un momento.',
     },
@@ -219,6 +349,16 @@
       enquire: 'Richiedi',
       noDataTitle: 'Dati meteo non disponibili',
       noDataBody: 'Controlla la configurazione della pagina. Questo widget cerca una destinazione con dati climatici non ancora inseriti.',
+      liveNow: 'In questo momento', liveLabel: 'Meteo attuale', liveFeels: 'Percepita {temp}°',
+      liveWind: 'Vento {speed} {unit}', liveHumidity: 'Umidità {pct}%', liveCredit: 'Dati di',
+      liveCreditLabel: 'Dati meteo di MET Norway (si apre in una nuova scheda)',
+      wxSleet: 'Nevischio', wxSleetShowers: 'Rovesci di nevischio',
+      wxClear: 'Cielo sereno', wxMainlyClear: 'Prevalentemente sereno', wxPartlyCloudy: 'Parzialmente nuvoloso', wxOvercast: 'Coperto',
+      wxFog: 'Nebbia', wxDrizzle: 'Pioviggine', wxFreezingDrizzle: 'Pioviggine gelata',
+      wxLightRain: 'Pioggia debole', wxRain: 'Pioggia', wxHeavyRain: 'Pioggia forte', wxFreezingRain: 'Pioggia gelata',
+      wxLightSnow: 'Neve debole', wxSnow: 'Neve', wxHeavySnow: 'Neve forte',
+      wxShowers: 'Rovesci', wxHeavyShowers: 'Forti rovesci', wxSnowShowers: 'Rovesci di neve',
+      wxThunder: 'Temporali', wxThunderHail: 'Temporali con grandine',
       errorTitle: 'Impossibile caricare il meteo',
       errorBody: 'I dati climatici non sono temporaneamente disponibili. Riprova tra un momento.',
     },
@@ -241,6 +381,16 @@
       enquire: 'Solicită',
       noDataTitle: 'Date meteo indisponibile',
       noDataBody: 'Verificați configurația paginii. Acest widget caută o destinație cu date climatice care nu au fost încă completate.',
+      liveNow: 'Chiar acum', liveLabel: 'Vremea actuală', liveFeels: 'Resimțită {temp}°',
+      liveWind: 'Vânt {speed} {unit}', liveHumidity: 'Umiditate {pct}%', liveCredit: 'Date de la',
+      liveCreditLabel: 'Date meteo de la MET Norway (se deschide într-o filă nouă)',
+      wxSleet: 'Lapoviță', wxSleetShowers: 'Averse de lapoviță',
+      wxClear: 'Cer senin', wxMainlyClear: 'Predominant senin', wxPartlyCloudy: 'Parțial noros', wxOvercast: 'Cer acoperit',
+      wxFog: 'Ceață', wxDrizzle: 'Burniță', wxFreezingDrizzle: 'Burniță înghețată',
+      wxLightRain: 'Ploaie slabă', wxRain: 'Ploaie', wxHeavyRain: 'Ploaie puternică', wxFreezingRain: 'Ploaie înghețată',
+      wxLightSnow: 'Ninsoare slabă', wxSnow: 'Ninsoare', wxHeavySnow: 'Ninsoare puternică',
+      wxShowers: 'Averse', wxHeavyShowers: 'Averse puternice', wxSnowShowers: 'Averse de ninsoare',
+      wxThunder: 'Furtuni', wxThunderHail: 'Furtuni cu grindină',
       errorTitle: 'Vremea nu poate fi încărcată',
       errorBody: 'Datele climatice sunt temporar indisponibile. Încercați din nou într-un moment.',
     },
@@ -280,6 +430,15 @@
     calendar:  '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
     info:      '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
     alert:     '<path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+    moon:      '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+    cloudSun:  '<path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"/><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"/>',
+    cloudMoon: '<path d="M10.188 8.5A6 6 0 0 1 16 4a1 1 0 0 0 6 6 6 6 0 0 1-3 5.197"/><path d="M13 16a3 3 0 1 1 0 6H7a5 5 0 1 1 4.9-6Z"/>',
+    fog:       '<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 17H7"/><path d="M17 21H9"/>',
+    drizzle:   '<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M8 19v1"/><path d="M8 14v1"/><path d="M16 19v1"/><path d="M16 14v1"/><path d="M12 21v1"/><path d="M12 16v1"/>',
+    cloudSnow: '<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M8 15h.01"/><path d="M8 19h.01"/><path d="M12 17h.01"/><path d="M12 21h.01"/><path d="M16 15h.01"/><path d="M16 19h.01"/>',
+    storm:     '<path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973"/><path d="m13 12-3 5h4l-3 5"/>',
+    wind:      '<path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/>',
+    droplet:   '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
     sparkle:   '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>',
   };
 
@@ -530,6 +689,71 @@
     }
     .tgw-callout-pill[data-season="shoulder"] { background: var(--tgw-season-shoulder); }
     .tgw-callout-pill[data-season="off"] { background: var(--tgw-season-off); color: #fff; }
+
+    /* ─── LIVE "RIGHT NOW" STRIP ─────────────────────── */
+    /* The slot is always drawn when the strip can show, and stays empty (and
+       takes no room) until the weather arrives or if it never does. */
+    .tgw-live-slot { padding: 2px 22px 0; }
+    .tgw-live-slot:empty { display: none; }
+    .tgw-card > .tgw-live-slot:first-child { padding-top: 18px; }
+    .tgw-live {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px;
+      border-radius: var(--tgw-radius-sm);
+      background: linear-gradient(135deg, var(--tgw-accent-soft), var(--tgw-brand-soft));
+    }
+    .tgw-live[data-enter="true"] { animation: tgw-live-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    @keyframes tgw-live-in { from { opacity: 0.001; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+    .tgw-live-icon {
+      width: 44px; height: 44px; flex: 0 0 44px;
+      border-radius: 12px;
+      background: var(--tgw-card);
+      color: var(--tgw-accent);
+      box-shadow: var(--tgw-shadow-sm);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tgw-live-body { min-width: 0; flex: 1; }
+    .tgw-live-top {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 2px 8px; margin: 0 0 2px;
+    }
+    .tgw-live-label {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin: 0;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--tgw-sub);
+    }
+    .tgw-live-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.18);
+    }
+    .tgw-live-credit {
+      font-size: 10px; color: var(--tgw-sub);
+      text-decoration: none; white-space: nowrap;
+      opacity: 0.85;
+    }
+    .tgw-live-credit:hover { text-decoration: underline; opacity: 1; }
+    .tgw-live-credit:focus-visible { outline: 2px solid var(--tgw-accent); outline-offset: 2px; border-radius: 3px; opacity: 1; }
+    .tgw-live-main {
+      display: flex; align-items: baseline; flex-wrap: wrap;
+      gap: 2px 10px; margin: 0;
+    }
+    .tgw-live-temp {
+      font-size: 26px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1;
+      color: var(--tgw-text);
+      font-variant-numeric: tabular-nums;
+    }
+    .tgw-live-desc { font-size: 14px; font-weight: 600; color: var(--tgw-text); }
+    .tgw-live-meta {
+      display: flex; flex-wrap: wrap; gap: 2px 12px;
+      margin: 4px 0 0;
+      font-size: 12px; color: var(--tgw-sub);
+      font-variant-numeric: tabular-nums;
+    }
+    .tgw-live-meta span { display: inline-flex; align-items: center; gap: 4px; }
+    .tgw-live-meta svg { color: var(--tgw-accent); flex: 0 0 auto; }
 
     /* ─── CLIMATE STRIP ─────────────────────────────── */
     .tgw-climate {
@@ -800,6 +1024,10 @@
     .tgw-root[data-layout="compact"] .tgw-climate-months,
     .tgw-root[data-layout="compact"] .tgw-climate-rain { gap: 3px; }
     .tgw-root[data-layout="compact"] .tgw-climate-temp { font-size: 9px; }
+    .tgw-root[data-layout="compact"] .tgw-live-slot { padding: 2px 18px 0; }
+    .tgw-root[data-layout="compact"] .tgw-live { gap: 12px; padding: 12px; }
+    .tgw-root[data-layout="compact"] .tgw-live-icon { width: 38px; height: 38px; flex-basis: 38px; }
+    .tgw-root[data-layout="compact"] .tgw-live-temp { font-size: 22px; }
 
     /* STANDARD — the default. All enabled sections stacked vertically. */
     .tgw-root[data-layout="standard"] .tgw-card { max-width: 440px; }
@@ -822,6 +1050,7 @@
     }
     .tgw-root[data-layout="wide"] .tgw-header { padding: 0 0 14px; }
     .tgw-root[data-layout="wide"] .tgw-climate { padding: 0; }
+    .tgw-root[data-layout="wide"] .tgw-live-slot { padding: 0 0 14px; }
     .tgw-root[data-layout="wide"] .tgw-callout { margin: 0; background: var(--tgw-card); }
     .tgw-root[data-layout="wide"] .tgw-best { padding: 0; }
     .tgw-root[data-layout="wide"] .tgw-cta { margin: 0; border-radius: var(--tgw-radius-sm); padding: 14px 16px; }
@@ -840,6 +1069,11 @@
       .tgw-header { padding: 16px 16px 8px; }
       .tgw-title { font-size: 18px; }
       .tgw-callout { margin: 10px 16px; padding: 12px; }
+      .tgw-live-slot { padding: 2px 16px 0; }
+      .tgw-root[data-layout="wide"] .tgw-live-slot { padding: 0 0 14px; }
+      .tgw-live { gap: 12px; padding: 12px; }
+      .tgw-live-icon { width: 38px; height: 38px; flex-basis: 38px; }
+      .tgw-live-temp { font-size: 22px; }
       .tgw-climate { padding: 0 16px 14px; }
       .tgw-best { padding: 0 16px 14px; }
       .tgw-climate-chart { height: 110px; gap: 3px; }
@@ -983,6 +1217,7 @@
         temperatureUnit: 'C',      // 'C' | 'F'
         sections: {
           header: true,
+          live: true,              // the "Right now" strip (1.2.0); needs geo on the destination
           callout: true,
           climate: true,
           bestMonths: true,
@@ -993,13 +1228,8 @@
           bestMonths: 'Best months to visit',
         },
         showFlag: true,            // country-level only
-        // Phase 2 hook. Forced off in Phase 1 — the live strip requires
-        // coordinates which the Destination Content base does not yet store.
-        // When Phase 2 ships: flip to true, widget calls /api/weather-current,
-        // renders the "Today" strip above the climate chart, and falls back
-        // to climatology on any error. No editor changes needed beyond
-        // surfacing the toggle.
-        showLiveWeather: false,
+        // `showLiveWeather` is retired: it was a Phase 1 placeholder the editor
+        // saved as false on every widget. The strip is `sections.live` above.
         cta: {
           title: 'Plan your trip',
           subtitle: '',
@@ -1008,6 +1238,7 @@
         },
         destination: null,
         destinationData: null,
+        liveData: null,            // editor preview: the weather answer, inline
       };
       if (!c || typeof c !== 'object') return base;
       const merged = Object.assign({}, base, c);
@@ -1105,12 +1336,14 @@
         this.root.innerHTML = this._renderStacked(d);
       }
       this._bind();
+      this._loadLive(d);
     }
 
     _renderStacked(d) {
       const s = this.c.sections;
       const parts = [];
       if (s.header) parts.push(this._renderHeader(d));
+      parts.push(this._renderLiveSlot(d));
       if (s.callout) parts.push(this._renderCallout(d));
       if (s.climate) parts.push(this._renderClimate(d));
       if (s.bestMonths) parts.push(this._renderBestMonths(d));
@@ -1123,6 +1356,7 @@
       // Wide layout: header + climate on the left; callout + best months + CTA stacked right.
       const left = [];
       if (s.header) left.push(this._renderHeader(d));
+      left.push(this._renderLiveSlot(d));
       if (s.climate) left.push(this._renderClimate(d));
 
       const right = [];
@@ -1153,6 +1387,85 @@
         '<div class="tgw-header">' +
           '<p class="tgw-eyebrow">' + icon('cloud', 11) + '<span>' + esc(eyebrowText) + '</span></p>' +
           '<h2 class="tgw-title">' + flagHtml + '<span>' + esc(name) + '</span></h2>' +
+        '</div>'
+      );
+    }
+
+    // ── Live "Right now" strip ─────────────────────────────────────
+    // Drawn into a slot so the answer, which lands after the rest of the
+    // widget, fills that one element and never re-renders the card (a re-render
+    // would drop keyboard focus from the unit toggle). Nothing here moves focus
+    // or scrolls: it runs on load and on every editor keystroke.
+    _liveGeo(d) {
+      if (!this.c.sections || !this.c.sections.live || !d || !d.geo) return null;
+      const lat = Number(d.geo.lat), lng = Number(d.geo.lng);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+      return { lat: lat, lng: lng, key: lat + ',' + lng };
+    }
+
+    _renderLiveSlot(d) {
+      const g = this._liveGeo(d);
+      if (!g) return '';
+      const w = this._liveKey === g.key ? this._live : null;
+      return '<div class="tgw-live-slot" data-live-slot>' + (w ? this._liveInner(w, false) : '') + '</div>';
+    }
+
+    _loadLive(d) {
+      const g = this._liveGeo(d);
+      if (!g) return;
+      // The editor hands the preview its weather inline, like destinationData.
+      const inline = this.c.liveData ? shapeLive(this.c.liveData) : null;
+      if (inline) {
+        this._liveKey = g.key; this._live = inline;
+        this._fillLive(false);
+        return;
+      }
+      if (this._liveKey === g.key) return;   // already have it, or it is on its way, or it failed
+      this._liveKey = g.key; this._live = null;
+      fetchLive(g.lat, g.lng).then((w) => {
+        if (!w || this._destroyed || this._liveKey !== g.key) return;
+        this._live = w;
+        this._fillLive(!(typeof window !== 'undefined' && window.__TG_PREVIEW__));
+      });
+    }
+
+    _fillLive(enter) {
+      const slot = this.root && this.root.querySelector('[data-live-slot]');
+      if (slot && this._live) slot.innerHTML = this._liveInner(this._live, enter);
+    }
+
+    _liveInner(w, enter) {
+      const unit = this._tempUnit === 'F' ? 'F' : 'C';
+      const deg = (c) => (unit === 'F' ? Math.round(c * 9 / 5 + 32) : Math.round(c));
+      // Wind in mph for English readers and anyone reading Fahrenheit (as the
+      // Met Office and US forecasts do), km/h for the European languages.
+      const mph = unit === 'F' || this.t.lang === 'en';
+      const cond = w.code !== null ? WMO_LIVE[w.code] : null;
+      const desc = cond ? this.t(cond[1]) : '';
+      const meta = [];
+      if (w.feels !== null) meta.push('<span>' + esc(this.t('liveFeels', { temp: deg(w.feels) })) + '</span>');
+      if (w.wind !== null) {
+        meta.push('<span>' + icon('wind', 12) + esc(this.t('liveWind', {
+          speed: mph ? Math.round(w.wind * 0.621371) : Math.round(w.wind),
+          unit: mph ? 'mph' : 'km/h',
+        })) + '</span>');
+      }
+      if (w.humidity !== null) meta.push('<span>' + icon('droplet', 12) + esc(this.t('liveHumidity', { pct: w.humidity })) + '</span>');
+      return (
+        '<div class="tgw-live" role="group" aria-label="' + esc(this.t('liveLabel')) + '"' + (enter ? ' data-enter="true"' : '') + '>' +
+          '<div class="tgw-live-icon">' + icon(liveIconName(cond && cond[0], w.isDay), 24) + '</div>' +
+          '<div class="tgw-live-body">' +
+            '<div class="tgw-live-top">' +
+              '<p class="tgw-live-label"><span class="tgw-live-dot" aria-hidden="true"></span>' + esc(this.t('liveNow')) + '</p>' +
+              // MET Norway's licence (NLOD 2.0 / CC BY 4.0) asks for this credit.
+              '<a class="tgw-live-credit" href="https://www.met.no/en" target="_blank" rel="noopener noreferrer" aria-label="' + esc(this.t('liveCreditLabel')) + '">' + esc(this.t('liveCredit')) + ' MET Norway</a>' +
+            '</div>' +
+            '<p class="tgw-live-main">' +
+              '<span class="tgw-live-temp">' + deg(w.temp) + '°' + unit + '</span>' +
+              (desc ? '<span class="tgw-live-desc">' + esc(desc) + '</span>' : '') +
+            '</p>' +
+            (meta.length ? '<p class="tgw-live-meta">' + meta.join('') + '</p>' : '') +
+          '</div>' +
         '</div>'
       );
     }
@@ -1383,6 +1696,7 @@
     }
 
     destroy() {
+      this._destroyed = true;
       try { while (this.shadow.firstChild) this.shadow.removeChild(this.shadow.firstChild); } catch (e) { /* noop */ }
       this.el.removeAttribute('data-tg-initialised');
       this.el.__tgWeather = null;

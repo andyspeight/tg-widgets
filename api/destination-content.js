@@ -41,6 +41,7 @@
  *     events: [{month,name,description}],
  *     planning: { priceBand, bookingLead, tripDuration[], visaStatus, visaAdvisory, healthNotes },
  *     pairedWith: [{ name, slug, url }],                // "Pairs well with" sibling destinations
+ *     geo: { lat, lng } | null,                         // the record's own coordinates (Weather live strip)
  *     factsInherited: { fact: 'city' | 'country' },     // present-only-if inherited
  *     planningInherited: { field: 'city' | 'country' }  // present-only-if inherited
  *   }
@@ -117,6 +118,11 @@ const LEVEL_MAP = {
       visaAdvisory:   'fldecKeSnkZ6ABZfd',
       healthNotes:    'fldOGSgbbH3BIoU6A',
       bestPaired:     'fldgP3ncmDU6LNOS4', // Best Paired With (Countries)
+      // Latitude/Longitude (the same fields the World Map reads). A country's
+      // point is its main city (Athens for Greece, Madrid for Spain), not the
+      // middle of the country. Feeds the Weather widget's live strip.
+      lat:            'fldlxsWrbmU6ELUPW',
+      lng:            'fldz3whFdzKsZ66hg',
     },
   },
   city: {
@@ -145,6 +151,8 @@ const LEVEL_MAP = {
       // are not held at city level and inherit from the parent country.
       tripDuration:   'fldPSVfkYVAIhtNDp',
       bestPaired:     'fldNVIjyXYu8R7Fbk', // Best Paired With (Cities)
+      lat:            'fldjk3yUCbVQRuxx8', // Latitude (not the empty Lat duplicate)
+      lng:            'fldNSlAA0Qb1akknz', // Longitude
     },
   },
   resort: {
@@ -170,6 +178,8 @@ const LEVEL_MAP = {
       bestForTags:    'fldTmH3gT1wT48PLn',
       eventsJson:     'fldWRl0d0z1MY6DMq',
       bestPaired:     'fldQflINufhsgS6so', // Best Paired With (Resorts)
+      lat:            'fld4INRwIKWCG21RV', // Latitude (not the empty Lat duplicate)
+      lng:            'fldd8CwfdzCDhW68w', // Longitude
     },
   },
 };
@@ -613,7 +623,21 @@ function shapePayload(level, fields, inherited, paired, recordId) {
     planningInherited,
     factsInherited,
     pairedWith: Array.isArray(paired) ? paired : [],
+    // The record's own coordinates, or null. Not inherited: a point that
+    // belongs to another place would give that place's weather.
+    geo: shapeGeo(f[map.fields.lat], f[map.fields.lng]),
   };
+}
+
+// A usable coordinate pair or null. Rejects non-numbers, out-of-range values
+// and the 0,0 placeholder (the Atlantic, never a destination).
+export function shapeGeo(latRaw, lngRaw) {
+  if (latRaw == null || lngRaw == null || latRaw === '' || lngRaw === '') return null;
+  const lat = Number(latRaw), lng = Number(lngRaw);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+  if (lat === 0 && lng === 0) return null;
+  return { lat: Math.round(lat * 10000) / 10000, lng: Math.round(lng * 10000) / 10000 };
 }
 
 // Resolve a slug across the levels in `lookupOrder` (most specific first).

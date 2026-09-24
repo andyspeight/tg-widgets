@@ -796,12 +796,10 @@
         layout: 'standard',
         temperatureUnit: 'C',
         sections: {
-          header: true, callout: true, climate: true,
+          header: true, live: true, callout: true, climate: true,
           bestMonths: true, cta: true,
         },
         showFlag: true,
-        // Phase 2 hook — forced off in Phase 1 until lat/lng fields land.
-        showLiveWeather: false,
         headings: {
           climate: '12-month climate',
           bestMonths: 'Best months to visit',
@@ -979,6 +977,7 @@
        ============================================================ */
     const SECTION_TOGGLES = [
       { key: 'header',     label: 'Header',              help: 'Destination name and region eyebrow.' },
+      { key: 'live',       label: 'Weather right now',   help: 'Today\'s temperature and conditions at the destination, refreshed every 15 minutes. For a country it is the main city\'s weather.' },
       { key: 'callout',    label: 'Current month callout', help: 'Season pill + headline for the current month.' },
       { key: 'climate',    label: 'Climate chart',       help: '12-month temperature bars with rainfall strip and season colours.' },
       { key: 'bestMonths', label: 'Best months panel',   help: 'Up to 3 months flagged as the best time to visit, with reasoning.' },
@@ -1073,6 +1072,23 @@
     // cleared when they clear the selection.
     let destCache = {};
     let destInFlight = null;
+    // The live "Right now" weather for the preview, fetched once per place and
+    // handed to the widget inline (liveData), like destinationData, so the
+    // strip does not flicker in and out as the preview reloads on each change.
+    const liveCache = {};
+    function liveFor(dest) {
+      const g = dest && dest.geo;
+      if (!g || !Number.isFinite(Number(g.lat)) || !Number.isFinite(Number(g.lng))) return null;
+      const key = g.lat + ',' + g.lng;
+      if (liveCache[key] !== undefined) return liveCache[key];
+      liveCache[key] = null;   // asked; a failure stays null and the strip is simply absent
+      fetch('/api/weather-current?lat=' + encodeURIComponent(g.lat) + '&lng=' + encodeURIComponent(g.lng) + '&units=c', { credentials: 'omit' })
+        .then(r => r.ok ? r.json() : null)
+        .then(j => { if (j && j.ok) { liveCache[key] = j; schedulePreview(); } })
+        .catch(() => {});
+      return null;
+    }
+
     async function fetchDestinationData(level, recordId) {
       const key = level + ':' + recordId;
       if (destCache[key]) {
@@ -1362,6 +1378,9 @@ ${escHtml(code)}
         const cfg = (data && data.config && typeof data.config === 'object') ? data.config : data;
         state.config = Object.assign(defaultConfig(), cfg);
         state.config.sections = Object.assign(defaultConfig().sections, cfg.sections || {});
+        // Retired Phase 1 placeholder: saved as false on every widget, never a
+        // choice anyone made. The live strip is sections.live.
+        delete state.config.showLiveWeather;
         state.config.headings = Object.assign(defaultConfig().headings, cfg.headings || {});
         state.config.cta = Object.assign(defaultConfig().cta, cfg.cta || {});
         state.config.autoDetect = Object.assign(defaultConfig().autoDetect, cfg.autoDetect || {});
@@ -1399,6 +1418,8 @@ ${escHtml(code)}
         const key = cfg.destination.level + ':' + cfg.destination.recordId;
         if (destCache[key]) {
           cfg.destinationData = destCache[key];
+          const live = cfg.sections && cfg.sections.live ? liveFor(destCache[key]) : null;
+          if (live) cfg.liveData = live;
         }
         // If not cached yet, kick off a fetch. The preview will re-render when
         // the fetch lands. In the meantime the widget shows its loading/notice

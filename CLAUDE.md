@@ -149,6 +149,21 @@ and starving the cache it was supposed to be a safety net for. An empty cache
 answer means the calm empty state, not a live search. Guarded by
 `npm run test:offers-cache-only`.
 
+**Live weather comes from MET Norway, and it is credited** (24 Sep 2026). The
+Weather widget's "Right now" strip reads `/api/weather-current`, which proxies
+MET Norway's Locationforecast (the data behind yr.no): free INCLUDING commercial
+use, no key, under NLOD 2.0 / CC BY 4.0. Do not move it to Open-Meteo's free
+tier: that is licensed for non-commercial use only, and weather on paying
+clients' sites is commercial. MET's terms are kept in code and must stay kept:
+an identifying User-Agent on every request (a generic one is refused with 403;
+`MET_NO_USER_AGENT` overrides the default), never asking again before its
+Expires time (the edge cache honours it), and the "Data by MET Norway" credit on
+the strip. The coordinates are the destination record's own Latitude/Longitude,
+returned by `/api/destination-content` as `geo`; a country's point is its main
+city. Two older callers still use Open-Meteo's free services and have not been
+reviewed for this: Prayer Times' place search and the climate-reference cron.
+Guarded by `npm run test:weather-live`.
+
 **Every server-side Travelify call sends a Referer** (17 Sep 2026, Better
 Lifestyle app 474). A client can lock their Travelify application to their own
 domains, and that check reads the REFERER. A server sends none unless it sets

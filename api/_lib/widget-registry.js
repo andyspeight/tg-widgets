@@ -105,7 +105,7 @@ export const WIDGET_REGISTRY = [
     id: "weather",
     name: "Weather",
     airtableType: "Weather",
-    description: "Compact destination weather widget — 12-month climate, season callout, best months to visit, and a brandable CTA. Three layouts: compact for sidebars, standard for mid-article, wide for hero strips. Live from the Travelgenix destination content database.",
+    description: "Compact destination weather widget: the weather right now, 12-month climate, season callout, best months to visit and a brandable CTA. Three layouts: compact for sidebars, standard for mid-article, wide for hero strips. Live from the Travelgenix destination content database.",
     dashboardCategory: "Content",
     status: "live",
     editorUrl: "/editor-weather",
