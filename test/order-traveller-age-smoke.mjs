@@ -130,8 +130,9 @@ console.log('\nWhat the search then asks for');
     // list offers nothing, so this one says what its application sells.
     upsellsActive: ['TicketsAttractions', 'CarRental'],
     items: [
-      { product: 'Flights', legs: [leg('LHR', 'CDG', '2027-04-10T07:00:00', '2027-04-10T09:20:00'),
-        leg('CDG', 'LHR', '2027-04-17T18:00:00', '2027-04-17T18:20:00')] },
+      // The shape /api/retrieve-order really sends: item.flights.routes[].
+      { product: 'Flights', flights: { routes: [leg('LHR', 'CDG', '2027-04-10T07:00:00', '2027-04-10T09:20:00'),
+        leg('CDG', 'LHR', '2027-04-17T18:00:00', '2027-04-17T18:20:00')] } },
       { product: 'Accommodation', startDate: '2027-04-10T00:00:00',
         accommodation: { location: { city: 'Paris', country: 'FR' }, units: [{ checkin: '2027-04-10', nights: 7 }] } },
     ],
