@@ -254,7 +254,8 @@
     "test:traveller-age": "node test/order-traveller-age-smoke.mjs",
     "test:booking-no-emoji": "node test/booking-no-emoji-smoke.mjs",
     "build:email-icons": "node scripts/build-email-icons.mjs",
-    "test:view-as-client": "node test/admin-view-as-client-smoke.mjs"
+    "test:view-as-client": "node test/admin-view-as-client-smoke.mjs",
+    "test:order-shape-atol": "node test/order-shape-atol-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

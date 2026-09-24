@@ -147,6 +147,57 @@ function partyShape(items) {
 }
 
 /**
+ * Every field anywhere in the order whose NAME speaks of ATOL or financial
+ * protection, with the path it sits at.
+ *
+ * Added 24 Sep 2026 for ATOL certificates. A client that holds its own ATOL
+ * must give the customer a certificate when a booking is protected under it,
+ * and nothing we read so far says so: the one flag we know is a Packages
+ * item's inclusions list naming 'ATOLProtection', which is the TOUR OPERATOR's
+ * licence (Jet2 Holidays and the like), not the agency's. Travelify's order
+ * model is not published, so this is how the question gets answered: run it
+ * on a booking the agency sold under its own ATOL and read what comes back.
+ *
+ * Values only when they are a flag or a code: a boolean, a number, or text
+ * with no spaces of up to 40 characters (an ATOL number, 'ATOLProtection', a
+ * type such as 'PackageSingle'). Anything with a space in it could be a
+ * person's name, so it is reported by its length only, in a list as well.
+ */
+const ATOLISH = /(atol|protect|bond|licen[cs]e|caa|abta|pkgtype|packagetype|contracttype)/i;
+export function atolTrail(root, maxDepth = 8) {
+  const out = [];
+  const code = (x) => (/^[A-Za-z0-9_.\/-]{1,40}$/.test(x) ? x : '(text, ' + x.length + ' characters)');
+  const shown = (v) => {
+    if (typeof v === 'boolean' || (typeof v === 'number' && Number.isFinite(v))) return v;
+    if (typeof v === 'string') return code(v);
+    if (Array.isArray(v)) return v.slice(0, 20).map((x) => (typeof x === 'string' ? code(x) : typeof x));
+    if (v && typeof v === 'object') return '{' + Object.keys(v).slice(0, 20).join(', ') + '}';
+    return v === null ? null : typeof v;
+  };
+  const walk = (node, path, depth) => {
+    if (out.length >= 60 || depth > maxDepth || node == null) return;
+    if (Array.isArray(node)) {
+      for (let i = 0; i < node.length && i < 30; i++) {
+        const x = node[i];
+        // A string in a list (inclusions: ['ATOLProtection', ...]) is the flag.
+        if (typeof x === 'string' && ATOLISH.test(x)) out.push({ at: path + '[' + i + ']', value: code(x) });
+        else walk(x, path + '[' + i + ']', depth + 1);
+      }
+      return;
+    }
+    if (typeof node !== 'object') return;
+    for (const k of Object.keys(node)) {
+      const v = node[k];
+      const at = path ? path + '.' + k : k;
+      if (ATOLISH.test(k)) out.push({ at, value: shown(v) });
+      if (v && typeof v === 'object') walk(v, at, depth + 1);
+    }
+  };
+  walk(root, '', 0);
+  return out;
+}
+
+/**
  * Build the money report for a raw Travelify order. Pure; no network. Codes
  * are masked before they leave; nothing personal is copied.
  */
@@ -196,6 +247,9 @@ export function buildOrderShapeReport(raw, opts) {
     // do not read" from "never recorded at all".
     shape: describeOrderShape(r),
     moneyTrail: moneyTrail(r),
+    // How Travelify marks ATOL protection, and under whose licence. See
+    // atolTrail above. Empty means the order says nothing about it at all.
+    atolTrail: atolTrail(r),
   };
 }
 
