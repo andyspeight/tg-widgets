@@ -377,6 +377,18 @@ block per public script file (copy the `/widget-hours.js` block).
   see the slicer handover for setup).
 - When you add a capability, add a test that exercises it and re-run the
   whole suite. Regressions show up immediately.
+- **The runtime is Node 24** (24 Sep 2026; Vercel stopped building Node 20 on
+  1 Oct 2026). The booking PDF and quote PDF functions answer
+  `GET ?selfcheck=1` on PREVIEW deployments only (Vercel's own `VERCEL_ENV`
+  decides; production answers 405): they start Chromium, draw a made-up PDF
+  and report each step. Use it on the branch preview before any runtime or
+  Chromium upgrade reaches `main`. One thing that will bite: on Node 24,
+  `AWS_EXECUTION_ENV` is EMPTY, and `@sparticuz/chromium` 138 recognises the
+  runtime only through the `VERCEL` system variable. Keep the project's
+  "Automatically expose System Environment Variables" setting on, or Chromium
+  starts without its libraries and every PDF fails. Node 24 also logs a
+  `DEP0169 url.parse()` deprecation line once per cold start: that comes from
+  the platform, not our code, and is harmless. `npm run test:runtime-selfcheck`.
 
 ## tg-sites: client-site design with Impeccable (18 Aug 2026)
 
