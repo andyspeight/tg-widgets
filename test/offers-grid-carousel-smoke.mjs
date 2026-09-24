@@ -47,8 +47,11 @@ console.log('Source guards — the carousel is additive and safe');
     /aria-disabled/.test(GRID) && !/\.disabled = /.test(GRID));
   ok('the clamped final scroll position counts as the LAST page (5 offers at 3-up lights dot 2 of 2)',
     /atTrackEnd\(\)\) return pages - 1;/.test(GRID));
+  // Since 10 Sep 2026 (a96b0cf) the grid builds EVERY card fluid, not only the
+  // carousel's: its tracks are 1fr, so a 380px card would leave gaps there too.
+  // test/offers-grid-fill-smoke.mjs owns the grid side of that.
   ok('carousel cards go FLUID so they fill the row instead of capping at 380px with gaps',
-    /fluid: cfg\.display === 'carousel'/.test(GRID)
+    /fluid: true,/.test(GRID)
     && /fluid: c\.fluid === true/.test(CARD)
     && /\.tgoc-root--fluid \.tgoc-card--vertical \{ max-width: none; \}/.test(CARD));
   ok('the original 380px vertical cap is untouched for everything else',
@@ -180,7 +183,7 @@ console.log('Functional — the real widget in jsdom with inline offers');
   await tick();
   ok('columns "4" → 4 cards per view → 2 pages of dots for 6 offers', four.root.querySelectorAll('[data-dot]').length === 2);
   ok('carousel cards are told to go fluid (fill their slot)', !!four.root.querySelector('[data-fluid]'));
-  ok('grid cards are NOT fluid — the 380px cap stays for the grid', !grid.root.querySelector('[data-fluid]'));
+  ok('grid cards are fluid too (1fr tracks, bounded at 460px by the grid)', !!grid.root.querySelector('[data-fluid]'));
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
