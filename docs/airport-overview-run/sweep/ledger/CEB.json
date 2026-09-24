@@ -6,8 +6,449 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Mactan%E2%80%93Cebu_International_Airport",
  "audited": "2026-09-23",
  "before": "The second busiest airport in the Philippines and the main gateway to the Central Visayas, on Mactan island in Lapu-Lapu City.\n\nThe quality is genuinely high for its size. Airports Council International named it the best airport in the Asia-Pacific region in the 5 to 15 million passenger category in both 2024 and 2025, and it was named Asia's airport of the year at the 2025 Travel Trade Excellence Awards.\n\nThere are two passenger terminals and the split is straightforward. Terminal 1, built in 1990, is now the domestic terminal, with six jet bridges and twelve remote stands. Terminal 2 took over international flights. A third terminal has been planned since 2019.\n\nIt is a hub for Philippine Airlines and an operating base for Cebu Pacific, Philippines AirAsia and Sunlight Air.\n\nThe airport opened on 27 April 1966 and is operated by Aboitiz InfraCapital.",
- "after": "The second busiest airport in the Philippines and the main gateway to the Central Visayas, on Mactan island in Lapu-Lapu City.\n\nThe quality is genuinely high for its size. Airports Council International named it the best airport in the Asia-Pacific region in the 5 to 15 million passenger category in both 2024 and 2025, and it was named Asia's airport of the year at the 2025 Travel Trade Excellence Awards.\n\nThere are two passenger terminals and the split is straightforward. Terminal 1, built in 1990, is now the domestic terminal, with six jet bridges and twelve remote stands. Terminal 2 took over international flights. A third terminal has been planned since 2019.\n\nIt is a hub for Philippine Airlines and an operating base for Cebu Pacific, Philippines AirAsia and Sunlight Air.\n\nThe airport opened on 27 April 1966 and is operated by Aboitiz InfraCapital.",
- "claims": [],
- "opinion": [],
+ "after": "The second busiest airport in the Philippines and the main airport for the Central Visayas, on Mactan island in Lapu-Lapu City.\n\nFor its size, the quality is genuinely high. Airports Council International listed it among the best airports in the Asia-Pacific region in the 5 to 15 million passenger category in both 2024 and 2025.\n\nThere are two passenger terminals, one domestic and one international, so the split is straightforward. International flights use Terminal 2.\n\nIt is a hub for Philippine Airlines and an operating base for Cebu Pacific and Philippines AirAsia. Sunlight Air also flies from here.\n\nThe airport opened in the mid-1960s and is operated by Aboitiz InfraCapital.",
+ "claims": [
+  {
+   "claim": "second busiest airport in the Philippines",
+   "verdict": "confirmed",
+   "inAfter": "The second busiest airport in the Philippines",
+   "note": "Consistent with the traffic figures: Wikipedia's infobox gives 11,604,218 passengers in 2025 (source MCIAA), far behind Manila and far ahead of any other Philippine airport named in the saved sources.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "it is the second busiest airport in the Philippines"
+    },
+    {
+     "file": "avgeek-jan2026-record",
+     "org": "AvGeek Philippines",
+     "dated": "2026-02-05",
+     "quote": [
+      "As the Philippines’ second-busiest airport, MCIA has increasingly positioned itself as a preferred transfer hub outside Metro Manila.",
+      "Feb 5, 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the main airport for the Central Visayas",
+   "verdict": "confirmed",
+   "inAfter": "the main airport for the Central Visayas",
+   "note": "Was 'the main gateway to the Central Visayas'; reworded because 'gateway to' is barred by house style. AvGeek and the operator's own release (carried by SunStar, marked PR) call it the primary gateway to the Visayas as a whole, which includes the Central Visayas.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is the main gateway to the Central Visayas region in the Philippines"
+    },
+    {
+     "file": "avgeek-asean-2026",
+     "org": "AvGeek Philippines",
+     "dated": "2026-04-21",
+     "quote": [
+      "As the primary gateway to the Visayas, MCIA is undergoing a massive operational transformation",
+      "Apr 21, 2026"
+     ]
+    },
+    {
+     "file": "sunstar-new-routes",
+     "org": "SunStar (carrying the operator's press release)",
+     "dated": "2025-09-26",
+     "quote": [
+      "solidify Cebu’s role as the primary gateway to the Visayas and Mindanao",
+      "Published on : Sep 26, 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "on Mactan island",
+   "verdict": "confirmed",
+   "inAfter": "on Mactan island",
+   "sources": [
+    {
+     "file": "mciaa-profile",
+     "org": "Mactan-Cebu International Airport Authority (MCIAA)",
+     "quote": "The Mactan (Cebu) International Airport is located in Mactan Island, province of Cebu in Central Philippines"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "in Lapu-Lapu City on Mactan island"
+    }
+   ]
+  },
+  {
+   "claim": "in Lapu-Lapu City",
+   "verdict": "confirmed",
+   "inAfter": "in Lapu-Lapu City",
+   "sources": [
+    {
+     "file": "sunstar-north-airport",
+     "org": "SunStar",
+     "dated": "2026-06-09",
+     "quote": [
+      "Currently, the Mactan-Cebu International Airport in Lapu-Lapu City handles the province's international and domestic flights.",
+      "Published on : Jun 09, 2026"
+     ]
+    },
+    {
+     "file": "aci-asq-2025",
+     "org": "ACI World (Airports Council International)",
+     "quote": "Mactan-Cebu International Airport (Lapu-Lapu, Philippines)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "in Lapu-Lapu City on Mactan island"
+    }
+   ]
+  },
+  {
+   "claim": "ACI listed it among the best in Asia-Pacific, 5 to 15 million, in 2024 and 2025",
+   "verdict": "corrected",
+   "inAfter": "Airports Council International listed it among the best airports in the Asia-Pacific region in the 5 to 15 million passenger category in both 2024 and 2025",
+   "note": "Was 'named it the best airport'. ACI's own winners lists put Mactan-Cebu among five Asia-Pacific winners in the 5 to 15 million class in each year (with Surabaya, Shijiazhuang, Balikpapan and Makassar in 2024; with Lucknow, Shijiazhuang, Balikpapan and Makassar in 2025), an award for the top fifth of airports by satisfaction score, so 'among the best'. MCIAA's February 2026 release confirms both years.",
+   "sources": [
+    {
+     "file": "aci-asq-2024",
+     "org": "ACI World (Airports Council International)",
+     "quote": [
+      "2024 Winners",
+      "Best Airports by Size and Region",
+      "This award recognizes airports with the top 20% overall satisfaction score by size and region at departure.",
+      "5 to 15 million passengers per year",
+      "Mactan-Cebu International Airport (Lapu-Lapu, Philippines)"
+     ]
+    },
+    {
+     "file": "aci-asq-2025",
+     "org": "ACI World (Airports Council International)",
+     "quote": [
+      "2025 ASQ CUSTOMER EXPERIENCE AWARD WINNERS",
+      "The ASQ Customer Experience Awards recognize airports that perform among the best globally",
+      "Best Airports at Departures, by size and region",
+      "5 to 15 million passengers per year",
+      "Mactan-Cebu International Airport (Lapu-Lapu, Philippines)"
+     ]
+    },
+    {
+     "file": "mciaa-asq-2025",
+     "org": "Mactan-Cebu International Airport Authority (MCIAA)",
+     "quote": [
+      "has once again been recognized as the 2025 Airport Service Quality (ASQ) Best Airport Award in the 5–15 million passengers category in the Asia-Pacific region",
+      "having previously secured the same Airport Service Quality (ASQ) Best Airport Award in the 5–15 million passengers category in the Asia-Pacific region for 2024"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "being named the Best Airport in the Asia-Pacific Region (5–15 million passengers) for two consecutive years in 2024 and 2025"
+    }
+   ]
+  },
+  {
+   "claim": "two passenger terminals, one domestic and one international",
+   "verdict": "softened",
+   "inAfter": "There are two passenger terminals, one domestic and one international",
+   "note": "Was 'Terminal 1 ... is now the domestic terminal' and 'Terminal 2 took over international flights'. The operator's live Cebu Connects page speaks of 'the international terminal' and of moving luggage between terminals when connecting between domestic and international flights; AvGeek (April 2026) names Terminals 1 and 2. Only Wikipedia says in so many words that Terminal 1 is the domestic one, so the text names only Terminal 2 (below). Three tries on the operator's own guide pages: the FAQ and the old Terminal 1 notice would not render (the site's app answers 404), and the international departure guide does not name a terminal.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": [
+      "Mactan–Cebu International Airport has two passenger terminals, with plans laid in 2019 for another terminal.",
+      "serves as the airport's domestic terminal",
+      "Terminal 2 is exclusive only for international flights."
+     ]
+    },
+    {
+     "file": "mcia-cebu-connects",
+     "org": "Aboitiz InfraCapital Cebu Airport Corporation (operator, mactancebuairport.com)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "you will be directed back to the international terminal if you are moving from international to domestic flights",
+      "eliminating the hassle of transporting luggage between terminals"
+     ]
+    },
+    {
+     "file": "avgeek-asean-2026",
+     "org": "AvGeek Philippines",
+     "dated": "2026-04-21",
+     "quote": "designated vehicle areas in Terminals 1 and 2"
+    }
+   ]
+  },
+  {
+   "claim": "international flights use Terminal 2",
+   "verdict": "confirmed",
+   "inAfter": "International flights use Terminal 2",
+   "note": "Was 'Terminal 2 took over international flights' (it opened in 2018). The operator's June 2026 release puts the lounge for departing overseas Filipino workers on Terminal 2's departures level and their help centre for returning workers on its arrivals level: overseas workers fly international, so Terminal 2 is the international terminal now.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Terminal 2 is exclusive only for international flights."
+    },
+    {
+     "file": "mcia-news",
+     "org": "Aboitiz InfraCapital Cebu Airport Corporation (operator, mactancebuairport.com)",
+     "dated": "2026-06-26",
+     "quote": [
+      "The OFW Lounge (Terminal 2 Departures Level near Gate 16): A dedicated space for departing OFWs waiting for their flights",
+      "The OFW Facilitation Center (Terminal 2 Arrivals Level near pick-up area)",
+      "for returning and transiting OFWs",
+      "today, June 26, 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "hub for Philippine Airlines",
+   "verdict": "confirmed",
+   "inAfter": "It is a hub for Philippine Airlines",
+   "sources": [
+    {
+     "file": "avgeek-transfers-2026",
+     "org": "AvGeek Philippines",
+     "dated": "2026-09-01",
+     "quote": [
+      "Home carriers Philippine Airlines (PR) and Cebu Pacific (5J) pioneered the service",
+      "Sep 1, 2026"
+     ]
+    },
+    {
+     "file": "capa-pal",
+     "org": "CAPA Centre for Aviation (airline profiles)",
+     "quote": "With hubs at Ninoy Aquino International Airport and Mactan-Cebu International Airport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "the airport serves as a hub for Philippine Airlines"
+    }
+   ]
+  },
+  {
+   "claim": "operating base for Cebu Pacific",
+   "verdict": "confirmed",
+   "inAfter": "an operating base for Cebu Pacific",
+   "sources": [
+    {
+     "file": "jgsummit-cebupacific",
+     "org": "JG Summit Holdings (Cebu Pacific's parent)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The airline flies from three strategically placed hubs: Manila, Cebu and Clark."
+    },
+    {
+     "file": "avgeek-transfers-2026",
+     "org": "AvGeek Philippines",
+     "dated": "2026-09-01",
+     "quote": "Home carriers Philippine Airlines (PR) and Cebu Pacific (5J) pioneered the service"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "as an operating base for Cebu Pacific, Philippines AirAsia, and Sunlight Air"
+    }
+   ]
+  },
+  {
+   "claim": "operating base for Philippines AirAsia",
+   "verdict": "confirmed",
+   "inAfter": "and Philippines AirAsia",
+   "note": "AirAsia Philippines reopened its Cebu hub with new routes from 15 November 2025 (AvGeek, September 2025), so the base is current.",
+   "sources": [
+    {
+     "file": "avgeek-airasia-hub",
+     "org": "AvGeek Philippines",
+     "dated": "2025-09-25",
+     "quote": [
+      "To mark its Cebu hub revival, AirAsia Philippines will host a Music Festival on 15 November 2025",
+      "To meet the needs of this hub reopening",
+      "Sep 25, 2025"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "as an operating base for Cebu Pacific, Philippines AirAsia, and Sunlight Air"
+    }
+   ]
+  },
+  {
+   "claim": "Sunlight Air flies from here",
+   "verdict": "softened",
+   "inAfter": "Sunlight Air also flies from here",
+   "note": "Was 'an operating base for ... Sunlight Air'. GMA (October 2025) says it flies from Clark, Cebu and Manila, with its new ATR on Siargao to Cebu and Cebu to Busuanga and a Cebu to Siquijor route from December 2025; no second source calls Cebu a base, so the text says only that it flies from here.",
+   "sources": [
+    {
+     "file": "gma-sunlight",
+     "org": "GMA News",
+     "dated": "2025-10-28",
+     "quote": [
+      "Sunlight Air currently flies from Clark, Cebu, and Manila to various destinations in the Philippines",
+      "Published October 28, 2025"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "as an operating base for Cebu Pacific, Philippines AirAsia, and Sunlight Air"
+    }
+   ]
+  },
+  {
+   "claim": "opened in the mid-1960s",
+   "verdict": "softened",
+   "inAfter": "The airport opened in the mid-1960s",
+   "note": "Was 'opened on 27 April 1966'. MCIAA's profile gives the mid-1960s, replacing Lahug Airport; the exact day rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "mciaa-profile",
+     "org": "Mactan-Cebu International Airport Authority (MCIAA)",
+     "quote": "It started operations in the mid 1960’s as the replacement of the Lahug Airport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "Opened on April 27, 1966"
+    }
+   ]
+  },
+  {
+   "claim": "operated by Aboitiz InfraCapital",
+   "verdict": "confirmed",
+   "inAfter": "is operated by Aboitiz InfraCapital",
+   "note": "Checked against current sources, as the terminal operator has changed in recent years. BusinessWorld (30 October 2024): Megawide sold its last stake to Aboitiz InfraCapital, giving it full control. Since then MCIAA (February 2026), AvGeek (February and April 2026) and the operator itself (June 2026) all name Aboitiz InfraCapital Cebu Airport Corporation (ACAC) as the private operator, with the government's MCIAA as the airport authority. The old text is right as it stands.",
+   "sources": [
+    {
+     "file": "mcia-news",
+     "org": "Aboitiz InfraCapital Cebu Airport Corporation (operator, mactancebuairport.com)",
+     "dated": "2026-06-26",
+     "quote": "Aboitiz InfraCapital Cebu Airport Corporation (ACAC) General Manager Ricia Vinelli Montejo"
+    },
+    {
+     "file": "avgeek-jan2026-record",
+     "org": "AvGeek Philippines",
+     "dated": "2026-02-05",
+     "quote": "The Aboitiz InfraCapital Cebu Airport Corporation (ACAC) , which operates MCIA"
+    },
+    {
+     "file": "avgeek-asean-2026",
+     "org": "AvGeek Philippines",
+     "dated": "2026-04-21",
+     "quote": "the airport’s private operator, Aboitiz InfraCapital Cebu Airport Corporation (ACAC)"
+    },
+    {
+     "file": "mciaa-asq-2025",
+     "org": "Mactan-Cebu International Airport Authority (MCIAA)",
+     "quote": "MCIAA, alongside its private sector partner Aboitiz InfraCapital Cebu Airport Corporation (ACAC)"
+    },
+    {
+     "file": "bworld-megawide-exit",
+     "org": "BusinessWorld",
+     "dated": "2024-10-30",
+     "quote": [
+      "This move gives Aboitiz InfraCapital full control of the airport.",
+      "October 30, 2024"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "operated by Aboitiz InfraCapital Inc."
+    }
+   ]
+  },
+  {
+   "claim": "named it the best airport",
+   "verdict": "cut",
+   "wasBefore": "Airports Council International named it the best airport in the Asia-Pacific region",
+   "why": "Corrected to 'among the best': ACI's own lists name five winners in this class in each year (see above)."
+  },
+  {
+   "claim": "Asia's airport of the year, 2025 Travel Trade Excellence Awards",
+   "verdict": "cut",
+   "wasBefore": "and it was named Asia's airport of the year at the 2025 Travel Trade Excellence Awards",
+   "why": "Wikipedia alone. Its cited source is on business.inquirer.net, which served Cloudflare's bot check to the earlier helper and was not tried again; Aboitiz InfraCapital's site and the Aboitiz group's magazine site (aboitizeyes.aboitiz.com) refused a plain link listing (403), so no other tool went there; the operator's media centre page would not render (its app answered 404)."
+  },
+  {
+   "claim": "Terminal 1 built in 1990, now the domestic terminal",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1, built in 1990, is now the domestic terminal",
+   "why": "The 1990 date rests on Wikipedia alone. That Terminal 1 in particular is the domestic terminal is stated only by Wikipedia, so the text keeps the split (one domestic, one international) and names only Terminal 2 (see above)."
+  },
+  {
+   "claim": "six jet bridges and twelve remote stands",
+   "verdict": "cut",
+   "wasBefore": "with six jet bridges and twelve remote stands",
+   "why": "The twelve remote stands rest on Wikipedia alone. The six boarding bridges are also in MCIAA's undated profile, but that page was written around 2018 (it counts the authority's 28th year and names the DOTC), before Terminal 1 was rebuilt in 2019 and 2020, so there is no current second source for a terminal detail."
+  },
+  {
+   "claim": "a third terminal planned since 2019",
+   "verdict": "cut",
+   "wasBefore": "A third terminal has been planned since 2019.",
+   "why": "Wikipedia alone ('plans laid in 2019'), and no source from the last 12 months says a third terminal is still planned; works need a current source."
+  },
+  {
+   "claim": "operating base for Sunlight Air",
+   "verdict": "cut",
+   "wasBefore": "an operating base for Cebu Pacific, Philippines AirAsia and Sunlight Air",
+   "why": "Softened for Sunlight Air only: it flies from Cebu (GMA, October 2025), but no second source calls Cebu its base (see above). Cebu Pacific and Philippines AirAsia are kept."
+  },
+  {
+   "claim": "opened on 27 April 1966",
+   "verdict": "cut",
+   "wasBefore": "The airport opened on 27 April 1966",
+   "why": "The exact day rests on Wikipedia alone (the Inquirer story it cites is on the blocked business.inquirer.net); softened to the mid-1960s, which MCIAA confirms (see above)."
+  },
+  {
+   "claim": "Cebu Connects transfer service (since April 2025)",
+   "verdict": "cut",
+   "why": "Held back: a verified new fact that replaces nothing, for Andy to add if he wants. Since April 2025, passengers connecting between flights on one booking with bags tagged through can clear immigration and customs in a transfer area inside the terminal instead of re-checking in; the minimum connection is 60 minutes where an international flight is involved and 35 minutes domestic to domestic. AvGeek names the airlines taking part: Philippine Airlines and Cebu Pacific from April 2025, Singapore Airlines, AirAsia Philippines, China Airlines and, from 26 May 2026, Emirates.",
+   "sources": [
+    {
+     "file": "mcia-cebu-connects",
+     "org": "Aboitiz InfraCapital Cebu Airport Corporation (operator, mactancebuairport.com)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "Passengers can now complete Immigration, Customs, and Quarantine processes in a designated transfer area within the terminal, negating the need to exit the facility.",
+      "Passengers must book flights under the same itinerary.",
+      "All checked luggage must be tagged through from the departure airport to the final destination.",
+      "60 Minutes",
+      "35 Minutes"
+     ]
+    },
+    {
+     "file": "avgeek-transfers-2026",
+     "org": "AvGeek Philippines",
+     "dated": "2026-09-01",
+     "quote": [
+      "since the program launched on April 2025",
+      "The program operates with highly efficient Minimum Connecting Times (MCT) set at just 35 minutes for domestic flights and 60 minutes for international flights.",
+      "Home carriers Philippine Airlines (PR) and Cebu Pacific (5J) pioneered the service by activating International-to-Domestic transfers on 07 April 2025",
+      "onboarding China Airlines (CI) on 30 April 2026, and Emirates (EK) on 26 May 2026"
+     ]
+    },
+    {
+     "file": "sunstar-new-routes",
+     "org": "SunStar (carrying the operator's press release)",
+     "dated": "2025-09-26",
+     "quote": "a unique feature at MCIA that allows for seamless transfers between domestic and international"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "For its size, the quality is genuinely high.",
+   "why": "The old text's judgement, kept (reordered only so that two sentences in a row do not start with 'The'); backed by ACI listing it among the best in its class two years running (sourced)."
+  },
+  {
+   "text": "so the split is straightforward",
+   "why": "The old text's framing, kept: one terminal for domestic flights and one for international flights (sourced), so a traveller only needs to know which kind of flight they are on."
+  }
+ ],
  "tracerOk": {}
 }

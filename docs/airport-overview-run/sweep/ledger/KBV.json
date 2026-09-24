@@ -6,8 +6,411 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Krabi_International_Airport",
  "audited": "2026-09-23",
  "before": "The airport for Krabi and the Andaman coast, about 7 km east of the town. It opened in 1999 and is sixth busiest in Thailand, handling 2.3 million passengers in 2023 and over 4.3 million in 2017.\n\nCapacity is the issue to know about. The terminal was designed for three million passengers and passed that some time ago. Money was allocated in 2018 for a third terminal, a refit of the existing two, more aircraft stands and better electrical supply, and a 2019 project aims to double capacity to eight million a year.\n\nAfter that there is nowhere to go. The airport cannot be expanded beyond its final phase because the town has grown around it, and a new international airport has been proposed in Phang Nga province as the long term alternative.\n\nThat electrical work matters more than it sounds. In February 2016 a planned power cut left the terminal dark for over six hours because the back-up generators failed, and immigration staff had to record 2,000 passengers by hand.",
- "after": "The airport for Krabi and the Andaman coast, about 7 km east of the town. It opened in 1999 and is sixth busiest in Thailand, handling 2.3 million passengers in 2023 and over 4.3 million in 2017.\n\nCapacity is the issue to know about. The terminal was designed for three million passengers and passed that some time ago. Money was allocated in 2018 for a third terminal, a refit of the existing two, more aircraft stands and better electrical supply, and a 2019 project aims to double capacity to eight million a year.\n\nAfter that there is nowhere to go. The airport cannot be expanded beyond its final phase because the town has grown around it, and a new international airport has been proposed in Phang Nga province as the long term alternative.\n\nThat electrical work matters more than it sounds. In February 2016 a planned power cut left the terminal dark for over six hours because the back-up generators failed, and immigration staff had to record 2,000 passengers by hand.",
- "claims": [],
+ "after": "The airport for Krabi and the Andaman coast, east of the town.\n\nA third terminal and a refit of the first two have doubled its capacity to eight million passengers a year.",
+ "claims": [
+  {
+   "claim": "The airport for Krabi and the Andaman coast",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Krabi and the Andaman coast",
+   "note": "Thai Rath (6 August 2026) reports the deputy transport minister calling Krabi's airport the gateway to the Andaman for the European market; CAPA names the Krabi province beach resorts it serves (Had Yao, Ao Nang, Rai Leh, Koh Lanta), all on the Andaman coast; Krungthep Turakij (October 2024) ties its high season to Andaman sea tourism. Krungthep Turakij and Thansettakij may share a parent group, so neither is counted without Thai Rath or CAPA beside it.",
+   "sources": [
+    {
+     "file": "thairath-2026-finnair",
+     "org": "Thai Rath (thairath.co.th)",
+     "dated": "2026-08-06",
+     "quote": [
+      "6 ส.ค. 2569 18:05 น.",
+      "ประตูสู่อันดามันสำหรับตลาดยุโรป",
+      "ยกระดับสนามบินภูมิภาค ขับเคลื่อนเศรษฐกิจและการท่องเที่ยวอันดามัน"
+     ]
+    },
+    {
+     "file": "capa-krabi",
+     "org": "CAPA Centre for Aviation (centreforaviation.com)",
+     "dated": "read 2026-09-24 (live airport profile)",
+     "quote": "Krabi Airport serves as a gateway to Krabi province in southern Thailand and to the popular Thai beach resorts of Had Yao, Ao Nang, Rai Leh and Koh Lanta."
+    },
+    {
+     "file": "kt-2024-10-highseason",
+     "org": "Krungthep Turakij (bangkokbiznews.com; Krungthep Turakij Media Co.)",
+     "dated": "October 2024 (the article is about the winter 2024/25 schedule, October 2024 to March 2025)",
+     "quote": [
+      "ไฮซีซั่นการท่องเที่ยวทางทะเลฝั่งอันดามัน",
+      "ศูนย์กลางการเดินทางที่สำคัญของภูมิภาคอันดามัน"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "is an international airport in Nuea Khlong subdistrict, Nuea Khlong district, Krabi province in southern Thailand"
+    }
+   ]
+  },
+  {
+   "claim": "east of the town",
+   "verdict": "softened",
+   "inAfter": "east of the town",
+   "note": "Was 'about 7 km east of the town'. The direction passes the coordinates check (73 degrees from the GeoNames centre of Krabi, which is east). The 7 km fails it: 9.0 km in a straight line gives a ratio of 0.78, under the 0.8 floor, and no written source for another figure could be read (the Department of Airports' own airport pages answered 503; Krabi province's site 403). So the number goes.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Krabi",
+      "Straight-line distance from the city centre: 9.0 km (5.6 miles)",
+      "Bearing from the city centre: 73 degrees, which is east"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "It is about 7 kilometres (4 mi) east of downtown Krabi."
+    }
+   ]
+  },
+  {
+   "claim": "A third terminal and a refit of the first two have doubled its capacity to eight million passengers a year",
+   "verdict": "corrected",
+   "inAfter": "A third terminal and a refit of the first two have doubled its capacity to eight million passengers a year.",
+   "note": "Replaces the old capacity paragraph, which described the works as money allocated in 2018 and a 2019 project that 'aims to double capacity to eight million a year'. The works are done. On 18 March 2021 Department of Airports officials told Krungthep Turakij that the third terminal, with the refit of terminals 1 and 2 and a car park building (2,923.4 million baht), would raise capacity from 4 million to 8 million passengers a year (1,500 to 3,000 an hour). Krungthep Turakij then reported that the new building would open to passengers on 8 March 2023, with every airline checking in there (one organisation, so the date is not in the text). On 6 August 2026 the department's director-general told Thai Rath the terminal now handles 3,000 passengers an hour, or 8 million a year. Wikipedia describes the same project (a third terminal and a renovation of the existing two, doubling capacity to eight million).",
+   "sources": [
+    {
+     "file": "kt-2021-03-expansion",
+     "org": "Krungthep Turakij (bangkokbiznews.com; Krungthep Turakij Media Co.)",
+     "dated": "2021-03-18 (the site visit the article reports)",
+     "quote": [
+      "เมื่อวันที่ 18 มี.ค.64",
+      "โครงการก่อสร้างอาคารที่พักผู้โดยสารหลังที่ 3 และปรับปรุงอาคารที่พักผู้โดยสารหลังที่ 1,2",
+      "จาก 4 ล้านคนต่อปี เป็น 8 ล้านคนต่อปี"
+     ]
+    },
+    {
+     "file": "thairath-2026-finnair",
+     "org": "Thai Rath (thairath.co.th)",
+     "dated": "2026-08-06",
+     "quote": [
+      "6 ส.ค. 2569 18:05 น.",
+      "อาคารที่พักผู้โดยสาร สามารถรองรับผู้โดยสารได้ 3,000 คน/ชั่วโมง หรือ 8 ล้านคน/ปี"
+     ]
+    },
+    {
+     "file": "kt-2023-03-terminal",
+     "org": "Krungthep Turakij (bangkokbiznews.com; Krungthep Turakij Media Co.)",
+     "dated": "early March 2023 (before the 8 March 2023 opening it announces)",
+     "quote": [
+      "อาคารหลังใหม่ที่เตรียมเปิดให้บริการผู้โดยสารอย่างเป็นทางการในวันที่ 8 มีนาคม 2566",
+      "ผู้โดยสารทุกสายการบินทั้งในประเทศและผู้โดยสารเที่ยวบินระหว่างประเทศ จะเริ่มทำการเช็คอินที่อาคารผู้โดยสารหลังใหม่ได้ตั้งแต่วันที่ 8 มีนาคม 2566 เป็นต้นไป"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": [
+      "In 2018, the airport was allocated 6.6 billion baht to build a third terminal, renovate the existing two terminals and car park",
+      "In 2019, the Department of Airports announced a project to double the airport's capacity to eight million passengers per year."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 7 km",
+   "verdict": "cut",
+   "wasBefore": "about 7 km east of the town",
+   "why": "Fails the coordinates check (9.0 km in a straight line, ratio 0.78). The direction is kept (see above)."
+  },
+  {
+   "claim": "opened in 1999",
+   "verdict": "cut",
+   "wasBefore": "It opened in 1999",
+   "why": "Wikipedia alone (its infobox gives 10 July 1999). The Department of Airports' airport pages answered 503 (minisite.airports.go.th to the earlier helper, www.airports.go.th to the browser), Krabi province's site answered 403, and none of the saved news pages gives the year."
+  },
+  {
+   "claim": "sixth busiest in Thailand",
+   "verdict": "cut",
+   "wasBefore": "is sixth busiest in Thailand",
+   "why": "A 2023 ranking on Wikipedia alone. No current national ranking could be read: the regulator (caat.or.th) refused the link lister to the earlier helper, and the Department of Airports' figures cover only its own 28 airports, not Airports of Thailand's."
+  },
+  {
+   "claim": "2.3 million passengers in 2023; over 4.3 million in 2017",
+   "verdict": "cut",
+   "wasBefore": "handling 2.3 million passengers in 2023 and over 4.3 million in 2017.",
+   "why": "Stale, and Wikipedia alone. No 2025 total could be quoted from a saved page. Wikipedia's infobox gives 3,053,553 for 2025, citing a Department of Airports Power BI dashboard that now reads 'This content isn't available'. The department's open data catalogue (gdcatalog.airports.go.th) holds 2025 traffic only as flight-by-flight rows, as a monthly airline table whose 2025 rows for Krabi cover a single traffic type and add up to 2,217,139 passengers (a sum of mine, not a published figure, and well short of the infobox's total), and as a summary spreadsheet the fetch tools cannot read (saved for the reviewer: doa-13-02-krabi-2025, the monthly rows; doa-gdcatalog-13-01, the summary's catalogue entry). For the owner: a published 2025 total would replace this like for like.",
+   "sources": [
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 3,053,553 62.88%"
+     ]
+    },
+    {
+     "file": "doa-powerbi",
+     "org": "Department of Airports (its Power BI dashboard, app.powerbi.com)",
+     "dated": "read 2026-09-24",
+     "quote": "This content isn't available."
+    }
+   ]
+  },
+  {
+   "claim": "capacity the issue; designed for three million and passed",
+   "verdict": "cut",
+   "wasBefore": "Capacity is the issue to know about. The terminal was designed for three million passengers and passed that some time ago.",
+   "why": "Overtaken: capacity is now 8 million a year (see above). The figure was also disputed: Wikipedia says the terminal was designed for three million, while the department's officials put the pre-expansion capacity at 4 million a year (Krungthep Turakij, 18 March 2021).",
+   "sources": [
+    {
+     "file": "kt-2021-03-expansion",
+     "org": "Krungthep Turakij (bangkokbiznews.com; Krungthep Turakij Media Co.)",
+     "quote": "จาก 4 ล้านคนต่อปี เป็น 8 ล้านคนต่อปี"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The terminal is designed for three million passengers, a number that has already been exceeded"
+    }
+   ]
+  },
+  {
+   "claim": "money allocated in 2018 for a third terminal, refit, stands and electrical supply",
+   "verdict": "cut",
+   "wasBefore": "Money was allocated in 2018 for a third terminal, a refit of the existing two, more aircraft stands and better electrical supply",
+   "why": "The 2018 allocation (6.6 billion baht) rests on Wikipedia alone; its source, the Bangkok Post, answers 451. The works themselves are carried by the corrected sentence. Of the rest, the apron with its airfield lighting was finished on 21 January 2021 (Krungthep Turakij), while the parallel taxiway with airfield lighting (941.9 million baht, contracted to April 2023) is still unfinished: the department's own report for the 2025 fiscal year lists it as waiting for electrical fixes and imported equipment, and Thansettakij (7 May 2026) has the deputy transport minister telling the department to finish it quickly. That is works detail with nothing in the text to replace, so it stays here.",
+   "sources": [
+    {
+     "file": "kt-2021-03-expansion",
+     "org": "Krungthep Turakij (bangkokbiznews.com; Krungthep Turakij Media Co.)",
+     "quote": [
+      "โครงการก่อสร้างลานจอดเครื่องบิน พร้อมระบบไฟฟ้าสนามบิน",
+      "ซึ่งก่อสร้างเสร็จเรียบร้อยแล้ว เมื่อวันที่ 21 มกราคม 2564",
+      "วงเงิน 941,900,000 บาท สัญญาเริ่ม 29 ตุลาคม 2563 ถึง 16 เมษายน 2566"
+     ]
+    },
+    {
+     "file": "doa-o7-fy2568",
+     "org": "Department of Airports (the operator; its open data catalogue, gdcatalog.airports.go.th)",
+     "dated": "fiscal year 2025 (October 2024 to September 2025), 12-month report",
+     "quote": [
+      "ผลการด าเนินงานตามแผนด าเนินงาน ประจ าปีงบประมาณ พ.ศ. 2568 (รอบ 12 เดือน)",
+      "งานก่อสร้างทางขับขนาน พร้อมระบบไฟฟ้าสนามบิน  ท่าอากาศยานกระบี่",
+      "รอแก้ไขงานระบบไฟฟ้าและอุปกรณ์น าเข้าจากต่างประเทศ",
+      "วงเงินทั้งสิ้น 941,900,000"
+     ]
+    },
+    {
+     "file": "thansettakij-2026-05-quickwin",
+     "org": "Thansettakij (thansettakij.com)",
+     "dated": "2026-05-07",
+     "quote": [
+      "วันนี้ (วันที่ 7 พฤษภาคม 2569)",
+      "โครงการก่อสร้างทางขับขนานท่าอากาศยานกระบี่ และสุราษฎร์ธานี"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a 2019 project aims to double capacity",
+   "verdict": "cut",
+   "wasBefore": "and a 2019 project aims to double capacity to eight million a year.",
+   "why": "Out of date: the doubling has happened. Corrected (see above)."
+  },
+  {
+   "claim": "nowhere to go; cannot be expanded beyond its final phase",
+   "verdict": "cut",
+   "wasBefore": "After that there is nowhere to go. The airport cannot be expanded beyond its final phase because the town has grown around it",
+   "why": "Wikipedia alone, and the department's own report points the other way: for the 2025 fiscal year it budgeted a consultant (7 million baht, bids under review) to survey property for a Krabi airport 'improvement and expansion project'. What that project is could not be read, so nothing replaces the line.",
+   "sources": [
+    {
+     "file": "doa-o7-fy2568",
+     "org": "Department of Airports (the operator; its open data catalogue, gdcatalog.airports.go.th)",
+     "quote": "ค่าจ้างที่ปรึกษาสารวจอสังหาริมทรัพย์โครงการปรับปรุง ขยายท่าอากาศยานกระบี่"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The airport will no longer be expanded after its final phase of expansion due to lack of space and the city's expansion"
+    }
+   ]
+  },
+  {
+   "claim": "a new international airport proposed in Phang Nga as the long term alternative",
+   "verdict": "cut",
+   "wasBefore": "and a new international airport has been proposed in Phang Nga province as the long term alternative.",
+   "why": "Only Wikipedia calls it Krabi's alternative. CAPA says the planned Phang Nga (Andaman) airport is meant to ease traffic at Phuket, and Thansettakij (October 2024) reports Airports of Thailand's feasibility study for it (7,300 rai in Phang Nga, 22.5 million passengers a year) and tags it as Phuket's second airport. The sources also disagree on timing (CAPA's profile says completion by 31 December 2027; Thansettakij has construction planned for 2028 to 2031, BE 2571 to 2574), and none is dated within 12 months.",
+   "sources": [
+    {
+     "file": "capa-phangnga",
+     "org": "CAPA Centre for Aviation (centreforaviation.com)",
+     "dated": "read 2026-09-24 (live profile; latest entry May 2024)",
+     "quote": [
+      "Completion: in over 1 year (31-Dec-2027)",
+      "The new airport is expected to ease passenger traffic at the existing airport in Phuket"
+     ]
+    },
+    {
+     "file": "thansettakij-2024-10-andaman",
+     "org": "Thansettakij (thansettakij.com)",
+     "dated": "October 2024 (consultants hired September 2024, per the article)",
+     "quote": [
+      "ท่าอากาศยานล้านนา และ ท่าอากาศยานอันดามัน",
+      "สำหรับแผนพัฒนาโครงการท่าอากาศยานอันดามัน มีพื้นที่ 7,300 ไร่",
+      "ดำเนินการก่อสร้าง 42 เดือน (ปี 2571-2574)",
+      "สนามบินภูเก็ต 2"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "A new international airport is proposed to be built in Phang Nga province, which is expected to be completed by 2025, and will serve as an alternative to Krabi airport."
+    }
+   ]
+  },
+  {
+   "claim": "February 2016 blackout",
+   "verdict": "cut",
+   "wasBefore": "That electrical work matters more than it sounds. In February 2016 a planned power cut left the terminal dark for over six hours because the back-up generators failed, and immigration staff had to record 2,000 passengers by hand.",
+   "why": "Wikipedia alone: its source, a Bangkok Post opinion piece, answers 451, and the TTG Asia article it also cites is gone (404). Newer electrical failures are recorded as held back below."
+  },
+  {
+   "claim": "Held back: the Department of Airports still runs Krabi; the transfer to Airports of Thailand is on hold",
+   "verdict": "cut",
+   "why": "Held back: the old text does not name the operator, so this replaces nothing, but it answers the question of who runs Krabi. The Department of Airports runs it: its own report for the 2025 fiscal year lists Krabi's works among its airports, and news through May 2026 says so. The cabinet agreed in principle on 30 August 2022 to hand the management of Krabi, Udon Thani and Buriram to Airports of Thailand (AOT). The deputy transport minister shelved that in March 2025 (Thai Rath, 6 March 2025; Krabi was the department's most profitable airport, 180 million baht), another deputy minister, Mallika Jirapanvanich, ordered it slowed again (Thansettakij; that page shows no date of its own), and on 7 May 2026 the deputy minister said the handover still stands on the old cabinet resolution but waits for a study, and that he personally opposes it (Thansettakij). Earlier still, the transport ministry kept Krabi with the department while letting AOT manage Udon Thani, Tak and Buriram under contract (Krungthep Turakij, dated 27 August; the year is not on the saved page). So Krabi has not changed hands, whatever the plans. Wikipedia's infobox also says Department of Airports.",
+   "sources": [
+    {
+     "file": "doa-o7-fy2568",
+     "org": "Department of Airports (the operator; its open data catalogue, gdcatalog.airports.go.th)",
+     "dated": "fiscal year 2025, 12-month report",
+     "quote": [
+      "กรมท่าอากาศยาน",
+      "ผลการด าเนินงานตามแผนด าเนินงาน ประจ าปีงบประมาณ พ.ศ. 2568 (รอบ 12 เดือน)",
+      "งานก่อสร้างทางขับขนาน พร้อมระบบไฟฟ้าสนามบิน  ท่าอากาศยานกระบี่"
+     ]
+    },
+    {
+     "file": "thansettakij-2026-05-transfer",
+     "org": "Thansettakij (thansettakij.com)",
+     "dated": "2026-05-07",
+     "quote": [
+      "วันนี้ (วันที่ 7 พฤษภาคม 2569)",
+      "สถานะในตอนนี้ยังคงเป็นไปตามมติ ครม. เดิมที่ให้โอนสิทธิการบริหาร แต่ต้องรอผลการศึกษาสรุปอีกครั้ง",
+      "ไม่เห็นด้วยกับการโอนย้ายสนามบินให้ทอท."
+     ]
+    },
+    {
+     "file": "thairath-2025-03-transfer",
+     "org": "Thai Rath (thairath.co.th)",
+     "dated": "2025-03-06",
+     "quote": [
+      "Date Time: 6 มี.ค. 2568 09:01 น.",
+      "“มนพร” ลุยมาเฟีย 28 สนามบิน ทย. พับแผนโอนสนามบิน “กระบี่-อุดรฯ-บุรีรัมย์” ให้ ทอท.",
+      "สนามบินกระบี่ มีกำไรถึง 180 ล้านบาท"
+     ]
+    },
+    {
+     "file": "thansettakij-2025-10-transfer",
+     "org": "Thansettakij (thansettakij.com)",
+     "dated": "not on the saved page (the deputy minister named, Mallika Jirapanvanich, is quoted halting the transfer)",
+     "quote": [
+      "รมช.คมนาคมสั่งชะลอการโอน 3 สนามบินภูมิภาค ได้แก่ กระบี่ อุดรธานี และบุรีรัมย์ ของกรมท่าอากาศยาน (ทย.) ให้แก่บริษัท ท่าอากาศยานไทย (ทอท.)",
+      "ที่ผ่านมาตามมติคณะรัฐมนตรี (ครม.) เมื่อวันที่ 30 ส.ค.2565 เห็นชอบในหลักการให้มีการโอนสิทธิดังกล่าวไปอยู่ในความรับผิดชอบของ ทอท."
+     ]
+    },
+    {
+     "file": "kt-2019-08-operator",
+     "org": "Krungthep Turakij (bangkokbiznews.com; Krungthep Turakij Media Co.)",
+     "dated": "27 August (the year is not on the saved page)",
+     "quote": "'ทอท.' ชวดเข้าบริหารสนามบินกระบี่ 'ทย.' ยังดูแลเหมือนเดิม"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-15",
+     "quote": "operator = Department of Airports"
+    }
+   ]
+  },
+  {
+   "claim": "Held back: this winter's international flights, with Finnair and SAS new",
+   "verdict": "cut",
+   "why": "Held back: the old text names no airlines and counts no flights, so under the like-for-like rule this stays out. The Department of Airports' director-general told both papers that for the winter 2026/27 schedule (25 October 2026 to 27 March 2027) 14 airlines asked for slots at Krabi: 10 with scheduled international flights, 98 a week, and 4 with international charters; new are SAS from Copenhagen and Finnair from Helsinki, twice a week each. It would go in as an attributed statement if Andy wants it.",
+   "sources": [
+    {
+     "file": "thairath-2026-regional",
+     "org": "Thai Rath (thairath.co.th)",
+     "dated": "2026-06-15",
+     "quote": [
+      "Date Time: 15 มิ.ย. 2569 08:59 น.",
+      "เที่ยวบินประจำเส้นทางระหว่างประเทศ 10 สายการบิน รวม 98 เที่ยวบินต่อสัปดาห์ และเที่ยวบินเช่าเหมาลำระหว่างประเทศ 4 สายการบิน",
+      "Scandinavian Airlines (SAS) ในเส้นทาง โคเปนเฮเกน–กระบี่–โคเปนเฮเกน จำนวน 2 เที่ยวบินต่อสัปดาห์ และ Finnair ในเส้นทาง เฮลซิงกิ–กระบี่–เฮลซิงกิ จำนวน 2 เที่ยวบินต่อสัปดาห์"
+     ]
+    },
+    {
+     "file": "thansettakij-2026-06-flights",
+     "org": "Thansettakij (thansettakij.com)",
+     "dated": "June 2026 (after the 158th IATA Slot Conference, 9 to 11 June 2026)",
+     "quote": [
+      "เป็นเที่ยวบินประจำเส้นทางระหว่างประเทศ 10 สายการบิน รวม 98 เที่ยวบินต่อสัปดาห์ และเที่ยวบินเช่าเหมาลำเส้นทางระหว่างประเทศ 4 สายการบิน",
+      "ระหว่างวันที่ 9 - 11 มิถุนายน 2569"
+     ]
+    },
+    {
+     "file": "thansettakij-2025-11-flights",
+     "org": "Thansettakij (thansettakij.com)",
+     "dated": "November 2025 (after the 157th IATA Slot Conference, 18 to 20 November 2025)",
+     "quote": "สายการบิน TUI fly เส้นทาง สตอกโฮล์ม - กระบี่"
+    }
+   ]
+  },
+  {
+   "claim": "Held back: airfield power failures in February 2023 and March 2024",
+   "verdict": "cut",
+   "why": "Held back, one source each, so not for the text: the runway lights failed after a short circuit from 18:00 on 26 February 2023 and were fixed by 1 am on 27 February, holding six domestic flights (Thai Rath); on 2 March 2024 at about 20:30 a short circuit in a manhole by stand 3 stopped normal take-offs and landings, three flights were affected and the minister had portable runway lights sent (Krungthep Turakij). They would be the natural replacement for the 2016 blackout if a second source for either is found.",
+   "sources": [
+    {
+     "file": "thairath-power-delays",
+     "org": "Thai Rath (thairath.co.th)",
+     "dated": "late February 2023 (the events it reports)",
+     "quote": [
+      "ตั้งแต่เวลา 18.00 น. ของวันที่ 26 ก.พ.2566",
+      "ส่งผลให้เที่ยวบินภายในประเทศ 6 เที่ยวบิน"
+     ]
+    },
+    {
+     "file": "kt-2024-03-power",
+     "org": "Krungthep Turakij (bangkokbiznews.com; Krungthep Turakij Media Co.)",
+     "dated": "2024-03-03 (the day it reports)",
+     "quote": [
+      "เมื่อวันที่ 2 มีนาคม 2567 เวลาประมาณ 20:30 น.",
+      "ไฟฟ้าลัดวงจร ในบ่อแมนโฮล บริเวณ หลุมจอดเครี่องบินที่ 3",
+      "portable runways light"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Held back: FCDO advice for Thailand",
+   "verdict": "cut",
+   "why": "Held back: a warning that replaces nothing. The FCDO advises against all but essential travel to the provinces by the Malaysian border (Pattani, Yala, Narathiwat and parts of Songkhla) and within 20 km of the Cambodian border (updated 18 September 2026, still current 24 September 2026). Krabi is in neither area. The page also warns that it is illegal to carry cannabis out of Thailand and that airports scan transiting passengers' bags.",
+   "sources": [
+    {
+     "file": "fcdo-thailand",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-09-18 (updated; still current 24 September 2026)",
+     "quote": [
+      "FCDO advises against all but essential travel to parts of Thailand.",
+      "24 September 2026",
+      "18 September 2026",
+      "FCDO advises against all but essential travel to parts of the south, near the Thailand-Malaysia border:",
+      "FCDO advises against all but essential travel to areas within 20km of the land border with Cambodia.",
+      "It is illegal to carry cannabis out of Thailand"
+     ]
+    }
+   ]
+  }
+ ],
  "opinion": [],
  "tracerOk": {}
 }

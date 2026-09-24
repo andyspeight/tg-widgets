@@ -4,10 +4,555 @@
  "name": "Hazrat Shahjalal International Airport",
  "country": "Bangladesh",
  "wikipedia": "https://en.wikipedia.org/wiki/Hazrat_Shahjalal_International_Airport",
- "audited": "2026-09-23",
+ "audited": "2026-09-24",
  "before": "Bangladesh's largest airport and the main gateway to Dhaka, at Kurmitola 17 km from the city centre in the northern part of the city.\n\nCapacity is the pressure point. The airport is rated for 18.5 million passengers a year, and the civil aviation authority predicted that would be sufficient only until 2026, so it is at or approaching its ceiling. It handles around 190 aircraft movements a day.\n\nThe code is a relic worth knowing. DAC comes from Dacca, the older spelling of Dhaka, so it does not match the airport's name or the city's current spelling.\n\nIt is the primary hub for most Bangladeshi airlines including the flag carrier Biman Bangladesh, plus Air Astra, Novoair and US-Bangla.\n\nIt opened in 1980, taking over from Tejgaon Airport, and was formerly called Dacca International and then Zia International before being named after Shah Jalal, one of the most respected Sufi saints in Bangladesh. It also hosts a Bangladesh Air Force base.",
- "after": "Bangladesh's largest airport and the main gateway to Dhaka, at Kurmitola 17 km from the city centre in the northern part of the city.\n\nCapacity is the pressure point. The airport is rated for 18.5 million passengers a year, and the civil aviation authority predicted that would be sufficient only until 2026, so it is at or approaching its ceiling. It handles around 190 aircraft movements a day.\n\nThe code is a relic worth knowing. DAC comes from Dacca, the older spelling of Dhaka, so it does not match the airport's name or the city's current spelling.\n\nIt is the primary hub for most Bangladeshi airlines including the flag carrier Biman Bangladesh, plus Air Astra, Novoair and US-Bangla.\n\nIt opened in 1980, taking over from Tejgaon Airport, and was formerly called Dacca International and then Zia International before being named after Shah Jalal, one of the most respected Sufi saints in Bangladesh. It also hosts a Bangladesh Air Force base.",
- "claims": [],
- "opinion": [],
+ "after": "Dhaka's airport and the largest in Bangladesh, at Kurmitola about 17 km from the city centre in the northern part of the city.\n\nCapacity is the pressure point. The terminals were designed for 8 million passengers a year but handled about 12.7 million in 2025. A third terminal is due for a soft opening on 16 December 2026, the government says, so check which terminal a client will use.\n\nBiman Bangladesh, the flag carrier, is based here, as are US-Bangla, Novoair and Air Astra.\n\nIt took over from Tejgaon Airport and was first called Dacca International, then Zia International, before being named after the Sufi saint Shah Jalal.",
+ "claims": [
+  {
+   "claim": "Dhaka's airport",
+   "verdict": "confirmed",
+   "inAfter": "Dhaka's airport",
+   "note": "Was 'the main gateway to Dhaka'; 'gateway to' is on the house list of banned phrases, so the claim is kept in plainer words (the old phrase is cut below). OurAirports places the airport in Dhaka, and The Business Standard and US-Bangla both name it as Dhaka's in September 2026.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the main international airport serving Dhaka City, the capital city of Bangladesh"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Dhaka"
+    },
+    {
+     "file": "tbs-fire-backlog",
+     "org": "The Business Standard (tbsnews.net)",
+     "dated": "20 September 2026",
+     "quote": "Import cargo operations at Hazrat Shahjalal International Airport (HSIA) in Dhaka are yet to return to normal"
+    },
+    {
+     "file": "usbangla-airport-care-b",
+     "org": "US-Bangla Airlines (us-bangla.com)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": "Dhaka Hazrat Shahjalal International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "the largest airport in Bangladesh",
+   "verdict": "confirmed",
+   "inAfter": "and the largest in Bangladesh",
+   "note": "Wikipedia's current revision still calls it the largest airport in the country. The civil aviation ministry's 2010 proposal (The Daily Star, 27 August 2010) said about 80 per cent of the country's air passengers used it. Nothing since suggests another airport has overtaken it: TBS (19 July 2026) has US-Bangla planning direct international flights from Chattogram and Sylhet to cut passengers' reliance on transiting through Dhaka.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "and it is the largest airport in the country"
+    },
+    {
+     "file": "dailystar-152589",
+     "org": "The Daily Star (thedailystar.net)",
+     "dated": "27 August 2010",
+     "quote": "about 80 percent of the air passengers use Hazrat Shahjalal International Airport"
+    },
+    {
+     "file": "tbs-local-airlines-t3",
+     "org": "The Business Standard (tbsnews.net)",
+     "dated": "19 July 2026",
+     "quote": "reducing passengers' reliance on transiting through Dhaka"
+    }
+   ]
+  },
+  {
+   "claim": "at Kurmitola",
+   "verdict": "confirmed",
+   "inAfter": "at Kurmitola",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is located in Kurmitola"
+    },
+    {
+     "file": "dailystar-126503",
+     "org": "The Daily Star (thedailystar.net)",
+     "dated": "15 February 2010",
+     "quote": "the international airport in Dhaka was named Dhaka International Airport when it was shifted from Tejgaon to Kurmitola in 1979"
+    }
+   ]
+  },
+  {
+   "claim": "about 17 km from the city centre",
+   "verdict": "confirmed",
+   "inAfter": "about 17 km from the city centre",
+   "note": "The coordinates give 14.8 km in a straight line from the GeoNames centre of Dhaka (ratio 1.15, inside the check's tolerance for a road distance). Wikipedia's body also gives 11 nautical miles (20.4 km) north of downtown, which passes too (ratio 1.38), so the text keeps the lead's 17 km with 'about'.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "17 km (11 mi) from the city centre"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "11 nautical miles (20.37 kilometres; 12.66 miles) north of downtown Dhaka"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 14.8 km (9.2 miles)"
+    }
+   ]
+  },
+  {
+   "claim": "in the northern part of the city",
+   "verdict": "confirmed",
+   "inAfter": "in the northern part of the city",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "in the northern part of Dhaka"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Bearing from the city centre: 356 degrees, which is north"
+    }
+   ]
+  },
+  {
+   "claim": "the terminals were designed for 8 million passengers a year",
+   "verdict": "corrected",
+   "inAfter": "The terminals were designed for 8 million passengers a year",
+   "note": "Was 'rated for 18.5 million passengers a year', which comes from Wikipedia's lead; its own body gives the current capacity as 8 million a year. TBS (19 July 2026) says the existing terminal was designed for 80 lakh (8 million) passengers a year, the figure the ministry gave in 2010 (The Daily Star, 27 August 2010) and CAAB's website gave then (quoted in a Daily Star opinion piece, 28 September 2010). No source outside Wikipedia's lead gives 18.5 million.",
+   "sources": [
+    {
+     "file": "tbs-local-airlines-t3",
+     "org": "The Business Standard (tbsnews.net)",
+     "dated": "19 July 2026",
+     "quote": "While the airport's existing terminal was designed to handle 80 lakh passengers annually"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "the passenger handling capacity of the airport will increase to 24 million from the current 8 million per annum"
+    },
+    {
+     "file": "dailystar-152589",
+     "org": "The Daily Star (thedailystar.net)",
+     "dated": "27 August 2010",
+     "quote": "the airport has only one runway and its annual passenger handling capacity is 80 lakh"
+    },
+    {
+     "file": "dailystar-156306",
+     "org": "The Daily Star (thedailystar.net)",
+     "dated": "28 September 2010 (opinion)",
+     "quote": "Shahjalal's actual handling capacity of 8 million passengers"
+    }
+   ]
+  },
+  {
+   "claim": "handled about 12.7 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "but handled about 12.7 million in 2025",
+   "note": "Was 'so it is at or approaching its ceiling'. The airport is well past its design capacity: TBS (19 July 2026) gives 1.27 crore (12.7 million) travellers in 2025, up from 1.25 crore in 2024; Wikipedia's infobox gives 12,720,000 for 2025, citing CAAB. The passenger total corrects the old text's claim about how close the airport is to capacity; it is not a figure added where the old text had none.",
+   "sources": [
+    {
+     "file": "tbs-local-airlines-t3",
+     "org": "The Business Standard (tbsnews.net)",
+     "dated": "19 July 2026",
+     "quote": "it stretched to accommodate 1.27 crore travellers in 2025"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_header = Passenger movements",
+      "stat1_data = 12,720,000",
+      "footnotes = Source: Civil Aviation Authority, Bangladesh"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a third terminal is due for a soft opening on 16 December 2026, the government says",
+   "verdict": "corrected",
+   "inAfter": "A third terminal is due for a soft opening on 16 December 2026, the government says",
+   "note": "Replaces the forecast that capacity would last 'only until 2026' (cut below): the capacity outlook now is the third terminal, which the minister says will double passenger capacity (The Daily Star, 30 August 2026). The minister told reporters the government is working to hold a soft opening on 16 December (The Daily Star, 24 August 2026); TBS (17 September 2026) says CAAB plans to begin partial operations by 16 December; TBS (19 July 2026) and Wikipedia (a statement of April 2026) give 16 December or early 2027. It is given as the government's plan: the terminal has stood idle for about 19 months over the operating deal with a Japanese consortium (TBS, 28 July 2026), and on 30 August the minister said it still needed Tk 902 crore to clear dues and finish works (The Daily Star). The advice to check the terminal is listed under opinion.",
+   "sources": [
+    {
+     "file": "dailystar-t3-soft-opening",
+     "org": "The Daily Star (thedailystar.net)",
+     "dated": "24 August 2026",
+     "quote": "The government is working to hold a soft opening of the third terminal at Hazrat Shahjalal International Airport on December 16"
+    },
+    {
+     "file": "tbs-menzies-t3",
+     "org": "The Business Standard (tbsnews.net)",
+     "dated": "17 September 2026",
+     "quote": [
+      "17 September, 2026, 03:45 pm",
+      "CAAB plans to begin partial operations at Terminal 3 by 16 December this year."
+     ]
+    },
+    {
+     "file": "tbs-local-airlines-t3",
+     "org": "The Business Standard (tbsnews.net)",
+     "dated": "19 July 2026",
+     "quote": "The Third Terminal, which the government plans to inaugurate either on December 16 this year or in early 2027"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "In April 2026, State Minister for Civil Aviation Rashiduzzaman Millat stated that the terminal will likely open by 16 December or early 2027."
+    },
+    {
+     "file": "tbs-japan-16dec",
+     "org": "The Business Standard (tbsnews.net)",
+     "dated": "28 July 2026",
+     "quote": "The third terminal has remained idle for nearly 19 months"
+    },
+    {
+     "file": "dailystar-t3-minister",
+     "org": "The Daily Star (thedailystar.net)",
+     "dated": "30 August 2026 (updated 1 September 2026)",
+     "quote": [
+      "still needs Tk 902 crore to clear dues, complete works and begin full operations",
+      "The minister also said that the third terminal's launch would double passenger capacity"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Biman Bangladesh, the flag carrier, is based here",
+   "verdict": "confirmed",
+   "inAfter": "Biman Bangladesh, the flag carrier, is based here",
+   "note": "Biman's own site (biman-airlines.com) answered with a Cloudflare check ('Just a moment...'), so it was not tried again. TBS, in reports from July to September 2026, calls Biman the national flag carrier, ties its fleet growth to the airport's upgrades, names it as the airport's ground handler and reports its new direct Dhaka to Narita flight.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the primary hub of most of airlines in Bangladesh including Air Astra, Novoair, US-Bangla Airlines, and the national flag carrier Biman Bangladesh Airlines."
+    },
+    {
+     "file": "tbs-local-airlines-t3",
+     "org": "The Business Standard (tbsnews.net)",
+     "dated": "19 July 2026",
+     "quote": [
+      "National flag carrier Biman Bangladesh Airlines plans to lease 10 aircraft",
+      "The simultaneous expansion by Biman Bangladesh Airlines, US-Bangla Airlines, Air Astra, and Novoair aims to capitalise on critical infrastructure upgrades at Hazrat Shahjalal International Airport (HSIA)."
+     ]
+    },
+    {
+     "file": "tbs-menzies-t3",
+     "org": "The Business Standard (tbsnews.net)",
+     "dated": "17 September 2026",
+     "quote": "The Civil Aviation Authority of Bangladesh plans to appoint a second ground-handling operator alongside Biman Bangladesh Airlines for passenger services at the third terminal"
+    },
+    {
+     "file": "tbs-regional-hub",
+     "org": "The Business Standard (tbsnews.net)",
+     "dated": "2 September 2026",
+     "quote": "the recently launched direct Dhaka-Narita flight by Biman Bangladesh Airlines"
+    }
+   ]
+  },
+  {
+   "claim": "US-Bangla, Novoair and Air Astra are based here too",
+   "verdict": "confirmed",
+   "inAfter": "as are US-Bangla, Novoair and Air Astra",
+   "note": "US-Bangla's own route page lists its international destinations from Dhaka. TBS (19 July 2026) names Air Astra and Novoair with Biman and US-Bangla as the four airlines whose fleet growth rests on the airport's upgrades, and quotes Air Astra's chief executive that terminal and parking capacity had held fleet growth back; Air Astra's own page gives its office in Uttara, which Wikipedia puts just north of the airport. Novoair's own pages name no base (its schedule and route map are images), so TBS and Wikipedia carry Novoair. TBS does not use the word 'base'; the reading is that airlines whose growth depends on this airport's capacity fly from it as home.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the primary hub of most of airlines in Bangladesh including Air Astra, Novoair, US-Bangla Airlines"
+    },
+    {
+     "file": "tbs-local-airlines-t3",
+     "org": "The Business Standard (tbsnews.net)",
+     "dated": "19 July 2026",
+     "quote": [
+      "The simultaneous expansion by Biman Bangladesh Airlines, US-Bangla Airlines, Air Astra, and Novoair aims to capitalise on critical infrastructure upgrades at Hazrat Shahjalal International Airport (HSIA).",
+      "reducing passengers' reliance on transiting through Dhaka",
+      "Previously, terminal and parking capacity limited fleet expansion."
+     ]
+    },
+    {
+     "file": "usbangla-asia-b",
+     "org": "US-Bangla Airlines (us-bangla.com)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": "Destination from Dhaka Bangladesh Book Your Flight to the City of Mosque Kolkata Doha Singapore Bangkok"
+    },
+    {
+     "file": "airastra-home",
+     "org": "Air Astra (airastra.com)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "Astra Airways Limited",
+      "Dhaka-Mymensingh Road, Sector: 3, Uttara"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "To the north of the airport lies Uttara area"
+    }
+   ]
+  },
+  {
+   "claim": "took over from Tejgaon Airport",
+   "verdict": "softened",
+   "inAfter": "It took over from Tejgaon Airport",
+   "note": "Was 'It opened in 1980, taking over from Tejgaon Airport'. The Daily Star's report of the 2010 cabinet decision says the international airport moved from Tejgaon to Kurmitola in 1979; Wikipedia's text says operations began in 1980 and its infobox gives 1981. The sources disagree on the year, so none is given (cut below).",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It started operations in 1980, taking over from Tejgaon Airport as the principal international airport of the country."
+    },
+    {
+     "file": "dailystar-126503",
+     "org": "The Daily Star (thedailystar.net)",
+     "dated": "15 February 2010",
+     "quote": "the international airport in Dhaka was named Dhaka International Airport when it was shifted from Tejgaon to Kurmitola in 1979"
+    }
+   ]
+  },
+  {
+   "claim": "first called Dacca International, then Zia International",
+   "verdict": "confirmed",
+   "inAfter": "was first called Dacca International, then Zia International",
+   "note": "The Daily Star's report of the 2010 cabinet decision gives the first name in today's spelling, Dhaka International Airport, renamed Zia International Airport in 1981; Wikipedia gives it as Dacca International Airport and notes that Dacca is the former spelling of Dhaka. The same name either way; the text keeps the old text's spelling.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport was formerly known as Dacca International Airport and later as Zia International Airport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "as Dacca International Airport (\"Dacca\" is the former spelling of \"Dhaka\")"
+    },
+    {
+     "file": "dailystar-126503",
+     "org": "The Daily Star (thedailystar.net)",
+     "dated": "15 February 2010",
+     "quote": [
+      "was named Dhaka International Airport when it was shifted from Tejgaon to Kurmitola in 1979",
+      "Later in 1981, the then government renamed it to Zia International Airport."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after the Sufi saint Shah Jalal",
+   "verdict": "softened",
+   "inAfter": "before being named after the Sufi saint Shah Jalal",
+   "note": "Was 'named after Shah Jalal, one of the most respected Sufi saints in Bangladesh'. The Daily Star's report of the 2010 cabinet decision gives the new name, Hazrat Shahjalal (R) International Airport, and the cabinet's reason: the country respects Sufis and religious figures, as airports already named after them show. 'One of the most respected' rests on Wikipedia alone (cut below). The name is still in use: TBS, The Daily Star, US-Bangla and the UK CAA all use Hazrat Shahjalal International Airport in 2026.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "before being named in honour of Shah Jalal, who is one of the most respected Sufi saints of Bangladesh"
+    },
+    {
+     "file": "dailystar-126503",
+     "org": "The Daily Star (thedailystar.net)",
+     "dated": "15 February 2010",
+     "quote": [
+      "including the Zia International Airport, which is to be named Hazrat Shahjalal (R) International Airport",
+      "since the people of the country respect Sufis and religious figures and wish to keep their memory alive many important establishments had been named after them"
+     ]
+    },
+    {
+     "file": "tbs-menzies-t3",
+     "org": "The Business Standard (tbsnews.net)",
+     "dated": "17 September 2026",
+     "quote": "Hazrat Shahjalal International Airport's Terminal 3"
+    }
+   ]
+  },
+  {
+   "claim": "the main gateway to Dhaka",
+   "verdict": "cut",
+   "wasBefore": "and the main gateway to Dhaka",
+   "why": "House style: 'gateway to' is a banned phrase. The fact is kept as 'Dhaka's airport' (see above)."
+  },
+  {
+   "claim": "rated for 18.5 million passengers a year",
+   "verdict": "cut",
+   "wasBefore": "The airport is rated for 18.5 million passengers a year",
+   "why": "Contradicted: TBS (July 2026), the ministry in 2010 (The Daily Star) and Wikipedia's own body all give a design capacity of 8 million a year. Corrected (see above)."
+  },
+  {
+   "claim": "CAAB predicted the capacity would last only until 2026; at or approaching its ceiling",
+   "verdict": "cut",
+   "wasBefore": "and the civil aviation authority predicted that would be sufficient only until 2026, so it is at or approaching its ceiling",
+   "why": "Overtaken: the airport handled about 12.7 million passengers in 2025 against a design capacity of 8 million, and the answer to it is the third terminal (both above). The CAAB forecast itself rests on Wikipedia alone; CAAB's site (caab.gov.bd) failed to connect (503) and was not tried again."
+  },
+  {
+   "claim": "around 190 aircraft movements a day",
+   "verdict": "cut",
+   "wasBefore": "It handles around 190 aircraft movements a day.",
+   "why": "A count of flights, which only the airport's own current count may replace. Wikipedia's figure is undated (it sits beside 2014 traffic figures), and the airport's site (hsia.gov.bd) and CAAB's both failed to connect (503, remote connection failure), so neither was tried again."
+  },
+  {
+   "claim": "DAC comes from Dacca, the older spelling of Dhaka",
+   "verdict": "cut",
+   "wasBefore": "The code is a relic worth knowing. DAC comes from Dacca, the older spelling of Dhaka, so it does not match the airport's name or the city's current spelling.",
+   "why": "Wikipedia alone: no saved source explains the code. Banglapedia, the likeliest reference, answered with a near-empty page and then a 502 through the browser. The first name, Dacca International, is kept (see above), so the old spelling still shows."
+  },
+  {
+   "claim": "the primary hub for most Bangladeshi airlines",
+   "verdict": "cut",
+   "wasBefore": "It is the primary hub for most Bangladeshi airlines including",
+   "why": "'Most' rests on Wikipedia alone. The text names the four airlines TBS ties to the airport (see above)."
+  },
+  {
+   "claim": "opened in 1980",
+   "verdict": "cut",
+   "wasBefore": "It opened in 1980",
+   "why": "Sources disagree: 1979 (The Daily Star's report of the 2010 cabinet decision), 1980 (Wikipedia's text) and 1981 (Wikipedia's infobox). Kept only that it took over from Tejgaon (see above).",
+   "sources": [
+    {
+     "file": "dailystar-126503",
+     "org": "The Daily Star (thedailystar.net)",
+     "dated": "15 February 2010",
+     "quote": "when it was shifted from Tejgaon to Kurmitola in 1979"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "opened = {{start date and age|1981"
+    }
+   ]
+  },
+  {
+   "claim": "one of the most respected Sufi saints in Bangladesh",
+   "verdict": "cut",
+   "wasBefore": "one of the most respected Sufi saints in Bangladesh",
+   "why": "The superlative rests on Wikipedia alone; softened to 'the Sufi saint' (see above)."
+  },
+  {
+   "claim": "hosts a Bangladesh Air Force base",
+   "verdict": "cut",
+   "wasBefore": "It also hosts a Bangladesh Air Force base.",
+   "why": "Wikipedia alone (it names the base BAF Base Bir Uttom A. K. Khandker). The Air Force's own site (baf.mil.bd) failed DNS resolution, and TBS's report of the July 2025 training-jet crash in Uttara does not say where the jet took off from."
+  },
+  {
+   "claim": "Held back: FCDO advice on Dhaka airport (theft, harassment, taxi overcharging; frequent short-notice disruption to air travel)",
+   "verdict": "cut",
+   "why": "Held back: a warning that replaces nothing in the old text. The FCDO's Bangladesh advice (updated 4 September 2026, still current 24 September) says Dhaka's international airport is fully operational; lists theft (including passport theft), harassment and overcharging of taxi fees as risks there, and advises avoiding touts, keeping documents safe and arranging taxis in advance; and warns of frequent disruptions to air travel, often at short notice, and slow airport security checks.",
+   "sources": [
+    {
+     "file": "fcdo-bangladesh-safety",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "Dhaka international and Sylhet airports are fully operational. Check with your travel provider for updates.",
+      "Risks at Dhaka and Sylhet airports include:",
+      "theft, including passport theft",
+      "overcharging of taxi fees",
+      "avoid touts offering to carry your bags",
+      "arrange taxis in advance",
+      "Due to the security situation in Bangladesh, there are frequent disruptions to air travel, often at short notice. Stay in touch with your airline. Security checks at the airport can also be slow."
+     ]
+    },
+    {
+     "file": "fcdo-bangladesh",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "updated 4 September 2026",
+     "quote": [
+      "Still current at: 24 September 2026",
+      "Updated: 4 September 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Held back: visa on arrival at Dhaka airport; electronic arrival and departure cards",
+   "verdict": "cut",
+   "why": "Held back: entry rules replace nothing in the old text. The FCDO says British visitors may be able to get a visa on arrival at Dhaka airport (with a return ticket and proof of funds) and that Bangladesh has introduced electronic arrival and departure cards for foreign nationals.",
+   "sources": [
+    {
+     "file": "fcdo-bangladesh-entry",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "You may be able to apply for a visa on arrival at Dhaka airport .",
+      "You must have a return ticket and proof of funds to apply for a visa on arrival.",
+      "Travellers may be required to complete an electronic arrival card before entering Bangladesh and an electronic departure card before leaving."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Held back: flights to the UK",
+   "verdict": "cut",
+   "why": "Held back: routes replace nothing in the old text. The UK CAA's table for 2025 counts 37,199 scheduled passengers between Manchester and Hazrat Shahjalal (down 37 per cent on 2024) and 14,695 between Heathrow and Hazrat Shahjalal, against 108,003 between Heathrow and Sylhet; it does not name the airline. TBS reports a Biman flight from Sylhet to London on 17 September 2026. Biman's own site answered with a Cloudflare check, so its current UK schedule could not be read.",
+   "sources": [
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2025 (table run 25 February 2026)",
+     "quote": [
+      "25/02/2026 16:41,2025,60,INDIAN SUB-CONTINENT,BANGLADESH,1,HEATHROW,HAZRAT SHAHJALAL INTERNATIONAL AIRPORT,14695,14695,0,9907,9907,0,48.32946",
+      "25/02/2026 16:41,2025,60,INDIAN SUB-CONTINENT,BANGLADESH,1,HEATHROW,SYLHET,108003,108003,0,97027,97027,0,11.31232",
+      "25/02/2026 16:41,2025,60,INDIAN SUB-CONTINENT,BANGLADESH,2,MANCHESTER,HAZRAT SHAHJALAL INTERNATIONAL AIRPORT,37199,37199,0,58988,58988,0,-36.93802"
+     ]
+    },
+    {
+     "file": "tbs-biman-london",
+     "org": "The Business Standard (tbsnews.net)",
+     "dated": "17 September 2026",
+     "quote": "Two passengers got into a physical altercation mid-air aboard a Biman Bangladesh Airlines flight from Sylhet to London"
+    }
+   ]
+  },
+  {
+   "claim": "Held back: the October 2025 cargo fire",
+   "verdict": "cut",
+   "why": "Held back: replaces nothing in the old text, and it is a cargo matter. A fire in the cargo area on 18 October 2025 suspended flights until the evening (Wikipedia); nearly 11 months on, import cargo operations are still not back to normal (TBS, 20 September 2026).",
+   "sources": [
+    {
+     "file": "tbs-fire-backlog",
+     "org": "The Business Standard (tbsnews.net)",
+     "dated": "20 September 2026",
+     "quote": [
+      "Import cargo operations at Hazrat Shahjalal International Airport (HSIA) in Dhaka are yet to return to normal nearly 11 months after a fire damaged the Cargo Village.",
+      "the 18 October 2025 fire"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-14",
+     "quote": "On 18 October 2025, at around 2:30 PM (BST), a fire broke out in the cargo section near Gate 8 of the Hazrat Shahjalal International Airport, Dhaka."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Capacity is the pressure point.",
+   "why": "The old text's framing, kept and now borne out: the terminals, designed for 8 million passengers a year, handled about 12.7 million in 2025 (TBS, Wikipedia), and the minister says the third terminal will double capacity (The Daily Star, 30 August 2026)."
+  },
+  {
+   "text": "so check which terminal a client will use",
+   "why": "Advice that follows from the planned soft opening: the date is the government's plan, the terminal has stood idle for about 19 months, and no source yet says which airlines will move."
+  }
+ ],
  "tracerOk": {}
 }
