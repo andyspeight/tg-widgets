@@ -1,13 +1,485 @@
 {
- "iata": "PPT",
- "id": "recn1MLwTkzcR5Xlb",
- "name": "Fa'a'ā International Airport",
- "country": "French Polynesia",
- "wikipedia": "https://en.wikipedia.org/wiki/Faa%CA%BCa_International_Airport",
- "audited": "2026-09-23",
- "before": "French Polynesia's international airport, on Tahiti just 5 km south west of Papeete.\n\nIt is built on the sea. There was not enough level ground on Tahiti, and rather than flatten large stretches of sloping farmland the airport was laid primarily on reclaimed land over the coral reef just offshore.\n\nThe single runway is 3,420 metres and takes aircraft up to a 747 or A380. Intercontinental flights reach France, the United States, Canada by way of the States, Chile, Japan and New Zealand.\n\nFor island hopping, Air Tahiti flies daily to most other islands in French Polynesia and has one international route, to the Cook Islands. Both Air Tahiti and Air Tahiti Nui have their head offices on the airport.\n\nBuses run in from Papeete along the west coast freeway, which passes directly in front of the terminal.\n\nThe airport opened in 1960.",
- "after": "French Polynesia's international airport, on Tahiti just 5 km south west of Papeete.\n\nIt is built on the sea. There was not enough level ground on Tahiti, and rather than flatten large stretches of sloping farmland the airport was laid primarily on reclaimed land over the coral reef just offshore.\n\nThe single runway is 3,420 metres and takes aircraft up to a 747 or A380. Intercontinental flights reach France, the United States, Canada by way of the States, Chile, Japan and New Zealand.\n\nFor island hopping, Air Tahiti flies daily to most other islands in French Polynesia and has one international route, to the Cook Islands. Both Air Tahiti and Air Tahiti Nui have their head offices on the airport.\n\nBuses run in from Papeete along the west coast freeway, which passes directly in front of the terminal.\n\nThe airport opened in 1960.",
- "claims": [],
- "opinion": [],
- "tracerOk": {}
+  "iata": "PPT",
+  "id": "recn1MLwTkzcR5Xlb",
+  "name": "Fa'a'ā International Airport",
+  "country": "French Polynesia",
+  "wikipedia": "https://en.wikipedia.org/wiki/Faa%CA%BCa_International_Airport",
+  "audited": "2026-09-24",
+  "before": "French Polynesia's international airport, on Tahiti just 5 km south west of Papeete.\n\nIt is built on the sea. There was not enough level ground on Tahiti, and rather than flatten large stretches of sloping farmland the airport was laid primarily on reclaimed land over the coral reef just offshore.\n\nThe single runway is 3,420 metres and takes aircraft up to a 747 or A380. Intercontinental flights reach France, the United States, Canada by way of the States, Chile, Japan and New Zealand.\n\nFor island hopping, Air Tahiti flies daily to most other islands in French Polynesia and has one international route, to the Cook Islands. Both Air Tahiti and Air Tahiti Nui have their head offices on the airport.\n\nBuses run in from Papeete along the west coast freeway, which passes directly in front of the terminal.\n\nThe airport opened in 1960.",
+  "after": "French Polynesia's international airport, on Tahiti just 5 km south west of Papeete.\n\nIt is built on the sea, mostly on reclaimed land just offshore.\n\nThe single runway is 3,420 metres and takes aircraft up to a 747. Long-haul flights reach France, the United States, Japan and New Zealand.\n\nFor island hopping, Air Tahiti and Air Moana fly from here to the other islands, several times a day to the most popular ones. Air Tahiti also has one international route, to Rarotonga in the Cook Islands. The long-haul airline Air Tahiti Nui has its head office on the airport.\n\nTaxis serve the terminal, and tour operators run transfers that can be booked ahead through a travel agent or the hotel.",
+  "claims": [
+    {
+      "claim": "French Polynesia's international airport",
+      "verdict": "confirmed",
+      "inAfter": "French Polynesia's international airport",
+      "note": "Tahiti Tourisme says all international flights land here. SEAC's 2025 traffic table carries international traffic only on Tahiti-Faa'a's line (822,656 passengers in 2025).",
+      "sources": [
+        {
+          "file": "wikipedia-now",
+          "org": "Wikimedia",
+          "dated": "revision of 2026-09-21",
+          "quote": "is the international airport of French Polynesia"
+        },
+        {
+          "file": "tt-how-to-come",
+          "org": "Tahiti Tourisme (the territory's tourism board, tahititourisme.com)",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "All international flights land at Tahiti-Faa'a International Airport (PPT)"
+        },
+        {
+          "file": "seac-ra-2025",
+          "org": "SEAC/PF (the French State's civil aviation service in French Polynesia)",
+          "dated": "activity report for 2025",
+          "quote": [
+            "L'aéroport International de Tahiti-faa'a, exploité par",
+            "Tahiti international 3 835 3 513 9,17 % 822 656 784 057 4,92 %"
+          ]
+        }
+      ]
+    },
+    {
+      "claim": "on Tahiti",
+      "verdict": "confirmed",
+      "inAfter": "on Tahiti",
+      "sources": [
+        {
+          "file": "sia-aip-ntaa",
+          "org": "DGAC SIA (French AIP, PAC-P, AD 2 NTAA)",
+          "dated": "valid from 2026-09-03",
+          "quote": [
+            "AIP PAC P (section AD-2.NTAA) valide à partir du 03 SEP 2026",
+            "TAHITI FAA'A"
+          ]
+        },
+        {
+          "file": "atn-airports",
+          "org": "Air Tahiti Nui",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "Located on the island of Tahiti, it is in the district of Faa'a, only a few minutes from Papeete."
+        },
+        {
+          "file": "wikipedia-now",
+          "org": "Wikimedia",
+          "dated": "revision of 2026-09-21",
+          "quote": "on the island of Tahiti"
+        }
+      ]
+    },
+    {
+      "claim": "5 km south west of Papeete",
+      "verdict": "confirmed",
+      "inAfter": "just 5 km south west of Papeete",
+      "note": "The AIP gives 5 km WSW of Papeete. The coordinates give 4.6 km at 243 degrees, which is south west (5 km is a ratio of 1.09). Tahiti Tourisme says 5 km west; WSW lies between the two, and south west is the computed point.",
+      "sources": [
+        {
+          "file": "sia-aip-ntaa",
+          "org": "DGAC SIA (French AIP, PAC-P, AD 2 NTAA)",
+          "dated": "valid from 2026-09-03",
+          "quote": "Direction, distance from city 5 km WSW Papeete"
+        },
+        {
+          "file": "geo",
+          "org": "OurAirports + GeoNames (computed)",
+          "quote": [
+            "Straight-line distance from the city centre: 4.6 km (2.8 miles)",
+            "Bearing from the city centre: 243 degrees, which is south west"
+          ]
+        },
+        {
+          "file": "wikipedia-now",
+          "org": "Wikimedia",
+          "dated": "revision of 2026-09-21",
+          "quote": "It is situated 5 km (3.1 mi) southwest of Papeete"
+        }
+      ]
+    },
+    {
+      "claim": "built on the sea",
+      "verdict": "confirmed",
+      "inAfter": "It is built on the sea",
+      "note": "Tahiti Tourisme's Chilean site says the airport was built in the lagoon ('se construyó en la laguna'); Wikipedia puts it on reclaimed land just offshore.",
+      "sources": [
+        {
+          "file": "tt-cl-llegar",
+          "org": "Tahiti Tourisme (the territory's tourism board, tahititourisme.cl)",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "El Aeropuerto Internacional de Tahiti-Faa'a, situado a 5 km al oeste de Papeete, se construyó en la laguna."
+        },
+        {
+          "file": "wikipedia-now",
+          "org": "Wikimedia",
+          "dated": "revision of 2026-09-21",
+          "quote": "the airport is built primarily on reclaimed land on the coral reef just offshore"
+        }
+      ]
+    },
+    {
+      "claim": "mostly on reclaimed land just offshore",
+      "verdict": "softened",
+      "inAfter": "mostly on reclaimed land just offshore",
+      "note": "Was 'the airport was laid primarily on reclaimed land over the coral reef just offshore'. Wikipedia says on the coral reef, Tahiti Tourisme in the lagoon; both put it on the water just offshore, so the text says only that. The reason given in the old text (not enough level ground, rather than flatten farmland) is cut below.",
+      "sources": [
+        {
+          "file": "wikipedia-now",
+          "org": "Wikimedia",
+          "dated": "revision of 2026-09-21",
+          "quote": "the airport is built primarily on reclaimed land on the coral reef just offshore"
+        },
+        {
+          "file": "tt-cl-llegar",
+          "org": "Tahiti Tourisme (the territory's tourism board, tahititourisme.cl)",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "se construyó en la laguna"
+        }
+      ]
+    },
+    {
+      "claim": "a single runway of 3,420 metres",
+      "verdict": "confirmed",
+      "inAfter": "The single runway is 3,420 metres",
+      "note": "The AIP lists one runway, 04/22, 3,420 by 45 metres. OurAirports lists one runway but gives it as 3,463 m; the text follows the AIP and Wikipedia, which agree.",
+      "sources": [
+        {
+          "file": "sia-aip-ntaa",
+          "org": "DGAC SIA (French AIP, PAC-P, AD 2 NTAA)",
+          "dated": "valid from 2026-09-03",
+          "quote": [
+            "Caractéristiques physiques des pistes",
+            "3420 x 45"
+          ]
+        },
+        {
+          "file": "wikipedia-now",
+          "org": "Wikimedia",
+          "dated": "revision of 2026-09-21",
+          "quote": "has a single 3,420 m (11,220 ft) runway"
+        },
+        {
+          "file": "geo",
+          "org": "OurAirports + GeoNames (computed)",
+          "quote": [
+            "Runway 04/22: 3,463 m (11,360 ft), ASP",
+            "Runways listed: 1"
+          ]
+        }
+      ]
+    },
+    {
+      "claim": "takes aircraft up to a 747",
+      "verdict": "softened",
+      "inAfter": "takes aircraft up to a 747",
+      "note": "Was 'up to a 747 or A380'. The AIP's local rules for NTAA set push-back procedures for code E aircraft and name the B747 among them; they name no larger type. The A380 rests on Wikipedia alone and is cut.",
+      "sources": [
+        {
+          "file": "sia-aip-ntaa",
+          "org": "DGAC SIA (French AIP, PAC-P, AD 2 NTAA)",
+          "dated": "valid from 2026-09-03",
+          "quote": [
+            "Push back of heavy ACFT on departure",
+            "The E-coded ACFT are : A340, A330, A350, B747, B777, B787."
+          ]
+        },
+        {
+          "file": "wikipedia-now",
+          "org": "Wikimedia",
+          "dated": "revision of 2026-09-21",
+          "quote": "that can accommodate aircraft up to Boeing 747 and Airbus A380 size"
+        }
+      ]
+    },
+    {
+      "claim": "long-haul flights reach France, the United States, Japan and New Zealand",
+      "verdict": "corrected",
+      "inAfter": "Long-haul flights reach France, the United States, Japan and New Zealand.",
+      "note": "Was '... France, the United States, Canada by way of the States, Chile, Japan and New Zealand' (Canada and Chile cut below). SEAC's map of the 2025 scheduled international routes shows Paris CDG (Air Tahiti Nui, Air France, French Bee), Los Angeles, Seattle, San Francisco, Honolulu, Tokyo and Auckland, plus Nouméa, Nadi and Rarotonga. Air Tahiti Nui and Tahiti Tourisme name the same cities. 'Intercontinental' is kept from the old text, which took it from Wikipedia with New Zealand included. Review (24 Sep): 'Intercontinental' changed to 'Long-haul', because Tahiti and New Zealand are both in Oceania, so the Auckland flights are not intercontinental. Air Tahiti Nui counts New Zealand among the places its long-haul flights reach (atn-destinations), and the four countries are unchanged.",
+      "sources": [
+        {
+          "file": "seac-ra-2025",
+          "org": "SEAC/PF (the French State's civil aviation service in French Polynesia)",
+          "dated": "activity report for 2025",
+          "quote": [
+            "Paris CDG - ATN",
+            "LAX - AF",
+            "San Francisco - UNITED",
+            "Tokyo - ATN",
+            "Auckland – ANZ",
+            "Air Tahiti Nui a également maintenu sa ligne vers le Japon en proposant 2 vols par semaine"
+          ]
+        },
+        {
+          "file": "atn-destinations",
+          "org": "Air Tahiti Nui",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "With its long-haul flights, Air Tahiti Nui connects the largest cities of the Northern Hemisphere - Paris, Los Angeles, Tokyo - to the most popular places in Oceania: French Polynesia, Australia, New Zealand."
+        },
+        {
+          "file": "tt-how-to-come",
+          "org": "Tahiti Tourisme (the territory's tourism board, tahititourisme.com)",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "Several different airlines fly to French Polynesia from major interational cities: Paris, Los Angeles, Seattle, San Francisco, Honolulu, Tokyo, Auchland, Rarotonga."
+        },
+        {
+          "file": "wikipedia-now",
+          "org": "Wikimedia",
+          "dated": "revision of 2026-09-21",
+          "quote": "There are intercontinental flights to Canada (via the U.S.), Chile, Metropolitan France, Japan, New Zealand and the United States."
+        }
+      ]
+    },
+    {
+      "claim": "Air Tahiti and Air Moana fly from here to the other islands, several times a day to the most popular ones",
+      "verdict": "corrected",
+      "inAfter": "For island hopping, Air Tahiti and Air Moana fly from here to the other islands, several times a day to the most popular ones.",
+      "note": "Was 'Air Tahiti flies daily to most other islands in French Polynesia'. SEAC's 2025 table shows only 10 of the 46 public outer aerodromes with 730 or more commercial movements, the number a daily return flight needs (Bora Bora had 10,430, Raiatea 8,251); 36 had fewer. Air Moana is added: SEAC ranks it second to Air Tahiti by movements (about 5,300 flights in 2025) and credits its arrival with the growth on tourist routes; Tahiti Tourisme names both airlines; Wikipedia's infobox lists it among the airport's hub airlines. For the owner: this adds a second airline to a sentence that named one.",
+      "sources": [
+        {
+          "file": "tt-island-to-island",
+          "org": "Tahiti Tourisme (the territory's tourism board, tahititourisme.com)",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "Two domestic airlines, Air Tahiti and Air Moana, fly several times a day to the most popular islands."
+        },
+        {
+          "file": "tt-tahiti-around",
+          "org": "Tahiti Tourisme (the territory's tourism board, tahititourisme.com)",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "To get to the other islands, you can take a domestic flight with Air Tahiti or Air Moana from the same airport."
+        },
+        {
+          "file": "seac-ra-2025",
+          "org": "SEAC/PF (the French State's civil aviation service in French Polynesia)",
+          "dated": "activity report for 2025",
+          "quote": [
+            "Air Tahiti est la première compagnie aérienne en termes de vols contrôlés",
+            "La compagnie Air Moana est la seconde compagnie aérienne en termes de mouvements, ce qui représente environ 5 300 vols",
+            "l'arrivée de la compagnie domestique Air Moana",
+            "Tahiti domestique 20 426 19 538 4,54 % 899 610 890 273 1,05 %",
+            "2 Bora bora 10 430 9 947 4,86 % 409 389 355 368 15,20 %",
+            "3 Raiatea 8 251 7 634 8,08 %"
+          ]
+        },
+        {
+          "file": "wikipedia-now",
+          "org": "Wikimedia",
+          "dated": "revision of 2026-09-21",
+          "quote": "Air Tahiti has daily flights to most other islands in French Polynesia"
+        },
+        {
+          "file": "wikipedia-infobox",
+          "org": "Wikimedia",
+          "dated": "revision of 2026-09-21",
+          "quote": "hub = <div> * Air Moana * Air Tahiti * Air Tahiti Nui</div>"
+        }
+      ]
+    },
+    {
+      "claim": "Air Tahiti has one international route, to Rarotonga in the Cook Islands",
+      "verdict": "confirmed",
+      "inAfter": "Air Tahiti also has one international route, to Rarotonga in the Cook Islands.",
+      "note": "Was 'and has one international route, to the Cook Islands'; Rarotonga added. SEAC's 2025 route map shows Air Tahiti (AT) on Rarotonga and on no other international route. Tahiti Tourisme gives 2 to 4 flights a week, two of them codeshares with Air Rarotonga; RNZ reported the two airlines doubled their Papeete to Rarotonga flights from July to December 2025.",
+      "sources": [
+        {
+          "file": "tt-service-air-tahiti",
+          "org": "Tahiti Tourisme (the territory's tourism board, tahititourisme.com)",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "Air Tahiti also offers 2 to 4 flights a week from Tahiti to Rarotonga in the Cook Islands"
+        },
+        {
+          "file": "seac-ra-2025",
+          "org": "SEAC/PF (the French State's civil aviation service in French Polynesia)",
+          "dated": "activity report for 2025",
+          "quote": "Rarotonga - AT Pax 2025 : 5 400"
+        },
+        {
+          "file": "rnz-cook-flight",
+          "org": "RNZ (Radio New Zealand, from Cook Islands News)",
+          "dated": "2025-11-04",
+          "quote": [
+            "4 November 2025, 8:59am",
+            "Air Rarotonga and Air Tahiti have doubled flights between Papeete and Rarotonga from July to December."
+          ]
+        },
+        {
+          "file": "wikipedia-now",
+          "org": "Wikimedia",
+          "dated": "revision of 2026-09-21",
+          "quote": "one international service to the Cook Islands"
+        }
+      ]
+    },
+    {
+      "claim": "Air Tahiti Nui has its head office on the airport",
+      "verdict": "confirmed",
+      "inAfter": "The long-haul airline Air Tahiti Nui has its head office on the airport.",
+      "note": "Narrowed from 'Both Air Tahiti and Air Tahiti Nui have their head offices on the airport'; Air Tahiti's is cut below. 'Long-haul' is the airline's own description of its flights.",
+      "sources": [
+        {
+          "file": "atn-legal",
+          "org": "Air Tahiti Nui",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "Head office : TUA RATA Building - Tahiti Faa'a Airport"
+        },
+        {
+          "file": "atn-destinations",
+          "org": "Air Tahiti Nui",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "With its long-haul flights, Air Tahiti Nui connects"
+        },
+        {
+          "file": "wikipedia-now",
+          "org": "Wikimedia",
+          "dated": "revision of 2026-09-21",
+          "quote": "The Air Tahiti Nui head office is in the Tua Rata Building on the airport property."
+        }
+      ]
+    },
+    {
+      "claim": "taxis serve the terminal; tour operators run transfers booked ahead",
+      "verdict": "softened",
+      "inAfter": "Taxis serve the terminal, and tour operators run transfers that can be booked ahead through a travel agent or the hotel.",
+      "note": "Replaces 'Buses run in from Papeete along the west coast freeway...', which rests on Wikipedia alone (cut below). The AIP's list of transport at the aerodrome is taxis, tour operators' buses and car rental; Tahiti Tourisme says to take a taxi from the airport or arrange to be collected through a travel agent or the accommodation, and to organise transfers in advance. For the owner: this keeps a ground-transport line by softening it to what the AIP and the tourism board support; dropping the paragraph is the alternative.",
+      "sources": [
+        {
+          "file": "sia-aip-ntaa",
+          "org": "DGAC SIA (French AIP, PAC-P, AD 2 NTAA)",
+          "dated": "valid from 2026-09-03",
+          "quote": "Transportation facilities Taxis, cars des tours opérateurs, voitures de location. Taxis, tour operators buses, car rental."
+        },
+        {
+          "file": "tt-tahiti-around",
+          "org": "Tahiti Tourisme (the territory's tourism board, tahititourisme.com)",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "You can get a taxi to your accommodations from Tahiti-Faa'a International Airport, or you can arrange to be collected on arrival with your travel agent or accommodations."
+        },
+        {
+          "file": "tt-how-to-come",
+          "org": "Tahiti Tourisme (the territory's tourism board, tahititourisme.com)",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "Airport transfers should also be organized in advance through a travel agent or directly with the accommodations."
+        }
+      ]
+    },
+    {
+      "claim": "not enough level ground; built offshore rather than flatten sloping farmland",
+      "verdict": "cut",
+      "wasBefore": "There was not enough level ground on Tahiti, and rather than flatten large stretches of sloping farmland",
+      "why": "The reason rests on Wikipedia alone ('Because of limited level terrain, rather than leveling large stretches of sloping agricultural land'); no second source gives it. That the airport sits on reclaimed land just offshore is kept (see above)."
+    },
+    {
+      "claim": "laid on reclaimed land over the coral reef",
+      "verdict": "cut",
+      "wasBefore": "the airport was laid primarily on reclaimed land over the coral reef just offshore",
+      "why": "Reworded to 'mostly on reclaimed land just offshore': Wikipedia says on the coral reef and Tahiti Tourisme in the lagoon, so the text keeps only what both say."
+    },
+    {
+      "claim": "takes an A380",
+      "verdict": "cut",
+      "wasBefore": "takes aircraft up to a 747 or A380",
+      "why": "The A380 rests on Wikipedia alone. The AIP's local rules for NTAA name code D and code E aircraft (the B747 among them) and no larger type. The 747 is kept (see above)."
+    },
+    {
+      "claim": "Canada by way of the States, and Chile",
+      "verdict": "cut",
+      "wasBefore": "Canada by way of the States, Chile",
+      "why": "Out of date or not a route from here, and on Wikipedia alone. SEAC's map of the 2025 scheduled international routes from Tahiti-Faa'a (Paris, Los Angeles, Seattle, San Francisco, Honolulu, Tokyo, Auckland, Nouméa, Nadi, Rarotonga) has no Santiago and no Canadian city, and Tahiti Tourisme's lists of departure cities, its Chilean edition included, name neither. 'Canada by way of the States' is a connection in the United States, not a flight from Tahiti."
+    },
+    {
+      "claim": "Air Tahiti flies daily to most other islands",
+      "verdict": "cut",
+      "wasBefore": "Air Tahiti flies daily to most other islands in French Polynesia",
+      "why": "Not supported: SEAC's 2025 table shows fewer than 730 commercial movements a year (less than a daily return flight) at 36 of the 46 public outer aerodromes. Corrected to several times a day to the most popular islands, with Air Moana (see above)."
+    },
+    {
+      "claim": "Air Tahiti's head office on the airport",
+      "verdict": "cut",
+      "wasBefore": "Both Air Tahiti and Air Tahiti Nui have their head offices on the airport.",
+      "why": "Air Tahiti's head office rests on Wikipedia alone. Tahiti Tourisme gives only a Papeete PO box (BP 314); the AIP lists Air Tahiti's international handling office at Faa'a and its ATR heavy maintenance on the aerodrome, not its head office; airtahiti.com refused the earlier helper (403) and was not tried again. Air Tahiti Nui's head office is kept (see above)."
+    },
+    {
+      "claim": "buses from Papeete along the west coast freeway, which passes in front of the terminal",
+      "verdict": "cut",
+      "wasBefore": "Buses run in from Papeete along the west coast freeway, which passes directly in front of the terminal.",
+      "why": "Wikipedia alone. The AIP's transport list for the aerodrome (taxis, tour operators' buses, car rental) and Tahiti Tourisme's pages (its getting-around page says only that a bus service connects Papeete with the other districts) place no public bus at the airport, and nothing else puts the west coast road in front of the terminal. Softened to taxis and transfers (see above)."
+    },
+    {
+      "claim": "opened in 1960",
+      "verdict": "cut",
+      "wasBefore": "The airport opened in 1960.",
+      "why": "Wikipedia alone. No opening date on any page tried for the airport's history: SEAC's aerodromes page, its 2010 activity report and its 2021 highlights, and Tahiti Tourisme's history of Tahiti (saved as seac-aerodromes, seac-ra-2010, seac-faits-2021 and tt-history), nor SEAC's Manureva collection page, which lists 114 untitled magazine issues (not kept). That is more tries than the brief's two or three. The operator's own site (tahiti-aeroport.pf) answered 503 to the earlier helper and was not tried again."
+    },
+    {
+      "claim": "more than 1.7 million passengers in 2025",
+      "verdict": "cut",
+      "why": "Held back: the old text has no passenger figure, so there is nothing for it to replace. SEAC counts 1,722,726 regular commercial passengers in 2025, up 2.9 per cent; UAF counts 1,804,602, up 8.3 per cent and 23 per cent above 2019 (the two define traffic differently). 'More than 1.7 million passengers in 2025' is true of both, if the owner wants it added.",
+      "sources": [
+        {
+          "file": "seac-ra-2025",
+          "org": "SEAC/PF (the French State's civil aviation service in French Polynesia)",
+          "dated": "activity report for 2025",
+          "quote": [
+            "Plus de 1,72 million de passagers commerciaux réguliers ont ainsi transité par l'aéroport de Tahiti-Faa'a",
+            "Total Tahiti 24 261 23 051 5,25 % 1 722 726 1 674 330 2,89 %"
+          ]
+        },
+        {
+          "file": "uaf-2025",
+          "org": "UAF (Union des Aéroports Français)",
+          "dated": "results for 2025",
+          "quote": [
+            "Tahiti - Faa'a 1 804 602 8,3% 23,0% 14",
+            "Tahiti - Faa'a 1 467 020 1 405 538 1 670 865 1 666 068 1 804 602 8.3% 23.0%"
+          ]
+        }
+      ]
+    },
+    {
+      "claim": "Delta stopped flying to French Polynesia at the end of 2025",
+      "verdict": "cut",
+      "why": "Held back: one source only (SEAC's 2025 report), and the old text does not name Delta. SEAC's map also shows Delta's Los Angeles route falling from 20,501 passengers in 2024 to 11,371 in 2025. It does not change the countries served: SEAC's map still has Air Tahiti Nui, Air France, United, French Bee and Hawaiian on United States routes.",
+      "sources": [
+        {
+          "file": "seac-ra-2025",
+          "org": "SEAC/PF (the French State's civil aviation service in French Polynesia)",
+          "dated": "activity report for 2025",
+          "quote": [
+            "Notons également l'arrêt fin 2025 de la desserte poly-",
+            "nésienne par la compagnie Delta Airlines.",
+            "LAX - DEL TA Pax 2025 : 11 371 Pax 2024 : 20 501"
+          ]
+        }
+      ]
+    },
+    {
+      "claim": "Air Tahiti Nui to fly nonstop to Sydney from 14 December 2026",
+      "verdict": "cut",
+      "why": "Held back: a future route that replaces nothing in the old text. The Canberra Times (4 March 2026) reports twice-weekly Sydney to Papeete flights from 14 December; Air Tahiti Nui's destinations page already sells direct Sydney flights, though its airports page still says it does not fly directly to Australia. Worth adding once it is flying.",
+      "sources": [
+        {
+          "file": "canberratimes-atn-syd",
+          "org": "The Canberra Times",
+          "dated": "2026-03-04, updated 2026-03-05",
+          "quote": [
+            "Updated March 5, 2026 , first published March 4, 2026",
+            "Air Tahiti Nui will begin operating direct flights between Sydney and Papeete this December.",
+            "The new twice-weekly service, starting on December 14"
+          ]
+        },
+        {
+          "file": "atn-destinations",
+          "org": "Air Tahiti Nui",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "Fly directly to Sydney with Air Tahiti Nui and easily connect to the rest of Australia through our trusted partner airlines."
+        },
+        {
+          "file": "atn-airports",
+          "org": "Air Tahiti Nui",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "Air Tahiti Nui does not fly directly to Australia, but offers flights from Tahiti via Auckland, in codeshare with our partner airline, Qantas Airways."
+        }
+      ]
+    }
+  ],
+  "opinion": [],
+  "tracerOk": {
+    "French Polynesia's": "A possessive; 'French Polynesia' is in the AIP, SEAC's report, Tahiti Tourisme's pages and Wikipedia."
+  }
 }
