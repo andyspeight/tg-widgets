@@ -10,9 +10,7 @@
  *
  * Run: node test/weather-cache-smoke.mjs   (also: npm run test:weather-cache)
  */
-import { readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -35,16 +33,13 @@ globalThis.fetch = async () => ({
   }),
 });
 
-// The API is CommonJS (module.exports) but the repo is type:module, so a plain
-// require/import treats it as ESM and fails. Evaluate the source with a CJS
-// shim, giving it a require scoped to api/ so its own ./_auth import resolves.
+// Imported as the ES module it is. Until 24 Sep 2026 the file was CommonJS
+// (module.exports) in a type:module project, so this test evaluated it through
+// a CommonJS shim, and that shim hid the fact that Vercel could not load it at
+// all (every call was FUNCTION_INVOCATION_FAILED). A plain import is the same
+// load Vercel does, so it cannot hide that again. test:api-esm guards the rest.
 const apiPath = join(__dirname, '..', 'api', 'weather-current.js');
-const scopedRequire = createRequire(apiPath);
-const SRC = readFileSync(apiPath, 'utf8');
-const mod = { exports: {} };
-// eslint-disable-next-line no-new-func
-new Function('module', 'exports', 'require', SRC)(mod, mod.exports, scopedRequire);
-const handler = mod.exports;
+const { default: handler } = await import(pathToFileURL(apiPath).href);
 
 function makeRes() {
   const headers = {};
