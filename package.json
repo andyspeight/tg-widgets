@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "engines": {
-    "node": "20.x"
+    "node": "24.x"
   },
   "scripts": {
     "test:brain": "node test/brain-smoke.mjs",
@@ -256,7 +256,8 @@
     "build:email-icons": "node scripts/build-email-icons.mjs",
     "test:view-as-client": "node test/admin-view-as-client-smoke.mjs",
     "test:order-shape-atol": "node test/order-shape-atol-smoke.mjs",
-    "test:atol-certificate": "node test/atol-certificate-smoke.mjs"
+    "test:atol-certificate": "node test/atol-certificate-smoke.mjs",
+    "test:runtime-selfcheck": "node test/runtime-selfcheck-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
