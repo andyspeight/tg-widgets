@@ -1,0 +1,420 @@
+{
+ "iata": "ABJ",
+ "id": "recQkgmQE0kWV8K0n",
+ "name": null,
+ "country": "Côte d’Ivoire",
+ "wikipedia": "https://en.wikipedia.org/wiki/F%C3%A9lix-Houphou%C3%ABt-Boigny_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Ivory Coast's largest airport, 16 km south east of Abidjan, and the hub for Air Côte d'Ivoire. Twenty one airlines serve it across more than 30 destinations, with direct links to Europe, across Africa and into the Middle East.\n\nTraffic is the story here. The airport carried more than a million passengers in the late 1990s, then lost much of that through a decade of political and military crisis, during which it was looted in 2004 and twice taken by French troops. With stability and economic growth it has recovered and passed its old peak, reaching 2,331,917 passengers in 2023.\n\nIt was refurbished and modernised after the unrest, and is run by Aeria, a private Ivorian company.\n\nAccess should improve again. The new Abidjan Metro, under construction since 2018, is due to serve the airport when it enters service in 2027.\n\nIt is named after Félix Houphouët-Boigny, the first president of Ivory Coast, and is also known as Port Bouët Airport.",
+ "after": "Ivory Coast's main airport lies 16 km south east of Abidjan and is the base for Air Côte d'Ivoire, the national airline. There are direct links to Europe, across Africa and into the Middle East. It handled more than 2.5 million passengers in 2025.\n\nThe airport is run under concession by the Ivorian company Aeria and has been extended and modernised.\n\nIt is named after Félix Houphouët-Boigny, a former president of Ivory Coast.",
+ "claims": [
+  {
+   "claim": "Ivory Coast's main airport",
+   "verdict": "softened",
+   "inAfter": "Ivory Coast's main airport",
+   "note": "Was 'largest'. Wikipedia says largest for air traffic; the operator calls it the main gateway to the country and the ministry the hub of West African air transport. No national comparison table was reached (ANAC's site answered 502), so 'main' is used. Review (24 Sep): the opening is now a full sentence ('lies 16 km south east of Abidjan and is the base for'), so it carries no comma before 'and' (facts unchanged).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-15",
+     "quote": "It is the largest airport in the country for air traffic."
+    },
+    {
+     "file": "aeria-company-b",
+     "org": "Aeria (AERIA, the airport's concessionaire, abidjan-aeroport.com)",
+     "dated": "read 2026-09-23 (live page, © 2025)",
+     "quote": "AERIA is a company responsible for the operation and development of Abidjan's FHB International Airport, the main gateway to Côte d'Ivoire."
+    },
+    {
+     "file": "min-transports-cap",
+     "org": "Ministère des Transports et des Affaires Maritimes, Côte d'Ivoire (transports.gouv.ci)",
+     "dated": "2025-06-16",
+     "quote": [
+      "16 juin 2025",
+      "confirmant son statut de plaque tournante du transport aérien en Afrique de l’Ouest"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "16 km south east of Abidjan",
+   "verdict": "confirmed",
+   "inAfter": "16 km south east of Abidjan",
+   "note": "Coordinates: 13.3 km from the GeoNames centre of Abidjan at 141 degrees (south east); ratio 1.20, inside the tolerance for a road distance.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-15",
+     "quote": "is located 16 km (9 nmi; 10 mi) south east of Abidjan, Ivory Coast"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 13.3 km (8.3 miles)",
+      "Bearing from the city centre: 141 degrees, which is south east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the base for Air Côte d'Ivoire, the national airline",
+   "verdict": "softened",
+   "inAfter": "the base for Air Côte d'Ivoire, the national airline",
+   "note": "Was 'the hub for Air Côte d'Ivoire'. ch-aviation's airline profile gives its base as Abidjan; the ministry calls it the national airline and reports its second A330-900neo arriving at Abidjan in December 2025.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-15",
+     "quote": "The airport is the main hub of the national airline Air Côte d'Ivoire."
+    },
+    {
+     "file": "chaviation-beirut",
+     "org": "ch-aviation (aviation trade press)",
+     "dated": "2025-11-13",
+     "quote": [
+      "13Nov2025",
+      "Air Côte d'Ivoire (HF, Abidjan ) has scheduled the start of 3x weekly flights between Abidjan and Beirut"
+     ]
+    },
+    {
+     "file": "min-transports-a330-dec2025",
+     "org": "Ministère des Transports et des Affaires Maritimes, Côte d'Ivoire (transports.gouv.ci)",
+     "dated": "2025-12-23",
+     "quote": "La Compagnie nationale Air Côte d'Ivoire a, ce mardi 23 décembre 2025, accueilli à Abidjan un deuxième Airbus A330-900 NEO"
+    }
+   ]
+  },
+  {
+   "claim": "direct links to Europe, across Africa and into the Middle East",
+   "verdict": "confirmed",
+   "inAfter": "There are direct links to Europe, across Africa and into the Middle East",
+   "note": "Europe: Air Côte d'Ivoire's long-haul route to Paris CDG (from September 2025) and the operator's list (Paris, Bruxelles, Istanbul). Middle East: Beirut (the operator lists Middle East Airlines and Beirut; ch-aviation reports Air Côte d'Ivoire scheduling Abidjan to Beirut from 4 January 2026). Africa: most of the operator's list, plus TAAG's Luanda flights from 6 April 2026 (ministry). Dubai is on the operator's list but the ministry says a direct Abidjan to Dubai flight is only being studied (July 2026), so Dubai is not named.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-15",
+     "quote": "this international airport is directly connected currently to airports in Europe and to many destinations within the rest of Africa and the Middle East"
+    },
+    {
+     "file": "chaviation-beirut",
+     "org": "ch-aviation (aviation trade press)",
+     "dated": "2025-11-13",
+     "quote": [
+      "13Nov2025",
+      "This follows its first long-haul route to Paris CDG",
+      "3x weekly flights between Abidjan and Beirut"
+     ]
+    },
+    {
+     "file": "aeria-home-b",
+     "org": "Aeria (AERIA, the airport's concessionaire, abidjan-aeroport.com)",
+     "dated": "read 2026-09-23 (live page, © 2025)",
+     "quote": [
+      "Destinations",
+      "Paris",
+      "Bruxelles",
+      "Istanbul",
+      "Beirut",
+      "Dakar",
+      "Johannesburg",
+      "Nairobi"
+     ]
+    },
+    {
+     "file": "min-transports-aero-list",
+     "org": "Ministère des Transports et des Affaires Maritimes, Côte d'Ivoire (transports.gouv.ci)",
+     "dated": "2026-04-06",
+     "quote": "Ce lundi 6 avril 2026, l'aéroport international Félix Houphouët-Boigny d'Abidjan a célébré le premier vol commercial de la compagnie TAAG Angola Airlines"
+    }
+   ]
+  },
+  {
+   "claim": "more than 2.5 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "It handled more than 2.5 million passengers in 2025.",
+   "note": "Was '2,331,917 passengers in 2023' (the ministry's own 2023 figure, June 2025). A passenger total replaces a passenger total. The two 2025 figures differ: the ministry (28 July 2026) gives 2,551,915 and Wikipedia's infobox 2,520,594 (+0.9%), whose cited source is a 2023 ministry PDF. Both exceed 2.5 million, which is all the text says; the difference is not split. The ministry's 2024 figure was 2,535,451 (June 2025), so 2025 was roughly flat on its own figures. No 'record' is claimed.",
+   "sources": [
+    {
+     "file": "min-transports-dubai-hub",
+     "org": "Ministère des Transports et des Affaires Maritimes, Côte d'Ivoire (transports.gouv.ci)",
+     "dated": "2026-07-28",
+     "quote": [
+      "28 juil 2026",
+      "En 2025, l’aéroport Félix-Houphouët-Boigny a enregistré 2 551 915 passagers."
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-15",
+     "quote": [
+      "stat1_data = 2,520,594",
+      "stat_year = 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "run under concession by Aeria, an Ivorian company",
+   "verdict": "softened",
+   "inAfter": "The airport is run under concession by the Ivorian company Aeria",
+   "note": "Was 'run by Aeria, a private Ivorian company'. The operator describes itself as an Ivorian public limited company (a société anonyme), concessionaire since 1996, with the concession renewed for 20 years; Wikipedia dates the renewal from 1 January 2010. 'Private' is Wikipedia's word only. Its technical partner is the Egis group (operator), not stated. Review (24 Sep): reworded from 'by Aeria, an Ivorian company, and has been' so the sentence carries no comma before 'and' (facts unchanged).",
+   "sources": [
+    {
+     "file": "aeria-company-b",
+     "org": "Aeria (AERIA, the airport's concessionaire, abidjan-aeroport.com)",
+     "dated": "read 2026-09-23 (live page, © 2025)",
+     "quote": [
+      "AERIA (International Airport of Abidjan) is an Ivoirian public limited company",
+      "AERIA is the concessionary of Felix Houphouet Boigny Airport since 1996.",
+      "the Ivorian government renewed AERIA's concession for a period of 20 years"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-15",
+     "quote": [
+      "The airport is managed by Aeria, a private Ivorian company.",
+      "the renewal of Aeria's concession, effective 1 January 2010, for a period of 20 years"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "has been extended and modernised",
+   "verdict": "softened",
+   "inAfter": "and has been extended and modernised",
+   "note": "Was 'refurbished and modernised after the unrest'. The unrest is cut (see below), so the timing goes; the works themselves are in all three sources.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-15",
+     "quote": [
+      "The airport was later refurbished by the Ivorian government and modernized with new modern facilities.",
+      "the refurbishment included an extension of the international terminal"
+     ]
+    },
+    {
+     "file": "min-transports-cap",
+     "org": "Ministère des Transports et des Affaires Maritimes, Côte d'Ivoire (transports.gouv.ci)",
+     "dated": "2025-06-16",
+     "quote": "Signe que les travaux d’extension et de modernisation portent des fruits"
+    },
+    {
+     "file": "aeria-company-b",
+     "org": "Aeria (AERIA, the airport's concessionaire, abidjan-aeroport.com)",
+     "dated": "read 2026-09-23 (live page, © 2025)",
+     "quote": "Comprehensive redevelopment of the departure area"
+    }
+   ]
+  },
+  {
+   "claim": "named after Félix Houphouët-Boigny, a former president of Ivory Coast",
+   "verdict": "softened",
+   "inAfter": "It is named after Félix Houphouët-Boigny, a former president of Ivory Coast.",
+   "note": "Was 'the first president of Ivory Coast'. UNESCO gives his presidency as 1960 to 1993 but does not say 'first'; 'first' rests on Wikipedia alone (the presidency's site answered 502), so 'a former president' is what both say. The operator's own name for the airport carries his name.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-15",
+     "quote": "Named after the first president of Ivory Coast, Félix Houphouët-Boigny (1905–1993)"
+    },
+    {
+     "file": "unesco-fhb",
+     "org": "UNESCO (the Félix Houphouët-Boigny UNESCO Peace Prize)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Félix Houphouët-Boigny Former President of Côte d’Ivoire (1960-1993)"
+    },
+    {
+     "file": "aeria-home-b",
+     "org": "Aeria (AERIA, the airport's concessionaire, abidjan-aeroport.com)",
+     "dated": "read 2026-09-23 (live page, © 2025)",
+     "quote": "ABIDJAN INTERNATIONAL AIRPORT FÉLIX HOUPHOUËT-BOIGNY"
+    }
+   ]
+  },
+  {
+   "claim": "largest airport",
+   "verdict": "cut",
+   "wasBefore": "Ivory Coast's largest airport",
+   "why": "Softened to 'main airport' (see above): no national comparison was reached."
+  },
+  {
+   "claim": "hub for Air Côte d'Ivoire",
+   "verdict": "cut",
+   "wasBefore": "and the hub for Air Côte d'Ivoire.",
+   "why": "Reworded as 'the base for Air Côte d'Ivoire, the national airline' (see above)."
+  },
+  {
+   "claim": "21 airlines, more than 30 destinations",
+   "verdict": "cut",
+   "wasBefore": "Twenty one airlines serve it across more than 30 destinations, with direct links to Europe, across Africa and into the Middle East.",
+   "why": "A count, which only the airport's own current count may replace. The operator's live lists name 20 airlines and 41 destinations, but they are undated (site footer © 2025) and leave out TAAG Angola Airlines' Luanda flights, which the ministry says began on 6 April 2026, so they are not a current count. Wikipedia's 21 and 30 are undated. The direct links are kept in their own sentence.",
+   "sources": [
+    {
+     "file": "aeria-airlines-b",
+     "org": "Aeria (AERIA, the airport's concessionaire, abidjan-aeroport.com)",
+     "dated": "read 2026-09-23 (live page, undated list)",
+     "quote": [
+      "Air Algérie",
+      "Turkish Airlines",
+      "Middle East Airlines Air Liban"
+     ]
+    },
+    {
+     "file": "min-transports-aero-list",
+     "org": "Ministère des Transports et des Affaires Maritimes, Côte d'Ivoire (transports.gouv.ci)",
+     "dated": "2026-04-06",
+     "quote": "Transport aérien/ Démarrage de la liaison Abidjan-Luanda"
+    }
+   ]
+  },
+  {
+   "claim": "Traffic is the story here",
+   "verdict": "cut",
+   "wasBefore": "Traffic is the story here.",
+   "why": "Framing for the history that is cut below."
+  },
+  {
+   "claim": "more than a million passengers in the late 1990s",
+   "verdict": "cut",
+   "wasBefore": "The airport carried more than a million passengers in the late 1990s",
+   "why": "Wikipedia alone. The operator gives only an early capacity (600,000 passengers) and traffic from 2014."
+  },
+  {
+   "claim": "lost traffic in a decade of crisis; looted in 2004; twice taken by French troops",
+   "verdict": "cut",
+   "wasBefore": "then lost much of that through a decade of political and military crisis, during which it was looted in 2004 and twice taken by French troops.",
+   "why": "Wikipedia alone. France 24's April 2011 report (cited by Wikipedia) answered with a security block page ('The website you are visiting is protected'), so it was left; web.archive.org copies are blocked by network policy. History of little use for booking."
+  },
+  {
+   "claim": "recovered and passed its old peak, 2,331,917 in 2023",
+   "verdict": "cut",
+   "wasBefore": "With stability and economic growth it has recovered and passed its old peak, reaching 2,331,917 passengers in 2023.",
+   "why": "The 2023 figure is right (the ministry gives the same 2,331,917) but superseded by 2025's (see above). 'Passed its old peak' depends on the late-1990s figure, which rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "min-transports-cap",
+     "org": "Ministère des Transports et des Affaires Maritimes, Côte d'Ivoire (transports.gouv.ci)",
+     "dated": "2025-06-16",
+     "quote": "2 535 451 passagers ont été transportés en 2024 contre 2 331 917 en 2023"
+    }
+   ]
+  },
+  {
+   "claim": "refurbished and modernised after the unrest",
+   "verdict": "cut",
+   "wasBefore": "It was refurbished and modernised after the unrest",
+   "why": "Reworded as 'has been extended and modernised' (see above); the unrest is cut."
+  },
+  {
+   "claim": "a private Ivorian company",
+   "verdict": "cut",
+   "wasBefore": "is run by Aeria, a private Ivorian company.",
+   "why": "Reworded: the operator calls itself an Ivorian public limited company and the airport's concessionaire (see above)."
+  },
+  {
+   "claim": "Abidjan Metro to serve the airport from 2027",
+   "verdict": "cut",
+   "wasBefore": "Access should improve again. The new Abidjan Metro, under construction since 2018, is due to serve the airport when it enters service in 2027.",
+   "why": "No source from the last 12 months was found. The 2018 start and the 2027 target are in Wikipedia and in AIP's report of 1 February 2024 (the minister 'confident' of 2027; the 37 km line to serve seven communes including Port Bouët, without naming the airport). The ministry's 2026 budget presentation gives no date, and its rail news page reached shows nothing dated on the metro after 2023; two undated metro items in its news index (a validated model, a rail bridge at Abobo) were not read, after three attempts on this claim. A two-year-old opening date for works is not safe to repeat.",
+   "sources": [
+    {
+     "file": "aip-metro",
+     "org": "AIP (Agence Ivoirienne de Presse, the national news agency)",
+     "dated": "2024-02-01",
+     "quote": [
+      "Je suis confiant pour le respect du délai en 2027 pour mettre en marche le train",
+      "Les travaux de construction du métro d’Abidjan ont débuté courant 2018."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the first president",
+   "verdict": "cut",
+   "wasBefore": "the first president of Ivory Coast",
+   "why": "Softened to 'a former president' (see above): 'first' rests on Wikipedia alone."
+  },
+  {
+   "claim": "also known as Port Bouët Airport",
+   "verdict": "cut",
+   "wasBefore": "and is also known as Port Bouët Airport.",
+   "why": "Wikipedia alone. ASECNA's official aerodrome chart names it 'ABIDJAN / F. H. Boigny (DIAP)', and no current source reached uses Port Bouët for the airport.",
+   "sources": [
+    {
+     "file": "asecna-diap-adc",
+     "org": "ASECNA (air navigation agency, aeronautical information service)",
+     "dated": "2020-11-05",
+     "quote": "ABIDJAN / F. H. Boigny (DIAP)"
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: e-visa before travel, collected at Abidjan airport; yellow fever certificate; Ebola screening; northern border warnings",
+   "verdict": "cut",
+   "why": "Held back: a warning and entry rules that replace nothing. The FCDO (updated 29 May 2026, still current 24 September 2026) says British visitors must have an e-visa approved before travel (apply at least 10 working days ahead) and collect it on arrival at Abidjan airport, must carry a yellow fever vaccination certificate, and may face Ebola health screening if arriving from affected countries. It advises against all travel within 40 km of the borders with Burkina Faso and Mali (and parts of the north) and all but essential travel within 20 km of the Liberian border; Abidjan is not in those areas. For Andy to decide whether an agent should be told.",
+   "sources": [
+    {
+     "file": "fcdo-cote-divoire-entry",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-05-29 (updated; still current 24 September 2026)",
+     "quote": [
+      "You must have a visa to enter Côte d’Ivoire.",
+      "Once it is approved, you will be able to collect your visa on arrival at Abidjan airport.",
+      "To enter Côte d’Ivoire, you must have a certificate to prove you’ve had a yellow fever vaccination."
+     ]
+    },
+    {
+     "file": "fcdo-cote-divoire",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-05-29 (updated; still current 24 September 2026)",
+     "quote": [
+      "Still current at:",
+      "24 September 2026",
+      "Updated:",
+      "29 May 2026",
+      "within 40km of the borders with Burkina Faso and Mali"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Air Côte d'Ivoire long haul: Paris CDG from September 2025, Beirut scheduled from January 2026",
+   "verdict": "cut",
+   "why": "Held back: a recent change that replaces nothing in the old text. ch-aviation (13 November 2025) reports Air Côte d'Ivoire's first long-haul route, to Paris CDG, flown with the A330-900neo delivered in September 2025, and 3x weekly Abidjan to Beirut scheduled from 4 January 2026; the airline's own press page lists reports of the Abidjan to Paris launch (10 September 2025).",
+   "sources": [
+    {
+     "file": "chaviation-beirut",
+     "org": "ch-aviation (aviation trade press)",
+     "dated": "2025-11-13",
+     "quote": [
+      "This follows its first long-haul route to Paris CDG",
+      "has scheduled the start of 3x weekly flights between Abidjan and Beirut"
+     ]
+    },
+    {
+     "file": "aircotedivoire-presse",
+     "org": "Air Côte d'Ivoire (aircotedivoire.com)",
+     "dated": "2025-09-10",
+     "quote": [
+      "La compagnie nationale ivoirienne d'aviation lance sa ligne Abidjan-Paris avec un nouvel Airbus",
+      "10 septembre 2025"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "Ivory Coast's": "A possessive; 'Ivory Coast' is in the saved Wikipedia text."
+ }
+}

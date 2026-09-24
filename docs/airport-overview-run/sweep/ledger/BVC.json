@@ -1,0 +1,312 @@
+{
+ "iata": "BVC",
+ "id": "recz2gGllNprkc2Vc",
+ "name": "Aristides Pereira International Airport",
+ "country": "Cape Verde",
+ "wikipedia": "https://en.wikipedia.org/wiki/Aristides_Pereira_International_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Boa Vista in Cape Verde, about 5 km south east of the island capital Sal Rei, and third busiest in the country.\n\nIt became an international airport fairly recently. The existing Rabil airfield was converted between 2005 and 2007, with the runway extended from 1,200 to 2,100 metres and widened from 30 to 45 metres at a cost of 21 million euros. It opened officially on 31 October 2007, which is what made Boa Vista's package holiday market possible.\n\nOwnership changed in July 2023, when Vinci Airports finalised a 40-year concession covering seven Cape Verde airports, alongside ANA-Aeroportos de Portugal which holds 30 per cent. Vinci is responsible for funding, operating and expanding them, so facilities here should improve over the concession.",
+ "after": "The airport for Boa Vista in Cape Verde, and the third busiest in the country.\n\nIt became an international airport in 2007, when the old Rabil airfield was converted. Its runway is 2,100 metres long and 45 metres wide.\n\nSince July 2023 it has been run by Cabo Verde Airports, 70 per cent owned by Vinci Airports and 30 per cent by ANA-Aeroportos de Portugal, under a 40-year concession covering seven Cape Verde airports. Vinci is responsible for funding, operating and expanding them, so facilities here should improve over the concession.",
+ "claims": [
+  {
+   "claim": "the airport for Boa Vista in Cape Verde",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Boa Vista in Cape Verde",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "is an airport in Cape Verde located on the island of Boa Vista"
+    },
+    {
+     "file": "cva-boavista",
+     "org": "Cabo Verde Airports (VINCI Airports, operator, caboverde-airports.cv)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Boa Vista is home to one of Cape Verde's four major airports, Aristides Pereira International Airport"
+    },
+    {
+     "file": "cva-bvc",
+     "org": "Cabo Verde Airports (VINCI Airports, operator, caboverde-airports.cv)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "O Aeroporto Internacional da Boa Vista, na ilha da Boa Vista"
+    }
+   ]
+  },
+  {
+   "claim": "the third busiest in the country",
+   "verdict": "confirmed",
+   "inAfter": "and the third busiest in the country",
+   "note": "The operator's 2025 table (in thousands of passengers): Sal 1,588, Praia 753, Boa Vista 670, São Vicente 354. The concession's three small aerodromes share the rest of its 3,482 total. The table was saved for SID and copied here with a NOTE line.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "It is the third-busiest airport in the country."
+    },
+    {
+     "file": "cva-bvc",
+     "org": "Cabo Verde Airports (VINCI Airports, operator, caboverde-airports.cv)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "este aeroporto é, atualmente, o terceiro mais ativo de Cabo Verde"
+    },
+    {
+     "file": "vinci-traffic-2025",
+     "org": "Cabo Verde Airports (VINCI Airports, operator, caboverde-airports.cv)",
+     "dated": "2026-01 (traffic to 31 December 2025)",
+     "quote": [
+      "In thousands of passengers",
+      "Sal (SID) 100 430 +14% 1,588 +19%",
+      "Praia (RAI) 100 197 +16% 753 +13%",
+      "Boa Vista (BVC) 100 183 +14% 670 +8.5%",
+      "São Vicente (VXE) 100 97 +16% 354 +18%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "international airport since 2007, converted from the old Rabil airfield",
+   "verdict": "softened",
+   "inAfter": "It became an international airport in 2007, when the old Rabil airfield was converted.",
+   "note": "Was 'fairly recently' and 'converted between 2005 and 2007'. The operator gives 2007 and a former aerodrome; the 2005 start rests on Wikipedia alone. OurAirports and the UK CAA both still name the airport after Rabil.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": [
+      "The conversion of the existing airport of Rabil into an international airport started in 2005, and was completed in 2007.",
+      "The airport was officially opened on 31 October 2007."
+     ]
+    },
+    {
+     "file": "cva-bvc",
+     "org": "Cabo Verde Airports (VINCI Airports, operator, caboverde-airports.cv)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "foi inaugurado em 2007, num antigo aeródromo"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": "OurAirports municipality: Rabil"
+    },
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority (airport data 2025, international routes)",
+     "dated": "2025 (run 25 February 2026)",
+     "quote": "25/02/2026 16:41,2025,105,ATLANTIC OCEAN ISLANDS,CAPE VERDE ISLANDS,1,GATWICK,BOA VISTA (RABIL),85188,85188,0,76452,76452,0,11.42678"
+    }
+   ]
+  },
+  {
+   "claim": "runway 2,100 m long and 45 m wide",
+   "verdict": "corrected",
+   "inAfter": "Its runway is 2,100 metres long and 45 metres wide.",
+   "note": "Replaces 'the runway extended from 1,200 to 2,100 metres and widened from 30 to 45 metres': the present size is confirmed; the old size and the cost rest on Wikipedia alone (cut below). The operator plans a longer runway (held back below).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "The runway was extended from 1,200 to 2,100 metres (3,900 to 6,900 ft) length and from 30 to 45 metres (98 to 148 ft) width."
+    },
+    {
+     "file": "cva-bvc",
+     "org": "Cabo Verde Airports (VINCI Airports, operator, caboverde-airports.cv)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Com uma pista de 2.100 m de comprimento e 45m de largura"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": "Runway 03/21: 2,100 m (6,890 ft), ASP"
+    }
+   ]
+  },
+  {
+   "claim": "run since July 2023 by Cabo Verde Airports (Vinci 70%, ANA 30%) under a 40-year concession covering seven airports",
+   "verdict": "corrected",
+   "inAfter": "Since July 2023 it has been run by Cabo Verde Airports, 70 per cent owned by Vinci Airports and 30 per cent by ANA-Aeroportos de Portugal, under a 40-year concession covering seven Cape Verde airports.",
+   "note": "Was 'Ownership changed in July 2023'. It is a concession, not a sale: the operator says Cabo Verde Airports began operating on 24 July 2023 under a 40-year concession contract with the government, for four international airports and three aerodromes.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": [
+      "In July 2023 Vinci Airports finalized a financial arrangement to take over seven airports in Cape Verde under a concession agreement",
+      "alongside its subsidiary ANA-Aeroportos de Portugal, which holds 30% of the concession company Cabo Verde Airports."
+     ]
+    },
+    {
+     "file": "cva-sobre",
+     "org": "Cabo Verde Airports (VINCI Airports, operator, caboverde-airports.cv)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "é detida pela VINCI Airports (70%) e pela sua subsidiária portuguesa, ANA Aeroportos de Portugal (30%), e iniciou atividades a 24 de julho de 2023",
+      "no âmbito do Contrato de Concessão assinado com o Governo de Cabo Verde, com um período de vigência de quarenta anos",
+      "sendo quatro aeroportos internacionais, em Santiago, Sal, São Vicente e Boa Vista, e três aeródromos"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Vinci responsible for funding, operating and expanding them",
+   "verdict": "confirmed",
+   "inAfter": "Vinci is responsible for funding, operating and expanding them",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-04",
+     "quote": "The company will be responsible for the funding, operation, maintenance, extension and modernization of the airports for 40 years"
+    },
+    {
+     "file": "cva-sobre",
+     "org": "Cabo Verde Airports (VINCI Airports, operator, caboverde-airports.cv)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "a VINCI Airports desenvolve, financia, constrói e gere aeroportos",
+      "é a empresa responsável pela gestão das infraestruturas aeroportuárias do país"
+     ]
+    },
+    {
+     "file": "cva-modernizacao",
+     "org": "Cabo Verde Airports (VINCI Airports, operator, caboverde-airports.cv)",
+     "dated": "undated (reports the whole of 2025)",
+     "quote": "O projeto inclui ampliações dos terminais, novas áreas comerciais e melhorias operacionais importantes, como a extensão da pista na Boa Vista."
+    }
+   ]
+  },
+  {
+   "claim": "5 km south east of the island capital Sal Rei",
+   "verdict": "cut",
+   "wasBefore": "about 5 km south east of the island capital Sal Rei",
+   "why": "Wikipedia alone. The coordinates check has no GeoNames entry for Sal Rei or Rabil, the operator's pages give no distance, and ASA's site (the national AIP) answered 502. Macauhub's 2007 report was tried once at the http:// address Wikipedia cites and failed with a DNS error (EAI_AGAIN); not retried."
+  },
+  {
+   "claim": "international fairly recently",
+   "verdict": "cut",
+   "wasBefore": "It became an international airport fairly recently.",
+   "why": "Replaced by the year, 2007 (see above); nineteen years is not 'fairly recently'."
+  },
+  {
+   "claim": "converted between 2005 and 2007; runway from 1,200 m and 30 m; cost 21 million euros",
+   "verdict": "cut",
+   "wasBefore": "The existing Rabil airfield was converted between 2005 and 2007, with the runway extended from 1,200 to 2,100 metres and widened from 30 to 45 metres at a cost of 21 million euros.",
+   "why": "The 2005 start, the old runway size and the cost rest on Wikipedia alone (Macauhub's 2007 report, which Wikipedia cites, could not be reached: one try, DNS error). The conversion, 2007 and today's runway size are kept."
+  },
+  {
+   "claim": "opened officially on 31 October 2007; made the package holiday market possible",
+   "verdict": "cut",
+   "wasBefore": "It opened officially on 31 October 2007, which is what made Boa Vista's package holiday market possible.",
+   "why": "The day rests on Wikipedia alone (the operator gives only the year, kept). The package holiday claim is in no source, Wikipedia included: an inference. The operator says the island is one of the most tourist-oriented in Cape Verde and the airport the way in for many foreign tourists, but only on its own pages."
+  },
+  {
+   "claim": "ownership changed in July 2023",
+   "verdict": "cut",
+   "wasBefore": "Ownership changed in July 2023, when Vinci Airports finalised a 40-year concession covering seven Cape Verde airports, alongside ANA-Aeroportos de Portugal which holds 30 per cent.",
+   "why": "Wrong in kind: a 40-year concession, not a change of ownership. Rewritten with the operator's own terms (see above)."
+  },
+  {
+   "claim": "FCDO: pre-register and pay the TSA 5 days ahead (double at the border from 1 July 2026); blue and yellow authorised taxis; sandstorms disrupt Boa Vista flights",
+   "verdict": "cut",
+   "why": "Held back: advice that replaces nothing in the old text. The FCDO (updated 28 July 2026, still current 24 September 2026) says visitors must pre-register and pay the airport security fee (TSA) online at least 5 days before arrival, and from 1 July 2026 pay double at the border without proof; British visitors need no visa for up to 30 days; authorised taxis on Sal and Boa Vista are blue and yellow; and sandstorms ('bruma seca') between December and February can disrupt air travel, especially on Boa Vista. SID's Overview carries the first two (added before the held-back rule). For Andy to decide.",
+   "sources": [
+    {
+     "file": "fcdo-cape-verde-entry",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-28 (updated; still current 24 September 2026)",
+     "quote": [
+      "Complete the pre-registration and pay the airport security fee (‘TSA’) on the official online platform.",
+      "From 1 July 2026, if you do not complete the pre-registration or cannot show proof, you will have to pay double the TSA fee at border control.",
+      "You can enter Cape Verde as a visitor for up to 30 days without a visa."
+     ]
+    },
+    {
+     "file": "fcdo-cape-verde-safety",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-28 (updated; still current 24 September 2026)",
+     "quote": [
+      "On the islands of Sal and Boa Vista, authorised taxis are coloured blue and yellow.",
+      "Sandstorms (‘bruma seca’) can happen between December and February. When intense, they can disrupt air travel, especially on the island of Boa Vista."
+     ]
+    },
+    {
+     "file": "fcdo-cape-verde",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-28",
+     "quote": [
+      "Still current at:",
+      "24 September 2026",
+      "Updated:",
+      "28 July 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "UK flights in 2025: Gatwick, Manchester, Birmingham and East Midlands",
+   "verdict": "cut",
+   "why": "Held back: the kind of fact an agent wants, but it replaces nothing in the old text. The UK CAA's 2025 table has Boa Vista passengers from Gatwick (85,188), Manchester (72,579), Birmingham (43,953) and East Midlands (20,919, new in 2025), and none from Bristol (4,856 in 2024), all on scheduled services; about 223,000 in all, for 2025.",
+   "sources": [
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority (airport data 2025, international routes)",
+     "dated": "2025 (run 25 February 2026)",
+     "quote": [
+      "2,MANCHESTER,BOA VISTA (RABIL),72579,72579,0,73467,73467,0,-1.20871",
+      "2,BIRMINGHAM,BOA VISTA (RABIL),43953,43953,0,54450,54450,0,-19.27824",
+      "2,EAST MIDLANDS INTERNATIONAL,BOA VISTA (RABIL),20919,20919,0,0,0,0,0",
+      "2,BRISTOL,BOA VISTA (RABIL),0,0,0,4856,3631,1225,-100"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about 670,000 passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: a passenger total that replaces nothing (the old text gives only the rank, kept). The operator's table has 670,000 for 2025, up 8.5 per cent; no second source for the figure was reached (SID's helper found INE Cabo Verde's tables script-driven).",
+   "sources": [
+    {
+     "file": "vinci-traffic-2025",
+     "org": "Cabo Verde Airports (VINCI Airports, operator, caboverde-airports.cv)",
+     "dated": "2026-01 (traffic to 31 December 2025)",
+     "quote": "Boa Vista (BVC) 100 183 +14% 670 +8.5%"
+    }
+   ]
+  },
+  {
+   "claim": "operator plans a longer runway; renamed Aristides Pereira on 19 November 2011; enlarged in 2010",
+   "verdict": "cut",
+   "why": "Held back: the operator says its current three-year phase of works (Phase 1-B, 142 million euros) includes extending the runway at Boa Vista, and that the airport was enlarged in 2010 and renamed Aristides Pereira International Airport on 19 November 2011. Operator only, and nothing in the old text to replace.",
+   "sources": [
+    {
+     "file": "cva-modernizacao",
+     "org": "Cabo Verde Airports (VINCI Airports, operator, caboverde-airports.cv)",
+     "dated": "undated (reports the whole of 2025)",
+     "quote": "como a extensão da pista na Boa Vista"
+    },
+    {
+     "file": "cva-bvc",
+     "org": "Cabo Verde Airports (VINCI Airports, operator, caboverde-airports.cv)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Em 2010, foi objeto de ampliação para melhorar a capacidade operacional.",
+      "Renomeado a 19 de novembro de 2011 para Aeroporto Internacional Aristides Pereira"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so facilities here should improve over the concession.",
+   "why": "The old text's judgement, kept: the operator finished a first phase of works across its airports in 2025 and its new three-year phase includes terminal expansions and a longer runway at Boa Vista."
+  }
+ ],
+ "tracerOk": {
+  "Since July": "The tracer reads the opening word with the month; 'In July 2023' is in Wikipedia and '24 de julho de 2023' on the operator's page."
+ }
+}

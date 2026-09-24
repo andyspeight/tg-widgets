@@ -1,0 +1,362 @@
+{
+ "iata": "COO",
+ "id": "rec22rQkfXnEObj2A",
+ "name": "Cotonou Cadjehoun International Airport",
+ "country": "Benin",
+ "wikipedia": "https://en.wikipedia.org/wiki/Cadjehoun_Airport",
+ "audited": "2026-09-23",
+ "before": "Benin's main airport and effectively its only international one, sitting in the Cadjehoun neighbourhood of Cotonou, the country's largest city. Flights run to destinations across Africa and to Europe.\n\nIt was renamed in 2021 after Cardinal Bernardin Gantin, so older schedules and guidebooks still list it as Cotonou Cadjehoun. Both names refer to the same place.\n\nA replacement has been talked about for a very long time. The decision to move operations to a new site at Glo-Djigbe was taken in 1974 and ran out of funding. The plan was revived in 2011 with South African backing and a ceremonial start to construction, and appears to have stalled again since. Work has gone into improving the existing airport instead, so for the foreseeable future this remains the way into Benin.",
+ "after": "Benin's main airport and effectively its only international one, sitting in the Cadjehoun neighbourhood of Cotonou. Flights run to destinations across Africa and to Europe.\n\nIt is named after Cardinal Bernardin Gantin, but older schedules and guidebooks may still call it Cotonou Cadjehoun. Both names refer to the same place.\n\nA replacement airport at Glo-Djigbé has long been planned, but work has gone into improving this one, and for the foreseeable future it remains the way into Benin.",
+ "claims": [
+  {
+   "claim": "Benin's main airport and effectively its only international one",
+   "verdict": "confirmed",
+   "inAfter": "Benin's main airport and effectively its only international one",
+   "note": "The Logistics Cluster page is undated (its latest traffic figures are for November 2022). The FCDO (current) sends visitors to collect their visas at Cotonou airport, and the operator, which runs Benin's airports, presents only Cotonou and Tourou (Parakou).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "The airport is the largest in the country, and the primary entry point into the country by air"
+    },
+    {
+     "file": "dlca-coo",
+     "org": "WFP Logistics Cluster (UN World Food Programme, Digital Logistics Capacity Assessment)",
+     "dated": "undated (latest figures November 2022)",
+     "quote": [
+      "Cotonou-Cadjehoun Airport is the only international airport of the country.",
+      "Cotonou International Airport is the largest airport in Benin."
+     ]
+    },
+    {
+     "file": "fcdo-benin-entry",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "You will get your visa when you arrive at Cotonou airport."
+    }
+   ]
+  },
+  {
+   "claim": "in the Cadjehoun neighbourhood of Cotonou",
+   "verdict": "confirmed",
+   "inAfter": "sitting in the Cadjehoun neighbourhood of Cotonou",
+   "note": "ASECNA's official designation pairs the cardinal's name with Cadjehoun, the locality, and the Logistics Cluster calls it Cotonou-Cadjehoun, about 5 km from downtown. Coordinates: 3.9 km west of the GeoNames centre of Cotonou, in the municipality of Cotonou.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "is an airport in the Cadjehoun neighborhood of Cotonou"
+    },
+    {
+     "file": "asecna-dbbb",
+     "org": "ASECNA (air navigation agency, aeronautical information publication)",
+     "dated": "2022-02-24 (valid from)",
+     "quote": [
+      "valide à partir du 24 FEB 2022",
+      "DBBB — AEROPORT INTERNATIONAL CARDINAL BERNARDIN GANTIN/CADJEHOUN"
+     ]
+    },
+    {
+     "file": "dlca-coo",
+     "org": "WFP Logistics Cluster (UN World Food Programme, Digital Logistics Capacity Assessment)",
+     "dated": "undated (latest figures November 2022)",
+     "quote": "It is located about 5km from downtown."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Cotonou",
+      "Straight-line distance from the city centre: 3.9 km (2.4 miles)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "flights across Africa and to Europe",
+   "verdict": "confirmed",
+   "inAfter": "Flights run to destinations across Africa and to Europe.",
+   "note": "The operator's live destination list (first of three pages) shows Abidjan, Dakar, Lomé, Ouagadougou, Addis Ababa and Bamako in Africa and Paris, Istanbul and Brussels in Europe; its only region filters are Africa, Europe and West Africa.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "with flights to Africa and Europe"
+    },
+    {
+     "file": "sab-destinations-b",
+     "org": "Société des Aéroports du Bénin (SAB, the operator, aeroport-de-cotonou.bj)",
+     "dated": "read 2026-09-23 (live page, © 2026)",
+     "quote": [
+      "Our destinations",
+      "Abidjan",
+      "AFRIQUE DE L'OUEST",
+      "Addis Abeba",
+      "Paris",
+      "Istanbul",
+      "Bruxelles",
+      "EUROPE"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after Cardinal Bernardin Gantin",
+   "verdict": "softened",
+   "inAfter": "It is named after Cardinal Bernardin Gantin",
+   "note": "Was 'renamed in 2021 after Cardinal Bernardin Gantin'. The name is on the operator's site and in ASECNA's official publication; the year is disputed (see the cut below), so none is given.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "The airport was renamed after cardinal Bernardin Gantin in 2021."
+    },
+    {
+     "file": "sab-home-b",
+     "org": "Société des Aéroports du Bénin (SAB, the operator, aeroport-de-cotonou.bj)",
+     "dated": "read 2026-09-23 (live page, © 2026)",
+     "quote": "© 2026 Bernardin GANTIN International Airport of Cotonou"
+    },
+    {
+     "file": "asecna-dbbb",
+     "org": "ASECNA (air navigation agency, aeronautical information publication)",
+     "dated": "2022-02-24 (valid from)",
+     "quote": "AEROPORT INTERNATIONAL CARDINAL BERNARDIN GANTIN/CADJEHOUN"
+    },
+    {
+     "file": "dlca-coo",
+     "org": "WFP Logistics Cluster (UN World Food Programme, Digital Logistics Capacity Assessment)",
+     "dated": "undated (latest figures November 2022)",
+     "quote": "It was renamed Cardinal Bernardin Gantin International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "both names refer to the same place",
+   "verdict": "confirmed",
+   "inAfter": "Both names refer to the same place.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "Cardinal Bernadin Gantin International Airport (formerly known as Cotonou Cadjehoun Airport)"
+    },
+    {
+     "file": "asecna-dbbb",
+     "org": "ASECNA (air navigation agency, aeronautical information publication)",
+     "dated": "2022-02-24 (valid from)",
+     "quote": "DBBB — AEROPORT INTERNATIONAL CARDINAL BERNARDIN GANTIN/CADJEHOUN"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Airport: Cotonou Cadjehoun International Airport (OurAirports DBBB, IATA COO)"
+    }
+   ]
+  },
+  {
+   "claim": "a replacement airport at Glo-Djigbé has long been planned",
+   "verdict": "softened",
+   "inAfter": "A replacement airport at Glo-Djigbé has long been planned",
+   "note": "Was the 1974 decision, the 2011 revival and 'appears to have stalled again since'. Wikipedia has the 1974 decision and the 2011 ceremonial start; the Logistics Cluster has a further contract with China signed in 2017, to be finished within three years. What has happened since is not confirmed by any current source, so only 'long been planned' is said.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": [
+      "In 1974, it was decided to move the operations of the Cotonou international airport to a new facility in Glo-Djigbé.",
+      "The plans were revived in 2011"
+     ]
+    },
+    {
+     "file": "dlca-coo",
+     "org": "WFP Logistics Cluster (UN World Food Programme, Digital Logistics Capacity Assessment)",
+     "dated": "undated (latest figures November 2022)",
+     "quote": "The contract for the completion of the work of Glo-Djigbé International Airport (40 Km out of Cotonou) was signed between Benin and China in 2017."
+    }
+   ]
+  },
+  {
+   "claim": "work has gone into improving this airport",
+   "verdict": "confirmed",
+   "inAfter": "but work has gone into improving this one",
+   "note": "Current: the transport minister visited the terminal renovation on 27 April 2026, with delivery planned for 30 June 2026 (held back, below). Earlier: a new arrival hall opened in December 2017 (Logistics Cluster).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "Meanwhile, improvements to the Cotonou airport were initiated."
+    },
+    {
+     "file": "gouv-tonato-visite",
+     "org": "Government of Benin (gouv.bj)",
+     "dated": "2026-04-28",
+     "quote": [
+      "28 Apr 2026",
+      "le niveau d’avancement des travaux de rénovation de l’aérogare"
+     ]
+    },
+    {
+     "file": "dlca-coo",
+     "org": "WFP Logistics Cluster (UN World Food Programme, Digital Logistics Capacity Assessment)",
+     "dated": "undated (latest figures November 2022)",
+     "quote": "The new arrival hall has finally opened in early December 2017 after a delay of more than a year."
+    }
+   ]
+  },
+  {
+   "claim": "the country's largest city",
+   "verdict": "cut",
+   "wasBefore": "the country's largest city",
+   "why": "Wikipedia alone. Of little use to an agent, so no further source was sought beyond the pages saved here."
+  },
+  {
+   "claim": "renamed in 2021",
+   "verdict": "cut",
+   "wasBefore": "It was renamed in 2021 after Cardinal Bernardin Gantin",
+   "why": "Sources disagree on the year. Wikipedia says 2021; the WFP Logistics Cluster says it was renamed by President Thomas Yayi Boni, whose term ended in April 2016 on the same page ('the day before the investiture of President Talon'). ASECNA's publication valid from February 2022 carries the name. The name is kept without a year.",
+   "sources": [
+    {
+     "file": "dlca-coo",
+     "org": "WFP Logistics Cluster (UN World Food Programme, Digital Logistics Capacity Assessment)",
+     "dated": "undated (latest figures November 2022)",
+     "quote": [
+      "It was renamed Cardinal Bernardin Gantin International Airport by President Thomas Yayi Boni.",
+      "the former President Yayi Boni has inaugurated on April 5, 2016 (the day before the investiture of President Talon)"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-28",
+     "quote": "The airport was renamed after cardinal Bernardin Gantin in 2021."
+    }
+   ]
+  },
+  {
+   "claim": "older schedules and guidebooks still list it as Cotonou Cadjehoun",
+   "verdict": "cut",
+   "wasBefore": "so older schedules and guidebooks still list it as Cotonou Cadjehoun.",
+   "why": "Reworded as advice ('may still call it'); see the opinion list."
+  },
+  {
+   "claim": "a replacement talked about for a very long time",
+   "verdict": "cut",
+   "wasBefore": "A replacement has been talked about for a very long time.",
+   "why": "Reworded as 'a replacement airport at Glo-Djigbé has long been planned' (see above)."
+  },
+  {
+   "claim": "1974 decision; ran out of funding",
+   "verdict": "cut",
+   "wasBefore": "The decision to move operations to a new site at Glo-Djigbe was taken in 1974 and ran out of funding.",
+   "why": "Wikipedia alone for the year and the funding. History of little use for booking; the plan itself is kept."
+  },
+  {
+   "claim": "2011 revival with South African backing; stalled since",
+   "verdict": "cut",
+   "wasBefore": "The plan was revived in 2011 with South African backing and a ceremonial start to construction, and appears to have stalled again since.",
+   "why": "The 2011 revival and its South African funding rest on Wikipedia alone, and 'stalled since' is overtaken: the WFP Logistics Cluster reports a new contract with China in 2017, to be delivered within three years. No current source says where the project stands in 2026."
+  },
+  {
+   "claim": "work improving the existing airport; remains the way in",
+   "verdict": "cut",
+   "wasBefore": "Work has gone into improving the existing airport instead, so for the foreseeable future this remains the way into Benin.",
+   "why": "Reworded into the last sentence; the improvement works are kept with a 2026 government source."
+  },
+  {
+   "claim": "terminal renovation due for delivery on 30 June 2026",
+   "verdict": "cut",
+   "why": "Held back: the government reported on 28 April 2026 that the transport minister had visited the renovation of the terminal and that delivery was planned for 30 June 2026 ('some delays, but broadly on schedule'). One source only (the national news agency's site, abp.bj, was refused at the session's proxy: connect_rejected), and nothing says whether it finished.",
+   "sources": [
+    {
+     "file": "gouv-tonato-visite",
+     "org": "Government of Benin (gouv.bj)",
+     "dated": "2026-04-28",
+     "quote": [
+      "il ressort que le planning est respecté pour une livraison des travaux prévue le 30 juin 2026",
+      "« Nous avons quelques retards, mais globalement le calendrier est tenu »"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "operator's key figures: more than 575,000 passengers a year, 15 airlines, 20 direct destinations",
+   "verdict": "cut",
+   "why": "Held back: the operator's key figures page (live, undated) gives more than 575,000 annual passengers, more than 15 airlines and more than 20 cities served direct, with 9,300 tonnes of freight. It replaces nothing in the old text, and no second source for the passenger figure was reached (its 2025 traffic report, posted 28 July 2026, is not linked as a readable document).",
+   "sources": [
+    {
+     "file": "sab-chiffres-b",
+     "org": "Société des Aéroports du Bénin (SAB, the operator, aeroport-de-cotonou.bj)",
+     "dated": "read 2026-09-23 (live page, undated figures)",
+     "quote": [
+      "PASSAGERS ANNUELS",
+      "+ 575 000",
+      "Villes desservies en direct"
+     ]
+    },
+    {
+     "file": "sab-stats-b",
+     "org": "Société des Aéroports du Bénin (SAB, the operator, aeroport-de-cotonou.bj)",
+     "dated": "2026-07-28",
+     "quote": [
+      "BILAN TRAFIC 2025",
+      "28/07/2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: visa online 7 days ahead, collected at Cotonou airport; yellow fever certificate; northern warnings",
+   "verdict": "cut",
+   "why": "Held back: entry rules and warnings that replace nothing. The FCDO (warnings updated 15 December 2025, still current 24 September 2026) says British visitors need a visa, applied for online at least 7 days before arrival and collected at Cotonou airport, and a yellow fever vaccination certificate. It advises against all travel to the Parc du W, the Pendjari National Park and within 5 km of the Burkina Faso border, and against all but essential travel to the rest of Alibori and Atacora and near the Nigerian border in the east. Cotonou is not in those areas. Note for Andy: the airport's own home page promotes the Pendjari National Park, where the FCDO advises against all travel.",
+   "sources": [
+    {
+     "file": "fcdo-benin-entry",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "You must have a visa to enter or travel through Benin.",
+      "Apply for a Benin visa online at least 7 days before your arrival date. You will get your visa when you arrive at Cotonou airport.",
+      "To enter Benin, you must have a certificate to prove you’ve had a yellow fever vaccination."
+     ]
+    },
+    {
+     "file": "fcdo-benin",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2025-12-15 (updated; still current 24 September 2026)",
+     "quote": [
+      "Still current at:",
+      "24 September 2026",
+      "Updated:",
+      "15 December 2025",
+      "the Pendjari National Park and adjacent hunting grounds"
+     ]
+    },
+    {
+     "file": "sab-home-b",
+     "org": "Société des Aéroports du Bénin (SAB, the operator, aeroport-de-cotonou.bj)",
+     "dated": "read 2026-09-23 (live page, © 2026)",
+     "quote": "Le Parc National de la Pendjari"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "but older schedules and guidebooks may still call it Cotonou Cadjehoun.",
+   "why": "Advice: OurAirports, the WFP Logistics Cluster and this record itself still use the Cotonou Cadjehoun name, and ASECNA's official designation carries both."
+  },
+  {
+   "text": "and for the foreseeable future it remains the way into Benin.",
+   "why": "Judgement kept from the old text: the government was renovating this terminal in 2026, the operator presents only Cotonou and Tourou (Parakou), and the FCDO sends visitors to Cotonou airport for their visas."
+  }
+ ],
+ "tracerOk": {}
+}
