@@ -32,10 +32,15 @@ console.log('The card finds its cover image in the images[] array');
 
 console.log('The grid centres a short row instead of packing it left');
 {
+  // Since 10 Sep 2026 (a96b0cf) the tracks are 1fr so a full row fills the
+  // container, and a short row is bounded and centred per card (max-width 460px,
+  // margin-inline auto) instead of by a 380px track cap. offers-grid-fill-smoke
+  // checks the sizes; this keeps the centring promise.
   ok('the base grid uses auto-fit (collapses empty columns)',
-    /\.tgog-items\.grid \{ grid-template-columns: repeat\(auto-fit, minmax\(300px, 380px\)\); justify-content: center; \}/.test(GRID));
+    /\.tgog-items\.grid \{ grid-template-columns: repeat\(auto-fit, minmax\(300px, 1fr\)\); \}/.test(GRID));
   ok('the left-packing auto-fill rule is gone', !/repeat\(auto-fill/.test(GRID));
-  ok('the track cap matches the card max-width (380px)', /minmax\(300px, 380px\)/.test(GRID));
+  ok('a short row still centres: each card is bounded and centred in its track',
+    /\.tgog-items\.grid > \* \{ width: 100%; max-width: 460px; margin-inline: auto; \}/.test(GRID));
 }
 
 console.log("Each offer shows its OWN saved currency, not the widget's");

@@ -91,10 +91,13 @@ global.fetch = async (url, opts = {}) => {
     const userMsg = sent.messages?.[0]?.content || '';
     let obj;
     if (/configuration generator for the Travelgenix Widget Suite, producing short website content/.test(sys)) {
-      // Passthrough (Logo Showcase / Text FX): echo the requested schema shape.
+      // Passthrough (Logo Showcase / Text FX / Appointment): echo the requested schema shape.
       obj = /"logos"/.test(userMsg)
         ? { logos: [{ name: 'TUI', group: 'Suppliers', image: '' }, { name: 'Jet2holidays', group: 'Suppliers', image: '' }] }
-        : { phrases: ['Find your perfect beach escape', 'Find your perfect city break'] };
+        : /"eventTypes"/.test(userMsg)
+          ? { heading: 'Talk to us about your next trip', subheading: 'Pick a time that suits you.', company: 'Sunny Days Travel',
+              eventTypes: [{ label: 'Holiday planning call', mins: 30, mode: 'phone', description: 'We talk through ideas and budgets.' }], questions: [] }
+          : { phrases: ['Find your perfect beach escape', 'Find your perfect city break'] };
     } else if (/Widget type: TRAVEL OFFERS/.test(userMsg)) {
       // Deliberately mix valid fields with junk (bad template, non-code dests,
       // out-of-range maxOffers, an unknown key) to prove the whitelist drops it.
@@ -368,6 +371,15 @@ ok(res.statusCode === 400 && res.body?.code === 'prompt_too_thin', 'Countdown st
   await handler(request({ widgetType: 'Logo Showcase', prompt: logoPrompt, responseFormat: 'json', schema: { logos: 'array of { name: string, group: string }' } }), res);
   ok(res.statusCode === 200 && Array.isArray(res.body?.result?.logos) && res.body.result.logos.length >= 1,
     'Logo Showcase passthrough returns parsed logos under result');
+
+  // The Appointment editor's "Build my scheduler" (added with the Appointment
+  // Scheduler, Aug 2026) relays its own instruction the same way.
+  const aptPrompt = 'You are helping a UK travel business set up an appointment scheduler widget. Return ONE JSON object with heading, subheading, company, eventTypes, questions. Business description: a family-run agency in Leeds selling tailor-made holidays';
+  res = mockRes();
+  await handler(request({ widgetType: 'Appointment', prompt: aptPrompt, responseFormat: 'json', schema: { heading: 'string', eventTypes: 'array of { label, mins, mode, description }' } }), res);
+  ok(res.statusCode === 200 && Array.isArray(res.body?.result?.eventTypes) && res.body.result.eventTypes.length >= 1,
+    'Appointment passthrough returns parsed meeting types under result');
+  ok(/Never fabricate trust signals/.test(state.anthropicBodies.at(-1)?.system || ''), 'and runs under the same hardened SYSTEM_PASSTHROUGH');
 }
 
 // ── Reviews / Testimonials are refused outright (unlawful to generate) ────────
@@ -411,7 +423,10 @@ ok(/if \(b && b\.error\) msg = b\.error/.test(faqEd), 'FAQ editor surfaces the s
 ok(/const SYSTEM_PASSTHROUGH/.test(src), 'passthrough uses a dedicated hardened system prompt');
 ok(/Never fabricate trust signals/.test(src) && /Never invent an image, logo, file, or link URL/.test(src),
   'passthrough forbids fabricated accreditations and invented asset URLs (the fake-accreditation cousin of fake reviews)');
-ok(/PASSTHROUGH_WIDGET_TYPES = \['LOGO SHOWCASE', 'TEXT FX'\]/.test(src), 'only Logo Showcase and Text FX are passthrough types');
+// Pinned exactly: a passthrough type relays the editor's own instruction, so
+// adding one is a deliberate act. Appointment joined on 21 Aug 2026 for the
+// scheduler editor's "Build my scheduler".
+ok(/PASSTHROUGH_WIDGET_TYPES = \['LOGO SHOWCASE', 'TEXT FX', 'APPOINTMENT'\]/.test(src), 'only Logo Showcase, Text FX and Appointment are passthrough types');
 const allowedLiteral = (src.match(/const ALLOWED_WIDGET_TYPES = \[[^\]]*\]/) || [''])[0];
 ok(allowedLiteral && !/REVIEWS|TESTIMONIALS/i.test(allowedLiteral), 'REVIEWS/TESTIMONIALS are not in the allowed widget-type list');
 

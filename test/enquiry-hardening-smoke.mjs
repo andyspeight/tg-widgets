@@ -108,9 +108,53 @@ ok((submitSrc.match(/AbortSignal\.timeout\(/g) || []).length >= 4, 'submit.js: a
 ok(/honeypotEnabled/.test(submitSrc), 'honeypot drop is gated on the form flag');
 const authSrc = readFileSync(new URL('../api/_auth.js', import.meta.url), 'utf8');
 ok(/message: friendly/.test(authSrc), 'shared 429 body carries a message key the widget can render');
-for (const [file, min] of [['../api/enquiry/_lib/routing/sendgrid.js', 2], ['../api/enquiry/_lib/routing/google-sheets.js', 2], ['../api/enquiry/_lib/routing/airtable.js', 2]]) {
+// The enquiry router's sendgrid.js made TWO outbound calls until 8 Sep 2026,
+// when the authenticated-domain lookup moved into the shared
+// api/_lib/sendgrid.js (quote emails needed it too). One is left here; the
+// shared module is held to the stricter rule below: EVERY fetch it makes has a
+// timeout, the send included (it had none until 24 Sep 2026).
+for (const [file, min] of [['../api/enquiry/_lib/routing/sendgrid.js', 1], ['../api/enquiry/_lib/routing/google-sheets.js', 2], ['../api/enquiry/_lib/routing/airtable.js', 2]]) {
   const src = readFileSync(new URL(file, import.meta.url), 'utf8');
   ok((src.match(/AbortSignal\.timeout\(/g) || []).length >= min, `${file.split('/').pop()}: outbound fetches have timeouts`);
+}
+{
+  const shared = readFileSync(new URL('../api/_lib/sendgrid.js', import.meta.url), 'utf8');
+  const calls = (shared.match(/\bawait fetch\(/g) || []).length;
+  const timed = (shared.match(/AbortSignal\.timeout\(/g) || []).length;
+  ok(calls >= 2 && timed >= calls, `shared sendgrid.js: every outbound fetch has a timeout (${timed} of ${calls})`);
+}
+
+// ── 5b. A send that times out is NOT retried (24 Sep 2026) ───────────────────
+// SendGrid may have accepted it and only the answer was lost; a retry would put
+// the same email in the customer's inbox twice. A 5xx is still retried.
+{
+  const prevKey = process.env.SENDGRID_API_KEY, prevFrom = process.env.SENDGRID_FROM_EMAIL;
+  process.env.SENDGRID_API_KEY = 'SG.test'; process.env.SENDGRID_FROM_EMAIL = 'noreply@travelify.io';
+  const { sendViaSendGrid } = await import('../api/_lib/sendgrid.js');
+  const realFetch = globalThis.fetch;
+  let tries = 0;
+  const mail = { to: 'a@example.com', subject: 'x', html: '<p>x</p>', timeoutMs: 50 };
+  try {
+    globalThis.fetch = (url, init) => { tries++; return new Promise((_, rej) => init.signal.addEventListener('abort', () => rej(init.signal.reason))); };
+    // AbortSignal.timeout's timer does not hold the process open (a live send
+    // has its socket for that); a plain timer stands in for the socket here.
+    const hold = setTimeout(() => {}, 2000);
+    const r = await sendViaSendGrid(mail);
+    clearTimeout(hold);
+    ok(r.status === 'failed' && r.timedOut === true && tries === 1, `a timed-out send fails once, unretried (tries ${tries}, ${JSON.stringify(r)})`);
+    tries = 0;
+    globalThis.fetch = async () => { tries++; return { status: 503, text: async () => 'busy', headers: { get: () => null } }; };
+    const r2 = await sendViaSendGrid(mail);
+    ok(r2.status === 'failed' && tries === 3, `a 5xx is still retried (tries ${tries})`);
+    tries = 0;
+    globalThis.fetch = async () => { tries++; return { status: 202, text: async () => '', headers: { get: () => 'msg-1' } }; };
+    const r3 = await sendViaSendGrid(mail);
+    ok(r3.status === 'sent' && tries === 1, 'a normal send goes once');
+  } finally {
+    globalThis.fetch = realFetch;
+    if (prevKey === undefined) delete process.env.SENDGRID_API_KEY; else process.env.SENDGRID_API_KEY = prevKey;
+    if (prevFrom === undefined) delete process.env.SENDGRID_FROM_EMAIL; else process.env.SENDGRID_FROM_EMAIL = prevFrom;
+  }
 }
 
 // ── 6. Routing correctness guards ────────────────────────────────────────────
