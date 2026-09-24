@@ -49,6 +49,28 @@ import { listStays, bookingMoment, stayCheckout, boardLabel, roomLabel } from '.
 
 const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 
+// Icons, as small PNGs (24 Sep 2026). Andy: no emoji, "but there should still
+// be relevant icons". An email cannot carry the SVG icons the booking page
+// draws, since Gmail strips SVG, so these are PNGs built from the SAME paths by
+// scripts/build-email-icons.mjs and served from our own domain. The fixed
+// origin, rather than whichever host sent the email, because an email is
+// opened for months after it is sent and must not point at a deployment that
+// has gone. alt is empty: they are decoration beside words that already say
+// what the row is, and a client that blocks images shows nothing, not "car".
+const EMAIL_ICON_BASE = 'https://widgets.travelify.io/email-icons/';
+function emailIcon(name, size, inline) {
+  const style = inline
+    ? `display:inline-block;vertical-align:-3px;margin-right:6px;border:0;outline:none;width:${size}px;height:${size}px;`
+    : `display:block;border:0;outline:none;width:${size}px;height:${size}px;`;
+  return `<img src="${EMAIL_ICON_BASE}${name}.png" width="${size}" height="${size}" alt="" style="${style}">`;
+}
+const UPSELL_ICON = new Map([
+  ['TicketsAttractions', 'upsell-tickets'],
+  ['CarRental', 'upsell-car'],
+  ['Transfers', 'upsell-transfers'],
+  ['AirportExtras', 'upsell-extras'],
+]);
+
 
 // =============================================================================
 //  The block vocabulary
@@ -1101,14 +1123,14 @@ export function renderBookingEmail(opts) {
   // https and escaped, although it came from our own API: an email is the one
   // place a bad link cannot be fixed after it is sent.
   //
-  // No emoji. Andy, 24 Sep 2026: emoji "are not acceptable in our designs". The
-  // booking page draws a proper icon in each tile; an email cannot rely on SVG
-  // (Gmail strips it), so the rows here are words only, like the documents list.
+  // No emoji (Andy, 24 Sep 2026); each row carries the same icon as the tile on
+  // the booking page, as a PNG chip (see emailIcon).
   const safeUpsell = (Array.isArray(upsell) ? upsell : [])
     .map((t) => ({
       label: t && typeof t.label === 'string' ? t.label.slice(0, 60) : '',
       hint: t && typeof t.hint === 'string' ? t.hint.slice(0, 160) : '',
       url: safeHttpsUrl(t && t.url),
+      icon: (t && UPSELL_ICON.get(t.product)) || '',
     }))
     .filter((t) => t.label && t.url)
     .slice(0, 6);
@@ -1125,6 +1147,7 @@ export function renderBookingEmail(opts) {
                 return `
                   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${isLast ? '' : 'border-bottom:1px solid #e2e8f0;'}">
                     <tr>
+                      ${t.icon ? `<td width="44" style="padding:12px 12px 12px 0;width:32px;vertical-align:top;"><a href="${escapeHtml(t.url)}" target="_blank" style="text-decoration:none;">${emailIcon(t.icon, 32, false)}</a></td>` : ''}
                       <td style="padding:10px 0;">
                         <a href="${escapeHtml(t.url)}" target="_blank" style="font:600 15px/1.4 ${FONT};color:#0f172a;text-decoration:none;">${escapeHtml(t.label)}</a>
                         ${t.hint ? `<div style="font:400 13px/1.4 ${FONT};color:#64748b;margin-top:2px;">${escapeHtml(t.hint)}</div>` : ''}
@@ -1161,7 +1184,7 @@ export function renderBookingEmail(opts) {
                   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${isLast ? '' : 'border-bottom:1px solid #e2e8f0;'}">
                     <tr>
                       <td style="padding:10px 0;">
-                        <a href="${escapeHtml(url)}" target="_blank" style="font:600 15px/1.4 ${FONT};color:#0f172a;text-decoration:none;">${name}</a>
+                        <a href="${escapeHtml(url)}" target="_blank" style="font:600 15px/1.4 ${FONT};color:#0f172a;text-decoration:none;">${emailIcon('doc-file', 18, true)}${name}</a>
                         ${metaBits ? `<div style="font:400 12px/1.4 ${FONT};color:#64748b;margin-top:2px;">${escapeHtml(metaBits)}</div>` : ''}
                       </td>
                       <td style="padding:10px 0;text-align:right;white-space:nowrap;">
@@ -1291,7 +1314,7 @@ export function renderBookingEmail(opts) {
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
               <tr>
                 <td style="background:${escapeHtml(accent)}1a;border-left:4px solid ${escapeHtml(accent)};border-radius:8px;padding:16px 20px;">
-                  <div style="font:600 15px/1.6 ${FONT};color:#0f172a;margin-bottom:2px;">${safeDocs.length ? 'Booking pack and documents attached' : 'Full booking pack attached'}</div>
+                  <div style="font:600 15px/1.6 ${FONT};color:#0f172a;margin-bottom:2px;">${emailIcon('doc-paperclip', 18, true)}${safeDocs.length ? 'Booking pack and documents attached' : 'Full booking pack attached'}</div>
                   <div style="font:400 15px/1.6 ${FONT};color:#475569;">Your A4 confirmation includes the room details, full flight breakdown, payment schedule, and important booking conditions.${safeDocs.length ? ' Supplier documents are attached where size allows — and always available via the links above.' : ''}</div>
                 </td>
               </tr>

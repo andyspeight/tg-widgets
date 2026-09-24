@@ -252,7 +252,8 @@
     "test:offer-builder-loads-offers": "node test/offer-builder-loads-offers-smoke.mjs",
     "test:mybooking-dark": "node test/mybooking-dark-theme-smoke.mjs",
     "test:traveller-age": "node test/order-traveller-age-smoke.mjs",
-    "test:booking-no-emoji": "node test/booking-no-emoji-smoke.mjs"
+    "test:booking-no-emoji": "node test/booking-no-emoji-smoke.mjs",
+    "build:email-icons": "node scripts/build-email-icons.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
