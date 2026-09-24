@@ -112,9 +112,18 @@ export const EMAIL_BLOCKS = [
 ];
 
 /**
- * The built-in layout: what every confirmation email has looked like since the
- * widget shipped. A client who never opens the layout builder gets exactly
- * this, byte for byte, which is what `test:confirmation-blocks` holds us to.
+ * The built-in layout: what a client who never opens the layout builder sends.
+ *
+ * Until 24 Sep 2026 this was held byte for byte to the email the widget first
+ * shipped with. Andy then chose to put "Add to your trip" in everyone's email
+ * by default ("yes please", 24 Sep 2026), after Travelify's upsellsActive spec
+ * asked for the same upsells in the email as on the booking page. It sits
+ * where it sits on the page: after the booking and before the contact details.
+ *
+ * What still holds, and `test:confirmation-blocks` checks it: on a booking with
+ * nothing to offer, which is any booking whose application sells no upsells or
+ * whose client has switched "Add to your trip" off, the block draws nothing
+ * and the email is the one we have always sent.
  */
 export const DEFAULT_EMAIL_LAYOUT = [
   { type: 'greeting' },
@@ -123,6 +132,7 @@ export const DEFAULT_EMAIL_LAYOUT = [
   { type: 'documents' },
   { type: 'payment' },
   { type: 'pdfnote' },
+  { type: 'upsell' },
   { type: 'support' },
   { type: 'signoff' },
 ];
@@ -135,6 +145,8 @@ export const DEFAULT_EMAIL_LAYOUT = [
  *
  * Every style ends the same way — the pack note, the contact details and the
  * sign off — because those are the parts a confirmation cannot do without.
+ * "Add to your trip" sits just before the contact details in all four (24 Sep
+ * 2026), as it does in the built-in layout and on the booking page.
  * Blocks that need material we may not hold (the hotel photo, the destination
  * write-up) draw nothing when it is missing, so a style never leaves a hole.
  */
@@ -157,6 +169,7 @@ export const EMAIL_STYLES = [
       { type: 'documents' },
       { type: 'payment' },
       { type: 'pdfnote' },
+      { type: 'upsell' },
       { type: 'support' },
       { type: 'signoff' },
     ],
@@ -182,6 +195,7 @@ export const EMAIL_STYLES = [
       { type: 'knowbefore' },
       { type: 'documents' },
       { type: 'pdfnote' },
+      { type: 'upsell' },
       { type: 'support' },
       { type: 'signoff' },
     ],
@@ -201,6 +215,7 @@ export const EMAIL_STYLES = [
       { type: 'knowbefore' },
       { type: 'documents' },
       { type: 'pdfnote' },
+      { type: 'upsell' },
       { type: 'support' },
       { type: 'signoff' },
     ],

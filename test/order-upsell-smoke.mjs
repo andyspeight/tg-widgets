@@ -465,10 +465,13 @@ console.log('\nthe same tiles, in the email');
   ok('a label is escaped, not pasted in',
     render([{ type: 'upsell' }], [{ product: 'CarRental', label: '<b>x</b>', hint: '', url: tiles[0].url }]).includes('&lt;b&gt;'));
 
-  // 16 Sep 2026, locked: a client who never opens the layout builder gets the
-  // email we have always sent. So the block is in the palette, not the default.
-  ok('the built-in email is unchanged: the block is offered, not imposed',
-    !DEFAULT_EMAIL_LAYOUT.some((b) => b.type === 'upsell'));
+  // Andy, 24 Sep 2026: in everyone's email by default ("yes please"), where it
+  // sits on the page, after the booking and before the contact details.
+  ok('the built-in email carries it, just before the contact details',
+    DEFAULT_EMAIL_LAYOUT.map((b) => b.type).indexOf('upsell')
+      === DEFAULT_EMAIL_LAYOUT.map((b) => b.type).indexOf('support') - 1);
+  ok('so a client who never opens the builder still offers it',
+    render(undefined, tiles).includes('Add to your trip'));
 
   const sender = readFileSync(new URL('../api/booking-email.js', import.meta.url), 'utf8');
   ok('the real send hands over the tiles retrieve-order built, rather than building its own',

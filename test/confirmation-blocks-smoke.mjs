@@ -135,9 +135,24 @@ console.log('A client who never touches it gets the email we have always sent');
     norm(render([]).html) === norm(none.html));
   ok('so does rubbish', norm(render('nonsense').html) === norm(none.html)
     && norm(render([{ type: 'not-a-block' }, null, 7]).html) === norm(none.html));
-  ok('and the built-in order is the one we shipped',
+  // Andy, 24 Sep 2026: "Add to your trip" goes in everyone's email by default,
+  // after the booking and before the contact details, as it is on the page.
+  ok('and the built-in order is the one we ship, upsells before the contact details',
     DEFAULT_EMAIL_LAYOUT.map(b => b.type).join(',')
-      === 'greeting,message,summary,documents,payment,pdfnote,support,signoff');
+      === 'greeting,message,summary,documents,payment,pdfnote,upsell,support,signoff');
+
+  // What replaced the old byte-for-byte promise: a booking with nothing to
+  // offer still gets the email we have always sent. That is every booking
+  // whose application sells no upsells, and every client who has switched
+  // "Add to your trip" off, so for them nothing about this email moved.
+  const shipped = [{ type: 'greeting' }, { type: 'message' }, { type: 'summary' }, { type: 'documents' },
+    { type: 'payment' }, { type: 'pdfnote' }, { type: 'support' }, { type: 'signoff' }];
+  const plain = (layout) => renderBookingEmail({ ...OPTS, upsell: [], layout });
+  ok('with nothing to offer, the built-in email is the one we have always sent',
+    norm(plain(undefined).html) === norm(plain(shipped).html)
+      && plain(undefined).text === plain(shipped).text && plain(undefined).subject === plain(shipped).subject);
+  ok('and with something to offer, it says so',
+    render(undefined).html.includes('Add to your trip') && !plain(undefined).html.includes('Add to your trip'));
 }
 
 console.log('Every block in the palette is one the renderer knows');
@@ -368,6 +383,8 @@ console.log('The four starter styles are real layouts');
     const have = s.layout.map(b => b.type);
     ok(s.id + ' keeps the pack note, the contact details and the sign off',
       ['pdfnote', 'support', 'signoff'].every(t => have.includes(t)));
+    ok(s.id + ' offers "Add to your trip", just before the contact details',
+      have.indexOf('upsell') !== -1 && have.indexOf('upsell') === have.indexOf('support') - 1);
     const html = render(s.layout).html;
     ok(s.id + ' renders, branded, with the booking on it',
       at(html, 'ET121109') > -1 && at(html, 'ABTA P1234') > -1);

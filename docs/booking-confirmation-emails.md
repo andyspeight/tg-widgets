@@ -222,9 +222,12 @@ of that, block by block.
   Travelify's upsellsActive spec asks for the same upsells in the email as on
   the page, and handing over the page's own list is the only way that is true
   by construction. The rules live in `public/_order-upsell.js`; every link ends
-  `&orderRef={id}/{key}`. **Not in `DEFAULT_EMAIL_LAYOUT`**: the block is in the
-  palette, and a client who never opens the builder still gets the email we
-  have always sent.
+  `&orderRef={id}/{key}`. **In `DEFAULT_EMAIL_LAYOUT` and all four starter
+  styles**, just before `support` (Andy, 24 Sep 2026, reversing the 16 Sep
+  "never change the default" rule for this one block). A booking with nothing to
+  offer still gets the email we have always sent, which `test:confirmation-blocks`
+  checks. A client who had already SAVED their own layout keeps it exactly as
+  they arranged it; the block is in their palette to add.
 
 ### Where the destination pack comes from
 
