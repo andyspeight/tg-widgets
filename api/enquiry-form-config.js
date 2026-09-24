@@ -25,6 +25,7 @@ import {
   applyRateLimit,
   RATE_LIMITS,
 } from './_auth.js';
+import { randomBytes } from 'node:crypto';
 import { getRecord } from './_lib/auth/airtable.js';
 import { USERS, CLIENTS } from './_lib/auth/schema.js';
 import { isStaffEmail } from './_lib/auth/staff.js';
@@ -307,16 +308,9 @@ function cleanTranslations(raw) {
 
 function generateWebhookSecret() {
   // 32 bytes of entropy, hex-encoded = 64 chars. Good enough for HMAC signing.
-  const arr = new Uint8Array(32);
-  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-    crypto.getRandomValues(arr);
-  } else {
-    // Node fallback
-    const nodeCrypto = require('crypto');
-    const buf = nodeCrypto.randomBytes(32);
-    for (let i = 0; i < 32; i++) arr[i] = buf[i];
-  }
-  return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+  // node:crypto, imported: the old fallback called require('crypto'), which
+  // does not exist in an ES module and would have thrown had it ever run.
+  return randomBytes(32).toString('hex');
 }
 
 // Build the Airtable fields body for Enquiry Forms write from the editor payload
