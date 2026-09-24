@@ -551,6 +551,10 @@ export function renderBookingEmail(opts) {
     // them for the booking page: [{ product, label, hint, url }]. Optional:
     // absent or empty, and the block draws nothing.
     upsell,
+    // True when the client's ATOL certificate for this booking is attached
+    // (24 Sep 2026). The pack note then says so, in the certificate's own
+    // words: it is the document the customer must take with them.
+    atolCertificate = false,
   } = opts;
 
   const primary = colors.primary || '#1B2B5B';
@@ -1208,7 +1212,8 @@ export function renderBookingEmail(opts) {
   const textParts = [
     greeting,
     '',
-    'Your booking is confirmed. Full details are in the attached PDF.',
+    'Your booking is confirmed. Full details are in the attached PDF.'
+      + (atolCertificate ? ' Your ATOL Certificate is attached too. It is an important document: take it with you when you travel.' : ''),
     '',
     '─── Booking summary ───',
     '',
@@ -1315,7 +1320,7 @@ export function renderBookingEmail(opts) {
               <tr>
                 <td style="background:${escapeHtml(accent)}1a;border-left:4px solid ${escapeHtml(accent)};border-radius:8px;padding:16px 20px;">
                   <div style="font:600 15px/1.6 ${FONT};color:#0f172a;margin-bottom:2px;">${emailIcon('doc-paperclip', 18, true)}${safeDocs.length ? 'Booking pack and documents attached' : 'Full booking pack attached'}</div>
-                  <div style="font:400 15px/1.6 ${FONT};color:#475569;">Your A4 confirmation includes the room details, full flight breakdown, payment schedule, and important booking conditions.${safeDocs.length ? ' Supplier documents are attached where size allows — and always available via the links above.' : ''}</div>
+                  <div style="font:400 15px/1.6 ${FONT};color:#475569;">Your A4 confirmation includes the room details, full flight breakdown, payment schedule, and important booking conditions.${safeDocs.length ? ' Supplier documents are attached where size allows — and always available via the links above.' : ''}${atolCertificate ? ' Your ATOL Certificate is attached too. It is an important document: take it with you when you travel.' : ''}</div>
                 </td>
               </tr>
             </table>

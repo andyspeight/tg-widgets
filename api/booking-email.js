@@ -304,6 +304,26 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'server_error' });
     }
 
+    // The client's ATOL certificate travels with the confirmation when this
+    // booking has one (retrieve-order decided, from the client's ATOL details
+    // and switches). The CAA's rule for a booking made at a distance is to send
+    // the certificate by email "immediately after the payment is taken", and
+    // this is that email. Fetched alongside the booking pack; if it alone
+    // fails, the email still goes (the customer can download it from their
+    // booking page) and the failure is logged loudly.
+    const wantsAtol = !!(retrieveData && retrieveData.atol && retrieveData.atol.type);
+    const atolPromise = wantsAtol
+      ? fetch(pdfUrl, {
+          method: 'POST',
+          headers: internalHeaders(ip),
+          body: JSON.stringify({ widgetId, emailAddress, departDate, orderRef, document: 'atol' }),
+          signal: AbortSignal.timeout(20000),
+        }).then(async (r) => (r.ok ? Buffer.from(await r.arrayBuffer()) : { error: 'status ' + r.status }))
+          // Caught here, not where it is awaited: an early return below would
+          // otherwise leave a rejected promise nobody handles.
+          .catch((err) => ({ error: (err && err.message) || 'fetch failed' }))
+      : Promise.resolve(null);
+
     const pdfRes = await fetch(pdfUrl, {
       method: 'POST',
       headers: internalHeaders(ip),
@@ -325,6 +345,19 @@ export default async function handler(req, res) {
     }
     const pdfBase64 = pdfBuffer.toString('base64');
     const pdfFilename = `booking-${orderRef.replace(/[^A-Z0-9_-]/gi, '')}.pdf`;
+
+    let atolAttachment = null;
+    const atolResult = await atolPromise;
+    if (Buffer.isBuffer(atolResult) && atolResult.length) {
+      atolAttachment = {
+        filename: `ATOL-certificate-${orderRef.replace(/[^A-Z0-9_-]/gi, '')}.pdf`,
+        content: atolResult.toString('base64'),
+        type: 'application/pdf',
+        disposition: 'attachment',
+      };
+    } else if (wantsAtol) {
+      console.error(`Email: ATOL certificate NOT attached for widget ${widgetId} ref ${orderRef}: ${(atolResult && atolResult.error) || 'empty'}`);
+    }
 
     // ----- 4b. Fetch supplier documents to attach -----
     // Supplier documents (vouchers, tickets, etc.) come from the order JSON
@@ -467,6 +500,8 @@ export default async function handler(req, res) {
       // own list is the only way that is true by construction rather than by
       // two copies agreeing. Drawn only where the client's layout has the block.
       upsell: Array.isArray(retrieveData?.upsell) ? retrieveData.upsell : [],
+      // Says so in the pack note only when the certificate really is attached.
+      atolCertificate: !!atolAttachment,
       // Origin for wrapping document links through /api/doc-redirect, which
       // launders the referrer so Travelify serves DOC/DOCX (not just PDFs).
       baseUrl: buildInternalUrl(req, ''),
@@ -493,6 +528,7 @@ export default async function handler(req, res) {
           type: 'application/pdf',
           disposition: 'attachment',
         },
+        ...(atolAttachment ? [atolAttachment] : []),
         ...docAttachments,
       ],
     });

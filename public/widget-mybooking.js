@@ -39,6 +39,15 @@
  *     for anyone in Sydney; it compares calendar dates now, and the PDF has
  *     the marker too. Guarded by npm run test:booking-dates-tz.
  *
+ * v1.15.0 (24 Sep 2026):
+ *   - ATOL certificates. When the client holds an ATOL and has switched the
+ *     certificate on in the editor, a booking with a flight they sold gets an
+ *     "ATOL Certificate" button beside the PDF buttons (or on its own row if
+ *     those are hidden). It downloads the CAA's own certificate filled in for
+ *     this booking, from /api/booking-pdf with document 'atol'. Whether a
+ *     booking has one is decided on the server (retrieve-order's `atol`); the
+ *     widget only draws the button. See api/_lib/atol-certificate.js.
+ *
  * v1.14.1 (22 Sep 2026, Exclusively Travel ET122406):
  *   - A voucher the payment plan has already taken off is no longer taken off
  *     twice. Travelify sometimes sends depositOption NET of the voucher, and
@@ -264,7 +273,7 @@
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
   const API_AMEND = (typeof window !== 'undefined' && window.__TG_AMEND_API__) || (API_BASE + '/api/amend-order');
   const AMEND_MAX = 1000; // matches the server cap in /api/amend-order
-  const VERSION = '1.14.1';
+  const VERSION = '1.15.0';
 
   // ── Payment deep link ──
   // The balance reminder email links to the client's booking page with
@@ -522,6 +531,8 @@
       payHintFull: 'Pay your balance in full, or enter a smaller amount (up to {max}).',
       confirmed: 'Confirmed',
       atolProtected: 'ATOL Protected',
+      atolCertificate: 'ATOL Certificate',
+      atolCertificateSub: 'Your ATOL protection, to take with you',
       packagedHoliday: 'Package Holiday',
       operatedBy: 'operated by',
       yourBooking: 'Your booking',
@@ -791,6 +802,8 @@
       payHintFull: 'Réglez l\'intégralité de votre solde ou saisissez un montant inférieur (jusqu\'à {max}).',
       confirmed: 'Confirmée',
       atolProtected: 'ATOL Protected',
+      atolCertificate: 'ATOL Certificate',
+      atolCertificateSub: 'Votre protection ATOL, à emporter avec vous',
       packagedHoliday: 'Séjour forfait',
       operatedBy: 'exploité par',
       yourBooking: 'Votre réservation',
@@ -1060,6 +1073,8 @@
       payHintFull: 'Zahlen Sie Ihren Restbetrag vollständig oder geben Sie einen kleineren Betrag ein (bis zu {max}).',
       confirmed: 'Bestätigt',
       atolProtected: 'ATOL Protected',
+      atolCertificate: 'ATOL Certificate',
+      atolCertificateSub: 'Ihr ATOL-Schutz zum Mitnehmen',
       packagedHoliday: 'Pauschalreise',
       operatedBy: 'durchgeführt von',
       yourBooking: 'Ihre Buchung',
@@ -1329,6 +1344,8 @@
       payHintFull: 'Paga tu saldo completo o introduce un importe menor (hasta {max}).',
       confirmed: 'Confirmada',
       atolProtected: 'ATOL Protected',
+      atolCertificate: 'ATOL Certificate',
+      atolCertificateSub: 'Tu protección ATOL, para llevar contigo',
       packagedHoliday: 'Viaje combinado',
       operatedBy: 'operado por',
       yourBooking: 'Tu reserva',
@@ -1598,6 +1615,8 @@
       payHintFull: 'Paga il saldo per intero o inserisci un importo inferiore (fino a {max}).',
       confirmed: 'Confermata',
       atolProtected: 'ATOL Protected',
+      atolCertificate: 'ATOL Certificate',
+      atolCertificateSub: 'La tua protezione ATOL, da portare con te',
       packagedHoliday: 'Vacanza tutto incluso',
       operatedBy: 'operato da',
       yourBooking: 'La tua prenotazione',
@@ -1867,6 +1886,8 @@
       payHintFull: 'Plătește soldul integral sau introdu o sumă mai mică (până la {max}).',
       confirmed: 'Confirmată',
       atolProtected: 'ATOL Protected',
+      atolCertificate: 'ATOL Certificate',
+      atolCertificateSub: 'Protecția ta ATOL, de luat cu tine',
       packagedHoliday: 'Pachet de vacanță',
       operatedBy: 'operat de',
       yourBooking: 'Rezervarea ta',
@@ -4851,7 +4872,26 @@
       </div>`;
   }
 
-  function renderFound(order, c, lookup, upsell) {
+  // The ATOL certificate button (24 Sep 2026). Shown only when the server says
+  // this booking comes with the client's certificate (retrieve-order's `atol`,
+  // decided by api/_lib/atol-certificate.js from the client's ATOL details and
+  // switches). It is a legal document with switches of its own, so it shows
+  // whether or not the client has hidden the PDF buttons.
+  function renderAtolAction(atol, c) {
+    if (!atol || !atol.type) return '';
+    return `
+          <button type="button" class="tgm-action" data-tgm-atol>
+            <div class="tgm-action-icon">${svg(IC.shield)}</div>
+            <div class="tgm-action-text">
+              <div class="tgm-action-title">${esc(c.labels?.atolCertificate || c.t('atolCertificate'))}</div>
+              <div class="tgm-action-sub">${esc(c.labels?.atolCertificateSub || c.t('atolCertificateSub'))}</div>
+            </div>
+            <div class="tgm-action-loader" aria-hidden="true"></div>
+            ${svg(IC.arrow)}
+          </button>`;
+  }
+
+  function renderFound(order, c, lookup, upsell, atol) {
     const items = order.items || [];
     const summary = order.summary || {};
 
@@ -5097,11 +5137,11 @@
             </div>
             <div class="tgm-action-loader" aria-hidden="true"></div>
             ${svg(IC.arrow)}
-          </button>
+          </button>${renderAtolAction(atol, c)}
         </div>
         <div data-tgm-pdf-viewer-mount></div>
         <div data-tgm-modal-mount></div>
-        ` : ''}
+        ` : (atol && atol.type ? `<div class="tgm-action-row">${renderAtolAction(atol, c)}</div>` : '')}
 
         ${stays.map((st, i) => renderStayCard(st, i, stays.length, c)).join('')}
 
@@ -5672,7 +5712,7 @@
       const overrides = this._buildOverrides();
       let inner;
       if (this.state.stage === 'loading') inner = renderLoading(this.c);
-      else if (this.state.stage === 'found') inner = renderFound(this.state.order, this.c, this.lookup, this.state.upsell);
+      else if (this.state.stage === 'found') inner = renderFound(this.state.order, this.c, this.lookup, this.state.upsell, this.state.atol);
       else if (this.state.stage === 'notfound') inner = renderNotFound(this.c);
       else inner = renderForm(this.c, this.state, this._lastAttempt);
 
@@ -5761,6 +5801,8 @@
       if (emailBtn) emailBtn.addEventListener('click', () => this._handleEmailOpen(emailBtn));
       const printBtn = root.querySelector('[data-tgm-pdf-print]');
       if (printBtn) printBtn.addEventListener('click', () => this._handlePdfPrint(printBtn));
+      const atolBtn = root.querySelector('[data-tgm-atol]');
+      if (atolBtn) atolBtn.addEventListener('click', () => this._handleAtolDownload(atolBtn));
 
       // Seat map: one button per leg that has seats, carrying its cabin id.
       root.querySelectorAll('[data-tgm-seatmap]').forEach(btn => {
@@ -5951,7 +5993,8 @@
         // What else they could book, worked out by the API from the order it
         // just trimmed. The widget only draws it: deciding here would mean a
         // second copy of "which products are already on this booking".
-        this.state = { stage: 'found', order: data.order, upsell: Array.isArray(data.upsell) ? data.upsell : [], error: null };
+        const atol = data.atol && typeof data.atol === 'object' && typeof data.atol.type === 'string' ? { type: data.atol.type, label: String(data.atol.label || '') } : null;
+        this.state = { stage: 'found', order: data.order, upsell: Array.isArray(data.upsell) ? data.upsell : [], atol, error: null };
         this._render();
         // The booking is up, so the details have done their job and come out of
         // the address bar. Only after success: a failed link is left in place so
@@ -6038,12 +6081,67 @@
       }
     }
 
+    // The ATOL certificate: its own PDF, from the same endpoint with document
+    // 'atol', fetched once and kept like the booking pack. Downloaded rather
+    // than previewed: it is the document the customer is told to take with
+    // them when they travel.
+    async _handleAtolDownload(btn) {
+      if (btn.disabled) return;
+      if (!this.lookup || !this.c.widgetId) {
+        this._showToast('error', this.t('pdfCannotTitle'), this.t('pdfLookupAgain'));
+        return;
+      }
+      btn.disabled = true;
+      btn.classList.add('is-loading');
+      try {
+        if (!this._atolBlob) {
+          const res = await fetch(API_PDF, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              widgetId: this.c.widgetId,
+              emailAddress: this.lookup.email,
+              departDate: this.lookup.date,
+              orderRef: this.lookup.ref,
+              document: 'atol',
+            }),
+          });
+          if (!res.ok) {
+            if (res.status === 429) this._showToast('error', this.t('pdfTooManyTitle'), this.t('pdfTooManySub'), 6000);
+            else if (res.status === 404) this._showToast('error', this.t('pdfCouldntTitle'), this.t('pdfLookupAgain'), 6000);
+            else this._showToast('error', this.t('pdfWrongTitle'), this.t('pdfTryAgainSoon'), 6000);
+            return;
+          }
+          this._atolBlob = await res.blob();
+        }
+        const ref = String(this.lookup.ref || 'booking').toUpperCase().replace(/[^A-Z0-9_\-]/gi, '');
+        const filename = 'ATOL-certificate-' + ref + '.pdf';
+        const url = URL.createObjectURL(this._atolBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        this._showToast('success', this.t('pdfDownloadedTitle'), filename, 4000);
+        this._fireEvent('atol-downloaded', { filename });
+      } catch (err) {
+        this._showToast('error', this.t('pdfFailedTitle'), this.t('pdfCheckConnection'), 6000);
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('is-loading');
+      }
+    }
+
     _discardPdfCache() {
       if (this._pdfPreviewUrl) {
         try { URL.revokeObjectURL(this._pdfPreviewUrl); } catch {}
         this._pdfPreviewUrl = null;
       }
       this._pdfBlob = null;
+      this._atolBlob = null;
       this._pdfViewerOpen = false;
     }
 
