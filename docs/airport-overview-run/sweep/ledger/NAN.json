@@ -33,7 +33,7 @@
    "claim": "a regional hub for the Pacific islands",
    "verdict": "softened",
    "inAfter": "a regional hub for the Pacific islands",
-   "note": "Was 'an important regional hub for the South Pacific'. The operator's 2024 annual report calls Nadi 'a hub for the blue Pacific' (the Pacific Islands Forum's name for the island region), and oneworld says Fiji Link flies on to Tonga, Samoa, Tuvalu and Vanuatu; 'important' is Wikipedia's word alone and is dropped. The operator's history page also says 'a major regional hub for the South Pacific islands', but that page follows Wikipedia's article sentence by sentence, so it is not counted.",
+   "note": "Was 'an important regional hub for the South Pacific'. The operator's 2024 annual report calls Nadi 'a hub for the blue Pacific' (the Pacific Islands Forum's name for the island region), and oneworld says Fiji Link flies on to Tonga, Samoa, Tuvalu and Vanuatu; 'important' is Wikipedia's word alone and is dropped. The operator's history page also says 'a major regional hub for the South Pacific islands', but that page closely paraphrases Wikipedia's article (the 1939 airstrips, the South Pacific air ferry route, the drier west coast, 'Colony of Fiji: Nadi Airport', and its hub sentence almost word for word), so it is not counted.",
    "sources": [
     {
      "file": "afl-ar2024",
@@ -208,7 +208,7 @@
    "claim": "Suva has its own airport at Nausori",
    "verdict": "confirmed",
    "inAfter": "has its own airport at Nausori",
-   "note": "The operator's Nausori page says so, but other pages on its new site repeat Wikipedia's wording (its history page does, sentence by sentence), and this one was not compared with Wikipedia's Nausori article, which belongs to another airport's record. So it is not relied on alone: OurAirports' own record has Nausori International Airport with scheduled service and the IATA code SUV, 17.7 km north east of Suva.",
+   "note": "The operator's Nausori page says so, but other pages on its new site repeat Wikipedia's wording (its history page closely paraphrases the Nadi article), and this one was not compared with Wikipedia's Nausori article, which belongs to another airport's record. So it is not relied on alone: OurAirports' own record has Nausori International Airport with scheduled service and the IATA code SUV, 17.7 km north east of Suva.",
    "sources": [
     {
      "file": "geo-nausori",
@@ -267,7 +267,7 @@
    "claim": "Fiji Airways, the national airline, flies the widest network from here",
    "verdict": "softened",
    "inAfter": "The national airline, Fiji Airways, flies the widest network from here",
-   "note": "Was 'the main hub for Fiji Airways'. The operator names Fiji Airways as the national airline with the most extensive network among the carriers at Nadi, and oneworld calls it Fiji's flag carrier. 'Hub' in so many words rests on Wikipedia and on the operator's history page, which follows Wikipedia's text and so is not counted. Fiji Airways' own site answered the link lister with 502 and Qantas' newsroom with 503; each was tried once.",
+   "note": "Was 'the main hub for Fiji Airways'. The operator names Fiji Airways as the national airline with the most extensive network among the carriers at Nadi, and oneworld calls it Fiji's flag carrier. 'Hub' in so many words rests on Wikipedia and on the operator's history page, which closely paraphrases Wikipedia's article ('the main hub for Fiji Airways and its domestic and regional subsidiary, Fiji Link') and so is not counted. Fiji Airways' own site answered the link lister with 502 and Qantas' newsroom with 503; each was tried once.",
    "sources": [
     {
      "file": "afl-intl-airlines",

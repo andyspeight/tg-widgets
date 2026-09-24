@@ -6,7 +6,7 @@
  "wikipedia": "https://en.wikipedia.org/wiki/Bauerfield_International_Airport",
  "audited": "2026-09-23",
  "before": "Vanuatu's main international gateway, on Efate at Port Vila, and small enough that most arrivals are through the building quickly. The runway is the surprise: it is long and strong enough to take wide body aircraft up to an A330, which is what keeps long haul connections possible from a country of this size.\n\nThe airport is formally Port Vila International and almost universally called Bauerfield, a name it carries from the airfield the United States built on the island in 1942, when Efate was fortified to protect the sea route between America and Australia.\n\nOne thing to check before quoting: it was the international hub for Air Vanuatu, the national carrier, until the airline went into bankruptcy in 2024. Schedules and connections through Port Vila have been unsettled since, so confirm the operating airline rather than relying on an older route map.",
- "after": "Vanuatu's main international gateway, on Efate at Port Vila. Its paved runway is 2,600 metres long.\n\nThe airport is formally Port Vila International but widely known as Bauerfield. It began as an airfield the United States built on Efate in 1942, when the island was fortified to protect the sea route between America and Australia.\n\nOne thing to check before quoting: it was the international hub for Air Vanuatu, the national carrier, until the airline collapsed in 2024. Air Vanuatu now flies only domestic routes, while other airlines carry the international traffic, so confirm the operating airline rather than relying on an older route map.",
+ "after": "Vanuatu's main international gateway, on Efate at Port Vila. Its paved runway is 2,600 metres long.\n\nThe airport is formally Port Vila International but widely known as Bauerfield. It began as an airfield the United States built on Efate in 1942, when the island was fortified to protect the sea route between America and Australia.\n\nOne thing to check before quoting: it was the international hub for Air Vanuatu, the national carrier, until the airline collapsed in 2024. Air Vanuatu no longer flies international routes, while other airlines carry the international traffic, so confirm the operating airline rather than relying on an older route map.",
  "claims": [
   {
    "claim": "Vanuatu's main international gateway",
@@ -244,10 +244,10 @@
    ]
   },
   {
-   "claim": "Air Vanuatu now flies only domestic routes",
+   "claim": "Air Vanuatu no longer flies international routes",
    "verdict": "corrected",
-   "inAfter": "Air Vanuatu now flies only domestic routes",
-   "note": "New, replacing 'Schedules and connections through Port Vila have been unsettled since' (cut below). Air Vanuatu's own site sells only domestic fares from Port Vila (Santo, Tanna, Norsup, Longana and others) and says its fleet of two Twin Otters and one ATR operates on domestic routes; the operator lists it among the domestic airlines and not among the international ones. The sources disagree on one point: the FCDO's advice (still current at 24 September 2026) says Air Vanuatu is not operating international or domestic flights. The airline's and the operator's own current pages are preferred for what the airline flies; the FCDO line agrees that it flies no international routes.",
+   "inAfter": "Air Vanuatu no longer flies international routes",
+   "note": "Review (24 Sep): the helper's text said 'Air Vanuatu now flies only domestic routes'. The sources disagree on the domestic part: Air Vanuatu's own site sells domestic fares and says its two Twin Otters and one ATR fly domestic routes, and the operator lists it among the domestic airlines, but the FCDO's current advice (updated 19 March 2026, still current 24 September 2026) says it is 'currently not operating international or domestic flights'. All three agree it flies no international routes, so the text says only that, and the advice to confirm the operating airline follows. It replaces 'Schedules and connections through Port Vila have been unsettled since' (cut below).",
    "sources": [
     {
      "file": "airvanuatu-about",
