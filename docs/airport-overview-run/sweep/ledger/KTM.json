@@ -1,0 +1,252 @@
+{
+ "iata": "KTM",
+ "id": "rec2MvNoCQzjRoUtj",
+ "name": "Tribhuvan International Airport",
+ "country": "Nepal",
+ "wikipedia": "https://en.wikipedia.org/wiki/Tribhuvan_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Nepal's only international airport, and the starting point for most Everest trips. Several flights a day run to Lukla for trekkers, and sightseeing flights along the Himalaya leave from here too.\n\nIt connects Kathmandu to more than forty destinations across seventeen countries, with Nepal Airlines and Himalaya Airlines both based here alongside the domestic carriers.\n\nTwo things to build into an itinerary. The airport is running at capacity, and winter fog and congestion cause real delays, to the point that the government has promoted the newer airports at Gautam Buddha and Pokhara as diversion alternatives. And the apron is tight: it takes seventeen aircraft at once but only three of those can be wide bodies, with a further bay on the eastern side.\n\nThe runway is a tabletop, built on raised ground that falls away at the ends, which is worth knowing for a nervous flyer. Domestic and international operations run from separate terminals.",
+ "after": "The airport for Kathmandu, and no longer Nepal's only international airport: Gautam Buddha at Bhairahawa and Pokhara are international airports too.\n\nFlights to Lukla for Everest treks leave from here, though Tara Air, which flies the route, also sells Lukla flights from Ramechhap. Everest sightseeing flights leave early in the morning from the domestic terminal. Domestic and international flights use separate terminals.",
+ "claims": [
+  {
+   "claim": "the airport for Kathmandu",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Kathmandu",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-22",
+     "quote": "is an international airport located in Kathmandu, Bagmati, Nepal."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Kathmandu",
+      "Straight-line distance from the city centre: 3.8 km (2.4 miles)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "no longer Nepal's only international airport: Gautam Buddha at Bhairahawa and Pokhara are international airports too",
+   "verdict": "corrected",
+   "inAfter": "and no longer Nepal's only international airport: Gautam Buddha at Bhairahawa and Pokhara are international airports too.",
+   "note": "Was 'Nepal's only international airport', which the old text itself contradicted by naming Gautam Buddha and Pokhara as diversion airports. OurAirports lists Gautam Buddha International Airport at Siddharthanagar (Bhairahawa) and Pokhara International Airport, both with scheduled service; Wikipedia's Kathmandu article names both as international airports; The Kathmandu Post (23 September 2026) reports Pokhara International Airport's first scheduled international service, flydubai's daily flight from Dubai, after years of charter and special flights (held back below).",
+   "sources": [
+    {
+     "file": "ourairports-np-intl",
+     "org": "OurAirports (data rows)",
+     "dated": "airports.csv of 2026-09-23",
+     "quote": [
+      "\"Gautam Buddha International Airport\",27.504636,83.410381,358,\"AS\",\"NP\",\"NP-P5\",\"Siddharthanagar (Bhairahawa)\",\"yes\"",
+      "\"Pokhara International Airport\",28.1838,84.0147,2595,\"AS\",\"NP\",\"NP-P4\",\"Pokhara\",\"yes\""
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-22",
+     "quote": "promoted Gautam Buddha International Airport and Pokhara International Airport as alternative airports in case of necessary diversions."
+    },
+    {
+     "file": "kpost-flydubai-pokhara",
+     "org": "The Kathmandu Post (kathmandupost.com)",
+     "dated": "23 September 2026",
+     "quote": [
+      "Published at : September 23, 2026",
+      "first scheduled commercial international flight to Pokhara International Airport landed at 6:18 pm on Wednesday",
+      "Since Pokhara International Airport began operations, it has handled various chartered and special flights from China, India and Bhutan."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "flights to Lukla for Everest treks leave from here",
+   "verdict": "softened",
+   "inAfter": "Flights to Lukla for Everest treks leave from here",
+   "note": "Was 'the starting point for most Everest trips. Several flights a day run to Lukla for trekkers'. Tara Air, which flies to Lukla, sells flights from Kathmandu to Lukla and calls Lukla the gateway to Everest where many trekkers begin; Wikipedia has several daily Lukla flights from Kathmandu for Everest visitors. 'Most' and 'several a day' rest on Wikipedia alone (cut below).",
+   "sources": [
+    {
+     "file": "taraair-destinations",
+     "org": "Tara Air (taraair.com)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "your flight from Kathmandu to Lukla(KTM-LUA) or Ramechhap to Lukla(RHP-LUA)",
+      "serves as the crucial gateway to Mount Everest",
+      "where many trekkers begin their epic journey"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-22",
+     "quote": "The airport is considered as a starting point for Mount Everest international tourists, with several daily flights to Lukla."
+    }
+   ]
+  },
+  {
+   "claim": "Tara Air, which flies the route, also sells Lukla flights from Ramechhap",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Tara Air",
+   "inAfter": "though Tara Air, which flies the route, also sells Lukla flights from Ramechhap.",
+   "note": "Attributed statement: the airline's own page for its own flights. It sells Lukla flights both from Kathmandu (KTM-LUA) and from Ramechhap (RHP-LUA), so not every Lukla flight leaves from here, which the old 'Several flights a day run to Lukla' implied. When Lukla flights move to Ramechhap was not found in a readable source (the civil aviation authority's site answered 502 and the airport's own refused the link lister), so the text gives no season.",
+   "sources": [
+    {
+     "file": "taraair-destinations",
+     "org": "Tara Air (taraair.com)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "your flight from Kathmandu to Lukla(KTM-LUA) or Ramechhap to Lukla(RHP-LUA)",
+      "We operate scheduled and charter flights to destinations including Lukla, Jomsom, Phaplu, Simikot, Dolpa, Jumla and Rara."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Everest sightseeing flights leave early in the morning from the domestic terminal",
+   "verdict": "corrected",
+   "inAfter": "Everest sightseeing flights leave early in the morning from the domestic terminal.",
+   "note": "Was 'sightseeing flights along the Himalaya leave from here too'. Yeti Airlines sells its Everest mountain flights from Kathmandu, leaving from 'Kathmandu's domestic airport' in the morning (its page gives both 6:00 and 8:00 AM, so no time is given); Wikipedia says the mountain flights usually leave the domestic terminal early in the morning.",
+   "sources": [
+    {
+     "file": "yeti-mountain",
+     "org": "Yeti Airlines (yetiairlines.com)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "Mountain Flights from Kathmandu (Everest View)",
+      "The Mountain Flight departs from Kathmandu's domestic airport at 8:00 AM each day"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-22",
+     "quote": [
+      "Several airlines also offer Everest sightseeing flights from Kathmandu.",
+      "They usually depart from the domestic terminal early morning and return to the airport one hour later."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "domestic and international flights use separate terminals",
+   "verdict": "confirmed",
+   "inAfter": "Domestic and international flights use separate terminals.",
+   "note": "Kept from 'Domestic and international operations run from separate terminals'. Wikipedia describes two public terminals, one for each; Yeti Airlines' page sends its mountain flights from what it calls Kathmandu's domestic airport.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-22",
+     "quote": [
+      "There are two public terminals at the airport, one for international traffic and one for domestic traffic.",
+      "It has a tabletop runway, a domestic terminal and an international terminal."
+     ]
+    },
+    {
+     "file": "yeti-mountain",
+     "org": "Yeti Airlines (yetiairlines.com)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": "The Mountain Flight departs from Kathmandu's domestic airport"
+    }
+   ]
+  },
+  {
+   "claim": "Nepal's only international airport",
+   "verdict": "cut",
+   "wasBefore": "Nepal's only international airport, and the starting point",
+   "why": "Out of date: Gautam Buddha and Pokhara are international airports too, and Pokhara has had scheduled international flights since 23 September 2026. Corrected (see above)."
+  },
+  {
+   "claim": "the starting point for most Everest trips",
+   "verdict": "cut",
+   "wasBefore": "and the starting point for most Everest trips.",
+   "why": "'Most' rests on Wikipedia alone; softened to Lukla flights for Everest treks (see above)."
+  },
+  {
+   "claim": "several flights a day to Lukla; sightseeing flights along the Himalaya",
+   "verdict": "cut",
+   "wasBefore": "Several flights a day run to Lukla for trekkers, and sightseeing flights along the Himalaya leave from here too.",
+   "why": "Reworded (see above). 'Several a day' rests on Wikipedia alone: Tara Air gives no frequency, and it also sells Lukla flights from Ramechhap."
+  },
+  {
+   "claim": "more than forty destinations across seventeen countries",
+   "verdict": "cut",
+   "wasBefore": "It connects Kathmandu to more than forty destinations across seventeen countries",
+   "why": "A count, which only the airport's own current count may replace; the airport's site (tiairport.com.np) refused the link lister (403) and the civil aviation authority's (caanepal.gov.np) answered 502, so neither was tried again, and Wikipedia's figure is undated."
+  },
+  {
+   "claim": "Nepal Airlines and Himalaya Airlines both based here alongside the domestic carriers",
+   "verdict": "cut",
+   "wasBefore": "with Nepal Airlines and Himalaya Airlines both based here alongside the domestic carriers.",
+   "why": "Wikipedia alone. Nepal Airlines' About page came back empty to both the plain fetch and the browser, and Himalaya Airlines' About page lists its fleet and countries but names no base. The FCDO's note that every Nepali airline is on the UK Air Safety List is held back (below)."
+  },
+  {
+   "claim": "two things to build into an itinerary",
+   "verdict": "cut",
+   "wasBefore": "Two things to build into an itinerary.",
+   "why": "A lead-in to the two warnings, both cut below."
+  },
+  {
+   "claim": "running at capacity; winter fog and congestion cause delays; Gautam Buddha and Pokhara promoted as diversion airports",
+   "verdict": "cut",
+   "wasBefore": "The airport is running at capacity, and winter fog and congestion cause real delays, to the point that the government has promoted the newer airports at Gautam Buddha and Pokhara as diversion alternatives.",
+   "why": "Wikipedia alone: the airport's and the civil aviation authority's sites could not be read (403 and 502), and no dated report on fog or congestion was found. The two airports are kept, as international airports (see above)."
+  },
+  {
+   "claim": "apron: seventeen aircraft, three wide bodies, an eastern bay",
+   "verdict": "cut",
+   "wasBefore": "And the apron is tight: it takes seventeen aircraft at once but only three of those can be wide bodies, with a further bay on the eastern side.",
+   "why": "Wikipedia alone, and of little use to an agent."
+  },
+  {
+   "claim": "tabletop runway on raised ground",
+   "verdict": "cut",
+   "wasBefore": "The runway is a tabletop, built on raised ground that falls away at the ends, which is worth knowing for a nervous flyer.",
+   "why": "Wikipedia alone (it says only that the airport has a tabletop runway); no second source describes the runway."
+  },
+  {
+   "claim": "domestic and international operations from separate terminals",
+   "verdict": "cut",
+   "wasBefore": "Domestic and international operations run from separate terminals.",
+   "why": "Reworded only (see above)."
+  },
+  {
+   "claim": "Held back: every Nepali airline is on the UK Air Safety List",
+   "verdict": "cut",
+   "why": "Held back: a warning that replaces nothing in the old text (the airline sentence it would sit beside is cut). The FCDO (read 24 September 2026) says no Nepali airline currently meets international safety standards, so all are on the UK Air Safety List and banned from flying to or from the UK, and that Nepal has had a number of fatal air accidents, with at least 100 deaths in the last five years.",
+   "sources": [
+    {
+     "file": "fcdo-nepal-safety",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "Currently no Nepali airline meets the international safety standards and so all are listed on the",
+      "Over the last 5 years, this includes a number of separate incidents and at least 100 deaths."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Held back: Pokhara's first scheduled international service, flydubai from Dubai, from 23 September 2026",
+   "verdict": "cut",
+   "why": "Held back: detail beyond the correction, on one source. The Kathmandu Post (23 September 2026) reports flydubai's first scheduled flight to Pokhara International Airport that day, a daily Dubai service in codeshare with Emirates, with fares from Pokhara set below Kathmandu's for major destinations.",
+   "sources": [
+    {
+     "file": "kpost-flydubai-pokhara",
+     "org": "The Kathmandu Post (kathmandupost.com)",
+     "dated": "23 September 2026",
+     "quote": [
+      "With the launch of the service, Flydubai will operate a daily scheduled flight between Pokhara and Dubai.",
+      "fares from Pokhara have been set lower than those from Kathmandu for major destinations on average"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
