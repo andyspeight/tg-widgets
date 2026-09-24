@@ -280,7 +280,12 @@ async function fillAllStepsAndSubmit(env) {
   const chip = s2.querySelector('.tg-chip');
   if (!chip) throw new Error('destination chip not rendered after selection');
 
-  const tenNights = s2.querySelector('.tg-pill[data-n="10"]');
+  // Found by what the customer reads. The pills were keyed data-n="<nights>"
+  // until duration options became configurable per form (a client's own
+  // labels, and "Other" asking for a number); they are keyed data-idx now, an
+  // index into the form's own list, so the label is the stable way in.
+  const tenNights = Array.from(s2.querySelectorAll('.tg-pill')).find((b) => b.textContent.trim() === '10 nights');
+  if (!tenNights) throw new Error('no "10 nights" duration pill');
   tenNights.click();
 
   const dateInputs = s2.querySelectorAll('input[type="date"]');
@@ -359,6 +364,8 @@ function record(scenario, pass, detail) {
     if (!payload || payload.widgetId !== WIDGET_ID) checks.push('payload widgetId=' + (payload && payload.widgetId));
     if (!at.lookupUrls[0] || at.lookupUrls[0].indexOf(encodeURIComponent(WIDGET_ID)) === -1) checks.push('handler did not look up by widgetId');
     if (firstNameField !== 'Jo') checks.push('master record firstName=' + JSON.stringify(firstNameField));
+    const dur = payload && (payload.fields || payload.answers || payload).duration;
+    if (!dur || dur.nights !== 10) checks.push('the "10 nights" pill did not submit 10 nights: ' + JSON.stringify(dur));
     if (!master || master.typecast !== true) checks.push('typecast missing on create');
     record('a. happy path (5 steps, real handler, master record)', checks.length === 0,
       checks.length ? checks.join('; ')
