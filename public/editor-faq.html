@@ -1713,13 +1713,13 @@
         <div class="toggle-row">
           <div class="toggle-row-main">
             <div class="toggle-row-label">FAQPage schema (JSON-LD)</div>
-            <div class="toggle-row-hint">Injects structured data so your FAQs are eligible for Google rich results</div>
+            <div class="toggle-row-hint">Structured data that Bing and other search engines use to understand your FAQs</div>
           </div>
           <button class="toggle" role="switch" data-toggle="seo.enableSchema" aria-pressed="${!!c.seo.enableSchema}"></button>
         </div>
         <div style="padding:10px;background:var(--panel-2);border-radius:8px;margin-top:8px">
           <div style="font-size:12px;font-weight:600;margin-bottom:4px">${icn('sparkle', 12)} Why enable this?</div>
-          <p class="field-hint" style="margin:0">Google reads this markup to show your FAQs as expandable panels directly in search results. Boosts clicks, no downside unless you don't want the schema in your HTML.</p>
+          <p class="field-hint" style="margin:0">Bing and other search engines still use this markup to understand your questions and answers. Google stopped showing FAQ rich results in May 2026 and its Rich Results Test no longer lists them, but Google says the markup does no harm, so it's worth keeping on.</p>
         </div>
       `;
 

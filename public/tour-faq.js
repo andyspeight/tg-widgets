@@ -16,7 +16,7 @@
      [data-section="layout"]           Layout chooser      (Design tab — accordion/two-column/tabs/searchable)
      [data-section="colours"]          Colours block       (Design tab)
      [data-toggle="search.enabled"]    Search bar toggle   (Settings tab, behaviour)
-     [data-toggle="seo.enableSchema"]  FAQ schema toggle   (Settings tab — Google rich results)
+     [data-toggle="seo.enableSchema"]  FAQ schema toggle   (Settings tab, SEO)
      .tgse-preview                     Live preview        (main area)
      #btn-save                         Save button         (header)
      #btn-embed                        Get embed code      (preview toolbar)
@@ -69,8 +69,8 @@
       {
         tab: 'settings',
         target: '[data-toggle="seo.enableSchema"]',
-        title: 'Get found on Google',
-        body: 'Switch on FAQ schema and your questions become eligible to show as rich results in Google search, right under your listing. A genuine free win for an FAQ page.',
+        title: 'Help search engines read your FAQs',
+        body: 'FAQ schema labels your questions and answers as structured data. Bing and other search engines still use it to understand your page. Google stopped showing FAQ rich results in May 2026 but says the markup does no harm, so keep it switched on.',
         placement: 'right'
       },
       {
