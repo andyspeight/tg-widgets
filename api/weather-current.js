@@ -6,14 +6,21 @@
  *   - Strict lat/lng validation (rejects anything that isn't a plausible coordinate)
  *   - In-memory rate limiting per IP (anonymous, public endpoint)
  *   - 15-minute edge cache via CDN headers (cuts Open-Meteo load by ~98%)
- *   - Locked CORS to approved origins only
+ *   - Open CORS (*), like every other public widget read: the widget runs on
+ *     client websites, so a locked list would silently blank it on all of them
  *   - Uniform error shape that never leaks upstream details
  *   - Opinionated response shape — we return only what the widget needs,
  *     not whatever Open-Meteo happens to send. Stable contract, future-proof.
  *
- * Upstream: https://open-meteo.com/en/docs (no API key required)
- * Free tier: 10,000 calls/day — with 15-min caching we can serve hundreds of
- * thousands of widget loads before hitting that.
+ * Upstream: https://open-meteo.com/en/docs
+ * Licence: Open-Meteo's free service is for NON-COMMERCIAL use only (up to
+ * 10,000 calls a day, no key). Weather on paying clients' websites is
+ * commercial, which needs one of their subscriptions: those come with an API
+ * key and the customer-api.open-meteo.com host. Set OPEN_METEO_API_KEY in
+ * Vercel and this route switches to the commercial host with that key; no
+ * code change. The data is CC BY 4.0, so the widget shows a credit line.
+ * With the 15-minute edge cache each place costs at most ~100 upstream calls a
+ * day however many visitors it has.
  *
  * Usage from the widget:
  *   GET /api/weather-current?lat=35.3728&lng=25.7500&units=c
@@ -21,9 +28,10 @@
  *        icon:"sun-cloud", wind:12, humidity:58, isDay:true,
  *        updated:"2026-04-23T10:15:00Z", source:"open-meteo" }
  *
- * Phase 2 hook — widget-weather.js reads `config.showLiveWeather` and
- * (if true + lat/lng present on the destination record) calls this route.
- * Fall back to climatology-only on any non-200 response.
+ * Used by widget-weather.js (1.2.0+) for its "Right now" strip, when the
+ * widget's liveWeather switch is on and the destination record carries
+ * coordinates (/api/destination-content returns them as `geo`). On any
+ * non-200 the widget simply leaves the strip out.
  */
 
 'use strict';
@@ -32,25 +40,14 @@
 // Config
 // ─────────────────────────────────────────────────────────────────────────────
 
-// CORS allowlist — add client origins as they come online.
-// We do NOT use '*' because even though the endpoint is public, locked CORS
-// means a rogue site can't embed our widget and silently burn through the
-// rate limit on another origin's behalf (it'll still work via direct fetch
-// but not via opaque browser requests from un-allowlisted sites).
-const ALLOWED_ORIGINS = [
-  'https://tg-widgets.vercel.app',
-  'https://www.travelgenix.io',
-  'https://travelgenix.io',
-  'https://www.traveldemo.site',
-  'https://traveldemo.site',
-];
-
-// Allow any *.duda.co preview origin, plus any explicitly set client domains
-// via an env var (comma-separated). This avoids having to redeploy every time
-// a new client embeds a widget.
-const ALLOW_DUDA_PREVIEWS = true;
-const EXTRA_ORIGINS = (process.env.TG_ALLOWED_ORIGINS || '')
-  .split(',').map(s => s.trim()).filter(Boolean);
+// CORS is open (*), the convention for every public widget read here
+// (setCors in _auth.js). Until 24 Sep 2026 this route echoed only five listed
+// origins plus Duda previews, which would have blanked the live strip on every
+// client's own website, the one place it has to work. Openness costs nothing:
+// the data is public, there is no key or cookie to protect, the per-IP rate
+// limit below applies whatever the origin, and the edge cache answers most
+// calls without reaching this function at all. One shared cache entry per
+// place (no Vary: Origin) is also what keeps that cache effective.
 
 // Rate limit — per-IP, in-memory (Vercel warm instance). Gets reset on cold
 // start, which is fine: we're defending against sustained abuse, not bursts.
@@ -67,9 +64,12 @@ const ipHits = new Map();                    // ip -> [timestamps]
 // only until the next visitor triggers the background refresh.
 const CACHE_SECONDS = 900;                   // 15 minutes fresh
 const STALE_WHILE_REVALIDATE = 14400;        // then serve stale up to 4 hours while revalidating
+const BROWSER_SECONDS = 300;                 // the visitor's own browser: 5 minutes
 
-// Upstream
+// Upstream. The free host by default; the commercial host once a key is set
+// (see the licence note at the top).
 const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast';
+const OPEN_METEO_CUSTOMER_URL = 'https://customer-api.open-meteo.com/v1/forecast';
 const UPSTREAM_TIMEOUT_MS = 4000;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -112,29 +112,8 @@ const WMO = {
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-function isOriginAllowed(origin) {
-  if (!origin) return false;
-  if (ALLOWED_ORIGINS.includes(origin)) return true;
-  if (EXTRA_ORIGINS.includes(origin)) return true;
-  if (ALLOW_DUDA_PREVIEWS) {
-    try {
-      const u = new URL(origin);
-      if (u.hostname.endsWith('.duda.co') || u.hostname.endsWith('.multiscreensite.com')) {
-        return true;
-      }
-    } catch { /* fall through */ }
-  }
-  return false;
-}
-
 function applyCors(req, res) {
-  const origin = req.headers.origin || '';
-  // Echo the origin if allowed. Do NOT set a wildcard — even on a public
-  // endpoint that invites caching pollution and complicates debugging.
-  if (isOriginAllowed(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Vary', 'Origin');
-  }
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Max-Age', '86400');
@@ -278,6 +257,7 @@ export default async function handler(req, res) {
   // Build upstream URL with an explicit, fixed parameter set — no passthrough
   // of arbitrary query params. This is the SSRF guard: we never let the caller
   // influence the upstream URL beyond the two coordinates we validated.
+  const apiKey = String(process.env.OPEN_METEO_API_KEY || '').trim();
   const params = new URLSearchParams({
     latitude: String(coords.lat),
     longitude: String(coords.lng),
@@ -286,7 +266,8 @@ export default async function handler(req, res) {
     wind_speed_unit: 'kmh',
     timezone: 'auto',
   });
-  const upstreamUrl = `${OPEN_METEO_URL}?${params.toString()}`;
+  if (apiKey) params.set('apikey', apiKey);
+  const upstreamUrl = `${apiKey ? OPEN_METEO_CUSTOMER_URL : OPEN_METEO_URL}?${params.toString()}`;
 
   let upstream;
   try {
@@ -316,13 +297,17 @@ export default async function handler(req, res) {
 
   // Edge cache: 15 min fresh, then served stale for up to 4 hours while it
   // revalidates in the background, so a quiet site never waits on Open-Meteo.
+  // The browser keeps it for 5 minutes too, so the editor's preview (which
+  // reloads on every keystroke) and a page with several widgets for the same
+  // place ask once.
   res.setHeader(
     'Cache-Control',
-    `public, s-maxage=${CACHE_SECONDS}, stale-while-revalidate=${STALE_WHILE_REVALIDATE}`
+    `public, max-age=${BROWSER_SECONDS}, s-maxage=${CACHE_SECONDS}, stale-while-revalidate=${STALE_WHILE_REVALIDATE}`
   );
-  // Tell intermediaries to key on units too (otherwise a °F response
-  // could be served to a °C requester).
-  res.setHeader('Vary', 'Origin, Accept-Encoding');
+  // The query string (lat, lng, units) is already part of the cache key, so a
+  // °F answer can never reach a °C request. No Vary: Origin: with open CORS the
+  // answer is the same for every site, so every site shares one cache entry.
+  res.setHeader('Vary', 'Accept-Encoding');
 
   res.status(200).json(shaped);
 }
