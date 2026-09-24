@@ -22,7 +22,8 @@
  */
 import { readFileSync } from 'node:fs';
 import { upsellTiles, upsellUrl, bookedProducts, tripShape, partySize, travellerList,
-  UPSELL_PRODUCTS, UPSELL_CATALOGUE, AWAITING_PROOF, REFUSED, CHILD_AGE_WHEN_UNKNOWN } from '../public/_order-upsell.js';
+  activeUpsells, allowedUpsells, orderLinkRef,
+  UPSELL_PRODUCTS, UPSELL_CATALOGUE, AWAITING_PROOF, CHILD_AGE_WHEN_UNKNOWN } from '../public/_order-upsell.js';
 
 let passed = 0, failed = 0;
 const ok = (label, cond, detail) => {
@@ -31,10 +32,19 @@ const ok = (label, cond, detail) => {
 };
 const find = (tiles, p) => tiles.find((t) => t.product === p) || null;
 
+/**
+ * Travelify's own example order from the upsellsActive spec (24 Sep 2026): all
+ * four active, id 123456, key 0CB5D0BC-.... Every fixture below carries the
+ * list, because since that spec an order WITHOUT it offers nothing at all.
+ */
+const ALL_FOUR = ['CarRental', 'Transfers', 'AirportExtras', 'TicketsAttractions'];
+const REF = orderLinkRef(123456, '0CB5D0BC-51FE-4950-9201-E9AD792489F5');
+
 /** Andy's own example: a flight and hotel to Paris. */
 const leg = (from, to, depart, arrive) => ({ segments: [{ origin: { iataCode: from }, destination: { iataCode: to }, depart, arrive }] });
 const PARIS = {
-  id: 'TG1',
+  id: 123456,
+  upsellsActive: ALL_FOUR,
   items: [
     { product: 'Flights', legs: [
       leg('LHR', 'CDG', '2027-04-10T07:00:00', '2027-04-10T09:20:00'),
@@ -61,8 +71,8 @@ console.log("Andy's example, a flight and hotel to Paris");
   ok('the two linkable additions are offered', tiles.length === 2, tiles.map((t) => t.product).join(', '));
   ok('and neither the flight nor the hotel is offered again',
     !find(tiles, 'Flights') && !find(tiles, 'Accommodation'));
-  ok('transfers and airport extras are built and refused, not forgotten',
-    !!REFUSED.Transfers && !!REFUSED.AirportExtras);
+  ok('transfers and airport extras are built and waiting on one click, not forgotten',
+    AWAITING_PROOF.includes('Transfers') && AWAITING_PROOF.includes('AirportExtras'));
   ok('and neither is offered as a tile',
     !find(tiles, 'Transfers') && !find(tiles, 'AirportExtras'));
 
@@ -105,7 +115,7 @@ console.log('\nthe party, counted rather than assumed');
   // An infant is its own deep link parameter, needs no age and is capped at one
   // per adult. Counted as a child it would both overstate chd and price a babe
   // in arms as a seated eight-year-old.
-  const url = upsellUrl(upsellTiles(family)[0], '474');
+  const url = upsellUrl(upsellTiles(family)[0], '474', REF);
   ok('and the link says so', /adt=3/.test(url) && /chd=2/.test(url) && /inf=1/.test(url), url);
   ok('with an age for each child, theirs and not ours',
     /chdage=11/.test(url) && /chdage=6/.test(url), url);
@@ -138,9 +148,14 @@ console.log('\nsomething they already have');
   ok('a booked car hire is not offered again', !find(tiles, 'CarRental'));
   ok('the other one still is', tiles.length === 1);
 
+  // Travelify's rule 3. Our first version dropped booked tickets like any other
+  // product; their spec says keep offering them, "customers may want to buy
+  // further tickets for other activities during their stay".
   const both = { ...PARIS, items: [...PARIS.items,
     { product: 'CarRental' }, { product: 'TicketsAttractions' }] };
-  ok('a booking with everything gets no tiles at all', upsellTiles(both).length === 0);
+  const left = upsellTiles(both);
+  ok('a booking that has car hire AND tickets is still offered things to do',
+    left.length === 1 && left[0].product === 'TicketsAttractions', left.map((t) => t.product).join(', '));
 }
 
 // ── The client's switches ────────────────────────────────────────────────────
@@ -158,6 +173,7 @@ console.log("\nthe client's own switches");
 console.log('\nbookings with less to go on');
 {
   const hotelOnly = {
+    upsellsActive: ALL_FOUR,
     items: [{ product: 'Accommodation', startDate: '2027-04-10T00:00:00',
       accommodation: { name: 'Hotel X', location: { city: 'Paris', country: 'FR' },
         units: [{ checkin: '2027-04-10', nights: 3 }] } }],
@@ -168,6 +184,7 @@ console.log('\nbookings with less to go on');
   ok('but no car hire, having no airport to pick one up at', !find(tiles, 'CarRental'));
 
   const flightOnly = {
+    upsellsActive: ALL_FOUR,
     items: [{ product: 'Flights', legs: [
       leg('MAN', 'ALC', '2027-06-01T06:00:00', '2027-06-01T09:30:00'),
       leg('ALC', 'MAN', '2027-06-08T20:00:00', '2027-06-08T21:40:00')] }],
@@ -192,7 +209,7 @@ console.log('\nthe deep link, against Travelify\'s own examples');
   const tiles = upsellTiles(PARIS);
 
   // Spec: st=TicketsAttractions&loc=Barcelona&ctry=ES&fr=...&to=...&adt=2
-  const things = upsellUrl(find(tiles, 'TicketsAttractions'), '474');
+  const things = upsellUrl(find(tiles, 'TicketsAttractions'), '474', REF);
   ok('attractions go to the client\'s own application', things.indexOf('/deeplink/474?') !== -1, things);
   ok('attractions search a location NAME and country, not an airport code',
     things.indexOf('loc=Paris') !== -1 && things.indexOf('ctry=FR') !== -1, things);
@@ -200,7 +217,7 @@ console.log('\nthe deep link, against Travelify\'s own examples');
     things.indexOf('fr=2027-04-10') !== -1 && things.indexOf('to=2027-04-17') !== -1);
 
   // Spec: st=CarRental&pup=BCN&pupctry=ES&pupt=Airport&fr=<datetime>&to=<datetime>
-  const car = upsellUrl(find(tiles, 'CarRental'), '474');
+  const car = upsellUrl(find(tiles, 'CarRental'), '474', REF);
   ok('car hire uses a PICKUP, not a destination', car.indexOf('pup=CDG') !== -1, car);
   ok('and says it is an airport, so the code resolves', car.indexOf('pupt=Airport') !== -1);
   ok('its dates are datetimes, as the spec requires',
@@ -217,43 +234,99 @@ console.log('\nthe deep link, against Travelify\'s own examples');
   // search for two. The customer can change an age on the results page; they
   // cannot add a child who was never in the search.
   const noAge = { ...PARIS, summary: { travellers: [{ type: 'Adult' }, { type: 'Child' }] } };
-  const bare = upsellUrl(upsellTiles(noAge)[0], '474');
+  const bare = upsellUrl(upsellTiles(noAge)[0], '474', REF);
   ok('a child with no stated age is still searched for',
     bare.indexOf('chd=1') !== -1, bare);
   ok('at the one assumed age, stated once so it can be found',
     bare.indexOf('chdage=' + CHILD_AGE_WHEN_UNKNOWN) !== -1, bare);
   ok('and a real age always beats the assumption',
-    /chdage=9/.test(upsellUrl(upsellTiles(PARIS)[0], '474')));
+    /chdage=9/.test(upsellUrl(upsellTiles(PARIS)[0], '474', REF)));
   ok('nobody is invited who is not on the booking',
     bare.indexOf('inf=') === -1, bare);
 
-  ok('no application id means no link', upsellUrl(find(tiles, 'CarRental'), '') === '');
-  ok('no tile means no link', upsellUrl(null, '474') === '');
+  ok('no application id means no link', upsellUrl(find(tiles, 'CarRental'), '', REF) === '');
+  ok('no tile means no link', upsellUrl(null, '474', REF) === '');
 }
 
-// ── The two Travelify will not take yet ──────────────────────────────────────
-// Andy asked for both. Both were built, both links were opened against the live
-// service on 23 Sep 2026, and the deep linker refused each by name:
-//
-//     {"success":false,"error":"Search type Transfers is not currently
-//      supported by deep linker"}
-//
-// A Travelify-side gap, not a shape we got wrong, and Andy has raised it with
-// Darren. So the anchors stay built and stay tested: when the deep linker
-// learns the types, each tile is one word in UPSELL_CATALOGUE away from
-// shipping and this suite already says its dates and places are right.
-//
-// The URLs print so the same click re-checks it in a second.
-console.log('\nbuilt, and refused by the deep linker for now');
+// ── Travelify's rule, against their own table ────────────────────────────────
+// "Orders API: upsellsActive field", 24 Sep 2026. allowedUpsells is their rule
+// and nothing else, so it is held to their worked example row for row, before
+// any gate of ours gets a say.
+console.log("\nTravelify's upsellsActive rule, against the table in their spec");
+{
+  const order = (items) => ({ id: 123456, upsellsActive: ALL_FOUR, items: items.map((p) => ({ product: p })) });
+  const same = (a, b) => [...a].sort().join(',') === [...b].sort().join(',');
+
+  ok('nothing booked: all four',
+    same(allowedUpsells(order([])), ['CarRental', 'Transfers', 'AirportExtras', 'TicketsAttractions']));
+  ok('transfers booked: car hire, airport extras and tickets',
+    same(allowedUpsells(order(['Transfers'])), ['CarRental', 'AirportExtras', 'TicketsAttractions']));
+  ok('tickets booked: all four still, because tickets are never removed',
+    same(allowedUpsells(order(['TicketsAttractions'])), ALL_FOUR));
+  ok('all four booked: tickets and nothing else',
+    same(allowedUpsells(order(ALL_FOUR)), ['TicketsAttractions']));
+
+  ok('a product not in upsellsActive is never offered, booked or not',
+    !allowedUpsells({ upsellsActive: ['CarRental'], items: [] }).includes('TicketsAttractions'));
+  ok('upsellsActive missing: nothing', allowedUpsells({ items: [] }).length === 0);
+  ok('upsellsActive null: nothing', allowedUpsells({ upsellsActive: null, items: [] }).length === 0);
+  ok('upsellsActive empty: nothing', allowedUpsells({ upsellsActive: [], items: [] }).length === 0);
+  ok('a value we do not know is ignored, not an error',
+    activeUpsells(['CarRental', 'Cruises', 42, null, '']).join(',') === 'CarRental');
+  ok('a value named twice counts once', activeUpsells(['CarRental', 'CarRental']).length === 1);
+  ok('not an array at all: nothing, and no throw', activeUpsells('CarRental').length === 0);
+
+  // And the whole pipeline agrees with it, so no gate of ours can ADD a
+  // product Travelify did not allow.
+  ok('a booking whose application sells nothing gets no tiles',
+    upsellTiles({ ...PARIS, upsellsActive: [] }).length === 0);
+  ok('a booking whose application sells only car hire is offered only car hire',
+    upsellTiles({ ...PARIS, upsellsActive: ['CarRental'] }).map((t) => t.product).join(',') === 'CarRental');
+  ok('a booking from before the field existed offers nothing, per rule 4',
+    upsellTiles({ ...PARIS, upsellsActive: undefined }).length === 0);
+}
+
+// ── The order reference ──────────────────────────────────────────────────────
+// Every upsell link ends ?orderRef={id}/{key} (or &orderRef= where there is
+// already a query string), so what is bought through it is linked back to this
+// booking.
+console.log('\nevery link carries the order reference');
+{
+  ok('it is the id and the key, joined with a slash',
+    REF === '123456/0CB5D0BC-51FE-4950-9201-E9AD792489F5', REF);
+  const url = upsellUrl(find(upsellTiles(PARIS), 'CarRental'), '474', REF);
+  ok('it is the LAST thing on the link', url.endsWith('&orderRef=123456/0CB5D0BC-51FE-4950-9201-E9AD792489F5'), url);
+  ok('with the slash as the spec writes it, not %2F', !/orderRef=[^&]*%2F/.test(url));
+  ok('joined with & because the link already has a query string', /\?st=/.test(url) && /&orderRef=/.test(url));
+  ok('and there is only one of it', (url.match(/orderRef=/g) || []).length === 1);
+
+  // "Do not use orderRef from the order record (for example DEMO123456)".
+  ok('the customer-facing reference is refused as the id', orderLinkRef('DEMO123456', 'ABCDEF12-0000') === '');
+  ok('no id, no link', orderLinkRef(null, '0CB5D0BC-51FE-4950-9201-E9AD792489F5') === '');
+  ok('no key, no link', orderLinkRef(123456, '') === '' && orderLinkRef(123456, undefined) === '');
+  ok('a key with anything but letters, digits and hyphens is refused, not escaped',
+    orderLinkRef(123456, 'abc/../def') === '' && orderLinkRef(123456, 'a b c d e f g h') === '');
+  ok('a tile without the reference has no link, so it is dropped',
+    upsellUrl(find(upsellTiles(PARIS), 'CarRental'), '474', '') === ''
+    && upsellUrl(find(upsellTiles(PARIS), 'CarRental'), '474') === '');
+}
+
+// ── The two built and waiting on one click ───────────────────────────────────
+// 23 Sep 2026: Andy opened both links on a real application and the deep linker
+// refused each by name, {"success":false,"error":"Search type Transfers is not
+// currently supported by deep linker"}. 24 Sep 2026: Travelify's upsellsActive
+// spec names both as products whose deeplinks "can be shown", so the refusal
+// may be stale. Their spec can say the client sells transfers; it cannot say
+// OUR transfer parameters are right, which were read across from Car Rental.
+// So they stay off until a link lands on a search, and these are those links.
+console.log('\nbuilt, allowed by Travelify, and waiting on one click');
 {
   const pending = upsellTiles(PARIS, { include: ['Transfers', 'AirportExtras'] });
   const transfer = find(pending, 'Transfers');
   const extras = find(pending, 'AirportExtras');
 
-  ok('the refusal is recorded in the service\'s own words, not paraphrased',
-    /not currently supported by deep linker/.test(REFUSED.Transfers)
-    && /not currently supported by deep linker/.test(REFUSED.AirportExtras));
-  ok('and nothing is left merely untried', AWAITING_PROOF.length === 0);
+  ok('both are waiting on proof, and the history is kept in the module rather than a status',
+    AWAITING_PROOF.join(',') === 'Transfers,AirportExtras');
 
   ok('a transfer runs from the airport they land at',
     transfer && transfer.pup === 'CDG' && transfer.pupt === 'Airport', JSON.stringify(transfer));
@@ -269,12 +342,14 @@ console.log('\nbuilt, and refused by the deep linker for now');
   ok('and last from leaving to getting back, not the stay',
     extras && extras.fr === '2027-04-10T07:00' && extras.to === '2027-04-17T18:20');
 
-  ok('neither reaches a customer while the service refuses it',
+  ok('neither reaches a customer until its link is proved, even when Travelify allows it',
     !find(upsellTiles(PARIS), 'Transfers') && !find(upsellTiles(PARIS), 'AirportExtras'));
+  ok('and "include" cannot override Travelify: not active, not built',
+    !find(upsellTiles({ ...PARIS, upsellsActive: ['CarRental'] }, { include: ['Transfers'] }), 'Transfers'));
 
-  console.log('\n    Re-check when Travelify add them:');
-  console.log('    Transfers     ' + upsellUrl(transfer, '474'));
-  console.log('    AirportExtras ' + upsellUrl(extras, '474') + '\n');
+  console.log('\n    Open these, each on a real application ID in place of 474:');
+  console.log('    Transfers     ' + upsellUrl(transfer, '474', REF));
+  console.log('    AirportExtras ' + upsellUrl(extras, '474', REF) + '\n');
 }
 
 // ── The shape of the list itself ─────────────────────────────────────────────
@@ -360,6 +435,63 @@ console.log('\nthe section on the booking page');
   ok('and one for the section itself', /data-display="showUpsell"/.test(editor));
   ok('a config saved before this existed still gets the section',
     /sw\.classList\.toggle\('on', v !== false\)/.test(editor));
+}
+
+// ── The same tiles in the email ──────────────────────────────────────────────
+// Travelify: "apply the same rules consistently in emails and in order view
+// widgets/apps, so the customer sees the same upsell options in both places".
+// The email does not work them out again. /api/booking-email reads the booking
+// through /api/retrieve-order, which has already built the tiles, and hands
+// that same list to the renderer.
+console.log('\nthe same tiles, in the email');
+{
+  const { renderBookingEmail, EMAIL_BLOCKS, DEFAULT_EMAIL_LAYOUT } = await import('../public/_booking-email-template.js');
+  const tiles = upsellTiles(PARIS).map((t) => ({ product: t.product, label: t.label, hint: t.hint, url: upsellUrl(t, '474', REF) }));
+  const order = { id: 123456, status: 'Confirmed', customerFirstname: 'Claire', currency: 'GBP', items: PARIS.items, summary: PARIS.summary };
+  const render = (layout, upsell) => renderBookingEmail({ order, brand: { name: 'Sample Travel' }, layout, upsell, orderRef: 'X' }).html;
+
+  ok('the email has an "Add to your trip" block', EMAIL_BLOCKS.some((b) => b.type === 'upsell' && b.kind === 'data'));
+  const html = render([{ type: 'greeting' }, { type: 'upsell' }, { type: 'signoff' }], tiles);
+  ok('it draws every tile the booking page is offering',
+    tiles.every((t) => html.includes(t.label)), tiles.map((t) => t.label).join(', '));
+  ok('with the very same links, order reference and all',
+    tiles.every((t) => html.includes(t.url.replace(/&/g, '&amp;'))));
+  ok('nothing to offer, nothing drawn',
+    !render([{ type: 'upsell' }], []).includes('Add to your trip')
+    && !render([{ type: 'upsell' }], undefined).includes('Add to your trip'));
+  ok('a link that is not https is dropped, even from our own API',
+    !render([{ type: 'upsell' }], [{ product: 'CarRental', label: 'Car hire', hint: '', url: 'http://dl.tvllnk.com/x' }]).includes('Car hire')
+    && !render([{ type: 'upsell' }], [{ product: 'CarRental', label: 'Car hire', hint: '', url: 'javascript:alert(1)' }]).includes('javascript:'));
+  ok('a label is escaped, not pasted in',
+    render([{ type: 'upsell' }], [{ product: 'CarRental', label: '<b>x</b>', hint: '', url: tiles[0].url }]).includes('&lt;b&gt;'));
+
+  // 16 Sep 2026, locked: a client who never opens the layout builder gets the
+  // email we have always sent. So the block is in the palette, not the default.
+  ok('the built-in email is unchanged: the block is offered, not imposed',
+    !DEFAULT_EMAIL_LAYOUT.some((b) => b.type === 'upsell'));
+
+  const sender = readFileSync(new URL('../api/booking-email.js', import.meta.url), 'utf8');
+  ok('the real send hands over the tiles retrieve-order built, rather than building its own',
+    /upsell: Array\.isArray\(retrieveData\?\.upsell\) \? retrieveData\.upsell : \[\]/.test(sender)
+    && !/upsellTiles\(/.test(sender));
+  const preview = readFileSync(new URL('../api/admin/booking-email-preview.js', import.meta.url), 'utf8');
+  ok('and so does the staff preview', /looked\?\.upsell/.test(preview) && /\n\s+upsell,\n/.test(preview));
+  const editor = readFileSync(new URL('../public/editor-mybooking.html', import.meta.url), 'utf8');
+  ok('and the editor preview draws sample tiles, so a client adding the block sees it',
+    (editor.match(/upsell: MOCK_UPSELL,/g) || []).length === 2);
+}
+
+// ── The key goes in the link and nowhere else ────────────────────────────────
+console.log('\nthe order key');
+{
+  const api = readFileSync(new URL('../api/retrieve-order.js', import.meta.url), 'utf8');
+  ok('the reference is built from the raw order\'s id and key', /orderLinkRef\(raw\.id, raw\.key\)/.test(api));
+  ok('and the key is never added to the order the widget, PDF and email pass around',
+    !/^\s+key:/m.test(api.slice(api.indexOf('function trimOrder('), api.indexOf('function computeSummary('))));
+  ok('upsellsActive is carried through, fresh on every fetch', /upsellsActive: Array\.isArray\(raw\.upsellsActive\)/.test(api));
+  const shape = readFileSync(new URL('../api/admin/order-shape.js', import.meta.url), 'utf8');
+  ok('the staff inspector reports upsellsActive, and only WHETHER a key is there',
+    /upsellsActive:/.test(shape) && /hasKey:/.test(shape) && !/key: r\.key/.test(shape));
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');

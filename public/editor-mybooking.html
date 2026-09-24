@@ -1080,6 +1080,18 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
     ],
   };
 
+  // The "Add to your trip" block's sample tiles, in the shape /api/retrieve-order
+  // hands the real email. Built as the module would build them for the sample
+  // Dubai booking, on the demo application 250 and ending in the sample order's
+  // own id and a made-up key, so the preview shows what a customer would see
+  // without pointing at anyone's real booking.
+  const MOCK_UPSELL = [
+    { product: 'TicketsAttractions', label: 'Things to do', hint: 'Tours, attractions and days out while you are there.',
+      url: 'https://dl.tvllnk.com/deeplink/250?st=TicketsAttractions&loc=Dubai&ctry=AE&loct=City&fr=2027-02-03&to=2027-02-10&adt=2&orderRef=81376/00000000-0000-0000-0000-000000000000' },
+    { product: 'CarRental', label: 'Car hire', hint: 'A car for your trip, picked up when you land.',
+      url: 'https://dl.tvllnk.com/deeplink/250?st=CarRental&pup=DXB&pupctry=AE&pupt=Airport&fr=2027-02-03T19%3A40&to=2027-02-10T08%3A15&adt=2&orderRef=81376/00000000-0000-0000-0000-000000000000' },
+  ];
+
   function remConfirmationPreview(layout) {
     const a = remAgency();
     const out = renderBookingEmail({
@@ -1091,6 +1103,7 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
       orderRef: '',
       layout: (layout && layout.length) ? layout : undefined,
       destination: MOCK_DESTINATION,
+      upsell: MOCK_UPSELL,
       baseUrl: location.origin,
     });
     let note;
@@ -1360,6 +1373,7 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
         orderRef: '',
         layout: state.config.confirmationEmail?.layout,
         destination: MOCK_DESTINATION,
+        upsell: MOCK_UPSELL,
         baseUrl: location.origin,
       });
       _writeIframe('email-iframe', html);

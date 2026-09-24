@@ -33,7 +33,7 @@ import { travelifyAuthHeaders } from './_lib/travelify.js';
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
 import { moneyOf, moneyOptsFromEnv } from './_lib/order-money.js';
 import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape, trimFlightSeating } from './_lib/travelify-items.js';
-import { upsellTiles, upsellUrl } from '../public/_order-upsell.js';
+import { upsellTiles, upsellUrl, orderLinkRef } from '../public/_order-upsell.js';
 import { bookingMoment } from '../public/_order-stays.js';
 import { readWidgetSettings } from './_lib/booking-email-brand.js';
 
@@ -1156,6 +1156,15 @@ function trimOrder(raw) {
     // Order-level payment state (where balance/instalments actually live).
     paidToDate: computePaidToDate(raw),
     depositOption: trimDepositOption(raw.depositOption),
+    // What the client's application is selling as an upsell against this
+    // order, per Travelify's Orders API (24 Sep 2026). Carried as it came,
+    // cleaned to short strings: which of them are real products, and what each
+    // is allowed to do, is the upsell module's rule, not the trimmer's. Read
+    // fresh on every fetch and never stored, per their spec, because "active
+    // product types can change".
+    upsellsActive: Array.isArray(raw.upsellsActive)
+      ? raw.upsellsActive.filter(v => typeof v === 'string').slice(0, 20).map(v => v.slice(0, 40))
+      : null,
     documents: Array.isArray(raw.documents)
       ? raw.documents.slice(0, 20).map(doc => ({
           name: safeStr(doc.name, 200),
@@ -1576,8 +1585,16 @@ export default async function handler(req, res) {
     try {
       const up = widgetConfig && widgetConfig.upsell;
       if (!up || up.enabled !== false) {
+        // Every upsell link ends with the order's own id and key, so whatever is
+        // bought through it is linked back to this booking (Travelify's spec,
+        // 24 Sep 2026). The KEY is read off the raw order here and goes into
+        // the link and nowhere else: it is not added to the trimmed order, so
+        // it never sits in the object the widget, the PDF and the email pass
+        // around. No id or no key, and orderLinkRef returns '' and every tile
+        // is dropped, which is the spec's rule too.
+        const ref = orderLinkRef(raw.id, raw.key);
         upsell = upsellTiles(order, { enabled: (up && up.products) || {} })
-          .map((t) => ({ product: t.product, label: t.label, hint: t.hint, url: upsellUrl(t, appId) }))
+          .map((t) => ({ product: t.product, label: t.label, hint: t.hint, url: upsellUrl(t, appId, ref) }))
           .filter((t) => t.url);
       }
     } catch (err) {

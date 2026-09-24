@@ -98,6 +98,12 @@ export const EMAIL_BLOCKS = [
   { type: 'knowbefore', kind: 'data',  label: 'Before you go',         hint: 'Currency, plugs, time zone, flight time and the average high for the month they travel.' },
   { type: 'whatson',    kind: 'data',  label: 'What is on',            hint: 'An event happening in the month they travel. Nothing on, nothing shown.' },
   { type: 'thingstodo', kind: 'data',  label: 'Three things to do',    hint: 'Three highlights from our destination write-up.' },
+  // 24 Sep 2026, Travelify's upsellsActive spec: "apply the same rules
+  // consistently in emails and in order view widgets/apps, so the customer
+  // sees the same upsell options in both places". So the email does not work
+  // them out. It is handed the tiles /api/retrieve-order has already built for
+  // the booking page, links and all, and draws those.
+  { type: 'upsell',     kind: 'data',  label: 'Add to your trip',      hint: 'Things they could add to this booking, the same ones their booking page offers. Nothing to offer, nothing shown.' },
   { type: 'text',       kind: 'write', label: 'Your own words',        fields: ['text'], hint: 'A paragraph or several. Merge tags are filled in.' },
   { type: 'heading',    kind: 'write', label: 'Heading',               fields: ['text'] },
   { type: 'button',     kind: 'write', label: 'Button',                fields: ['text', 'url'], hint: 'A link the customer can tap, such as your booking page.' },
@@ -454,6 +460,10 @@ export function renderBookingEmail(opts) {
     // renderer is runtime-neutral and cannot fetch, so whoever calls it looks
     // this up and passes it in.
     destination,
+    // The "Add to your trip" tiles, exactly as /api/retrieve-order returned
+    // them for the booking page: [{ product, label, hint, url }]. Optional:
+    // absent or empty, and the block draws nothing.
+    upsell,
   } = opts;
 
   const primary = colors.primary || '#1B2B5B';
@@ -1015,6 +1025,52 @@ export function renderBookingEmail(opts) {
     return `${(n / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  // "Add to your trip". Drawn to match the documents card above it, because
+  // that is the list of links this email already has and a second style of
+  // link list would read as a different sender. Every link is checked for
+  // https and escaped, although it came from our own API: an email is the one
+  // place a bad link cannot be fixed after it is sent.
+  const UPSELL_MARK = { TicketsAttractions: '🎟️', CarRental: '🚗', Transfers: '🚐', AirportExtras: '🛫' };
+  const safeUpsell = (Array.isArray(upsell) ? upsell : [])
+    .map((t) => ({
+      label: t && typeof t.label === 'string' ? t.label.slice(0, 60) : '',
+      hint: t && typeof t.hint === 'string' ? t.hint.slice(0, 160) : '',
+      url: safeHttpsUrl(t && t.url),
+      mark: (t && Object.prototype.hasOwnProperty.call(UPSELL_MARK, t.product)) ? UPSELL_MARK[t.product] : '',
+    }))
+    .filter((t) => t.label && t.url)
+    .slice(0, 6);
+  const upsellHtml = safeUpsell.length ? `
+    <tr>
+      <td style="padding:0 32px 24px 32px;">
+        <div style="font:500 12px/1.4 ${FONT};color:#64748b;letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px;">Add to your trip</div>
+        <div style="font:400 14px/1.5 ${FONT};color:#475569;margin-bottom:12px;">A few things that go well with this booking.</div>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;">
+          <tr>
+            <td style="padding:8px 16px;">
+              ${safeUpsell.map((t, i) => {
+                const isLast = i === safeUpsell.length - 1;
+                return `
+                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${isLast ? '' : 'border-bottom:1px solid #e2e8f0;'}">
+                    <tr>
+                      <td style="padding:10px 0;">
+                        <a href="${escapeHtml(t.url)}" target="_blank" style="font:600 15px/1.4 ${FONT};color:#0f172a;text-decoration:none;">${t.mark ? t.mark + ' ' : ''}${escapeHtml(t.label)}</a>
+                        ${t.hint ? `<div style="font:400 13px/1.4 ${FONT};color:#64748b;margin-top:2px;">${escapeHtml(t.hint)}</div>` : ''}
+                      </td>
+                      <td style="padding:10px 0;text-align:right;white-space:nowrap;vertical-align:top;">
+                        <a href="${escapeHtml(t.url)}" target="_blank" style="font:500 13px/1.4 ${FONT};color:${escapeHtml(accent)};text-decoration:none;">Search →</a>
+                      </td>
+                    </tr>
+                  </table>
+                `;
+              }).join('')}
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  ` : '';
+
   const documentsHtml = safeDocs.length ? `
     <tr>
       <td style="padding:0 32px 24px 32px;">
@@ -1536,6 +1592,7 @@ export function renderBookingEmail(opts) {
     extras:     () => summaryCard(rowsIn('extras'), 'Extras'),
     payment:    () => paymentHtml,
     documents:  () => documentsHtml,
+    upsell:     () => upsellHtml,
     pdfnote:    () => pdfNoteHtml,
     support:    () => supportHtml,
     signoff:    () => signOffHtml,

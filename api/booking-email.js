@@ -461,6 +461,12 @@ export default async function handler(req, res) {
       // Our own write-up of where they are going. Null unless the layout uses
       // it; every block that reads it draws nothing when it is absent.
       destination,
+      // "Add to your trip", the SAME tiles retrieve-order built for the booking
+      // page, orderRef and all. Travelify's spec wants the customer to see the
+      // same upsells in the email as on the page, and handing over the page's
+      // own list is the only way that is true by construction rather than by
+      // two copies agreeing. Drawn only where the client's layout has the block.
+      upsell: Array.isArray(retrieveData?.upsell) ? retrieveData.upsell : [],
       // Origin for wrapping document links through /api/doc-redirect, which
       // launders the referrer so Travelify serves DOC/DOCX (not just PDFs).
       baseUrl: buildInternalUrl(req, ''),

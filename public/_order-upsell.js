@@ -31,51 +31,57 @@
 import { listStays, bookingMoment } from './_order-stays.js';
 
 /**
- * What we can upsell, in the order it is shown.
+ * WHAT DECIDES A TILE (24 Sep 2026)
  *
- * Travelify's deep linking document (Darren, 2022) describes five search types:
+ * Travelify's Orders API now says, on every order, which upsells the client's
+ * application is selling: `upsellsActive`, an array of product types. Their
+ * spec ("Orders API: upsellsActive field", Andy, 24 Sep 2026) is the authority
+ * on WHICH products may be offered, and `allowedUpsells` below is that spec
+ * and nothing else:
  *
- *     Flights · Accommodation · DynamicPackaging · CarRental · TicketsAttractions
+ *   1. only a product type listed in upsellsActive;
+ *   2. CarRental, Transfers and AirportExtras are dropped when the order
+ *      already has an item of that product;
+ *   3. TicketsAttractions is the one exception, and is offered even when
+ *      tickets are already booked, "customers may want to buy further tickets
+ *      for other activities during their stay";
+ *   4. missing, null or empty means NO upsells at all;
+ *   5. a value we do not know is ignored, never an error or a broken link.
  *
- * It is NOT the whole list. Our own Event Tickets widgets have been booking
- * through `TicketAccommodation` and `TicketAccommodationFlight` since August
- * 2026, both from live links Andy supplied, and neither appears in the
- * document. So "it is not in the spec" says the document is old, not that the
- * search type does not exist.
+ * That replaces our own guess at rule 2, which dropped a booked
+ * TicketsAttractions like any other.
  *
- * Which leaves `status`, and it is settled rather than guessed at. Both of the
- * two Andy asked for were BUILT, and their links opened against the live
- * service on 23 Sep 2026, and the deep linker refused both by name:
+ * Two gates of our own sit after Travelify's, and neither can ADD a product it
+ * did not allow:
  *
- *     {"success":false,"error":"Search type Transfers is not currently
- *      supported by deep linker"}
+ *   `status`  whether OUR link for the product has been opened against the
+ *             live service and landed on a search. upsellsActive says the
+ *             client sells transfers; it cannot say our transfer parameters
+ *             are right. See below.
+ *   anchor    whether this booking has something to search with: a place for
+ *             attractions, an arrival airport for car hire. A tile with
+ *             nothing to search for is dropped rather than drawn dead.
  *
- * So the service validates the search type, the answer is no today, and it is
- * a Travelify-side gap rather than a shape we got wrong. Andy has raised it
- * with Darren. The anchors stay built and tested: when the deep linker learns
- * the types, each tile is one word in this list away from shipping, with its
- * icon, its copy and its dates already right.
+ * Plus the client's own switches in the My Booking editor, which can only
+ * hide.
+ *
+ * `status`:
  *
  *   'live'     opened against the service and lands on a real search.
- *              TicketsAttractions and CarRental, built from the document's own
- *              worked examples parameter for parameter.
- *   'refused'  asked, and told no in those words. The reason is kept verbatim
- *              so nobody spends an afternoon rediscovering it.
- *   'unproved' built and never opened. `npm run test:order-upsell` prints the
+ *              TicketsAttractions and CarRental, built from the deep linking
+ *              document's own worked examples parameter for parameter.
+ *   'unproved' built and never landed. `npm run test:order-upsell` prints the
  *              exact URL, so one click settles it.
- *
- * Only 'live' reaches a customer. A refused search type answers
- * {"success":false,...} rather than a search, so shipping one is a button that
- * fails in front of the person who paid. The same rule the Event Tickets
- * deeplink works to: a missing button is honest and a dead one is not.
  *
  * Deliberately absent whatever happens: Flights, Accommodation and Packages are
  * the booking itself rather than an addition, and Extras is a bag of supplier
- * oddments with nothing to search for.
+ * oddments with nothing to search for. Neither is in Travelify's list either.
  */
 export const UPSELL_CATALOGUE = Object.freeze([
   Object.freeze({
     product: 'TicketsAttractions', st: 'TicketsAttractions', status: 'live',
+    // Travelify's rule 3: offered even when tickets are already on the order.
+    repeatable: true,
     label: 'Things to do', hint: 'Tours, attractions and days out while you are there.',
   }),
   Object.freeze({
@@ -83,27 +89,32 @@ export const UPSELL_CATALOGUE = Object.freeze([
     label: 'Car hire', hint: 'A car for your trip, picked up when you land.',
   }),
   Object.freeze({
-    // Asked and answered, 23 Sep 2026. Andy opened the link built below on a
-    // real application and the deep linker replied, verbatim:
+    // HISTORY. 23 Sep 2026: Andy opened this link on a real application and the
+    // deep linker replied, verbatim,
     //   {"success":false,"error":"Search type Transfers is not currently
     //    supported by deep linker"}
-    // So the service validates the search type and names the one it refused.
-    // The anchor stays built: if Travelify add the type, this is one word.
-    product: 'Transfers', st: 'Transfers', status: 'refused',
-    reason: 'Travelify\'s deep linker replied "Search type Transfers is not currently supported by deep linker" (23 Sep 2026).',
+    // and he raised it with Darren. 24 Sep 2026: Travelify's upsellsActive spec
+    // names Transfers as a product whose deeplink "can be shown", so the refusal
+    // may be stale. Unproved rather than refused until the link is opened again.
+    // The PARAMETERS are ours, read across from Car Rental; the search type
+    // being accepted does not prove them.
+    product: 'Transfers', st: 'Transfers', status: 'unproved',
     label: 'Airport transfers', hint: 'A ride from the airport to where you are staying, and back.',
   }),
   Object.freeze({
-    // Asked and answered the same way, 23 Sep 2026:
+    // Same history as Transfers: refused by name on 23 Sep 2026
     //   {"success":false,"error":"Search type AirportExtras is not currently
     //    supported by deep linker"}
-    product: 'AirportExtras', st: 'AirportExtras', status: 'refused',
-    reason: 'Travelify\'s deep linker replied "Search type AirportExtras is not currently supported by deep linker" (23 Sep 2026).',
+    // and named as deeplink-able by the upsellsActive spec on 24 Sep 2026.
+    product: 'AirportExtras', st: 'AirportExtras', status: 'unproved',
     label: 'Airport extras', hint: 'Parking, lounges and fast track at the airport you fly from.',
   }),
 ]);
 
-/** The tiles a customer can actually be shown, in order. */
+/** Every product type Travelify's upsellsActive can name that we know about. */
+const KNOWN = new Map(UPSELL_CATALOGUE.map((t) => [t.product, t]));
+
+/** The tiles a customer can actually be shown, in order, when Travelify allows them. */
 export const UPSELL_PRODUCTS = Object.freeze(
   UPSELL_CATALOGUE.filter((t) => t.status === 'live').map((t) => t.product));
 
@@ -111,17 +122,68 @@ export const UPSELL_PRODUCTS = Object.freeze(
 export const AWAITING_PROOF = Object.freeze(
   UPSELL_CATALOGUE.filter((t) => t.status === 'unproved').map((t) => t.product));
 
-/** Asked for, built, and refused by the service. Product to the reason why. */
-export const REFUSED = Object.freeze(UPSELL_CATALOGUE
-  .filter((t) => t.status === 'refused')
-  .reduce((acc, t) => { acc[t.product] = t.reason; return acc; }, {}));
-
 /** Search type by product, for every tile in the catalogue. */
 export const SEARCH_TYPE = Object.freeze(
   UPSELL_CATALOGUE.reduce((acc, t) => { acc[t.product] = t.st; return acc; }, {}));
 
 /** What each tile says. Plain, warm, UK English, no exclamation marks. */
 const COPY = new Map(UPSELL_CATALOGUE.map((t) => [t.product, { label: t.label, hint: t.hint }]));
+
+/**
+ * Travelify's `upsellsActive`, cleaned. Rules 4 and 5 of their spec: anything
+ * but a non-empty array is none, and a value we do not know is dropped rather
+ * than trusted, "new product types may be added in future and should not cause
+ * errors or produce broken deeplinks". Order kept, duplicates dropped.
+ */
+export function activeUpsells(value) {
+  if (!Array.isArray(value) || !value.length) return [];
+  const out = [];
+  for (const v of value) {
+    const p = typeof v === 'string' ? v.trim() : '';
+    if (p && KNOWN.has(p) && !out.includes(p)) out.push(p);
+  }
+  return out;
+}
+
+/**
+ * Travelify's rule, exactly as their spec states it and nothing more: the
+ * product types that may be offered on this order. "upsellsActive minus the
+ * product types already present in items, except TicketsAttractions, which is
+ * never removed by the existing purchase check."
+ *
+ * Read off `order.upsellsActive` on every call. /api/retrieve-order carries it
+ * through from the order it has just fetched, and it is never stored, per the
+ * spec: "active product types can change".
+ */
+export function allowedUpsells(order) {
+  const active = activeUpsells(order && order.upsellsActive);
+  if (!active.length) return [];
+  const booked = bookedProducts(order);
+  return active.filter((p) => KNOWN.get(p).repeatable || !booked.has(p));
+}
+
+/**
+ * The order's own id and key, as the `orderRef` every upsell deeplink must end
+ * with so a new purchase can be linked back to this booking: "123456/0CB5D0BC-
+ * 51FE-4950-9201-E9AD792489F5".
+ *
+ * Travelify's spec, and it is specific about three things:
+ *   - the id and the KEY, never the order record's own `orderRef` field
+ *     ("DEMO123456"), which is the customer-facing reference and links nothing;
+ *   - on EVERY upsell link, in the widget and in the email;
+ *   - no id or no key means no link at all, "as the resulting purchase could
+ *     not be linked to the order".
+ *
+ * Returns '' for anything that is not plainly an id and a key, so the tile is
+ * dropped rather than sent with a reference that points nowhere.
+ */
+export function orderLinkRef(id, key) {
+  const i = id == null ? '' : String(id).trim();
+  const k = key == null ? '' : String(key).trim();
+  if (!/^\d{1,15}$/.test(i)) return '';
+  if (!/^[A-Za-z0-9-]{8,64}$/.test(k)) return '';
+  return i + '/' + k;
+}
 
 /** yyyy-mm-dd from a Travelify date, read as a calendar date and not an instant. */
 export function dayOf(value) {
@@ -383,9 +445,11 @@ export function partySize(order) {
  * @param order  a trimmed Travelify order, as /api/retrieve-order returns it
  * @param opts   { enabled: { TicketsAttractions: true, ... } } from the widget config
  *
- * A tile is dropped when the product is already booked, when the client has
- * switched it off, or when the trip carries nothing to anchor its search to.
- * That last one is the difference between a useful link and a dead one.
+ * A tile is offered only when Travelify's upsellsActive allows it (see
+ * allowedUpsells), and then dropped when our link for it is unproved, when the
+ * client has switched it off, or when the trip carries nothing to anchor its
+ * search to. That last one is the difference between a useful link and a dead
+ * one.
  */
 export function upsellTiles(order, opts = {}) {
   if (!order) return [];
@@ -394,7 +458,10 @@ export function upsellTiles(order, opts = {}) {
   // catalogue but not live, so its real URL can be read off and opened against
   // the service. It is never passed by the API, so it cannot reach a customer.
   const include = (opts && Array.isArray(opts.include)) ? opts.include : [];
-  const booked = bookedProducts(order);
+  // Travelify's rule first. It is the only thing that can put a product on the
+  // list; everything after it can only take one off.
+  const allowed = allowedUpsells(order);
+  if (!allowed.length) return [];
   const trip = tripShape(order);
   const party = partySize(order);
 
@@ -404,11 +471,13 @@ export function upsellTiles(order, opts = {}) {
   const toDate = trip.checkOut || trip.inboundDate || fromDate;
 
   const tiles = [];
-  const wanted = include.length
-    ? UPSELL_CATALOGUE.filter((t) => t.status === 'live' || include.includes(t.product)).map((t) => t.product)
-    : UPSELL_PRODUCTS;
+  // Catalogue order, so the tiles come out the same way round whatever order
+  // Travelify happened to list them in.
+  const wanted = UPSELL_CATALOGUE
+    .filter((t) => allowed.includes(t.product))
+    .filter((t) => t.status === 'live' || include.includes(t.product))
+    .map((t) => t.product);
   for (const product of wanted) {
-    if (booked.has(product)) continue;
     if (enabled[product] === false) continue;
 
     let anchor = null;
@@ -480,10 +549,16 @@ export function upsellTiles(order, opts = {}) {
  * One tile's Travelify deep link, on the CLIENT's own application.
  *
  * Returns '' without an appId, so the caller drops the tile rather than
- * sending a customer to somebody else's booking engine.
+ * sending a customer to somebody else's booking engine; and '' without the
+ * order's id/key reference (orderLinkRef), because a purchase that cannot be
+ * linked back to the booking is exactly what Travelify's spec forbids.
  */
-export function upsellUrl(tile, appId) {
+export function upsellUrl(tile, appId, orderRef) {
   if (!tile || !appId || !tile.st) return '';
+  // No id or no key, no link: Travelify's rule, because a purchase made through
+  // it could not be linked back to this booking. See orderLinkRef.
+  const ref = typeof orderRef === 'string' && /^\d{1,15}\/[A-Za-z0-9-]{8,64}$/.test(orderRef) ? orderRef : '';
+  if (!ref) return '';
   const p = new URLSearchParams();
   p.set('st', tile.st);
   // Location, however this search type names it.
@@ -511,6 +586,12 @@ export function upsellUrl(tile, appId) {
   // adult. Counting one as a child would both overstate the children and price
   // a babe in arms as a seated eight-year-old.
   if (tile.infants) p.set('inf', String(tile.infants));
-  return 'https://dl.tvllnk.com/deeplink/' + encodeURIComponent(String(appId)) + '?' + p.toString();
+  const url = 'https://dl.tvllnk.com/deeplink/' + encodeURIComponent(String(appId)) + '?' + p.toString();
+  // Last, and with the slash as it is. Travelify's spec puts orderRef "to the
+  // end of the deeplink" and writes it `orderRef=123456/0CB5D0BC-...`; letting
+  // URLSearchParams have it would send the slash as %2F. Both halves are
+  // already held to digits, letters and hyphens by the check above, so nothing
+  // here needs encoding.
+  return url + (url.indexOf('?') === -1 ? '?' : '&') + 'orderRef=' + ref;
 
 }
