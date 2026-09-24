@@ -137,22 +137,54 @@ console.log('A client who never touches it gets the email we have always sent');
     && norm(render([{ type: 'not-a-block' }, null, 7]).html) === norm(none.html));
   // Andy, 24 Sep 2026: "Add to your trip" goes in everyone's email by default,
   // after the booking and before the contact details, as it is on the page.
-  ok('and the built-in order is the one we ship, upsells before the contact details',
+  // Andy, 24 Sep 2026, twice: every passenger listed after the summary, and
+  // "Add to your trip" before the contact details.
+  ok('and the built-in order is the one we ship',
     DEFAULT_EMAIL_LAYOUT.map(b => b.type).join(',')
-      === 'greeting,message,summary,documents,payment,pdfnote,upsell,support,signoff');
+      === 'greeting,message,summary,travellers,documents,payment,pdfnote,upsell,support,signoff');
 
-  // What replaced the old byte-for-byte promise: a booking with nothing to
-  // offer still gets the email we have always sent. That is every booking
-  // whose application sells no upsells, and every client who has switched
-  // "Add to your trip" off, so for them nothing about this email moved.
-  const shipped = [{ type: 'greeting' }, { type: 'message' }, { type: 'summary' }, { type: 'documents' },
-    { type: 'payment' }, { type: 'pdfnote' }, { type: 'support' }, { type: 'signoff' }];
+  // A booking with nothing to offer: the upsell block draws nothing at all, so
+  // the email is exactly the same email without that block in it.
   const plain = (layout) => renderBookingEmail({ ...OPTS, upsell: [], layout });
-  ok('with nothing to offer, the built-in email is the one we have always sent',
-    norm(plain(undefined).html) === norm(plain(shipped).html)
-      && plain(undefined).text === plain(shipped).text && plain(undefined).subject === plain(shipped).subject);
+  const withoutUpsell = DEFAULT_EMAIL_LAYOUT.filter(b => b.type !== 'upsell');
+  ok('with nothing to offer, the upsell block leaves no trace',
+    norm(plain(undefined).html) === norm(plain(withoutUpsell).html)
+      && plain(undefined).text === plain(withoutUpsell).text);
   ok('and with something to offer, it says so',
     render(undefined).html.includes('Add to your trip') && !plain(undefined).html.includes('Add to your trip'));
+}
+
+console.log("Who's travelling: everyone on the booking, with ages");
+{
+  // Andy, 24 Sep 2026: "the email should have a section for passengers, and
+  // list them all, including ages". The ages are the ones retrieve-order has
+  // already worked out; the email prints them.
+  const family = { ...ORDER, summary: { ...ORDER.summary, travellers: [
+    { type: 'Lead', title: 'Mr', firstname: 'Luke', surname: 'Livsey' },
+    { type: 'Adult', title: 'Mrs', firstname: 'Hannah', surname: 'Livsey', age: 41 },
+    { type: 'Child', title: 'Miss', firstname: 'Ella', surname: 'Livsey', age: 9 },
+    { type: 'Child', firstname: 'Sam', surname: 'Livsey' },
+    { type: 'Infant', firstname: 'Tom', surname: 'Livsey', age: 1 },
+    { type: 'Infant', firstname: 'Rosie', surname: 'Livsey', age: 0 },
+  ] } };
+  const out = renderBookingEmail({ ...OPTS, order: family });
+  const h = out.html;
+  ok('the section is in the email a client sends by default', h.includes("Who&#39;s travelling") || h.includes("Who's travelling"));
+  ok('every one of them is listed by name',
+    ['Mr Luke Livsey', 'Mrs Hannah Livsey', 'Miss Ella Livsey', 'Sam Livsey', 'Tom Livsey', 'Rosie Livsey'].every(n => h.includes(n)));
+  ok('the lead guest is named as the lead, as on the booking page', h.includes('Lead guest'));
+  ok('a child shows their age', h.includes('Child, aged 9'));
+  ok('a child with no age on the booking is still listed, as a child', /Child\s*<\/td>/.test(h));
+  ok('an infant shows their age', h.includes('Infant, aged 1'));
+  ok('a baby under one says so rather than "aged 0"', h.includes('Infant, under 1') && !h.includes('aged 0'));
+  ok('a grown-up\'s age is not printed', !h.includes('aged 41') && !h.includes('41'));
+  ok('the summary does not also say "+5 others" above the full list', !h.includes('+5 others'));
+  ok('the plain-text version lists everyone too',
+    out.text.includes("Who's travelling") && out.text.includes('Miss Ella Livsey (Child, aged 9)')
+      && out.text.includes('Rosie Livsey (Infant, under 1)'));
+  // A client's own layout without the section keeps the summary's short line.
+  const own = renderBookingEmail({ ...OPTS, order: family, layout: [{ type: 'greeting' }, { type: 'summary' }] }).html;
+  ok('a layout without the section still says who is going in the summary', own.includes('+5 others'));
 }
 
 console.log('Every block in the palette is one the renderer knows');

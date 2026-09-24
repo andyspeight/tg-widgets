@@ -271,7 +271,11 @@ check('CANONICAL_PRODUCTS has all eight types', CANONICAL_PRODUCTS.length === 8)
   check('Email: html is a string', typeof email.html === 'string');
   check('Email: hotel name in email', email.html.includes('Lindos Blu Hotel'));
   check('Email: lead traveller shows correct title (Miss, not Mr)', /Miss\s+Alexandra/.test(emailText));
-  check('Email: reflects the full party (two travellers)', /Travellers/.test(emailText));
+  // Since 24 Sep 2026 the email lists every traveller by name in "Who's
+  // travelling" rather than summarising to "Lead +1 other", so check for the
+  // people themselves, not the old summary line's label.
+  check('Email: reflects the full party (two travellers)',
+    /Who.{0,6}s travelling/.test(emailText) && /Alexandra/.test(emailText) && /Jordan/.test(emailText));
 }
 
 console.log(`\n${fails === 0 ? 'ALL PASS' : fails + ' FAILED'}`);
