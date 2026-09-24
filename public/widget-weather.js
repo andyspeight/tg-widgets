@@ -17,7 +17,8 @@
  *
  * Live "Right now" strip (1.2.0, 24 Sep 2026): the current temperature,
  *   conditions, feels-like, wind and humidity for the destination, from
- *   /api/weather-current (Open-Meteo behind our edge cache). It sits under the
+ *   /api/weather-current (MET Norway behind our edge cache; free for
+ *   commercial use, credited on the strip as its licence asks). It sits under the
  *   header, is on by default as `sections.live` and needs the coordinates
  *   /api/destination-content now returns as `geo`. No coordinates, a slow or
  *   failed answer, or the section switched off: the strip is simply not
@@ -154,7 +155,7 @@
     return p;
   }
 
-  // WMO weather code (what Open-Meteo reports) to an icon family and the
+  // WMO weather code (what /api/weather-current answers with) to an icon family and the
   // message key for its words. Translated here rather than taking the API's
   // English description, so the strip reads in the widget's language.
   const WMO_LIVE = {
@@ -165,7 +166,9 @@
     61: ['rain', 'wxLightRain'], 63: ['rain', 'wxRain'], 65: ['rain', 'wxHeavyRain'],
     66: ['rain', 'wxFreezingRain'], 67: ['rain', 'wxFreezingRain'],
     71: ['snow', 'wxLightSnow'], 73: ['snow', 'wxSnow'], 75: ['snow', 'wxHeavySnow'], 77: ['snow', 'wxSnow'],
+    68: ['rain', 'wxSleet'], 69: ['rain', 'wxSleet'],
     80: ['rain', 'wxShowers'], 81: ['rain', 'wxShowers'], 82: ['rain', 'wxHeavyShowers'],
+    83: ['rain', 'wxSleetShowers'], 84: ['rain', 'wxSleetShowers'],
     85: ['snow', 'wxSnowShowers'], 86: ['snow', 'wxSnowShowers'],
     95: ['storm', 'wxThunder'], 96: ['storm', 'wxThunderHail'], 99: ['storm', 'wxThunderHail'],
   };
@@ -220,7 +223,8 @@
       noDataBody: 'Please check the page configuration. This widget is looking for a destination with climate data that has not yet been populated.',
       liveNow: 'Right now', liveLabel: 'Current weather', liveFeels: 'Feels like {temp}°',
       liveWind: 'Wind {speed} {unit}', liveHumidity: 'Humidity {pct}%', liveCredit: 'Data by',
-      liveCreditLabel: 'Weather data by Open-Meteo.com (opens in a new tab)',
+      liveCreditLabel: 'Weather data by MET Norway (opens in a new tab)',
+      wxSleet: 'Sleet', wxSleetShowers: 'Sleet showers',
       wxClear: 'Clear sky', wxMainlyClear: 'Mainly clear', wxPartlyCloudy: 'Partly cloudy', wxOvercast: 'Overcast',
       wxFog: 'Fog', wxDrizzle: 'Drizzle', wxFreezingDrizzle: 'Freezing drizzle',
       wxLightRain: 'Light rain', wxRain: 'Rain', wxHeavyRain: 'Heavy rain', wxFreezingRain: 'Freezing rain',
@@ -251,7 +255,8 @@
       noDataBody: 'Veuillez vérifier la configuration de la page. Ce widget recherche une destination dont les données climatiques ne sont pas encore renseignées.',
       liveNow: 'En ce moment', liveLabel: 'Météo actuelle', liveFeels: 'Ressenti {temp}°',
       liveWind: 'Vent {speed} {unit}', liveHumidity: 'Humidité {pct} %', liveCredit: 'Données',
-      liveCreditLabel: 'Données météo Open-Meteo.com (nouvel onglet)',
+      liveCreditLabel: 'Données météo MET Norway (nouvel onglet)',
+      wxSleet: 'Neige fondue', wxSleetShowers: 'Averses de neige fondue',
       wxClear: 'Ciel dégagé', wxMainlyClear: 'Plutôt dégagé', wxPartlyCloudy: 'Partiellement nuageux', wxOvercast: 'Couvert',
       wxFog: 'Brouillard', wxDrizzle: 'Bruine', wxFreezingDrizzle: 'Bruine verglaçante',
       wxLightRain: 'Pluie faible', wxRain: 'Pluie', wxHeavyRain: 'Forte pluie', wxFreezingRain: 'Pluie verglaçante',
@@ -282,7 +287,8 @@
       noDataBody: 'Bitte prüfen Sie die Seitenkonfiguration. Dieses Widget sucht ein Reiseziel mit Klimadaten, die noch nicht hinterlegt sind.',
       liveNow: 'Aktuell', liveLabel: 'Aktuelles Wetter', liveFeels: 'Gefühlt {temp}°',
       liveWind: 'Wind {speed} {unit}', liveHumidity: 'Luftfeuchtigkeit {pct} %', liveCredit: 'Daten von',
-      liveCreditLabel: 'Wetterdaten von Open-Meteo.com (öffnet in neuem Tab)',
+      liveCreditLabel: 'Wetterdaten von MET Norway (öffnet in neuem Tab)',
+      wxSleet: 'Schneeregen', wxSleetShowers: 'Schneeregenschauer',
       wxClear: 'Klarer Himmel', wxMainlyClear: 'Überwiegend klar', wxPartlyCloudy: 'Teilweise bewölkt', wxOvercast: 'Bedeckt',
       wxFog: 'Nebel', wxDrizzle: 'Nieselregen', wxFreezingDrizzle: 'Gefrierender Nieselregen',
       wxLightRain: 'Leichter Regen', wxRain: 'Regen', wxHeavyRain: 'Starker Regen', wxFreezingRain: 'Gefrierender Regen',
@@ -313,7 +319,8 @@
       noDataBody: 'Compruebe la configuración de la página. Este widget busca un destino con datos climáticos que aún no se han cargado.',
       liveNow: 'Ahora mismo', liveLabel: 'Tiempo actual', liveFeels: 'Sensación {temp}°',
       liveWind: 'Viento {speed} {unit}', liveHumidity: 'Humedad {pct} %', liveCredit: 'Datos de',
-      liveCreditLabel: 'Datos meteorológicos de Open-Meteo.com (se abre en una pestaña nueva)',
+      liveCreditLabel: 'Datos meteorológicos de MET Norway (se abre en una pestaña nueva)',
+      wxSleet: 'Aguanieve', wxSleetShowers: 'Chubascos de aguanieve',
       wxClear: 'Cielo despejado', wxMainlyClear: 'Mayormente despejado', wxPartlyCloudy: 'Parcialmente nublado', wxOvercast: 'Cubierto',
       wxFog: 'Niebla', wxDrizzle: 'Llovizna', wxFreezingDrizzle: 'Llovizna helada',
       wxLightRain: 'Lluvia ligera', wxRain: 'Lluvia', wxHeavyRain: 'Lluvia intensa', wxFreezingRain: 'Lluvia helada',
@@ -344,7 +351,8 @@
       noDataBody: 'Controlla la configurazione della pagina. Questo widget cerca una destinazione con dati climatici non ancora inseriti.',
       liveNow: 'In questo momento', liveLabel: 'Meteo attuale', liveFeels: 'Percepita {temp}°',
       liveWind: 'Vento {speed} {unit}', liveHumidity: 'Umidità {pct}%', liveCredit: 'Dati di',
-      liveCreditLabel: 'Dati meteo di Open-Meteo.com (si apre in una nuova scheda)',
+      liveCreditLabel: 'Dati meteo di MET Norway (si apre in una nuova scheda)',
+      wxSleet: 'Nevischio', wxSleetShowers: 'Rovesci di nevischio',
       wxClear: 'Cielo sereno', wxMainlyClear: 'Prevalentemente sereno', wxPartlyCloudy: 'Parzialmente nuvoloso', wxOvercast: 'Coperto',
       wxFog: 'Nebbia', wxDrizzle: 'Pioviggine', wxFreezingDrizzle: 'Pioviggine gelata',
       wxLightRain: 'Pioggia debole', wxRain: 'Pioggia', wxHeavyRain: 'Pioggia forte', wxFreezingRain: 'Pioggia gelata',
@@ -375,7 +383,8 @@
       noDataBody: 'Verificați configurația paginii. Acest widget caută o destinație cu date climatice care nu au fost încă completate.',
       liveNow: 'Chiar acum', liveLabel: 'Vremea actuală', liveFeels: 'Resimțită {temp}°',
       liveWind: 'Vânt {speed} {unit}', liveHumidity: 'Umiditate {pct}%', liveCredit: 'Date de la',
-      liveCreditLabel: 'Date meteo de la Open-Meteo.com (se deschide într-o filă nouă)',
+      liveCreditLabel: 'Date meteo de la MET Norway (se deschide într-o filă nouă)',
+      wxSleet: 'Lapoviță', wxSleetShowers: 'Averse de lapoviță',
       wxClear: 'Cer senin', wxMainlyClear: 'Predominant senin', wxPartlyCloudy: 'Parțial noros', wxOvercast: 'Cer acoperit',
       wxFog: 'Ceață', wxDrizzle: 'Burniță', wxFreezingDrizzle: 'Burniță înghețată',
       wxLightRain: 'Ploaie slabă', wxRain: 'Ploaie', wxHeavyRain: 'Ploaie puternică', wxFreezingRain: 'Ploaie înghețată',
@@ -706,7 +715,7 @@
     .tgw-live-body { min-width: 0; flex: 1; }
     .tgw-live-top {
       display: flex; align-items: center; justify-content: space-between;
-      gap: 8px; margin: 0 0 2px;
+      flex-wrap: wrap; gap: 2px 8px; margin: 0 0 2px;
     }
     .tgw-live-label {
       display: inline-flex; align-items: center; gap: 6px;
@@ -1448,7 +1457,8 @@
           '<div class="tgw-live-body">' +
             '<div class="tgw-live-top">' +
               '<p class="tgw-live-label"><span class="tgw-live-dot" aria-hidden="true"></span>' + esc(this.t('liveNow')) + '</p>' +
-              '<a class="tgw-live-credit" href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" aria-label="' + esc(this.t('liveCreditLabel')) + '">' + esc(this.t('liveCredit')) + ' Open-Meteo</a>' +
+              // MET Norway's licence (NLOD 2.0 / CC BY 4.0) asks for this credit.
+              '<a class="tgw-live-credit" href="https://www.met.no/en" target="_blank" rel="noopener noreferrer" aria-label="' + esc(this.t('liveCreditLabel')) + '">' + esc(this.t('liveCredit')) + ' MET Norway</a>' +
             '</div>' +
             '<p class="tgw-live-main">' +
               '<span class="tgw-live-temp">' + deg(w.temp) + '°' + unit + '</span>' +

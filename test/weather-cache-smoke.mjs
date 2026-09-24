@@ -3,10 +3,11 @@
  *
  * /api/weather-current stays fresh for 15 min, but the stale-while-revalidate
  * window was only 30 min, so a quiet client site could still make the odd
- * visitor wait on Open-Meteo after an idle spell. It now serves stale for up to
+ * visitor wait on the weather service after an idle spell. It now serves stale for up to
  * 4 hours while it refreshes in the background.
  *
- * Drives the real handler with a stubbed Open-Meteo and checks the header.
+ * Drives the real handler with a stubbed weather service (MET Norway since
+ * 24 Sep 2026) and checks the header.
  *
  * Run: node test/weather-cache-smoke.mjs   (also: npm run test:weather-cache)
  */
@@ -21,15 +22,20 @@ function ok(name, cond) {
   else { failed++; console.error('  ✗ ' + name); }
 }
 
-// Stub Open-Meteo before loading the handler (it uses the global fetch).
+// Stub the weather service before loading the handler (it uses the global fetch).
+// MET Norway's Locationforecast shape (the source since 24 Sep 2026). No
+// Expires header here, so the fresh window is the 15-minute floor.
 globalThis.fetch = async () => ({
   ok: true, status: 200,
+  headers: { get: () => null },
   json: async () => ({
-    current: {
-      temperature_2m: 21, apparent_temperature: 20, weather_code: 1,
-      wind_speed_10m: 9, relative_humidity_2m: 55, is_day: 1,
+    properties: {
+      meta: { updated_at: '2026-09-24T12:00:00Z' },
+      timeseries: [{ time: new Date().toISOString(), data: {
+        instant: { details: { air_temperature: 21, relative_humidity: 55, wind_speed: 2.5 } },
+        next_1_hours: { summary: { symbol_code: 'fair_day' } },
+      } }],
     },
-    current_units: { temperature_2m: '°C' },
   }),
 });
 

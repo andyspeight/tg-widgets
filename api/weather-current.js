@@ -2,31 +2,38 @@
  * Travelgenix Widget Suite — Weather Current API
  * /api/weather-current
  *
- * Proxies the free Open-Meteo forecast API with Travelgenix hardening on top:
+ * Proxies MET Norway's Locationforecast with Travelgenix hardening on top:
  *   - Strict lat/lng validation (rejects anything that isn't a plausible coordinate)
  *   - In-memory rate limiting per IP (anonymous, public endpoint)
- *   - 15-minute edge cache via CDN headers (cuts Open-Meteo load by ~98%)
+ *   - Edge cache for as long as MET says its forecast holds (15 min to 1 hour)
  *   - Open CORS (*), like every other public widget read: the widget runs on
  *     client websites, so a locked list would silently blank it on all of them
  *   - Uniform error shape that never leaks upstream details
  *   - Opinionated response shape — we return only what the widget needs,
- *     not whatever Open-Meteo happens to send. Stable contract, future-proof.
+ *     not whatever the source happens to send. Stable contract: the same
+ *     fields and WMO weather codes whichever service is behind it.
  *
- * Upstream: https://open-meteo.com/en/docs
- * Licence: Open-Meteo's free service is for NON-COMMERCIAL use only (up to
- * 10,000 calls a day, no key). Weather on paying clients' websites is
- * commercial, which needs one of their subscriptions: those come with an API
- * key and the customer-api.open-meteo.com host. Set OPEN_METEO_API_KEY in
- * Vercel and this route switches to the commercial host with that key; no
- * code change. The data is CC BY 4.0, so the widget shows a credit line.
- * With the 15-minute edge cache each place costs at most ~100 upstream calls a
- * day however many visitors it has.
+ * Upstream: MET Norway (the Norwegian Meteorological Institute, the data
+ * behind yr.no), Locationforecast 2.0, https://api.met.no. Chosen 24 Sep 2026
+ * because it is free INCLUDING commercial use, with no key: Andy asked for a
+ * free service once it turned out Open-Meteo's free tier is non-commercial
+ * only, and weather on paying clients' websites is commercial.
+ *   - Licence: NLOD 2.0 and CC BY 4.0, credit to MET Norway. The widget shows
+ *     "Data by MET Norway" on the strip. Keep that credit wherever this data
+ *     is shown.
+ *   - Their terms: identify the application in the User-Agent (a missing or
+ *     generic one is refused with 403), do not ask again before the Expires
+ *     time they send, stay under 20 requests a second in total. The edge
+ *     cache keeps us far below that: one call per place per cache period,
+ *     however many visitors that place has.
+ *   - They send no "feels like", so it is worked out here (apparentTemp), and
+ *     wind comes in m/s and leaves as km/h, as it always has.
  *
  * Usage from the widget:
  *   GET /api/weather-current?lat=35.3728&lng=25.7500&units=c
  *   →  { ok:true, temp:27, feels:29, code:1, desc:"Mainly clear",
  *        icon:"sun-cloud", wind:12, humidity:58, isDay:true,
- *        updated:"2026-04-23T10:15:00Z", source:"open-meteo" }
+ *        updated:"2026-04-23T10:15:00Z", source:"met-norway" }
  *
  * Used by widget-weather.js (1.2.0+) for its "Right now" strip, when the
  * widget's liveWeather switch is on and the destination record carries
@@ -55,27 +62,31 @@ const RATE_LIMIT_WINDOW_MS = 60 * 1000;      // 1 minute
 const RATE_LIMIT_MAX = 30;                   // 30 calls/min per IP
 const ipHits = new Map();                    // ip -> [timestamps]
 
-// Edge cache duration (Vercel / Cloudflare).
-// Weather changes but not that fast — 15 min is the sweet spot for
-// "looks live" without hammering Open-Meteo. The stale window is much longer
-// so a quiet client site (no visitor within the fresh window) still serves an
+// Edge cache duration (Vercel).
+// Weather changes but not that fast. Fresh for as long as MET Norway's
+// Expires header says (their terms ask us not to ask sooner), but never less
+// than 15 minutes nor more than an hour. The stale window is much longer so a
+// quiet client site (no visitor within the fresh window) still serves an
 // instant, slightly-older reading and refreshes it in the background, rather
-// than making that visitor wait on Open-Meteo. A few hours stale at worst, and
-// only until the next visitor triggers the background refresh.
-const CACHE_SECONDS = 900;                   // 15 minutes fresh
+// than making that visitor wait on the upstream. A few hours stale at worst,
+// and only until the next visitor triggers the background refresh.
+const CACHE_SECONDS = 900;                   // at least 15 minutes fresh
+const CACHE_MAX_SECONDS = 3600;              // at most an hour
 const STALE_WHILE_REVALIDATE = 14400;        // then serve stale up to 4 hours while revalidating
 const BROWSER_SECONDS = 300;                 // the visitor's own browser: 5 minutes
 
-// Upstream. The free host by default; the commercial host once a key is set
-// (see the licence note at the top).
-const OPEN_METEO_URL = 'https://api.open-meteo.com/v1/forecast';
-const OPEN_METEO_CUSTOMER_URL = 'https://customer-api.open-meteo.com/v1/forecast';
+// Upstream: MET Norway Locationforecast 2.0, the compact form (all we use).
+const MET_URL = 'https://api.met.no/weatherapi/locationforecast/2.0/compact';
+// MET requires every request to name the application and a way to reach its
+// owner. MET_NO_USER_AGENT in Vercel overrides this, e.g. to add an email.
+const DEFAULT_USER_AGENT = 'TravelgenixWidgets/1.2 (+https://widgets.travelify.io)';
 const UPSTREAM_TIMEOUT_MS = 4000;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WMO weather code → icon + description
-// https://open-meteo.com/en/docs → "WMO Weather interpretation codes"
-// Icons map to the same vocabulary widget-weather.js already uses.
+// The route has always answered in WMO weather codes, and the widget translates
+// them into six languages, so MET's symbol codes are mapped onto them below.
+// 68/69 and 83/84 are WMO's "rain and snow mixed" (sleet) and its showers.
 // ─────────────────────────────────────────────────────────────────────────────
 const WMO = {
   0:  { icon: 'sun',         desc: 'Clear sky' },
@@ -94,6 +105,8 @@ const WMO = {
   65: { icon: 'rain',        desc: 'Heavy rain' },
   66: { icon: 'rain',        desc: 'Light freezing rain' },
   67: { icon: 'rain',        desc: 'Heavy freezing rain' },
+  68: { icon: 'rain',        desc: 'Light sleet' },
+  69: { icon: 'rain',        desc: 'Sleet' },
   71: { icon: 'snow',        desc: 'Light snow' },
   73: { icon: 'snow',        desc: 'Moderate snow' },
   75: { icon: 'snow',        desc: 'Heavy snow' },
@@ -101,12 +114,55 @@ const WMO = {
   80: { icon: 'rain',        desc: 'Light rain showers' },
   81: { icon: 'rain',        desc: 'Rain showers' },
   82: { icon: 'rain',        desc: 'Violent rain showers' },
+  83: { icon: 'rain',        desc: 'Light sleet showers' },
+  84: { icon: 'rain',        desc: 'Sleet showers' },
   85: { icon: 'snow',        desc: 'Light snow showers' },
   86: { icon: 'snow',        desc: 'Heavy snow showers' },
   95: { icon: 'storm',       desc: 'Thunderstorm' },
   96: { icon: 'storm',       desc: 'Thunderstorm with light hail' },
   99: { icon: 'storm',       desc: 'Thunderstorm with heavy hail' },
 };
+
+// MET Norway symbol code, less its _day / _night / _polartwilight suffix, to
+// the nearest WMO code. Every "...andthunder" symbol is a thunderstorm (95).
+// MET has no drizzle or hail symbols, so those WMO codes simply never appear.
+const MET_TO_WMO = {
+  clearsky: 0, fair: 1, partlycloudy: 2, cloudy: 3, fog: 45,
+  lightrain: 61, rain: 63, heavyrain: 65,
+  lightrainshowers: 80, rainshowers: 81, heavyrainshowers: 82,
+  lightsleet: 68, sleet: 69, heavysleet: 69,
+  lightsleetshowers: 83, sleetshowers: 84, heavysleetshowers: 84,
+  lightsnow: 71, snow: 73, heavysnow: 75,
+  lightsnowshowers: 85, snowshowers: 85, heavysnowshowers: 86,
+};
+
+export function metSymbolToWmo(symbol) {
+  const base = String(symbol || '').split('_')[0].toLowerCase();
+  if (!base) return null;
+  if (base.includes('thunder')) return 95;
+  return Object.prototype.hasOwnProperty.call(MET_TO_WMO, base) ? MET_TO_WMO[base] : null;
+}
+
+// "Feels like": the apparent temperature the Australian Bureau of Meteorology
+// publishes (Steadman), from air temperature (C), relative humidity (%) and
+// wind (m/s). MET Norway does not send one.
+export function apparentTemp(tC, rh, windMs) {
+  const e = (rh / 100) * 6.105 * Math.exp((17.27 * tC) / (237.7 + tC));
+  return tC + 0.33 * e - 0.70 * windMs - 4.0;
+}
+
+// The forecast hour nearest now: the last one that starts no more than 30
+// minutes from now (so at 13:40 it is the 14:00 hour, at 13:20 the 13:00).
+function currentSlot(series, nowMs) {
+  if (!Array.isArray(series) || !series.length) return null;
+  let pick = series[0];
+  for (const s of series) {
+    const t = Date.parse(s && s.time);
+    if (!Number.isFinite(t)) continue;
+    if (t <= nowMs + 30 * 60 * 1000) pick = s; else break;
+  }
+  return pick;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -169,7 +225,7 @@ function validateCoords(latRaw, lngRaw) {
   if (lat === 0 && lng === 0) {
     return { ok: false, reason: 'lat/lng cannot both be zero' };
   }
-  // Round to 4dp — Open-Meteo grid resolution is ~11km so extra precision is
+  // Round to 4dp — forecast grids are kilometres wide so extra precision is
   // wasted, and rounding improves cache hit rate dramatically.
   return {
     ok: true,
@@ -187,32 +243,59 @@ async function fetchWithTimeout(url, ms) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), ms);
   try {
-    const r = await fetch(url, { signal: ctrl.signal });
+    const r = await fetch(url, {
+      signal: ctrl.signal,
+      headers: {
+        'User-Agent': String(process.env.MET_NO_USER_AGENT || '').trim() || DEFAULT_USER_AGENT,
+        'Accept': 'application/json',
+      },
+    });
     return r;
   } finally {
     clearTimeout(timer);
   }
 }
 
-function shapeResponse(raw, units) {
-  const c = raw && raw.current;
-  if (!c) return null;
-  const code = Number.isFinite(c.weather_code) ? c.weather_code : 0;
-  const wmo = WMO[code] || { icon: 'sun-cloud', desc: 'Unknown conditions' };
+export function shapeResponse(raw, units, nowMs = Date.now()) {
+  const props = raw && raw.properties;
+  const slot = currentSlot(props && props.timeseries, nowMs);
+  const data = slot && slot.data;
+  const d = data && data.instant && data.instant.details;
+  if (!d) return null;
+  const tC = Number(d.air_temperature);
+  if (d.air_temperature == null || !Number.isFinite(tC)) return null;
+  const rh = d.relative_humidity != null && Number.isFinite(Number(d.relative_humidity)) ? Number(d.relative_humidity) : null;
+  const ws = d.wind_speed != null && Number.isFinite(Number(d.wind_speed)) ? Number(d.wind_speed) : null;   // m/s
+  const next = data.next_1_hours || data.next_6_hours || data.next_12_hours;
+  const symbol = String((next && next.summary && next.summary.symbol_code) || '');
+  const code = metSymbolToWmo(symbol);
+  const wmo = code !== null ? WMO[code] : null;
+  const feelsC = rh !== null ? apparentTemp(tC, rh, ws || 0) : null;
+  const conv = (c) => (units === 'f' ? c * 9 / 5 + 32 : c);
+  const updated = props.meta && typeof props.meta.updated_at === 'string' ? props.meta.updated_at : '';
   return {
     ok: true,
-    temp: Math.round(Number(c.temperature_2m)),
-    feels: Math.round(Number(c.apparent_temperature)),
+    temp: Math.round(conv(tC)),
+    feels: feelsC === null ? null : Math.round(conv(feelsC)),
     code,
-    desc: wmo.desc,
-    icon: wmo.icon,
-    wind: Math.round(Number(c.wind_speed_10m)),
-    humidity: Math.round(Number(c.relative_humidity_2m)),
-    isDay: c.is_day === 1,
+    desc: wmo ? wmo.desc : '',
+    icon: wmo ? wmo.icon : 'sun-cloud',
+    wind: ws === null ? null : Math.round(ws * 3.6),   // km/h
+    humidity: rh === null ? null : Math.round(rh),
+    isDay: !/_night$/.test(symbol),
     units,                                         // echo back so widget knows
-    updated: new Date().toISOString(),
-    source: 'open-meteo',
+    updated: /^\d{4}-\d{2}-\d{2}T/.test(updated) ? updated : new Date(nowMs).toISOString(),
+    source: 'met-norway',
   };
+}
+
+// How long the edge may treat this answer as fresh: until MET's Expires, held
+// between 15 minutes and an hour.
+function freshSeconds(upstream) {
+  let exp = NaN;
+  try { exp = Date.parse(upstream.headers.get('expires')); } catch { /* no headers */ }
+  if (!Number.isFinite(exp)) return CACHE_SECONDS;
+  return Math.max(CACHE_SECONDS, Math.min(CACHE_MAX_SECONDS, Math.round((exp - Date.now()) / 1000)));
 }
 
 function fail(res, status, reason) {
@@ -256,18 +339,13 @@ export default async function handler(req, res) {
 
   // Build upstream URL with an explicit, fixed parameter set — no passthrough
   // of arbitrary query params. This is the SSRF guard: we never let the caller
-  // influence the upstream URL beyond the two coordinates we validated.
-  const apiKey = String(process.env.OPEN_METEO_API_KEY || '').trim();
+  // influence the upstream URL beyond the two coordinates we validated. MET
+  // asks for no more than 4 decimals, which validateCoords already rounds to.
   const params = new URLSearchParams({
-    latitude: String(coords.lat),
-    longitude: String(coords.lng),
-    current: 'temperature_2m,apparent_temperature,weather_code,wind_speed_10m,relative_humidity_2m,is_day',
-    temperature_unit: units === 'f' ? 'fahrenheit' : 'celsius',
-    wind_speed_unit: 'kmh',
-    timezone: 'auto',
+    lat: String(coords.lat),
+    lon: String(coords.lng),
   });
-  if (apiKey) params.set('apikey', apiKey);
-  const upstreamUrl = `${apiKey ? OPEN_METEO_CUSTOMER_URL : OPEN_METEO_URL}?${params.toString()}`;
+  const upstreamUrl = `${MET_URL}?${params.toString()}`;
 
   let upstream;
   try {
@@ -278,8 +356,9 @@ export default async function handler(req, res) {
   }
 
   if (!upstream.ok) {
-    // Open-Meteo rejected the request. Don't pass its body through — that's
-    // potentially an attack surface and might leak details. Map to 502.
+    // MET refused the request (403 for a bad User-Agent, 429 when throttled).
+    // Don't pass its body through — that's potentially an attack surface and
+    // might leak details. Map to 502, which is never cached.
     return fail(res, 502, 'Upstream weather service returned an error');
   }
 
@@ -295,14 +374,15 @@ export default async function handler(req, res) {
     return fail(res, 502, 'Upstream response missing current weather block');
   }
 
-  // Edge cache: 15 min fresh, then served stale for up to 4 hours while it
-  // revalidates in the background, so a quiet site never waits on Open-Meteo.
+  // Edge cache: fresh until MET's Expires (15 min to an hour), then served
+  // stale for up to 4 hours while it revalidates in the background, so a quiet
+  // site never waits on the upstream.
   // The browser keeps it for 5 minutes too, so the editor's preview (which
   // reloads on every keystroke) and a page with several widgets for the same
   // place ask once.
   res.setHeader(
     'Cache-Control',
-    `public, max-age=${BROWSER_SECONDS}, s-maxage=${CACHE_SECONDS}, stale-while-revalidate=${STALE_WHILE_REVALIDATE}`
+    `public, max-age=${BROWSER_SECONDS}, s-maxage=${freshSeconds(upstream)}, stale-while-revalidate=${STALE_WHILE_REVALIDATE}`
   );
   // The query string (lat, lng, units) is already part of the cache key, so a
   // °F answer can never reach a °C request. No Vary: Origin: with open CORS the

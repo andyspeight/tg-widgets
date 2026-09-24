@@ -10,8 +10,9 @@
  *      `geo` (the real handler, with Airtable stood in for).
  *   2. /api/weather-current answers ANY website (it used to answer five
  *      listed domains only, which would have blanked the strip on every
- *      client's site), shares one cache entry per place, and moves to
- *      Open-Meteo's commercial host when OPEN_METEO_API_KEY is set.
+ *      client's site), shares one cache entry per place, and reads MET Norway
+ *      (free for commercial use, unlike Open-Meteo's free tier) on MET's
+ *      terms: an identifying User-Agent, no asking again before Expires.
  *   3. widget-weather.js draws the strip from that answer: in all layouts, in
  *      the reader's units and language, once per place, without moving focus
  *      or scrolling, and draws nothing at all when it cannot.
@@ -91,13 +92,23 @@ console.log('\nThe destination feed returns the record\'s coordinates\n');
 }
 
 // ── 2. The weather route answers any website ─────────────────────────────
-console.log('\nThe weather route answers client websites\n');
+console.log('\nThe weather route answers client websites, from MET Norway\n');
 {
-  const { default: handler } = await import('../api/weather-current.js');
-  let asked = '';
-  globalThis.fetch = async (url) => {
+  const { default: handler, metSymbolToWmo, apparentTemp, shapeResponse } = await import('../api/weather-current.js');
+  const metBody = (symbol = 'partlycloudy_day', details = { air_temperature: 23.4, relative_humidity: 52, wind_speed: 6.7 }) => ({
+    properties: {
+      meta: { updated_at: '2026-09-24T12:31:07Z' },
+      timeseries: [
+        { time: new Date(Date.now() - 20 * 60000).toISOString(), data: { instant: { details }, next_1_hours: { summary: { symbol_code: symbol } } } },
+        { time: new Date(Date.now() + 40 * 60000).toISOString(), data: { instant: { details: { air_temperature: 99 } }, next_1_hours: { summary: { symbol_code: 'heavysnow' } } } },
+      ],
+    },
+  });
+  let asked = '', askedHeaders = {}, expires = null, status = 200;
+  globalThis.fetch = async (url, opts) => {
     asked = String(url);
-    return { ok: true, json: async () => ({ current: { temperature_2m: 23.4, apparent_temperature: 21.2, weather_code: 2, wind_speed_10m: 24, relative_humidity_2m: 52, is_day: 1 } }) };
+    askedHeaders = (opts && opts.headers) || {};
+    return { ok: status >= 200 && status < 300, status, headers: { get: (k) => (String(k).toLowerCase() === 'expires' ? expires : null) }, json: async () => metBody() };
   };
   const call = async (origin, query = { lat: '37.9838', lng: '23.7275', units: 'c' }) => {
     const res = mockRes();
@@ -107,19 +118,50 @@ console.log('\nThe weather route answers client websites\n');
     return res;
   };
   try {
-    delete process.env.OPEN_METEO_API_KEY;
     const client = await call('https://www.freefromtravel.co.uk');
     ok('a client\'s own website may read it (Access-Control-Allow-Origin: *)', client.statusCode === 200 && client.headers['access-control-allow-origin'] === '*');
     const preview = await call('null');
     ok('so may the editor preview (a data: page, origin "null")', preview.headers['access-control-allow-origin'] === '*');
     ok('one cache entry per place for every site (no Vary: Origin)', !/origin/i.test(client.headers['vary'] || ''));
-    ok('the browser keeps it 5 minutes, the edge 15', /max-age=300/.test(client.headers['cache-control']) && /s-maxage=900/.test(client.headers['cache-control']));
-    ok('without a key it uses Open-Meteo\'s free host, with no key in the URL', asked.startsWith('https://api.open-meteo.com/v1/forecast?') && !/apikey=/.test(asked));
-    process.env.OPEN_METEO_API_KEY = 'test-commercial-key';
+    ok('asks MET Norway\'s Locationforecast, with only the coordinates we checked',
+      asked === 'https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=37.9838&lon=23.7275', asked);
+    const ua = String(askedHeaders['User-Agent'] || '');
+    ok('names itself in the User-Agent, as MET requires (a generic one gets a 403)', /TravelgenixWidgets\/\S+/.test(ua) && /widgets\.travelify\.io/.test(ua), ua);
+    process.env.MET_NO_USER_AGENT = 'TravelgenixWidgets/1.2 ops@example.com';
     await call('https://www.freefromtravel.co.uk');
-    ok('with OPEN_METEO_API_KEY set it uses the commercial host and sends the key', asked.startsWith('https://customer-api.open-meteo.com/v1/forecast?') && /apikey=test-commercial-key/.test(asked));
-    ok('and still only the coordinates we checked', /latitude=37\.9838/.test(asked) && /longitude=23\.7275/.test(asked));
-  } finally { delete process.env.OPEN_METEO_API_KEY; globalThis.fetch = realFetch; }
+    ok('MET_NO_USER_AGENT can replace it (e.g. to add an email)', askedHeaders['User-Agent'] === 'TravelgenixWidgets/1.2 ops@example.com');
+    delete process.env.MET_NO_USER_AGENT;
+    const b = client.body;
+    ok('answers in the same shape as before: 23°C, partly cloudy (WMO 2), daytime', b.ok === true && b.temp === 23 && b.code === 2 && b.desc === 'Partly cloudy' && b.isDay === true && b.source === 'met-norway', JSON.stringify(b));
+    ok('the hour nearest now, not a later one', b.temp !== 99);
+    ok('wind converted from m/s to km/h (6.7 m/s is 24 km/h)', b.wind === 24);
+    ok('"feels like" worked out, since MET sends none (19.6, so 20°C here)', b.feels === 20, String(b.feels));
+    ok('the browser keeps it 5 minutes, and with no Expires the edge keeps it 15', /max-age=300/.test(client.headers['cache-control']) && /s-maxage=900/.test(client.headers['cache-control']));
+    expires = new Date(Date.now() + 40 * 60000).toUTCString();
+    const later = await call('https://www.freefromtravel.co.uk');
+    ok('MET\'s Expires is honoured: 40 minutes away means fresh for about 40 minutes', /s-maxage=(239\d|2400)\b/.test(later.headers['cache-control']), later.headers['cache-control']);
+    expires = new Date(Date.now() + 5 * 3600000).toUTCString();
+    const capped = await call('https://www.freefromtravel.co.uk');
+    ok('but never more than an hour', /s-maxage=3600\b/.test(capped.headers['cache-control']));
+    expires = null;
+    status = 403;
+    const refused = await call('https://www.freefromtravel.co.uk');
+    ok('a refusal from MET is a clean 502 and is not cached', refused.statusCode === 502 && !refused.headers['cache-control']);
+    status = 200;
+    const f = await call('https://www.freefromtravel.co.uk', { lat: '37.9838', lng: '23.7275', units: 'f' });
+    ok('°F on request (74°F)', f.body.temp === 74 && f.body.units === 'f');
+  } finally { delete process.env.MET_NO_USER_AGENT; globalThis.fetch = realFetch; }
+  ok('MET symbols map onto WMO codes: clear sky, fair, cloudy, fog',
+    metSymbolToWmo('clearsky_night') === 0 && metSymbolToWmo('fair_day') === 1 && metSymbolToWmo('cloudy') === 3 && metSymbolToWmo('fog') === 45);
+  ok('rain, showers, sleet and snow keep their strength',
+    metSymbolToWmo('lightrain') === 61 && metSymbolToWmo('heavyrain') === 65 && metSymbolToWmo('rainshowers_day') === 81 &&
+    metSymbolToWmo('sleet') === 69 && metSymbolToWmo('lightsleetshowers_day') === 83 && metSymbolToWmo('heavysnow') === 75);
+  ok('anything with thunder is a thunderstorm, even MET\'s misspelt codes', metSymbolToWmo('heavyrainandthunder') === 95 && metSymbolToWmo('lightssleetshowersandthunder_day') === 95);
+  ok('an unknown symbol is no code at all (the widget then shows no words)', metSymbolToWmo('somethingnew') === null && metSymbolToWmo('') === null);
+  ok('feels like follows the BoM formula (30°C, 70%, still air: 35.8°C)', Math.abs(apparentTemp(30, 70, 0) - 35.77) < 0.01);
+  const night = shapeResponse({ properties: { timeseries: [{ time: new Date().toISOString(), data: { instant: { details: { air_temperature: 12 } }, next_1_hours: { summary: { symbol_code: 'clearsky_night' } } } }] } }, 'c');
+  ok('night is read from the symbol, and missing humidity or wind are left out', night.isDay === false && night.feels === null && night.wind === null && night.humidity === null);
+  ok('no temperature in the answer: nothing to show', shapeResponse({ properties: { timeseries: [{ time: new Date().toISOString(), data: { instant: { details: {} } } }] } }, 'c') === null);
 }
 
 // ── 3. The widget draws the strip ─────────────────────────────────────────
@@ -133,7 +175,7 @@ const GREECE = {
     season: ['off', 'off', 'shoulder', 'shoulder', 'best', 'best', 'best', 'best', 'best', 'shoulder', 'off', 'off'],
   },
 };
-const LIVE = { ok: true, temp: 23.4, feels: 21.2, code: 2, desc: 'Partly cloudy', icon: 'sun-cloud', wind: 24, humidity: 52, isDay: true, units: 'c' };
+const LIVE = { ok: true, temp: 23.4, feels: 21.2, code: 2, desc: 'Partly cloudy', icon: 'sun-cloud', wind: 24, humidity: 52, isDay: true, units: 'c', source: 'met-norway' };
 
 function makeWin({ answer = LIVE, status = 200, lang = 'en' } = {}) {
   const dom = new JSDOM('<!doctype html><html lang="' + lang + '"><body></body></html>', { url: 'https://www.clientsite.example/greece', runScripts: 'outside-only' });
@@ -169,7 +211,7 @@ function mount(win, cfg) {
   ok('it reads "Right now", 23°C, Partly cloudy', /Right now/.test(strip.textContent) && root.querySelector('.tgw-live-temp').textContent === '23°C' && root.querySelector('.tgw-live-desc').textContent === 'Partly cloudy');
   ok('feels like, wind in mph for an English reader, and humidity', /Feels like 21°/.test(strip.textContent) && /Wind 15 mph/.test(strip.textContent) && /Humidity 52%/.test(strip.textContent), strip.textContent);
   const credit = root.querySelector('.tgw-live-credit');
-  ok('credits Open-Meteo (CC BY 4.0) with a safe link', credit && credit.getAttribute('href') === 'https://open-meteo.com/' && /noopener/.test(credit.getAttribute('rel')) && /Open-Meteo/.test(credit.textContent));
+  ok('credits MET Norway, as its licence asks, with a safe link', credit && credit.getAttribute('href') === 'https://www.met.no/en' && /noopener/.test(credit.getAttribute('rel')) && credit.textContent === 'Data by MET Norway');
   ok('it sits under the header and above the month callout',
     !!root.querySelector('.tgw-header + .tgw-live-slot + .tgw-callout'));
   const cBtn = root.querySelector('.tgw-climate-unit[data-unit="F"]');
@@ -237,6 +279,13 @@ function mount(win, cfg) {
   await tick(10);
   const t = root.querySelector('.tgw-live').textContent;
   ok('in French it reads "En ce moment", "Orages", wind in km/h', /En ce moment/.test(t) && /Orages/.test(t) && /Vent 40 km\/h/.test(t), t);
+}
+
+{
+  const { win } = makeWin({ answer: Object.assign({}, LIVE, { code: 69 }), lang: 'de' });
+  const { root } = mount(win, { destinationData: GREECE });
+  await tick(10);
+  ok('sleet, which MET reports, has words too (German: Schneeregen)', /Schneeregen/.test(root.querySelector('.tgw-live').textContent));
 }
 
 {
