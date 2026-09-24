@@ -212,7 +212,10 @@ export function bookedProducts(order) {
  */
 export function tripShape(order) {
   const items = (order && Array.isArray(order.items)) ? order.items : [];
-  const flights = items.filter((it) => it && it.product === 'Flights');
+  // Every item that CARRIES flights, not only the ones sold as Flights: a
+  // package holiday (Jet2, TUI, EveryHoliday) is product 'Packages' with its
+  // flights on item.flights, exactly where a flight-only booking keeps them.
+  const flights = items.filter((it) => it && it.flights && typeof it.flights === 'object');
 
   let originIata = null;
   let destIata = null;
@@ -229,9 +232,20 @@ export function tripShape(order) {
   // and the moment they get back.
   let leaveAt = '';
   let backAt = '';
+  // The two airports' country codes, when the segment carries them. Car hire
+  // and airport extras both name a location by its IATA code, and a country
+  // alongside it is what the deep linking document's own examples send.
+  let originCountry = '';
+  let destCountry = '';
 
+  // THE SHAPE /api/retrieve-order ACTUALLY SENDS: item.flights.routes[], each
+  // with its segments (trimFlights). Until 24 Sep 2026 this read item.legs, a
+  // shape that exists only in the fixtures this file was first tested with, so
+  // on every real booking it found no flight at all: no arrival airport, and so
+  // no car hire tile, for any customer, from the day the section shipped. The
+  // tests now use the real shape, taken from ET122149.
   for (const f of flights) {
-    const legs = Array.isArray(f.legs) ? f.legs : [];
+    const legs = Array.isArray(f.flights.routes) ? f.flights.routes : [];
     for (let i = 0; i < legs.length; i++) {
       const segs = Array.isArray(legs[i] && legs[i].segments) ? legs[i].segments : [];
       if (!segs.length) continue;
@@ -247,6 +261,8 @@ export function tripShape(order) {
         outboundDate = dayOf(first.depart);
         leaveAt = clockOf(first.depart);
         arriveAt = clockOf(last && last.arrive);
+        originCountry = countryCode(first.origin && first.origin.country);
+        destCountry = countryCode(last && last.destination && last.destination.country);
       } else if (to && originIata && to === originIata) {
         inboundDate = dayOf(first.depart);
         departAt = clockOf(first.depart);
@@ -279,6 +295,8 @@ export function tripShape(order) {
     departAt,
     leaveAt,
     backAt,
+    originCountry,
+    destCountry,
     // Where the trip actually happens. The spec's location searches want a
     // NAME plus a country code ("loc=Barcelona&ctry=ES"), not an airport code,
     // so this comes off the accommodation's own location. A resort or state is
@@ -287,6 +305,12 @@ export function tripShape(order) {
     // Malaga. Falls back to the airport, which the spec allows via loct.
     place: placeOf(order, destIata),
   };
+}
+
+/** A two-letter country code, or ''. A country NAME is not a code ("Maldives"). */
+function countryCode(v) {
+  const c = typeof v === 'string' ? v.trim().toUpperCase() : '';
+  return /^[A-Z]{2}$/.test(c) ? c : '';
 }
 
 /** "2027-04-10T14:35" from a Travelify local-time string. */
@@ -496,7 +520,7 @@ export function upsellTiles(order, opts = {}) {
       const to = trip.departAt || (trip.inboundDate ? trip.inboundDate + 'T10:00'
         : (trip.checkOut ? trip.checkOut + 'T10:00' : ''));
       if (trip.destIata && from && to) {
-        anchor = { pup: trip.destIata, pupt: 'Airport', pupctry: (trip.place && trip.place.ctry) || '', fr: from, to };
+        anchor = { pup: trip.destIata, pupt: 'Airport', pupctry: (trip.place && trip.place.ctry) || trip.destCountry, fr: from, to };
       }
     } else if (product === 'Transfers') {
       // Read across from Car Rental, which is the nearest product the document
@@ -517,12 +541,13 @@ export function upsellTiles(order, opts = {}) {
       // and to the whole time the car is parked: out on the outbound departure,
       // back on the inbound arrival. Not the week in Paris, which is the reason
       // each product states its own anchor rather than sharing the trip's.
-      // The origin airport's country is not on the booking, and the document
-      // lets a location stand on its code when the type says Airport.
+      // The origin airport's country comes off the flight segment when it
+      // carries one; without it, the document lets a location stand on its code
+      // when the type says Airport.
       // st=AirportExtras&loc=<iata>&loct=Airport&fr=<datetime>&to=<datetime>
       if (trip.originIata && trip.leaveAt) {
         anchor = {
-          loc: trip.originIata, ctry: '', loct: 'Airport',
+          loc: trip.originIata, ctry: trip.originCountry, loct: 'Airport',
           fr: trip.leaveAt, to: trip.backAt || trip.leaveAt,
         };
       }

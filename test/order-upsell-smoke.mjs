@@ -41,14 +41,20 @@ const ALL_FOUR = ['CarRental', 'Transfers', 'AirportExtras', 'TicketsAttractions
 const REF = orderLinkRef(123456, '0CB5D0BC-51FE-4950-9201-E9AD792489F5');
 
 /** Andy's own example: a flight and hotel to Paris. */
+// A flight route in THE SHAPE /api/retrieve-order SENDS (trimFlights):
+// item.flights.routes[], each with a direction and its segments. The first
+// version of these fixtures put routes at item.legs, a shape no real order has,
+// and the module was written to match them; so every test passed while every
+// real booking found no flight and no car hire tile. Taken from ET122149.
 const leg = (from, to, depart, arrive) => ({ segments: [{ origin: { iataCode: from }, destination: { iataCode: to }, depart, arrive }] });
+const flightsItem = (...routes) => ({ product: 'Flights', flights: { routes } });
 const PARIS = {
   id: 123456,
   upsellsActive: ALL_FOUR,
   items: [
-    { product: 'Flights', legs: [
+    flightsItem(
       leg('LHR', 'CDG', '2027-04-10T07:00:00', '2027-04-10T09:20:00'),
-      leg('CDG', 'LHR', '2027-04-17T18:00:00', '2027-04-17T18:20:00')] },
+      leg('CDG', 'LHR', '2027-04-17T18:00:00', '2027-04-17T18:20:00')),
     { product: 'Accommodation', startDate: '2027-04-10T00:00:00',
       accommodation: { name: 'Hotel X', location: { city: 'Paris', country: 'FR' },
         units: [{ checkin: '2027-04-10', nights: 7 }] } },
@@ -185,9 +191,9 @@ console.log('\nbookings with less to go on');
 
   const flightOnly = {
     upsellsActive: ALL_FOUR,
-    items: [{ product: 'Flights', legs: [
+    items: [flightsItem(
       leg('MAN', 'ALC', '2027-06-01T06:00:00', '2027-06-01T09:30:00'),
-      leg('ALC', 'MAN', '2027-06-08T20:00:00', '2027-06-08T21:40:00')] }],
+      leg('ALC', 'MAN', '2027-06-08T20:00:00', '2027-06-08T21:40:00'))],
     summary: { travellers: [{ type: 'Adult' }, { type: 'Adult' }] },
   };
   const f = upsellTiles(flightOnly);
@@ -246,6 +252,45 @@ console.log('\nthe deep link, against Travelify\'s own examples');
 
   ok('no application id means no link', upsellUrl(find(tiles, 'CarRental'), '', REF) === '');
   ok('no tile means no link', upsellUrl(null, '474', REF) === '');
+}
+
+// ── A real booking, in the real shape ────────────────────────────────────────
+// ET122149, Exclusively Travel: Luton to Rhodes and back, flights only, as the
+// booking-dates suite carries it. Travelify dresses the airport-local times as
+// UTC ("...Z"), and bookingMoment reads those fields straight back.
+console.log('\na real booking in the shape retrieve-order sends');
+{
+  const route = (direction, from, to, depart, arrive, country) => ({ legID: 0, direction, duration: 255,
+    segments: [{ origin: { iataCode: from, name: from, country: country[0] }, destination: { iataCode: to, name: to, country: country[1] },
+      depart, arrive, cabinClass: 'Economy', marketingCarrier: { code: 'U2', name: 'Easyjet' }, flightNo: 'EZY2381' }] });
+  const ET122149 = {
+    id: 122149, upsellsActive: ALL_FOUR,
+    summary: { travellers: [{ type: 'Adult', title: 'Mrs', firstname: 'Gillian', surname: 'Clark' }] },
+    items: [{ id: 111089, product: 'Flights', startDate: '2026-10-02T00:00:00', duration: 14,
+      flights: { fareType: 'LowCost', routes: [
+        route('Outbound', 'LTN', 'RHO', '2026-10-02T12:55:00Z', '2026-10-02T19:10:00Z', ['GB', 'GR']),
+        route('Inbound', 'RHO', 'LTN', '2026-10-16T19:55:00Z', '2026-10-16T22:20:00Z', ['GR', 'GB'])] } }],
+  };
+  const trip = tripShape(ET122149);
+  ok('it finds the flight where the order really keeps it', trip.originIata === 'LTN' && trip.destIata === 'RHO', JSON.stringify(trip));
+  ok('and the clocks on it, read from the UTC fields', trip.arriveAt === '2026-10-02T19:10' && trip.departAt === '2026-10-16T19:55');
+  const car = find(upsellTiles(ET122149), 'CarRental');
+  ok('so a real booking is offered car hire, which none was before 24 Sep', !!car);
+  ok('picked up at Rhodes, with the country the segment carries', car && car.pup === 'RHO' && car.pupctry === 'GR', JSON.stringify(car));
+  const extras = find(upsellTiles(ET122149, { include: ['AirportExtras'] }), 'AirportExtras');
+  ok('and airport extras would be at Luton, in GB', extras && extras.loc === 'LTN' && extras.ctry === 'GB', JSON.stringify(extras));
+
+  // A package holiday keeps its flights on item.flights under product
+  // 'Packages', exactly where a flight booking does.
+  const pkg = { ...ET122149, items: [{ ...ET122149.items[0], product: 'Packages' }] };
+  ok('a package holiday\'s flights are found too', tripShape(pkg).destIata === 'RHO');
+
+  // The drift that hid this: the module and the trimmer must agree on where
+  // flights live.
+  const api = readFileSync(new URL('../api/retrieve-order.js', import.meta.url), 'utf8');
+  const mod = readFileSync(new URL('../public/_order-upsell.js', import.meta.url), 'utf8');
+  ok('the trimmer sends flights as routes, and the module reads routes',
+    /routes: Array\.isArray\(d\.routes\)/.test(api) && /f\.flights\.routes/.test(mod) && !/\bf\.legs\b/.test(mod));
 }
 
 // ── Travelify's rule, against their own table ────────────────────────────────
