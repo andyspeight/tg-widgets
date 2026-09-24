@@ -26,6 +26,11 @@ work:
    connection stays healthy and the traffic is visible, then skipped.
 4. **The PDF is attached**, as it already is when a customer emails themselves
    their booking.
+5. **So is the client's ATOL certificate** (24 Sep 2026), when the client holds
+   an ATOL, has switched the certificate on and the booking has a flight they
+   sold. `/api/booking-email` asks `/api/booking-pdf` for `document: 'atol'`
+   beside the pack, and the pack note says it is attached. A failed certificate
+   is logged and the email still goes. See `docs/atol-certificates.md`.
 
 ## How it fits together
 

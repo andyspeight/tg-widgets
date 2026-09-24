@@ -31,6 +31,8 @@ import { renderPdfHtml, renderPdfFooterTemplate, PDF_HEADER_TEMPLATE } from '../
 import { moneyOf, moneyOptsFromEnv } from './_lib/order-money.js';
 import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape, trimFlightSeating } from './_lib/travelify-items.js';
 import { travelifyAuthHeaders } from './_lib/travelify.js';
+import { normaliseAtolSettings, atolCertificateType, buildAtolCertificate, renderAtolCertificatePdf } from './_lib/atol-certificate.js';
+import { atolIssueDate } from './_lib/atol-issue-log.js';
 
 // ----- Constants (matched 1:1 with retrieve-order.js) -----
 
@@ -644,7 +646,12 @@ export default async function handler(req, res) {
     ? req.headers['x-tg-real-ip']
     : getClientIp(req);
 
-  const ipLimit = rateLimit(`pdf:ip:${realIp}`, isInternalCall ? 30 : 5);
+  // body.document === 'atol' asks for the booking's ATOL certificate instead of
+  // the booking pack (24 Sep 2026). Same lookup, same checks; its own rate
+  // bucket so a customer who downloads both is not locked out of either.
+  const wantsAtol = !!(req.body && typeof req.body === 'object' && req.body.document === 'atol')
+    || (typeof req.body === 'string' && /"document"\s*:\s*"atol"/.test(req.body));
+  const ipLimit = rateLimit(`${wantsAtol ? 'atol' : 'pdf'}:ip:${realIp}`, isInternalCall ? 30 : 5);
   if (!ipLimit.ok) {
     return res.status(429).json({ error: 'too_many_attempts', retryAfterMs: ipLimit.retryAfterMs });
   }
@@ -672,6 +679,7 @@ export default async function handler(req, res) {
   try {
     let appId;
     let apiKey;
+    let clientRecordId = '';
 
     if (widgetId === DEMO_WIDGET_SENTINEL) {
       // ----- Demo path -----
@@ -697,6 +705,7 @@ export default async function handler(req, res) {
       if (widgetStatus && widgetStatus !== 'Active' && widgetStatus !== 'Draft') return notFound(res);
 
       const ownerRecordId = (widget.fields?.ClientRecordId || '').trim();
+      clientRecordId = ownerRecordId;
       const clientEmail = (widget.fields?.ClientEmail || '').toLowerCase().trim();
       if (!ownerRecordId && !clientEmail) return notFound(res);
 
@@ -799,6 +808,29 @@ export default async function handler(req, res) {
       // Only accept HTTPS — Puppeteer will refuse mixed content and a typo'd
       // URL renders as a broken-image placeholder in the PDF.
       pdfLogoUrl = (logoUrl && /^https:\/\//i.test(logoUrl)) ? logoUrl : '';
+    }
+
+    // ─── The ATOL certificate, when that is what was asked for ───────────────
+    // The client's ATOL details and switches live in the widget's config
+    // (config.atol, set in the My Booking editor). No Chromium: the CAA's own
+    // form is filled in with pdf-lib. See api/_lib/atol-certificate.js.
+    if (body.document === 'atol') {
+      const settings = normaliseAtolSettings(widgetSettings && widgetSettings.atol);
+      const { type, reason } = atolCertificateType(order, settings);
+      if (!type) {
+        console.log(`[booking-pdf] no ATOL certificate for widget ${widgetId} ref ${orderRef}: ${reason}`);
+        return res.status(404).json({ error: 'no_certificate' });
+      }
+      const model = buildAtolCertificate(order, settings, { type, orderRef });
+      const { issuedOn, logged } = await atolIssueDate(model, { widgetId, clientRecordId, orderRef });
+      const bytes = Buffer.from(await renderAtolCertificatePdf(model, { issuedOn }));
+      console.log(`[booking-pdf] ATOL certificate ${model.reference} (${model.typeLabel}) for widget ${widgetId}, register: ${logged}`);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Length', bytes.length);
+      res.setHeader('Content-Disposition', `inline; filename="ATOL-certificate-${orderRef}.pdf"`);
+      res.setHeader('Cache-Control', 'private, no-store');
+      res.status(200);
+      return res.end(bytes);
     }
 
     const html = renderPdfHtml(order, {

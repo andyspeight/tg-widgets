@@ -554,6 +554,39 @@
           </div></div>
         </div>
 
+        <div class="section" data-section="atol">
+          <div class="section-header">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg> ATOL certificates</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-body"><div class="section-body-inner">
+            <div class="field-help" style="margin-bottom:12px;">If you hold an ATOL, your customers get their ATOL Certificate with their booking: a download on this page and a copy attached to their confirmation email. It is the CAA's own certificate, filled in with the booking.</div>
+            <div class="field">
+              <label for="atol-holder">ATOL Certificate Issuer</label>
+              <input type="text" id="atol-holder" maxlength="120" autocomplete="organization" placeholder="e.g. Sunshine Travel Limited">
+            </div>
+            <div class="field-help">Your company's legal name, exactly as it is registered with the CAA.</div>
+            <div class="field">
+              <label for="atol-number">ATOL number</label>
+              <input type="text" id="atol-number" maxlength="20" inputmode="text" placeholder="e.g. 12345">
+            </div>
+            <div class="field-help">The number on your ATOL licence.</div>
+            <div class="toggle-row"><span>Flight-only certificate<small>For flights sold on their own under your ATOL. Leave it off if you sell flights as the airline's agent with the ticket issued there and then: those are not ATOL protected.</small></span><button class="switch" data-atol="flightOnly" type="button" aria-label="Flight-only certificate"></button></div>
+            <div class="toggle-row"><span>Package certificate (single contract)<small>For a flight sold with a hotel or car hire, where the customer has one contract with you for all of it.</small></span><button class="switch" data-atol="packageSingle" type="button" aria-label="Package certificate, single contract"></button></div>
+            <div class="toggle-row"><span>Package certificate (multi-contract)<small>For a flight sold with a hotel or car hire as a package, where the customer has a separate contract for each part. Only one of the two package certificates can be on.</small></span><button class="switch" data-atol="packageMulti" type="button" aria-label="Package certificate, multi-contract"></button></div>
+            <div class="field-help" id="atol-status" style="margin-top:10px;"></div>
+            <div class="rem-card">
+              <div class="rem-card-info">
+                <div class="rem-card-title">See it with your details</div>
+                <div class="rem-card-status">A made-up booking, marked SAMPLE</div>
+              </div>
+              <button type="button" class="rem-edit-btn" data-atol-preview="flight-only">Flight-only</button>
+              <button type="button" class="rem-edit-btn" data-atol-preview="package">Package</button>
+            </div>
+            <div class="field-help" style="margin-top:10px;">A certificate is only issued once both details above are filled in and that certificate is switched on. Flights inside a tour operator's own package, such as Jet2 Holidays, come with that operator's certificate, so none is issued for them here. When a booking changes, its certificate changes with it and gets a new reference, as the CAA requires.</div>
+          </div></div>
+        </div>
+
         <div class="section" data-section="embed">
           <div class="section-header">
             <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Embed code</h3>
@@ -916,6 +949,105 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
     });
   });
 
+  // ===== ATOL certificates (24 Sep 2026) =====
+  // The client's legal name and ATOL number, and one switch per certificate.
+  // Saved in the config as `atol`; read on the server by
+  // api/_lib/atol-certificate.js, which issues nothing until both details are
+  // there and the matching switch is on. The two package certificates are one
+  // choice (a company sells its packages one way or the other), so switching
+  // one on switches the other off.
+  function atolConfig() {
+    if (!state.config.atol || typeof state.config.atol !== 'object') state.config.atol = {};
+    return state.config.atol;
+  }
+  // Whether a customer's email would carry a certificate: both details and at
+  // least one certificate switched on. The email preview shows the note then.
+  function atolPreviewOn() {
+    const a = (state.config && state.config.atol) || {};
+    return !!(String(a.holderName || '').trim() && String(a.atolNumber || '').trim()
+      && (a.flightOnly === true || a.packageSingle === true || a.packageMulti === true));
+  }
+  function atolStatus() {
+    const a = atolConfig();
+    const el = document.getElementById('atol-status');
+    if (!el) return;
+    const ready = !!(String(a.holderName || '').trim() && String(a.atolNumber || '').trim());
+    const on = ['flightOnly', 'packageSingle', 'packageMulti'].filter((k) => a[k] === true);
+    el.textContent = !on.length ? 'No certificates are switched on.'
+      : !ready ? 'Add your legal name and ATOL number, or no certificate will be issued.'
+      : 'Certificates are being issued to customers with a flight booked through you.';
+  }
+  function markEditorDirty() {
+    if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
+  }
+  [['atol-holder', 'holderName'], ['atol-number', 'atolNumber']].forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', () => {
+      atolConfig()[key] = key === 'atolNumber' ? el.value.toUpperCase() : el.value;
+      atolStatus();
+      markEditorDirty();
+      if (state.previewTab === 'email') schedulePreview();
+    });
+  });
+  document.querySelectorAll('[data-atol]').forEach(sw => {
+    sw.addEventListener('click', () => {
+      const key = sw.dataset.atol;
+      const on = !sw.classList.contains('on');
+      sw.classList.toggle('on', on);
+      atolConfig()[key] = on;
+      if (on && (key === 'packageSingle' || key === 'packageMulti')) {
+        const other = key === 'packageSingle' ? 'packageMulti' : 'packageSingle';
+        atolConfig()[other] = false;
+        const osw = document.querySelector('[data-atol="' + other + '"]');
+        if (osw) osw.classList.remove('on');
+      }
+      atolStatus();
+      markEditorDirty();
+      if (state.previewTab === 'email') schedulePreview();
+    });
+  });
+  // Preview: the certificate with the client's details as typed, on a made-up
+  // booking, with the CAA's SAMPLE watermark left on. The tab is opened inside
+  // the click so a pop-up blocker lets it through; the PDF follows.
+  document.querySelectorAll('[data-atol-preview]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const a = atolConfig();
+      if (!String(a.holderName || '').trim() || !String(a.atolNumber || '').trim()) {
+        toast('Add your legal name and ATOL number first, then preview.', 'error');
+        return;
+      }
+      const kind = btn.dataset.atolPreview;
+      const type = kind === 'package' ? (a.packageMulti ? 'package-multi' : 'package-single') : 'flight-only';
+      const win = window.open('', '_blank');
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/atol-certificate-preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type, atol: { holderName: a.holderName || '', atolNumber: a.atolNumber || '' } }),
+        });
+        if (!res.ok) {
+          let msg = 'The preview could not be drawn. Please try again.';
+          try { const j = await res.json(); if (j && j.error) msg = j.error; } catch (_) {}
+          throw new Error(msg);
+        }
+        const url = URL.createObjectURL(await res.blob());
+        if (win) win.location.href = url;
+        else {
+          const link = document.createElement('a');
+          link.href = url; link.download = 'ATOL-certificate-sample.pdf';
+          document.body.appendChild(link); link.click(); link.remove();
+        }
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+      } catch (e) {
+        if (win) win.close();
+        toast(e.message, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  });
+
   // ===== Copy fields =====
   ['copy-title', 'copy-subtitle', 'copy-subtitle-short', 'copy-eyebrow', 'support-email', 'support-phone', 'page-url'].forEach(id => {
     const el = document.getElementById(id);
@@ -1104,6 +1236,8 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
       layout: (layout && layout.length) ? layout : undefined,
       destination: MOCK_DESTINATION,
       upsell: MOCK_UPSELL,
+        // The pack note mentions the ATOL certificate when the client issues them.
+        atolCertificate: atolPreviewOn(),
       baseUrl: location.origin,
     });
     let note;
@@ -1374,6 +1508,8 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
         layout: state.config.confirmationEmail?.layout,
         destination: MOCK_DESTINATION,
         upsell: MOCK_UPSELL,
+        // The pack note mentions the ATOL certificate when the client issues them.
+        atolCertificate: atolPreviewOn(),
         baseUrl: location.origin,
       });
       _writeIframe('email-iframe', html);
@@ -1597,6 +1733,13 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
         const v = state.config.upsell?.products?.[sw.dataset.upsell];
         sw.classList.toggle('on', v !== false);
       });
+      // ATOL certificates. Every switch is OFF unless the client turned it on:
+      // this is a legal document, never issued by default.
+      const atol = state.config.atol || {};
+      document.getElementById('atol-holder').value = atol.holderName || '';
+      document.getElementById('atol-number').value = atol.atolNumber || '';
+      document.querySelectorAll('[data-atol]').forEach(sw => sw.classList.toggle('on', atol[sw.dataset.atol] === true));
+      atolStatus();
       // Luna integration
       if (!state.config.lunaIntegration) state.config.lunaIntegration = { connected: false, clientName: '' };
       renderLunaStatus();

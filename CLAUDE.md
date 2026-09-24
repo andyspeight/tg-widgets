@@ -44,6 +44,14 @@ Owner: Andy Speight, CEO, Travelgenix.
   `api/v1/booking-webhook.js`, `api/cron/booking-confirmations.js` or the block
   vocabulary in `public/_booking-email-template.js`.
 
+- **ATOL certificates in My Booking** (the CAA's own certificate, filled in for
+  a booking and attached to the page and the confirmation email):
+  `docs/atol-certificates.md`. Read it before touching
+  `api/_lib/atol-certificate.js`, the templates in `api/_data/atol/`, the ATOL
+  Certificates register or the editor's ATOL section. The certificate is the
+  CAA's file with only the SAMPLE watermark removed: never redraw it. Airtable
+  record `recEqxD9kk0uG4UYK`.
+
 - **Acting as a client (staff) and Control's "View as client"**:
   `docs/act-as-scoping-spec.md`. Read it before touching `api/_lib/auth/actas.js`,
   `/api/auth/act-as/start`, `/api/auth/switch-client`, `staff-switcher.js` or the

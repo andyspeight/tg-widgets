@@ -34,6 +34,7 @@ import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClie
 import { moneyOf, moneyOptsFromEnv } from './_lib/order-money.js';
 import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape, trimFlightSeating } from './_lib/travelify-items.js';
 import { upsellTiles, upsellUrl, orderLinkRef } from '../public/_order-upsell.js';
+import { normaliseAtolSettings, atolCertificateType, ATOL_TYPES } from './_lib/atol-certificate.js';
 import { bookingMoment } from '../public/_order-stays.js';
 import { readWidgetSettings } from './_lib/booking-email-brand.js';
 
@@ -1602,7 +1603,19 @@ export default async function handler(req, res) {
       upsell = [];
     }
 
-    return res.status(200).json({ order, upsell });
+    // 7. Whether this booking comes with the client's ATOL certificate, and
+    // which one. Only the answer goes to the page, which then offers the
+    // download; the certificate itself is drawn by /api/booking-pdf with
+    // document 'atol', from the same rule. Never fatal, like the upsell.
+    let atol = null;
+    try {
+      const { type } = atolCertificateType(order, normaliseAtolSettings(widgetConfig && widgetConfig.atol));
+      if (type) atol = { type, label: ATOL_TYPES[type].label };
+    } catch (err) {
+      console.error('[retrieve-order] ATOL decision failed, booking returned without it:', err && err.message);
+    }
+
+    return res.status(200).json({ order, upsell, atol });
   } catch (err) {
     console.error('retrieve-order error:', err.message);
     return notFound(res);

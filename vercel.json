@@ -44,7 +44,10 @@
     "api/booking-pdf.js": {
       "memory": 1024,
       "maxDuration": 30,
-      "includeFiles": "node_modules/@sparticuz/chromium/**"
+      "includeFiles": "{node_modules/@sparticuz/chromium/**,api/_data/atol/*.pdf}"
+    },
+    "api/atol-certificate-preview.js": {
+      "includeFiles": "api/_data/atol/*.pdf"
     },
     "api/booking-email.js": {
       "memory": 512,
