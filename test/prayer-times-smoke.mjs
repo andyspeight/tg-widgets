@@ -398,7 +398,8 @@ async function run() {
     ok('renders instantly on construction (model present, no await)', !!w._model);
     ok('not flagged stale', w._stale === false);
     const rows0 = el.shadowRoot.querySelectorAll('.tgpt-row');
-    ok('shows five prayer rows immediately', rows0.length === 5);
+    // Sunrise is on by default (showSunrise), so five prayers plus Sunrise.
+    ok('shows the five prayers and Sunrise immediately', Array.prototype.map.call(rows0, r => r.getAttribute('data-key')).join(',') === 'Fajr,Sunrise,Dhuhr,Asr,Maghrib,Isha');
     ok('times are HH:MM', Array.prototype.every.call(rows0, r => /^\d{2}:\d{2}$/.test(r.querySelector('.tgpt-row-time').textContent.trim())));
     const expectDate = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(new Date());
     ok('header shows today in the location timezone', el.shadowRoot.querySelector('.tgpt-greg').textContent.trim() === expectDate);
@@ -409,13 +410,15 @@ async function run() {
   {
     // Hard offline: coords+tz seeded, every fetch rejects → still renders locally.
     const { win } = makeDom();
-    win.localStorage.setItem('tgpt_loc_c:21.423,39.826', JSON.stringify({ lat: 21.4225, lng: 39.8262, tz: 'Asia/Riyadh' }));
+    // The key is built the way the widget builds it (toFixed(3)); 21.4225 rounds
+    // to 21.422 in floating point, so a hand-typed "21.423" is never read.
+    win.localStorage.setItem('tgpt_loc_c:' + (21.4225).toFixed(3) + ',' + (39.8262).toFixed(3), JSON.stringify({ lat: 21.4225, lng: 39.8262, tz: 'Asia/Riyadh' }));
     let calls = 0;
     win.fetch = () => { calls++; return Promise.reject(new Error('offline')); };
     const el = win.document.createElement('div');
     win.document.body.appendChild(el);
     const w = new win.TGPrayerWidget(el, { method: 4, school: 0, latitudeAdjustment: 3, locations: [{ mode: 'coords', lat: 21.4225, lng: 39.8262, label: 'Makkah' }] });
-    ok('renders with no working network (local compute)', !!w._model && el.shadowRoot.querySelectorAll('.tgpt-row').length === 5);
+    ok('renders with no working network (local compute)', !!w._model && el.shadowRoot.querySelectorAll('.tgpt-row').length === 6);
     await delay(20);
     ok('reconcile attempted, and its failure left the local render intact', calls >= 1 && !!w._model);
     w.destroy();
