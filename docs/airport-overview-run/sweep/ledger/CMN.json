@@ -1,0 +1,254 @@
+{
+ "iata": "CMN",
+ "id": "recNCpbNavAor6BLI",
+ "name": "Mohammed V International Airport",
+ "country": "Morocco",
+ "wikipedia": "https://en.wikipedia.org/wiki/Mohammed_V_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Morocco's busiest airport and one of the ten busiest in Africa, in Nouaceur Province, serving Casablanca. It is the hub for Royal Air Maroc, Royal Air Maroc Express and Air Arabia Maroc, and handled around 7.6 million passengers in 2022.\n\nThe train is the easy way in and out. The Al Bidaoui service is run by ONCF every hour from four in the morning until eleven at night and reaches both of Casablanca's main stations, Casa-Port and Casa-Voyageurs. By road the A3 runs from Casablanca and from Marrakesh, and the A1 from Rabat and El Jadida.\n\nThe airport was built by the United States in early 1943, after Operation Torch, as Berrechid Airfield. It worked as an auxiliary field for Anfa Airport in Casablanca, a stop on the Cairo to Dakar route across North Africa and the terminus of transatlantic flights running by way of the Azores to Nova Scotia. It was handed over for civil use in 1945.\n\nIt is named after King Mohammed V.",
+ "after": "Morocco's busiest airport, serving Casablanca from about 20 to 25 km south of the city centre in a straight line. It is the hub for Royal Air Maroc, and Royal Air Maroc Express flies domestic routes from here.",
+ "claims": [
+  {
+   "claim": "Morocco's busiest airport",
+   "verdict": "confirmed",
+   "inAfter": "Morocco's busiest airport",
+   "note": "Busiest by passengers. ONDA's figures for the first half of 2026, as Morocco World News reported them on 16 July 2026, put Mohammed V first with 5,756,388 passengers, narrowly ahead of Marrakech Menara with 5,636,776. Wikipedia says it was the busiest in 2022. Hespress (6 September 2026, citing ONDA) has nearly 6.95 million at Mohammed V in the first seven months of 2026, against 22.28 million at all Moroccan airports.",
+   "sources": [
+    {
+     "file": "mwn-h1-2026",
+     "org": "Morocco World News (reporting ONDA's statistics)",
+     "dated": "2026-07-16 (on the page)",
+     "quote": [
+      "Jul, 16, 2026",
+      "Among Morocco’s main airports, Mohammed V International Airport recorded the highest passenger volume, with 5,756,388 travelers",
+      "It was followed by Marrakech Menara Airport, which handled 5,636,776 passengers"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-16",
+     "quote": "it was the busiest airport in Morocco"
+    }
+   ]
+  },
+  {
+   "claim": "serving Casablanca",
+   "verdict": "confirmed",
+   "inAfter": "serving Casablanca",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Casablanca"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-16",
+     "quote": "is an international airport serving Casablanca, Morocco"
+    }
+   ]
+  },
+  {
+   "claim": "about 20 to 25 km south of the city centre in a straight line",
+   "verdict": "corrected",
+   "inAfter": "from about 20 to 25 km south of the city centre in a straight line",
+   "note": "Replaces 'in Nouaceur Province' (cut below, Wikipedia alone) with what two independent position sets show: OurAirports' airport with GeoNames' centre of Casablanca gives 24.6 km at 175 degrees, and Wikipedia's own coordinates for Casablanca and the airport give 18.5 km at 182 degrees, both south. The two differ only in where each puts the city centre, so a range is given. No road distance is given: no saved source states one.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 24.6 km (15.3 miles)",
+      "Bearing from the city centre: 175 degrees, which is south"
+     ]
+    },
+    {
+     "file": "wikipedia-coords",
+     "org": "Wikimedia",
+     "dated": "revisions of 2026-09-23 (Casablanca) and 2026-08-16 (the airport)",
+     "quote": "Straight-line distance from Casablanca to Mohammed V International Airport, from the Wikipedia coordinates: 18.5 km, bearing 182 degrees, which is south"
+    }
+   ]
+  },
+  {
+   "claim": "the hub for Royal Air Maroc",
+   "verdict": "confirmed",
+   "inAfter": "It is the hub for Royal Air Maroc",
+   "note": "oneworld, the alliance Royal Air Maroc belongs to, calls Mohammed V its main hub; Royal Air Maroc's own network page lists the worldwide destinations it serves from Casablanca, and its transit page describes connections at Mohammed V Airport.",
+   "sources": [
+    {
+     "file": "oneworld-ram",
+     "org": "oneworld (the airline alliance, oneworld.com)",
+     "dated": "read 2026-09-23 (live member page)",
+     "quote": "Its main hub is located at Mohammed V airport in Casablanca."
+    },
+    {
+     "file": "ram-our-network",
+     "org": "Royal Air Maroc (royalairmaroc.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Discover all the worldwide destinations served by Royal Air Maroc from Casablanca:"
+    },
+    {
+     "file": "ram-airport-transit",
+     "org": "Royal Air Maroc (royalairmaroc.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Transform your transit time into a privileged moment of comfort at Mohammed V Airport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-16",
+     "quote": "The airport serves as hub for Royal Air Maroc, Royal Air Maroc Express and Air Arabia Maroc."
+    }
+   ]
+  },
+  {
+   "claim": "Royal Air Maroc Express flies domestic routes from here",
+   "verdict": "softened",
+   "inAfter": "and Royal Air Maroc Express flies domestic routes from here.",
+   "note": "Was 'the hub for ... Royal Air Maroc Express'. oneworld describes it as Royal Air Maroc's regional subsidiary flying domestic routes to and from Mohammed V; no saved source other than Wikipedia calls the airport its hub, so the text says only that it flies domestic routes from here.",
+   "sources": [
+    {
+     "file": "oneworld-ram",
+     "org": "oneworld (the airline alliance, oneworld.com)",
+     "dated": "read 2026-09-23 (live member page)",
+     "quote": [
+      "Royal Air Maroc Express, a regional subsidiary of Royal Air Maroc, operates 6 ATR-72.",
+      "It provides domestic flights from and to Mohammed V airport in Casablanca and other local destinations across Morocco."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-16",
+     "quote": "The airport serves as hub for Royal Air Maroc, Royal Air Maroc Express and Air Arabia Maroc."
+    }
+   ]
+  },
+  {
+   "claim": "one of the ten busiest in Africa",
+   "verdict": "cut",
+   "wasBefore": "and one of the ten busiest in Africa",
+   "why": "A 2022 ranking (Wikipedia: fourth in Africa in 2022, citing Hespress). No ranking from the last 12 months could be read, so it is not repeated."
+  },
+  {
+   "claim": "in Nouaceur Province",
+   "verdict": "cut",
+   "wasBefore": "in Nouaceur Province",
+   "why": "Wikipedia alone. The airport's own site (aeroportcasablanca.ma) shows Cloudflare's 'Just a moment... Enable JavaScript and cookies to continue' check and ONDA's (onda.ma) is behind Cloudflare too, so no address could be read. The text gives the airport's position from two coordinate sets instead (above)."
+  },
+  {
+   "claim": "the hub for Royal Air Maroc Express and Air Arabia Maroc",
+   "verdict": "cut",
+   "wasBefore": "Royal Air Maroc Express and Air Arabia Maroc",
+   "why": "Royal Air Maroc Express is softened to flying domestic routes from here (above). Air Arabia Maroc rests on Wikipedia alone: airarabia.com refused the link lister (403), so it was not fetched with any other tool, and Hespress's Air Arabia index has no report from the last 12 months of Air Arabia Maroc flying from Casablanca."
+  },
+  {
+   "claim": "handled around 7.6 million passengers in 2022",
+   "verdict": "cut",
+   "wasBefore": "and handled around 7.6 million passengers in 2022",
+   "why": "Four years old, and no newer figure has two sources of its own. ONDA, which publishes the figures, is behind Cloudflare. Wikipedia's infobox gives 10,449,372 for 2024 (citing France Aviation Civile Services, whose April 2026 bulletin page carries no figures as text). No full-year 2025 figure for Mohammed V was found in the indexes of Morocco World News or Hespress English, and MAP's English site refused the link lister (403). The 2026 figures found each rest on one outlet reporting ONDA: 5,756,388 in the first half, up 10.13 per cent (Morocco World News, 16 July 2026), and nearly 6.95 million in the first seven months, up 9.7 per cent (Hespress, 6 September 2026). 'Morocco's busiest airport' is kept (above). A current total can go back when a second source for the same period is found.",
+   "sources": [
+    {
+     "file": "mwn-h1-2026",
+     "org": "Morocco World News (reporting ONDA's statistics)",
+     "dated": "2026-07-16 (on the page)",
+     "quote": "Mohammed V International Airport recorded the highest passenger volume, with 5,756,388 travelers, marking a 10.13% increase compared with the first six months of 2025."
+    },
+    {
+     "file": "hespress-cmn-jul2026",
+     "org": "Hespress English (reporting ONDA)",
+     "dated": "2026-09-06 (on the page)",
+     "quote": [
+      "Hespress EN Sunday 6 September 2026",
+      "Casablanca’s Mohammed V International Airport handled nearly 6.95 million passengers during the first seven months of 2026, up 9.7% from 6.34 million a year earlier, Morocco’s National Airports Office said."
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-16",
+     "quote": [
+      "stat1_header = Passengers (2024)",
+      "stat1_data = 10,449,372"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the Al Bidaoui train, run by ONCF hourly from 04:00 to 23:00, to Casa-Port and Casa-Voyageurs",
+   "verdict": "cut",
+   "wasBefore": "The train is the easy way in and out. The Al Bidaoui service is run by ONCF every hour from four in the morning until eleven at night and reaches both of Casablanca's main stations, Casa-Port and Casa-Voyageurs.",
+   "why": "Wikipedia alone. ONCF's two sites (oncf.ma and oncf-voyages.ma) each answered 502 to one try; Hespress's and Morocco World News's ONCF indexes, Hespress's July 2026 report on Casablanca's new regional rail stations and Visit Morocco's getting-around page say nothing about the airport train. The biggest practical loss in this text: restore it when ONCF's timetable can be read."
+  },
+  {
+   "claim": "the A3 from Casablanca and Marrakesh, the A1 from Rabat and El Jadida",
+   "verdict": "cut",
+   "wasBefore": "By road the A3 runs from Casablanca and from Marrakesh, and the A1 from Rabat and El Jadida.",
+   "why": "Wikipedia alone. The page it cites is ONDA's access page on onda.ma, which is behind Cloudflare, as is the airport's own site."
+  },
+  {
+   "claim": "built by the United States in early 1943, after Operation Torch, as Berrechid Airfield",
+   "verdict": "cut",
+   "wasBefore": "The airport was built by the United States in early 1943, after Operation Torch, as Berrechid Airfield.",
+   "why": "Wikipedia alone; the article cites no source for its 1940s history and none was found."
+  },
+  {
+   "claim": "an auxiliary field for Anfa, a stop on the Cairo to Dakar route, the terminus of flights via the Azores to Nova Scotia",
+   "verdict": "cut",
+   "wasBefore": "It worked as an auxiliary field for Anfa Airport in Casablanca, a stop on the Cairo to Dakar route across North Africa and the terminus of transatlantic flights running by way of the Azores to Nova Scotia.",
+   "why": "Wikipedia alone, uncited."
+  },
+  {
+   "claim": "handed over for civil use in 1945",
+   "verdict": "cut",
+   "wasBefore": "It was handed over for civil use in 1945.",
+   "why": "Wikipedia alone, uncited."
+  },
+  {
+   "claim": "named after King Mohammed V",
+   "verdict": "cut",
+   "wasBefore": "It is named after King Mohammed V.",
+   "why": "Wikipedia alone. The saved sources give the airport's name (Mohammed V) but none says whom it honours, and the airport's and ONDA's sites could not be read."
+  },
+  {
+   "claim": "UK routes in 2025: Heathrow, Gatwick, Manchester and Stansted",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing. The UK CAA's 2025 table counts passengers between Casablanca and Heathrow (112,043, down 11.8 per cent), Gatwick (78,893), Manchester (32,857, more than double 2024's 15,712) and Stansted (11,338, none in 2024). No saved page names the airline on each UK route.",
+   "sources": [
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2026-02-25 (run date on each row; 2025 data)",
+     "quote": [
+      "25/02/2026 16:41,2025,30,NORTH AFRICA,MOROCCO,1,HEATHROW,CASABLANCA MOHAMED V,112043,112043,0,127079,127079,0,-11.83201",
+      "25/02/2026 16:41,2025,30,NORTH AFRICA,MOROCCO,1,GATWICK,CASABLANCA MOHAMED V,78893,78893,0,83659,83659,0,-5.69694",
+      "25/02/2026 16:41,2025,30,NORTH AFRICA,MOROCCO,2,MANCHESTER,CASABLANCA MOHAMED V,32857,32857,0,15712,15712,0,109.12042",
+      "25/02/2026 16:41,2025,30,NORTH AFRICA,MOROCCO,1,STANSTED,CASABLANCA MOHAMED V,11338,11338,0,0,0,0,0"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a new terminal for 2029, a new parallel runway and a high-speed rail station",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing, and on Wikipedia alone. Wikipedia says ONDA put a new H-shaped terminal out to tender in May 2025 (about US$1.6 billion, capacity from about 15 to 35 million a year, due by 2029 for the 2030 World Cup), with a new parallel runway, a new control tower and a high-speed rail station, and that earthworks began in mid-2025. Its source, Reuters, is blocked by the session's egress policy (one try, not retried), and nothing from the last 12 months was found. Works at the airport may matter to travellers, so worth checking by hand.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-16",
+     "quote": [
+      "In May 2025 Morocco's airports authority Moroccan Airports Authority launched an international tender to build a new H-shaped terminal at Mohammed V International Airport",
+      "is expected to be completed by 2029 in time for the 2030 FIFA World Cup",
+      "Earthworks began in mid-2025 with main construction slated to follow and full operation targeted for 2029."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

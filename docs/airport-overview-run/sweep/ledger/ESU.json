@@ -1,0 +1,181 @@
+{
+ "iata": "ESU",
+ "id": "rec2lA0hfLnubYJnR",
+ "name": "Essaouira-Mogador Airport",
+ "country": "Morocco",
+ "wikipedia": "https://en.wikipedia.org/wiki/Essaouira-Mogador_Airport",
+ "audited": "2026-09-23",
+ "before": "Essaouira's own airport, 15 km from the city centre and small enough that arrivals are quick. It has a single runway of 2,100 metres and a modest schedule, which is part of the appeal: clients who would otherwise fly into Marrakech and drive across country can land almost on the coast.\n\nGetting into town is easy either way. Taxis wait outside, and the number 2 local bus stops at the airport on its route between Bab Doukkala and Sidi Kaouki, at a small fraction of the taxi fare. For anyone heading to the beaches south of town, that bus runs the right way.\n\nThe airport is still widely listed under the city's older name, Mogador, so both names appear on schedules.",
+ "after": "Essaouira's own airport, 15 km from the city centre, with a single runway. Clients who would otherwise fly into Marrakech and drive across country can land almost on the coast.\n\nIts full name, Essaouira-Mogador, joins the city's name to its older one, Mogador.",
+ "claims": [
+  {
+   "claim": "Essaouira's own airport",
+   "verdict": "confirmed",
+   "inAfter": "Essaouira's own airport",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Essaouira"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "is an international airport serving Essaouira"
+    }
+   ]
+  },
+  {
+   "claim": "15 km from the city centre",
+   "verdict": "confirmed",
+   "inAfter": "15 km from the city centre",
+   "note": "Straight line 15.3 km from the GeoNames centre of Essaouira (a ratio of 0.98).",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from the city centre: 15.3 km (9.5 miles)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "The airport is 15 km or 9.3 miles from the city center."
+    }
+   ]
+  },
+  {
+   "claim": "a single runway",
+   "verdict": "confirmed",
+   "inAfter": "with a single runway.",
+   "note": "The runway's length is cut (below): the two sources disagree on it.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 16/34: 2,607 m (8,553 ft), BIT",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": "It has one runway designated 16/34"
+    }
+   ]
+  },
+  {
+   "claim": "its full name joins Essaouira to the city's older name, Mogador",
+   "verdict": "softened",
+   "inAfter": "Its full name, Essaouira-Mogador, joins the city's name to its older one, Mogador.",
+   "note": "Was 'The airport is still widely listed under the city's older name, Mogador, so both names appear on schedules.' The name and the older name have two sources each; that the airport is 'widely listed' under Mogador on schedules has none (Ryanair's own data lists it simply as Essaouira, as does the UK CAA), so that part is cut (below).",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Airport: Essaouira-Mogador Airport (OurAirports GMMI, IATA ESU)"
+    },
+    {
+     "file": "visitmorocco-essaouira",
+     "org": "Moroccan National Tourist Office (Visit Morocco, visitmorocco.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Essaouira-Mogador, a wild beauty | Moroccan National Tourist Office",
+      "Essaouira, the ancient Mogador"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-26",
+     "quote": [
+      "Essaouira-Mogador Airport",
+      "serving Essaouira (formerly known as Mogador)"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "small enough that arrivals are quick",
+   "verdict": "cut",
+   "wasBefore": "and small enough that arrivals are quick",
+   "why": "No source says how quick arrivals are; Wikipedia gives no traffic or terminal figures, and ONDA, the operator, is behind Cloudflare."
+  },
+  {
+   "claim": "a runway of 2,100 metres",
+   "verdict": "cut",
+   "wasBefore": "of 2,100 metres",
+   "why": "The sources disagree: Wikipedia gives 2,100 by 45 metres (citing DAFIF), OurAirports 2,607 metres (8,553 ft). No third source (Morocco's aeronautical publication or ONDA) could be read, ONDA being behind Cloudflare, so the length is left out and only the single runway is kept."
+  },
+  {
+   "claim": "a modest schedule, which is part of the appeal",
+   "verdict": "cut",
+   "wasBefore": "and a modest schedule, which is part of the appeal:",
+   "why": "A judgement with no source behind it. The routes Ryanair lists and the UK figures are held back (below)."
+  },
+  {
+   "claim": "getting into town is easy either way",
+   "verdict": "cut",
+   "wasBefore": "Getting into town is easy either way.",
+   "why": "Framing for the taxi and bus lines, which are cut (below)."
+  },
+  {
+   "claim": "taxis wait outside; the number 2 bus between Bab Doukkala and Sidi Kaouki stops at the airport, at a fraction of the taxi fare, and runs towards the beaches south of town",
+   "verdict": "cut",
+   "wasBefore": "Taxis wait outside, and the number 2 local bus stops at the airport on its route between Bab Doukkala and Sidi Kaouki, at a small fraction of the taxi fare. For anyone heading to the beaches south of town, that bus runs the right way.",
+   "why": "All from one unreferenced Wikipedia paragraph (taxi 150 dirhams, bus 8 dirhams). Alsa's Moroccan site (alsa.ma) refused the link lister (403) and was not tried with another tool; Visit Morocco's Essaouira page and Hespress's Essaouira index say nothing about the airport's transport; the tourism council's domain linked from Visit Morocco (visiteessaouira.com) now serves a Google redirect page, which was discarded unread. A bus route and fares need two sources, one from the last 12 months. Worth restoring when the town's bus operator can be read."
+  },
+  {
+   "claim": "widely listed under Mogador; both names appear on schedules",
+   "verdict": "cut",
+   "wasBefore": "is still widely listed under the city's older name, Mogador, so both names appear on schedules",
+   "why": "No source says how schedules list it. Ryanair's own airport data names it 'Essaouira', with no aliases, and the UK CAA's table 'ESSAOUIRA'. The name itself is kept (above).",
+   "sources": [
+    {
+     "file": "ryanair-esu",
+     "org": "Ryanair (its own airport data, ryanair.com)",
+     "dated": "read 2026-09-23 (live data)",
+     "quote": "{\"iataCode\":\"ESU\",\"name\":\"Essaouira\",\"seoName\":\"essaouira\",\"aliases\":[]"
+    }
+   ]
+  },
+  {
+   "claim": "Ryanair from London Stansted, the only UK route in 2025",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing. Ryanair's own airport data lists Essaouira routes to London Stansted, Paris Beauvais, Marseille, Brussels Charleroi, Brussels, Weeze (for Dusseldorf), Madrid and Tangier. The UK CAA's 2025 table has Stansted as the only UK airport with passengers to Essaouira: 29,080 in 2025 (29,201 in 2024). The old text named no airline.",
+   "sources": [
+    {
+     "file": "ryanair-esu",
+     "org": "Ryanair (its own airport data, ryanair.com)",
+     "dated": "read 2026-09-23 (live data)",
+     "quote": [
+      "\"routes\":[\"airport:BVA\"",
+      "\"airport:STN\"",
+      "\"airport:TNG\"",
+      "\"airport:MRS\"",
+      "\"airport:NRN\"",
+      "\"airport:CRL\"",
+      "\"airport:BRU\"",
+      "\"airport:MAD\""
+     ]
+    },
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2026-02-25 (run date on each row; 2025 data)",
+     "quote": "25/02/2026 16:41,2025,30,NORTH AFRICA,MOROCCO,1,STANSTED,ESSAOUIRA,29080,29080,0,29201,29201,0,-0.41437"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Clients who would otherwise fly into Marrakech and drive across country can land almost on the coast.",
+   "why": "The old text's judgement, kept. Essaouira is on the Atlantic (Visit Morocco calls it the 'Bride of the Atlantic'), the airport is 15.3 km from its centre (coordinates), and Marrakesh Menara Airport is 164.6 km east of Essaouira in a straight line (Wikipedia's coordinates, saved as wikipedia-coords)."
+  }
+ ],
+ "tracerOk": {}
+}

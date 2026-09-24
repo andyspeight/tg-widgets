@@ -1,0 +1,239 @@
+{
+ "iata": "ORN",
+ "id": "reccxseuiAqgdKaUP",
+ "name": "Oran Es-Sénia (Ahmed Ben Bella) International Airport",
+ "country": "Algeria",
+ "wikipedia": "https://en.wikipedia.org/wiki/Ahmed_Ben_Bella_Airport",
+ "audited": "2026-09-23",
+ "before": "Oran's airport, 8.7 km south of the city near Es Senia, and the gateway to Algeria's second city.\n\nTerminal 3 is the one that matters now. Opened by President Abdelmadjid Tebboune in June 2022, it covers 41,000 square metres with six air bridges and is built for 3.5 million passengers a year, extendable to 6 million, which takes the airport's total capacity to 5.5 million. It runs partly on its own photovoltaic panels and has two cargo hangars handling 15,000 tonnes a year.\n\nBefore that the airport worked from two buildings, the old terminal for international flights and what locals call the huge tent for domestic.\n\nThe runway 07R/25L, 9,843 feet long, has been in service since February 2009.\n\nThe site has wartime history. As La Sénia it was a French air force field, then Vichy controlled from 1940, and it was one of the primary objectives of the Allied assault on Oran during the Operation Torch landings of November 1942.",
+ "after": "The airport for Oran, Algeria's second city, 8.7 km south of the centre near Es Senia. It has two runways, of 3,600 and 3,000 metres.\n\nAs La Sénia it was a French airfield, taken by American forces on 9 November 1942 during the Operation Torch landings around Oran.",
+ "claims": [
+  {
+   "claim": "the airport for Oran",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Oran",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "City centre: Oran (GeoNames 2485926)",
+      "Straight-line distance from the city centre: 8.8 km (5.5 miles)"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "the copy the Overview was written from",
+     "quote": "is an airport located 4.7 nm (8.7 km) south of Oran (near Es Senia), in Algeria."
+    }
+   ]
+  },
+  {
+   "claim": "Algeria's second city",
+   "verdict": "confirmed",
+   "inAfter": "Algeria's second city",
+   "note": "GeoNames ranks Oran second in Algeria by population (803,329), after Algiers (2,364,230).",
+   "sources": [
+    {
+     "file": "geo-cities",
+     "org": "GeoNames (computed)",
+     "quote": [
+      "1. Algiers (GeoNames 2507480, PPLC): population 2,364,230",
+      "2. Oran (GeoNames 2485926, PPLA): population 803,329"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-11",
+     "quote": "located in the second largest city in Algeria"
+    }
+   ]
+  },
+  {
+   "claim": "8.7 km south of the centre near Es Senia",
+   "verdict": "confirmed",
+   "inAfter": "8.7 km south of the centre near Es Senia.",
+   "note": "Straight line 8.8 km at 172 degrees, south, from the GeoNames centre of Oran (a ratio of 0.99). OurAirports gives Es-Sénia as the municipality.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Es-Sénia",
+      "Straight-line distance from the city centre: 8.8 km (5.5 miles)",
+      "Bearing from the city centre: 172 degrees, which is south"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "dated": "the copy the Overview was written from",
+     "quote": "is an airport located 4.7 nm (8.7 km) south of Oran (near Es Senia), in Algeria."
+    }
+   ]
+  },
+  {
+   "claim": "two runways, of 3,600 and 3,000 metres",
+   "verdict": "corrected",
+   "inAfter": "It has two runways, of 3,600 and 3,000 metres.",
+   "note": "Was 'The runway 07R/25L, 9,843 feet long, has been in service since February 2009', which reads as if there were one. OurAirports and Wikipedia's infobox both list two: 07L/25R at 3,600 m and 07R/25L at 3,000 m (9,843 ft). The 2009 date is cut (below).",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 07L/25R: 3,600 m (11,811 ft), ASP",
+      "Runway 07R/25L: 3,000 m (9,843 ft), CON",
+      "Runways listed: 2"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-11",
+     "quote": [
+      "r1_number = 07L/25R",
+      "r1_length_m = 3,600",
+      "r2_number = 07R/25L",
+      "r2_length_m = 3,000"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "as La Sénia it was a French airfield",
+   "verdict": "softened",
+   "inAfter": "As La Sénia it was a French airfield",
+   "note": "Was 'As La Sénia it was a French air force field, then Vichy controlled from 1940'. The Army history has La Sénia among the French airfields near Oran that were lost on 9 November 1942; Wikipedia says the French Air Force used it. The Vichy period from 1940 rests on Wikipedia alone (cut below).",
+   "sources": [
+    {
+     "file": "army-nwa-ch12",
+     "org": "US Army official history (Howe, Northwest Africa: Seizing the Initiative in the West, chapter XII, as transcribed by HyperWar at ibiblio.org)",
+     "dated": "published history of the 1942 campaign",
+     "quote": [
+      "La S&eacute;nia airfield was not seized until 1000, 9 November",
+      "The French had lost all their airfields near Oran."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-11",
+     "quote": "During World War II, La Sénia Airport was used by the French Air Force as a military airfield"
+    }
+   ]
+  },
+  {
+   "claim": "taken by American forces on 9 November 1942 during the Operation Torch landings around Oran",
+   "verdict": "softened",
+   "inAfter": "taken by American forces on 9 November 1942 during the Operation Torch landings around Oran.",
+   "note": "Was 'it was one of the primary objectives of the Allied assault on Oran during the Operation Torch landings of November 1942'. The US Army's official history of the seizure of Oran describes the advance on La Sénia airfield and its capture at 1000 on 9 November by American light tanks and guns; Wikipedia gives the same date and hour. 'Primary objective' is Wikipedia's word alone, so the text says what happened instead.",
+   "sources": [
+    {
+     "file": "army-nwa-ch12",
+     "org": "US Army official history (Howe, Northwest Africa: Seizing the Initiative in the West, chapter XII, as transcribed by HyperWar at ibiblio.org)",
+     "dated": "published history of the 1942 campaign",
+     "quote": [
+      "HyperWar: US Army in WWII: Northwest Africa: Seizing the Initiative In the West",
+      "The Seizure of Oran",
+      "the advance on La S&eacute;nia airfield and Oran",
+      "La S&eacute;nia airfield was not seized until 1000, 9 November, after many airplanes had already flown off, presumably to French Morocco.",
+      "The first American elements to reach the airfield were a few light tanks and self-propelled guns",
+      "the planners of Operation T ORCH had well recognized"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-11",
+     "quote": [
+      "During the Operation Torch landings in 1942, La Sénia was one of the primary objectives of the assault on Oran on 9 November.",
+      "the airfield was captured by Company B, of the 1st Armored Regiment about 1000"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the gateway to Algeria's second city",
+   "verdict": "cut",
+   "wasBefore": "and the gateway to Algeria's second city",
+   "why": "House style: 'gateway to' is a banned phrase. The fact it carried, that Oran is Algeria's second city, is kept (above)."
+  },
+  {
+   "claim": "Terminal 3: opened by President Tebboune in June 2022, 41,000 m2, six air bridges, 3.5 million a year extendable to 6 million, 5.5 million in all, solar panels, two cargo hangars of 15,000 tonnes a year",
+   "verdict": "cut",
+   "wasBefore": "Terminal 3 is the one that matters now. Opened by President Abdelmadjid Tebboune in June 2022, it covers 41,000 square metres with six air bridges and is built for 3.5 million passengers a year, extendable to 6 million, which takes the airport's total capacity to 5.5 million. It runs partly on its own photovoltaic panels and has two cargo hangars handling 15,000 tonnes a year.",
+   "why": "Wikipedia alone (inaugurated on 23 June 2022, it says), and nothing from the last 12 months says which terminal is in use. The operator's site given in Wikipedia's infobox (lesaeroportsdoran.dz) did not resolve (DNS error, one try; Wikipedia itself links an archived copy from 2023); TSA's and Algérie360's airport tag pages answered 404; Air Algérie's destination and Explore Algeria pages have no Oran page. The new terminal is the main thing an agent would want here: worth restoring when EGSA Oran or APS's 2022 report can be read."
+  },
+  {
+   "claim": "before that, two buildings: the old terminal for international flights and the 'huge tent' for domestic",
+   "verdict": "cut",
+   "wasBefore": "Before that the airport worked from two buildings, the old terminal for international flights and what locals call the huge tent for domestic.",
+   "why": "Wikipedia alone, and a description of the airport before 2022."
+  },
+  {
+   "claim": "runway 07R/25L in service since February 2009",
+   "verdict": "cut",
+   "wasBefore": "has been in service since February 2009",
+   "why": "Wikipedia alone (12 February 2009). The amendment to Algeria's aeronautical publication it cites (sia-enna.dz, AMDT 01/09) answered 404. The runway itself is kept (above)."
+  },
+  {
+   "claim": "the site has wartime history",
+   "verdict": "cut",
+   "wasBefore": "The site has wartime history.",
+   "why": "Framing for the wartime sentence, which now stands on its own."
+  },
+  {
+   "claim": "Vichy controlled from 1940",
+   "verdict": "cut",
+   "wasBefore": "then Vichy controlled from 1940",
+   "why": "Wikipedia alone. The Army history names Vichy only for the civil administration of the Oran area, not the airfield, and gives no date."
+  },
+  {
+   "claim": "one of the primary objectives of the Allied assault",
+   "verdict": "cut",
+   "wasBefore": "it was one of the primary objectives of the Allied assault on Oran during the Operation Torch landings of November 1942",
+   "why": "'Primary objective' is Wikipedia's word alone; softened to what both sources say happened (above)."
+  },
+  {
+   "claim": "no UK flights to Oran in 2024 or 2025",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing. The UK CAA's 2025 table lists only Algiers among Algerian airports with passengers to or from the UK (Heathrow, Gatwick and Stansted), in 2025 and in 2024, so UK clients reach Oran with a change of plane.",
+   "sources": [
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2026-02-25 (run date on each row; 2025 data)",
+     "quote": [
+      "25/02/2026 16:41,2025,30,NORTH AFRICA,ALGERIA,1,GATWICK,ALGIERS,65481,65481,0,69268,69268,0,-5.46717",
+      "25/02/2026 16:41,2025,30,NORTH AFRICA,ALGERIA,1,HEATHROW,ALGIERS,75501,75501,0,89607,89607,0,-15.74207",
+      "25/02/2026 16:41,2025,30,NORTH AFRICA,ALGERIA,1,STANSTED,ALGIERS,34806,34806,0,0,0,0,0"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FCDO advises against all travel to within 30 km of Algeria's southern and eastern borders",
+   "verdict": "cut",
+   "why": "Held back: a warning that replaces nothing. The FCDO advises against all travel within 30 km of Algeria's borders with Libya, Mauritania, Mali, Niger and parts of Tunisia (updated 24 July 2026). Oran, in the north west, is not in those areas.",
+   "sources": [
+    {
+     "file": "fcdo-algeria",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-24 (updated; still current 24 September 2026)",
+     "quote": [
+      "FCDO advises against all travel to parts of Algeria.",
+      "24 July 2026",
+      "FCDO advises against all travel to within 30km of Algeria’s borders with:"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "As La Sénia": "The tracer reads the sentence's opening word with the name; 'La Sénia' is in Wikipedia and, written 'La S&eacute;nia', on the saved Army history page."
+ }
+}

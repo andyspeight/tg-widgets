@@ -1,0 +1,349 @@
+{
+ "iata": "ALG",
+ "id": "recLFZl3VWoxAwR10",
+ "name": "Houari Boumediene Airport",
+ "country": "Algeria",
+ "wikipedia": "https://en.wikipedia.org/wiki/Houari_Boumediene_Airport",
+ "audited": "2026-09-23",
+ "before": "Algeria's main airport, 17 km east south east of Algiers.\n\nThe terminals need explaining because they have all moved around. Terminal 4 is the newest, opened in April 2019, and took Air Algérie's French routes first and then the rest. Terminal 1, the original international building, now splits into two halls: Hall 1 for domestic flights and Hall 2 for Middle East and Gulf carriers. Terminal 2 handles charter and pilgrimage traffic, with 20 check in desks, seven gates, a prayer room and 900 parking spaces. Terminal 3 is out of use and due to be demolished to make way for a new building, so check which terminal a client is flying from rather than relying on an older guide.\n\nThe airport is named after Houari Boumediene, a former president. In older writing about the Algerian War of Independence it appears as Maison Blanche, after the area it stands in.",
+ "after": "Algeria's main airport, about 12 km east south east of central Algiers in a straight line.\n\nThe terminals need explaining. International flights use Terminal 4, the West Terminal, which the airport's departures board shows as TO. Terminal 1 handles domestic flights and Umrah pilgrimage flights, and Terminal 2 charter and Hajj flights. There is no Terminal 3 in use, so check which terminal a client is flying from rather than relying on an older guide.\n\nIt stands in Dar El Beida, and its old name, Maison Blanche, still turns up in older writing.",
+ "claims": [
+  {
+   "claim": "Algeria's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Algeria's main airport",
+   "note": "Air Algérie, the national airline, calls it the most important airport in Algeria and runs it as its connecting platform; Wikipedia calls it the main international airport of the capital. No national traffic table could be read (ENNA's statistics page answered 404). Wikipedia's infobox gives 9,151,517 passengers for 2024.",
+   "sources": [
+    {
+     "file": "airalgerie-aeroport",
+     "org": "Air Algérie (airalgerie.dz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "L’aéroport international d’Alger – Houari Boumédiène, le plus important aéroport algérien",
+      "principalement exploité par la compagnie aérienne nationale Air Algérie, comme plateforme de correspondance aéroportuaire"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "is the main international airport serving Algiers, the capital of Algeria"
+    }
+   ]
+  },
+  {
+   "claim": "about 12 km east south east of central Algiers in a straight line",
+   "verdict": "corrected",
+   "inAfter": "about 12 km east south east of central Algiers in a straight line",
+   "note": "Was '17 km east south east of Algiers'. Two position sets agree on about 12 km: OurAirports' airport with GeoNames' centre of Algiers gives 12.1 km at 111 degrees, and Wikipedia's own coordinates give 12.3 km at 112 degrees, which is east south east (112.5). The 17 km is Wikipedia's 9.1 nautical miles (16.9 km), from Algeria's aeronautical publication, measured from a point it does not name; it passes the coordinates check as a road distance, but no source gives it as one, so the straight-line figure is used, as at Guatemala City.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 12.1 km (7.5 miles)",
+      "Bearing from the city centre: 111 degrees, which is east"
+     ]
+    },
+    {
+     "file": "wikipedia-coords",
+     "org": "Wikimedia",
+     "dated": "revisions of 2026-09-22 (Algiers) and 2026-09-19 (the airport)",
+     "quote": "Straight-line distance from Algiers to Houari Boumediene Airport, from the Wikipedia coordinates: 12.3 km, bearing 112 degrees, which is east"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "It is located 9.1 NM (16.9 km; 10.5 mi) east southeast of the city."
+    }
+   ]
+  },
+  {
+   "claim": "international flights use Terminal 4, the West Terminal",
+   "verdict": "corrected",
+   "inAfter": "International flights use Terminal 4, the West Terminal",
+   "note": "Was 'Terminal 4 is the newest, opened in April 2019, and took Air Algérie's French routes first and then the rest' (the 2019 move, cut below). Air Algérie lists Terminal 4 as the West Terminal for international flights; the operator's board for 23 September 2026 shows 39 of 54 departures at 'TO', every one of them international (Paris, Marseille, London Stansted, Istanbul, Doha, Cairo and others), and reading TO as Terminal Ouest is the only fit with Air Algérie's list.",
+   "sources": [
+    {
+     "file": "airalgerie-aeroport",
+     "org": "Air Algérie (airalgerie.dz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Terminal 4 : Terminal Ouest ( International )."
+    },
+    {
+     "file": "sgsia-home-b",
+     "org": "SGSIA, the airport's operator (aeroportalger.dz, live departures board)",
+     "dated": "2026-09-23 (the board's date)",
+     "quote": [
+      "الرحلات المغادرة في الأربعاء، 23 سبتمبر 2026",
+      "AF1055 06:30 باريس سي دي جي TO",
+      "AH2056 11:20 لندن ستانستد TO",
+      "QR1380 15:35 الدوحة TO",
+      "MS892 00:55 القاهرة TO"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "As of 15 May, the other foreign airlines also began operations in this terminal."
+    }
+   ]
+  },
+  {
+   "claim": "the board shows Terminal 4 as TO",
+   "verdict": "confirmed",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "which the airport's departures board shows as TO.",
+   "note": "The operator's own board, attributed: its terminal column reads TO or T1 for every departure on 23 September 2026, and never T4.",
+   "sources": [
+    {
+     "file": "sgsia-home-b",
+     "org": "SGSIA, the airport's operator (aeroportalger.dz, live departures board)",
+     "dated": "2026-09-23 (the board's date)",
+     "quote": [
+      "الرحلات المغادرة في الأربعاء، 23 سبتمبر 2026",
+      "AF1055 06:30 باريس سي دي جي TO",
+      "AH6180 07:00 وهران T1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 1 handles domestic flights and Umrah pilgrimage flights",
+   "verdict": "corrected",
+   "inAfter": "Terminal 1 handles domestic flights and Umrah pilgrimage flights",
+   "note": "Was 'Terminal 1, the original international building, now splits into two halls: Hall 1 for domestic flights and Hall 2 for Middle East and Gulf carriers'. Air Algérie lists Terminal 1 for domestic and Umrah flights. On the operator's board for 23 September 2026 all 13 domestic departures leave from T1, with a Saudia flight to Jeddah and a flynas flight to Medina; other Middle East and Gulf flights (Qatar Airways to Doha, EgyptAir to Cairo, a second flynas flight to Medina) leave from TO. The halls and 'the original international building' rest on Wikipedia alone and are cut (below).",
+   "sources": [
+    {
+     "file": "airalgerie-aeroport",
+     "org": "Air Algérie (airalgerie.dz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Terminal 1 : Domestique et Omra."
+    },
+    {
+     "file": "sgsia-home-b",
+     "org": "SGSIA, the airport's operator (aeroportalger.dz, live departures board)",
+     "dated": "2026-09-23 (the board's date)",
+     "quote": [
+      "الرحلات المغادرة في الأربعاء، 23 سبتمبر 2026",
+      "AH6180 07:00 وهران T1",
+      "AH6190 07:00 قسنطينة T1",
+      "SF2340 18:30 تندوف T1",
+      "SV340 15:35 جدة T1",
+      "XY668 18:30 المدينة T1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "Hall 1 has been reserved for domestic passengers and Hall 2 is dedicated to the Middle East, and Gulf airlines."
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2 handles charter and Hajj flights",
+   "verdict": "confirmed",
+   "inAfter": "and Terminal 2 charter and Hajj flights.",
+   "note": "Was 'charter and pilgrimage traffic'; Air Algérie names the pilgrimage as the Hajj (Umrah flights use Terminal 1).",
+   "sources": [
+    {
+     "file": "airalgerie-aeroport",
+     "org": "Air Algérie (airalgerie.dz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Terminal 2 : Charter et Hadj."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "since 2019 all of the charters and pilgrimage flights have been moved to terminal 2"
+    }
+   ]
+  },
+  {
+   "claim": "there is no Terminal 3 in use",
+   "verdict": "softened",
+   "inAfter": "There is no Terminal 3 in use",
+   "note": "Was 'Terminal 3 is out of use and due to be demolished to make way for a new building'. Air Algérie lists three terminals, numbered 1, 2 and 4; Wikipedia calls Terminal 3 'the former Terminal 3'. The demolition and a new building rest on Wikipedia alone, undated, and are cut (below).",
+   "sources": [
+    {
+     "file": "airalgerie-aeroport",
+     "org": "Air Algérie (airalgerie.dz)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "L’aéroport comporte deux pistes d'atterrissage d'une longueur de 3 500 mètres chacune et trois terminaux :",
+      "Terminal 1 : Domestique et Omra.",
+      "Terminal 2 : Charter et Hadj.",
+      "Terminal 4 : Terminal Ouest ( International )."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "the former Terminal 3 will be demolished in order to build a new terminal"
+    }
+   ]
+  },
+  {
+   "claim": "it stands in Dar El Beida",
+   "verdict": "corrected",
+   "inAfter": "It stands in Dar El Beida",
+   "note": "Was 'after the area it stands in', now named. The operator's address on its own site is PO Box 295, Dar El Beida, Algiers.",
+   "sources": [
+    {
+     "file": "sgsia-home-b",
+     "org": "SGSIA, the airport's operator (aeroportalger.dz, live departures board)",
+     "dated": "read 2026-09-23 (the site's footer)",
+     "quote": "شركة تسيير مصالح ومنشآت مطار الجزائر، ص.ب 295، الدار البيضاء، الجزائر"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "location = Dar El Beida, Algiers Province"
+    }
+   ]
+  },
+  {
+   "claim": "its old name, Maison Blanche, still turns up in older writing",
+   "verdict": "softened",
+   "inAfter": "its old name, Maison Blanche, still turns up in older writing.",
+   "note": "Was 'In older writing about the Algerian War of Independence it appears as Maison Blanche, after the area it stands in.' Wikipedia gives Maison Blanche as the airport's name from 1924 and in the war's literature; OurAirports keeps it among the airport's other names, as at Sofia and George. That the old name came from the district rests on Wikipedia alone, and so does the war, so both are left out.",
+   "sources": [
+    {
+     "file": "ourairports-daag",
+     "org": "OurAirports (data row)",
+     "quote": "\"https://en.wikipedia.org/wiki/Houari_Boumediene_Airport\",\"Algiers, Maison Blanche\""
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": [
+      "The airport was created in 1924 and named Maison Blanche Airport.",
+      "the airport is called Maison Blanche Airport in much of the literature about the Algerian War of Independence"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the terminals have all moved around",
+   "verdict": "cut",
+   "wasBefore": "because they have all moved around",
+   "why": "The moves are the 2019 ones (below), on Wikipedia alone; the text now gives the current roles instead."
+  },
+  {
+   "claim": "Terminal 4 is the newest, opened in April 2019, and took Air Algérie's French routes first and then the rest",
+   "verdict": "cut",
+   "wasBefore": "Terminal 4 is the newest, opened in April 2019, and took Air Algérie's French routes first and then the rest.",
+   "why": "Wikipedia alone (29 April 2019, in three stages). No second source for the date or the order of the move could be read; what Terminal 4 does now is kept (above)."
+  },
+  {
+   "claim": "Terminal 1 is the original international building, in two halls: Hall 1 domestic, Hall 2 Middle East and Gulf carriers",
+   "verdict": "cut",
+   "wasBefore": "Terminal 1, the original international building, now splits into two halls: Hall 1 for domestic flights and Hall 2 for Middle East and Gulf carriers.",
+   "why": "The halls and the building's history rest on Wikipedia alone, and 'Middle East and Gulf carriers' no longer fits the operator's board, where Qatar Airways, EgyptAir and Turkish Airlines leave from TO. Corrected to Air Algérie's current terminal roles (above)."
+  },
+  {
+   "claim": "Terminal 2: 20 check-in desks, seven gates, a prayer room, 900 parking spaces",
+   "verdict": "cut",
+   "wasBefore": "with 20 check in desks, seven gates, a prayer room and 900 parking spaces",
+   "why": "Wikipedia alone (a 2007 description of the renovated terminal)."
+  },
+  {
+   "claim": "Terminal 3 due to be demolished for a new building",
+   "verdict": "cut",
+   "wasBefore": "Terminal 3 is out of use and due to be demolished to make way for a new building",
+   "why": "The demolition and new building rest on Wikipedia alone, with no date. That Terminal 3 is not in use is kept (above)."
+  },
+  {
+   "claim": "named after Houari Boumediene, a former president",
+   "verdict": "cut",
+   "wasBefore": "The airport is named after Houari Boumediene, a former president.",
+   "why": "Wikipedia alone for whom it honours: Air Algérie and the operator give the name (Houari Boumediene) but neither says who he was, and no other source was read. Cut, as at Casablanca."
+  },
+  {
+   "claim": "Air Algérie to Heathrow, Stansted and Manchester; UK traffic in 2025",
+   "verdict": "cut",
+   "why": "Held back: a new fact that replaces nothing. APS reported on 24 February 2026 that Air Algérie is adding Heathrow, Stansted and Manchester; the operator's board for 23 September 2026 has Air Algérie AH2056 to London Stansted from TO. The UK CAA's 2025 table counts passengers between Algiers and Heathrow (75,501), Gatwick (65,481) and Stansted (34,806, none in 2024).",
+   "sources": [
+    {
+     "file": "aps-uk-routes",
+     "org": "Algérie Presse Service (APS, the national news agency)",
+     "dated": "2026-02-24 (on the page)",
+     "quote": [
+      "Tuesday, February 24, 2026 09:41",
+      "ALGIERS - Air Algerie announced Monday, in a statement, the launch of new flights to Manchester (United Kingdom), along with the introduction of flights to London’s Heathrow and Stansted airports, expanding its route network to the UK."
+     ]
+    },
+    {
+     "file": "sgsia-home-b",
+     "org": "SGSIA, the airport's operator (aeroportalger.dz, live departures board)",
+     "dated": "2026-09-23 (the board's date)",
+     "quote": "AH2056 11:20 لندن ستانستد TO"
+    },
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "2026-02-25 (run date on each row; 2025 data)",
+     "quote": [
+      "25/02/2026 16:41,2025,30,NORTH AFRICA,ALGERIA,1,HEATHROW,ALGIERS,75501,75501,0,89607,89607,0,-15.74207",
+      "25/02/2026 16:41,2025,30,NORTH AFRICA,ALGERIA,1,GATWICK,ALGIERS,65481,65481,0,69268,69268,0,-5.46717",
+      "25/02/2026 16:41,2025,30,NORTH AFRICA,ALGERIA,1,STANSTED,ALGIERS,34806,34806,0,0,0,0,0"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Algeria closed its airspace to UAE-registered aircraft from 11 September 2026; UAE airlines' Algiers flights exempt only to 31 December 2026",
+   "verdict": "cut",
+   "why": "Held back, and on one source only, a trade news site (Aviation A2Z, 14 September 2026, which Wikipedia cites): Algeria cut diplomatic ties with the UAE and closed its airspace to UAE-registered aircraft from 11 September 2026, exempting UAE airlines' commercial flights to and from Algiers until 31 December 2026; Emirates' last Algiers flight had been expected in February 2027. APS's news index answered 500 (one try) and the FCDO's Algeria page does not mention it. Recommended for Andy: clients connecting through Dubai or Abu Dhabi may lose that routing from 2027. Needs a second source before it goes in.",
+   "sources": [
+    {
+     "file": "aviationa2z-airspace",
+     "org": "Aviation A2Z (aviation news site)",
+     "dated": "2026-09-14 (on the page)",
+     "quote": [
+      "By Karan Bhatta September 14, 2026",
+      "The restriction took effect at midnight on September 11, 2026, following Algeria’s decision to sever diplomatic relations with the UAE.",
+      "However, UAE commercial flights operating to and from Algiers Houari Boumediene Airport (ALG) have been temporarily exempted from the restriction until the end of 2026."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FCDO advises against all travel to within 30 km of Algeria's southern and eastern borders",
+   "verdict": "cut",
+   "why": "Held back: a warning that replaces nothing. The FCDO advises against all travel within 30 km of Algeria's borders with Libya, Mauritania, Mali, Niger and parts of Tunisia, and all but essential travel near the rest of the Tunisian border (updated 24 July 2026). Algiers is not in those areas.",
+   "sources": [
+    {
+     "file": "fcdo-algeria",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-24 (updated; still current 24 September 2026)",
+     "quote": [
+      "FCDO advises against all travel to parts of Algeria.",
+      "24 July 2026",
+      "FCDO advises against all travel to within 30km of Algeria’s borders with:",
+      "FCDO advises against all but essential travel to within 30km of the rest of Algeria’s border with Tunisia."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The terminals need explaining.",
+   "why": "The old text's framing, kept: the airport uses three terminals numbered 1, 2 and 4, each with its own kind of flight (Air Algérie), and the board labels Terminal 4 as TO."
+  },
+  {
+   "text": "so check which terminal a client is flying from rather than relying on an older guide.",
+   "why": "The old text's advice, kept: Wikipedia's own terminal section still describes halls and roles that the operator's current board and Air Algérie's list no longer match."
+  }
+ ],
+ "tracerOk": {}
+}
