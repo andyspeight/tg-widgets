@@ -8,7 +8,8 @@
  *  - Live client-side search with match highlighting
  *  - Category filtering (tabs / chips)
  *  - Markdown-lite answers (bold, italic, lists, safe links)
- *  - FAQPage JSON-LD schema injection for SEO rich results
+ *  - FAQPage JSON-LD schema injection, still used by Bing and other search
+ *    engines (Google stopped showing FAQ rich results on 7 May 2026)
  *  - Deep-link support (#faq-slug opens and scrolls to a question)
  *  - Dark mode (`theme: "dark"`)
  *  - Respects prefers-reduced-motion
