@@ -179,6 +179,15 @@ export function buildOrderShapeReport(raw, opts) {
       status: str(it && it.status, 30), pricingFlags: isPlainObject(it) ? pricingFlags(it) : {},
     })),
     party: partyShape(items),
+    // Travelify's upsellsActive (24 Sep 2026): which upsells the application is
+    // selling against this order. Product type names, nothing personal, so it
+    // is shown as it came. If My Booking's "Add to your trip" has vanished,
+    // this is the first thing to read: missing or empty means no upsells, by
+    // their rule.
+    upsellsActive: Array.isArray(r.upsellsActive) ? r.upsellsActive.slice(0, 20).map((v) => str(v, 40)) : (r.upsellsActive === undefined ? '(missing)' : r.upsellsActive),
+    // Every upsell link must end with the order's id and KEY, and has no link at
+    // all without both. Whether they are there, never the key itself.
+    upsellLinkable: { hasId: r.id != null && r.id !== '', hasKey: typeof r.key === 'string' && r.key.length > 0 },
     money: moneyOf(r, opts),
     deductNonGift: !!(opts && opts.deductNonGift),
     // The two containers we have never opened, as TYPES not values, plus every

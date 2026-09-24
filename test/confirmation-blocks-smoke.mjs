@@ -110,6 +110,12 @@ const OPTS = {
   colors: { primary: '#1B2B5B', accent: '#00B4D8' },
   supportEmail: 'hello@exclusivelytravel.co.uk', supportPhone: '01202 934033',
   orderRef: 'ET121109', baseUrl: 'https://exclusivelytravel.co.uk/my-booking',
+  // The "Add to your trip" tiles, as /api/retrieve-order hands them to the real
+  // email (24 Sep 2026). Only the upsell block reads them, and the built-in
+  // layout does not carry that block, so the email we have always sent is
+  // unchanged by their being here.
+  upsell: [{ product: 'TicketsAttractions', label: 'Things to do', hint: 'Tours, attractions and days out while you are there.',
+    url: 'https://dl.tvllnk.com/deeplink/474?st=TicketsAttractions&loc=Lindos&ctry=GR&fr=2026-09-26&to=2026-10-02&adt=2&orderRef=121109/0CB5D0BC-51FE-4950-9201-E9AD792489F5' }],
 };
 
 const render = (layout) => renderBookingEmail({ ...OPTS, layout });

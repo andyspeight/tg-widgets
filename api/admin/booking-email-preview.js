@@ -182,7 +182,11 @@ export default async function handler(req, res) {
         lookupStatus: lookup.status,
       });
     }
-    const order = (await lookup.json())?.order;
+    const looked = await lookup.json();
+    const order = looked?.order;
+    // The booking page's own upsell tiles, so a style with the "Add to your
+    // trip" block previews what this customer would really be offered.
+    const upsell = Array.isArray(looked?.upsell) ? looked.upsell : [];
     if (!order || !order.id) return res.status(404).json({ error: 'That lookup returned no order.' });
 
     // ----- Who the email is from, resolved exactly as the sender does -----
@@ -217,6 +221,7 @@ export default async function handler(req, res) {
       orderRef,
       layout: style.layout,
       destination,
+      upsell,
       baseUrl,
     });
 

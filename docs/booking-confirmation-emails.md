@@ -215,6 +215,16 @@ of that, block by block.
 - `destination`, `knowbefore`, `whatson`, `thingstodo` — read `opts.destination`,
   the pack in the shape `/api/destination-content` returns. The renderer is
   runtime-neutral and cannot look anything up, so the caller passes it in.
+- `upsell` (24 Sep 2026) — "Add to your trip", the things the customer could add
+  to this booking. Reads `opts.upsell`, the tiles `/api/retrieve-order` has
+  ALREADY built for the My Booking page, links and all: `api/booking-email.js`
+  passes `retrieveData.upsell` straight through and works nothing out itself.
+  Travelify's upsellsActive spec asks for the same upsells in the email as on
+  the page, and handing over the page's own list is the only way that is true
+  by construction. The rules live in `public/_order-upsell.js`; every link ends
+  `&orderRef={id}/{key}`. **Not in `DEFAULT_EMAIL_LAYOUT`**: the block is in the
+  palette, and a client who never opens the builder still gets the email we
+  have always sent.
 
 ### Where the destination pack comes from
 

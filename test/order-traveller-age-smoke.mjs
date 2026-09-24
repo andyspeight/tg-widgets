@@ -26,7 +26,7 @@
  * Run: node test/order-traveller-age-smoke.mjs   (npm run test:traveller-age)
  */
 import { readFileSync } from 'node:fs';
-import { partySize, upsellTiles, upsellUrl, CHILD_AGE_WHEN_UNKNOWN } from '../public/_order-upsell.js';
+import { partySize, upsellTiles, upsellUrl, orderLinkRef, CHILD_AGE_WHEN_UNKNOWN } from '../public/_order-upsell.js';
 import { aggregateTravellers } from '../api/_lib/travelify-items.js';
 
 let passed = 0, failed = 0;
@@ -126,6 +126,9 @@ console.log('\nWhat the search then asks for');
 {
   const leg = (from, to, depart, arrive) => ({ segments: [{ origin: { iataCode: from }, destination: { iataCode: to }, depart, arrive }] });
   const order = {
+    // Since Travelify's upsellsActive spec (24 Sep 2026) an order without the
+    // list offers nothing, so this one says what its application sells.
+    upsellsActive: ['TicketsAttractions', 'CarRental'],
     items: [
       { product: 'Flights', legs: [leg('LHR', 'CDG', '2027-04-10T07:00:00', '2027-04-10T09:20:00'),
         leg('CDG', 'LHR', '2027-04-17T18:00:00', '2027-04-17T18:20:00')] },
@@ -139,7 +142,7 @@ console.log('\nWhat the search then asks for');
   const party = partySize(order);
   ok('the real ages are used, in order', party.childAges.join(',') === '7,12', JSON.stringify(party));
   ok('and nothing is assumed', !party.childAges.includes(CHILD_AGE_WHEN_UNKNOWN));
-  const url = upsellUrl(upsellTiles(order)[0], '474');
+  const url = upsellUrl(upsellTiles(order)[0], '474', orderLinkRef(123456, '0CB5D0BC-51FE-4950-9201-E9AD792489F5'));
   ok('the link carries an age per child', /chdage=7/.test(url) && /chdage=12/.test(url), url);
   ok('and the infant, which needs none', /inf=1/.test(url) && !/infage/.test(url), url);
 
