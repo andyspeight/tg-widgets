@@ -1,0 +1,528 @@
+{
+ "iata": "PQC",
+ "id": "rec6oYjWF1JN3K26d",
+ "name": "Phú Quốc International Airport",
+ "country": "Vietnam",
+ "wikipedia": "https://en.wikipedia.org/wiki/Phu_Quoc_International_Airport",
+ "audited": "2026-09-24",
+ "before": "The airport for Phú Quốc island in southern Vietnam, about 9 km south of the island's administrative centre, built at a cost of around 810 million dollars to open the island up to international beach tourism.\n\nIt is already being rebuilt. Sun Group took over ownership from Airports Corporation of Vietnam in November 2025 and is delivering a major expansion: an entirely new runway alongside a lengthened existing one, plus new terminals, timed for APEC in 2027. Expect construction disruption and changing facilities over the next couple of years.\n\nCapacity started at about 2.5 million passengers a year and is designed to reach 7 million. The single runway takes aircraft up to an A350 or 747.\n\nIt opened on 2 December 2012, replacing the old Phu Quoc Airport 10 km away.",
+ "after": "The airport for Phú Quốc island in southern Vietnam, about 9 km south of the island's administrative centre. It opened in December 2012, replacing the island's old airport. Long-haul wide-bodied jets such as the Boeing 747 can already use it.\n\nThe airport is being expanded for APEC 2027, which the island will host. Airports Corporation of Vietnam handed the airport's assets to Sun Group in November 2025, and Sun Group now runs it. The works add a second runway of 3,300 metres, a new Terminal 2 and a VIP terminal, while the existing runway is to be lengthened from 3,000 to 3,500 metres. Terminal 2 is due to open in 2027. Expect construction disruption and changing facilities over the next couple of years.",
+ "claims": [
+  {
+   "claim": "The airport for Phú Quốc island",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Phú Quốc island",
+   "note": "The operator's own guide places it in Duong To ward of the Phu Quoc special zone and 'centrally situated on the island'.",
+   "sources": [
+    {
+     "file": "op-transport",
+     "org": "Phu Quoc International Airport (Sun Airport, Sun Group, the operator, sunairport.com)",
+     "dated": "read 2026-09-24 (live guide page)",
+     "quote": [
+      "Phu Quoc International Airport is located in Group 2, Duong To Ward, Phu Quoc Special Administrative Zone, An Giang Province, Vietnam.",
+      "The airport is centrally situated on the island"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "OurAirports municipality: Phu Quoc Island"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "is an international airport that serves Phú Quốc Island"
+    }
+   ]
+  },
+  {
+   "claim": "in southern Vietnam",
+   "verdict": "confirmed",
+   "inAfter": "in southern Vietnam",
+   "note": "Wikipedia says southern Vietnam. Tuoi Tre names the Southern Airports Authority (Cảng vụ hàng không miền Nam, the state airports authority for the south) among the parties to the November 2025 handover, so the airport falls in its southern region; the operator, VNA and Tuoi Tre put it in An Giang province.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "serves Phú Quốc Island, in southern Vietnam"
+    },
+    {
+     "file": "tuoitre-handover",
+     "org": "Tuổi Trẻ (tuoitre.vn)",
+     "dated": "2025-11-18",
+     "quote": [
+      "18/11/2025 15:16 GMT+7",
+      "Cảng vụ hàng không miền Nam"
+     ]
+    },
+    {
+     "file": "vietnamplus-flights",
+     "org": "Vietnam News Agency (VietnamPlus, en.vietnamplus.vn)",
+     "dated": "2025-10-20",
+     "quote": "Phu Quoc International Airport in the special zone of the same name, An Giang province"
+    }
+   ]
+  },
+  {
+   "claim": "about 9 km south of the island's administrative centre",
+   "verdict": "confirmed",
+   "inAfter": "about 9 km south of the island's administrative centre",
+   "note": "Straight line 6.5 km at 158 degrees (south); 9 km gives a ratio of 1.38, inside the check for a road distance. The operator puts Duong Dong town centre 20 to 25 minutes away by taxi.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "about 9 kilometres (5.6 mi) south of the administrative centre of Phu Quoc special zone"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 6.5 km (4.0 miles)",
+      "Bearing from the city centre: 158 degrees, which is south"
+     ]
+    },
+    {
+     "file": "op-transport",
+     "org": "Phu Quoc International Airport (Sun Airport, Sun Group, the operator, sunairport.com)",
+     "dated": "read 2026-09-24 (live guide page)",
+     "quote": "Airport – Duong Dong town center: approx. 20–25 minutes"
+    }
+   ]
+  },
+  {
+   "claim": "opened in December 2012",
+   "verdict": "softened",
+   "inAfter": "It opened in December 2012",
+   "note": "Was 'on 2 December 2012'. The day is disputed: the operator and Wikipedia's lead give 2 December 2012; Tuoi Tre (November 2025) says it officially went into operation on 15 December 2012, the day Wikipedia's history gives for the inaugural flight. All agree on December 2012.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Phu Quoc International Airport (Sun Airport, Sun Group, the operator, sunairport.com)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "02 December 2012",
+      "Phu Quoc International Airport officially commenced operations, replacing the former airport."
+     ]
+    },
+    {
+     "file": "tuoitre-handover",
+     "org": "Tuổi Trẻ (tuoitre.vn)",
+     "dated": "2025-11-18",
+     "quote": "Trước đó ngày 15-12-2012, cảng hàng không quốc tế Phú Quốc (với tổng mức đầu tư 3.000 tỉ đồng) chính thức đưa vào hoạt động."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": [
+      "was put into operation on 2 December 2012",
+      "the airport operated its inaugural flight on 15 December 2012"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "replacing the island's old airport",
+   "verdict": "confirmed",
+   "inAfter": "replacing the island's old airport",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Phu Quoc International Airport (Sun Airport, Sun Group, the operator, sunairport.com)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": "replacing the former airport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "the previous Phu Quoc Airport, which it replaced in December 2012"
+    }
+   ]
+  },
+  {
+   "claim": "long-haul wide-bodied jets such as the Boeing 747 can already use it",
+   "verdict": "softened",
+   "inAfter": "Long-haul wide-bodied jets such as the Boeing 747 can already use it.",
+   "note": "Was 'The single runway takes aircraft up to an A350 or 747'. Tuoi Tre (November 2025) says the airport, ICAO class 4E, takes long-range wide-bodied aircraft such as the Boeing 777-300 and 747-400 and, with limits, the A380-800; Wikipedia gives the A350 and 747. The 747 is common to both. The single runway is overtaken (see the second runway below).",
+   "sources": [
+    {
+     "file": "tuoitre-handover",
+     "org": "Tuổi Trẻ (tuoitre.vn)",
+     "dated": "2025-11-18",
+     "quote": "đảm bảo tiếp nhận được các loại máy bay tầm xa, thân rộng như Boeing 777-300, Boeing 747-400"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "capable of handling aircraft like the Airbus A350 and Boeing 747"
+    }
+   ]
+  },
+  {
+   "claim": "being expanded for APEC 2027, which the island will host",
+   "verdict": "corrected",
+   "inAfter": "The airport is being expanded for APEC 2027, which the island will host.",
+   "note": "Was 'It is already being rebuilt' and 'timed for APEC in 2027'. The sources describe an expansion of the working airport, not a rebuild. The Government's Resolution 01/2025/NQ-CP of 1 June 2025 approved the expansion to serve APEC 2027 (operator; Tuoi Tre).",
+   "sources": [
+    {
+     "file": "op-news-2026-01",
+     "org": "Phu Quoc International Airport (Sun Airport, Sun Group, the operator, sunairport.com)",
+     "dated": "2026-01-02",
+     "quote": [
+      "02/01/2026",
+      "Sun Group is urgently constructing key items in service of APEC 2027."
+     ]
+    },
+    {
+     "file": "vietnamplus-flights",
+     "org": "Vietnam News Agency (VietnamPlus, en.vietnamplus.vn)",
+     "dated": "2025-10-20",
+     "quote": [
+      "Monday, October 20, 2025",
+      "Phu Quoc will host the Asia-Pacific Economic Cooperation (APEC) forum in 2027"
+     ]
+    },
+    {
+     "file": "tuoitre-handover",
+     "org": "Tuổi Trẻ (tuoitre.vn)",
+     "dated": "2025-11-18",
+     "quote": "mở rộng sân bay đón Diễn đàn hợp tác kinh tế châu Á - Thái Bình Dương vào năm 2027 ở Phú Quốc"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "new terminals and facilities for APEC 2027"
+    }
+   ]
+  },
+  {
+   "claim": "Airports Corporation of Vietnam handed the airport's assets to Sun Group in November 2025",
+   "verdict": "softened",
+   "inAfter": "Airports Corporation of Vietnam handed the airport's assets to Sun Group in November 2025",
+   "note": "Was 'Sun Group took over ownership from Airports Corporation of Vietnam in November 2025'. The operator dates the transfer of the infrastructure assets from ACV to Sun Group to 18 November 2025; Tuoi Tre reports the handover meeting that day, with ACV, the Southern Airports Authority, An Giang province and the expansion investor (Sun Group's Sun Airport JSC, per Tuoi Tre's June 2025 report).",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Phu Quoc International Airport (Sun Airport, Sun Group, the operator, sunairport.com)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "18 November 2025",
+      "Airports Corporation of Vietnam (ACV) officially transferred the infrastructure assets of Phu Quoc International Airport to Sun Group"
+     ]
+    },
+    {
+     "file": "tuoitre-handover",
+     "org": "Tuổi Trẻ (tuoitre.vn)",
+     "dated": "2025-11-18",
+     "quote": [
+      "18/11/2025 15:16 GMT+7",
+      "Việc tiếp nhận tài sản cảng hàng không quốc tế Phú Quốc được thực hiện gồm các bên như UBND tỉnh An Giang, Tổng công ty Cảng hàng không Việt Nam - CTCP (ACV), Cảng vụ hàng không miền Nam và nhà đầu tư dự án mở rộng cảng hàng không quốc tế Phú Quốc."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "The ownership of the airport was transferred to Sun Group from the Airports Corporation of Vietnam in November 2025."
+    }
+   ]
+  },
+  {
+   "claim": "Sun Group now runs it",
+   "verdict": "confirmed",
+   "inAfter": "and Sun Group now runs it.",
+   "note": "The operator says Sun Group has managed and operated the airport since 1 January 2026, when its Sun Airport Corporation received the airport business licence and the operations certificate; Wikipedia's infobox names Sun Airport JSC as owner and operator. The date rests on the operator alone, so the text says only 'now'.",
+   "sources": [
+    {
+     "file": "op-about",
+     "org": "Phu Quoc International Airport (Sun Airport, Sun Group, the operator, sunairport.com)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": "Phu Quoc International Airport has been officially managed and operated by Sun Group since January 1, 2026."
+    },
+    {
+     "file": "op-news-2026-01",
+     "org": "Phu Quoc International Airport (Sun Airport, Sun Group, the operator, sunairport.com)",
+     "dated": "2026-01-02",
+     "quote": [
+      "Sun Group officially takes over the operation of Phu Quoc International Airport from January 1, 2026.",
+      "Sun Airport Corporation (SAC – a member of Sun Group)"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "owner_oper = Sun Airport JSC"
+    }
+   ]
+  },
+  {
+   "claim": "a second runway of 3,300 metres",
+   "verdict": "confirmed",
+   "inAfter": "The works add a second runway of 3,300 metres",
+   "note": "Was 'an entirely new runway'. Whether it is finished is disputed, so the text says only what the works add: the operator (28 July 2026) and Tuoi Tre (26 July 2026) call it complete after about eight months, with a first calibration flight on 27 July, while the CAAV's reprint (7 August 2026) of Sun Group's report to the Deputy Prime Minister's meeting of 2 August puts it at about 85 per cent, to be finished this year. OurAirports and Wikipedia's infobox already list it (10L/28R, 3,300 m).",
+   "sources": [
+    {
+     "file": "op-runway2-calibration",
+     "org": "Phu Quoc International Airport (Sun Airport, Sun Group, the operator, sunairport.com)",
+     "dated": "2026-07-28",
+     "quote": [
+      "28/07/2026",
+      "đường cất hạ cánh dài 3.300 m, rộng 45 m"
+     ]
+    },
+    {
+     "file": "tuoitre-runway2",
+     "org": "Tuổi Trẻ (tuoitre.vn)",
+     "dated": "2026-07-26",
+     "quote": [
+      "26/07/2026 17:01 GMT+7",
+      "Đường cất hạ cánh số 2 ở sân bay Phú Quốc có chiều dài 3.300m, rộng 45m."
+     ]
+    },
+    {
+     "file": "caav-2026-09-plan",
+     "org": "Civil Aviation Authority of Vietnam (caa.gov.vn, reprinting Báo Xây dựng)",
+     "dated": "2026-09-23",
+     "quote": [
+      "23/09/2026",
+      "đường lăn nối phía Bắc đường cất hạ cánh số 2"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runway 10L/28R: 3,300 m (10,827 ft), ASP"
+    }
+   ]
+  },
+  {
+   "claim": "a new Terminal 2 and a VIP terminal",
+   "verdict": "confirmed",
+   "inAfter": "a new Terminal 2 and a VIP terminal",
+   "note": "Was 'plus new terminals'. The operator calls Terminal 2 a new international terminal; the CAAV's September 2026 plan submission adds a raised walkway to link Terminals 1 and 2.",
+   "sources": [
+    {
+     "file": "op-news-2026-01",
+     "org": "Phu Quoc International Airport (Sun Airport, Sun Group, the operator, sunairport.com)",
+     "dated": "2026-01-02",
+     "quote": "The project includes a second runway, a new international terminal T2, a VIP terminal, along with expanded aprons and auxiliary infrastructure."
+    },
+    {
+     "file": "tuoitre-approval-2025",
+     "org": "Tuổi Trẻ (tuoitre.vn)",
+     "dated": "2025-06-19",
+     "quote": [
+      "19/06/2025 18:05 GMT+7",
+      "Dự án cũng thực hiện xây dựng nhà ga hành khách T2 của sân bay Phú Quốc.",
+      "Bên cạnh đó, nhà ga VIP của sân bay Phú Quốc cũng được xây mới"
+     ]
+    },
+    {
+     "file": "caav-2026-09-plan",
+     "org": "Civil Aviation Authority of Vietnam (caa.gov.vn, reprinting Báo Xây dựng)",
+     "dated": "2026-09-23",
+     "quote": "bổ sung hành lang kết nối trên cao giữa nhà ga hành khách T1 và T2"
+    }
+   ]
+  },
+  {
+   "claim": "the existing runway is to be lengthened from 3,000 to 3,500 metres",
+   "verdict": "confirmed",
+   "inAfter": "while the existing runway is to be lengthened from 3,000 to 3,500 metres",
+   "note": "Was 'a lengthened existing one'. OurAirports lists the existing runway (10R/28L) at 3,000 m; the operator calls it 'only 3 km long'.",
+   "sources": [
+    {
+     "file": "tuoitre-approval-2025",
+     "org": "Tuổi Trẻ (tuoitre.vn)",
+     "dated": "2025-06-19",
+     "quote": "Dự án sẽ kéo dài đường băng hiện tại của sân bay Phú Quốc từ 3.000m lên 3.500m, và xây mới đường băng thứ hai có chiều dài 3.300m"
+    },
+    {
+     "file": "op-runway2-calibration",
+     "org": "Phu Quoc International Airport (Sun Airport, Sun Group, the operator, sunairport.com)",
+     "dated": "2026-07-28",
+     "quote": [
+      "tiếp tục nâng cấp đường cất hạ cánh số 1 hiện hữu lên chiều dài 3.500 m",
+      "vốn chỉ dài 3 km"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Runway 10R/28L: 3,000 m (9,843 ft), ASP"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": "the lengthening of the current counterpart"
+    }
+   ]
+  },
+  {
+   "claim": "Terminal 2 is due to open in 2027",
+   "verdict": "confirmed",
+   "inAfter": "Terminal 2 is due to open in 2027.",
+   "note": "Tuoi Tre (23 September 2026, from Sun Group) gives April 2027; Sun Group told the Deputy Prime Minister's meeting of 2 August 2026 it would finish Terminal 2 by the end of March 2027 (the CAAV's reprint of Sun Group's report); the operator's January release has phase 1 finished and in use in 2027. All three trace to Sun Group's own schedule, so the text gives only the year.",
+   "sources": [
+    {
+     "file": "tuoitre-t1-2026-09",
+     "org": "Tuổi Trẻ (tuoitre.vn)",
+     "dated": "2026-09-23",
+     "quote": [
+      "23/09/2026 16:19 GMT+7",
+      "Nhà ga T2 và các công trình phụ trợ ở sân bay Phú Quốc (có tổng mức đầu tư khoảng 58.000 tỉ đồng) đang thực hiện và dự kiến đưa vào khai thác trong tháng 4-2027."
+     ]
+    },
+    {
+     "file": "op-news-2026-01",
+     "org": "Phu Quoc International Airport (Sun Airport, Sun Group, the operator, sunairport.com)",
+     "dated": "2026-01-02",
+     "quote": "Once the Phase 1 facilities are completed and commissioned in 2027"
+    },
+    {
+     "file": "caav-2026-08-progress",
+     "org": "Civil Aviation Authority of Vietnam (caa.gov.vn, reprinting Sun Group)",
+     "dated": "2026-08-07",
+     "quote": [
+      "07/08/2026",
+      "doanh nghiệp cam kết hoàn thành Nhà ga T2 Cảng hàng không quốc tế Phú Quốc vào cuối tháng 3/2027"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "built at a cost of around 810 million dollars",
+   "verdict": "cut",
+   "wasBefore": "built at a cost of around 810 million dollars",
+   "why": "Contradicted. Tuoi Tre (November 2025) gives the total investment as 3,000 billion dong, and so does Wikipedia's own history section; the US$810 million (VND 16.2 trillion) is in Wikipedia's lead alone.",
+   "sources": [
+    {
+     "file": "tuoitre-handover",
+     "org": "Tuổi Trẻ (tuoitre.vn)",
+     "dated": "2025-11-18",
+     "quote": "với tổng mức đầu tư 3.000 tỉ đồng"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-19",
+     "quote": [
+      "It is built at a cost of around VND 16.2 trillion (US$810 million)",
+      "with an investment of VND 3,000 billion"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "to open the island up to international beach tourism",
+   "verdict": "cut",
+   "wasBefore": "to open the island up to international beach tourism",
+   "why": "Wikipedia alone (the Government's expectation that it would bring tourists drawn to the beaches). The 2012 Tuoi Tre News report Wikipedia cites survives only on web.archive.org, which the network policy blocks, so it was not tried."
+  },
+  {
+   "claim": "It is already being rebuilt",
+   "verdict": "cut",
+   "wasBefore": "It is already being rebuilt.",
+   "why": "'Rebuilt' overstates it: the operator and Tuoi Tre describe an expansion of the working airport. Replaced by 'is being expanded' (see above)."
+  },
+  {
+   "claim": "Sun Group took over ownership in November 2025",
+   "verdict": "cut",
+   "wasBefore": "Sun Group took over ownership from Airports Corporation of Vietnam in November 2025",
+   "why": "Softened to what the operator, Tuoi Tre and Wikipedia support: ACV handed over the airport's infrastructure assets on 18 November 2025, and Sun Group took over running it on 1 January 2026 (see above)."
+  },
+  {
+   "claim": "a major expansion: an entirely new runway, a lengthened existing one, new terminals, timed for APEC in 2027",
+   "verdict": "cut",
+   "wasBefore": "is delivering a major expansion: an entirely new runway alongside a lengthened existing one, plus new terminals, timed for APEC in 2027",
+   "why": "Kept in substance with the runway lengths and the terminals named, each on two sources (see above)."
+  },
+  {
+   "claim": "capacity started at about 2.5 million and is designed to reach 7 million",
+   "verdict": "cut",
+   "wasBefore": "Capacity started at about 2.5 million passengers a year and is designed to reach 7 million.",
+   "why": "Out of date, and the current figures disagree. Tuoi Tre (November 2025) says the 2018 expansion took the terminal from 2.65 to 4 million a year; Tuoi Tre (23 September 2026, from Sun Group) says Terminal 1 has now been enlarged to 9 million a year, which no second source gives; the April 2025 masterplan aims at about 10 million a year by 2030 and 18 million by 2050 (Tuoi Tre, June 2025), while the operator says 20 million once phase 1 is finished in 2027. So no capacity figure is given.",
+   "sources": [
+    {
+     "file": "tuoitre-handover",
+     "org": "Tuổi Trẻ (tuoitre.vn)",
+     "dated": "2025-11-18",
+     "quote": "công suất phục vụ hành khách của nhà ga từ 2,65 triệu hành khách/năm lên 4 triệu hành khách/năm"
+    },
+    {
+     "file": "tuoitre-t1-2026-09",
+     "org": "Tuổi Trẻ (tuoitre.vn)",
+     "dated": "2026-09-23",
+     "quote": "Sun Group đã đầu tư khoảng 500 tỉ đồng mở rộng nâng cấp nhà ga T1 ở sân bay Phú Quốc để nâng cao năng lực phục vụ 9 triệu lượt khách/năm, tăng 50% so với năm 2025."
+    },
+    {
+     "file": "tuoitre-approval-2025",
+     "org": "Tuổi Trẻ (tuoitre.vn)",
+     "dated": "2025-06-19",
+     "quote": "sân bay Phú Quốc sẽ có công suất khoảng 10 triệu khách/năm đến năm 2030, và khoảng 18 triệu hành khách/năm đến năm 2050 thay vì 4 triệu khách/năm như hiện nay"
+    },
+    {
+     "file": "op-news-2026-01",
+     "org": "Phu Quoc International Airport (Sun Airport, Sun Group, the operator, sunairport.com)",
+     "dated": "2026-01-02",
+     "quote": "the airport’s capacity will increase to 20 million passengers per year"
+    }
+   ]
+  },
+  {
+   "claim": "the single runway takes aircraft up to an A350 or 747",
+   "verdict": "cut",
+   "wasBefore": "The single runway takes aircraft up to an A350 or 747.",
+   "why": "A second runway of 3,300 m has been built (the operator, Tuoi Tre; OurAirports now lists two). The A350 on the existing runway rests on Wikipedia alone (the operator and Tuoi Tre give the A350 for the new runway). The 747 is kept (softened, above)."
+  },
+  {
+   "claim": "opened on 2 December 2012",
+   "verdict": "cut",
+   "wasBefore": "It opened on 2 December 2012",
+   "why": "The day is disputed (2 or 15 December 2012). Softened to December 2012 (see above)."
+  },
+  {
+   "claim": "the old Phu Quoc Airport 10 km away",
+   "verdict": "cut",
+   "wasBefore": "replacing the old Phu Quoc Airport 10 km away",
+   "why": "The replacement is kept (operator, Wikipedia). The 10 km rests on Wikipedia alone."
+  },
+  {
+   "claim": "FCDO: UK visitors can enter Vietnam without a visa for up to 45 days; tropical storm season May to November",
+   "verdict": "cut",
+   "why": "Held back: verified on the FCDO's own pages (updated 21 September 2026, still current 24 September), but it replaces nothing in the old text, which says nothing on entry or weather. Neither page mentions Phu Quoc.",
+   "sources": [
+    {
+     "file": "fcdo-vietnam-entry",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "quote": "You can visit Vietnam without a visa for up to 45 days for tourism or business."
+    },
+    {
+     "file": "fcdo-vietnam",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-09-21",
+     "quote": [
+      "21 September 2026",
+      "The tropical storm season runs from May to November."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "Expect construction disruption and changing facilities over the next couple of years.",
+   "why": "Advice carried over from the old text. It follows from the confirmed works, carried out while the airport stays open (the operator's July 2026 article: 'vừa làm vừa khai thác', building while operating), with Terminal 2 due in 2027 and a second phase running to 2030 (Tuoi Tre, June 2025)."
+  }
+ ],
+ "tracerOk": {}
+}

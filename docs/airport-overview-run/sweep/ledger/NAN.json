@@ -1,0 +1,469 @@
+{
+ "iata": "NAN",
+ "id": "recFrwcYkP81HOmyf",
+ "name": "Nadi International Airport",
+ "country": "Fiji",
+ "wikipedia": "https://en.wikipedia.org/wiki/Nadi_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Fiji's main international airport and an important regional hub for the South Pacific, at Namaka 10 km from Nadi and 20 km from Lautoka. It handles about 97 per cent of international visitors to Fiji, of whom 86 per cent are tourists.\n\nThe thing to plan around is the distance to the capital. Suva, Fiji's largest city, is 192 km south east of Nadi and has its own airport at Nausori. A client heading for Suva faces a long transfer or a domestic hop, so do not assume Nadi is close to everything.\n\nIt is the main hub for Fiji Airways and its regional subsidiary Fiji Link, which between them reach six airports across the south west Pacific and many more around the Pacific Rim. In 2019 the airport handled 2,485,319 passengers.\n\nThe runway is capable enough that a Qantas A380 made an emergency landing here in 2008 to offload a sick passenger, despite the airport not being certified for the type.",
+ "after": "Fiji's main international airport and a regional hub for the Pacific islands, at Namaka, north east of Nadi town and about 20 km from Lautoka. It handles about 97 per cent of the country's international passengers.\n\nThe thing to plan around is the distance to the capital, Suva, which is more than 110 km away and has its own airport at Nausori. A client heading there faces a long transfer or a domestic hop, so do not assume Nadi is close to everything.\n\nThe national airline, Fiji Airways, flies the widest network from here; its subsidiary Fiji Link covers domestic and regional routes. Fiji Airports, which runs the airport, says it serves more than 2.4 million passengers a year.",
+ "claims": [
+  {
+   "claim": "Fiji's main international airport",
+   "verdict": "confirmed",
+   "inAfter": "Fiji's main international airport",
+   "sources": [
+    {
+     "file": "afl-nadi",
+     "org": "Fiji Airports (Airports Fiji Limited, the operator; fijiairports.com, the site the Civil Aviation Authority of Fiji links to)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Nadi International Airport is Fiji's main airport and gateway",
+      "Nadi International Airport – Fiji's main international gateway"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the main international airport of Fiji"
+    }
+   ]
+  },
+  {
+   "claim": "a regional hub for the Pacific islands",
+   "verdict": "softened",
+   "inAfter": "a regional hub for the Pacific islands",
+   "note": "Was 'an important regional hub for the South Pacific'. The operator's 2024 annual report calls Nadi 'a hub for the blue Pacific' (the Pacific Islands Forum's name for the island region), and oneworld says Fiji Link flies on to Tonga, Samoa, Tuvalu and Vanuatu; 'important' is Wikipedia's word alone and is dropped. The operator's history page also says 'a major regional hub for the South Pacific islands', but that page follows Wikipedia's article sentence by sentence, so it is not counted.",
+   "sources": [
+    {
+     "file": "afl-ar2024",
+     "org": "Fiji Airports (Airports Fiji Limited, the operator; fijiairports.com, the site the Civil Aviation Authority of Fiji links to)",
+     "dated": "annual report for 2024, letter of 9 June 2025",
+     "quote": [
+      "June 9, 2025",
+      "SUBJECT: SUBMISSION OF FIJI AIRPORTS 2024 ANNUAL REPORT",
+      "reinforcing its status as the gateway to Fiji and a hub for the blue Pacific"
+     ]
+    },
+    {
+     "file": "oneworld-fiji-airways",
+     "org": "oneworld (the airline alliance, oneworld.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "as well as regionally to the Pacific Island nations of Tonga, Samoa, Tuvalu and Vanuatu"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "an important regional hub for the South Pacific islands"
+    }
+   ]
+  },
+  {
+   "claim": "at Namaka",
+   "verdict": "confirmed",
+   "inAfter": "at Namaka",
+   "note": "The operator's annual report gives its headquarters as FA Compound, Namaka, and its registered office as the AFL Compound at Nadi Airport: the same compound, so the airport grounds are at Namaka.",
+   "sources": [
+    {
+     "file": "afl-ar2024",
+     "org": "Fiji Airports (Airports Fiji Limited, the operator; fijiairports.com, the site the Civil Aviation Authority of Fiji links to)",
+     "dated": "annual report for 2024, letter of 9 June 2025",
+     "quote": [
+      "Fiji Airports Headquarters, FA Compound, Namaka, Nadi, Fiji",
+      "The registered office is located at AFL Compound, Nadi Airport, Fiji."
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The airport is located at Namaka"
+    }
+   ]
+  },
+  {
+   "claim": "north east of Nadi town",
+   "verdict": "corrected",
+   "inAfter": "north east of Nadi town",
+   "note": "Was '10 km from Nadi'. Both position sets put the airport about 5 km north east of the town in a straight line (OurAirports and GeoNames 5.1 km at 27 degrees; Wikipedia's coordinates 5.7 km at 30 degrees), so 10 km is a ratio of 1.95 or 1.75, outside the check, and no written source gives the road distance. The bearing is kept and the figure dropped.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "City centre: Nadi (GeoNames 2202064) at -17.8031, 177.4162, population 42,284",
+      "Straight-line distance from the city centre: 5.1 km (3.2 miles)",
+      "Bearing from the city centre: 27 degrees, which is north east"
+     ]
+    },
+    {
+     "file": "wikipedia-coords-computed",
+     "org": "Wikimedia",
+     "quote": "Straight-line distance from Nadi (Wikipedia coordinates -17.8000, 177.4167) to Nadi International Airport (infobox coordinates): 5.7 km; the airport lies at 30 degrees from Nadi, which is north east"
+    }
+   ]
+  },
+  {
+   "claim": "about 20 km from Lautoka",
+   "verdict": "confirmed",
+   "inAfter": "about 20 km from Lautoka",
+   "note": "Straight lines: 16.2 km (OurAirports and GeoNames) and 14.6 km (Wikipedia coordinates), ratios 1.24 and 1.37, inside the check for a road distance.",
+   "sources": [
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "20 km (12 mi) from the city of Lautoka"
+    },
+    {
+     "file": "geo-cities",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from Lautoka (GeoNames 2204506, -17.6169, 177.4505, population 52,500): 16.2 km",
+      "a stated 20 km by road would be a ratio of 1.24"
+     ]
+    },
+    {
+     "file": "wikipedia-coords-computed",
+     "org": "Wikimedia",
+     "quote": "Straight-line distance from Lautoka (Wikipedia coordinates -17.6242, 177.4528) to Nadi International Airport (infobox coordinates): 14.6 km"
+    }
+   ]
+  },
+  {
+   "claim": "about 97 per cent of the country's international passengers",
+   "verdict": "corrected",
+   "inAfter": "It handles about 97 per cent of the country's international passengers.",
+   "note": "Was '97 per cent of international visitors to Fiji'. The operator counts passengers (its live page: of total annual international passengers; its 2024 report: of all international arrivals), which includes Fijians travelling, so 'visitors' is changed to 'passengers'. The tourist share is cut (below).",
+   "sources": [
+    {
+     "file": "afl-nadi",
+     "org": "Fiji Airports (Airports Fiji Limited, the operator; fijiairports.com, the site the Civil Aviation Authority of Fiji links to)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "which handles 97 percent (97%) of total annual international passengers"
+    },
+    {
+     "file": "afl-ar2024",
+     "org": "Fiji Airports (Airports Fiji Limited, the operator; fijiairports.com, the site the Civil Aviation Authority of Fiji links to)",
+     "dated": "annual report for 2024, letter of 9 June 2025",
+     "quote": [
+      "June 9, 2025",
+      "SUBJECT: SUBMISSION OF FIJI AIRPORTS 2024 ANNUAL REPORT",
+      "Nadi International Airport, which handles 97% of all international arrivals"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It handles about 97% of international visitors to Fiji"
+    }
+   ]
+  },
+  {
+   "claim": "the capital, Suva",
+   "verdict": "confirmed",
+   "inAfter": "the capital, Suva",
+   "note": "Was 'Suva, Fiji's largest city'; 'largest city' is cut (below).",
+   "sources": [
+    {
+     "file": "geo-cities",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Suva (GeoNames 2198148, -18.1368, 178.4253, population 77,366, GeoNames class PPLC, the national capital)"
+    },
+    {
+     "file": "afl-nausori",
+     "org": "Fiji Airports (Airports Fiji Limited, the operator; fijiairports.com, the site the Civil Aviation Authority of Fiji links to)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "the main domestic and secondary international airport serving Fiji's capital, Suva"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the country's capital and largest city Suva"
+    }
+   ]
+  },
+  {
+   "claim": "Suva is more than 110 km away",
+   "verdict": "corrected",
+   "inAfter": "which is more than 110 km away",
+   "note": "Was '192 km south east of Nadi'. The straight line is 112.5 km (OurAirports and GeoNames) or 114.0 km (Wikipedia's coordinates), so 192 km is a ratio of 1.71 or 1.68, outside the check, and no written source for the road distance could be read (Tourism Fiji's site refused the link lister, 403). 'More than 110 km' is true on either measure. Wikipedia's 192 km is most likely the road distance.",
+   "sources": [
+    {
+     "file": "geo-cities",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "the national capital): 112.5 km"
+    },
+    {
+     "file": "wikipedia-coords-computed",
+     "org": "Wikimedia",
+     "quote": "Straight-line distance from Suva (Wikipedia coordinates -18.1416, 178.4419) to Nadi International Airport (infobox coordinates): 114.0 km"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "it is located 192 km (119 mi) northwest of the country's capital"
+    }
+   ]
+  },
+  {
+   "claim": "Suva has its own airport at Nausori",
+   "verdict": "confirmed",
+   "inAfter": "has its own airport at Nausori",
+   "note": "The operator's Nausori page says so, but other pages on its new site repeat Wikipedia's wording (its history page does, sentence by sentence), and this one was not compared with Wikipedia's Nausori article, which belongs to another airport's record. So it is not relied on alone: OurAirports' own record has Nausori International Airport with scheduled service and the IATA code SUV, 17.7 km north east of Suva.",
+   "sources": [
+    {
+     "file": "geo-nausori",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "\"NFNA\",\"large_airport\",\"Nausori International Airport\"",
+      "\"Nausori\",\"yes\",\"NFNA\",\"SUV\"",
+      "to Nausori International Airport (OurAirports NFNA, IATA SUV): 17.7 km, bearing from Suva 54 degrees, which is north east"
+     ]
+    },
+    {
+     "file": "afl-nausori",
+     "org": "Fiji Airports (Airports Fiji Limited, the operator; fijiairports.com, the site the Civil Aviation Authority of Fiji links to)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Nausori Airport, sometimes called Luvuluvu, is the main domestic and secondary international airport serving Fiji's capital, Suva."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Suva and its own airport, Nausori International Airport"
+    }
+   ]
+  },
+  {
+   "claim": "a long transfer or a domestic hop to Suva",
+   "verdict": "confirmed",
+   "inAfter": "A client heading there faces a long transfer or a domestic hop",
+   "note": "The old text's advice, kept on the facts: buses run from the airport to Suva (the operator), and Fiji Link's domestic network includes both Suva and Nadi (oneworld; the operator names Fiji Link and Northern Air as the domestic airlines linking Nadi and Nausori with the regional airports).",
+   "sources": [
+    {
+     "file": "afl-transport",
+     "org": "Fiji Airports (Airports Fiji Limited, the operator; fijiairports.com, the site the Civil Aviation Authority of Fiji links to)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Regular bus services operate between Nadi International Airport and various destinations, including Nadi Town, Denarau Island, and Suva."
+    },
+    {
+     "file": "oneworld-fiji-airways",
+     "org": "oneworld (the airline alliance, oneworld.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "offering affordable domestic flights to twelve exciting destinations including Suva, Nadi, Labasa, Taveuni and Kadavu"
+    },
+    {
+     "file": "afl-domestic-airlines",
+     "org": "Fiji Airports (Airports Fiji Limited, the operator; fijiairports.com, the site the Civil Aviation Authority of Fiji links to)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "These airlines offer scheduled flights connecting the main hubs Nadi and Nausori with regional airports"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Despite being Fiji's main airport, it is a considerable distance from the country's major population centre"
+    }
+   ]
+  },
+  {
+   "claim": "Fiji Airways, the national airline, flies the widest network from here",
+   "verdict": "softened",
+   "inAfter": "The national airline, Fiji Airways, flies the widest network from here",
+   "note": "Was 'the main hub for Fiji Airways'. The operator names Fiji Airways as the national airline with the most extensive network among the carriers at Nadi, and oneworld calls it Fiji's flag carrier. 'Hub' in so many words rests on Wikipedia and on the operator's history page, which follows Wikipedia's text and so is not counted. Fiji Airways' own site answered the link lister with 502 and Qantas' newsroom with 503; each was tried once.",
+   "sources": [
+    {
+     "file": "afl-intl-airlines",
+     "org": "Fiji Airports (Airports Fiji Limited, the operator; fijiairports.com, the site the Civil Aviation Authority of Fiji links to)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "Nadi International Airport is the primary gateway, welcoming carriers such as Fiji Airways, Qantas, Virgin Australia, Air New Zealand, and Jetstar.",
+      "Fiji Airways, the national airline, has the most extensive network, operating international flights to Sydney, Melbourne, Brisbane, Auckland, Los Angeles, and Singapore, among others."
+     ]
+    },
+    {
+     "file": "oneworld-fiji-airways",
+     "org": "oneworld (the airline alliance, oneworld.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Fiji Airways is the flag carrier of Fiji and the South Pacific."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": [
+      "it is the main hub of Fiji Airways",
+      "Nadi is the operational base for Fiji Airways"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "its subsidiary Fiji Link covers domestic and regional routes",
+   "verdict": "confirmed",
+   "inAfter": "its subsidiary Fiji Link covers domestic and regional routes",
+   "sources": [
+    {
+     "file": "oneworld-fiji-airways",
+     "org": "oneworld (the airline alliance, oneworld.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Fiji Link, a wholly owned subsidiary of Fiji Airways, is an affiliate airline of one world and extends the alliance's network even further by bringing flights to domestic destinations; as well as regionally to the Pacific Island nations of Tonga, Samoa, Tuvalu and Vanuatu."
+    },
+    {
+     "file": "afl-domestic-airlines",
+     "org": "Fiji Airports (Airports Fiji Limited, the operator; fijiairports.com, the site the Civil Aviation Authority of Fiji links to)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Fiji's domestic airline services are primarily operated by Fiji Link, a subsidiary of Fiji Airways, and Northern Air."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "its domestic and regional subsidiary Fiji Link"
+    }
+   ]
+  },
+  {
+   "claim": "Fiji Airports operates the airport",
+   "verdict": "confirmed",
+   "inAfter": "Fiji Airports, which runs the airport",
+   "sources": [
+    {
+     "file": "afl-ar2024",
+     "org": "Fiji Airports (Airports Fiji Limited, the operator; fijiairports.com, the site the Civil Aviation Authority of Fiji links to)",
+     "dated": "annual report for 2024, letter of 9 June 2025",
+     "quote": "the operation and management of the Nadi International Airport and other airports throughout Fiji"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Owned and operated by Fiji Airports Limited"
+    }
+   ]
+  },
+  {
+   "claim": "Fiji Airports says the airport serves more than 2.4 million passengers a year",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "Fiji Airports",
+   "inAfter": "Fiji Airports, which runs the airport, says it serves more than 2.4 million passengers a year.",
+   "note": "Was 'In 2019 the airport handled 2,485,319 passengers' (Wikipedia's infobox, from the operator; the operator's 2019 report sits on its old airportsfiji.com site, whose pages now show a PHP error). A passenger total for a passenger total, attributed: the operator's 2024 annual report (letter of 9 June 2025) says Nadi 'now serves more than 2.4 million passengers annually', and its live Nadi page gives more than 2.1 million international and close to 300,000 domestic passengers a year. The operator's figure looks like a floor: the same report counts 2,895,185 international passenger movements across all its airports in 2024, up 9.3 per cent, and says 97 per cent of international arrivals come through Nadi. No Nadi-only total for 2024 or 2025 was found.",
+   "sources": [
+    {
+     "file": "afl-ar2024",
+     "org": "Fiji Airports (Airports Fiji Limited, the operator; fijiairports.com, the site the Civil Aviation Authority of Fiji links to)",
+     "dated": "annual report for 2024, letter of 9 June 2025",
+     "quote": [
+      "June 9, 2025",
+      "SUBJECT: SUBMISSION OF FIJI AIRPORTS 2024 ANNUAL REPORT",
+      "now serves more than 2.4 million passengers annually",
+      "Total Int’l Movement 2,212,090 409,161 81,147 1,613,464 2,649,610 2,895,185"
+     ]
+    },
+    {
+     "file": "afl-nadi",
+     "org": "Fiji Airports (Airports Fiji Limited, the operator; fijiairports.com, the site the Civil Aviation Authority of Fiji links to)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Nadi International Airport welcomes more than 2.1 million international passengers and close to 300,000 domestic passengers annually."
+    }
+   ]
+  },
+  {
+   "claim": "'important' regional hub",
+   "verdict": "cut",
+   "wasBefore": "an important regional hub for the South Pacific",
+   "why": "Softened to 'a regional hub for the Pacific islands', what the operator's 2024 report and oneworld support (see above)."
+  },
+  {
+   "claim": "10 km from Nadi",
+   "verdict": "cut",
+   "wasBefore": "at Namaka 10 km from Nadi",
+   "why": "Fails the coordinates check (5.1 km and 5.7 km in a straight line; ratios 1.95 and 1.75) and no written source for a road distance could be read. The bearing from the town is kept (see above)."
+  },
+  {
+   "claim": "of international visitors, 86 per cent are tourists",
+   "verdict": "cut",
+   "wasBefore": "It handles about 97 per cent of international visitors to Fiji, of whom 86 per cent are tourists.",
+   "why": "The tourist share rests on Wikipedia alone (it cites the operator's old airportsfiji.com page, which now shows a PHP error). The operator's current page and 2024 report give the 97 per cent share but not the tourist share, and the Fiji Bureau of Statistics' release page answered the link lister with 502, so its tables could not be reached. The 97 per cent is kept, as passengers (see above)."
+  },
+  {
+   "claim": "Suva is Fiji's largest city, 192 km south east of Nadi",
+   "verdict": "cut",
+   "wasBefore": "Suva, Fiji's largest city, is 192 km south east of Nadi",
+   "why": "'Largest city' rests on Wikipedia alone (GeoNames puts neighbouring Nasinu's population, 92,043, above Suva's, 77,366, so it cannot settle it). 192 km fails both coordinate sets (ratios 1.71 and 1.68) and no road-distance source could be read. Now 'the capital, Suva, which is more than 110 km away' (see above)."
+  },
+  {
+   "claim": "main hub for Fiji Airways and its regional subsidiary Fiji Link",
+   "verdict": "cut",
+   "wasBefore": "It is the main hub for Fiji Airways and its regional subsidiary Fiji Link",
+   "why": "Softened: 'hub' rests on Wikipedia and on the operator's history page, which repeats Wikipedia's wording; Fiji Airways' own site (502) and Qantas' newsroom (503) could not be read. Now the national airline with the widest network here, and Fiji Link as its domestic and regional subsidiary (see above)."
+  },
+  {
+   "claim": "six airports across the south west Pacific and many more around the Pacific Rim",
+   "verdict": "cut",
+   "wasBefore": "which between them reach six airports across the south west Pacific and many more around the Pacific Rim",
+   "why": "A destination count on Wikipedia alone, and stale. The operator's own count ('connects Fiji to 15 cities, internationally') sits on an undated page whose traffic figures predate 2020, and oneworld alone says Fiji Airways serves 25 destinations, so neither replaces it (held back below)."
+  },
+  {
+   "claim": "2,485,319 passengers in 2019",
+   "verdict": "cut",
+   "wasBefore": "In 2019 the airport handled 2,485,319 passengers.",
+   "why": "A 2019 figure. Replaced by the operator's current statement, attributed (see above)."
+  },
+  {
+   "claim": "a Qantas A380 emergency landing in 2008",
+   "verdict": "cut",
+   "wasBefore": "The runway is capable enough that a Qantas A380 made an emergency landing here in 2008 to offload a sick passenger, despite the airport not being certified for the type.",
+   "why": "Wikipedia alone. Its source, a Sydney Morning Herald report of December 2008, is blocked by the session's egress policy, and no other report of the landing could be reached."
+  },
+  {
+   "claim": "FCDO: many roads in poor condition; avoid road travel outside towns at night",
+   "verdict": "cut",
+   "why": "Held back: verified on the FCDO's own page but replaces nothing. The FCDO says many roads in Fiji are in poor condition and can be dangerous, and to avoid road travel outside urban areas at night; worth a line beside the long transfer to Suva if Andy wants it (attributed to the FCDO).",
+   "sources": [
+    {
+     "file": "fcdo-fiji",
+     "org": "FCDO (UK Foreign, Commonwealth & Development Office, gov.uk)",
+     "dated": "still current at 24 September 2026, updated 10 August 2026",
+     "quote": [
+      "Still current at:",
+      "24 September 2026",
+      "Updated:",
+      "10 August 2026"
+     ]
+    },
+    {
+     "file": "fcdo-fiji-safety",
+     "org": "FCDO (UK Foreign, Commonwealth & Development Office, gov.uk)",
+     "dated": "same guide",
+     "quote": [
+      "Many roads in Fiji are in poor condition and can be dangerous.",
+      "Avoid road travel outside of urban areas at night."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "oneworld's counts: Fiji Airways 25 destinations in 14 countries; Fiji Link twelve domestic destinations",
+   "verdict": "cut",
+   "why": "Held back: one source only (oneworld's member page, read 23 Sep 2026) and a count of the airline's network, not the airport's, so it does not replace the old count under the like-for-like rule.",
+   "sources": [
+    {
+     "file": "oneworld-fiji-airways",
+     "org": "oneworld (the airline alliance, oneworld.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": [
+      "It serves 25 destinations in 14 countries and territories",
+      "offering affordable domestic flights to twelve exciting destinations"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The thing to plan around is the distance to the capital",
+   "why": "The old text's framing, kept: Suva is more than 110 km away in a straight line (two coordinate sets), with its own airport (sourced above)."
+  },
+  {
+   "text": "so do not assume Nadi is close to everything",
+   "why": "The old text's advice, kept; it follows from the distance to Suva (sourced above)."
+  }
+ ],
+ "tracerOk": {}
+}

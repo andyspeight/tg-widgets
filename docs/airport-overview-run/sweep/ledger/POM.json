@@ -1,0 +1,361 @@
+{
+ "iata": "POM",
+ "id": "recWzw9x6r7GHaFXg",
+ "name": "Port Moresby Jacksons International Airport",
+ "country": "Papua New Guinea",
+ "wikipedia": "https://en.wikipedia.org/wiki/Port_Moresby_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Papua New Guinea's main airport, 8 km outside Port Moresby, and the hub for both Air Niugini and PNG Air. It handled an estimated 1.6 million passengers in 2025.\n\nThe terminal split is the thing to get right, and it is not the obvious one. The Domestic Terminal is for Air Niugini and PNG Air domestic flights. The International Terminal handles every other international airline plus Air Niugini's and PNG Air's own international routes, so a client flying Air Niugini could be at either building depending on where they are going. The two are linked by a covered walkway.\n\nThe International Terminal has four aircraft parking bays, all four with air bridges.\n\nThe airport began life as the 7 Mile Drome in the wartime Port Moresby airfield complex and was renamed after John Francis Jackson, the Australian fighter ace killed in action in 1942 during the New Guinea campaign.",
+ "after": "Papua New Guinea's main airport sits 8 km from the centre of Port Moresby and is the hub for both Air Niugini and PNG Air.\n\nThe terminal split is the thing to get right. There are two terminals, the Domestic Terminal and the International Terminal. Air Niugini uses both, its domestic flights leaving from one and its international flights from the other, so a client flying Air Niugini could be at either building depending on where they are going.\n\nThe airport is named after John Francis Jackson, the Australian fighter pilot killed in action in 1942 during the New Guinea campaign.",
+ "claims": [
+  {
+   "claim": "Papua New Guinea's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Papua New Guinea's main airport",
+   "note": "The tourism authority calls it the country's main international gateway and its busiest airport; Wikipedia calls it the largest and busiest.",
+   "sources": [
+    {
+     "file": "pngtpa-port-moresby",
+     "org": "PNG Tourism Promotion Authority (the national tourism body, papuanewguinea.travel)",
+     "dated": "read 2026-09-24 (live page, undated)",
+     "quote": "It’s Papua New Guinea’s main international gateway and the busiest airport in the country."
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "It is the largest and busiest airport in Papua New Guinea"
+    }
+   ]
+  },
+  {
+   "claim": "8 km from the centre of Port Moresby",
+   "verdict": "softened",
+   "inAfter": "sits 8 km from the centre of Port Moresby",
+   "note": "Was '8 km outside Port Moresby'. The airport lies within the capital (Wikipedia's infobox places it at Saraga, Port Moresby), so the distance is now given from the centre, as the tourism authority gives it. The coordinates put it 8.5 km north east of the city centre in a straight line (ratio 0.94); Air Niugini's airport guide also says 8 km.",
+   "sources": [
+    {
+     "file": "pngtpa-port-moresby",
+     "org": "PNG Tourism Promotion Authority (the national tourism body, papuanewguinea.travel)",
+     "dated": "read 2026-09-24 (live page, undated)",
+     "quote": "Port Moresby is accessible via Jacksons International Airport (POM), located just 8 km from the city centre."
+    },
+    {
+     "file": "airniugini-airports",
+     "org": "Air Niugini (the national airline, airniugini.com.pg)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": "Jacksons International (POM) Central Region 8km from Port Moresby"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 8.5 km (5.3 miles)",
+      "Bearing from the city centre: 64 degrees, which is north east"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is an international airport located 8 kilometres (5 miles) outside of Port Moresby, the capital of Papua New Guinea"
+    }
+   ]
+  },
+  {
+   "claim": "the hub for both Air Niugini and PNG Air",
+   "verdict": "confirmed",
+   "inAfter": "is the hub for both Air Niugini and PNG Air",
+   "note": "Air Niugini's own pages sell connections through Port Moresby (Cairns to Hong Kong via Port Moresby) and its resumed Japan service from Port Moresby, and describe its domestic network as run from Port Moresby and Lae. PNG Air's timetable for 1 December 2025 to 31 December 2026 is domestic only, and Port Moresby is on far more of its flights than anywhere else (POM appears 224 times in the timetable's rows, Lae 110, Mount Hagen 74). Air Niugini's site still uses the name Air Niugini throughout (checked 24 Sep 2026), so the name is kept.",
+   "sources": [
+    {
+     "file": "airniugini-home",
+     "org": "Air Niugini (the national airline, airniugini.com.pg)",
+     "dated": "read 2026-09-24 (live page; the Japan service it advertises restarted 18 July 2026)",
+     "quote": [
+      "Fly Cairns to Hong Kong via Port Moresby",
+      "Direct Service to Japan from Port Moresby",
+      "Our direct service to Japan recommences on the 18th of July 2026."
+     ]
+    },
+    {
+     "file": "airniugini-story",
+     "org": "Air Niugini (the national airline, airniugini.com.pg)",
+     "dated": "read 2026-09-24 (live page, undated)",
+     "quote": "Today, Air Niugini operates a robust domestic network from [Port Moresby] and Lae, alongside international services across Asia, Oceania, and Australia"
+    },
+    {
+     "file": "pngair-schedule-pdf",
+     "org": "PNG Air (the airline, pngair.com.pg)",
+     "dated": "timetable effective 1 December 2025 to 31 December 2026",
+     "quote": [
+      "PNGAir Schedule 37.7 Effective 01Dec 2025 to 31Dec 2026 Public",
+      "CG8300 0630 POM DAU 0755",
+      "CG8540 0830 POM HGU 1005",
+      "CG8710 0600 POM HKN 0730",
+      "CG8736 0930 POM RAB 1140"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "is the main hub for Air Niugini, the national airline of Papua New Guinea, as well as the main hub for PNG Air"
+    }
+   ]
+  },
+  {
+   "claim": "two terminals, the Domestic Terminal and the International Terminal",
+   "verdict": "confirmed",
+   "inAfter": "There are two terminals, the Domestic Terminal and the International Terminal.",
+   "note": "Air Niugini lists a lounge at each of the two Port Moresby buildings; a hotel listing on the tourism authority's site also mentions both terminals.",
+   "sources": [
+    {
+     "file": "airniugini-lounges",
+     "org": "Air Niugini (the national airline, airniugini.com.pg)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "POM Domestic Jackson’s Domestic Airport",
+      "POM International Jackson’s International Airport"
+     ]
+    },
+    {
+     "file": "pngtpa-port-moresby",
+     "org": "PNG Tourism Promotion Authority (the national tourism body, papuanewguinea.travel)",
+     "dated": "read 2026-09-24 (live page, undated)",
+     "quote": "A short drive from both the international & domestic terminals in the hotel's free shuttle bus"
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Jacksons International Airport consists of two terminals: the Domestic Terminal, housing Air Niugini and PNG Air, and the International Terminal"
+    }
+   ]
+  },
+  {
+   "claim": "Air Niugini uses both terminals, domestic flights from one and international flights from the other",
+   "verdict": "softened",
+   "inAfter": "Air Niugini uses both, its domestic flights leaving from one and its international flights from the other",
+   "note": "Was two sentences naming PNG Air with Air Niugini in both buildings (see the cuts). Air Niugini keeps a Kumul lounge in each Port Moresby building; its Jacksons International lounge is for eligible passengers travelling on Air Niugini services, and its domestic Kumul lounges for its domestic network. Reading that as international flights from the International Terminal and domestic ones from the Domestic Terminal is a judgement, and it is exactly what Wikipedia says.",
+   "sources": [
+    {
+     "file": "airniugini-lounges",
+     "org": "Air Niugini (the national airline, airniugini.com.pg)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "Access to Air Niugini Jacksons International Kumul Lounge is permitted in the following circumstances for;",
+      "Qantas members of Chairman’s Lounge, Platinum, Platinum one, Gold & Silver Frequent Flyers, and Qantas Club travelling on Air Niugini services only",
+      "Access to Air Niugini Domestic Kumul Lounge is permitted in the following circumstances for;",
+      "POM Domestic Jackson’s Domestic Airport",
+      "POM International Jackson’s International Airport"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "the Domestic Terminal, housing Air Niugini and PNG Air, and the International Terminal, servicing all other international airlines including Air Niugini's and PNG Air's international routes"
+    }
+   ]
+  },
+  {
+   "claim": "named after John Francis Jackson",
+   "verdict": "confirmed",
+   "inAfter": "The airport is named after John Francis Jackson",
+   "note": "Was 'renamed after'; the renaming belongs to the 7 Mile Drome story, which is cut. The Australian Dictionary of Biography (published by the Australian National University) says the airport commemorates him.",
+   "sources": [
+    {
+     "file": "adb-jackson",
+     "org": "Australian Dictionary of Biography (National Centre of Biography, Australian National University)",
+     "dated": "first published in hardcopy 1996",
+     "quote": [
+      "Jackson International Airport, Port Moresby, commemorates him.",
+      "published first in hardcopy 1996"
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "The strip was renamed Jackson Airfield in honour of Australian fighter ace John Francis Jackson"
+    }
+   ]
+  },
+  {
+   "claim": "the Australian fighter pilot killed in action in 1942 during the New Guinea campaign",
+   "verdict": "softened",
+   "inAfter": "the Australian fighter pilot killed in action in 1942 during the New Guinea campaign",
+   "note": "Was 'fighter ace'. The ADB lists his victories and his RAAF fighter commands but does not use the word ace, so 'fighter pilot'. It has him, Brisbane-born, commanding No.75 Squadron's Kittyhawks at Port Moresby against Japanese air attacks from March 1942 and killed in combat on 28 April 1942, which is the New Guinea campaign Wikipedia names.",
+   "sources": [
+    {
+     "file": "adb-jackson",
+     "org": "Australian Dictionary of Biography (National Centre of Biography, Australian National University)",
+     "dated": "first published in hardcopy 1996",
+     "quote": [
+      "John Francis Jackson (1908-1942), grazier, businessman and air force officer",
+      "born on 23 February 1908 at New Farm, Brisbane",
+      "Appointed pilot officer, R.A.A.F., on 2 October 1939",
+      "began moving the unit's Kittyhawks to Port Moresby which had been without fighter protection against Japanese air-attacks",
+      "On 28 April 1942 he led five aircraft to intercept a Japanese strike. He was killed in the ensuing combat."
+     ]
+    },
+    {
+     "file": "wikipedia-archived",
+     "org": "Wikimedia",
+     "quote": "Australian fighter ace John Francis Jackson, who was killed in action in 1942 during the New Guinea campaign"
+    }
+   ]
+  },
+  {
+   "claim": "8 km outside Port Moresby",
+   "verdict": "cut",
+   "wasBefore": "8 km outside Port Moresby",
+   "why": "Reworded to 8 km from the centre of Port Moresby (see above): the airport is inside the capital, and the tourism authority measures from the city centre."
+  },
+  {
+   "claim": "an estimated 1.6 million passengers in 2025",
+   "verdict": "cut",
+   "wasBefore": "It handled an estimated 1.6 million passengers in 2025.",
+   "why": "Wikipedia alone, and uncited there. The operator, the National Airports Corporation (nac.com.pg), refused the plain request with a 429 and was left alone; neither The National's nor the Post-Courier's front pages carried a traffic story, and a guessed National tag page was a 404."
+  },
+  {
+   "claim": "the terminal split is not the obvious one",
+   "verdict": "cut",
+   "wasBefore": "and it is not the obvious one",
+   "why": "Framing that went with the PNG Air detail below. What two sources support is a plain domestic and international split, with Air Niugini in both buildings."
+  },
+  {
+   "claim": "the Domestic Terminal is for Air Niugini and PNG Air domestic flights",
+   "verdict": "cut",
+   "wasBefore": "The Domestic Terminal is for Air Niugini and PNG Air domestic flights.",
+   "why": "Which building PNG Air uses rests on Wikipedia alone: PNG Air's own site and timetable do not name a terminal, and the operator's site refused (429). Air Niugini's domestic flights are kept (see above)."
+  },
+  {
+   "claim": "the International Terminal handles every other international airline plus Air Niugini's and PNG Air's own international routes",
+   "verdict": "cut",
+   "wasBefore": "The International Terminal handles every other international airline plus Air Niugini's and PNG Air's own international routes",
+   "why": "PNG Air's international routes are contradicted by PNG Air itself: it calls itself a domestic airline, and its timetable to 31 December 2026 lists only Papua New Guinea airports (a generic line on its check-in page about international check-in times names no route). Which foreign airlines use the International Terminal rests on Wikipedia alone. Air Niugini's international flights are kept (see above).",
+   "sources": [
+    {
+     "file": "pngair-about",
+     "org": "PNG Air (the airline, pngair.com.pg)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "At PNG Air , we are Papua New Guinea’s next-generation domestic airline",
+      "PNG Air currently operates over 460 flights each week across 24 destinations"
+     ]
+    },
+    {
+     "file": "pngair-profile",
+     "org": "PNG Air (the airline, pngair.com.pg)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": "Guided by our vision of being PNG’s First Choice Domestic Airline"
+    },
+    {
+     "file": "pngair-schedule-pdf",
+     "org": "PNG Air (the airline, pngair.com.pg)",
+     "dated": "timetable effective 1 December 2025 to 31 December 2026",
+     "quote": "PNGAir Schedule 37.7 Effective 01Dec 2025 to 31Dec 2026 Public"
+    },
+    {
+     "file": "pngair-checkin",
+     "org": "PNG Air (the airline, pngair.com.pg)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": "For INTERNATIONAL services, the flight will close for check-in 1 hour before the scheduled departure time."
+    }
+   ]
+  },
+  {
+   "claim": "the two terminals are linked by a covered walkway",
+   "verdict": "cut",
+   "wasBefore": "The two are linked by a covered walkway.",
+   "why": "Wikipedia alone; the operator's site refused (429) and neither airline describes the walk between buildings."
+  },
+  {
+   "claim": "four aircraft parking bays, all with air bridges",
+   "verdict": "cut",
+   "wasBefore": "The International Terminal has four aircraft parking bays, all four with air bridges.",
+   "why": "Wikipedia alone; the operator's site refused (429) and no other source describes the stands."
+  },
+  {
+   "claim": "began life as the 7 Mile Drome in the wartime Port Moresby airfield complex",
+   "verdict": "cut",
+   "wasBefore": "The airport began life as the 7 Mile Drome in the wartime Port Moresby airfield complex and was renamed after",
+   "why": "Wikipedia alone. Its only citation for the history is Pacific Wrecks, a specialist history site the brief does not accept as a second source; the ADB entry names the airport after Jackson but does not mention the 7 Mile Drome, and the tourism authority's history page does not either. The naming after Jackson is kept (see above)."
+  },
+  {
+   "claim": "the Australian fighter ace",
+   "verdict": "cut",
+   "wasBefore": "the Australian fighter ace",
+   "why": "Softened to fighter pilot: only Wikipedia uses the word ace (see above)."
+  },
+  {
+   "claim": "FCDO: high risk of serious crime in Port Moresby; carjacking; robberies in taxis and PMV buses; flight delays and cancellations",
+   "verdict": "cut",
+   "why": "Held back: verified on the FCDO's page (updated 17 August 2026, still current 24 September 2026) but it replaces nothing in the old text. It could go in as an attributed sentence if Andy wants it, for example: 'The FCDO warns of a high risk of serious crime in Port Moresby, including carjacking, and says flight delays and cancellations often happen.'",
+   "sources": [
+    {
+     "file": "fcdo-png-safety",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "updated 17 August 2026",
+     "quote": [
+      "There is a high risk of serious crime in the capital, Port Moresby, and in the cities of Lae and Mount Hagen.",
+      "Carjacking and other types of vehicle crime are common.",
+      "Armed criminals have attacked and robbed passengers on public buses (known as ‘PMVs’) and in taxis.",
+      "Delays and cancellations of international and domestic flights often happen. Check with your airline before travel."
+     ]
+    },
+    {
+     "file": "fcdo-png",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "updated 17 August 2026",
+     "quote": [
+      "Still current at:",
+      "24 September 2026",
+      "Updated:",
+      "17 August 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "visas on arrival at Jacksons; a Digital Arrival Card since 1 October 2025",
+   "verdict": "cut",
+   "why": "Held back: new entry rules on the FCDO's word, and they replace nothing. The FCDO says tourist and visitor visas can be obtained on arrival at Jacksons International Airport, and that since 1 October 2025 every traveller must submit a free online Digital Arrival Card within 72 hours of arrival. PNG's immigration site (ica.gov.pg) showed a Cloudflare check and was not tried again, so there is no second source yet.",
+   "sources": [
+    {
+     "file": "fcdo-png-entry",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "updated 17 August 2026",
+     "quote": [
+      "Tourist/visitor visas can also be obtained on arrival at Jacksons International Airport in Port Moresby.",
+      "From 1 October 2025 all travellers to Papua New Guinea must complete and submit online a Digital Arrival Card",
+      "should be submitted within 72 hours of arrival"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Air Niugini's Port Moresby to Tokyo Narita flights resumed on 18 July 2026",
+   "verdict": "cut",
+   "why": "Held back: a route change at the hub, on Air Niugini's word alone, and the old text lists no routes to replace.",
+   "sources": [
+    {
+     "file": "airniugini-home",
+     "org": "Air Niugini (the national airline, airniugini.com.pg)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "Direct flights between Port Moresby and Narita, Japan, commencing 18 July 2026.",
+      "Our direct service to Japan recommences on the 18th of July 2026."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The terminal split is the thing to get right.",
+   "why": "The old text's framing, kept: the airport has separate domestic and international terminals and Air Niugini uses both (sourced above)."
+  },
+  {
+   "text": "so a client flying Air Niugini could be at either building depending on where they are going",
+   "why": "The old text's advice to the agent, kept; it follows from Air Niugini flying from both buildings (sourced above)."
+  }
+ ],
+ "tracerOk": {}
+}

@@ -1,0 +1,307 @@
+{
+ "iata": "APW",
+ "id": "recD1EUe4UsduOzfe",
+ "name": "Faleolo International Airport",
+ "country": "Samoa",
+ "wikipedia": "https://en.wikipedia.org/wiki/Faleolo_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Samoa's international airport, 40 km west of Apia on the island of Upolu. The runway is 3,000 metres and the field sits barely above sea level at 58 feet.\n\nThe history explains why the airport matters. Until 1984 it could not take anything bigger than a 737, so flights from the United States, Australia and New Zealand had to land at Pago Pago in American Samoa instead. Once Faleolo was expanded, almost all of Samoa's international traffic moved here.\n\nIts origins are wartime. United States Navy Seabees built the airfield in 1942 alongside a naval base, and a Marine fighter squadron moved in to defend Upolu and Savai'i. After the war it went quiet, serving flying boats on the coral route, and was upgraded for land aircraft in 1957 and again in 1972.\n\nThe control tower has an unusually wide brief, covering some of the airspace over American Samoa and Tonga as well as Samoa's own.",
+ "after": "Samoa's main international airport, about 40 km west of Apia on the island of Upolu. Its runway is 3,000 metres and the field sits barely above sea level at 58 feet.\n\nThe history explains why the airport matters. Until the runway was lengthened for Boeing 747s in 1985, Faleolo could not take the largest jets. Most international traffic to Samoa now comes through here.\n\nIts origins are wartime. United States Navy Seabees built the airfield in 1942 alongside a naval base.",
+ "claims": [
+  {
+   "claim": "Samoa's main international airport",
+   "verdict": "confirmed",
+   "inAfter": "Samoa's main international airport",
+   "note": "Was 'Samoa's international airport'; 'main' added because the authority also runs Fagali'i, a regional terminal and two other airfields.",
+   "sources": [
+    {
+     "file": "saa-faleolo",
+     "org": "Samoa Airport Authority (the operator, samoaairports.com, the site the Samoa government directory links to)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": "Faleolo International Airport is Samoa's primary international gateway, connecting the nation to the Pacific region and the world."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-27",
+     "quote": "Since the airport's expansion, most international traffic now uses Faleolo."
+    }
+   ]
+  },
+  {
+   "claim": "about 40 km west of Apia",
+   "verdict": "confirmed",
+   "inAfter": "about 40 km west of Apia",
+   "note": "Straight line 26.1 km due west (271 degrees), so 40 km is a ratio of 1.53, inside the check for a road distance; the authority gives the same 40 km.",
+   "sources": [
+    {
+     "file": "saa-faleolo",
+     "org": "Samoa Airport Authority (the operator, samoaairports.com, the site the Samoa government directory links to)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": "Located approximately 40 kilometres west of Apia"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 26.1 km (16.2 miles)",
+      "Bearing from the city centre: 271 degrees, which is west"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-27",
+     "quote": "is an airport located 40 kilometres (25 mi) west of Apia, the capital of Samoa"
+    }
+   ]
+  },
+  {
+   "claim": "on the island of Upolu",
+   "verdict": "confirmed",
+   "inAfter": "on the island of Upolu",
+   "sources": [
+    {
+     "file": "usn-bases-samoa",
+     "org": "Building the Navy's Bases in World War II, chapter 24 (US Navy history; HyperWar transcription at ibiblio.org)",
+     "quote": [
+      "Upolu (Samoan Islands)",
+      "The topography of Upolu is not so precipitous as that of Tutuila, and there were many areas suitable for airfields.",
+      "Construction on a landplane runway, 4,000 feet by 200 feet, was begun immediately at Faleolo"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-27",
+     "quote": "area_served = Apia, Upolu Island, Samoa"
+    }
+   ]
+  },
+  {
+   "claim": "the runway is 3,000 metres",
+   "verdict": "confirmed",
+   "inAfter": "Its runway is 3,000 metres",
+   "note": "The authority's timeline agrees: 2,700 metres from 1985, extended by 300 metres in 2000.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 08/26: 3,000 m (9,843 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "saa-history",
+     "org": "Samoa Airport Authority (the operator, samoaairports.com, the site the Samoa government directory links to)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "Faleolo runway was upgraded and expanded to 2700 meters to cater for 747 operations.",
+      "Faleolo runway was resealed and extended by 300 metres."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-27",
+     "quote": "It has one runway designated 08/26 with an asphalt surface measuring 3,000 by 45 metres"
+    }
+   ]
+  },
+  {
+   "claim": "elevation 58 feet",
+   "verdict": "confirmed",
+   "inAfter": "the field sits barely above sea level at 58 feet",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": "Airport: Faleolo International Airport (OurAirports NSFA, IATA APW) at -13.8300, -172.0080, elevation 58 ft (18 m)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-27",
+     "quote": "The airport is at an elevation of 58 feet (18 m) above mean sea level."
+    }
+   ]
+  },
+  {
+   "claim": "until the runway was lengthened for Boeing 747s in 1985, Faleolo could not take the largest jets",
+   "verdict": "softened",
+   "inAfter": "Until the runway was lengthened for Boeing 747s in 1985, Faleolo could not take the largest jets.",
+   "note": "Was 'Until 1984 it could not take anything bigger than a 737'. The authority's timeline dates the runway extension for 747 operations to 1985 (Wikipedia: upgraded over 1984 to 1985 to enable large jets). The 737 limit itself is Wikipedia's alone, so the text now says what both support: before 1985 the largest jets could not use it.",
+   "sources": [
+    {
+     "file": "saa-history",
+     "org": "Samoa Airport Authority (the operator, samoaairports.com, the site the Samoa government directory links to)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "1985",
+      "Faleolo runway was upgraded and expanded to 2700 meters to cater for 747 operations."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-27",
+     "quote": [
+      "Until 1984, Faleolo could not accommodate jets larger than a Boeing 737.",
+      "Desire for increased tourism saw it upgraded again over 1984-1985 to enable large jets."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "most international traffic to Samoa now comes through here",
+   "verdict": "softened",
+   "inAfter": "Most international traffic to Samoa now comes through here.",
+   "note": "Was 'almost all of Samoa's international traffic moved here'. Wikipedia says 'most', and the authority calls Faleolo Samoa's primary international gateway; 'almost all' has no source.",
+   "sources": [
+    {
+     "file": "saa-faleolo",
+     "org": "Samoa Airport Authority (the operator, samoaairports.com, the site the Samoa government directory links to)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": "Faleolo International Airport is Samoa's primary international gateway"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-27",
+     "quote": "Since the airport's expansion, most international traffic now uses Faleolo."
+    }
+   ]
+  },
+  {
+   "claim": "United States Navy Seabees built the airfield in 1942 alongside a naval base",
+   "verdict": "confirmed",
+   "inAfter": "United States Navy Seabees built the airfield in 1942 alongside a naval base.",
+   "note": "The Navy's own history has the runway at Faleolo begun in May 1942 and completed by July 1942, as part of an air base with harbour facilities and seaplane ramps. It credits the 4th Construction Detachment of the 2nd Construction Battalion; Wikipedia says the 1st Battalion, which the text does not name.",
+   "sources": [
+    {
+     "file": "usn-bases-samoa",
+     "org": "Building the Navy's Bases in World War II, chapter 24 (US Navy history; HyperWar transcription at ibiblio.org)",
+     "quote": [
+      "At Upolu, the Navy's task was to construct and operate an air base and the necessary harbor facilities to support it.",
+      "The runway was completed by July 1942.",
+      "By March 1943 the Seabees had enlarged the runway to 6,000 feet by 350 feet"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-08-27",
+     "quote": [
+      "United States Navy SeaBees of 1st Construction Battalion subsequently constructed an airfield and Naval Base Upolu.",
+      "Faleolo Airfield was completed by the Seabees in July 1942"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "737 limit until 1984; US, Australian and NZ flights landed at Pago Pago",
+   "verdict": "cut",
+   "wasBefore": "Until 1984 it could not take anything bigger than a 737, so flights from the United States, Australia and New Zealand had to land at Pago Pago in American Samoa instead.",
+   "why": "The 737 limit and the Pago Pago diversion rest on Wikipedia alone (the authority's timeline starts in 1984 and says nothing of Pago Pago). Softened to the 1985 lengthening for 747s, which both support (see above)."
+  },
+  {
+   "claim": "almost all of Samoa's international traffic",
+   "verdict": "cut",
+   "wasBefore": "Once Faleolo was expanded, almost all of Samoa's international traffic moved here.",
+   "why": "Softened to 'most', as Wikipedia says; the authority calls it the primary international gateway (see above)."
+  },
+  {
+   "claim": "a Marine fighter squadron moved in to defend Upolu and Savai'i",
+   "verdict": "cut",
+   "wasBefore": "and a Marine fighter squadron moved in to defend Upolu and Savai'i",
+   "why": "Wikipedia alone. The Marine Corps' own history has VMF-111 operating from Tutuila's airfield, with Navy amphibians sent forward to Upolu while its airfield was rushed to completion; it does not record the move to Faleolo, and the Navy's history does not name a squadron there.",
+   "sources": [
+    {
+     "file": "usmc-history-samoa",
+     "org": "History of USMC Operations in WWII, Vol. I, Part II, chapter 3 (US Marine Corps history; HyperWar transcription at ibiblio.org)",
+     "quote": [
+      "one tactical squadron, VMF-111, operating from Tutuila's airfield",
+      "sent forward to operate from Upolu and Wallis while the airfields projected for those islands were rushed to completion by naval construction battalions"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "flying boats on the coral route after the war; upgraded in 1957 and 1972",
+   "verdict": "cut",
+   "wasBefore": "After the war it went quiet, serving flying boats on the coral route, and was upgraded for land aircraft in 1957 and again in 1972.",
+   "why": "Wikipedia alone. Its sources are Pacific Islands Monthly scans (images) and a Pacific Islands Report article that is gone (403 plain, 404 in the browser; the web archive is blocked by the session's network policy). The authority's timeline starts in 1984."
+  },
+  {
+   "claim": "the control tower covers some of the airspace over American Samoa and Tonga",
+   "verdict": "cut",
+   "wasBefore": "The control tower has an unusually wide brief, covering some of the airspace over American Samoa and Tonga as well as Samoa's own.",
+   "why": "Wikipedia alone (unsourced there). Airways New Zealand's South Pacific page, which the article cites, is gone (404), and its current air traffic management page describes only the Auckland Oceanic region. The authority's timeline records a new control tower in 2000 but nothing on its airspace."
+  },
+  {
+   "claim": "a new terminal opened in 2018; aerobridges from 2019",
+   "verdict": "cut",
+   "why": "Held back: new and relevant to agents, but it replaces nothing in the old text and rests on the authority's own timeline alone (the Wikipedia article does not mention the terminal).",
+   "sources": [
+    {
+     "file": "saa-history",
+     "org": "Samoa Airport Authority (the operator, samoaairports.com, the site the Samoa government directory links to)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "Ground-breaking in July for Airport new Terminal building.",
+      "Opening of new terminal built by Shanghai Constructions Group.",
+      "Aerobridges commenced operations."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "airlines listed by the authority",
+   "verdict": "cut",
+   "why": "Held back: the authority's airline page lists Air New Zealand, Fiji Airways, Samoa Airways and Talofa Airways (and the ground handler Oceania Aviation). The old text names no airlines, so there is nothing for it to replace; one source only.",
+   "sources": [
+    {
+     "file": "saa-airlines",
+     "org": "Samoa Airport Authority (the operator, samoaairports.com, the site the Samoa government directory links to)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "Air New Zealand",
+      "Fiji Airways",
+      "Samoa Airways",
+      "Talofa Airways",
+      "Oceania Aviation"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Samoa Airways flies Twin Otters; Pago Pago flights leave from Fagali'i and cross the date line",
+   "verdict": "cut",
+   "why": "Held back: a catch-out for agents, from the airline's own page only. Samoa Airways runs three Twin Otters from the Faleolo regional terminal and Fagali'i, its Pago Pago flights leave from Fagali'i, and it warns that travellers cross the date line and do not arrive on the date they left.",
+   "sources": [
+    {
+     "file": "samoa-airways-home",
+     "org": "Samoa Airways (samoaairways.com)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "Operating from Faleolo Regional Terminal (APW) and Fagali'i (FGI) Airport servicing the International & Domestic routes between and within Samoa and American Samoa with a fleet of three Twin Otter Aircraft.",
+      "THURSDAY FLIGHTS DEPARTING FAGALII AIRPORT (FGI) TO PAGO PAGO INTERNATIONAL AIRPORT (PPG)",
+      "You will not arrive on the same date that you departed."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The history explains why the airport matters.",
+   "why": "The old text's framing, kept: the 1985 lengthening for 747s is what let long-haul jets use Faleolo (sourced above)."
+  },
+  {
+   "text": "Its origins are wartime.",
+   "why": "Framing for the next sentence, which is sourced (the US Navy and Wikipedia)."
+  }
+ ],
+ "tracerOk": {}
+}
