@@ -1,0 +1,264 @@
+{
+ "iata": "LBD",
+ "id": "rechDN1807ppxpDEA",
+ "name": "Khujand International Airport",
+ "country": "Tajikistan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Khujand_Airport",
+ "audited": "2026-09-23",
+ "before": "The airport for Khujand, Tajikistan's second city, in the nearby town of Buston.\n\nThe code is a relic. LBD comes from Leninabad, the city's name during the Soviet era, so it does not match the airport's current name at all and can confuse a search.\n\nTraffic has fallen sharply. The airport handled 1,025,537 passengers in 2023 and 779,201 in 2024, a drop of 22.1 per cent, so check what is actually flying rather than relying on an older schedule.\n\nThere is a single 3,200 metre runway at an elevation of 442 metres, and a new passenger terminal opened on 1 October 2019.",
+ "after": "The airport for Khujand, Tajikistan's second city, near the town of Buston.\n\nIts code, LBD, does not match the city's name, so it can confuse a search.\n\nThere is one asphalt runway of about 3,200 metres at an elevation of 442 metres, and a new passenger terminal came into use on 1 October 2019.",
+ "claims": [
+  {
+   "claim": "the airport for Khujand",
+   "verdict": "confirmed",
+   "inAfter": "The airport for Khujand",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Khujand",
+      "Straight-line distance from the city centre: 9.7 km"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-09",
+     "quote": "is an airport serving Khujand, the second-largest city in Tajikistan"
+    }
+   ]
+  },
+  {
+   "claim": "Tajikistan's second city",
+   "verdict": "confirmed",
+   "inAfter": "Tajikistan's second city",
+   "note": "The Agency on Statistics' 2020 census table (published 2022; columns are 2010 then 2020, each both sexes, men, women) gives the city of Khujand 196,427 in 2020, second to Dushanbe's 948,251; every other city row in the table is smaller (next Bokhtar 124,497, then Kulob 103,541). GeoNames' own population figures are not used here: they rank several whole districts above Khujand.",
+   "sources": [
+    {
+     "file": "stat-census-table1",
+     "org": "Agency on Statistics under the President of Tajikistan (stat.tj), 2020 census",
+     "dated": "2022 (census of 2020)",
+     "quote": [
+      "Агентство по статистике при Президенте Республики Таджикистан, 2022",
+      "Численность постоянного населения по областям, районам, городским поселениям, районным центрам и сельским населенным пунктам с числом жителей 5 тысяч и более",
+      "с. 2010 -2010 г. с. 2020 -2020 г.",
+      "город Душанбе 724844 374011 350833 948251 485974 462277",
+      "город Худжанд 162825 82293 80532 196427 99144 97283",
+      "город Бохтар 75450 37771 37679 124497 63332 61165"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-09",
+     "quote": "is an airport serving Khujand, the second-largest city in Tajikistan"
+    }
+   ]
+  },
+  {
+   "claim": "near the town of Buston",
+   "verdict": "softened",
+   "inAfter": "near the town of Buston",
+   "note": "Was 'in the nearby town of Buston'. The coordinates put the airport 2.1 km south of Buston's centre point, which supports 'near'; only Wikipedia says 'in'. The census lists Buston as a town in its own right; GeoNames lists Chkalovsk, the place name in Wikipedia's infobox, among Buston's alternative names.",
+   "sources": [
+    {
+     "file": "geo-cities",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Buston (GeoNames 1538311, TJ, 40.2342, 69.6948, population 36,900): 2.1 km"
+    },
+    {
+     "file": "stat-census-table1",
+     "org": "Agency on Statistics under the President of Tajikistan (stat.tj), 2020 census",
+     "dated": "2022 (census of 2020)",
+     "quote": "город Бустон 25963 13371 12592 33736 17103 16633"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-09",
+     "quote": "It is located out of the city, in the nearby town of Buston."
+    }
+   ]
+  },
+  {
+   "claim": "its code is LBD",
+   "verdict": "confirmed",
+   "inAfter": "Its code, LBD,",
+   "note": "The code is confirmed; the old text's explanation of it (Leninabad) is cut below.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Airport: Khujand International Airport (OurAirports UTDL, IATA LBD)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-09",
+     "quote": "(IATA: LBD, ICAO: UTDL)"
+    }
+   ]
+  },
+  {
+   "claim": "one asphalt runway of about 3,200 metres",
+   "verdict": "softened",
+   "inAfter": "There is one asphalt runway of about 3,200 metres",
+   "note": "Was 'a single 3,200 metre runway'. OurAirports gives 3,180 m and Wikipedia's text 3,200 m, so 'about 3,200'. Wikipedia's infobox (from the Tajik AIP) also lists a 1,650 m grass strip on the same heading, hence 'one asphalt runway' rather than 'a single runway'.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 08/26: 3,180 m (10,433 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-09",
+     "quote": "It has one runway designated 08/26 with an asphalt surface measuring 3,200 x 50 m."
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "r2_length_m = 1,650",
+      "r2_surface = Grass"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "at an elevation of 442 metres",
+   "verdict": "confirmed",
+   "inAfter": "at an elevation of 442 metres",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "elevation 1,450 ft (442 m)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-09",
+     "quote": "The airport resides at an elevation of 442 m above mean sea level."
+    }
+   ]
+  },
+  {
+   "claim": "a new passenger terminal came into use on 1 October 2019",
+   "verdict": "softened",
+   "inAfter": "a new passenger terminal came into use on 1 October 2019",
+   "note": "Was 'opened on 1 October 2019'. Asia-Plus quotes the airport's press secretary: the terminal began working on 1 October 2019 as a temporary arrangement for the autumn and winter, 'not yet the official opening'. 'Came into use' is what both sources support; no source for a later official opening was found.",
+   "sources": [
+    {
+     "file": "asiaplus-terminal-2019",
+     "org": "Asia-Plus (asiaplustj.info)",
+     "dated": "2019-10-02",
+     "quote": [
+      "02.10.2019 07:40",
+      "Новый пассажирский терминал международного аэропорта Худжанд начал функционировать с 1 октября 2019 года.",
+      "Это ещё не официальное открытие, а временное"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-09",
+     "quote": "The new passenger terminal was opened on 1 October 2019."
+    }
+   ]
+  },
+  {
+   "claim": "in the nearby town of Buston",
+   "verdict": "cut",
+   "wasBefore": "in the nearby town of Buston",
+   "why": "Softened to 'near the town of Buston' (coordinates: 2.1 km from Buston's centre point)."
+  },
+  {
+   "claim": "the code is a relic",
+   "verdict": "cut",
+   "wasBefore": "The code is a relic.",
+   "why": "Framing for the Leninabad explanation, which is cut (below)."
+  },
+  {
+   "claim": "LBD comes from Leninabad, the Soviet-era name",
+   "verdict": "cut",
+   "wasBefore": "LBD comes from Leninabad, the city's name during the Soviet era",
+   "why": "Wikipedia alone. GeoNames and OurAirports list Leninabad among the names for the city and the airport, but say nothing of when it was used or of the code. No other saved page mentions it (Tajik Air's history page was read for it). The code itself is kept."
+  },
+  {
+   "claim": "does not match the airport's current name at all",
+   "verdict": "cut",
+   "wasBefore": "so it does not match the airport's current name at all and can confuse a search",
+   "why": "Reworded without the Leninabad explanation; the practical point is kept as an opinion."
+  },
+  {
+   "claim": "traffic has fallen sharply",
+   "verdict": "cut",
+   "wasBefore": "Traffic has fallen sharply.",
+   "why": "Rests on the 2023 to 2024 figures, which are cut (below); no 2025 figure was found to show the trend now."
+  },
+  {
+   "claim": "1,025,537 passengers in 2023 and 779,201 in 2024, down 22.1 per cent",
+   "verdict": "cut",
+   "wasBefore": "The airport handled 1,025,537 passengers in 2023 and 779,201 in 2024, a drop of 22.1 per cent, so check what is actually flying rather than relying on an older schedule.",
+   "why": "Wikipedia alone, and more than a year old. The regional paper it cites (sugdnews.com, February 2025) is behind a Cloudflare block (not retried). No 2025 figure for Khujand was found: Khovar's and Asia-Plus's reports of the Civil Aviation Agency's January 2026 press conference give Dushanbe's total only, and their own day archives for 28 and 29 January 2026 list no Khujand item. The advice to check current schedules goes with the figures."
+  },
+  {
+   "claim": "a single 3,200 metre runway",
+   "verdict": "cut",
+   "wasBefore": "There is a single 3,200 metre runway",
+   "why": "Softened to 'one asphalt runway of about 3,200 metres' (see above)."
+  },
+  {
+   "claim": "terminal opened on 1 October 2019",
+   "verdict": "cut",
+   "wasBefore": "a new passenger terminal opened on 1 October 2019",
+   "why": "Softened to 'came into use': the airport called the 1 October 2019 start temporary, not the official opening (see above)."
+  },
+  {
+   "claim": "Somon Air flies from Khujand",
+   "verdict": "cut",
+   "why": "Held back: verified but replaces nothing (the old text names no airline). Somon Air's own About page says it also operates from Khujand and its route finder lists Khujand as one of its two departure points; Asia-Plus (18 Mar 2026) quotes the airline trying to fly Dushanbe to Khujand every day where it can; Wikipedia's infobox gives Somon Air as the hub. For Andy to add if he wants.",
+   "sources": [
+    {
+     "file": "somonair-about",
+     "org": "Somon Air (somonair.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The basic airport is the Dushanbe International Airport; the Khujand International Airport is additionally operated."
+    },
+    {
+     "file": "somonair-destinations",
+     "org": "Somon Air (somonair.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "Destinations from: Dushanbe Khujand"
+    },
+    {
+     "file": "asiaplus-dyu-lbd-fares",
+     "org": "Asia-Plus (asiaplus.news)",
+     "dated": "2026-03-18",
+     "quote": [
+      "18.03.2026 15:59",
+      "На данный момент Somon air старается ставить рейсы Душанбе - Худжанд каждый день по возможности"
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": "hub = Somon Air"
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "does not match the city's name, so it can confuse a search.",
+   "why": "The old text's practical point, kept without the unconfirmed Leninabad explanation: the code (OurAirports, Wikipedia) shares no letters with Khujand, so an agent searching by city may not find it."
+  }
+ ],
+ "tracerOk": {}
+}

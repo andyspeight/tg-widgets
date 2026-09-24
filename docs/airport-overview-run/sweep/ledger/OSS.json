@@ -1,0 +1,304 @@
+{
+ "iata": "OSS",
+ "id": "rechNAqbLO9DGumjq",
+ "name": "Osh International Airport",
+ "country": "Kyrgyzstan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Osh_Airport",
+ "audited": "2026-09-23",
+ "before": "Kyrgyzstan's second busiest airport, 9 km north of Osh, and the main gateway to the south of the country and the Fergana Valley. It carried 1,210,576 passengers in 2016.\n\nWhat makes it useful is how close it is to places in other countries. Andijan is 43 km away, Namangan 103 km and Tashkent 322 km, against 300 km to Bishkek, so for anything in the Fergana Valley this beats flying to the Kyrgyz capital.\n\nThe airport operates 24 hours a day with a 3,212 metre runway, rebuilt in 2019, and 14 parking stands. It takes aircraft up to a 767 as well as the full range of Soviet era types still flying in the region.\n\nA new two storey terminal began construction in February 2025, which will lift capacity to 900 passengers an hour.\n\nMarshrutka routes 107 and 142 serve the airport. It opened in 1974 and its international sector followed in 1992.",
+ "after": "The airport lies 9 km north of Osh and is a key transport hub for southern Kyrgyzstan and the Fergana Valley.\n\nIn a straight line, Andijan is about 43 km away and Namangan 103 km, while Tashkent and Bishkek are each about 300 km away.\n\nIt has a single runway of 3,212 metres. The airport dates from 1974, and a new terminal, planned to handle 900 passengers an hour, has been under construction since 2025.",
+ "claims": [
+  {
+   "claim": "9 km north of Osh",
+   "verdict": "confirmed",
+   "inAfter": "9 km north of Osh",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Osh",
+      "Straight-line distance from the city centre: 9.0 km (5.6 miles)",
+      "Bearing from the city centre: 357 degrees, which is north"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "It is located 9 km north of Osh"
+    }
+   ]
+  },
+  {
+   "claim": "a key transport hub for southern Kyrgyzstan and the Fergana Valley",
+   "verdict": "softened",
+   "inAfter": "a key transport hub for southern Kyrgyzstan and the Fergana Valley",
+   "note": "Was 'the main gateway to the south of the country and the Fergana Valley': 'gateway to' is barred by house style and 'main' has no second source. The president called Osh airport 'a key transport hub in Fergana region' when construction of the new terminal began (24.kg, 14 Feb 2025), and presented the terminal as part of developing aviation in the south; Wikipedia says the airport serves the southern region and is one of the largest in the Fergana Valley.",
+   "sources": [
+    {
+     "file": "24kg-terminal-2025",
+     "org": "24.kg news agency (from the president's press service)",
+     "dated": "2025-02-14",
+     "quote": [
+      "15:03, 14 February 2025",
+      "Sadyr Japarov noted that the Osh airport is a key transport hub in Fergana region",
+      "marking the beginning of a project to develop the aviation infrastructure in the south of the country"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": [
+      "The primary function of Osh International Airport is to meet the air transportation needs of Kyrgyzstan's southern region",
+      "Osh Airport is one of the largest airports in the Fergana Valley"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Andijan about 43 km and Namangan 103 km, Tashkent and Bishkek each about 300 km, in a straight line",
+   "verdict": "confirmed",
+   "inAfter": "In a straight line, Andijan is about 43 km away and Namangan 103 km, while Tashkent and Bishkek are each about 300 km away.",
+   "note": "The figures are Wikipedia's. The coordinates give straight lines of 42.1 km (Andijan, GeoNames 'Andijon'), 103.8 km (Namangan), 309.2 km (Tashkent) and 292.3 km (Bishkek), ratios 0.99 to 1.04, so these are straight-line distances and the text now says so; the old wording could be read as road distances. The old framing around them is cut (below). Review (24 Sep): Wikipedia's 322 km (Tashkent) and 300 km (Bishkek) are 4 and 3 per cent above the straight lines the coordinates give (309.2 and 292.3 km), so the text now says 'each about 300 km' for both rather than giving 322 as a straight-line figure; Andijan and Namangan match to within a kilometre.",
+   "sources": [
+    {
+     "file": "geo-cities",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from Andijon (GeoNames 1514588, UZ, 40.7834, 72.3507, population 747,800): 42.1 km",
+      "Straight-line distance from Namangan (GeoNames 1513157, UZ, 40.9983, 71.6726, population 713,220): 103.8 km",
+      "Straight-line distance from Tashkent (GeoNames 1512569, UZ, 41.2647, 69.2163, population 1,978,028): 309.2 km",
+      "Straight-line distance from Bishkek (GeoNames 1528675, KG, 42.8700, 74.5900, population 900,000): 292.3 km"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "Distances to major cities include 300 km to Bishkek, 322 km to Tashkent, 103 km to Namangan, and 43 km to Andijan."
+    }
+   ]
+  },
+  {
+   "claim": "a single runway of 3,212 metres",
+   "verdict": "confirmed",
+   "inAfter": "It has a single runway of 3,212 metres.",
+   "note": "Wikipedia's infobox (from DAFIF) still gives 2,812 m; its text and OurAirports give 3,212 m.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 12/30: 3,212 m (10,538 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "The runway is 3,212 meters long and 45 meters wide."
+    }
+   ]
+  },
+  {
+   "claim": "the airport dates from 1974",
+   "verdict": "confirmed",
+   "inAfter": "The airport dates from 1974",
+   "note": "Was 'It opened in 1974'. The president said the airport was built in 1974; Wikipedia says built and in operation from 1974. 'Dates from' covers both.",
+   "sources": [
+    {
+     "file": "24kg-terminal-2025",
+     "org": "24.kg news agency (from the president's press service)",
+     "dated": "2025-02-14",
+     "quote": "He noted that the Osh airport, built in 1974, can no longer cope with the growing passenger flow"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "Osh Airport was built in 1974. The airport began operations in 1974"
+    }
+   ]
+  },
+  {
+   "claim": "a new terminal for 900 passengers an hour, under construction since 2025",
+   "verdict": "softened",
+   "inAfter": "a new terminal, planned to handle 900 passengers an hour, has been under construction since 2025",
+   "note": "Was 'A new two storey terminal began construction in February 2025, which will lift capacity to 900 passengers an hour'. The start date is disputed: the president laid the first capsule on 14 February 2025 (Wikipedia's date), while the construction ministry says construction work began on 25 April 2025 (24.kg, 26 Feb 2026), so the text says 2025. The operator repeated the 900 passengers an hour in December 2025, when it expected to finish in summer 2026; in February 2026 the ministry reported the frame 95 per cent done but first-floor work paused for design changes, and no report of completion was found by 24 September 2026, so no opening date is given. 'Two storey' is dropped: that was the February 2025 design (25,443 square metres); the ministry now describes 26,000 square metres in six blocks, with the design being amended.",
+   "sources": [
+    {
+     "file": "24kg-terminal-summer2026",
+     "org": "24.kg news agency (from Airports of Kyrgyzstan's press service)",
+     "dated": "2025-12-18",
+     "quote": [
+      "18:04, 18 December 2025",
+      "Construction of a new terminal complex at Osh International Airport is scheduled to be completed in the summer of 2026, the press service of Airports of Kyrgyzstan OJSC reported.",
+      "The new 25,000-square-meter terminal will increase passenger handling capacity to 900 passengers per hour"
+     ]
+    },
+    {
+     "file": "24kg-terminal-progress",
+     "org": "24.kg news agency (from the construction ministry's press service)",
+     "dated": "2026-02-26",
+     "quote": [
+      "12:11, 26 February 2026",
+      "inspected the progress of the new terminal complex under construction at Osh International Airport",
+      "Construction work began on April 25, 2025.",
+      "Work on the first floor has been temporarily suspended due to amendments to the design and cost documentation."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-10",
+     "quote": "Construction of a new terminal at Osh International Airport began on February 14, 2025. The terminal will increase passenger capacity to 900 per hour."
+    }
+   ]
+  },
+  {
+   "claim": "Kyrgyzstan's second busiest airport",
+   "verdict": "cut",
+   "wasBefore": "Kyrgyzstan's second busiest airport",
+   "why": "Wikipedia alone, and resting on 2016 traffic. The operator's site (airport.kg) gives no traffic by airport: its indicators page covers only cargo and Manas, and its finance and older news pages answered 502. The president's own page on the terminal came back without its text. Softened to 'a key transport hub' (above)."
+  },
+  {
+   "claim": "the main gateway to the south and the Fergana Valley",
+   "verdict": "cut",
+   "wasBefore": "and the main gateway to the south of the country and the Fergana Valley",
+   "why": "Reworded to 'a key transport hub for southern Kyrgyzstan and the Fergana Valley': house style bars 'gateway to', and 'main' has no second source."
+  },
+  {
+   "claim": "1,210,576 passengers in 2016",
+   "verdict": "cut",
+   "wasBefore": "It carried 1,210,576 passengers in 2016.",
+   "why": "Ten years out of date, and no 2025 or 2024 figure for Osh was found (the operator's site as above). The president's February 2025 figure of 3.9 million rising to 5.8 million between 2021 and 2024 is not used: it does not say whether it counts Osh alone or all the country's airports."
+  },
+  {
+   "claim": "what makes it useful is how close it is to places in other countries",
+   "verdict": "cut",
+   "wasBefore": "What makes it useful is how close it is to places in other countries.",
+   "why": "The distances are kept, but not the advice built on them. The FCDO (Kyrgyzstan, updated 14 Sep 2026) says crossing the borders can be complex and border crossings can close at short notice, so being near Uzbek cities is not a dependable advantage; the FCDO line is held back (below) rather than added."
+  },
+  {
+   "claim": "distances as first worded",
+   "verdict": "cut",
+   "wasBefore": "Andijan is 43 km away, Namangan 103 km and Tashkent 322 km, against 300 km to Bishkek",
+   "why": "Reworded to say they are straight-line distances (coordinates); the figures are kept."
+  },
+  {
+   "claim": "for anything in the Fergana Valley this beats flying to the Kyrgyz capital",
+   "verdict": "cut",
+   "wasBefore": "so for anything in the Fergana Valley this beats flying to the Kyrgyz capital",
+   "why": "Advice rather than fact, and it assumes easy border crossings for the Uzbek side of the valley; see the FCDO line held back below."
+  },
+  {
+   "claim": "operates 24 hours a day",
+   "verdict": "cut",
+   "wasBefore": "The airport operates 24 hours a day",
+   "why": "Wikipedia alone. The only other page found that says anything about the airport's facilities, oss.port.kg (the site Wikipedia links), states in its footer that it is 'not an official website of the airport' and collects its information from open sources, so it is not used."
+  },
+  {
+   "claim": "runway as first worded",
+   "verdict": "cut",
+   "wasBefore": "with a 3,212 metre runway",
+   "why": "Reworded as 'a single runway of 3,212 metres' (OurAirports, Wikipedia)."
+  },
+  {
+   "claim": "runway rebuilt in 2019",
+   "verdict": "cut",
+   "wasBefore": "rebuilt in 2019",
+   "why": "Wikipedia alone; no second source reached (see the operator's site above)."
+  },
+  {
+   "claim": "14 parking stands",
+   "verdict": "cut",
+   "wasBefore": "and 14 parking stands",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "aircraft up to a 767 and Soviet-era types",
+   "verdict": "cut",
+   "wasBefore": "It takes aircraft up to a 767 as well as the full range of Soviet era types still flying in the region.",
+   "why": "Wikipedia alone."
+  },
+  {
+   "claim": "two storey terminal begun February 2025",
+   "verdict": "cut",
+   "wasBefore": "A new two storey terminal began construction in February 2025, which will lift capacity to 900 passengers an hour.",
+   "why": "Reworded (see the terminal claim above): the start date is disputed between February and April 2025, and the two-storey design is being amended."
+  },
+  {
+   "claim": "marshrutka routes 107 and 142",
+   "verdict": "cut",
+   "wasBefore": "Marshrutka routes 107 and 142 serve the airport.",
+   "why": "Wikipedia alone; the only other page with a 'how to get there' section is oss.port.kg, which says it is not the airport's official site (see above)."
+  },
+  {
+   "claim": "opened 1974, international sector 1992",
+   "verdict": "cut",
+   "wasBefore": "It opened in 1974 and its international sector followed in 1992.",
+   "why": "1974 is kept as 'The airport dates from 1974' (the president, Wikipedia). The 1992 international sector rests on Wikipedia alone (the operator's history page has nothing on Osh)."
+  },
+  {
+   "claim": "FCDO: border crossings can be complex and close at short notice",
+   "verdict": "cut",
+   "why": "Held back: FCDO advice that replaces nothing. The FCDO does not advise against travel to any part of Kyrgyzstan, but its regional risks page (updated 14 Sep 2026) says crossing the borders can be complex, to take local advice, to use only recognised crossings and that crossings can close at short notice. Relevant to anyone using Osh for Andijan or Namangan; for Andy to add if he wants, attributed to the FCDO.",
+   "sources": [
+    {
+     "file": "fcdo-kyrgyzstan-regional",
+     "org": "FCDO (gov.uk foreign travel advice, Kyrgyzstan)",
+     "quote": [
+      "Crossing the borders can be complex, take local advice if you’re planning on crossing.",
+      "Only use officially recognised border crossings.",
+      "Border crossings can close at short notice."
+     ]
+    },
+    {
+     "file": "fcdo-kyrgyzstan",
+     "org": "FCDO (gov.uk foreign travel advice, Kyrgyzstan)",
+     "quote": "14 September 2026"
+    }
+   ]
+  },
+  {
+   "claim": "old terminal to become domestic only; summer 2026 target; work paused in February 2026",
+   "verdict": "cut",
+   "why": "Held back: new detail on one publisher. Airports of Kyrgyzstan said in December 2025 that once the new terminal opens the existing one will handle only domestic flights, with completion due in summer 2026 (24.kg); in February 2026 the construction ministry reported first-floor work suspended for design changes (24.kg). No later report was found, so whether the new terminal is open by now is not known.",
+   "sources": [
+    {
+     "file": "24kg-terminal-summer2026",
+     "org": "24.kg news agency (from Airports of Kyrgyzstan's press service)",
+     "dated": "2025-12-18",
+     "quote": "Once the new complex is commissioned, the existing Osh airport terminal will be used exclusively for domestic flights"
+    },
+    {
+     "file": "24kg-terminal-progress",
+     "org": "24.kg news agency (from the construction ministry's press service)",
+     "dated": "2026-02-26",
+     "quote": "Work on the first floor has been temporarily suspended due to amendments to the design and cost documentation."
+    }
+   ]
+  },
+  {
+   "claim": "runway extension and reconstruction planned for 2026 to 2027",
+   "verdict": "cut",
+   "why": "Held back: new, and not confirmed as started. In February 2025 the president's office said the runway extension's design would be ready in 2025, the work was planned for 2026 and the runways at Bishkek and Osh would be rebuilt by 2027 (24.kg; Wikipedia says the same). No source from 2026 says the work has begun; if it has, it may affect flights.",
+   "sources": [
+    {
+     "file": "24kg-terminal-2025",
+     "org": "24.kg news agency (from the president's press service)",
+     "dated": "2025-02-14",
+     "quote": [
+      "Runway extension. Design and estimate documentation will be ready in 2025, and extension work is planned for 2026.",
+      "By 2027, the reconstruction of the runways of the Bishkek and Osh airports will be completed."
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}

@@ -1,0 +1,242 @@
+{
+ "iata": "DYU",
+ "id": "recibCzSiPv2IhrQ5",
+ "name": "Dushanbe International Airport",
+ "country": "Tajikistan",
+ "wikipedia": "https://en.wikipedia.org/wiki/Dushanbe_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Tajikistan's main airport, in the capital Dushanbe, and the hub for Somon Air and the home base for Tajik Air.\n\nThe terminal is newer than the country's aviation reputation suggests. A French built terminal opened on 3 September 2014, rated for 1.5 million passengers a year, funded by a 20 million euro long term loan from France alongside 19 million euros from Tajikistan itself.\n\nThere is a single runway of 3,112 metres at an altitude of 785 metres, plus a dedicated helicopter stand for aircraft up to 12 tonnes.\n\nThe airport has one extraordinary moment in its history. On 7 September 1992, in the early months of the Tajikistani civil war, President Rahmon Nabiyev was ambushed on his way here by opposition forces and then forced to resign at gunpoint in the terminal's VIP lounge, with tanks and troops stationed outside, before being released.",
+ "after": "The airport for the Tajik capital, Dushanbe, is the hub for Somon Air and the home base for Tajik Air.\n\nThere is a single runway of about 3,100 metres at an altitude of 785 metres.",
+ "claims": [
+  {
+   "claim": "the airport for Dushanbe, the capital",
+   "verdict": "softened",
+   "inAfter": "The airport for the Tajik capital, Dushanbe",
+   "note": "Was 'Tajikistan's main airport, in the capital Dushanbe'. The capital and the location hold (OurAirports puts it in Dushanbe, 3.9 km from the centre). 'Main' is cut: Wikipedia does not rank it either, and no source compares it with the other Tajik airports. The Civil Aviation Agency's 2025 figure for Dushanbe (about 2.16 million, below) came with no national total and no 2025 figure for Khujand.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "OurAirports municipality: Dushanbe",
+      "GeoNames class PPLC, the national capital",
+      "Straight-line distance from the city centre: 3.9 km"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "is an international airport in Dushanbe, the capital of Tajikistan"
+    }
+   ]
+  },
+  {
+   "claim": "the hub for Somon Air",
+   "verdict": "confirmed",
+   "inAfter": "the hub for Somon Air",
+   "note": "Somon Air's own About page names Dushanbe as its base airport and Khujand as its second.",
+   "sources": [
+    {
+     "file": "somonair-about",
+     "org": "Somon Air (somonair.com)",
+     "dated": "read 2026-09-23 (live page)",
+     "quote": "The basic airport is the Dushanbe International Airport"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "It is the main hub for Somon Air and is the home base for Tajik Air"
+    }
+   ]
+  },
+  {
+   "claim": "the home base for Tajik Air",
+   "verdict": "confirmed",
+   "inAfter": "the home base for Tajik Air",
+   "note": "Tajik Air's own site (© 2026) says it flies from Dushanbe and gives a Dushanbe address; Khovar (29 Jan 2026) reports the national carrier settled its leasing debt in 2025 and plans to lease two Airbus aircraft. Neither OurAirports nor the Wikipedia article links tajikair.tj, so it was checked against Khovar: both name the same director general (Parviz Shodmonzoda) and the same settled leasing dispute. Its flights are now all domestic (see the held-back note below).",
+   "sources": [
+    {
+     "file": "tajikair-about",
+     "org": "Tajik Air (tajikair.tj)",
+     "dated": "read 2026-09-23 (live page, © 2026)",
+     "quote": [
+      "ОФИЦИАЛЬНЫЙ САЙТ АВИАКОМПАНИИ",
+      "Tajik Air — национальный авиаперевозчик Таджикистана.",
+      "Сегодня компания выполняет рейсы из Душанбе в шесть городов страны",
+      "Шодмонзода Парвиз Абдурахим",
+      "урегулирован многолетний спор с лизингодателем",
+      "Душанбе, ул. Мастонгулова Мирзо, 32/1, 734012",
+      "© 2026 Tajik Air"
+     ]
+    },
+    {
+     "file": "khovar-tajikair-2026",
+     "org": "Khovar (national information agency of Tajikistan)",
+     "dated": "2026-01-29",
+     "quote": [
+      "ДУШАНБЕ, 29.01.2026 /НИАТ «Ховар»/.",
+      "Национальный авиаперевозчик «Таджик Эйр» намерен приобрести два самолета концерна «Эйрбас» в финансовый лизинг",
+      "генеральный директор ОАО «Таджик Эйр» Парвиз Шодмонзода",
+      "в 2025 году ОАО «Таджик Эйр» урегулировало давний спор с литовской компанией UAB «Skyroad Leasing»"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "It is the main hub for Somon Air and is the home base for Tajik Air"
+    }
+   ]
+  },
+  {
+   "claim": "a single runway of about 3,100 metres",
+   "verdict": "softened",
+   "inAfter": "There is a single runway of about 3,100 metres",
+   "note": "Was 'a single runway of 3,112 metres'. OurAirports gives 3,100 m (10,170 ft); Wikipedia's text gives 3,112 m but with 10,170 ft beside it, and its infobox 3,112 m and 10,210 ft. The AIP extract Wikipedia cites (caiga.ru) could not be reached. 'About 3,100 metres' is what both sources support; the exact figure is not settled.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 09/27: 3,100 m (10,170 ft), ASP",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "a single landing runway with an asphalt surface, 3 112 m long"
+    }
+   ]
+  },
+  {
+   "claim": "at an altitude of 785 metres",
+   "verdict": "confirmed",
+   "inAfter": "at an altitude of 785 metres",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "elevation 2,575 ft (785 m)"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-21",
+     "quote": "located at an altitude of 785 m / 2575 ft above sea level"
+    }
+   ]
+  },
+  {
+   "claim": "Tajikistan's main airport",
+   "verdict": "cut",
+   "wasBefore": "Tajikistan's main airport, in the capital Dushanbe",
+   "why": "No source ranks it among Tajikistan's airports, Wikipedia included; softened to the capital's airport (above)."
+  },
+  {
+   "claim": "the terminal is newer than the country's aviation reputation suggests",
+   "verdict": "cut",
+   "wasBefore": "The terminal is newer than the country's aviation reputation suggests.",
+   "why": "Framing for the 2014 terminal, which is cut (below)."
+  },
+  {
+   "claim": "French built terminal opened 3 September 2014, 1.5 million a year, 20 million euro French loan and 19 million euros from Tajikistan",
+   "verdict": "cut",
+   "wasBefore": "A French built terminal opened on 3 September 2014, rated for 1.5 million passengers a year, funded by a 20 million euro long term loan from France alongside 19 million euros from Tajikistan itself.",
+   "why": "Wikipedia alone. Tried: the airport's own site (airport.tj, failed to connect), the satrapia.com report Wikipedia cites on the French financing and a Xinhua item it cites on Shanghai Daily (both failed to connect; the archived copy is on web.archive.org, which the network policy blocks), the French Treasury's page on French-Tajik economic relations and the French Embassy's page on French-Tajik relations (neither mentions the airport). Three attempts, so cut."
+  },
+  {
+   "claim": "runway of 3,112 metres",
+   "verdict": "cut",
+   "wasBefore": "There is a single runway of 3,112 metres",
+   "why": "Softened to 'about 3,100 metres': OurAirports gives 3,100 m and Wikipedia's own figures disagree in feet (see above)."
+  },
+  {
+   "claim": "helicopter stand for aircraft up to 12 tonnes",
+   "verdict": "cut",
+   "wasBefore": "plus a dedicated helicopter stand for aircraft up to 12 tonnes",
+   "why": "Wikipedia alone; the AIP extract it cites (caiga.ru) failed to connect and its archived copy is on web.archive.org (blocked)."
+  },
+  {
+   "claim": "one extraordinary moment in its history",
+   "verdict": "cut",
+   "wasBefore": "The airport has one extraordinary moment in its history.",
+   "why": "Lead-in to the 1992 story, which is cut (below)."
+  },
+  {
+   "claim": "7 September 1992: Nabiyev ambushed, forced to resign at gunpoint in the VIP lounge, tanks outside",
+   "verdict": "cut",
+   "wasBefore": "On 7 September 1992, in the early months of the Tajikistani civil war, President Rahmon Nabiyev was ambushed on his way here by opposition forces and then forced to resign at gunpoint in the terminal's VIP lounge, with tanks and troops stationed outside, before being released.",
+   "why": "Wikipedia alone. The New York Times report it cites (8 Sep 1992) is blocked by the session's egress policy (not retried by any other route), and Asia-Plus's own archive for 7 Sep 2022, the 30th anniversary, has no piece on it. Two attempts; no second source reached."
+  },
+  {
+   "claim": "about 2.16 million passengers in 2025",
+   "verdict": "cut",
+   "why": "Held back: verified but replaces nothing (the old text gave no passenger figure, only the 2014 terminal's rated capacity, which is cut). Khovar (28 Jan 2026), reporting the Civil Aviation Agency's press conference: more than 2,160,000 passengers in 2025 (1,060,746 arriving and 1,099,502 departing, which adds up to 2,160,248); Wikipedia's infobox gives 2,160,248 for 2025. For Andy to add if he wants.",
+   "sources": [
+    {
+     "file": "khovar-2025-pax",
+     "org": "Khovar (national information agency of Tajikistan), from the Civil Aviation Agency",
+     "dated": "2026-01-28",
+     "quote": [
+      "ДУШАНБЕ, 28.01.2026 /НИАТ «Ховар»/.",
+      "В 2025 году Международный аэропорт Душанбе обслужил более 2-х миллионов 160 тысяч пассажиров.",
+      "Из них 1 миллион 60 тысяч 746 человек составили прилетевшие пассажиры, а 1 миллион 99 тысяч 502 — выбывшие."
+     ]
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 2,160,248"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "no Dushanbe to London flight for now",
+   "verdict": "cut",
+   "why": "Held back: new, and on one source. Asia-Plus (28 Jan 2026) reports the head of Tajikistan's Civil Aviation Agency saying the planned Dushanbe to London route will not launch for now because it would not pay; only three tickets were sold on the version via Tbilisi. Relevant to UK agents, so named for Andy; it would need the agency's own statement or a second report to go in.",
+   "sources": [
+    {
+     "file": "asiaplus-nazarzoda-2026",
+     "org": "Asia-Plus (asiaplus.news)",
+     "dated": "2026-01-28",
+     "quote": [
+      "28.01.2026 12:11",
+      "Ожидавшийся запуск авиарейса по маршруту Душанбе - Лондон - Душанбе пока не состоится из-за его нерентабельности.",
+      "на рейс Душанбе - Лондон через Тбилиси было продано всего лишь 3 билета"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Tajik Air now flies only within Tajikistan",
+   "verdict": "cut",
+   "why": "Held back: new detail. Tajik Air's own site says it flies from Dushanbe to six towns in the country and grew from one aircraft to four in 2025 after settling old debts (Khovar, 29 Jan 2026, reports the debt settled and two Airbus aircraft planned on finance lease). An agent reading 'home base for Tajik Air' may assume international flights; Andy may want the text to say its flights are domestic.",
+   "sources": [
+    {
+     "file": "tajikair-about",
+     "org": "Tajik Air (tajikair.tj)",
+     "dated": "read 2026-09-23 (live page, © 2026)",
+     "quote": [
+      "Сегодня компания выполняет рейсы из Душанбе в шесть городов страны",
+      "В 2025 году авиакомпания рассчиталась с многолетними долгами и увеличила флот с одного воздушного судна до четырёх."
+     ]
+    },
+    {
+     "file": "khovar-tajikair-2026",
+     "org": "Khovar (national information agency of Tajikistan)",
+     "dated": "2026-01-29",
+     "quote": "Национальный авиаперевозчик «Таджик Эйр» намерен приобрести два самолета концерна «Эйрбас» в финансовый лизинг"
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {}
+}
