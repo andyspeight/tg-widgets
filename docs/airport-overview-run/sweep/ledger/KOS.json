@@ -1,13 +1,420 @@
 {
- "iata": "KOS",
- "id": "recEUxuJiD2H1lNvd",
- "name": "Sihanouk International Airport",
- "country": "Cambodia",
- "wikipedia": "https://en.wikipedia.org/wiki/Sihanouk_International_Airport",
- "audited": "2026-09-23",
- "before": "Cambodia's third international airport, 20 km east of Sihanoukville and the way in for the southern coast and islands. It is named, like the province, after King Norodom Sihanouk, and is also known as Kang Keng. The code KOS comes from Kampong Som, the town's other name.\n\nThe runway is 3,300 metres and takes large aircraft, with five stands and a full set of navigation aids. Rescue and firefighting cover is at ICAO category 5.\n\nIts history has been stop and start. The airfield was built in the 1960s with Soviet help, then lay dormant through the Khmer Rouge years and long after. It formally reopened in January 2007 with a lengthened runway and widened taxiways, but scheduled flights stopped again after an accident that June and did not return until December 2011, when Cambodia Angkor Air began flying from Siem Reap. A triangle route linking Siem Reap, Sihanoukville and Phnom Penh followed in 2013.",
- "after": "Cambodia's third international airport, 20 km east of Sihanoukville and the way in for the southern coast and islands. It is named, like the province, after King Norodom Sihanouk, and is also known as Kang Keng. The code KOS comes from Kampong Som, the town's other name.\n\nThe runway is 3,300 metres and takes large aircraft, with five stands and a full set of navigation aids. Rescue and firefighting cover is at ICAO category 5.\n\nIts history has been stop and start. The airfield was built in the 1960s with Soviet help, then lay dormant through the Khmer Rouge years and long after. It formally reopened in January 2007 with a lengthened runway and widened taxiways, but scheduled flights stopped again after an accident that June and did not return until December 2011, when Cambodia Angkor Air began flying from Siem Reap. A triangle route linking Siem Reap, Sihanoukville and Phnom Penh followed in 2013.",
- "claims": [],
- "opinion": [],
- "tracerOk": {}
+  "iata": "KOS",
+  "id": "recEUxuJiD2H1lNvd",
+  "name": "Sihanouk International Airport",
+  "country": "Cambodia",
+  "wikipedia": "https://en.wikipedia.org/wiki/Sihanouk_International_Airport",
+  "audited": "2026-09-23",
+  "before": "Cambodia's third international airport, 20 km east of Sihanoukville and the way in for the southern coast and islands. It is named, like the province, after King Norodom Sihanouk, and is also known as Kang Keng. The code KOS comes from Kampong Som, the town's other name.\n\nThe runway is 3,300 metres and takes large aircraft, with five stands and a full set of navigation aids. Rescue and firefighting cover is at ICAO category 5.\n\nIts history has been stop and start. The airfield was built in the 1960s with Soviet help, then lay dormant through the Khmer Rouge years and long after. It formally reopened in January 2007 with a lengthened runway and widened taxiways, but scheduled flights stopped again after an accident that June and did not return until December 2011, when Cambodia Angkor Air began flying from Siem Reap. A triangle route linking Siem Reap, Sihanoukville and Phnom Penh followed in 2013.",
+  "after": "Sihanoukville's airport, 20 km east of the city and the way in for the coast and islands. The runway is 3,300 metres and takes large aircraft.\n\nIn late September 2026 the airport's departures board showed flights to Siem Reap and Ho Chi Minh City with Air Cambodia, to Kuala Lumpur with AirAsia and to Kunming with Ruili Airlines. Routes change, so check the current schedule before booking.",
+  "claims": [
+    {
+      "claim": "Sihanoukville's airport",
+      "verdict": "confirmed",
+      "inAfter": "Sihanoukville's airport",
+      "note": "The old opening ('Cambodia's third international airport') is cut below; what stays is which city it serves.",
+      "sources": [
+        {
+          "file": "op-cambodia-airports",
+          "org": "Cambodia Airports (the operator, kos.cambodia-airports.aero)",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "Sihanoukville International Airport – serving the coastal city and beach resorts"
+        },
+        {
+          "file": "wikipedia-now",
+          "org": "Wikimedia",
+          "dated": "revision of 2026-09-09",
+          "quote": "located 20 kilometres (12 mi) east of Sihanoukville City in Sihanoukville Province"
+        }
+      ]
+    },
+    {
+      "claim": "20 km east of the city",
+      "verdict": "confirmed",
+      "inAfter": "20 km east of the city",
+      "note": "The operator's live page says 20 km south east of the city centre and Wikipedia 20 km east. The straight line is 12.0 km (ratio 1.67, just over the 1.6 allowance), so under the method the figure needs a second written source, and it has one: the operator. The 20 km is best read as the road distance; an airport-coordination profile from about 2009 (its traffic tables run 2006 to 2008) gives 12 km, which is the straight line. The bearing (111 degrees) is east, and south east is also within the allowance.",
+      "sources": [
+        {
+          "file": "op-airport-city",
+          "org": "Cambodia Airports (the operator, kos.cambodia-airports.aero)",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "Only 20 km south east from the city centre and located next to Ream, Sihanouk International Airport makes it easy to reach the city."
+        },
+        {
+          "file": "wikipedia-now",
+          "org": "Wikimedia",
+          "dated": "revision of 2026-09-09",
+          "quote": "located 20 kilometres (12 mi) east of Sihanoukville City in Sihanoukville Province"
+        },
+        {
+          "file": "geo",
+          "org": "OurAirports + GeoNames (computed)",
+          "quote": [
+            "Straight-line distance from the city centre: 12.0 km (7.5 miles)",
+            "Bearing from the city centre: 111 degrees, which is east"
+          ]
+        },
+        {
+          "file": "apaca-cambodia",
+          "org": "APACA airport profiles (schedule-coordination.jp)",
+          "dated": "about 2009 (traffic tables for 2006 to 2008)",
+          "quote": [
+            "Airport Location 12km south east of city center",
+            "2006 2007 2008"
+          ]
+        }
+      ]
+    },
+    {
+      "claim": "the way in for the coast and islands",
+      "verdict": "softened",
+      "inAfter": "the way in for the coast and islands",
+      "note": "Was 'the way in for the southern coast and islands'. The operator describes the airport as serving the coastal city and beach resorts and the area as the south-west of Cambodia, with Otres, Ream, Koh Rong, Koh Rong Saloem and Koh Ta Kiev; the FCDO describes tourist boats running between Sihanoukville and the nearby islands. 'Southern' is dropped because the operator says south-west.",
+      "sources": [
+        {
+          "file": "op-area",
+          "org": "Cambodia Airports (the operator, kos.cambodia-airports.aero)",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": [
+            "Located in the South-West of Cambodia, famous for its beaches, islands, parks and seafood.",
+            "From Otres beaches to Ream Beachor Koh Rong, Kog Rong Saloem, Koh Ta Kiev and many more"
+          ]
+        },
+        {
+          "file": "op-cambodia-airports",
+          "org": "Cambodia Airports (the operator, kos.cambodia-airports.aero)",
+          "dated": "read 2026-09-24 (live page)",
+          "quote": "Sihanoukville International Airport – serving the coastal city and beach resorts"
+        },
+        {
+          "file": "fcdo-cambodia-safety",
+          "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+          "dated": "read 2026-09-24 (the guide's summary page: updated 19 March 2026, still current 24 September 2026)",
+          "quote": [
+            "Tourist boats sometimes operate despite weather warnings, particularly between Sihanoukville and the nearby islands.",
+            "the beaches and tourist areas of Sihanoukville and nearby islands"
+          ]
+        }
+      ]
+    },
+    {
+      "claim": "The runway is 3,300 metres and takes large aircraft",
+      "verdict": "confirmed",
+      "inAfter": "The runway is 3,300 metres and takes large aircraft.",
+      "note": "The operator's release of October 2020 marks the completion of the runway's extension to 3,300 metres from 2,500, for Code E aircraft such as the Boeing 777-300ER and Airbus A350-1000; its masterplan release of June 2020 says the same. OurAirports (2,500 m) and the airport-coordination profile of about 2009 (2,500 m) predate the extension. Wikipedia gives 3,300 metres for 4E aircraft but dates the extension to the 2007 reopening, which the operator contradicts (see the cut below).",
+      "sources": [
+        {
+          "file": "op-pr-runway",
+          "org": "Cambodia Airports (the operator, corp.cambodia-airports.aero)",
+          "dated": "2020-10-13",
+          "quote": [
+            "On October 13, 2020, a traditional Khmer blessing ceremony marks the works completion of the extension and renovation of the runway and its coming commissioning.",
+            "The runway has been fully upgraded including its extension to 3,300 meters from 2,500 meters",
+            "aims at accommodating larger aircraft (Code E) such as B-777-300ER or A-350-1000"
+          ]
+        },
+        {
+          "file": "op-pr-masterplan",
+          "org": "Cambodia Airports (the operator, corp.cambodia-airports.aero)",
+          "dated": "2020-06-02",
+          "quote": [
+            "On June 2, 2020",
+            "the runway extension to 3,300 meters from the current 2,500 meters"
+          ]
+        },
+        {
+          "file": "wikipedia-now",
+          "org": "Wikimedia",
+          "dated": "revision of 2026-09-09",
+          "quote": [
+            "The runway was extended to a length of 3,300 metres (10,827 ft) in order to accommodate 4E class aircraft.",
+            "Runway length: 3,300 metres"
+          ]
+        }
+      ]
+    },
+    {
+      "claim": "the departures board for 24 to 26 September 2026: Air Cambodia to Siem Reap and Ho Chi Minh City, AirAsia to Kuala Lumpur, Ruili Airlines to Kunming",
+      "verdict": "corrected",
+      "primary": true,
+      "attribution": "departures board",
+      "inAfter": "In late September 2026 the airport's departures board showed flights to Siem Reap and Ho Chi Minh City with Air Cambodia, to Kuala Lumpur with AirAsia and to Kunming with Ruili Airlines.",
+      "note": "Replaces the route history, which stopped in 2013 (Cambodia Angkor Air from Siem Reap in December 2011, the Siem Reap, Sihanoukville and Phnom Penh triangle in 2013; both cut below). Attributed to the airport's own live board, read on 24 September 2026, which covers 24 to 26 September: Air Cambodia K6 130 to Siem Reap (SAI) and K6 838 to Ho Chi Minh (SGN); AirAsia Cambodia KT 175 and AirAsia AK 265 to Kuala Lumpur; Ruili Airlines DR 5030 to Kunming. No Phnom Penh flight appears. The airport's destination page (saved as op-destinations) lists Siem Reap, Wuxi, Kuala Lumpur, Bangkok and Ho Chi Minh, and its airline page (op-airlines, titled 'Test') names more airlines, so the text rests on the board alone, as an attributed statement, and says which days it covers. AKP (21 January 2026) reports a Cambodia Airways route to Chengdu three times a week from that day; it is not on this week's board (held back below). Review (24 Sep): 'For 24 to 26 September 2026' became 'In late September 2026' (the board was read on 24 September and covered the 24th to the 26th), and a line of advice follows it, so the snapshot does not read as a timetable.",
+      "sources": [
+        {
+          "file": "op-departures",
+          "org": "Sihanouk International Airport departures board (Cambodia Airports, kos.cambodia-airports.aero)",
+          "dated": "read 2026-09-24 (live board, flights of 24 to 26 September 2026)",
+          "quote": [
+            "2026-09-24",
+            "Siem Reap (SAI)",
+            "K6 130",
+            "Ho Chi Minh (SGN)",
+            "K6 838",
+            "Air Cambodia",
+            "Kuala Lumpur (KUL)",
+            "KT 175",
+            "Air Asia Cambodia",
+            "AK 265",
+            "Kunming (KMG)",
+            "DR 5030",
+            "Ruili Airlines",
+            "2026-09-26"
+          ]
+        }
+      ]
+    },
+    {
+      "claim": "Cambodia's third international airport",
+      "verdict": "cut",
+      "wasBefore": "Cambodia's third international airport",
+      "why": "A ranking that no current source gives. The operator called Cambodia's international airports a network of three in 2020, with Sihanoukville far behind Phnom Penh and Siem Reap (1.6 million passengers in 2019, against 6 million and 3.9 million). Since then both larger airports have moved: Siem Reap's to a new airport (Cambodia Airports' concession there ended on 15 October 2023) and Phnom Penh's to Techo (9 September 2025). VINCI's 2025 table covers only Techo and Sihanoukville, and no saved page lists Cambodia's international airports today.",
+      "sources": [
+        {
+          "file": "op-pr-masterplan",
+          "org": "Cambodia Airports (the operator, corp.cambodia-airports.aero)",
+          "dated": "2020-06-02",
+          "quote": [
+            "Cambodia Airports, the longstanding concessionaire of Cambodia’s network of 3 international airports",
+            "6+ million for Phnom Penh Airport and 3.9 million for Siem Reap Airport"
+          ]
+        },
+        {
+          "file": "op-cambodia-airports",
+          "org": "Cambodia Airports (the operator, kos.cambodia-airports.aero)",
+          "dated": "read 2026-09-24",
+          "quote": [
+            "Phnom Penh International Airport – serving the capital (until September 9, 2025)",
+            "Siem Reap International Airport – gateway to Angkor (until October 15, 2023)"
+          ]
+        },
+        {
+          "file": "wikipedia-now",
+          "org": "Wikimedia",
+          "quote": "is Cambodia's third largest international airport"
+        }
+      ]
+    },
+    {
+      "claim": "the way in for the southern coast and islands",
+      "verdict": "cut",
+      "wasBefore": "and the way in for the southern coast and islands",
+      "why": "Softened to 'the coast and islands' (see above)."
+    },
+    {
+      "claim": "named, like the province, after King Norodom Sihanouk; also known as Kang Keng",
+      "verdict": "cut",
+      "wasBefore": "It is named, like the province, after King Norodom Sihanouk, and is also known as Kang Keng.",
+      "why": "Wikipedia alone. The operator's pages and the state news agency's report use the airport's name without explaining it, and none of the saved pages uses Kang Keng."
+    },
+    {
+      "claim": "the code KOS comes from Kampong Som",
+      "verdict": "cut",
+      "wasBefore": "The code KOS comes from Kampong Som, the town's other name.",
+      "why": "The derivation rests on Wikipedia alone. The state news agency AKP (21 January 2026) does call the city Kampong Som, but says nothing of the code.",
+      "sources": [
+        {
+          "file": "mininfo-181146",
+          "org": "AKP (Agence Kampuchea Presse, on the Ministry of Information's site, information.gov.kh)",
+          "dated": "2026-01-21",
+          "quote": [
+            "AKP Phnom Penh, January 21, 2026 --",
+            "A direct flight connecting Kampong Som city in Cambodia’s Preah Sihanouk province with Chengdu"
+          ]
+        }
+      ]
+    },
+    {
+      "claim": "five stands and a full set of navigation aids",
+      "verdict": "cut",
+      "wasBefore": "with five stands and a full set of navigation aids",
+      "why": "Wikipedia's airfield summary alone, and out of date: the airport-coordination profile of about 2009 gives 4 parking stands, and the operator's 2020 masterplan plans a new taxiway and aircraft stands by 2030. 'A full set' of navigation aids is a judgement on a list only Wikipedia gives.",
+      "sources": [
+        {
+          "file": "apaca-cambodia",
+          "org": "APACA airport profiles (schedule-coordination.jp)",
+          "quote": "Airport Parking 4 parking stands"
+        },
+        {
+          "file": "op-pr-masterplan",
+          "org": "Cambodia Airports (the operator, corp.cambodia-airports.aero)",
+          "quote": "new taxiway and aircraft stands, and the construction of a new passenger terminal"
+        }
+      ]
+    },
+    {
+      "claim": "rescue and firefighting at ICAO category 5",
+      "verdict": "cut",
+      "wasBefore": "Rescue and firefighting cover is at ICAO category 5.",
+      "why": "Wikipedia alone, from before the 2020 runway works for Code E aircraft; no current source gives the category."
+    },
+    {
+      "claim": "history stop and start; built in the 1960s with Soviet help; dormant",
+      "verdict": "cut",
+      "wasBefore": "Its history has been stop and start. The airfield was built in the 1960s with Soviet help, then lay dormant through the Khmer Rouge years and long after.",
+      "why": "Wikipedia alone. The public works ministry's 2010 transport overview, which Wikipedia cites, answered 503; the Cambodia Daily article it cites is gone (404); the operator's history pages say only that its concession dates from 1995."
+    },
+    {
+      "claim": "reopened in January 2007 with a lengthened runway and widened taxiways",
+      "verdict": "cut",
+      "wasBefore": "It formally reopened in January 2007 with a lengthened runway and widened taxiways",
+      "why": "Wikipedia alone for the date, and its runway detail is contradicted: Wikipedia puts the 3,300 metre runway in 2007, while the operator says the runway was 2,500 metres until the extension finished in October 2020, and the airport-coordination profile of about 2009 also gives 2,500 metres.",
+      "sources": [
+        {
+          "file": "op-pr-runway",
+          "org": "Cambodia Airports (the operator, corp.cambodia-airports.aero)",
+          "quote": "The runway has been fully upgraded including its extension to 3,300 meters from 2,500 meters"
+        },
+        {
+          "file": "apaca-cambodia",
+          "org": "APACA airport profiles (schedule-coordination.jp)",
+          "quote": "Runways A runway 03/21 2,500m"
+        }
+      ]
+    },
+    {
+      "claim": "scheduled flights stopped after the June 2007 accident until December 2011, when Cambodia Angkor Air began flying from Siem Reap",
+      "verdict": "cut",
+      "wasBefore": "but scheduled flights stopped again after an accident that June and did not return until December 2011, when Cambodia Angkor Air began flying from Siem Reap.",
+      "why": "Wikipedia alone: the Aviation Safety Network (crash record) and the Phnom Penh Post showed Cloudflare checks and were not tried again; the BBC report Wikipedia cites is on a site the egress policy blocks (logged in the README) and was not tried. The route history is replaced by the current departures board (see above)."
+    },
+    {
+      "claim": "a triangle route Siem Reap, Sihanoukville, Phnom Penh in 2013",
+      "verdict": "cut",
+      "wasBefore": "A triangle route linking Siem Reap, Sihanoukville and Phnom Penh followed in 2013.",
+      "why": "Wikipedia alone, and overtaken: both of the other airports have moved (Siem Reap in October 2023, Phnom Penh to Techo on 9 September 2025) and the current board shows no Phnom Penh flight. Replaced by the current departures board (see above)."
+    },
+    {
+      "claim": "Held back: passenger traffic, 172,000 in 2025 against 1.6 million in 2019",
+      "verdict": "cut",
+      "why": "Held back: the old text gives no passenger figure, so under the like-for-like rule this stays out. VINCI's table for 2025 (published 20 January 2026) gives Sihanoukville 172,000 passengers (up 84 per cent) and 2,669 aircraft movements (up 29 per cent); Wikipedia's infobox gives the same, citing VINCI. The operator's 2020 releases put 2019 at more than 1.6 million, after 94,000 in 2015 and 338,000 in 2017. So traffic is about a tenth of its 2019 level. VINCI owns 70 per cent of Cambodia Airports, so the two are one group: this would go in as 'on VINCI Airports' figures'.",
+      "sources": [
+        {
+          "file": "vinci-traffic-2025",
+          "org": "VINCI Airports (Cambodia Airports' majority owner)",
+          "dated": "2026-01-20 (traffic as of 31 December 2025)",
+          "quote": [
+            "Sihanoukville (KOS) 70 65 +82% 172 +84%",
+            "Sihanoukville (KOS) 70 826 +44% 2,669 +29%"
+          ]
+        },
+        {
+          "file": "op-pr-runway",
+          "org": "Cambodia Airports (the operator, corp.cambodia-airports.aero)",
+          "dated": "2020-10-13",
+          "quote": "Between 2015 and 2019, passengers grew from 94,000 to 1.6+ million passengers"
+        },
+        {
+          "file": "op-pr-terminal",
+          "org": "Cambodia Airports (the operator, corp.cambodia-airports.aero)",
+          "dated": "not on the saved page (it reports 2017 traffic)",
+          "quote": "In 2017, as a result of Sihanoukville becoming an increasingly popular sea destination, the airport reported a sharp growth of 115%, welcoming 338,000 passengers."
+        },
+        {
+          "file": "wikipedia-infobox",
+          "org": "Wikimedia",
+          "dated": "revision of 2026-09-09",
+          "quote": [
+            "stat_year = 2025",
+            "stat1_data = 172,000 84%"
+          ]
+        }
+      ]
+    },
+    {
+      "claim": "Held back: Phnom Penh's airport moved to Techo on 9 September 2025; Cambodia Airports runs it",
+      "verdict": "cut",
+      "why": "Held back: the old text mentions Phnom Penh only in the 2013 triangle route, which is cut. The operator says all Phnom Penh operations moved to Techo International Airport on 9 September 2025 and that it remains the aeronautical operator there; VINCI's 2025 table shows the old Phnom Penh airport with no passengers in the fourth quarter and says VINCI has run Techo since 9 September under an operating contract. One group (Cambodia Airports is 70 per cent VINCI's).",
+      "sources": [
+        {
+          "file": "op-cambodia-airports",
+          "org": "Cambodia Airports (the operator, kos.cambodia-airports.aero)",
+          "dated": "read 2026-09-24",
+          "quote": [
+            "On 9th of September 2025, all airport operations will relocate to Techo International Airport. Cambodia Airports remains the aeronautical operator of the new platform.",
+            "Cambodia Airports is jointly owned by VINCI Airports (70%) and Muhibbah Masteron Cambodia (30%), a Malaysian-Cambodian venture."
+          ]
+        },
+        {
+          "file": "vinci-traffic-2025",
+          "org": "VINCI Airports (Cambodia Airports' majority owner)",
+          "dated": "2026-01-20",
+          "quote": [
+            "Phnom Penh (PNH) 70 0 - 100% 3,664",
+            "VINCI Airports has been operating the new Techo International Airport in Phnom Penh since September 9 under an operating contract"
+          ]
+        }
+      ]
+    },
+    {
+      "claim": "Held back: Cambodia Airways' Chengdu route (from 21 January 2026), not on this week's board",
+      "verdict": "cut",
+      "why": "Held back, one source: AKP (21 January 2026) reports Cambodia Airways launching Sihanouk to Chengdu that day, three flights a week (Wednesday, Friday and Sunday). The board for 24 to 26 September 2026 (a Thursday to a Saturday) shows no Chengdu flight on the Friday, so whether it still runs is unknown.",
+      "sources": [
+        {
+          "file": "mininfo-181146",
+          "org": "AKP (Agence Kampuchea Presse, on the Ministry of Information's site, information.gov.kh)",
+          "dated": "2026-01-21",
+          "quote": [
+            "The inaugural flight departed Sihanouk International Airport at 9:00 a.m. this morning",
+            "The new route will operate three flights per week, on Wednesdays, Fridays, and Sundays, the same source said."
+          ]
+        }
+      ]
+    },
+    {
+      "claim": "Held back: FCDO advice for Cambodia",
+      "verdict": "cut",
+      "why": "Held back: warnings that replace nothing. The FCDO (updated 19 March 2026, still current 24 September 2026) advises against all but essential travel within 20 km of the land border with Thailand, after heavy fighting in 2025 and a ceasefire signed on 27 December, with land crossings still suspended; Sihanoukville is not in that area. Its safety page warns that tourist boats sometimes run despite weather warnings, particularly between Sihanoukville and the nearby islands, lists Sihanoukville's beaches and nearby islands among petty-crime hotspots, and says job-scam gangs hold trafficking victims in compounds in and around Sihanoukville. The boat warning is the one an agent sending clients to the islands might want, as an attributed sentence.",
+      "sources": [
+        {
+          "file": "fcdo-cambodia",
+          "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+          "dated": "2026-03-19 (updated; still current 24 September 2026)",
+          "quote": [
+            "FCDO advises against all but essential travel to parts of Cambodia.",
+            "24 September 2026",
+            "19 March 2026",
+            "FCDO advises against all but essential travel to within 20km from the land border with Thailand.",
+            "A ceasefire was signed on 27 December, but the situation remains tense.",
+            "Land borders and crossings between Cambodia and Thailand continue to be suspended."
+          ]
+        },
+        {
+          "file": "fcdo-cambodia-safety",
+          "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+          "quote": [
+            "Tourist boats sometimes operate despite weather warnings, particularly between Sihanoukville and the nearby islands.",
+            "the beaches and tourist areas of Sihanoukville and nearby islands",
+            "mostly to secure compounds in and around Sihanoukville"
+          ]
+        }
+      ]
+    },
+    {
+      "claim": "Held back: two licensed taxi associations at the terminal",
+      "verdict": "cut",
+      "why": "Held back, one source and nothing to replace: the operator names two taxi associations waiting outside the terminal, the Friendship Taxi Association and the Tourist Small Car Association. (Its link list shows fares from 15 US dollars, but that text is not on the saved page, so no fare is given.)",
+      "sources": [
+        {
+          "file": "op-airport-city",
+          "org": "Cambodia Airports (the operator, kos.cambodia-airports.aero)",
+          "dated": "read 2026-09-24",
+          "quote": [
+            "Friendship Taxi Association",
+            "Travel easy with the Tourist Small Car Association!"
+          ]
+        }
+      ]
+    }
+  ],
+  "opinion": [
+    {
+      "text": "Routes change, so check the current schedule before booking.",
+      "why": "Advice added in review (24 Sep): the list is a snapshot of three days on the airport's own board. The operator's destinations page (Wuxi and Bangkok, no Kunming) disagrees with the board, Cambodia Airways' Chengdu route launched in January 2026 (AKP) is not on it, and the route history cut above stopped and started."
+    }
+  ],
+  "tracerOk": {
+    "Ho Chi Minh City": "The board says 'Ho Chi Minh (SGN)'; SGN is Ho Chi Minh City's airport."
+  }
 }
