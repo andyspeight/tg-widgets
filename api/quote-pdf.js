@@ -58,6 +58,7 @@ import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClie
 import { renderQuoteEmail, normaliseQuoteEmail, isEmailAddress } from '../public/_quote-email-template.js';
 import { canSendFrom } from './_lib/sendgrid.js';
 import { generateQuotePdf, pdfFilename, fetchAttachmentBuffers } from '../generate-pdf.js';
+import { selfCheckAllowed, runtimeFacts, runSteps, pdfPageCount, al2023LibsPresent } from './_lib/runtime-selfcheck.js';
 import { travelifyAuthHeaders } from './_lib/travelify.js';
 
 const TRAVELIFY_API_BASE = process.env.QUOTE_API_BASE || 'https://api.travelify.io';
@@ -494,6 +495,18 @@ async function emailQuotePdf(doc, pdfBuffer, extraAttachments, opts) {
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
+  // Preview deployments only: draw a made-up quote through Chromium to prove
+  // this function on a new runtime. See api/_lib/runtime-selfcheck.js.
+  if (selfCheckAllowed(req)) {
+    const result = await runSteps([
+      ['quote PDF: drawn through Chromium', async () => {
+        const buf = await generateQuotePdf({ data: { items: [], setup: { quoteTitle: 'Runtime self-check' } } });
+        if (!Buffer.from(buf).subarray(0, 5).toString('latin1').startsWith('%PDF')) throw new Error('not a PDF');
+        return { bytes: buf.length, pages: await pdfPageCount(buf), al2023LibsUnpacked: al2023LibsPresent() };
+      }],
+    ]);
+    return res.status(result.ok ? 200 : 500).json({ function: 'quote-pdf', runtime: runtimeFacts(), ...result });
+  }
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const ip = getClientIp(req);

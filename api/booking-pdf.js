@@ -31,7 +31,8 @@ import { renderPdfHtml, renderPdfFooterTemplate, PDF_HEADER_TEMPLATE } from '../
 import { moneyOf, moneyOptsFromEnv } from './_lib/order-money.js';
 import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape, trimFlightSeating } from './_lib/travelify-items.js';
 import { travelifyAuthHeaders } from './_lib/travelify.js';
-import { normaliseAtolSettings, atolCertificateType, buildAtolCertificate, renderAtolCertificatePdf } from './_lib/atol-certificate.js';
+import { normaliseAtolSettings, atolCertificateType, buildAtolCertificate, renderAtolCertificatePdf, sampleAtolBooking } from './_lib/atol-certificate.js';
+import { selfCheckAllowed, runtimeFacts, runSteps, pdfPageCount, al2023LibsPresent } from './_lib/runtime-selfcheck.js';
 import { atolIssueDate } from './_lib/atol-issue-log.js';
 
 // ----- Constants (matched 1:1 with retrieve-order.js) -----
@@ -630,6 +631,10 @@ function notFound(res) {
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
+  // Preview deployments only: start Chromium and draw a made-up booking's PDF
+  // and ATOL certificate, to prove this function on a new runtime before it
+  // reaches production. See api/_lib/runtime-selfcheck.js.
+  if (selfCheckAllowed(req)) return runBookingPdfSelfCheck(res);
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   // Internal-call detection. /api/booking-email calls this endpoint server-to-
@@ -896,4 +901,44 @@ export default async function handler(req, res) {
     try { await browser?.close(); } catch {}
     return res.status(500).json({ error: 'server_error' });
   }
+}
+
+// ─── Preview-only runtime self-check ──────────────────────────────────────
+async function runBookingPdfSelfCheck(res) {
+  let browser = null;
+  const sample = sampleAtolBooking('package-single');
+  const order = { ...sample, created: '2026-09-24T09:00:00', customerEmail: 'selfcheck@example.com', summary: computeSummary(sample.items) };
+  const result = await runSteps([
+    ['chromium: executable unpacked', async () => {
+      const chromium = (await import('@sparticuz/chromium')).default;
+      const path = await chromium.executablePath();
+      return { path, al2023LibsUnpacked: al2023LibsPresent() };
+    }],
+    ['chromium: launched', async () => {
+      browser = await getBrowser();
+      return { version: await browser.version() };
+    }],
+    ['booking PDF: drawn from the real template', async () => {
+      const html = renderPdfHtml(order, { brandName: 'Runtime self-check', orderRef: 'SELFCHECK', display: {}, colors: {} });
+      const page = await browser.newPage();
+      await page.emulateMediaType('print');
+      await page.setContent(html, { waitUntil: 'networkidle0' });
+      const pdf = await page.pdf({
+        format: 'A4', printBackground: true, preferCSSPageSize: true, displayHeaderFooter: true,
+        headerTemplate: PDF_HEADER_TEMPLATE,
+        footerTemplate: renderPdfFooterTemplate({ brandName: 'Runtime self-check', orderRef: 'SELFCHECK', supportEmail: '' }),
+      });
+      const buf = Buffer.isBuffer(pdf) ? pdf : Buffer.from(pdf);
+      if (!buf.subarray(0, 5).toString('latin1').startsWith('%PDF')) throw new Error('not a PDF');
+      return { bytes: buf.length, pages: await pdfPageCount(buf) };
+    }],
+    ['ATOL certificate: drawn from the CAA template', async () => {
+      const settings = normaliseAtolSettings({ holderName: 'Runtime Self-Check Limited', atolNumber: '00000', packageSingle: true });
+      const model = buildAtolCertificate(order, settings, { type: 'package-single', orderRef: 'SELFCHECK' });
+      const buf = Buffer.from(await renderAtolCertificatePdf(model, { issuedOn: new Date(), sample: true }));
+      return { bytes: buf.length, pages: await pdfPageCount(buf), reference: model.reference };
+    }],
+  ]);
+  try { await browser?.close(); } catch {}
+  return res.status(result.ok ? 200 : 500).json({ function: 'booking-pdf', runtime: runtimeFacts(), ...result });
 }
