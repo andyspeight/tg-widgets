@@ -245,7 +245,12 @@ function fail(res, status, reason) {
 // Handler
 // ─────────────────────────────────────────────────────────────────────────────
 
-module.exports = async function handler(req, res) {
+// An ES module, like the rest of api/: this repo is "type": "module", so the
+// `module.exports =` this handler used to end with threw "module is not
+// defined in ES module scope" on every call and the route answered
+// FUNCTION_INVOCATION_FAILED on production (found 24 Sep 2026 while proving
+// the Node 24 move; broken on Node 20 too). Guarded by test:api-esm.
+export default async function handler(req, res) {
   applyCors(req, res);
 
   if (req.method === 'OPTIONS') {
@@ -320,4 +325,4 @@ module.exports = async function handler(req, res) {
   res.setHeader('Vary', 'Origin, Accept-Encoding');
 
   res.status(200).json(shaped);
-};
+}
