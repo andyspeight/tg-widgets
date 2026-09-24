@@ -161,6 +161,23 @@ console.log('\nThe weather route answers client websites, from MET Norway\n');
   ok('feels like follows the BoM formula (30°C, 70%, still air: 35.8°C)', Math.abs(apparentTemp(30, 70, 0) - 35.77) < 0.01);
   const night = shapeResponse({ properties: { timeseries: [{ time: new Date().toISOString(), data: { instant: { details: { air_temperature: 12 } }, next_1_hours: { summary: { symbol_code: 'clearsky_night' } } } }] } }, 'c');
   ok('night is read from the symbol, and missing humidity or wind are left out', night.isDay === false && night.feels === null && night.wind === null && night.humidity === null);
+  {
+    // Dubai at 17:42 local (13:42 UTC), sun down at about 18:15: the 13:00 UTC
+    // hour is still daylight, the 14:00 one is night. The temperature is the
+    // nearer 14:00 reading, the conditions are the hour we are in.
+    const now = Date.parse('2026-09-24T13:42:00Z');
+    const dubai = shapeResponse({ properties: { timeseries: [
+      { time: '2026-09-24T13:00:00Z', data: { instant: { details: { air_temperature: 34.1 } }, next_1_hours: { summary: { symbol_code: 'clearsky_day' } } } },
+      { time: '2026-09-24T14:00:00Z', data: { instant: { details: { air_temperature: 33.2 } }, next_1_hours: { summary: { symbol_code: 'clearsky_night' } } } },
+      { time: '2026-09-24T15:00:00Z', data: { instant: { details: { air_temperature: 31.0 } }, next_1_hours: { summary: { symbol_code: 'clearsky_night' } } } },
+    ] } }, 'c', now);
+    ok('the temperature is the nearest reading, the conditions the hour we are in (no moon before sunset)', dubai.temp === 33 && dubai.isDay === true && dubai.code === 0, JSON.stringify(dubai));
+    const early = shapeResponse({ properties: { timeseries: [
+      { time: '2026-09-24T13:00:00Z', data: { instant: { details: { air_temperature: 34.1 } }, next_1_hours: { summary: { symbol_code: 'rain' } } } },
+      { time: '2026-09-24T14:00:00Z', data: { instant: { details: { air_temperature: 20 } }, next_1_hours: { summary: { symbol_code: 'clearsky_night' } } } },
+    ] } }, 'c', Date.parse('2026-09-24T13:10:00Z'));
+    ok('ten past the hour: that hour\'s reading and conditions', early.temp === 34 && early.code === 63);
+  }
   ok('no temperature in the answer: nothing to show', shapeResponse({ properties: { timeseries: [{ time: new Date().toISOString(), data: { instant: { details: {} } } }] } }, 'c') === null);
 }
 

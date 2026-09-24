@@ -151,15 +151,30 @@ export function apparentTemp(tC, rh, windMs) {
   return tC + 0.33 * e - 0.70 * windMs - 4.0;
 }
 
-// The forecast hour nearest now: the last one that starts no more than 30
-// minutes from now (so at 13:40 it is the 14:00 hour, at 13:20 the 13:00).
-function currentSlot(series, nowMs) {
+// Two picks from MET's hourly series. The TEMPERATURE is the reading nearest
+// now (at 13:40 the 14:00 one, at 13:20 the 13:00 one). The CONDITIONS are
+// those of the hour we are in: a symbol describes the hour that follows its
+// time, so it is the last one that starts at or before now. Taking the next
+// hour's symbol put a moon over Dubai half an hour before sunset.
+function slotNearest(series, nowMs) {
+  if (!Array.isArray(series) || !series.length) return null;
+  let pick = series[0], best = Infinity;
+  for (const s of series) {
+    const t = Date.parse(s && s.time);
+    if (!Number.isFinite(t)) continue;
+    const gap = Math.abs(t - nowMs);
+    if (gap < best) { best = gap; pick = s; }
+    if (t > nowMs) break;
+  }
+  return pick;
+}
+function slotNow(series, nowMs) {
   if (!Array.isArray(series) || !series.length) return null;
   let pick = series[0];
   for (const s of series) {
     const t = Date.parse(s && s.time);
     if (!Number.isFinite(t)) continue;
-    if (t <= nowMs + 30 * 60 * 1000) pick = s; else break;
+    if (t <= nowMs) pick = s; else break;
   }
   return pick;
 }
@@ -258,7 +273,8 @@ async function fetchWithTimeout(url, ms) {
 
 export function shapeResponse(raw, units, nowMs = Date.now()) {
   const props = raw && raw.properties;
-  const slot = currentSlot(props && props.timeseries, nowMs);
+  const series = props && props.timeseries;
+  const slot = slotNearest(series, nowMs);
   const data = slot && slot.data;
   const d = data && data.instant && data.instant.details;
   if (!d) return null;
@@ -266,7 +282,10 @@ export function shapeResponse(raw, units, nowMs = Date.now()) {
   if (d.air_temperature == null || !Number.isFinite(tC)) return null;
   const rh = d.relative_humidity != null && Number.isFinite(Number(d.relative_humidity)) ? Number(d.relative_humidity) : null;
   const ws = d.wind_speed != null && Number.isFinite(Number(d.wind_speed)) ? Number(d.wind_speed) : null;   // m/s
-  const next = data.next_1_hours || data.next_6_hours || data.next_12_hours;
+  const cur = slotNow(series, nowMs);
+  const cd = (cur && cur.data) || data;
+  const next = cd.next_1_hours || cd.next_6_hours || cd.next_12_hours
+    || data.next_1_hours || data.next_6_hours || data.next_12_hours;
   const symbol = String((next && next.summary && next.summary.symbol_code) || '');
   const code = metSymbolToWmo(symbol);
   const wmo = code !== null ? WMO[code] : null;
