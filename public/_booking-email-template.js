@@ -1100,13 +1100,15 @@ export function renderBookingEmail(opts) {
   // link list would read as a different sender. Every link is checked for
   // https and escaped, although it came from our own API: an email is the one
   // place a bad link cannot be fixed after it is sent.
-  const UPSELL_MARK = { TicketsAttractions: '🎟️', CarRental: '🚗', Transfers: '🚐', AirportExtras: '🛫' };
+  //
+  // No emoji. Andy, 24 Sep 2026: emoji "are not acceptable in our designs". The
+  // booking page draws a proper icon in each tile; an email cannot rely on SVG
+  // (Gmail strips it), so the rows here are words only, like the documents list.
   const safeUpsell = (Array.isArray(upsell) ? upsell : [])
     .map((t) => ({
       label: t && typeof t.label === 'string' ? t.label.slice(0, 60) : '',
       hint: t && typeof t.hint === 'string' ? t.hint.slice(0, 160) : '',
       url: safeHttpsUrl(t && t.url),
-      mark: (t && Object.prototype.hasOwnProperty.call(UPSELL_MARK, t.product)) ? UPSELL_MARK[t.product] : '',
     }))
     .filter((t) => t.label && t.url)
     .slice(0, 6);
@@ -1124,7 +1126,7 @@ export function renderBookingEmail(opts) {
                   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${isLast ? '' : 'border-bottom:1px solid #e2e8f0;'}">
                     <tr>
                       <td style="padding:10px 0;">
-                        <a href="${escapeHtml(t.url)}" target="_blank" style="font:600 15px/1.4 ${FONT};color:#0f172a;text-decoration:none;">${t.mark ? t.mark + ' ' : ''}${escapeHtml(t.label)}</a>
+                        <a href="${escapeHtml(t.url)}" target="_blank" style="font:600 15px/1.4 ${FONT};color:#0f172a;text-decoration:none;">${escapeHtml(t.label)}</a>
                         ${t.hint ? `<div style="font:400 13px/1.4 ${FONT};color:#64748b;margin-top:2px;">${escapeHtml(t.hint)}</div>` : ''}
                       </td>
                       <td style="padding:10px 0;text-align:right;white-space:nowrap;vertical-align:top;">
@@ -1159,7 +1161,7 @@ export function renderBookingEmail(opts) {
                   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${isLast ? '' : 'border-bottom:1px solid #e2e8f0;'}">
                     <tr>
                       <td style="padding:10px 0;">
-                        <a href="${escapeHtml(url)}" target="_blank" style="font:600 15px/1.4 ${FONT};color:#0f172a;text-decoration:none;">📄 ${name}</a>
+                        <a href="${escapeHtml(url)}" target="_blank" style="font:600 15px/1.4 ${FONT};color:#0f172a;text-decoration:none;">${name}</a>
                         ${metaBits ? `<div style="font:400 12px/1.4 ${FONT};color:#64748b;margin-top:2px;">${escapeHtml(metaBits)}</div>` : ''}
                       </td>
                       <td style="padding:10px 0;text-align:right;white-space:nowrap;">
@@ -1289,7 +1291,7 @@ export function renderBookingEmail(opts) {
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
               <tr>
                 <td style="background:${escapeHtml(accent)}1a;border-left:4px solid ${escapeHtml(accent)};border-radius:8px;padding:16px 20px;">
-                  <div style="font:600 15px/1.6 ${FONT};color:#0f172a;margin-bottom:2px;">📎 ${safeDocs.length ? 'Booking pack and documents attached' : 'Full booking pack attached'}</div>
+                  <div style="font:600 15px/1.6 ${FONT};color:#0f172a;margin-bottom:2px;">${safeDocs.length ? 'Booking pack and documents attached' : 'Full booking pack attached'}</div>
                   <div style="font:400 15px/1.6 ${FONT};color:#475569;">Your A4 confirmation includes the room details, full flight breakdown, payment schedule, and important booking conditions.${safeDocs.length ? ' Supplier documents are attached where size allows — and always available via the links above.' : ''}</div>
                 </td>
               </tr>
