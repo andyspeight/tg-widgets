@@ -36,6 +36,11 @@
 const SENDGRID_ENDPOINT = 'https://api.sendgrid.com/v3/mail/send';
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 500;
+// How long one send may take before we stop waiting (24 Sep 2026). SendGrid
+// answers in well under a second, attachments and all; before this the send had
+// NO timeout, so a stuck connection held the calling function until Vercel killed
+// it (booking-email has 30s in total and can spend 28 of them on its PDF).
+const SEND_TIMEOUT_MS = 15000;
 
 function getEnv() {
   const apiKey = process.env.SENDGRID_API_KEY;
@@ -233,6 +238,7 @@ export async function sendViaSendGrid(opts) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(opts.timeoutMs > 0 ? opts.timeoutMs : SEND_TIMEOUT_MS),
       });
 
       lastStatus = res.status;
@@ -261,6 +267,18 @@ export async function sendViaSendGrid(opts) {
       try { errBody = await res.text(); } catch {}
       lastError = `SendGrid ${res.status}: ${errBody.slice(0, 200)}`;
     } catch (err) {
+      // A send that TIMED OUT is not retried. SendGrid may well have accepted it
+      // and only the answer was lost, and a retry would then put the same email
+      // in the customer's inbox twice. A connection that failed outright never
+      // reached SendGrid, so that is still retried like a 5xx.
+      if (err && (err.name === 'TimeoutError' || err.name === 'AbortError')) {
+        return {
+          status: 'failed',
+          error: 'SendGrid did not answer in time; the email may still have been sent',
+          statusCode: null,
+          timedOut: true,
+        };
+      }
       lastError = err.message || 'Network error';
     }
 

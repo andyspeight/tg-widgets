@@ -62,7 +62,11 @@ ok(/signal:\s*AbortSignal\.timeout\(WRITE_TIMEOUT_MS\)/.test(submit),
 // hung upstream reaches the error state instead of an eternal loading skeleton.
 for (const f of ['public/widget-attraction.js', 'public/widget-airport.js', 'public/widget-spotlight.js']) {
   const src = read(f);
-  ok(/ctrl\.abort\(\), 9000/.test(src) && /signal: ctrl\.signal/.test(src),
+  // Either way of writing it: `() => ctrl.abort(), 9000` or, since the
+  // Spotlight family's 3 Sep 2026 refactor to plain functions (Airport),
+  // `function () { ctrl.abort(); }, 9000`. What matters is the 9s abort and the
+  // signal on the fetch, not the arrow.
+  ok(/ctrl\.abort\(\);?\s*\}?\s*,\s*9000/.test(src) && /signal: ctrl\.signal/.test(src),
     `${f}: content fetch has a 9s abort guard`);
 }
 
