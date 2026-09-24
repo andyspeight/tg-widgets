@@ -1,0 +1,405 @@
+{
+ "iata": "VRA",
+ "id": "recbFacqhP0VTlzQH",
+ "name": "Juan Gualberto Gomez International Airport",
+ "country": "Cuba",
+ "wikipedia": "https://en.wikipedia.org/wiki/Juan_Gualberto_G%C3%B3mez_Airport",
+ "audited": "2026-09-23",
+ "before": "Varadero's airport, and second busiest in Cuba after Havana. It is 5 km from the village of Carbonera and actually closer to Matanzas than to Varadero itself, so build a real transfer into any resort booking.\n\nThe European picture has changed and it is worth knowing before quoting. TUI ended all its Varadero flying in 2024, having served the airport from Amsterdam and Brussels, after a sharp fall in passenger numbers to Cuba, and Condor announced in 2025 that it would drop its Frankfurt route. Check what is actually operating rather than relying on an older programme.\n\nThe terminal is straightforward. There are four jet bridges serving stands 2 to 5, with air stairs for the remaining stand. Departures is upstairs with cafeterias and a large lounge, and there is a smaller air conditioned VIP lounge below. Shops sell rum, cigars, books and carvings both before and after customs.\n\nThe airport was built in 1989 and opened by Fidel Castro, replacing the older Varadero airport at Santa Marta, now Kawama. It is named after Juan Gualberto Gómez, the journalist and independence campaigner.",
+ "after": "Varadero's airport, named after Juan Gualberto Gómez. It lies near Carbonera and is actually closer to Matanzas than to Varadero itself, so build a real transfer into any resort booking.\n\nIn 2026 Cuba's international airports, this one included, have run short of jet fuel. All the Canadian airlines have suspended their Cuba flights. TUI had already stopped flying here in 2024 after demand for Cuba fell sharply, ending its flights from Amsterdam and Belgium and its Manchester service, then the UK's only direct route to Cuba. Condor followed in 2025. Check what is actually operating rather than relying on an older programme.",
+ "claims": [
+  {
+   "claim": "Varadero's airport",
+   "verdict": "confirmed",
+   "inAfter": "Varadero's airport",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-22",
+     "quote": "is an international airport serving Varadero, Cuba, and the province of Matanzas"
+    },
+    {
+     "file": "cibercuba-oficinas",
+     "org": "CiberCuba (news)",
+     "dated": "2026-07-08",
+     "quote": [
+      "El Aeropuerto Internacional Juan Gualberto Gómez Ferrer de Varadero",
+      "El aeropuerto de Varadero, principal puerta de entrada al destino turístico más importante de Cuba"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "named after Juan Gualberto Gómez",
+   "verdict": "softened",
+   "inAfter": "named after Juan Gualberto Gómez",
+   "note": "Was 'named after Juan Gualberto Gómez, the journalist and independence campaigner'. The name itself is on OurAirports and in CiberCuba's report (which gives his full name, Gómez Ferrer); who he was rests on Wikipedia alone, because every Cuban source tried failed to connect (see the history cut), so the description is dropped.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-22",
+     "quote": "The airport was named after a journalist, fighter for the Cuban Independence and black rights activist in Cuba Juan Gualberto Gómez (1854–1933)."
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Airport: Juan Gualberto Gomez International Airport (OurAirports MUVR, IATA VRA)"
+    },
+    {
+     "file": "cibercuba-oficinas",
+     "org": "CiberCuba (news)",
+     "dated": "2026-07-08",
+     "quote": "El Aeropuerto Internacional Juan Gualberto Gómez Ferrer de Varadero"
+    }
+   ]
+  },
+  {
+   "claim": "near Carbonera",
+   "verdict": "softened",
+   "inAfter": "It lies near Carbonera",
+   "note": "Was '5 km from the village of Carbonera'. The airport company's own tender, as CiberCuba reports it, gives the airport unit's commercial department an address in Carbonera, Matanzas (the 'Km 5,6' there is a road marker, not a distance from the village). The 5 km rests on Wikipedia alone (the Cuban aviation authority's chart, which Wikipedia cites, is on a domain that no longer resolves), and Carbonera is too small for the GeoNames file, so the coordinates cannot check it. Softened to 'near'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-22",
+     "quote": "The airport is located 5 km from the village of Carbonera"
+    },
+    {
+     "file": "cibercuba-oficinas",
+     "org": "CiberCuba (news)",
+     "dated": "2026-07-08",
+     "quote": [
+      "la Unidad Empresarial de Base (UEB) del aeropuerto",
+      "ubicado en la Carretera Mártires de Barbados Km 5,6, Finca Cabarroca, Carbonera, Matanzas."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "closer to Matanzas than to Varadero itself",
+   "verdict": "confirmed",
+   "inAfter": "is actually closer to Matanzas than to Varadero itself",
+   "note": "Straight lines from the GeoNames town centres to the OurAirports position: 15.1 km from Matanzas, 23.8 km from Varadero (the airport lies south west of the resort).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-22",
+     "quote": "closer to the city of Matanzas than to Varadero"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "City centre: Matanzas (GeoNames 3547398)",
+      "Straight-line distance from the city centre: 15.1 km (9.4 miles)"
+     ]
+    },
+    {
+     "file": "geo-varadero",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": "Straight-line distance from Varadero (GeoNames 3534632, 23.1568, -81.2444, population 20,000) to Juan Gualberto Gomez International Airport (MUVR, IATA VRA): 23.8 km"
+    }
+   ]
+  },
+  {
+   "claim": "in 2026 Cuba's international airports, Varadero's included, have run short of jet fuel",
+   "verdict": "corrected",
+   "inAfter": "In 2026 Cuba's international airports, this one included, have run short of jet fuel",
+   "note": "Replaces the old framing 'The European picture has changed' (cut below): the old paragraph's point was which airlines have stopped flying here, and in 2026 the change is no longer European. Like for like: airlines that have stopped flying, and why. The FCDO says Cuba's authorities have announced that all its international airports are without aviation fuel; CiberCuba, in its July 2026 report on the airport, names Varadero among the airports that have been unable to guarantee Jet A-1 since at least February 2026. 'Run short' is the common ground between 'without' and 'cannot guarantee'. The FCDO's headline advice itself replaces nothing and is held back (below).",
+   "sources": [
+    {
+     "file": "fcdo-cuba",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-16 (updated; still current at 24 September 2026)",
+     "quote": [
+      "Cuban authorities have announced that all of its international airports are without aviation fuel.",
+      "16 July 2026",
+      "24 September 2026"
+     ]
+    },
+    {
+     "file": "cibercuba-oficinas",
+     "org": "CiberCuba (news)",
+     "dated": "2026-07-08",
+     "quote": "Desde al menos febrero de este año, los aeropuertos de La Habana, Varadero, Holguín y Santiago de Cuba no pueden garantizar el suministro de combustible Jet A-1 a las aerolíneas."
+    }
+   ]
+  },
+  {
+   "claim": "all the Canadian airlines have suspended their Cuba flights",
+   "verdict": "corrected",
+   "inAfter": "all the Canadian airlines have suspended their Cuba flights",
+   "note": "Part of the same 2026 update. The UK and Canadian governments both say it, the Canadian page updated the day before this audit. CiberCuba's June 2026 report names them (Air Canada, WestJet, Sunwing, Air Transat) with their planned return dates, from 9 October to 1 November 2026, so the suspension may lift; the text says 'have suspended', which is true today.",
+   "sources": [
+    {
+     "file": "fcdo-cuba",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-16 (updated; still current at 24 September 2026)",
+     "quote": "Some airlines, including all Canadian airlines, Air France, Iberia, World2Fly and LATAM, have suspended flights to and from Cuba."
+    },
+    {
+     "file": "canada-cuba",
+     "org": "Government of Canada (travel.gc.ca)",
+     "dated": "2026-09-22",
+     "quote": [
+      "All Canadian airlines have suspended service to Cuba until further notice.",
+      "Last updated: September 22, 2026"
+     ]
+    },
+    {
+     "file": "cibercuba-aerolineas-junio",
+     "org": "CiberCuba (news)",
+     "dated": "2026-06-04",
+     "quote": [
+      "En total, al menos 11 aerolíneas han suspendido vuelos a Cuba en lo que va de 2026 : Air Canada, WestJet, Sunwing, Air Transat",
+      "Air Canada pospuso su regreso hasta el 1 de noviembre , Sunwing canceló hasta el 9 de octubre y Air Transat cerró la venta de vuelos entre mediados de junio y finales de octubre"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "TUI stopped flying to Varadero in 2024 after demand for Cuba fell sharply",
+   "verdict": "confirmed",
+   "inAfter": "TUI had already stopped flying here in 2024 after demand for Cuba fell sharply",
+   "note": "Kept from the old text, reworded. CiberCuba (19 March 2024) has TUI's Amsterdam flights ending from mid-May 2024 and its Manchester service at the end of April 2024, both for lack of demand.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-22",
+     "quote": "In 2024, TUI terminated all flights to Varadero, which it had served from both Amsterdam and Brussels, due to a sharp decline in passenger figures to Cuba."
+    },
+    {
+     "file": "cibercuba-tui",
+     "org": "CiberCuba (news)",
+     "dated": "2024-03-19",
+     "quote": [
+      "La aerolínea TUI, líder en viajes vacacionales en Europa, anunció la suspensión definitiva de sus vuelos hacia el balneario cubano de Varadero desde Ámsterdam, la capital de Países Bajos .",
+      "La decisión responde a la alarmante falta de demanda y la consecuente ausencia de pasajeros que llenen los aviones hacia la isla caribeña",
+      "Martes, 19 Marzo, 2024"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "TUI's flights from Amsterdam and Belgium",
+   "verdict": "softened",
+   "inAfter": "ending its flights from Amsterdam and Belgium",
+   "note": "Wikipedia says Amsterdam and Brussels; CiberCuba says Amsterdam and 'Belgium'. Belgium is what both support.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-22",
+     "quote": "which it had served from both Amsterdam and Brussels"
+    },
+    {
+     "file": "cibercuba-tui",
+     "org": "CiberCuba (news)",
+     "dated": "2024-03-19",
+     "quote": [
+      "de sus vuelos hacia el balneario cubano de Varadero desde Ámsterdam",
+      "y se extenderá también a los vuelos desde Bélgica"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "TUI's Manchester service, then the UK's only direct route to Cuba, ended in 2024",
+   "verdict": "corrected",
+   "inAfter": "and its Manchester service, then the UK's only direct route to Cuba",
+   "note": "The old text named only Amsterdam and Brussels and so missed the route that matters to a UK agent. CiberCuba (citing Travel Weekly) and aeroTELEGRAPH (citing The Independent) both say TUI's weekly Manchester to Varadero charter was the UK's only direct link to Cuba and that TUI ended it; the UK CAA's 2025 route table has Manchester to Varadero as its only Cuban row, with 11,893 charter passengers in 2024 and none in 2025.",
+   "sources": [
+    {
+     "file": "cibercuba-tui",
+     "org": "CiberCuba (news)",
+     "dated": "2024-03-19",
+     "quote": [
+      "En diciembre pasado, el grupo TUI anunció que su aerolínea abandonaría su servicio directo desde Manchester al balneario cubano de Varadero el próximo año.",
+      "Este servicio, la única opción directa a Cuba desde el Reino Unido",
+      "cesaría su programación a la isla a finales de abril de 2024"
+     ]
+    },
+    {
+     "file": "aerotelegraph-condor",
+     "org": "aeroTELEGRAPH (aviation trade news)",
+     "quote": [
+      "In diesem Jahr gab es nur noch einen wöchentlichen Charterflug von Großbritannien: von Manchester zum wichtigsten Ferienort Varadero",
+      "Tui stellte dann sogar diesen Flug ein und trennte Kuba zum ersten Mal seit drei Jahrzehnten von Großbritannien."
+     ]
+    },
+    {
+     "file": "caa-2025-routes",
+     "org": "UK Civil Aviation Authority",
+     "dated": "report period 2025, run 25 February 2026",
+     "quote": "25/02/2026 16:41,2025,85,CENTRAL AMERICA,CUBA,2,MANCHESTER,VARADERO,0,0,0,11893,0,11893,-100"
+    }
+   ]
+  },
+  {
+   "claim": "Condor stopped flying here in 2025",
+   "verdict": "corrected",
+   "inAfter": "Condor followed in 2025.",
+   "note": "Was 'Condor announced in 2025 that it would drop its Frankfurt route'. aeroTELEGRAPH (undated on the saved page, but it quotes a 5 December 2024 update and speaks of 'next summer') has a Condor spokeswoman confirming no Cuba flights for summer 2025 and the last Varadero flight on 29 April 2025, so the announcement came in late 2024 and the ending in 2025. Condor's own Caribbean page, read today, lists its destinations for summer 2026, winter 2026/27 and summer 2027 with no Cuban airport, so it has not come back. 'Frankfurt' is dropped: for Varadero it rests on Wikipedia alone.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-07-22",
+     "quote": "Condor followed by announcing to terminate their route to Frankfurt in 2025"
+    },
+    {
+     "file": "aerotelegraph-condor",
+     "org": "aeroTELEGRAPH (aviation trade news)",
+     "quote": [
+      "Aufgrund zu geringer Nachfrage wird auch Condor im Sommer 2025 ihre Flüge zum Inselstaat in der Karibik einstellen.",
+      "der letzte Varadero-Flug am 29. April folgen",
+      "bestätigte eine Airline-Sprecherin gegenüber aeroTELEGRAPH"
+     ]
+    },
+    {
+     "file": "condor-karibik",
+     "org": "Condor (its own site, condor.com)",
+     "dated": "2026-09-23 (live page)",
+     "quote": [
+      "Folgende Karibikziele werden im aktuellen Condor-Flugplan angeflogen:",
+      "Condor bietet Direktflüge ab Frankfurt zu mehreren Karibikzielen an: ganzjährig in die Dominikanische Republik (Punta Cana, Puerto Plata, Santo Domingo), nach Jamaika (Montego Bay) sowie nach Mexiko (Cancún) und Panama-Stadt."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "second busiest in Cuba after Havana",
+   "verdict": "cut",
+   "wasBefore": "and second busiest in Cuba after Havana",
+   "why": "Rests on Wikipedia's 2009 figure (1.28 million) alone; no current ranking was found (the Cuban sites tried, the government portal, EcuRed and the aviation authority's old domain, did not connect; the statistics office ONEI was not tried). It would also mislead now: in June 2026 CiberCuba, from the airport company's own data, counted one airline flying here, and in July it reported the airport practically at a standstill (held back below)."
+  },
+  {
+   "claim": "5 km from the village of Carbonera",
+   "verdict": "cut",
+   "wasBefore": "It is 5 km from the village of Carbonera",
+   "why": "Softened to 'near Carbonera' (see above): the 5 km rests on Wikipedia alone."
+  },
+  {
+   "claim": "the European picture has changed",
+   "verdict": "cut",
+   "wasBefore": "The European picture has changed and it is worth knowing before quoting.",
+   "why": "Overtaken: in 2026 the change is not only European. Replaced, like for like, by the 2026 jet fuel shortage and the Canadian airlines' suspensions (FCDO, Government of Canada, CiberCuba)."
+  },
+  {
+   "claim": "TUI ended all its Varadero flying from Amsterdam and Brussels",
+   "verdict": "cut",
+   "wasBefore": "TUI ended all its Varadero flying in 2024, having served the airport from Amsterdam and Brussels, after a sharp fall in passenger numbers to Cuba",
+   "why": "Reworded (see above): Brussels becomes Belgium, and the Manchester service, the UK's only direct route, is added to the same TUI claim."
+  },
+  {
+   "claim": "Condor announced in 2025 that it would drop its Frankfurt route",
+   "verdict": "cut",
+   "wasBefore": "and Condor announced in 2025 that it would drop its Frankfurt route",
+   "why": "The announcement came in late 2024 and the last Varadero flight was on 29 April 2025 (aeroTELEGRAPH); corrected to 'Condor followed in 2025'. The Frankfurt origin rests on Wikipedia alone for Varadero."
+  },
+  {
+   "claim": "the terminal is straightforward",
+   "verdict": "cut",
+   "wasBefore": "The terminal is straightforward.",
+   "why": "A lead-in to the terminal details, which are cut below."
+  },
+  {
+   "claim": "four jet bridges serving stands 2 to 5; air stairs for the remaining stand",
+   "verdict": "cut",
+   "wasBefore": "There are four jet bridges serving stands 2 to 5, with air stairs for the remaining stand.",
+   "why": "Wikipedia alone, unreferenced there. The Cuban aviation authority's aerodrome chart that Wikipedia cites is on a domain that no longer resolves (iacc.gov.cu, one try)."
+  },
+  {
+   "claim": "departures upstairs with cafeterias and a large lounge; VIP lounge below",
+   "verdict": "cut",
+   "wasBefore": "Departures is upstairs with cafeterias and a large lounge, and there is a smaller air conditioned VIP lounge below.",
+   "why": "Wikipedia alone, unreferenced. With the airport reported practically at a standstill in July 2026 (CiberCuba), what is open cannot be assumed either."
+  },
+  {
+   "claim": "shops sell rum, cigars, books and carvings before and after customs",
+   "verdict": "cut",
+   "wasBefore": "Shops sell rum, cigars, books and carvings both before and after customs.",
+   "why": "Wikipedia alone, unreferenced; see the lounge line above."
+  },
+  {
+   "claim": "built in 1989 and opened by Fidel Castro, replacing the older airport at Santa Marta, now Kawama",
+   "verdict": "cut",
+   "wasBefore": "The airport was built in 1989 and opened by Fidel Castro, replacing the older Varadero airport at Santa Marta, now Kawama.",
+   "why": "Wikipedia alone. Its source, Fidel Castro's speech of 25 September 1989 on the Cuban government portal (cuba.cu), failed to connect; EcuRed timed out; the University of Texas copy of Castro's speeches (LANIC) answered 503. Each was tried once. OurAirports does list Kawama Airport at Santa Marta, with Varadero as a keyword and no scheduled service, which fits, but says nothing of 1989, Castro or a replacement. Worth restoring when a Cuban source can be read."
+  },
+  {
+   "claim": "Juan Gualberto Gómez, the journalist and independence campaigner",
+   "verdict": "cut",
+   "wasBefore": "It is named after Juan Gualberto Gómez, the journalist and independence campaigner.",
+   "why": "Softened to 'named after Juan Gualberto Gómez' (see above): who he was rests on Wikipedia alone."
+  },
+  {
+   "claim": "FCDO advises against all but essential travel to Cuba",
+   "verdict": "cut",
+   "why": "Held back, and recommended for Andy as the most important line for this airport: a warning that replaces nothing in the old text, so under the like-for-like rule it stays out. The FCDO advises against all but essential travel to Cuba (updated 16 July 2026, still current at 24 September 2026): the national grid collapsed for the third time in a week on 14 July, the government said on 13 May that diesel and fuel oil reserves were exhausted, there have been protests, and from 6 June international cards such as Visa and Mastercard are not accepted, so visitors need cash for their whole stay. The Government of Canada also says to avoid non-essential travel (updated 22 September 2026), warning that fuel shortages disrupt ground transport and taxis, which bears on the transfer advice. A suggested attributed sentence: 'The FCDO advises against all but essential travel to Cuba.'",
+   "sources": [
+    {
+     "file": "fcdo-cuba",
+     "org": "UK FCDO (Foreign, Commonwealth and Development Office)",
+     "dated": "2026-07-16 (updated; still current at 24 September 2026)",
+     "quote": [
+      "FCDO advises against all but essential travel to Cuba.",
+      "On 14 July, the Cuban National Electric grid collapsed for the third time in a week.",
+      "On 13 May, the Cuban government announced that the country had exhausted its reserves of diesel and fuel oil.",
+      "On 3 June the Cuban Central Bank announced that international cards such as Visa and Mastercard will no longer be accepted in Cuba, with effect from 6 June."
+     ]
+    },
+    {
+     "file": "canada-cuba",
+     "org": "Government of Canada (travel.gc.ca)",
+     "dated": "2026-09-22",
+     "quote": [
+      "Avoid non-essential travel to Cuba due to worsening shortages of fuel, electricity, and basic necessities including food, water, and medicine.",
+      "Public transportation services, including taxis, are often disrupted, leaving tourists with few options to travel."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Varadero's flights in mid-2026: one airline in June, practically at a standstill in July",
+   "verdict": "cut",
+   "why": "Held back: one organisation only. CiberCuba reported on 4 June 2026, from the airport company's (ECASA's) own published data, that American Airlines from Miami, four days a week, was the only airline linking Varadero with the outside world that month, after the Canadian and Russian airlines left; on 8 July 2026 it reported the airport 'practically paralysed', leasing out four fuel tanks under a tender whose contract is 'subject to the restart of airport operations'. No second organisation could be read to confirm the Varadero detail (the Cuban-hosted sites tried did not connect; the airport company's own Telegram channels, which CiberCuba cites, were not tried). If it can be confirmed, it is the line that says how busy the airport is now.",
+   "sources": [
+    {
+     "file": "cibercuba-aerolineas-junio",
+     "org": "CiberCuba (news)",
+     "dated": "2026-06-04",
+     "quote": [
+      "Varadero, el principal destino turístico de playa del país, solo cuenta con vuelos de American Airlines desde Miami, operados los lunes, jueves, viernes y domingos.",
+      "Es la única aerolínea que conecta ese destino con el exterior en junio"
+     ]
+    },
+    {
+     "file": "cibercuba-oficinas",
+     "org": "CiberCuba (news)",
+     "dated": "2026-07-08",
+     "quote": [
+      "supeditado al reinicio de las operaciones aeroportuarias",
+      "Miércoles, 8 Julio, 2026"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "so build a real transfer into any resort booking",
+   "why": "Advice kept from the old text. It rests on the sourced distances (15.1 km from Matanzas, 23.8 km from Varadero in a straight line), and the Government of Canada's current advice that fuel shortages disrupt taxis and ground transport makes it more pressing, not less."
+  },
+  {
+   "text": "Check what is actually operating rather than relying on an older programme.",
+   "why": "Advice kept from the old text; the airline changes it follows are sourced above."
+  }
+ ],
+ "tracerOk": {}
+}

@@ -1,0 +1,379 @@
+{
+ "iata": "SJU",
+ "id": "recl1cpCRvaRCYwiq",
+ "name": "Luis Munoz Marin International Airport",
+ "country": "Puerto Rico",
+ "wikipedia": "https://en.wikipedia.org/wiki/Luis_Mu%C3%B1oz_Mar%C3%ADn_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Puerto Rico's main airport and the busiest in the insular Caribbean, handling 13,643,689 passengers in 2025. It takes 93 per cent of all passenger traffic into Puerto Rico and 90 per cent of the air cargo.\n\nThe location is unusually good. The airport sits in the beachfront resort district of Isla Verde, four to seven miles from the Condado resort area, the Hato Rey financial district and Old San Juan, so transfers are short whichever of those a client is heading for.\n\nThe terminal naming needs care. The airport has switched between letters and numbers over the years and now uses both: letters for the concourses and numbers for the airline departure areas in Terminals B, C and D. Terminal A, opened in June 2012, is used solely by JetBlue and has its own ticketing area.\n\nIt is run by Aerostar Airport Holdings under a 40-year partnership that began in 2013, and as of 2025 it is the only privatised airport in the United States and its territories.\n\nIt is named after Luis Muñoz Marín, Puerto Rico's first popularly elected governor.",
+ "after": "Puerto Rico's main airport and the busiest in the insular Caribbean, handling more than 13.6 million passengers in 2025. It takes about 93 per cent of Puerto Rico's air passengers.\n\nThe location is unusually good: about seven miles east of central San Juan and a short drive from Puerto Rico's largest hotels, so transfers are short.\n\nTerminals A to D are in use and Terminal E is closed. Terminal A, the newest, opened in June 2012.\n\nAerostar Airport Holdings runs it under a 40-year lease from the Puerto Rico Ports Authority that began in 2013. It is named after Luis Muñoz Marín, Puerto Rico's first popularly elected governor.",
+ "claims": [
+  {
+   "claim": "Puerto Rico's main airport",
+   "verdict": "confirmed",
+   "inAfter": "Puerto Rico's main airport",
+   "note": "The FAA's CY2025 table has eight Puerto Rico airports; San Juan's 6,658,037 boardings are twenty times Aguadilla's 335,014, the next.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "is the main international airport of Puerto Rico"
+    },
+    {
+     "file": "asur-20f-2025",
+     "org": "ASUR (Grupo Aeroportuario del Sureste, 60 per cent owner of the operator Aerostar), 2025 annual report",
+     "dated": "annual report for the year to 31 December 2025",
+     "quote": "it is the primary gateway from Puerto Rico to international destinations"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "CY2025 preliminary",
+     "quote": [
+      "38 SO PR SJU San Juan Luis Munoz Marin International P M 6,658,037 6,490,669 2.58%",
+      "171 SO PR BQN Aguadilla Rafael Hernandez P N 335,014 360,645 -7.11%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the busiest in the insular Caribbean",
+   "verdict": "confirmed",
+   "inAfter": "the busiest in the insular Caribbean",
+   "note": "ASUR, which also runs Cancún, calls San Juan the Caribbean's largest and busiest airport, so it plainly means the islands, as Wikipedia's 'insular Caribbean' does. Its annual report covers 2025.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "making it the busiest airport in Puerto Rico and the insular Caribbean"
+    },
+    {
+     "file": "asur-20f-2025",
+     "org": "ASUR (Grupo Aeroportuario del Sureste, 60 per cent owner of the operator Aerostar), 2025 annual report",
+     "dated": "annual report for the year to 31 December 2025",
+     "quote": "It is the Caribbean’s largest and busiest airport"
+    }
+   ]
+  },
+  {
+   "claim": "more than 13.6 million passengers in 2025",
+   "verdict": "corrected",
+   "inAfter": "handling more than 13.6 million passengers in 2025",
+   "note": "Was 13,643,689, Wikipedia's body text. ASUR's full-year table gives 13,643,686 for 2025 (up 3.0 per cent on 13,247,382), matching Wikipedia's own infobox, so the body text is three passengers out; the text now rounds. The figure includes transit passengers (ASUR's note). The FAA's CY2025 table counts 6,658,037 revenue boardings, up 2.58 per cent, consistent with about half of the total boarding here.",
+   "sources": [
+    {
+     "file": "asur-4q25",
+     "org": "ASUR (Grupo Aeroportuario del Sureste, 60 per cent owner of the operator Aerostar)",
+     "dated": "fourth-quarter 2025 results, for the twelve months to 31 December 2025",
+     "quote": [
+      "Total San Juan, Puerto Rico 3,199,545 3,100,354 (3.1) 13,247,382 13,643,686 3.0",
+      "announced its results for the three- and twelve-month periods ended December 31, 2025"
+     ]
+    },
+    {
+     "file": "asur-20f-2025",
+     "org": "ASUR (Grupo Aeroportuario del Sureste, 60 per cent owner of the operator Aerostar), 2025 annual report",
+     "dated": "annual report for the year to 31 December 2025",
+     "quote": "approximately 12.2 million passengers, 13.2 million passengers and 13.6 million passengers, respectively, traveled through the LMM Airport."
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": [
+      "stat_year = 2025",
+      "stat1_data = 13,643,686"
+     ]
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "CY2025 preliminary",
+     "quote": "38 SO PR SJU San Juan Luis Munoz Marin International P M 6,658,037 6,490,669 2.58%"
+    }
+   ]
+  },
+  {
+   "claim": "about 93 per cent of Puerto Rico's air passengers",
+   "verdict": "softened",
+   "inAfter": "It takes about 93 per cent of Puerto Rico's air passengers.",
+   "note": "Was '93 per cent of all passenger traffic into Puerto Rico'. The FAA's CY2025 table has eight Puerto Rico airports with 7,193,562 boardings between them; San Juan's 6,658,037 is 92.56 per cent, which rounds to Wikipedia's 93. 'About' because the FAA counts boardings, not arrivals.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "Handling 93% of passenger flow and 90% of air cargo into Puerto Rico"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "CY2025 preliminary",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "38 SO PR SJU San Juan Luis Munoz Marin International P M 6,658,037 6,490,669 2.58%",
+      "171 SO PR BQN Aguadilla Rafael Hernandez P N 335,014 360,645 -7.11%",
+      "235 SO PR PSE Ponce Mercedita P N 95,055 137,553 -30.90%",
+      "301 SO PR VQS Vieques Antonio Rivera Rodriguez P N 35,973 37,756 -4.72%",
+      "344 SO PR RVR Ceiba Jose Aponte De La Torre P N 23,214 19,681 17.95%",
+      "355 SO PR CPX Culebra Benjamin Rivera Noriega P N 19,812 14,663 35.12%",
+      "366 SO PR SIG San Juan Fernando Luis Ribas Dominicci P N 17,466 16,844 3.69%",
+      "426 SO PR MAZ Mayaguez Eugenio Maria De Hostos CS None 8,991 9,207 -2.35%"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "about seven miles east of central San Juan",
+   "verdict": "softened",
+   "inAfter": "about seven miles east of central San Juan",
+   "note": "Replaces 'four to seven miles from the Condado resort area, the Hato Rey financial district and Old San Juan'. The coordinates give 7.1 miles in a straight line from GeoNames' point for San Juan, the capital, at 105 degrees (east), which matches the far end of Wikipedia's range, the one it gives for Old San Juan. Condado and Hato Rey are not in the GeoNames file and no second written source for their distances could be read (the operator's and the tourism board's sites refused), so they are not named.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "about 4 to 7 miles (6.4 to 11.3 km) east of the Milla de Oro financial district in Hato Rey barrio, Condado resort area and Isla Grande secondary airport in Santurce barrio, and Old San Juan historic quarter in San Juan Islet"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "City centre: San Juan (GeoNames 4568127)",
+      "Straight-line distance from the city centre: 11.4 km (7.1 miles)",
+      "Bearing from the city centre: 105 degrees, which is east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a short drive from Puerto Rico's largest hotels",
+   "verdict": "corrected",
+   "inAfter": "a short drive from Puerto Rico's largest hotels",
+   "note": "In place of the Isla Verde district and the named neighbourhoods (cut below): the operator's owner says it in these words, and Wikipedia puts the airport in a beachfront resort district within 4 to 7 miles of the Condado resort area.",
+   "sources": [
+    {
+     "file": "asur-20f-2025",
+     "org": "ASUR (Grupo Aeroportuario del Sureste, 60 per cent owner of the operator Aerostar), 2025 annual report",
+     "dated": "annual report for the year to 31 December 2025",
+     "quote": "The LMM Airport is a short driving distance from the largest hotels in Puerto Rico."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "is located in the beachfront resort district of Isla Verde in the municipality of Carolina"
+    }
+   ]
+  },
+  {
+   "claim": "Terminals A to D in use, Terminal E closed",
+   "verdict": "corrected",
+   "inAfter": "Terminals A to D are in use and Terminal E is closed.",
+   "note": "Replaces the terminal-naming paragraph, like for like: what a traveller will find. ASUR's 2025 report lists five terminals, A to E, with E not in use and D back in use after renovation; Wikipedia has Terminal D reopened on 14 March 2023 and the former Terminal E closed to the public. The PDF text splits some words ('Termin al'), so the quotes stop short of the breaks.",
+   "sources": [
+    {
+     "file": "asur-20f-2025",
+     "org": "ASUR (Grupo Aeroportuario del Sureste, 60 per cent owner of the operator Aerostar), 2025 annual report",
+     "dated": "annual report for the year to 31 December 2025",
+     "quote": [
+      "The LMM Airport is comprised of two runways and five terminals (Terminals A through E).",
+      "Terminal E is not currently in use and",
+      "D is currently in use after renovations."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": [
+      "Terminal D reopened on March 14, 2023",
+      "the former Terminal E remains closed off to the public"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "Terminal A, the newest, opened in June 2012",
+   "verdict": "confirmed",
+   "inAfter": "Terminal A, the newest, opened in June 2012.",
+   "sources": [
+    {
+     "file": "asur-20f-2025",
+     "org": "ASUR (Grupo Aeroportuario del Sureste, 60 per cent owner of the operator Aerostar), 2025 annual report",
+     "dated": "annual report for the year to 31 December 2025",
+     "quote": "newest facility at the LMM Airport, opened in June 2012."
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "Terminal A was opened in June 2012"
+    }
+   ]
+  },
+  {
+   "claim": "Aerostar Airport Holdings runs it under a 40-year lease from the Puerto Rico Ports Authority that began in 2013",
+   "verdict": "confirmed",
+   "inAfter": "Aerostar Airport Holdings runs it under a 40-year lease from the Puerto Rico Ports Authority that began in 2013.",
+   "note": "Was 'a 40-year partnership'. ASUR's report calls it a lease granted by the Ports Authority for an initial term of 40 years from 27 February 2013; the FAA approved the privatisation on 25 February 2013 with Aerostar as operator.",
+   "sources": [
+    {
+     "file": "asur-20f-2025",
+     "org": "ASUR (Grupo Aeroportuario del Sureste, 60 per cent owner of the operator Aerostar), 2025 annual report",
+     "dated": "annual report for the year to 31 December 2025",
+     "quote": [
+      "As authorized by Act No. 29, the PRPA granted Aerostar the LMM Lease for an initial term of 40 years from February 27,",
+      "own a 60.0% interest in Aerostar"
+     ]
+    },
+    {
+     "file": "faa-privatization",
+     "org": "Federal Aviation Administration",
+     "dated": "page last updated 4 February 2026",
+     "quote": [
+      "Sponsor selected Aerostar Airport Holdings on July 19, 2012, to become the private operator.",
+      "The FAA approved the final application to privatize Muñoz Marín International Airport in San Juan, Puerto Rico, on February 25, 2013."
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "SJU is owned by the Puerto Rico Ports Authority and managed by Aerostar Airport Holdings, a public–private partnership operating the airport for 40 years, beginning in 2013."
+    }
+   ]
+  },
+  {
+   "claim": "named after Luis Muñoz Marín, Puerto Rico's first popularly elected governor",
+   "verdict": "confirmed",
+   "inAfter": "It is named after Luis Muñoz Marín, Puerto Rico's first popularly elected governor.",
+   "note": "The National Governors Association's biography says Congress granted Puerto Rico the right to elect its own governor in 1948 and that he was elected to four consecutive terms from 1949, so he was the first.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "Named after Luis Muñoz Marín, the first popularly elected governor of the archipelago and island"
+    },
+    {
+     "file": "nga-munoz-marin",
+     "org": "National Governors Association",
+     "quote": [
+      "In 1948, Congress granted Puerto Rico the right to elect its own governor.",
+      "Muñoz Marín was overwhelmingly elected to four consecutive terms, from 1949 to 1965."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "13,643,689 passengers in 2025",
+   "verdict": "cut",
+   "wasBefore": "handling 13,643,689 passengers in 2025",
+   "why": "Three out: ASUR and Wikipedia's own infobox give 13,643,686. Corrected (see above)."
+  },
+  {
+   "claim": "93 per cent of all passenger traffic into Puerto Rico",
+   "verdict": "cut",
+   "wasBefore": "It takes 93 per cent of all passenger traffic into Puerto Rico",
+   "why": "Softened to 'about 93 per cent of Puerto Rico's air passengers' (see above): the FAA's boardings give 92.56 per cent."
+  },
+  {
+   "claim": "90 per cent of the air cargo",
+   "verdict": "cut",
+   "wasBefore": "and 90 per cent of the air cargo",
+   "why": "Wikipedia alone. The FAA's all-cargo table lists only the largest cargo airports, so no share for Puerto Rico can be worked out from it, and the operator's own site refused the link lister (403), which under the brief ends that site."
+  },
+  {
+   "claim": "in the beachfront resort district of Isla Verde",
+   "verdict": "cut",
+   "wasBefore": "The airport sits in the beachfront resort district of Isla Verde",
+   "why": "Wikipedia alone for the airport's position in Isla Verde: aeropuertosju.com (the operator) and discoverpuertorico.com (the tourism board) both refused the link lister (403) and were not tried again with another tool. JetBlue's own San Juan page calls Isla Verde a casual beach resort area but does not place the airport there, and OurAirports carries 'Isla Verde' only as a keyword (the airport's former name, Isla Verde International). Worth restoring when the operator's site can be read."
+  },
+  {
+   "claim": "four to seven miles from Condado, Hato Rey and Old San Juan",
+   "verdict": "cut",
+   "wasBefore": "four to seven miles from the Condado resort area, the Hato Rey financial district and Old San Juan",
+   "why": "Only the far end of the range is independently checked (7.1 miles from GeoNames' San Juan point); Condado and Hato Rey rest on Wikipedia alone. Softened to 'about seven miles east of central San Juan' (see above)."
+  },
+  {
+   "claim": "transfers are short whichever of those a client is heading for",
+   "verdict": "cut",
+   "wasBefore": "so transfers are short whichever of those a client is heading for",
+   "why": "Shortened to 'so transfers are short', since the named districts are cut."
+  },
+  {
+   "claim": "the terminal naming needs care",
+   "verdict": "cut",
+   "wasBefore": "The terminal naming needs care.",
+   "why": "A lead-in to the naming detail, which is cut below."
+  },
+  {
+   "claim": "letters for the concourses and numbers for the airline departure areas",
+   "verdict": "cut",
+   "wasBefore": "The airport has switched between letters and numbers over the years and now uses both: letters for the concourses and numbers for the airline departure areas in Terminals B, C and D.",
+   "why": "Wikipedia alone; the operator's site refused. Replaced by which terminals are in use (ASUR, Wikipedia)."
+  },
+  {
+   "claim": "Terminal A used solely by JetBlue, with its own ticketing area",
+   "verdict": "cut",
+   "wasBefore": "is used solely by JetBlue and has its own ticketing area",
+   "why": "Contradicted by Wikipedia's own current text, which lists Air Canada, Avelo, JetBlue and Tradewind Aviation at Terminal A as of June 2025; JetBlue's own San Juan page does not name a terminal, and the operator's site refused. The separate check-in hall rests on Wikipedia alone."
+  },
+  {
+   "claim": "a 40-year partnership",
+   "verdict": "cut",
+   "wasBefore": "It is run by Aerostar Airport Holdings under a 40-year partnership that began in 2013",
+   "why": "Reworded: ASUR's report calls it a 40-year lease from the Puerto Rico Ports Authority (see above)."
+  },
+  {
+   "claim": "as of 2025 the only privatised airport in the United States and its territories",
+   "verdict": "cut",
+   "wasBefore": "and as of 2025 it is the only privatised airport in the United States and its territories",
+   "why": "Contradicted by the FAA: 'As of February 2026, there are two airports in the program', San Juan and Hendry County Airglades in Florida (approved, record of decision 2019). The claim is of no use to an agent, so it is cut rather than rewritten.",
+   "sources": [
+    {
+     "file": "faa-privatization",
+     "org": "Federal Aviation Administration",
+     "dated": "page last updated 4 February 2026",
+     "quote": [
+      "As of February 2026, there are two airports in the program:",
+      "Hendry County Airglades Airport"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "JetBlue is the biggest airline here",
+   "verdict": "cut",
+   "why": "Held back: replaces nothing in the old text (the JetBlue line cut above was about its terminal). ASUR's 2025 report puts JetBlue first among its San Juan customers, 26 per cent of Puerto Rico revenues in 2025, and Wikipedia calls it the largest carrier at San Juan with 51 daily flights. For Andy, if he wants an airline named.",
+   "sources": [
+    {
+     "file": "asur-20f-2025",
+     "org": "ASUR (Grupo Aeroportuario del Sureste, 60 per cent owner of the operator Aerostar), 2025 annual report",
+     "dated": "annual report for the year to 31 December 2025",
+     "quote": "JetBlue Airways 24 % 23 % 26 %"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-16",
+     "quote": "JetBlue is the largest carrier in San Juan, with 51 daily flights on an average day."
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The location is unusually good",
+   "why": "The old text's judgement, kept; the distance and the hotels that follow are sourced."
+  },
+  {
+   "text": "so transfers are short",
+   "why": "Advice kept from the old text, resting on the sourced distance and ASUR's 'short driving distance from the largest hotels'."
+  }
+ ],
+ "tracerOk": {}
+}

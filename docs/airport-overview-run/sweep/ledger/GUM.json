@@ -1,0 +1,347 @@
+{
+ "iata": "GUM",
+ "id": "recM0Joc7mVMmlrqc",
+ "name": "Antonio B. Won Pat International Airport",
+ "country": "Guam",
+ "wikipedia": "https://en.wikipedia.org/wiki/Antonio_B._Won_Pat_International_Airport",
+ "audited": "2026-09-23",
+ "before": "Guam's only international airport, three miles east of Hagåtña, and a hub for United Airlines. It is also the main cargo hub for Asia Pacific Airlines.\n\nThere is one quirk that catches people out. Because every flight here needs a customs or immigration check, the concourse was never designed to keep arriving and departing passengers apart. The only ordinary way in is through security and the only ordinary way out is through immigration.\n\nThe terminal runs across three levels: arrivals, customs and baggage claim in the basement, ticketing on the apron level and the gates, immigration and offices on the third floor. It opened in two phases in 1996 and 1998 as part of a 741 million dollar programme.\n\nThe frontage carries stylised latte stone motifs, the latte stone being an icon of modern Chamoru identity.\n\nThere are two runways, of 12,014 and 10,014 feet, on the site of the former Naval Air Station Agana.",
+ "after": "Guam's only international airport, three miles east of Hagåtña, and a hub for United Airlines. It is also the base of the cargo carrier Asia Pacific Airlines.\n\nBecause every flight here needs a customs or immigration check, the concourse was built to be shared by arriving and departing passengers. Since January 2022, the airport says, a third-floor International Arrivals Corridor has taken arriving passengers from the gates straight to the US Customs and Border Protection hall, kept apart from departing passengers.\n\nThe current terminal opened in two phases, in 1996 and 1998.\n\nThere are two runways, of about 12,000 and 10,000 feet, on the site of the former Naval Air Station Agana.",
+ "claims": [
+  {
+   "claim": "Guam's only international airport",
+   "verdict": "confirmed",
+   "inAfter": "Guam's only international airport",
+   "note": "The FAA's CY2025 table of commercial-service airports has one Guam row, this airport's; the operator calls it Guam's only commercial airport.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "is the only international airport in the territory"
+    },
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "CY2025 preliminary",
+     "quote": [
+      "Preliminary CY2025 Enplanements at All Commercial Service Airports (by Rank)",
+      "106 WP GU GUM Tamuning Guam International P S 966,278 932,832 3.59%"
+     ]
+    },
+    {
+     "file": "giaa-timeline",
+     "org": "A.B. Won Pat International Airport Authority, Guam (the airport's operator, guamairport.com)",
+     "dated": "live page, read 2026-09-24",
+     "quote": "April 1, 1995 marks the first date that Guam's only commercial airport becomes fully operational"
+    }
+   ]
+  },
+  {
+   "claim": "three miles east of Hagåtña",
+   "verdict": "confirmed",
+   "inAfter": "three miles east of Hagåtña",
+   "note": "3.3 miles in a straight line at 79 degrees (east) from GeoNames' point for Hagåtña; a ratio of 0.91.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "three miles (4.8 km) east of the capital, Hagåtña (formerly Agana)"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 5.3 km (3.3 miles)",
+      "Bearing from the city centre: 79 degrees, which is east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a hub for United Airlines",
+   "verdict": "confirmed",
+   "inAfter": "a hub for United Airlines",
+   "note": "The operator's timeline speaks of 'United's hub activity from Guam' (May 2024, 87 weekly flights to 14 destinations), and its newsletter of 5 September 2026 lists United's September 2026 flights from Guam to twelve places: Honolulu, Tokyo Haneda and Narita, Osaka Kansai, Nagoya, Manila, Palau, Saipan, Taipei, Chuuk, Pohnpei and Yap.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "It is a hub for United Airlines"
+    },
+    {
+     "file": "giaa-timeline",
+     "org": "A.B. Won Pat International Airport Authority, Guam (the airport's operator, guamairport.com)",
+     "dated": "timeline entry of May 2024 (live page, read 2026-09-24)",
+     "quote": "increased United’s hub activity from Guam of more than 87 flights weekly to 14 destinations"
+    },
+    {
+     "file": "giaa-newsletter-fy26-11",
+     "org": "A.B. Won Pat International Airport Authority, Guam (the airport's operator, guamairport.com)",
+     "dated": "2026-09-05",
+     "quote": [
+      "Passenger Flight Network (For SEPTEMBER 2026)",
+      "VOLUME FY26 ISSUE #11 SEPTEMBER 5, 2026",
+      "UA201/UA200",
+      "UA848/UA849",
+      "UA827/UA873"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the base of the cargo carrier Asia Pacific Airlines",
+   "verdict": "softened",
+   "inAfter": "It is also the base of the cargo carrier Asia Pacific Airlines.",
+   "note": "Was 'the main cargo hub for Asia Pacific Airlines'. The airline's own page calls it a cargo airline and gives its headquarters as Guam Station, in the Yellow Cargo Building, the address and number the operator's directory gives for it. 'Base' is what the airline's page and Wikipedia's 'primary cargo hub' both support; the airline also has a Honolulu station.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "the primary cargo hub for Asia Pacific Airlines"
+    },
+    {
+     "file": "apa-about",
+     "org": "Asia Pacific Airlines (its own site, asiapacificairlines.com)",
+     "dated": "live page, read 2026-09-24",
+     "quote": [
+      "Asia Pacific Airlines is a cargo airline that was established in 1998 to serve the Asia Pacific region.",
+      "Headquarters Guam Station 355 Chalan Pasaheru, Tamuning, Guam, 96913 Yellow Cargo Building (671) 647-0050"
+     ]
+    },
+    {
+     "file": "giaa-airlines",
+     "org": "A.B. Won Pat International Airport Authority, Guam (the airport's operator, guamairport.com)",
+     "dated": "live page, read 2026-09-24",
+     "quote": [
+      "Asia Pacific Airlines",
+      "Yellow Cargo Building/LACF",
+      "(671) 647-0050/1"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the concourse was built to be shared by arriving and departing passengers, because every flight needs a customs or immigration check",
+   "verdict": "confirmed",
+   "inAfter": "Because every flight here needs a customs or immigration check, the concourse was built to be shared by arriving and departing passengers.",
+   "note": "Kept from the old text, now in the past: the operator's own account of the arrivals corridor speaks of 'the once shared concourse'.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "Since all flights require customs or immigration inspection, the airport's post-security concourse and gate area was not designed to separate arriving and departing passengers."
+    },
+    {
+     "file": "giaa-timeline",
+     "org": "A.B. Won Pat International Airport Authority, Guam (the airport's operator, guamairport.com)",
+     "dated": "timeline entry of February 2021 (live page, read 2026-09-24)",
+     "quote": "bypassing the once shared concourse by departing and arriving passengers."
+    }
+   ]
+  },
+  {
+   "claim": "since January 2022 the International Arrivals Corridor has kept arriving passengers apart from departing ones",
+   "verdict": "corrected",
+   "primary": true,
+   "attribution": "airport",
+   "inAfter": "Since January 2022, the airport says, a third-floor International Arrivals Corridor has taken arriving passengers from the gates straight to the US Customs and Border Protection hall, kept apart from departing passengers.",
+   "note": "The old text's quirk was out of date. The operator says it completed the International Arrivals Corridor in January 2022 (in use from 25 January, first flight Jin Air from Incheon; Phase I, for gates 4 to 10, in February 2021): a sterile third-floor corridor from the gates to the US Customs and Border Protection hall, 'completely separated from departing passengers'. Attributed to the airport because the completion rests on its own pages; Wikipedia describes the same corridor and its purpose, but only as a project. Wikipedia and the operator also disagree on its cost (110 against 137 million dollars), so no cost is given. Review (24 Sep): 'apart from departing passengers' became 'kept apart from departing passengers', as 'apart from' could be read as 'except'.",
+   "sources": [
+    {
+     "file": "giaa-history",
+     "org": "A.B. Won Pat International Airport Authority, Guam (the airport's operator, guamairport.com)",
+     "dated": "live page, read 2026-09-24",
+     "quote": [
+      "In January of 2022, GIAA completed its third largest capital improvement program, the International Arrivals Corridor (IAC)",
+      "The IAC is a 3rd floor sterile corridor that sits atop the concourse level of Guam’s Airport",
+      "from passenger gates to the sterile corridor and routed directly to the US Customs and Border Protection Hall, completely separated from departing passengers."
+     ]
+    },
+    {
+     "file": "giaa-timeline",
+     "org": "A.B. Won Pat International Airport Authority, Guam (the airport's operator, guamairport.com)",
+     "dated": "timeline entry of January 2022 (live page, read 2026-09-24)",
+     "quote": [
+      "International Arrivals Corridor Opens for Operations",
+      "Operations in the new International Arrivals Corridor (IAC) went into effect January 25, 2022"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": [
+      "A $110 million international arrivals corridor, the largest in the project, is the airport's newest capital improvement project.",
+      "by separating arriving international passengers with departing passenger"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the current terminal opened in two phases, 1996 and 1998",
+   "verdict": "confirmed",
+   "inAfter": "The current terminal opened in two phases, in 1996 and 1998.",
+   "note": "The operator's timeline: first phase completed 10 September 1996, second phase opened in August 1998 (its history page says the project was fully completed in September 1998).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": [
+      "The current passenger terminal's first phase was completed on September 10, 1996.",
+      "In August 1998, the second phase of the current passenger terminal opened."
+     ]
+    },
+    {
+     "file": "giaa-timeline",
+     "org": "A.B. Won Pat International Airport Authority, Guam (the airport's operator, guamairport.com)",
+     "dated": "live page, read 2026-09-24",
+     "quote": [
+      "The first phase of the terminal expansion project is completed on September 10, 1996.",
+      "In August of 1998, the second phase of the Terminal Expansion Project is opened for operations."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "two runways, about 12,000 and 10,000 feet",
+   "verdict": "softened",
+   "inAfter": "There are two runways, of about 12,000 and 10,000 feet",
+   "note": "Was '12,014 and 10,014 feet'. OurAirports gives 12,015 ft for the longer runway, Wikipedia 12,014 ft; both give 10,014 ft for the other. Rounded to what both support.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": [
+      "Runway 6L/24R: 12,014 x 150 ft (3,662 x 46 m.)",
+      "Runway 6R/24L: 10,014 x 150 ft (3,052 x 46 m.)"
+     ]
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Runway 06L/24R: 3,662 m (12,015 ft), asphalt",
+      "Runway 06R/24L: 3,052 m (10,014 ft), asphalt",
+      "Runways listed: 2"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "on the site of the former Naval Air Station Agana",
+   "verdict": "confirmed",
+   "inAfter": "on the site of the former Naval Air Station Agana",
+   "note": "The operator's timeline calls NAS Agana 'the joint-use airfield for civilian and military operations', listed for closure in June 1993, after which civilian controllers took over on 1 April 1995.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "dated": "revision of 2026-09-20",
+     "quote": "The airport occupies the site of the former Naval Air Station Agana"
+    },
+    {
+     "file": "giaa-timeline",
+     "org": "A.B. Won Pat International Airport Authority, Guam (the airport's operator, guamairport.com)",
+     "dated": "live page, read 2026-09-24",
+     "quote": [
+      "In June 1993, Naval Air Station (NAS) Agana, (the joint-use airfield for civilian and military operations) is added to the Base Realignment and Closure (BRAC)",
+      "GIAA obtains an Airport Operating Certificate from the Federal Aviation Administration (FAA) in preparation for the closure of NAS."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the main cargo hub for Asia Pacific Airlines",
+   "verdict": "cut",
+   "wasBefore": "It is also the main cargo hub for Asia Pacific Airlines.",
+   "why": "Softened to 'the base of the cargo carrier Asia Pacific Airlines' (see above)."
+  },
+  {
+   "claim": "one quirk that catches people out",
+   "verdict": "cut",
+   "wasBefore": "There is one quirk that catches people out.",
+   "why": "No longer true as a warning: the operator's arrivals corridor, in use since January 2022, separates arriving passengers from departing ones (see above)."
+  },
+  {
+   "claim": "the concourse was never designed to keep arriving and departing passengers apart",
+   "verdict": "cut",
+   "wasBefore": "the concourse was never designed to keep arriving and departing passengers apart",
+   "why": "Reworded in the past tense with the operator's 'once shared concourse', and followed by the corridor that now keeps them apart."
+  },
+  {
+   "claim": "the only ordinary way in is through security and out through immigration",
+   "verdict": "cut",
+   "wasBefore": "The only ordinary way in is through security and the only ordinary way out is through immigration.",
+   "why": "Wikipedia alone, and it described the shared concourse before the arrivals corridor. The corridor sentence now says how arriving passengers leave."
+  },
+  {
+   "claim": "three levels: arrivals in the basement, ticketing on the apron level, gates on the third floor",
+   "verdict": "cut",
+   "wasBefore": "The terminal runs across three levels: arrivals, customs and baggage claim in the basement, ticketing on the apron level and the gates, immigration and offices on the third floor.",
+   "why": "Wikipedia alone (the operator's terminal layout page says only 'Please check back with us later'), and it no longer squares with the operator's own description of the arrivals corridor as a third-floor corridor sitting atop the concourse level."
+  },
+  {
+   "claim": "part of a 741 million dollar programme",
+   "verdict": "cut",
+   "wasBefore": "It opened in two phases in 1996 and 1998 as part of a 741 million dollar programme.",
+   "why": "The cost is disputed: Wikipedia says 741 million dollars, the operator's own history 241 million ('a $241M expansion and construction project fully completed in September of 1998'). The two phases and years are kept (see above).",
+   "sources": [
+    {
+     "file": "giaa-history",
+     "org": "A.B. Won Pat International Airport Authority, Guam (the airport's operator, guamairport.com)",
+     "quote": "The second and current terminal is the end product of a $241M expansion and construction project fully completed in September of 1998"
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "The expansion program that opened the current terminal had a cost of $741 million."
+    }
+   ]
+  },
+  {
+   "claim": "the frontage carries latte stone motifs, an icon of Chamoru identity",
+   "verdict": "cut",
+   "wasBefore": "The frontage carries stylised latte stone motifs, the latte stone being an icon of modern Chamoru identity.",
+   "why": "Wikipedia alone: none of the operator's pages read (history, timeline, airlines, newsletter) mentions it."
+  },
+  {
+   "claim": "runways of 12,014 and 10,014 feet",
+   "verdict": "cut",
+   "wasBefore": "There are two runways, of 12,014 and 10,014 feet,",
+   "why": "Rounded to about 12,000 and 10,000 feet: OurAirports gives 12,015 ft where Wikipedia gives 12,014 ft."
+  },
+  {
+   "claim": "nearly a million passengers boarded here in 2025 (FAA)",
+   "verdict": "cut",
+   "why": "Held back: a traffic figure that replaces nothing in the old text, which gives none. The FAA's preliminary CY2025 table counts 966,278 boardings (enplanements) at Guam, 106th in the US and up 3.59 per cent; Wikipedia's infobox gives 935,980 arrivals and 938,413 departures for the fiscal year to September 2025. For Andy, if he wants a line on how busy it is.",
+   "sources": [
+    {
+     "file": "faa-cy2025-enpl",
+     "org": "Federal Aviation Administration",
+     "dated": "CY2025 preliminary",
+     "quote": "106 WP GU GUM Tamuning Guam International P S 966,278 932,832 3.59%"
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "stat2_data = 935,980",
+      "stat3_data = 938,413",
+      "stat_year = FY25 [Oct. 2024–Sep. 2025]"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [],
+ "tracerOk": {
+  "Since January": "Not a name: the sentence opens with 'Since' and the month follows (January 2022, the operator's history and timeline)."
+ }
+}
