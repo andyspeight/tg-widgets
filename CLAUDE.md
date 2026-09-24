@@ -108,6 +108,12 @@ Session Summary, Decisions Locked, Files Touched, Blockers).
   failed fixes and rethink.
 - Brand voice for any copy: warm, plain, UK English, no em dashes, no Oxford
   comma, no AI cliche.
+- No emoji in any design, on any surface (Andy, 24 Sep 2026: emoji "are not
+  acceptable in our designs"). On a page use the house SVG icons; in an email,
+  where Gmail strips SVG, use words alone. A plain check mark or arrow is
+  typography, not emoji. Guarded for the booking outputs by
+  `npm run test:booking-no-emoji`; other widgets still carry some and have not
+  been swept.
 - Commit directly to the repo from Claude Code (Andy's old flow was the
   GitHub web UI; direct commits remove that friction). Vercel deploys `main`
   automatically.

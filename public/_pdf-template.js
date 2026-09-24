@@ -342,7 +342,7 @@ const renderPdfFlightItem = (item, showCancellation = true) => {
   return `
     <div style="margin-bottom:16px;">
       <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px;">
-        <div style="font-size:14px; font-weight:600; color:#0F172A;">✈ Flights</div>
+        <div style="font-size:14px; font-weight:600; color:#0F172A;">Flights</div>
         ${carrier ? `<div style="font-size:11px; color:#94A3B8;">${escapeHtml(carrier)}</div>` : ''}
       </div>
       ${f.routes.map((route, i) => renderLeg(route, i)).join('')}
