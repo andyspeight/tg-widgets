@@ -6,8 +6,344 @@
  "wikipedia": "https://en.wikipedia.org/wiki/El_Nido_Airport",
  "audited": "2026-09-23",
  "before": "A small airstrip serving El Nido in Palawan, about 4 km from the town proper in the barangay of Villa Libertad.\n\nThe ownership is unusual and worth knowing. The airport is owned and operated by Cebu Pacific rather than by a public authority, so the schedule is effectively one airline's decision. Check what is flying before promising a client a date.\n\nIt is also known as Lio Airport, so both names appear in supplier systems.\n\nThere is a single concrete airstrip. An older gravel runway is now partly surfaced and used as a taxiway.",
- "after": "A small airstrip serving El Nido in Palawan, about 4 km from the town proper in the barangay of Villa Libertad.\n\nThe ownership is unusual and worth knowing. The airport is owned and operated by Cebu Pacific rather than by a public authority, so the schedule is effectively one airline's decision. Check what is flying before promising a client a date.\n\nIt is also known as Lio Airport, so both names appear in supplier systems.\n\nThere is a single concrete airstrip. An older gravel runway is now partly surfaced and used as a taxiway.",
- "claims": [],
- "opinion": [],
+ "after": "A small airstrip serving El Nido in Palawan, about 4 km from the town proper.\n\nThe airline side has changed and is worth knowing. AirSWIFT, the boutique airline that has long flown here, now belongs to Cebu Pacific. From 1 July 2026 its flights are run by Cebgo, Cebu Pacific's turboprop airline, under DG flight numbers instead of T6. Check what is flying before promising a client a date.\n\nIt is also known as Lio Airport.\n\nThere is a single concrete airstrip.",
+ "claims": [
+  {
+   "claim": "a small airstrip serving El Nido in Palawan",
+   "verdict": "confirmed",
+   "inAfter": "A small airstrip serving El Nido in Palawan",
+   "note": "'Small': one runway of 1,000 metres (OurAirports), used by turboprop airlines (see below).",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "OurAirports municipality: El Nido",
+      "Runway 15/33: 1,000 m (3,280 ft), CON",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "palawan-municipalities",
+     "org": "Provincial Government of Palawan (palawan.gov.ph)",
+     "dated": "read 2026-09-24 (live page)",
+     "quote": [
+      "Palawan is subdivided into 23 municipalities and 1 independent city",
+      "EL NIDO"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "is an airport serving the general area of El Nido, located in the province of Palawan in the Philippines"
+    }
+   ]
+  },
+  {
+   "claim": "about 4 km from the town proper",
+   "verdict": "confirmed",
+   "inAfter": "about 4 km from the town proper",
+   "note": "The coordinates put the airport 2.9 km in a straight line from the GeoNames centre of El Nido (ratio 1.38, inside the 0.8 to 1.6 allowed for a road distance), north east of the town (51 degrees).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "about 4 kilometres (2 mi) from the poblacion (town proper) of El Nido"
+    },
+    {
+     "file": "geo",
+     "org": "OurAirports + GeoNames (computed)",
+     "quote": [
+      "Straight-line distance from the city centre: 2.9 km (1.8 miles)",
+      "Bearing from the city centre: 51 degrees, which is north east"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "AirSWIFT, a boutique airline, has long flown here",
+   "verdict": "corrected",
+   "inAfter": "AirSWIFT, the boutique airline that has long flown here",
+   "note": "The old text named no airline. This claim and the next three replace its ownership sentence (cut below) with what two sources do confirm: Cebu Pacific's hold on El Nido is through the airline that flies here.",
+   "sources": [
+    {
+     "file": "avgeek-aplus-elnido",
+     "org": "AvGeek Philippines",
+     "dated": "2025-09-06",
+     "quote": [
+      "AirSWIFT , recently acquired by Cebu Pacific , has long connected travelers to El Nido",
+      "Sep 6, 2025"
+     ]
+    },
+    {
+     "file": "avgeek-airswift-cebgo",
+     "org": "AvGeek Philippines",
+     "dated": "2026-06-15",
+     "quote": "AirSWIFT has built a strong reputation as a premier boutique carrier, primarily servicing the highly popular tourist hub of El Nido in northern Palawan."
+    },
+    {
+     "file": "insider-airswift-cebgo",
+     "org": "Inquirer Insider (insiderph.com)",
+     "dated": "2026-06-16",
+     "quote": [
+      "Cebu Pacific has completed the integration of boutique carrier AirSWIFT into its airline group",
+      "with flights to and from El Nido continuing as scheduled",
+      "June 16, 2026"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "AirSWIFT now belongs to Cebu Pacific",
+   "verdict": "corrected",
+   "inAfter": "now belongs to Cebu Pacific",
+   "note": "Was 'The airport is owned and operated by Cebu Pacific'. Inquirer Insider says Cebu Pacific bought AirSWIFT from Ayala Land in 2024 for P1.75 billion; the seller, year and price rest on that one source, so the text says only that the airline now belongs to Cebu Pacific.",
+   "sources": [
+    {
+     "file": "insider-airswift-cebgo",
+     "org": "Inquirer Insider (insiderph.com)",
+     "dated": "2026-06-16",
+     "quote": [
+      "The move comes nearly two years after Cebu Pacific acquired AirSWIFT from Ayala Land for P1.75 billion",
+      "When Cebu Pacific acquired AirSWIFT in 2024"
+     ]
+    },
+    {
+     "file": "avgeek-turboprops-clark",
+     "org": "AvGeek Philippines",
+     "dated": "2026-01-22",
+     "quote": [
+      "AirSWIFT (T6) , a wholly owned subsidiary of Cebu Pacific",
+      "Jan 22, 2026"
+     ]
+    },
+    {
+     "file": "avgeek-aplus-elnido",
+     "org": "AvGeek Philippines",
+     "dated": "2025-09-06",
+     "quote": "AirSWIFT , recently acquired by Cebu Pacific"
+    }
+   ]
+  },
+  {
+   "claim": "from 1 July 2026 its flights are run by Cebgo, Cebu Pacific's turboprop airline",
+   "verdict": "corrected",
+   "inAfter": "From 1 July 2026 its flights are run by Cebgo, Cebu Pacific's turboprop airline",
+   "note": "Both reports were written in mid-June 2026, when Cebu Pacific announced the change for 1 July. Cebgo itself already flew here: a daily Cebu to El Nido service from 26 October 2025 (AvGeek, August 2025; the Cebu airport's release carried by SunStar, October 2025).",
+   "sources": [
+    {
+     "file": "avgeek-airswift-cebgo",
+     "org": "AvGeek Philippines",
+     "dated": "2026-06-15",
+     "quote": [
+      "Starting 01 July 2026, all flight operations for AirSWIFT (T6) will officially be handled by Cebgo (DG) , the turboprop subsidiary of the Cebu Pacific Group.",
+      "Jun 15, 2026"
+     ]
+    },
+    {
+     "file": "insider-airswift-cebgo",
+     "org": "Inquirer Insider (insiderph.com)",
+     "dated": "2026-06-16",
+     "quote": "with all AirSWIFT flights set to be operated by subsidiary Cebgo starting July 1"
+    },
+    {
+     "file": "avgeek-ceb-elnido-2025",
+     "org": "AvGeek Philippines",
+     "dated": "2025-08-27",
+     "quote": [
+      "The airline announced that its subsidiary Cebgo (DG) will operate daily flights on the Cebu–El Nido route",
+      "Aug 27, 2025"
+     ]
+    },
+    {
+     "file": "sunstar-ceb-elnido",
+     "org": "SunStar (carrying the Cebu airport's release)",
+     "dated": "2025-10-27",
+     "quote": [
+      "celebrates the launch of Cebu Pacific Air’s (DG) new daily service between Cebu (CEB) and El Nido, Palawan (ENI) starting October 26, 2025",
+      "Published on : Oct 27, 2025"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "DG flight numbers instead of T6",
+   "verdict": "corrected",
+   "inAfter": "under DG flight numbers instead of T6",
+   "note": "Replaces the old point about names in supplier systems (cut below) with the change booking systems do show: AvGeek says the new codes appear in booking engines, e-tickets and departure screens.",
+   "sources": [
+    {
+     "file": "avgeek-airswift-cebgo",
+     "org": "AvGeek Philippines",
+     "dated": "2026-06-15",
+     "quote": [
+      "All flights previously designated under the AirSWIFT \"T6\" airline code will be officially re-coded as \"DG\" flights",
+      "This coding change will be reflected across booking engines, electronic tickets, and airport departure screens."
+     ]
+    },
+    {
+     "file": "insider-airswift-cebgo",
+     "org": "Inquirer Insider (insiderph.com)",
+     "dated": "2026-06-16",
+     "quote": "All AirSWIFT flights previously carrying the T6 code will be re-designated as DG flights under Cebgo's operations."
+    }
+   ]
+  },
+  {
+   "claim": "also known as Lio Airport",
+   "verdict": "confirmed",
+   "inAfter": "It is also known as Lio Airport.",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "also known as Lio Airport"
+    },
+    {
+     "file": "avgeek-aplus-elnido",
+     "org": "AvGeek Philippines",
+     "dated": "2025-09-06",
+     "quote": [
+      "the launch of its newest line station in El Nido (ENI), Palawan",
+      "The facility, located at the Lio Airport Terminal"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "a single concrete airstrip",
+   "verdict": "confirmed",
+   "inAfter": "There is a single concrete airstrip.",
+   "sources": [
+    {
+     "file": "geo",
+     "org": "OurAirports (computed)",
+     "quote": [
+      "Runway 15/33: 1,000 m (3,280 ft), CON",
+      "Runways listed: 1"
+     ]
+    },
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "This concrete airstrip"
+    }
+   ]
+  },
+  {
+   "claim": "in the barangay of Villa Libertad",
+   "verdict": "cut",
+   "wasBefore": "in the barangay of Villa Libertad",
+   "why": "Wikipedia alone. The provincial government's municipalities page lists municipalities only, and no other saved source names the barangay."
+  },
+  {
+   "claim": "ownership framing",
+   "verdict": "cut",
+   "wasBefore": "The ownership is unusual and worth knowing.",
+   "why": "The ownership claim could not be confirmed (next entry), so the framing now points to the airline change, which is sourced."
+  },
+  {
+   "claim": "owned and operated by Cebu Pacific, not a public authority",
+   "verdict": "cut",
+   "wasBefore": "The airport is owned and operated by Cebu Pacific rather than by a public authority",
+   "why": "Not confirmed, and Wikipedia contradicts itself: its text says the airstrip is owned and operated by Cebu Pacific, its infobox gives the owner as Cebu Pacific but the operator as Ten Knots Development Corp. No second source on the airport's owner or operator could be read: AirSWIFT's own site (www.air-swift.com) does not resolve; CAAP's aerodrome certification list of 10 September 2026 covers only four certified aerodromes (Manila, Puerto Princesa, Bohol-Panglao, Kalibo) and is a scanned image; the provincial government's site has no airport page and its tourism site (turismo.palawan.gov.ph) does not resolve; AvGeek and Inquirer Insider report the airline deal, not the airport; BusinessWorld's tag page timed out and Ayala Land's news index shows only current items. What two sources do confirm is that Cebu Pacific owns the airline that flies here (see above).",
+   "sources": [
+    {
+     "file": "wikipedia-now",
+     "org": "Wikimedia",
+     "quote": "This concrete airstrip is owned and operated by Cebu Pacific."
+    },
+    {
+     "file": "wikipedia-infobox",
+     "org": "Wikimedia",
+     "quote": [
+      "owner = Cebu Pacific",
+      "operator = Ten Knots Development Corp."
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "the schedule is one airline's decision",
+   "verdict": "cut",
+   "wasBefore": "so the schedule is effectively one airline's decision",
+   "why": "Rests on the ownership claim (cut). No source says only Cebu Pacific's airlines may fly here, although every flight to El Nido named in the saved sources is AirSWIFT's or Cebgo's."
+  },
+  {
+   "claim": "both names appear in supplier systems",
+   "verdict": "cut",
+   "wasBefore": "so both names appear in supplier systems",
+   "why": "No source. The flight-number change from T6 to DG, which AvGeek says shows in booking engines, is given instead (see above)."
+  },
+  {
+   "claim": "older gravel runway now a taxiway",
+   "verdict": "cut",
+   "wasBefore": "An older gravel runway is now partly surfaced and used as a taxiway.",
+   "why": "Wikipedia alone; OurAirports lists the one concrete runway only."
+  },
+  {
+   "claim": "Manila flights moved to Clark on 29 March 2026; current routes",
+   "verdict": "cut",
+   "why": "Held back: a verified new fact that replaces nothing, and the one most likely to catch a UK traveller out, for Andy to add if he wants. From 29 March 2026 AirSWIFT's daily flights between Manila and El Nido became Clark to El Nido flights, under the government's order moving turboprops out of Manila's NAIA (AvGeek, January 2026). By June 2026 both AvGeek and Inquirer Insider list El Nido's routes as Clark, Boracay, Bohol, Cebu and Coron, with no Manila route. So a client arriving in Manila would need to get to Clark, or connect another way (for example through Cebu). AvGeek's June piece still calls Clark 'an alternative gateway', loose wording given its own January report and its route list.",
+   "sources": [
+    {
+     "file": "avgeek-turboprops-clark",
+     "org": "AvGeek Philippines",
+     "dated": "2026-01-22",
+     "quote": [
+      "Affected routes include multiple daily flights between Manila and El Nido, which will be re-designated as Clark–El Nido–Clark services.",
+      "The move, which will take effect on 29 March 2026",
+      "Cebu Pacific said affected passengers will be automatically transferred to a new flight departing from Clark.",
+      "Jan 22, 2026"
+     ]
+    },
+    {
+     "file": "insider-airswift-cebgo",
+     "org": "Inquirer Insider (insiderph.com)",
+     "dated": "2026-06-16",
+     "quote": "AirSWIFT operates routes linking Clark and El Nido, as well as flights connecting El Nido with Boracay, Bohol, Cebu and Coron."
+    },
+    {
+     "file": "avgeek-airswift-cebgo",
+     "org": "AvGeek Philippines",
+     "dated": "2026-06-15",
+     "quote": [
+      "The airline currently connects El Nido to Clark International Airport, providing an alternative gateway for travelers from Central and Northern Luzon.",
+      "including the world-famous white sands of Boracay, the scenic wonders of Bohol, the bustling hub of Cebu, and the stunning lakes of Coron"
+     ]
+    }
+   ]
+  },
+  {
+   "claim": "FCDO: no advice against travel to Palawan; typhoon season",
+   "verdict": "cut",
+   "why": "Held back: the FCDO's current advice (updated 15 July 2026, still current 24 September 2026) replaces nothing in the old text. It advises against all travel to western and central Mindanao and the Sulu archipelago, and against all but essential travel to the rest of Mindanao except Camiguin, Dinagat and Siargao; nothing covers Palawan. It notes around 20 typhoons a year, most between June and November, which matters for small turboprops. An attributed statement, so the FCDO's own page suffices if Andy wants it.",
+   "sources": [
+    {
+     "file": "fcdo-philippines",
+     "org": "FCDO (gov.uk travel advice)",
+     "dated": "updated 2026-07-15, still current 2026-09-24",
+     "quote": [
+      "FCDO advises against all travel to western and central Mindanao and the Sulu archipelago.",
+      "Camiguin Island",
+      "Around 20 typhoons hit the Philippines each year. Most typhoons happen between June and November.",
+      "Still current at:",
+      "24 September 2026",
+      "15 July 2026"
+     ]
+    }
+   ]
+  }
+ ],
+ "opinion": [
+  {
+   "text": "The airline side has changed and is worth knowing.",
+   "why": "The old text's 'worth knowing' framing, kept and pointed at what is sourced: Cebu Pacific's purchase of AirSWIFT and the move of its flights to Cebgo in July 2026."
+  },
+  {
+   "text": "Check what is flying before promising a client a date.",
+   "why": "The old text's advice, kept: in 2026 the flights changed airline code (T6 to DG, sourced) and, held back for Andy, moved from Manila to Clark."
+  }
+ ],
  "tracerOk": {}
 }
