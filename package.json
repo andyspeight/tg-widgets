@@ -253,7 +253,8 @@
     "test:mybooking-dark": "node test/mybooking-dark-theme-smoke.mjs",
     "test:traveller-age": "node test/order-traveller-age-smoke.mjs",
     "test:booking-no-emoji": "node test/booking-no-emoji-smoke.mjs",
-    "build:email-icons": "node scripts/build-email-icons.mjs"
+    "build:email-icons": "node scripts/build-email-icons.mjs",
+    "test:view-as-client": "node test/admin-view-as-client-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

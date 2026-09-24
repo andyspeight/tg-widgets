@@ -209,6 +209,18 @@ repo answer above.
   header yet, so nothing changed in practice. Covered by `npm run test:actas`
   (24 checks). The banner is deliberately NOT repointed yet, so it keeps working
   off the current global-switch signal until phase 2.
+- First real use (24 Sep 2026): "View as client" in Control. The clients list
+  and each client's own page carry a button that opens
+  `/dashboard.html?viewAs=<client id>` in a new tab. That tab mints a grant,
+  keeps it in its own sessionStorage and sends the header only on its
+  `me-products` call, so it shows the client's launchpad with an amber "Stop
+  previewing" bar while every other tab and tool stays as the staff member. An
+  explicit grant is always a preview in `me-products` (even of a client the
+  staff member is linked to), and a preview of a client with nothing switched on
+  shows an honest empty state rather than the staff member's own permission
+  tiles. Tiles do not open from a preview, because the products themselves do
+  not send the header yet (that is still phases 2 and 3). Covered by
+  `npm run test:view-as-client` (32 checks, real browser).
 - Phase 2: switch `staff-switcher.js` and the shell to the per-tab grant. Keep
   the global switch for genuine members only.
 - Phase 3: roll the header attach and banner into each other tool that shares

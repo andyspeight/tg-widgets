@@ -63,6 +63,19 @@
     .btn-primary { background: var(--tg-primary); color: white; }
     .btn-primary:hover { background: var(--tg-primary-light); }
 
+    .col-view { text-align: right; white-space: nowrap; }
+    a.view-as {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 10px; border-radius: var(--radius-md);
+      border: 1px solid var(--tg-border); background: var(--tg-bg-primary);
+      color: var(--tg-text-primary); font-size: 13px; font-weight: 600; text-decoration: none;
+      transition: border-color 150ms ease, background 150ms ease;
+    }
+    a.view-as:hover { border-color: var(--tg-accent); }
+    a.view-as:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.25); }
+    a.view-as svg { flex-shrink: 0; color: var(--tg-text-secondary); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
     .filter-bar {
       background: var(--tg-bg-primary);
       border: 1px solid var(--tg-border);
@@ -462,6 +475,7 @@
               <span class="num">${client.userCount}</span> ${client.userCount === 1 ? 'user' : 'users'}
               · <span class="num">${client.entitlementCount}</span> products
             </td>
+            <td class="col-view">${viewAsLink(client)}</td>
           </tr>
         `;
       }).join('');
@@ -479,12 +493,20 @@
                 <th>Setup</th>
                 <th>Go-live</th>
                 <th></th>
+                <th><span class="sr-only">View as client</span></th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
           </table>
         </div>
       `;
+
+      // The link opens a new tab; it must not also open the client's detail
+      // page underneath, which a click on the row does.
+      c.querySelectorAll('a.view-as').forEach(a => {
+        a.addEventListener('click', (e) => e.stopPropagation());
+        a.addEventListener('keydown', (e) => e.stopPropagation());
+      });
 
       c.querySelectorAll('tr[data-client-id]').forEach(row => {
         row.addEventListener('click', () => openClient(row.dataset.clientId));
@@ -495,6 +517,18 @@
           }
         });
       });
+    }
+
+    // "View as client" (24 Sep 2026): the client's launchpad in a new tab,
+    // exactly as their team sees it. Same link as on the client's own page;
+    // see the note there and the preview block in /dashboard.html. Not offered
+    // for a suspended client, which the server would refuse.
+    const EYE_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+    function viewAsLink(client) {
+      if (!client || !/^rec[A-Za-z0-9]{14}$/.test(String(client.id || ''))) return '';
+      if (String(client.status || '').toLowerCase() === 'suspended') return '';
+      return `<a class="view-as" href="/dashboard.html?viewAs=${encodeURIComponent(client.id)}" target="_blank" rel="noopener"
+        title="Open ${escapeHtml(client.clientName || 'this client')}'s launchpad in a new tab">${EYE_ICON}<span>View as client</span></a>`;
     }
 
     function openClient(id) {
