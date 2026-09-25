@@ -84,19 +84,32 @@ values stay in the form either way.
   raw order blanks every `foid*` value.
 - `retrieve-order` and `update-passport` answer with `Cache-Control: no-store`.
 
-## Open points from the spec, and how to settle them
+## The spec's open points, settled 25 Sep 2026
 
-1. **The FOID property names on a booking that already has passport details.**
-   The sample order had none. Run `/api/admin/order-shape` on such a booking:
-   `passports[].foidKeys` lists the field names Travelify used and
-   `withPassportValue` says who has a number, with no values shown. The code
-   reads `foidNumber`, `foidIssuingCountry`, `foidStartDate` and
-   `foidExpiryDate` in any case.
-2. **Whether a partial passenger list clears anyone not sent.** The spec
-   assumes it does not, and so does the code (only changed people go). Worth
-   one check on a two-adult test booking: save one, then read the other back.
-3. **UK time or airport time for "the day before".** The UTC calendar day, the
-   platform's existing handling (see The rules).
+Andy put the spec's open points to Darren at Travelify on 25 Sep 2026, the day
+this went live. His answers:
+
+1. **The FOID property names on a traveller who already has passport
+   details** are `foidNumber`, `foidIssuingCountry`, `foidStartDate` and
+   `foidExpiryDate`, the names the code already reads (in any case). Darren:
+   "yes, those are the field names".
+2. **A partial passenger list clears nobody.** Sending one passenger leaves
+   the other passengers' passport details as they were. Darren: "Yes". This is
+   what lets us send only the people who changed.
+3. **`canEditFOID` on the flight is the only switch.** Nothing else needs
+   turning on per application before `updatepaxfoid` accepts a call. Darren:
+   "Just look for the canEditFOID on the flight, nothing else is needed". So
+   when a customer asks why they cannot see the form, read `canEditFOID` on
+   that flight first (the staff inspector below shows it).
+4. **UK time or airport time for "the day before".** We chose the UTC calendar
+   day, the platform's existing handling (see The rules). During British Summer
+   Time that puts the cut-off at 1am UK time on departure day, not midnight.
+   Darren was told and raised no objection.
+
+`/api/admin/order-shape` still reports each flight's `canEditFOID`, its
+passport field names (`passports[].foidKeys`) and who has a number
+(`withPassportValue`), never a value. It is now a support check rather than an
+open question.
 
 ## Tests
 

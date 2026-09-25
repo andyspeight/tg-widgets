@@ -166,12 +166,15 @@ function partyShape(items) {
 const ATOLISH = /(atol|protect|bond|licen[cs]e|caa|abta|pkgtype|packagetype|contracttype)/i;
 
 /**
- * Passport details on each Flights item (25 Sep 2026), to settle the spec's
- * first open point: which field names Travelify uses for a passport already on
- * a booking. Field NAMES and whether each person has a value, never a value:
- * a passport number does not belong in a support report. canEditFOID is shown
- * as it came (a boolean, or its type when it is anything else), because the
- * form only appears for boolean true.
+ * Passport details on each Flights item (25 Sep 2026). Built to settle the
+ * spec's first open point, which field names Travelify uses for a passport
+ * already on a booking; Travelify confirmed the same day that they are
+ * foidNumber, foidIssuingCountry, foidStartDate and foidExpiryDate, so this is
+ * now a support check. Field NAMES and whether each person has a value, never
+ * a value: a passport number does not belong in a support report. canEditFOID
+ * is shown as it came (a boolean, or its type when it is anything else),
+ * because the form only appears for boolean true, and Travelify confirmed it
+ * is the only switch.
  */
 function passportShape(items) {
   return (Array.isArray(items) ? items : []).slice(0, 12).map((it, index) => {

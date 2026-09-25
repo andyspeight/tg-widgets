@@ -28,6 +28,9 @@
  *     FOIDNumber, FOIDIssuingCountry, FOIDStartDate, FOIDExpiryDate } ] }
  *   success → { "success": true }
  *   failure → { "success": false, "error": "Could not update order" }
+ *   Confirmed by Travelify (Darren, 25 Sep 2026): a passenger left out of the
+ *   list keeps their passport details, which is what lets us send only the
+ *   people who changed; and canEditFOID on the flight is the only switch.
  *
  * Request (POST /api/update-passport):
  *   { widgetId, emailAddress, departDate, orderRef, itemId,
