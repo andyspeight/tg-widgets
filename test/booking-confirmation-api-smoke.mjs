@@ -233,6 +233,32 @@ console.log('\nAccepted: one row, queued for the worker\n');
   ok('nothing is emailed on the request itself', !r.net.calls.some((c) => c.url.includes('booking-email')));
 }
 
+console.log('\nThe nudge outlives the answer (waitUntil)\n');
+{
+  // 25 Sep 2026: Darren's request was accepted at 10:51:43 and nothing ran
+  // until the sweep at 10:55:01. Vercel freezes a function once it has
+  // answered, so a nudge awaited after the 202 never left. It is now handed to
+  // waitUntil, which @vercel/functions reads from this request context.
+  const REQ_CTX = Symbol.for('@vercel/request-context');
+  const held = [];
+  globalThis[REQ_CTX] = { get: () => ({ waitUntil: (p) => { held.push(p); } }) };
+  let r;
+  try { r = await post(BODY); } finally { delete globalThis[REQ_CTX]; }
+  ok('the nudge is handed to the platform\'s waitUntil, so it survives the 202',
+    r.out.code === 202 && held.length === 1 && typeof held[0]?.then === 'function', 'held ' + held.length);
+  await Promise.allSettled(held);
+  ok('and it is the worker nudge that is held',
+    r.net.calls.some((c) => c.url.includes('/api/cron/booking-confirmations')));
+  const src = (p) => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
+  const doors = ['api/v1/booking-confirmations.js', 'api/v1/booking-webhook.js', 'api/v1/payment-reminders.js'];
+  ok('all three intake endpoints hold their nudge the same way, none awaits it bare',
+    doors.every((p) => src(p).includes('afterResponse(kickWorker())') && !/await kickWorker\(\)/.test(src(p))),
+    doors.filter((p) => !src(p).includes('afterResponse(kickWorker())')).join(', '));
+  ok('the helper uses Vercel\'s own waitUntil, and the package is a dependency Vercel installs',
+    /import \{ waitUntil \} from '@vercel\/functions'/.test(src('api/_lib/after-response.js'))
+    && !!JSON.parse(src('package.json')).dependencies?.['@vercel/functions']);
+}
+
 console.log('\nOne request, one email: repeats send too\n');
 {
   const KEY = '100|1|order.complete';

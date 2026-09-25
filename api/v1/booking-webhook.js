@@ -36,6 +36,7 @@
 
 import crypto from 'node:crypto';
 import { rateLimit, getClientIp } from '../_lib/travelify.js';
+import { afterResponse } from '../_lib/after-response.js';
 import { resolveApplication } from '../_lib/payment-reminders.js';
 import {
   resolveWebhookSecret,
@@ -169,6 +170,8 @@ export default async function handler(req, res) {
   }
 
   res.status(200).json({ status: 'accepted', reference, receivedAtUtc: receivedAt.toISOString() });
-  await kickWorker();
+  // Held open with waitUntil: without it Vercel freezes the function once the
+  // answer has gone, and the nudge never left (25 Sep 2026).
+  await afterResponse(kickWorker());
   return undefined;
 }
