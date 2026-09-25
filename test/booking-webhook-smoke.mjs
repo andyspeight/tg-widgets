@@ -355,16 +355,16 @@ console.log('The worker sends only what should be sent');
     r.net.patched[0].Status === 'Skipped' && /too old/.test(r.net.patched[0].LastError));
 
   // The demo application is where a test booking gets made without touching a
-  // real client's account, so it has to prove the chain — signature, client
-  // lookup, order fetch — and then stop. Marking it Skipped at the door (which
-  // is what it did until 17 Sep 2026) taught nobody anything.
+  // real client's account. From 17 to 25 Sep 2026 it proved the chain and then
+  // stopped at Fetched; since Andy's "on App 250, set it up to send so we can
+  // do a full test" it SENDS, as a test application, whatever the global
+  // switch says.
   r = await sweep([row({ ApplicationId: 250 })]);
-  ok('the demo application (250, the platform constant) reaches Fetched',
-    r.net.patched[0].Status === 'Fetched', JSON.stringify(r.net.patched[0]));
-  ok('having actually fetched the order, which is the point of testing with it',
+  ok('the demo application (250, the platform constant) sends, even with the global switch off',
+    r.net.patched[0].Status === 'Sent' && r.net.calls.some((c) => c.url.includes('booking-email')),
+    JSON.stringify(r.net.patched[0]));
+  ok('having fetched the order first, which is the point of testing with it',
     r.net.calls.some((c) => c.url.includes('api.travelify.io/account/order/')));
-  ok('and says why it stopped', /demo application 250/.test(r.net.patched[0].LastError));
-  ok('it never emails a real person', !r.net.calls.some((c) => c.url.includes('booking-email')));
 
   const offClient = { ...CLIENT, widget: { ...CLIENT.widget, fields: { ...CLIENT.widget.fields,
     Config: JSON.stringify({ brand: { name: 'Sunrise Travel' }, confirmationEmail: { enabled: false, layout: [] } }) } } };
@@ -397,11 +397,10 @@ console.log('The worker sends only what should be sent');
   ok('and the row records who it went to', r.net.patched[0].SentTo === 'demo@travelgenix.io'
     && r.net.patched[0].MessageId === 'sg-msg-1');
 
-  // The switch being on must not change what the demo application does.
+  // And with the switch on it sends just the same.
   r = await sweep([row({ ApplicationId: 250 })]);
-  ok('even with sending on, the demo application never emails a real person',
-    r.net.patched[0].Status === 'Fetched'
-    && !r.net.calls.some((c) => c.url.includes('booking-email')),
+  ok('with sending on, the demo application sends as well',
+    r.net.patched[0].Status === 'Sent' && r.net.calls.some((c) => c.url.includes('booking-email')),
     JSON.stringify(r.net.patched[0].Status));
 
   r = await sweep([row()], { sendOk: false });

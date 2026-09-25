@@ -323,7 +323,6 @@
       <li>The client has not switched <strong>Booking confirmation emails</strong> on in their My&nbsp;Booking editor, or has no My&nbsp;Booking widget.</li>
       <li>The order has no customer email, no departure date or no booking reference.</li>
       <li>The request is more than 12 hours old by the time we reach it. A confirmation is only useful while it is news.</li>
-      <li>The request is for the demo app <code class="inline">250</code>. It runs the whole chain, including reading the order, and stops just before sending, so it never emails anyone.</li>
     </ul>
   </section>
 
@@ -354,7 +353,7 @@
   <section>
     <h2>Current status</h2>
     <div class="note warn">
-      <strong>Nothing is emailed until a client is switched over.</strong> A client's customers only get this email once the client has switched confirmations on and we have switched sending on. Until then a valid request is still accepted, and the order is read, so you can see the whole chain work without a customer hearing from us. If you want to see a real email while testing, tell us the App ID you are testing with and we will send its emails to a test inbox rather than the customer.
+      <strong>The demo app <code class="inline">250</code> sends, for full end&#8209;to&#8209;end testing.</strong> A valid request for a booking on app 250 goes all the way through and emails, so you can see the real confirmation. <strong>Real clients are only emailed once they are switched over:</strong> the client switches confirmations on and we switch sending on. Until then a valid request for them is still accepted, and the order is read, so you can see the chain work without a customer hearing from us.
     </div>
   </section>
 

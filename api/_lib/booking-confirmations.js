@@ -296,16 +296,64 @@ export function confirmationTestRecipient() {
 }
 
 /**
- * Travelgenix's published demo application, which must never email a real
- * person. ONE id, taken from the platform's own constant rather than from the
- * webhook documentation: the sample payloads on that page use appid 100, but
- * that is an illustration, not a registration. Treating 100 as a demo would
- * silently swallow every confirmation for a real client who happened to hold
- * that App ID.
+ * Travelgenix's published demo application. Since 25 Sep 2026 it SENDS, as a
+ * test application (the worker treats isDemoApp like isConfirmationTestApp:
+ * it sends while the global switch is off, and the test redirect applies).
+ * Before that it stopped at Fetched and never emailed anyone. ONE id, taken
+ * from the platform's own constant rather than from the webhook
+ * documentation: the sample payloads on that page use appid 100, but that is
+ * an illustration, not a registration.
  */
 export const DEMO_APP_IDS = [DEMO_APP_ID];
 export function isDemoApp(applicationId) {
   return DEMO_APP_IDS.includes(String(applicationId));
+}
+
+// ── An App ID held by more than one client ──────────────────────────────────
+
+const CLIENTS_TABLE = 'tblikekpaTKraMktZ';
+const CLIENT_FIELDS = {
+  appId:      'fldE9dL05t0x0S88w',   // Travelify App ID
+  apiKey:     'fld9X1nvAgy0sHQ4B',
+  clientName: 'fldx9CiWtSm5lX7MF',
+};
+
+/**
+ * The client the confirmation should go out as, when the one the App ID
+ * resolved to has no My Booking widget. lookupClientCredentialsByAppId takes
+ * the FIRST Clients row with the App ID, and app 250 is held by two:
+ * "Travelgenix", with no widget, and "Travel Demo Tes Ltd", with the
+ * "My Booking test" widget. They share the application and its key, so the
+ * other row is the same caller with somewhere to send from. Returns
+ * { application, branding } for the first other row whose My Booking widget
+ * has confirmations switched on (else the first with a widget), or null.
+ * `resolveBranding` is passed in (it lives in payment-reminders.js).
+ */
+export async function resolveSiblingClient(application, resolveBranding) {
+  const appId = String((application && application.appId) || '').trim();
+  if (!/^\d{1,10}$/.test(appId)) return null;
+  const formula = `{Travelify App ID}=${appId}`;
+  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${CLIENTS_TABLE}`
+    + `?filterByFormula=${encodeURIComponent(formula)}&returnFieldsByFieldId=true&maxRecords=10`;
+  const data = await airtableRequest(url, { headers: airtableHeaders() }, 'sibling-clients');
+  let fallback = null;
+  for (const rec of (data.records || [])) {
+    if (!rec || rec.id === application.recordId) continue;
+    const f = rec.fields || {};
+    const apiKey = String(f[CLIENT_FIELDS.apiKey] || '').trim();
+    if (!apiKey) continue;
+    const sibling = {
+      appId: String(f[CLIENT_FIELDS.appId] || appId).trim(),
+      apiKey,
+      clientName: String(f[CLIENT_FIELDS.clientName] || '').trim(),
+      recordId: rec.id,
+    };
+    const branding = await resolveBranding(sibling);
+    if (!branding || !branding.widgetId) continue;
+    if (branding.confirmation && branding.confirmation.enabled) return { application: sibling, branding };
+    if (!fallback) fallback = { application: sibling, branding };
+  }
+  return fallback;
 }
 
 // ── Locks ────────────────────────────────────────────────────────────────────

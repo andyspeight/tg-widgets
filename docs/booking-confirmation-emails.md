@@ -118,14 +118,15 @@ booking the core has already asked us to confirm. The webhook's own
 one-per-push rule is unchanged.
 
 **Everything after intake is unchanged.** `api.confirmation` is a sending event;
-the worker fetches the order, checks the global switch, the client's own switch,
-the demo application and the twelve-hour age limit exactly as for a webhook row,
-and sends through `/api/booking-email`.
+the worker fetches the order, checks the global switch, the client's own switch
+and the twelve-hour age limit exactly as for a webhook row, and sends through
+`/api/booking-email`.
 
-**Testing it end to end.** App 250 runs the chain and stops at Fetched (the rule
-above). To see a real email, put a Travelgenix-owned client's App ID in
-`BOOKING_CONFIRMATION_TEST_APP_IDS` and a test inbox in
-`BOOKING_CONFIRMATION_TEST_RECIPIENT`; the page tells Darren to ask us for this.
+**Testing it end to end: app 250 sends (25 Sep 2026).** Andy: "on App 250, set
+it up to send so we can do a full test - please make sure there are no other
+blocks to sending". A request or push for app 250 now runs the whole chain AND
+emails; see **Testing with the demo application (250)** below for the four
+blocks that were taken away.
 
 ## The five-second rule
 
@@ -143,32 +144,47 @@ Nothing emails anyone until BOTH are on:
 | `BOOKING_CONFIRMATION_SEND_ENABLED=true` | Vercel env | Andy, once |
 | Booking confirmation emails → On | the client's My Booking editor, Settings | per client |
 
+A test application (`BOOKING_CONFIRMATION_TEST_APP_IDS`) and the demo application
+(250) pass the first switch; the client's own switch applies to everyone.
+
 While the global switch is off, a real booking still arrives, is fetched and
 parked at **Fetched**. That is the state to watch during the changeover: it
 proves the whole chain works for a client without a single email leaving.
 
 ### Testing with the demo application (250)
 
-The demo application is the obvious place to make test bookings without
-touching a real client's account, so a demo push runs the whole chain —
-signature, client lookup, order fetch — and stops at **Fetched**. It never
-emails anyone, with the global switch on or off. Before 17 Sep 2026 it was
-marked Skipped at the door, before the order was fetched, which taught nobody
-anything.
+**App 250 sends (Andy, 25 Sep 2026: "on App 250, set it up to send so we can do
+a full test - please make sure there are no other blocks to sending").** A
+booking on the demo application, by the webhook or the direct request, is
+fetched AND emailed. Four things stood in the way, and all four are gone:
 
-**Two things to know about app 250 before testing with it:**
+1. **The worker stopped the demo application at Fetched** ("demo application
+   250: fetched, never emailed"), by design from 17 Sep. It is now treated as a
+   test application: it sends while `BOOKING_CONFIRMATION_SEND_ENABLED` is off,
+   and `BOOKING_CONFIRMATION_TEST_RECIPIENT`, when set, redirects it.
+2. **App 250 resolved to the wrong client.** It is held by **two** Clients rows,
+   "Travelgenix" (`recRCZl6afFpBFSW6`) and "Travel Demo Tes Ltd"
+   (`recZNjh3ME4gOg9F0`), with the same Travelify key.
+   `lookupClientCredentialsByAppId` takes the first, which is Travelgenix, and
+   only Travel Demo Tes Ltd has a My Booking widget (`My Booking test`,
+   `tgw_1777215362250_tlpgd4`), so every row stopped at "client has no My
+   Booking widget". The worker now falls through to another Clients row with the
+   same App ID that has one (`resolveSiblingClient`), preferring one whose
+   confirmations are on. That is general, not a special case for 250.
+3. **Confirmations were not switched on** for "My Booking test". Its saved
+   config now carries `confirmationEmail: { enabled: true, layout: [] }` (the
+   built-in layout), exactly what ticking the switch in its editor writes.
+4. **The send endpoint refused a redirected test.** `/api/booking-email` insists
+   the booking's customer is a recipient (the guard against a stranger with a
+   booking's lookup details mailing it to anyone), so a send to the test inbox
+   came back `recipient_mismatch`. Our own worker, identified by
+   `TG_INTERNAL_KEY`, may now send elsewhere; a public caller still may not.
 
-- It maps to **two** Clients rows, "Travelgenix" (`recRCZl6afFpBFSW6`) and
-  "Travel Demo Tes Ltd" (`recZNjh3ME4gOg9F0`). `lookupClientCredentialsByAppId`
-  takes the first row Airtable returns, so which one you get is not
-  deterministic.
-- Only **Travel Demo Tes Ltd** has a My Booking widget (`My Booking test`,
-  `tgw_1777215362250_tlpgd4`). If the lookup lands on Travelgenix, the row
-  stops at `skipped: client has no My Booking widget` — which is the worker
-  being right, not a fault.
-
-Give the Travelgenix client a My Booking widget too, or test with a real
-client's application id, and the ambiguity stops mattering.
+What is left is ordinary: the order must carry a customer email, a departure
+date and a booking reference, and the request must be processed within twelve
+hours. `test:booking-confirmation-api` drives app 250 exactly as it sits in
+Airtable (both Clients rows, the widget on the second) with the global switch
+off and no test settings, and it sends.
 
 For end-to-end testing before the global flip:
 

@@ -21,7 +21,15 @@
  *    confirmed as a duplicate, so it never adds an automatic second email.
  *  - THE SAME EMAIL, THE SAME SWITCHES. A direct request is sent by the same
  *    worker through /api/booking-email, and stops at the same gates: the
- *    global switch, the client's own, and the demo application.
+ *    global switch and the client's own.
+ *  - APP 250 SENDS, END TO END (Andy, 25 Sep 2026: "on App 250, set it up to
+ *    send so we can do a full test - please make sure there are no other
+ *    blocks to sending"). Every block between a request for app 250 and an
+ *    email leaving is driven here: the demo stop (gone), the global switch
+ *    (the demo passes it as a test application), the App ID resolving to the
+ *    client without a My Booking widget (the sibling that has one is used),
+ *    and the send endpoint refusing the test inbox as a recipient (our own
+ *    worker may now send there).
  *
  * The endpoints and the worker run for real; only Airtable, Travelify and our
  * own send endpoint are stood in for.
@@ -294,12 +302,108 @@ console.log('\nThe worker sends it exactly as it sends a webhook booking\n');
     && !r.net.calls.some((c) => c.url.includes('booking-email')));
 
   r = await sweep([row({ ApplicationId: 250 })]);
-  ok('the demo application still never emails anyone',
-    r.net.patched[0].Status === 'Fetched' && !r.net.calls.some((c) => c.url.includes('booking-email')));
+  ok('the demo application sends too (Andy, 25 Sep: set 250 up to send)',
+    r.net.patched[0].Status === 'Sent' && r.net.calls.some((c) => c.url.includes('booking-email')));
 
   r = await sweep([row({ ReceivedAtUtc: new Date(Date.now() - 13 * 3600000).toISOString() })]);
   ok('a request more than twelve hours old is skipped, not sent late', r.net.patched[0].Status === 'Skipped' && /too old/.test(r.net.patched[0].LastError));
   delete process.env.BOOKING_CONFIRMATION_SEND_ENABLED;
+}
+
+console.log('\nApp 250 end to end: nothing left in the way\n');
+{
+  // App 250 as it really is in Airtable: two Clients rows share it, the FIRST
+  // one (what the App ID lookup returns) has no My Booking widget, and the
+  // second owns "My Booking test".
+  const TRAVELGENIX = { id: 'recRCZl6afFpBFSW6', fields: { fldE9dL05t0x0S88w: 250, fld9X1nvAgy0sHQ4B: 'A41D180E-KEY', fldx9CiWtSm5lX7MF: 'Travelgenix' } };
+  const DEMO_TES = { id: 'recZNjh3ME4gOg9F0', fields: { fldE9dL05t0x0S88w: 250, fld9X1nvAgy0sHQ4B: 'A41D180E-KEY', fldx9CiWtSm5lX7MF: 'Travel Demo Tes Ltd' } };
+  const TEST_WIDGET = { id: 'recl7meFbp2iIfpCD', fields: {
+    WidgetType: 'My Booking', Status: 'Active', WidgetID: 'tgw_1777215362250_tlpgd4', ClientRecordId: 'recZNjh3ME4gOg9F0',
+    Config: JSON.stringify({ pageUrl: 'https://tg-widgets.vercel.app/demo-mybooking', confirmationEmail: { enabled: true, layout: [] } }) } };
+  const DEMO_ORDER = { ...RAW_ORDER, customerEmail: 'andy@example.com' };
+
+  function app250Network() {
+    const calls = [], patched = [];
+    const real = globalThis.fetch;
+    globalThis.fetch = async (url, opts = {}) => {
+      const u = decodeURIComponent(String(url));
+      const body = opts.body ? JSON.parse(opts.body) : null;
+      calls.push({ url: u, body, headers: opts.headers || {} });
+      const reply = (payload, status = 200) => ({ ok: status < 400, status, json: async () => payload, text: async () => JSON.stringify(payload) });
+      if (u.includes('/api/booking-email')) return reply({ ok: true, messageId: 'sg-250' });
+      if (u.includes('api.travelify.io/account/order/')) return reply(DEMO_ORDER);
+      if (u.includes(lib.CONFIRMATIONS_TABLE)) {
+        if (opts.method === 'PATCH') { patched.push(body.fields); return reply({}); }
+        return reply({ records: [{ id: 'recQ', fields: { Reference: 'bc_250', ApplicationId: 250, OrderId: 1, OrderKey: ORDER_KEY,
+          EventType: 'api.confirmation', Status: 'Accepted', Attempts: 0, ReceivedAtUtc: new Date().toISOString() } }] });
+      }
+      if (u.includes('tblVAThVqAjqtria2')) {
+        return reply({ records: u.includes('recZNjh3ME4gOg9F0') ? [TEST_WIDGET] : [] });
+      }
+      if (u.includes('tblikekpaTKraMktZ')) {
+        if (u.includes('maxRecords=1&') || u.endsWith('maxRecords=1') || /maxRecords=1(&|$)/.test(u)) return reply({ records: [TRAVELGENIX] });
+        return reply({ records: [TRAVELGENIX, DEMO_TES] });
+      }
+      return reply({ records: [] });
+    };
+    return { calls, patched, restore: () => { globalThis.fetch = real; } };
+  }
+  const sweep250 = async () => {
+    const net = app250Network();
+    const { res, out } = response();
+    try { await worker.default({ headers: { authorization: 'Bearer cron-secret-value' } }, res); } finally { net.restore(); }
+    return { out, net };
+  };
+
+  delete process.env.BOOKING_CONFIRMATION_SEND_ENABLED;
+  delete process.env.BOOKING_CONFIRMATION_TEST_APP_IDS;
+  delete process.env.BOOKING_CONFIRMATION_TEST_RECIPIENT;
+  let r = await sweep250();
+  const send = r.net.calls.find((c) => c.url.includes('/api/booking-email'));
+  ok('with the global switch off and no test settings at all, a request for app 250 is SENT',
+    !!send && r.net.patched[0] && r.net.patched[0].Status === 'Sent', JSON.stringify(r.net.patched[0]));
+  ok('from "My Booking test", although the App ID lookup landed on the client with no widget',
+    send && send.body.widgetId === 'tgw_1777215362250_tlpgd4');
+  ok('to the email on the booking', send && send.body.toEmail === 'andy@example.com' && send.body.emailAddress === 'andy@example.com');
+
+  process.env.BOOKING_CONFIRMATION_TEST_RECIPIENT = 'inbox@travelgenix.example';
+  r = await sweep250();
+  const redirected = r.net.calls.find((c) => c.url.includes('/api/booking-email'));
+  ok('with a test inbox set, it goes to the test inbox, still looked up by the customer\'s email',
+    redirected && redirected.body.toEmail === 'inbox@travelgenix.example' && redirected.body.emailAddress === 'andy@example.com');
+  delete process.env.BOOKING_CONFIRMATION_TEST_RECIPIENT;
+
+  // The send endpoint itself: a stranger may not send a booking to someone
+  // else, but our own worker (the internal key) may send it to the test inbox.
+  process.env.SENDGRID_API_KEY = 'SG.test-key';
+  process.env.SENDGRID_FROM_EMAIL = 'bookings@travelgenix.example';
+  const emailHandler = (await import('../api/booking-email.js')).default;
+  const drive = async (internal) => {
+    const sent = [];
+    const real = globalThis.fetch;
+    globalThis.fetch = async (url, opts = {}) => {
+      const u = String(url);
+      const reply = (payload, status = 200, extra = {}) => ({ ok: status < 400, status, headers: { get: (k) => (k.toLowerCase() === 'x-message-id' ? 'sg-real-1' : null) },
+        json: async () => payload, text: async () => JSON.stringify(payload), arrayBuffer: async () => Buffer.from('%PDF-1.4 test').buffer, ...extra });
+      if (u.includes('/api/retrieve-order')) return reply({ order: { ...DEMO_ORDER, id: 1, items: [] }, upsell: [], atol: null });
+      if (u.includes('/api/booking-pdf')) return reply({});
+      if (u.includes('sendgrid')) { sent.push(JSON.parse(opts.body)); return reply({}, 202); }
+      return reply({ records: [TEST_WIDGET] });
+    };
+    const headers = { host: 'tg-widgets.test', 'content-type': 'application/json', 'x-forwarded-for': '198.51.100.' + Math.floor(Math.random() * 200) };
+    if (internal) { headers['x-tg-internal-key'] = 'internal-key-value'; headers['x-tg-real-ip'] = 'bookconf:250'; }
+    const { res, out } = response();
+    try {
+      await emailHandler({ method: 'POST', headers, body: { widgetId: 'tgw_1777215362250_tlpgd4', emailAddress: 'andy@example.com',
+        departDate: '2027-02-03', orderRef: 'ST24189', toEmail: 'inbox@travelgenix.example', message: '' } }, res);
+    } finally { globalThis.fetch = real; }
+    return { out, sent };
+  };
+  const stranger = await drive(false);
+  ok('a public caller still cannot send a booking to anyone but its customer', stranger.out.code === 400 && stranger.out.body.error === 'recipient_mismatch');
+  const ours = await drive(true);
+  ok('our own worker can send it to the test inbox', ours.out.code === 200 && ours.sent.length === 1,
+    JSON.stringify(ours.out.body));
 }
 
 console.log('\nThe published contract matches the code\n');

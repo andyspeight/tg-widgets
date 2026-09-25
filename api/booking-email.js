@@ -272,9 +272,16 @@ export default async function handler(req, res) {
     // widget is on a Travelgenix-owned page only — it is never embedded on
     // real client sites — so there's no client-reputation exposure. Rate
     // limits still apply to prevent abuse from anyone who finds the demo.
+    //
+    // Exception two (25 Sep 2026): our own confirmation worker, identified by
+    // TG_INTERNAL_KEY, which never leaves the server. Its test mode sends a
+    // booking's confirmation to BOOKING_CONFIRMATION_TEST_RECIPIENT instead of
+    // the customer, and this check refused exactly that ('recipient_mismatch'),
+    // so a redirected test could never send. The phishing risk above is a
+    // stranger with a booking's lookup details; the worker is not one.
     const customerEmail = (order.customerEmail || emailAddress || '').toLowerCase().trim();
     const allRecipients = new Set([toEmail, ...ccEmails]);
-    const bypassRecipientCheck = widgetId === DEMO_WIDGET_SENTINEL;
+    const bypassRecipientCheck = widgetId === DEMO_WIDGET_SENTINEL || internal;
     if (!bypassRecipientCheck && customerEmail && !allRecipients.has(customerEmail)) {
       return badRequest(res, 'recipient_mismatch');
     }
