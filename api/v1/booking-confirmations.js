@@ -21,17 +21,19 @@
  *             detail on any mismatch)
  *   Body      { applicationId, orderId, orderKey }
  *   202       { status: 'accepted', reference, receivedAtUtc }
- *   409       { status: 'duplicate', reference }   this booking's confirmation
- *             is already queued or sent (by this door or the webhook)
  *   400       { error: 'validation_failed', fields: { <field>: <message> } }
  *   401       {}                            missing/wrong key
  *   429       { error: 'rate_limited' }
  *   500       { error: 'server_error' }     nothing was queued — please retry
  *
- * ONE EMAIL PER BOOKING, unlike the reminders: a confirmation must never go
- * twice, so a booking whose confirmation is queued or sent answers 409 with the
- * original reference. A booking whose earlier attempt was Skipped or Failed
- * (nothing was sent) is accepted again.
+ * ONE REQUEST, ONE EMAIL, exactly as for the reminders (Andy, 25 Sep 2026:
+ * "The email confirmation can get sent multiple times, but you have limited to
+ * only send once - this needs changing"). The caller decides when a
+ * confirmation is wanted, so every accepted request is queued and sends,
+ * including a second request for a booking already confirmed. The first
+ * version answered a repeat 409; that is gone. The booking's key is still
+ * stored on each row, for audit and so the WEBHOOK does not add an automatic
+ * confirmation for a booking the core has already confirmed.
  *
  * Server-to-server only: no CORS headers on purpose — a browser should never
  * call this, so no origin is ever allowed one.
@@ -44,7 +46,6 @@ import {
   resolveConfirmationApiKey,
   validateConfirmationRequest,
   confirmationKey,
-  findLiveConfirmation,
   createConfirmationRecord,
 } from '../_lib/booking-confirmations.js';
 
@@ -121,24 +122,10 @@ export default async function handler(req, res) {
     });
   }
 
-  // ── One booking, one confirmation (across both doors) ─────────────────────
-  const idemKey = confirmationKey(value);
-  try {
-    const live = await findLiveConfirmation(idemKey);
-    if (live) {
-      return res.status(409).json({
-        status: 'duplicate',
-        reference: live.fields?.Reference || null,
-      });
-    }
-  } catch (err) {
-    // A lookup failure must not become a second confirmation, so ask for a
-    // retry rather than queue a row we could not check.
-    console.error('[booking-confirmations] duplicate check failed:', err.message);
-    return res.status(500).json({ error: 'server_error' });
-  }
-
   // ── Record + queue ────────────────────────────────────────────────────────
+  // NO duplicate suppression: every accepted request is one row and one send,
+  // the same order included (see the header). The key is stored, not enforced.
+  const idemKey = confirmationKey(value);
   const reference = 'bc_' + crypto.randomUUID();
   const receivedAt = new Date();
   try {

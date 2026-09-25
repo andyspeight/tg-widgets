@@ -13,11 +13,12 @@
  *  - THE CONTRACT on /booking-confirmations-api: auth before anything else,
  *    per-field validation, an unknown application refused, 202 with a
  *    reference, and the worker nudged only after the answer has gone.
- *  - ONE EMAIL PER BOOKING, ACROSS BOTH DOORS. A booking whose confirmation is
- *    queued or sent answers 409, whether it came in here or through the
- *    webhook, and the webhook answers a booking queued here as a duplicate.
- *    A booking whose earlier attempt sent nothing (Skipped or Failed) may be
- *    asked for again.
+ *  - ONE REQUEST, ONE EMAIL, as for the reminders (Andy, 25 Sep 2026: "The
+ *    email confirmation can get sent multiple times, but you have limited to
+ *    only send once - this needs changing"). Every accepted request queues and
+ *    sends, a booking already confirmed included; nothing is looked up to
+ *    refuse it. The webhook still answers a booking the core has already
+ *    confirmed as a duplicate, so it never adds an automatic second email.
  *  - THE SAME EMAIL, THE SAME SWITCHES. A direct request is sent by the same
  *    worker through /api/booking-email, and stops at the same gates: the
  *    global switch, the client's own, and the demo application.
@@ -212,35 +213,36 @@ console.log('\nAccepted: one row, queued for the worker\n');
   ok('nothing is emailed on the request itself', !r.net.calls.some((c) => c.url.includes('booking-email')));
 }
 
-console.log('\nOne booking, one email, across both doors\n');
+console.log('\nOne request, one email: repeats send too\n');
 {
   const KEY = '100|1|order.complete';
   const existingRow = (Status, EventType = 'api.confirmation') =>
     ({ id: 'recOLD000000000' + Status.length, fields: { Reference: 'bc_first_' + Status, IdempotencyKey: KEY, Status, EventType } });
 
-  for (const status of ['Accepted', 'Fetched', 'Sent']) {
+  for (const status of ['Accepted', 'Fetched', 'Sent', 'Skipped', 'Failed']) {
     const r = await post(BODY, {}, { existing: [existingRow(status)] });
-    ok(`a booking whose confirmation is ${status} answers 409 with the original reference`,
-      r.out.code === 409 && r.out.body.status === 'duplicate' && r.out.body.reference === 'bc_first_' + status && r.net.created.length === 0,
-      JSON.stringify(r.out));
+    ok(`a booking whose earlier confirmation is ${status} is accepted and queued again`,
+      r.out.code === 202 && r.out.body.status === 'accepted' && r.net.created.length === 1, JSON.stringify(r.out));
   }
   let r = await post(BODY, {}, { existing: [existingRow('Sent', 'order.complete')] });
-  ok('a booking already confirmed through the webhook is a duplicate here too', r.out.code === 409 && r.net.created.length === 0);
+  ok('so is a booking already confirmed through the webhook', r.out.code === 202 && r.net.created.length === 1);
 
-  r = await post(BODY, {}, { existing: [existingRow('Skipped'), existingRow('Failed')] });
-  ok('an earlier attempt that sent nothing (Skipped, Failed) does not block asking again', r.out.code === 202 && r.net.created.length === 1);
-
-  r = await post(BODY, {}, { existing: [{ id: 'recOTHER', fields: { Reference: 'bc_other', IdempotencyKey: '100|2|order.complete', Status: 'Sent' } }] });
-  ok('another booking\'s confirmation is no business of this one', r.out.code === 202);
-
-  r = await post(BODY, {}, { airtableDown: true });
-  ok('if the duplicate check cannot be made, it asks for a retry rather than risk a second email', r.out.code === 500 && r.net.created.length === 0);
+  r = await post(BODY);
+  const second = await post(BODY);
+  ok('two requests for the same booking are two rows with two references (two emails)',
+    r.out.code === 202 && second.out.code === 202 && r.out.body.reference !== second.out.body.reference);
+  ok('nothing is looked up to refuse a repeat: the only Airtable call is the row itself',
+    airtableCalls(second.net).filter((c) => c.url.includes(lib.CONFIRMATIONS_TABLE)).every((c) => c.method === 'POST'),
+    airtableCalls(second.net).map((c) => c.method + ' ' + c.url.slice(0, 90)).join(' | '));
+  ok('each row still carries the booking\'s key, for audit', second.net.created[0].IdempotencyKey === KEY);
+  ok('the answer never says duplicate', second.out.body.status === 'accepted' && !('duplicate' in second.out.body));
 
   r = await post(BODY, {}, { createFails: true });
   ok('if the row cannot be written, 500 and no kick (nothing was queued)',
     r.out.code === 500 && !r.net.calls.some((c) => c.url.includes('/api/cron/')));
 
-  // And the other way round: the webhook sees a booking queued here.
+  // The webhook keeps its own rule: it does not add an automatic confirmation
+  // for a booking the core has already asked us to confirm.
   const payload = { eventtype: 'order.complete', appid: APP_ID, data: { id: 1, key: ORDER_KEY }, timestamp: '2026-09-25T10:00:00Z' };
   const text = JSON.stringify(payload);
   const req = Readable.from([Buffer.from(text, 'utf8')]);
@@ -250,7 +252,7 @@ console.log('\nOne booking, one email, across both doors\n');
   const { res, out } = response();
   const net = network({ existing: [existingRow('Accepted')], out });
   try { await webhook(req, res); } finally { net.restore(); }
-  ok('the webhook answers a booking already queued by a direct request as a duplicate',
+  ok('the webhook still answers a booking the core already confirmed as a duplicate (no automatic second email)',
     out.code === 200 && out.body.status === 'duplicate' && out.body.reference === 'bc_first_Accepted' && net.created.length === 0,
     JSON.stringify(out));
 }
@@ -307,7 +309,9 @@ console.log('\nThe published contract matches the code\n');
   ok('the page names this endpoint', doc.includes('/api/v1/booking-confirmations'));
   ok('and the three fields, and no others', ['applicationId', 'orderId', 'orderKey'].every((f) => doc.includes('>' + f + ' <'))
     && !/reminderType|amountDue/.test(doc.replace(/Payment Reminders/g, '')));
-  ok('and every status the endpoint answers with', ['202', '409', '400', '401', '429', '500'].every((c) => doc.includes('>' + c + '<')));
+  ok('and every status the endpoint answers with, and no 409 (repeats send)',
+    ['202', '400', '401', '429', '500'].every((c) => doc.includes('>' + c + '<')) && !doc.includes('>409<') && !/status:\s*"duplicate"|"duplicate"<\/span>/.test(doc));
+  ok('it tells the caller that every request sends', /every (accepted )?request sends/i.test(doc));
   ok('the page is served at /booking-confirmations-api',
     (vercel.rewrites || []).some((r) => r.source === '/booking-confirmations-api' && r.destination === '/booking-confirmations-api.html'));
   ok('no em dashes in the new copy (house style)', !doc.slice(doc.indexOf('<body>')).includes('&mdash;') && !doc.includes('—'));

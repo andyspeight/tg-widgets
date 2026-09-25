@@ -88,8 +88,7 @@ Travelify core              us
 "confirm order N" ──POST──▶  /api/v1/booking-confirmations
   X-Api-Key                  key checked before anything else
   { applicationId,           validate; applicationId → client (400 if unknown)
-    orderId, orderKey }      this booking already queued or sent? → 409
-                             write one Airtable row (EventType api.confirmation)
+    orderId, orderKey }      write one Airtable row (EventType api.confirmation)
                              → 202 { status, reference, receivedAtUtc }
                              kick the worker
                                     │
@@ -103,19 +102,20 @@ What it shares with the reminders, and where it differs:
 | Auth | `X-Api-Key` = `PAYMENT_REMINDER_API_KEY` | `X-Api-Key` = `BOOKING_CONFIRMATION_API_KEY`, or the reminder key while that is unset |
 | Body | applicationId, orderId, orderKey, reminderType, amountDue, currency, dueDate? | applicationId, orderId, orderKey |
 | Unknown application | 400 `Unknown applicationId` | the same |
-| A repeat | sends again: the caller decides | **409 duplicate** with the original reference |
+| A repeat | sends again: the caller decides | sends again: the caller decides |
 | Answer | 202 accepted + reference | the same |
 
-**One email per booking, across both doors.** The rule in the library ("a
-confirmation must never go twice") holds for the direct request, and across the
-two routes: the direct request stores the webhook's own key,
-`applicationId|orderId|order.complete`, so a booking queued or sent by either
-door is a duplicate at the other. A client wired up both ways therefore still
-sends one email. The one difference: the webhook treats ANY earlier row as a
-duplicate, while the direct request only counts rows that are Accepted, Fetched
-or Sent (`findLiveConfirmation`). A Skipped or Failed row sent nothing, so the
-core can ask again once whatever stopped it (usually the client's switch) is put
-right.
+**Every request sends (Andy, 25 Sep 2026: "The email confirmation can get sent
+multiple times, but you have limited to only send once - this needs
+changing").** The first version answered a repeat 409; that is gone. Like the
+reminders, the caller decides when a confirmation is wanted, so every accepted
+request is a row and an email, a booking already confirmed included (a resend
+after an amendment, or for a customer who lost it). Each row still carries the
+webhook's own key, `applicationId|orderId|order.complete`, stored rather than
+enforced, for audit and for one reason: the WEBHOOK checks it, so a client wired
+up both ways does not get an automatic second email from the webhook for a
+booking the core has already asked us to confirm. The webhook's own
+one-per-push rule is unchanged.
 
 **Everything after intake is unchanged.** `api.confirmation` is a sending event;
 the worker fetches the order, checks the global switch, the client's own switch,
@@ -333,7 +333,7 @@ Magazine sees what those blocks do.
 | Command | What it holds |
 |---|---|
 | `npm run test:booking-webhook` | The published payloads, the signature, the endpoint's answers, and every reason the worker does or does not send. |
-| `npm run test:booking-confirmation-api` | The direct request: the key, the body, the 202, the one-email rule across both doors (including Skipped/Failed not blocking a new request), the worker sending it like a webhook row, and the published page matching the code. |
+| `npm run test:booking-confirmation-api` | The direct request: the key, the body, the 202, every repeat sending (with no lookup made to refuse it), the webhook still not adding a second email for a booking the core confirmed, the worker sending it like a webhook row, and the published page matching the code. |
 | `npm run test:confirmation-blocks` | The block vocabulary, the four starter styles, and that every block draws from a booking that has its material and draws nothing from one that does not. |
 | `npm run test:confirmation-layout` | The layout builder in the editor, driven for real. |
 | `npm run test:booking-email-drift` | One renderer for the preview and the send. |

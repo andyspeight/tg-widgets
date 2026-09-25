@@ -35,11 +35,12 @@
  *    resolveWebhookSecret takes the application id so per-client keys can
  *    arrive later without the endpoint changing shape.
  *
- *  - ONE EMAIL PER BOOKING. Unlike the reminders, where the caller decides
- *    when a chase is warranted, a confirmation must never go twice. The
- *    natural key applicationId|orderId|eventtype is stored AND enforced: a
+ *  - ONE EMAIL PER WEBHOOK PUSH. A push repeated by the platform (a retry, a
+ *    duplicate delivery) must not become a second email, so for the webhook
+ *    the natural key applicationId|orderId|eventtype is stored AND enforced: a
  *    repeat is answered 200 (the push succeeded, we simply already have it)
- *    rather than queued again.
+ *    rather than queued again. This is the WEBHOOK's rule. The direct request
+ *    below is caller-driven and sends every time it is asked.
  *
  *  - PER CLIENT (Andy, same day: "Per client as the booking gets notified to
  *    us"). The client switches the confirmation on in their My Booking editor.
@@ -58,12 +59,14 @@
  *    the Travelify core asks us directly, with the same X-Api-Key scheme as
  *    /api/v1/payment-reminders, instead of the per-client signed webhook. Its
  *    rows land in the same table with EventType api.confirmation and are sent
- *    by the same worker, through the same switches. The one-email rule holds
- *    ACROSS both doors: both use the key applicationId|orderId|order.complete,
- *    so a client wired up both ways still gets one confirmation. Unlike the
- *    webhook, a direct request that finds only Skipped or Failed rows for the
- *    booking is accepted, so the caller can ask again once whatever stopped the
- *    first one (the client's switch, say) is put right.
+ *    by the same worker, through the same switches. Like the reminders, and
+ *    UNLIKE the webhook, it has no duplicate suppression (Andy, 25 Sep 2026:
+ *    "The email confirmation can get sent multiple times, but you have limited
+ *    to only send once - this needs changing"): the caller decides, and every
+ *    accepted request sends. Its rows carry the webhook's own key
+ *    (applicationId|orderId|order.complete), stored rather than enforced, so
+ *    the webhook still will not add an automatic confirmation for a booking
+ *    the core has already confirmed.
  *
  *  - OFF BY DEFAULT. BOOKING_CONFIRMATION_SEND_ENABLED must be set to true in
  *    Vercel before a single email leaves. Travelify still sends its own
@@ -245,18 +248,20 @@ export function validateConfirmationRequest(body) {
 }
 
 /**
- * The one key that stands for "this booking's confirmation", whichever door it
- * came through. The webhook's order.complete key, so the two doors answer each
- * other's duplicates.
+ * The key that stands for "this booking's confirmation", whichever door it came
+ * through: the webhook's order.complete key. A direct request STORES it (for
+ * audit, and so the webhook's duplicate check sees a booking the core has
+ * already confirmed) and never checks it: the caller decides how often to send.
  */
 export function confirmationKey(value) {
   return buildIdempotencyKey({ applicationId: value.applicationId, orderId: value.orderId, eventType: 'order.complete' });
 }
 
 /**
- * One booking, one confirmation. Unlike a balance chase there is never a good
- * reason to send this twice, so the natural key is enforced rather than merely
- * recorded.
+ * One webhook push, one confirmation: the platform retrying a push must not
+ * email the customer twice, so for the webhook the natural key is enforced
+ * rather than merely recorded. (The direct request stores it and sends every
+ * time it is asked.)
  */
 export function buildIdempotencyKey(value) {
   return `${value.applicationId}|${value.orderId}|${value.eventType}`;
@@ -351,20 +356,6 @@ async function airtableRequest(url, options, stage) {
 /** The row already here for this exact event, or null. */
 export async function findByIdempotencyKey(idemKey) {
   const formula = `{IdempotencyKey}='${sanitiseForFormula(idemKey)}'`;
-  const url = `${tableUrl()}?filterByFormula=${encodeURIComponent(formula)}&maxRecords=1`;
-  const data = await airtableRequest(url, { headers: airtableHeaders() }, 'duplicate-check');
-  return (data.records || [])[0] || null;
-}
-
-/**
- * The confirmation for this booking that is still on its way or already sent:
- * a row with the key that is Accepted, Fetched (waiting to send) or Sent. A
- * Skipped or Failed row sent nothing, so it does not count, which is what lets
- * a direct request try again.
- */
-export async function findLiveConfirmation(idemKey) {
-  const formula = `AND({IdempotencyKey}='${sanitiseForFormula(idemKey)}',`
-    + `OR({Status}='Accepted',{Status}='Fetched',{Status}='Sent'))`;
   const url = `${tableUrl()}?filterByFormula=${encodeURIComponent(formula)}&maxRecords=1`;
   const data = await airtableRequest(url, { headers: airtableHeaders() }, 'duplicate-check');
   return (data.records || [])[0] || null;

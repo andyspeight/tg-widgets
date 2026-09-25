@@ -270,11 +270,6 @@
             <td class="rule">Queued. Store the <code class="inline">reference</code>: it is our handle on this confirmation.</td>
           </tr>
           <tr>
-            <td><span class="pill warn">409</span></td>
-            <td class="mono" style="font-size:12.5px;color:var(--ink-2)">{ status: "duplicate", reference }</td>
-            <td class="rule">This booking's confirmation is already queued or already sent. <code class="inline">reference</code> is the original one. Nothing new was queued. Do not retry.</td>
-          </tr>
-          <tr>
             <td><span class="pill crit">400</span></td>
             <td class="mono" style="font-size:12.5px;color:var(--ink-2)">{ error: "validation_failed", fields: {&hellip;} }</td>
             <td class="rule"><code class="inline">fields</code> maps each bad field to a message. Also returned for an unknown <code class="inline">applicationId</code>. Fix and resend.</td>
@@ -297,17 +292,17 @@
         </tbody>
       </table>
     </div>
-    <div class="note">Treat <strong>202</strong> and <strong>409</strong> as success. Retry on <strong>500</strong> and <strong>429</strong>. Fix and resend on <strong>400</strong> and <strong>401</strong>.</div>
+    <div class="note">Treat <strong>202</strong> as success. Retry on <strong>500</strong> and <strong>429</strong>: nothing was queued, so a retry cannot send twice. Fix and resend on <strong>400</strong> and <strong>401</strong>.</div>
   </section>
 
   <section>
-    <h2>One booking, one email</h2>
-    <p>This is where the confirmation differs from the payment reminders. A reminder sends every time you ask; a confirmation never goes twice.</p>
+    <h2>One request, one email</h2>
+    <p>This works exactly like the payment reminders: you decide when a confirmation is wanted, and every accepted request sends one email.</p>
     <ul class="clean">
-      <li><strong>A repeat is safe.</strong> If the same booking is sent again (a retry after a timeout, say) you get <span class="pill warn">409</span> with the original reference, and the customer still gets one email.</li>
-      <li><strong>It counts both ways in.</strong> Some clients are connected through the Travelgenix <code class="inline">order.complete</code> webhook as well. A booking confirmed that way answers <span class="pill warn">409</span> here too, so a client connected both ways never sends two.</li>
-      <li><strong>A confirmation that did not go can be asked for again.</strong> If an earlier request was stopped before anything was sent (the client had not switched confirmations on yet, or the order could not be read), a new request for the same booking is accepted.</li>
-      <li><strong>To resend on purpose</strong>, for a customer who has lost the email, the customer can email it to themselves from their booking page. This endpoint will not send a second copy.</li>
+      <li><strong>Resending is just another request.</strong> Send the same <code class="inline">applicationId</code> / <code class="inline">orderId</code> / <code class="inline">orderKey</code> again (after an amendment, say, or for a customer who has lost the email) and a fresh confirmation goes, showing the booking as it stands then.</li>
+      <li><strong>So only repeat what you mean to.</strong> We do not remove duplicates. A request that timed out on your side may already have been queued, so check before you send it again, or the customer may get two.</li>
+      <li><strong>Each request is its own record.</strong> Every <span class="pill ok">202</span> carries its own <code class="inline">reference</code>, one per email.</li>
+      <li><strong>Clients also on the Travelgenix webhook.</strong> A client connected through the <code class="inline">order.complete</code> webhook as well will not get an automatic second email from it for a booking you have already asked us to confirm.</li>
     </ul>
   </section>
 
@@ -352,13 +347,6 @@
   <span class="k">"status"</span>: <span class="s">"accepted"</span>,
   <span class="k">"reference"</span>: <span class="s">"bc_7f1c9b34-8a2e-4c1d-9f0a-2b6d5e4a1c88"</span>,
   <span class="k">"receivedAtUtc"</span>: <span class="s">"2026-09-25T10:14:00.000Z"</span>
-}</pre>
-    </div>
-    <div class="code">
-      <div class="code-head"><span class="label">Response &middot; the same booking again &middot; 409 Conflict</span><button class="copy" type="button" data-copy="dup">Copy</button></div>
-<pre id="dup">{
-  <span class="k">"status"</span>: <span class="s">"duplicate"</span>,
-  <span class="k">"reference"</span>: <span class="s">"bc_7f1c9b34-8a2e-4c1d-9f0a-2b6d5e4a1c88"</span>
 }</pre>
     </div>
   </section>
