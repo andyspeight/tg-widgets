@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light dark">
+<title>Booking Confirmations API</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+  :root {
+    --ground: #eef2f7;
+    --panel: #ffffff;
+    --panel-2: #f4f7fb;
+    --ink: #0f1a2b;
+    --ink-2: #48576e;
+    --ink-3: #6b7a92;
+    --line: #dbe3ee;
+    --line-strong: #c4d0e0;
+    --navy: #1b2b5b;
+    --accent: #0b7f9e;
+    --accent-soft: rgba(11,127,158,.10);
+    --ok: #0f7a4d;   --ok-bg: rgba(15,122,77,.10);
+    --warn: #9a6400; --warn-bg: rgba(154,100,0,.12);
+    --crit: #b0341f; --crit-bg: rgba(176,52,31,.10);
+    --code-bg: #101a2c;
+    --code-ink: #d7e2f2;
+    --code-line: #22304a;
+    --radius: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0a1120;
+      --panel: #10192a;
+      --panel-2: #142033;
+      --ink: #eaf1fb;
+      --ink-2: #a9b8d0;
+      --ink-3: #7e8ea8;
+      --line: #223047;
+      --line-strong: #2c3d58;
+      --navy: #a9c4ff;
+      --accent: #38b6d4;
+      --accent-soft: rgba(56,182,212,.14);
+      --ok: #4cc38a;   --ok-bg: rgba(76,195,138,.14);
+      --warn: #e0a53a; --warn-bg: rgba(224,165,58,.14);
+      --crit: #ef6a54; --crit-bg: rgba(239,106,84,.14);
+      --code-bg: #0b1322;
+      --code-ink: #d3def0;
+      --code-line: #1e2c44;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0a1120;
+    --panel: #10192a;
+    --panel-2: #142033;
+    --ink: #eaf1fb;
+    --ink-2: #a9b8d0;
+    --ink-3: #7e8ea8;
+    --line: #223047;
+    --line-strong: #2c3d58;
+    --navy: #a9c4ff;
+    --accent: #38b6d4;
+    --accent-soft: rgba(56,182,212,.14);
+    --ok: #4cc38a;   --ok-bg: rgba(76,195,138,.14);
+    --warn: #e0a53a; --warn-bg: rgba(224,165,58,.14);
+    --crit: #ef6a54; --crit-bg: rgba(239,106,84,.14);
+    --code-bg: #0b1322;
+    --code-ink: #d3def0;
+    --code-line: #1e2c44;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace; }
+
+  .wrap { max-width: 820px; margin: 0 auto; padding: 40px 22px 96px; }
+
+  /* Masthead */
+  header.mast { margin-bottom: 30px; }
+  .kicker {
+    font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 500;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 12px;
+  }
+  h1 {
+    font-size: clamp(28px, 4.4vw, 40px); font-weight: 700; line-height: 1.08;
+    letter-spacing: -.015em; margin: 0 0 12px; text-wrap: balance;
+  }
+  .sub { font-size: 16.5px; color: var(--ink-2); margin: 0; max-width: 62ch; }
+
+  /* Endpoint band */
+  .endpoint {
+    margin: 26px 0 8px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    background: var(--panel); border: 1px solid var(--line-strong); border-radius: var(--radius);
+    padding: 14px 16px; box-shadow: 0 1px 2px rgba(15,26,43,.05);
+    overflow-x: auto;
+  }
+  .verb {
+    font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 13px;
+    letter-spacing: .06em; color: #fff; background: var(--accent);
+    padding: 5px 10px; border-radius: 7px; flex: 0 0 auto;
+  }
+  .url { font-family: "JetBrains Mono", monospace; font-size: 14.5px; font-weight: 500; color: var(--ink); white-space: nowrap; }
+  .url .host { color: var(--ink-3); }
+  .endpoint-note { font-size: 12.5px; color: var(--ink-3); margin: 0 0 30px; }
+  .endpoint-note code { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--ink-2); }
+
+  section { margin-top: 40px; }
+  h2 {
+    font-size: 13px; font-family: "JetBrains Mono", monospace; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--accent);
+    margin: 0 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--line);
+  }
+  h2 .n { color: var(--ink-3); margin-right: 10px; }
+  section > p { color: var(--ink-2); margin: 14px 0; }
+  section > p:first-of-type { margin-top: 16px; }
+  strong { color: var(--ink); font-weight: 600; }
+  a { color: var(--accent); }
+
+  /* Tables */
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); margin: 16px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; min-width: 520px; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th {
+    background: var(--panel-2); font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-3); font-weight: 600; border-bottom: 1px solid var(--line-strong);
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.field, td.code, code.inline {
+    font-family: "JetBrains Mono", monospace;
+  }
+  td.field { font-weight: 500; color: var(--ink); white-space: nowrap; }
+  td.type { font-family: "JetBrains Mono", monospace; font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+  td.rule { color: var(--ink-2); }
+  code.inline {
+    background: var(--accent-soft); color: var(--ink); padding: 1px 6px; border-radius: 5px; font-size: 12.5px;
+  }
+  .req { color: var(--crit); font-weight: 700; }
+  .opt { color: var(--ink-3); }
+
+  .pill {
+    display: inline-block; font-family: "JetBrains Mono", monospace; font-weight: 700;
+    font-size: 12px; padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+  }
+  .pill.ok   { color: var(--ok);   background: var(--ok-bg); }
+  .pill.warn { color: var(--warn); background: var(--warn-bg); }
+  .pill.crit { color: var(--crit); background: var(--crit-bg); }
+
+  /* Code blocks */
+  .code {
+    position: relative; background: var(--code-bg); border: 1px solid var(--code-line);
+    border-radius: var(--radius); margin: 16px 0; overflow: hidden;
+  }
+  .code-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 14px; border-bottom: 1px solid var(--code-line);
+  }
+  .code-head .label {
+    font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: .1em;
+    text-transform: uppercase; color: #8296b4;
+  }
+  .copy {
+    font-family: "JetBrains Mono", monospace; font-size: 11.5px; color: #b9c8e0;
+    background: transparent; border: 1px solid var(--code-line); border-radius: 6px;
+    padding: 4px 10px; cursor: pointer; transition: all .14s ease;
+  }
+  .copy:hover { border-color: #3a5580; color: #eaf1fb; }
+  .copy.done { color: var(--ok); border-color: var(--ok); }
+  pre {
+    margin: 0; padding: 15px 16px; overflow-x: auto;
+    font-family: "JetBrains Mono", monospace; font-size: 13px; line-height: 1.65; color: var(--code-ink);
+  }
+  pre .k { color: #7cc7ff; }        /* keys */
+  pre .s { color: #a5e6b0; }        /* strings */
+  pre .n { color: #f0b979; }        /* numbers */
+  pre .c { color: #6b7a95; font-style: italic; } /* comments */
+
+  /* Callout */
+  .note {
+    border: 1px solid var(--line-strong); border-left: 3px solid var(--accent);
+    background: var(--panel); border-radius: 10px; padding: 14px 16px; margin: 18px 0;
+    font-size: 14.5px; color: var(--ink-2);
+  }
+  .note.warn { border-left-color: var(--warn); }
+  .note strong { color: var(--ink); }
+
+  ul.clean { margin: 14px 0; padding-left: 20px; color: var(--ink-2); }
+  ul.clean li { margin: 7px 0; }
+  ul.clean li strong { color: var(--ink); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
+    font-size: 13px; color: var(--ink-3);
+  }
+  footer .mono { font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="mast">
+    <p class="kicker">Travelgenix &middot; Integration reference</p>
+    <h1>Booking Confirmations API</h1>
+    <p class="sub">The endpoint the Travelify core platform calls when a booking should get its confirmation email. We check the request, queue it, and send the customer the client's own confirmation email with their booking documents attached. Server&#8209;to&#8209;server only.</p>
+  </header>
+
+  <div class="endpoint">
+    <span class="verb">POST</span>
+    <span class="url"><span class="host">https://widgets.travelify.io</span>/api/v1/booking-confirmations</span>
+  </div>
+  <p class="endpoint-note">The Vercel origin <code>https://tg-widgets.vercel.app/api/v1/booking-confirmations</code> serves the same endpoint if the alias domain is ever unavailable. There are no CORS headers by design: a browser must never call this. It works the same way as the <a href="/payment-reminders-api">Payment Reminders API</a>.</p>
+
+  <section>
+    <h2>Authentication</h2>
+    <p>Every request carries a shared secret in a header. It is the same key you already use for the Payment Reminders API, unless we give you a separate one. We never put it in this document.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Header</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td class="field">X-Api-Key</td><td class="rule">The shared secret, sent verbatim. Compared in constant time. A missing or wrong key returns <span class="pill crit">401</span> with an empty body and no detail.</td></tr>
+          <tr><td class="field">Content-Type</td><td class="rule"><code class="inline">application/json</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Request body</h2>
+    <p>A single JSON object with three fields, all <span class="req">required</span>. Everything the email shows comes from the live order, so nothing else is needed and any other field is ignored. A missing or invalid field rejects the whole request with <span class="pill crit">400</span> and a per&#8209;field message.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Rules</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="field">applicationId <span class="req">*</span></td>
+            <td class="type">integer</td>
+            <td class="rule">The client's <strong>Travelify App ID</strong>. Must be a JSON number (not a string) and a positive integer. Must match a client we already hold; an unknown id returns <span class="pill crit">400</span> <code class="inline">Unknown applicationId</code>.</td>
+          </tr>
+          <tr>
+            <td class="field">orderId <span class="req">*</span></td>
+            <td class="type">integer</td>
+            <td class="rule">The Travelify order id. JSON number, positive integer.</td>
+          </tr>
+          <tr>
+            <td class="field">orderKey <span class="req">*</span></td>
+            <td class="type">string</td>
+            <td class="rule">The order's 36&#8209;character GUID (e.g. <code class="inline">3f2504e0-4f89-41d3-9a0c-0305e82c3301</code>). We use it on our server to fetch the live order. It is never shown to the customer.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Responses</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Status</th><th>Body</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="pill ok">202</span></td>
+            <td class="mono" style="font-size:12.5px;color:var(--ink-2)">{ status: "accepted", reference, receivedAtUtc }</td>
+            <td class="rule">Queued. Store the <code class="inline">reference</code>: it is our handle on this confirmation.</td>
+          </tr>
+          <tr>
+            <td><span class="pill warn">409</span></td>
+            <td class="mono" style="font-size:12.5px;color:var(--ink-2)">{ status: "duplicate", reference }</td>
+            <td class="rule">This booking's confirmation is already queued or already sent. <code class="inline">reference</code> is the original one. Nothing new was queued. Do not retry.</td>
+          </tr>
+          <tr>
+            <td><span class="pill crit">400</span></td>
+            <td class="mono" style="font-size:12.5px;color:var(--ink-2)">{ error: "validation_failed", fields: {&hellip;} }</td>
+            <td class="rule"><code class="inline">fields</code> maps each bad field to a message. Also returned for an unknown <code class="inline">applicationId</code>. Fix and resend.</td>
+          </tr>
+          <tr>
+            <td><span class="pill crit">401</span></td>
+            <td class="mono" style="font-size:12.5px;color:var(--ink-2)">{}</td>
+            <td class="rule">Missing or wrong <code class="inline">X-Api-Key</code>.</td>
+          </tr>
+          <tr>
+            <td><span class="pill warn">429</span></td>
+            <td class="mono" style="font-size:12.5px;color:var(--ink-2)">{ error: "rate_limited" }</td>
+            <td class="rule">Over 2,000 requests in 15 minutes from one IP. Back off and retry.</td>
+          </tr>
+          <tr>
+            <td><span class="pill crit">500</span></td>
+            <td class="mono" style="font-size:12.5px;color:var(--ink-2)">{ error: "server_error" }</td>
+            <td class="rule">Something went wrong on our side and nothing was queued. Retry the same request.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">Treat <strong>202</strong> and <strong>409</strong> as success. Retry on <strong>500</strong> and <strong>429</strong>. Fix and resend on <strong>400</strong> and <strong>401</strong>.</div>
+  </section>
+
+  <section>
+    <h2>One booking, one email</h2>
+    <p>This is where the confirmation differs from the payment reminders. A reminder sends every time you ask; a confirmation never goes twice.</p>
+    <ul class="clean">
+      <li><strong>A repeat is safe.</strong> If the same booking is sent again (a retry after a timeout, say) you get <span class="pill warn">409</span> with the original reference, and the customer still gets one email.</li>
+      <li><strong>It counts both ways in.</strong> Some clients are connected through the Travelgenix <code class="inline">order.complete</code> webhook as well. A booking confirmed that way answers <span class="pill warn">409</span> here too, so a client connected both ways never sends two.</li>
+      <li><strong>A confirmation that did not go can be asked for again.</strong> If an earlier request was stopped before anything was sent (the client had not switched confirmations on yet, or the order could not be read), a new request for the same booking is accepted.</li>
+      <li><strong>To resend on purpose</strong>, for a customer who has lost the email, the customer can email it to themselves from their booking page. This endpoint will not send a second copy.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>What we send</h2>
+    <ul class="clean">
+      <li><strong>The client's own confirmation email</strong>, laid out the way they built it in their My&nbsp;Booking editor, from their own sender name and reply&#8209;to address.</li>
+      <li><strong>The booking documents</strong> as a PDF, and the client's ATOL certificate when they hold an ATOL and the booking includes a flight they sold.</li>
+      <li><strong>To the customer email on the order.</strong> We read the live order when we send, so the email always shows the booking as it stands.</li>
+      <li><strong>Usually within a minute.</strong> We start work as soon as we have answered you, and a sweep every five minutes picks up anything that did not go first time. A failed send is retried for several hours.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>When a request does not send</h2>
+    <p>These are accepted with <span class="pill ok">202</span>, recorded, and then stopped on our side without an email. None of them needs anything from you.</p>
+    <ul class="clean">
+      <li>The client has not switched <strong>Booking confirmation emails</strong> on in their My&nbsp;Booking editor, or has no My&nbsp;Booking widget.</li>
+      <li>The order has no customer email, no departure date or no booking reference.</li>
+      <li>The request is more than 12 hours old by the time we reach it. A confirmation is only useful while it is news.</li>
+      <li>The request is for the demo app <code class="inline">250</code>. It runs the whole chain, including reading the order, and stops just before sending, so it never emails anyone.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Example</h2>
+    <div class="code">
+      <div class="code-head"><span class="label">Request</span><button class="copy" type="button" data-copy="req">Copy</button></div>
+<pre id="req"><span class="c">POST https://widgets.travelify.io/api/v1/booking-confirmations</span>
+<span class="k">X-Api-Key</span>: &lt;shared secret&gt;
+<span class="k">Content-Type</span>: application/json
+
+{
+  <span class="k">"applicationId"</span>: <span class="n">295</span>,
+  <span class="k">"orderId"</span>: <span class="n">100482113</span>,
+  <span class="k">"orderKey"</span>: <span class="s">"3f2504e0-4f89-41d3-9a0c-0305e82c3301"</span>
+}</pre>
+    </div>
+    <div class="code">
+      <div class="code-head"><span class="label">Response &middot; 202 Accepted</span><button class="copy" type="button" data-copy="res">Copy</button></div>
+<pre id="res">{
+  <span class="k">"status"</span>: <span class="s">"accepted"</span>,
+  <span class="k">"reference"</span>: <span class="s">"bc_7f1c9b34-8a2e-4c1d-9f0a-2b6d5e4a1c88"</span>,
+  <span class="k">"receivedAtUtc"</span>: <span class="s">"2026-09-25T10:14:00.000Z"</span>
+}</pre>
+    </div>
+    <div class="code">
+      <div class="code-head"><span class="label">Response &middot; the same booking again &middot; 409 Conflict</span><button class="copy" type="button" data-copy="dup">Copy</button></div>
+<pre id="dup">{
+  <span class="k">"status"</span>: <span class="s">"duplicate"</span>,
+  <span class="k">"reference"</span>: <span class="s">"bc_7f1c9b34-8a2e-4c1d-9f0a-2b6d5e4a1c88"</span>
+}</pre>
+    </div>
+  </section>
+
+  <section>
+    <h2>Current status</h2>
+    <div class="note warn">
+      <strong>Nothing is emailed until a client is switched over.</strong> A client's customers only get this email once the client has switched confirmations on and we have switched sending on. Until then a valid request is still accepted, and the order is read, so you can see the whole chain work without a customer hearing from us. If you want to see a real email while testing, tell us the App ID you are testing with and we will send its emails to a test inbox rather than the customer.
+    </div>
+  </section>
+
+  <footer>
+    Travelgenix Widget Platform &middot; Booking Confirmations intake. Questions on this contract go to the Travelgenix team.
+    <div class="mono" style="margin-top:6px">POST /api/v1/booking-confirmations</div>
+  </footer>
+</div>
+
+<script>
+  document.querySelectorAll('.copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var el = document.getElementById(btn.getAttribute('data-copy'));
+      if (!el) return;
+      var text = el.innerText;
+      var done = function () {
+        var old = btn.textContent;
+        btn.textContent = 'Copied'; btn.classList.add('done');
+        setTimeout(function () { btn.textContent = old; btn.classList.remove('done'); }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {});
+      } else {
+        try {
+          var r = document.createRange(); r.selectNodeContents(el);
+          var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+          document.execCommand('copy'); s.removeAllRanges(); done();
+        } catch (e) { /* no-op */ }
+      }
+    });
+  });
+</script>
+</body>
+</html>

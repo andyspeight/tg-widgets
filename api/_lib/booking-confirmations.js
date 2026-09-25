@@ -51,6 +51,20 @@
  *    stays healthy and we can see the traffic, but they are marked Skipped and
  *    never email anyone. order.update is not implemented upstream anyway.
  *
+ *  - A SECOND WAY IN (25 Sep 2026). Andy: "We did an balance reminder API
+ *    endpoint and now we want to add similar functionality for sending the
+ *    booking confirmation. We need an endpoint that Darren can post to and then
+ *    we will send the email." POST /api/v1/booking-confirmations is that door:
+ *    the Travelify core asks us directly, with the same X-Api-Key scheme as
+ *    /api/v1/payment-reminders, instead of the per-client signed webhook. Its
+ *    rows land in the same table with EventType api.confirmation and are sent
+ *    by the same worker, through the same switches. The one-email rule holds
+ *    ACROSS both doors: both use the key applicationId|orderId|order.complete,
+ *    so a client wired up both ways still gets one confirmation. Unlike the
+ *    webhook, a direct request that finds only Skipped or Failed rows for the
+ *    booking is accepted, so the caller can ask again once whatever stopped the
+ *    first one (the client's switch, say) is put right.
+ *
  *  - OFF BY DEFAULT. BOOKING_CONFIRMATION_SEND_ENABLED must be set to true in
  *    Vercel before a single email leaves. Travelify still sends its own
  *    confirmation until each client is switched over there (Andy: "It will be
@@ -73,7 +87,15 @@ export const CONFIRMATIONS_TABLE = 'tbl9aTotenNERAKXa';
  * them in the Suppliers Directory without surprising anybody.
  */
 export const WEBHOOK_EVENTS = ['order.complete', 'order.update', 'order.cancel'];
-export const SENDING_EVENTS = ['order.complete'];
+
+/**
+ * The EventType a direct request from the Travelify core is recorded under
+ * (POST /api/v1/booking-confirmations). Ours, never a caller's value, so the
+ * table says at a glance which door a confirmation came through.
+ */
+export const API_EVENT = 'api.confirmation';
+
+export const SENDING_EVENTS = ['order.complete', API_EVENT];
 
 export const MAX_ATTEMPTS = 5;
 
@@ -116,6 +138,18 @@ export function verifyWebhookSignature(rawBody, headerValue, secret) {
   catch { return false; }
   if (provided.length !== expected.length) return false;
   return crypto.timingSafeEqual(provided, expected);
+}
+
+/**
+ * The X-Api-Key the direct confirmation request must carry. Its own key when
+ * BOOKING_CONFIRMATION_API_KEY is set; otherwise the key the same caller
+ * already holds for /api/v1/payment-reminders, so the Travelify core can start
+ * with the secret it has. Takes the application id for the same reason the
+ * reminder resolver does: per-application keys can arrive later without the
+ * endpoint changing.
+ */
+export function resolveConfirmationApiKey(_applicationId) {
+  return process.env.BOOKING_CONFIRMATION_API_KEY || process.env.PAYMENT_REMINDER_API_KEY || '';
 }
 
 // ── Validation ───────────────────────────────────────────────────────────────
@@ -177,6 +211,46 @@ export function validateWebhookPayload(body) {
       timestamp: str(b.timestamp, 40),
     },
   };
+}
+
+/**
+ * Validate a direct request from the Travelify core. The same three fields, and
+ * the same rules, as /api/v1/payment-reminders uses for an order: applicationId
+ * and orderId as JSON numbers, orderKey as the order's GUID. Everything else the
+ * email prints comes from the live order, so nothing else is asked for, and any
+ * other field is ignored.
+ */
+export function validateConfirmationRequest(body) {
+  const errors = {};
+  const b = (body && typeof body === 'object' && !Array.isArray(body)) ? body : {};
+  if (typeof b.applicationId !== 'number' || !isPositiveInt(b.applicationId, 2147483647)) {
+    errors.applicationId = 'applicationId must be a positive integer';
+  }
+  if (typeof b.orderId !== 'number' || !isPositiveInt(b.orderId, Number.MAX_SAFE_INTEGER)) {
+    errors.orderId = 'orderId must be a positive integer';
+  }
+  if (typeof b.orderKey !== 'string' || !GUID_RE.test(b.orderKey.trim())) {
+    errors.orderKey = 'orderKey must be a 36-character GUID';
+  }
+  if (Object.keys(errors).length) return { errors, value: null };
+  return {
+    errors,
+    value: {
+      eventType: API_EVENT,
+      applicationId: b.applicationId,
+      orderId: b.orderId,
+      orderKey: b.orderKey.trim(),
+    },
+  };
+}
+
+/**
+ * The one key that stands for "this booking's confirmation", whichever door it
+ * came through. The webhook's order.complete key, so the two doors answer each
+ * other's duplicates.
+ */
+export function confirmationKey(value) {
+  return buildIdempotencyKey({ applicationId: value.applicationId, orderId: value.orderId, eventType: 'order.complete' });
 }
 
 /**
@@ -282,6 +356,20 @@ export async function findByIdempotencyKey(idemKey) {
   return (data.records || [])[0] || null;
 }
 
+/**
+ * The confirmation for this booking that is still on its way or already sent:
+ * a row with the key that is Accepted, Fetched (waiting to send) or Sent. A
+ * Skipped or Failed row sent nothing, so it does not count, which is what lets
+ * a direct request try again.
+ */
+export async function findLiveConfirmation(idemKey) {
+  const formula = `AND({IdempotencyKey}='${sanitiseForFormula(idemKey)}',`
+    + `OR({Status}='Accepted',{Status}='Fetched',{Status}='Sent'))`;
+  const url = `${tableUrl()}?filterByFormula=${encodeURIComponent(formula)}&maxRecords=1`;
+  const data = await airtableRequest(url, { headers: airtableHeaders() }, 'duplicate-check');
+  return (data.records || [])[0] || null;
+}
+
 /** Queue one accepted notification. */
 export async function createConfirmationRecord({ reference, value, idemKey, receivedAt, clientName }) {
   const fields = {
@@ -303,7 +391,8 @@ export async function createConfirmationRecord({ reference, value, idemKey, rece
   const data = await airtableRequest(
     tableUrl(),
     // typecast so an event option added upstream materialises on first use.
-    // Safe: EventType is validated against WEBHOOK_EVENTS before it gets here.
+    // Safe: EventType is validated against WEBHOOK_EVENTS before it gets here,
+    // or is our own API_EVENT for a direct request.
     { method: 'POST', headers: airtableHeaders(), body: JSON.stringify({ records: [{ fields }], typecast: true }) },
     'record',
   );

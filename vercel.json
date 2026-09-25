@@ -26,6 +26,9 @@
     "api/v1/booking-webhook.js": {
       "maxDuration": 10
     },
+    "api/v1/booking-confirmations.js": {
+      "maxDuration": 10
+    },
     "api/cron/payment-reminders.js": {
       "maxDuration": 60
     },
@@ -203,6 +206,10 @@
     {
       "source": "/payment-reminders-api",
       "destination": "/payment-reminders-api.html"
+    },
+    {
+      "source": "/booking-confirmations-api",
+      "destination": "/booking-confirmations-api.html"
     },
     {
       "source": "/admin/traffic",
