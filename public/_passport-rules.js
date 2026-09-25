@@ -34,7 +34,8 @@
 //    - One emergency contact per flight's form (the spec's second revision,
 //      the same day): an email address and a telephone number, pre-filled from
 //      the primary passenger or else the booking, always sent with a save but
-//      never a reason to save on its own.
+//      never a reason to save on its own (Travelify: "you can't update one and
+//      not the other").
 //
 //  "Today" is the UTC calendar day, the same day the upsell rule uses
 //  (upsellStartsInTime in public/_order-upsell.js). Booking days are read from

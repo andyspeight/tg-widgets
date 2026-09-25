@@ -164,21 +164,20 @@ passport field names (`passports[].foidKeys`) and who has a number
 (`withPassportValue`), never a value. It is now a support check rather than an
 open question.
 
-The second revision (the emergency contact) adds two open points of its own,
-not yet answered:
+The second revision (the emergency contact) added two open points of its own.
+Andy put them to Darren the same day, and both answers matched what was built:
 
-5. **The shape of the primary passenger's `telephone`**, assumed to be
-   `{ countryPrefix, number }` (the sample order had none). The inspector's
-   `passports[].emergencyContact.primaryTelephone` lists the keys really there,
-   and says whether each email and number is filled, never a value. The code
-   reads the two keys in any case; if they differ, it is one line in
-   `ppContactExisting`.
-6. **Whether a contact change alone should be savable**, and if so whether
-   `updatepaxfoid` accepts an empty `Passengers` list. Until Travelify says, a
-   contact change alone is not sent, as the spec asks. If it becomes savable,
-   the two places that decide are `_submitPassport` in the widget and the
-   "nothing to save" line in `api/update-passport.js`, and the tests that pin
-   the current behaviour will say so.
+5. **The primary passenger's `telephone` is `{ countryPrefix, number }`**, the
+   keys `ppContactExisting` reads (in any case). Darren: "Yes". The inspector's
+   `passports[].emergencyContact.primaryTelephone` still lists the keys really
+   there on any booking, and whether each email and number is filled, never a
+   value.
+6. **A contact change alone is not savable.** Darren: "No, it is sent as part
+   of the passport updates, you can't update one and not the other". So the
+   contact always rides with a passenger change and never goes alone, which is
+   what `_submitPassport` in the widget and the "nothing to save" line in
+   `api/update-passport.js` do, and what the tests pin. Do not add a
+   contact-only save.
 
 ## Tests
 

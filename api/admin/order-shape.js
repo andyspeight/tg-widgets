@@ -200,9 +200,10 @@ function passportShape(items, order) {
 
 /**
  * The emergency contact behind the passport form (25 Sep 2026, the spec's
- * second revision). Its open point is the shape of the primary passenger's
- * telephone, assumed to be { countryPrefix, number }: this reports the key
- * names that are really there and whether each value is filled, never a value.
+ * second revision). Built to settle its open point, the shape of the primary
+ * passenger's telephone; Travelify confirmed the same day that it is
+ * { countryPrefix, number }, so this is now a support check. It reports the
+ * key names really there and whether each value is filled, never a value.
  */
 function contactShape(primary, order) {
   const has = (v) => v != null && String(v).trim() !== '';

@@ -184,9 +184,10 @@ export default async function handler(req, res) {
       if (!ppChanged(ppExisting(traveller), value)) continue;
       passengers.push(passengerBody(traveller, value));
     }
-    // A changed contact alone is not a save (the spec, pending Travelify on
-    // whether an empty Passengers list is accepted), so with nobody to send
-    // the answer is "nothing to save", whatever the contact says.
+    // A changed contact alone is not a save. Travelify confirmed it (Darren,
+    // 25 Sep 2026): the contact "is sent as part of the passport updates, you
+    // can't update one and not the other". So with nobody to send the answer
+    // is "nothing to save", whatever the contact says.
     if (!Object.keys(fields).length && !passengers.length) return fail(res, NOTHING, { nothing: true });
     if (sentContact && !contact) fields.contact = contactCheck.errors;
     if (Object.keys(fields).length) return fail(res, INVALID, { fields });
