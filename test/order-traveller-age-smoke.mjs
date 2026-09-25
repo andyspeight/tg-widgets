@@ -26,7 +26,10 @@
  * Run: node test/order-traveller-age-smoke.mjs   (npm run test:traveller-age)
  */
 import { readFileSync } from 'node:fs';
-import { partySize, upsellTiles, upsellUrl, orderLinkRef, CHILD_AGE_WHEN_UNKNOWN } from '../public/_order-upsell.js';
+import { partySize, upsellTiles as upsellTilesOn, upsellUrl, orderLinkRef, CHILD_AGE_WHEN_UNKNOWN } from '../public/_order-upsell.js';
+// Tiles for a search starting before today are dropped (25 Sep 2026); pin the
+// day so these dated fixtures do not stop producing a link as the dates pass.
+const upsellTiles = (order, opts = {}) => upsellTilesOn(order, { today: '2026-09-01', ...opts });
 import { aggregateTravellers } from '../api/_lib/travelify-items.js';
 
 let passed = 0, failed = 0;

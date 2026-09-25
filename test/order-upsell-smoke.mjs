@@ -21,9 +21,16 @@
  * Run: node test/order-upsell-smoke.mjs   (npm run test:order-upsell)
  */
 import { readFileSync } from 'node:fs';
-import { upsellTiles, upsellUrl, bookedProducts, tripShape, partySize, travellerList,
-  activeUpsells, allowedUpsells, orderLinkRef,
+import { upsellTiles as upsellTilesOn, upsellUrl, bookedProducts, tripShape, partySize, travellerList,
+  activeUpsells, allowedUpsells, orderLinkRef, upsellStartsInTime,
   UPSELL_PRODUCTS, UPSELL_CATALOGUE, AWAITING_PROOF, CHILD_AGE_WHEN_UNKNOWN } from '../public/_order-upsell.js';
+
+// A tile whose search would start before today is dropped (25 Sep 2026), and
+// these fixtures are dated late 2026 and 2027. So every call is pinned to a
+// day before all of them, or this suite would start failing as the fixture
+// dates pass. The rule itself is tested at the end, on days of its own.
+const FIXTURE_TODAY = '2026-09-01';
+const upsellTiles = (order, opts = {}) => upsellTilesOn(order, { today: FIXTURE_TODAY, ...opts });
 
 let passed = 0, failed = 0;
 const ok = (label, cond, detail) => {
@@ -540,6 +547,41 @@ console.log('\nthe order key');
   const shape = readFileSync(new URL('../api/admin/order-shape.js', import.meta.url), 'utf8');
   ok('the staff inspector reports upsellsActive, and only WHETHER a key is there',
     /upsellsActive:/.test(shape) && /hasKey:/.test(shape) && !/key: r\.key/.test(shape));
+}
+
+console.log('\nNo tile for a search that would start in the past (25 Sep 2026)\n');
+{
+  // Andy: "You should not show upsell options for dates in the past". Order
+  // 119221's ticket date had passed, and its Things to do link took him to a
+  // search a month ahead, Travelify's stand-in for a date it will not search.
+  ok('a search starting before today is not in time', !upsellStartsInTime({ fr: '2027-04-09' }, '2027-04-10'));
+  ok('one starting today is', upsellStartsInTime({ fr: '2027-04-10' }, '2027-04-10'));
+  ok('and one starting later is', upsellStartsInTime({ fr: '2027-04-11' }, '2027-04-10'));
+  ok('car hire\'s pickup clock is compared by its day, not its hour',
+    upsellStartsInTime({ fr: '2027-04-10T09:20' }, '2027-04-10') && !upsellStartsInTime({ fr: '2027-04-09T23:59' }, '2027-04-10'));
+  ok('a tile with no start day is never in time', !upsellStartsInTime({}, '2027-04-10') && !upsellStartsInTime({ fr: 'soon' }, '2027-04-10'));
+
+  const onDay = (today) => upsellTilesOn(PARIS, { today }).map((t) => t.product).sort().join(',');
+  ok('Paris the day before they fly: both tiles', onDay('2027-04-09') === 'CarRental,TicketsAttractions', onDay('2027-04-09'));
+  ok('Paris on the day they fly: still both, the searches start today', onDay('2027-04-10') === 'CarRental,TicketsAttractions', onDay('2027-04-10'));
+  ok('Paris once they are there: none, both searches would start in the past', onDay('2027-04-11') === '', onDay('2027-04-11'));
+  ok('Paris after they are home: none', onDay('2027-05-01') === '', onDay('2027-05-01'));
+
+  // With no day given, which is how the API calls it, the real clock decides.
+  const hotelOn = (day) => ({
+    upsellsActive: ALL_FOUR,
+    items: [{ product: 'Accommodation', startDate: day + 'T00:00:00',
+      accommodation: { name: 'Hotel X', location: { city: 'Paris', country: 'FR' }, units: [{ checkin: day, nights: 3 }] } }],
+    summary: { travellers: [{ type: 'Adult' }] },
+  });
+  ok('a stay that has been and gone offers nothing (order 119221\'s case)', upsellTilesOn(hotelOn('2020-06-01')).length === 0);
+  const ahead = upsellTilesOn(hotelOn('2099-06-01'));
+  ok('a stay still to come is offered', ahead.length === 1 && ahead[0].product === 'TicketsAttractions');
+  const u = new URL(upsellUrl(ahead[0], '474', REF));
+  ok('and its link searches the booking\'s own days, check-in to check-out, not a default',
+    u.searchParams.get('fr') === '2099-06-01' && u.searchParams.get('to') === '2099-06-04', u.search);
+  const api = readFileSync(new URL('../api/retrieve-order.js', import.meta.url), 'utf8');
+  ok('the API never pins the day, so the page and the email use the real clock', !/today\s*:/.test(api));
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed\n');
