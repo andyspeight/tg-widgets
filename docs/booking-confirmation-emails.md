@@ -88,8 +88,8 @@ Travelify core              us
 "confirm order N" ──POST──▶  /api/v1/booking-confirmations
   X-Api-Key                  key checked before anything else
   { applicationId,           validate; applicationId → client (400 if unknown)
-    orderId, orderKey }      this booking already queued or sent? → 409
-                             write one Airtable row (EventType api.confirmation)
+    orderId, orderKey,       write one Airtable row (EventType api.confirmation,
+    email? }                   the address in ToEmail)
                              → 202 { status, reference, receivedAtUtc }
                              kick the worker
                                     │
@@ -101,31 +101,46 @@ What it shares with the reminders, and where it differs:
 | | Payment reminders | Direct confirmation |
 |---|---|---|
 | Auth | `X-Api-Key` = `PAYMENT_REMINDER_API_KEY` | `X-Api-Key` = `BOOKING_CONFIRMATION_API_KEY`, or the reminder key while that is unset |
-| Body | applicationId, orderId, orderKey, reminderType, amountDue, currency, dueDate? | applicationId, orderId, orderKey |
+| Body | applicationId, orderId, orderKey, reminderType, amountDue, currency, dueDate? | applicationId, orderId, orderKey, email? |
+| Sent to | the customer email on the order | `email` when given, else the customer email on the order |
 | Unknown application | 400 `Unknown applicationId` | the same |
-| A repeat | sends again: the caller decides | **409 duplicate** with the original reference |
+| A repeat | sends again: the caller decides | sends again: the caller decides |
 | Answer | 202 accepted + reference | the same |
 
-**One email per booking, across both doors.** The rule in the library ("a
-confirmation must never go twice") holds for the direct request, and across the
-two routes: the direct request stores the webhook's own key,
-`applicationId|orderId|order.complete`, so a booking queued or sent by either
-door is a duplicate at the other. A client wired up both ways therefore still
-sends one email. The one difference: the webhook treats ANY earlier row as a
-duplicate, while the direct request only counts rows that are Accepted, Fetched
-or Sent (`findLiveConfirmation`). A Skipped or Failed row sent nothing, so the
-core can ask again once whatever stopped it (usually the client's switch) is put
-right.
+**Every request sends (Andy, 25 Sep 2026: "The email confirmation can get sent
+multiple times, but you have limited to only send once - this needs
+changing").** The first version answered a repeat 409; that is gone. Like the
+reminders, the caller decides when a confirmation is wanted, so every accepted
+request is a row and an email, a booking already confirmed included (a resend
+after an amendment, or for a customer who lost it). Each row still carries the
+webhook's own key, `applicationId|orderId|order.complete`, stored rather than
+enforced, for audit and for one reason: the WEBHOOK checks it, so a client wired
+up both ways does not get an automatic second email from the webhook for a
+booking the core has already asked us to confirm. The webhook's own
+one-per-push rule is unchanged.
+
+**The address to send to (Andy, 25 Sep 2026: "Darren will send you the email
+address to send to - so you need to accommodate that in the API as well").**
+The request takes an optional `email`, one plain address. It is stored in the
+`ToEmail` field (added to the table the same day) and the worker sends there;
+without it, the customer email on the order, as before. The booking is still
+looked up by the ORDER's email, departure date and reference, because that is
+what `/api/booking-email` finds it by, so an order with no customer email is
+still skipped. Order of precedence for the recipient: a test application's
+redirect (`BOOKING_CONFIRMATION_TEST_RECIPIENT`), then `ToEmail`, then the
+order's email. The send endpoint accepts a recipient other than the booking's
+customer only from our own worker (the internal key).
 
 **Everything after intake is unchanged.** `api.confirmation` is a sending event;
-the worker fetches the order, checks the global switch, the client's own switch,
-the demo application and the twelve-hour age limit exactly as for a webhook row,
-and sends through `/api/booking-email`.
+the worker fetches the order, checks the global switch, the client's own switch
+and the twelve-hour age limit exactly as for a webhook row, and sends through
+`/api/booking-email`.
 
-**Testing it end to end.** App 250 runs the chain and stops at Fetched (the rule
-above). To see a real email, put a Travelgenix-owned client's App ID in
-`BOOKING_CONFIRMATION_TEST_APP_IDS` and a test inbox in
-`BOOKING_CONFIRMATION_TEST_RECIPIENT`; the page tells Darren to ask us for this.
+**Testing it end to end: app 250 sends (25 Sep 2026).** Andy: "on App 250, set
+it up to send so we can do a full test - please make sure there are no other
+blocks to sending". A request or push for app 250 now runs the whole chain AND
+emails; see **Testing with the demo application (250)** below for the four
+blocks that were taken away.
 
 ## The five-second rule
 
@@ -143,32 +158,47 @@ Nothing emails anyone until BOTH are on:
 | `BOOKING_CONFIRMATION_SEND_ENABLED=true` | Vercel env | Andy, once |
 | Booking confirmation emails → On | the client's My Booking editor, Settings | per client |
 
+A test application (`BOOKING_CONFIRMATION_TEST_APP_IDS`) and the demo application
+(250) pass the first switch; the client's own switch applies to everyone.
+
 While the global switch is off, a real booking still arrives, is fetched and
 parked at **Fetched**. That is the state to watch during the changeover: it
 proves the whole chain works for a client without a single email leaving.
 
 ### Testing with the demo application (250)
 
-The demo application is the obvious place to make test bookings without
-touching a real client's account, so a demo push runs the whole chain —
-signature, client lookup, order fetch — and stops at **Fetched**. It never
-emails anyone, with the global switch on or off. Before 17 Sep 2026 it was
-marked Skipped at the door, before the order was fetched, which taught nobody
-anything.
+**App 250 sends (Andy, 25 Sep 2026: "on App 250, set it up to send so we can do
+a full test - please make sure there are no other blocks to sending").** A
+booking on the demo application, by the webhook or the direct request, is
+fetched AND emailed. Four things stood in the way, and all four are gone:
 
-**Two things to know about app 250 before testing with it:**
+1. **The worker stopped the demo application at Fetched** ("demo application
+   250: fetched, never emailed"), by design from 17 Sep. It is now treated as a
+   test application: it sends while `BOOKING_CONFIRMATION_SEND_ENABLED` is off,
+   and `BOOKING_CONFIRMATION_TEST_RECIPIENT`, when set, redirects it.
+2. **App 250 resolved to the wrong client.** It is held by **two** Clients rows,
+   "Travelgenix" (`recRCZl6afFpBFSW6`) and "Travel Demo Tes Ltd"
+   (`recZNjh3ME4gOg9F0`), with the same Travelify key.
+   `lookupClientCredentialsByAppId` takes the first, which is Travelgenix, and
+   only Travel Demo Tes Ltd has a My Booking widget (`My Booking test`,
+   `tgw_1777215362250_tlpgd4`), so every row stopped at "client has no My
+   Booking widget". The worker now falls through to another Clients row with the
+   same App ID that has one (`resolveSiblingClient`), preferring one whose
+   confirmations are on. That is general, not a special case for 250.
+3. **Confirmations were not switched on** for "My Booking test". Its saved
+   config now carries `confirmationEmail: { enabled: true, layout: [] }` (the
+   built-in layout), exactly what ticking the switch in its editor writes.
+4. **The send endpoint refused a redirected test.** `/api/booking-email` insists
+   the booking's customer is a recipient (the guard against a stranger with a
+   booking's lookup details mailing it to anyone), so a send to the test inbox
+   came back `recipient_mismatch`. Our own worker, identified by
+   `TG_INTERNAL_KEY`, may now send elsewhere; a public caller still may not.
 
-- It maps to **two** Clients rows, "Travelgenix" (`recRCZl6afFpBFSW6`) and
-  "Travel Demo Tes Ltd" (`recZNjh3ME4gOg9F0`). `lookupClientCredentialsByAppId`
-  takes the first row Airtable returns, so which one you get is not
-  deterministic.
-- Only **Travel Demo Tes Ltd** has a My Booking widget (`My Booking test`,
-  `tgw_1777215362250_tlpgd4`). If the lookup lands on Travelgenix, the row
-  stops at `skipped: client has no My Booking widget` — which is the worker
-  being right, not a fault.
-
-Give the Travelgenix client a My Booking widget too, or test with a real
-client's application id, and the ambiguity stops mattering.
+What is left is ordinary: the order must carry a customer email, a departure
+date and a booking reference, and the request must be processed within twelve
+hours. `test:booking-confirmation-api` drives app 250 exactly as it sits in
+Airtable (both Clients rows, the widget on the second) with the global switch
+off and no test settings, and it sends.
 
 For end-to-end testing before the global flip:
 
@@ -333,7 +363,7 @@ Magazine sees what those blocks do.
 | Command | What it holds |
 |---|---|
 | `npm run test:booking-webhook` | The published payloads, the signature, the endpoint's answers, and every reason the worker does or does not send. |
-| `npm run test:booking-confirmation-api` | The direct request: the key, the body, the 202, the one-email rule across both doors (including Skipped/Failed not blocking a new request), the worker sending it like a webhook row, and the published page matching the code. |
+| `npm run test:booking-confirmation-api` | The direct request: the key, the body, the 202, every repeat sending (with no lookup made to refuse it), the webhook still not adding a second email for a booking the core confirmed, the worker sending it like a webhook row, and the published page matching the code. |
 | `npm run test:confirmation-blocks` | The block vocabulary, the four starter styles, and that every block draws from a booking that has its material and draws nothing from one that does not. |
 | `npm run test:confirmation-layout` | The layout builder in the editor, driven for real. |
 | `npm run test:booking-email-drift` | One renderer for the preview and the send. |

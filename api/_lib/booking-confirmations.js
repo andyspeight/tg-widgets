@@ -35,11 +35,12 @@
  *    resolveWebhookSecret takes the application id so per-client keys can
  *    arrive later without the endpoint changing shape.
  *
- *  - ONE EMAIL PER BOOKING. Unlike the reminders, where the caller decides
- *    when a chase is warranted, a confirmation must never go twice. The
- *    natural key applicationId|orderId|eventtype is stored AND enforced: a
+ *  - ONE EMAIL PER WEBHOOK PUSH. A push repeated by the platform (a retry, a
+ *    duplicate delivery) must not become a second email, so for the webhook
+ *    the natural key applicationId|orderId|eventtype is stored AND enforced: a
  *    repeat is answered 200 (the push succeeded, we simply already have it)
- *    rather than queued again.
+ *    rather than queued again. This is the WEBHOOK's rule. The direct request
+ *    below is caller-driven and sends every time it is asked.
  *
  *  - PER CLIENT (Andy, same day: "Per client as the booking gets notified to
  *    us"). The client switches the confirmation on in their My Booking editor.
@@ -58,12 +59,14 @@
  *    the Travelify core asks us directly, with the same X-Api-Key scheme as
  *    /api/v1/payment-reminders, instead of the per-client signed webhook. Its
  *    rows land in the same table with EventType api.confirmation and are sent
- *    by the same worker, through the same switches. The one-email rule holds
- *    ACROSS both doors: both use the key applicationId|orderId|order.complete,
- *    so a client wired up both ways still gets one confirmation. Unlike the
- *    webhook, a direct request that finds only Skipped or Failed rows for the
- *    booking is accepted, so the caller can ask again once whatever stopped the
- *    first one (the client's switch, say) is put right.
+ *    by the same worker, through the same switches. Like the reminders, and
+ *    UNLIKE the webhook, it has no duplicate suppression (Andy, 25 Sep 2026:
+ *    "The email confirmation can get sent multiple times, but you have limited
+ *    to only send once - this needs changing"): the caller decides, and every
+ *    accepted request sends. Its rows carry the webhook's own key
+ *    (applicationId|orderId|order.complete), stored rather than enforced, so
+ *    the webhook still will not add an automatic confirmation for a booking
+ *    the core has already confirmed.
  *
  *  - OFF BY DEFAULT. BOOKING_CONFIRMATION_SEND_ENABLED must be set to true in
  *    Vercel before a single email leaves. Travelify still sends its own
@@ -214,11 +217,14 @@ export function validateWebhookPayload(body) {
 }
 
 /**
- * Validate a direct request from the Travelify core. The same three fields, and
- * the same rules, as /api/v1/payment-reminders uses for an order: applicationId
- * and orderId as JSON numbers, orderKey as the order's GUID. Everything else the
- * email prints comes from the live order, so nothing else is asked for, and any
- * other field is ignored.
+ * Validate a direct request from the Travelify core. The same three order
+ * fields, and the same rules, as /api/v1/payment-reminders: applicationId and
+ * orderId as JSON numbers, orderKey as the order's GUID. Plus `email`, the
+ * address to send to (Andy, 25 Sep 2026: "Darren will send you the email
+ * address to send to - so you need to accommodate that in the API as well").
+ * It is optional: without it the confirmation goes to the customer email on
+ * the order, as it always has. Everything the email prints still comes from
+ * the live order, and any other field is ignored.
  */
 export function validateConfirmationRequest(body) {
   const errors = {};
@@ -232,6 +238,11 @@ export function validateConfirmationRequest(body) {
   if (typeof b.orderKey !== 'string' || !GUID_RE.test(b.orderKey.trim())) {
     errors.orderKey = 'orderKey must be a 36-character GUID';
   }
+  let toEmail = '';
+  if (b.email !== undefined && b.email !== null && b.email !== '') {
+    toEmail = typeof b.email === 'string' ? b.email.trim().toLowerCase() : '';
+    if (!isRecipientEmail(toEmail)) errors.email = 'email must be a single valid email address';
+  }
   if (Object.keys(errors).length) return { errors, value: null };
   return {
     errors,
@@ -240,23 +251,32 @@ export function validateConfirmationRequest(body) {
       applicationId: b.applicationId,
       orderId: b.orderId,
       orderKey: b.orderKey.trim(),
+      toEmail,
     },
   };
 }
 
+/** One plain address: no display name, no list, no spaces, a dotted domain. */
+export function isRecipientEmail(v) {
+  return typeof v === 'string' && v.length <= 254
+    && /^[^@\s,;<>"]{1,64}@[^@\s,;<>"]+\.[^@\s,;<>".]{2,}$/.test(v);
+}
+
 /**
- * The one key that stands for "this booking's confirmation", whichever door it
- * came through. The webhook's order.complete key, so the two doors answer each
- * other's duplicates.
+ * The key that stands for "this booking's confirmation", whichever door it came
+ * through: the webhook's order.complete key. A direct request STORES it (for
+ * audit, and so the webhook's duplicate check sees a booking the core has
+ * already confirmed) and never checks it: the caller decides how often to send.
  */
 export function confirmationKey(value) {
   return buildIdempotencyKey({ applicationId: value.applicationId, orderId: value.orderId, eventType: 'order.complete' });
 }
 
 /**
- * One booking, one confirmation. Unlike a balance chase there is never a good
- * reason to send this twice, so the natural key is enforced rather than merely
- * recorded.
+ * One webhook push, one confirmation: the platform retrying a push must not
+ * email the customer twice, so for the webhook the natural key is enforced
+ * rather than merely recorded. (The direct request stores it and sends every
+ * time it is asked.)
  */
 export function buildIdempotencyKey(value) {
   return `${value.applicationId}|${value.orderId}|${value.eventType}`;
@@ -291,16 +311,64 @@ export function confirmationTestRecipient() {
 }
 
 /**
- * Travelgenix's published demo application, which must never email a real
- * person. ONE id, taken from the platform's own constant rather than from the
- * webhook documentation: the sample payloads on that page use appid 100, but
- * that is an illustration, not a registration. Treating 100 as a demo would
- * silently swallow every confirmation for a real client who happened to hold
- * that App ID.
+ * Travelgenix's published demo application. Since 25 Sep 2026 it SENDS, as a
+ * test application (the worker treats isDemoApp like isConfirmationTestApp:
+ * it sends while the global switch is off, and the test redirect applies).
+ * Before that it stopped at Fetched and never emailed anyone. ONE id, taken
+ * from the platform's own constant rather than from the webhook
+ * documentation: the sample payloads on that page use appid 100, but that is
+ * an illustration, not a registration.
  */
 export const DEMO_APP_IDS = [DEMO_APP_ID];
 export function isDemoApp(applicationId) {
   return DEMO_APP_IDS.includes(String(applicationId));
+}
+
+// ── An App ID held by more than one client ──────────────────────────────────
+
+const CLIENTS_TABLE = 'tblikekpaTKraMktZ';
+const CLIENT_FIELDS = {
+  appId:      'fldE9dL05t0x0S88w',   // Travelify App ID
+  apiKey:     'fld9X1nvAgy0sHQ4B',
+  clientName: 'fldx9CiWtSm5lX7MF',
+};
+
+/**
+ * The client the confirmation should go out as, when the one the App ID
+ * resolved to has no My Booking widget. lookupClientCredentialsByAppId takes
+ * the FIRST Clients row with the App ID, and app 250 is held by two:
+ * "Travelgenix", with no widget, and "Travel Demo Tes Ltd", with the
+ * "My Booking test" widget. They share the application and its key, so the
+ * other row is the same caller with somewhere to send from. Returns
+ * { application, branding } for the first other row whose My Booking widget
+ * has confirmations switched on (else the first with a widget), or null.
+ * `resolveBranding` is passed in (it lives in payment-reminders.js).
+ */
+export async function resolveSiblingClient(application, resolveBranding) {
+  const appId = String((application && application.appId) || '').trim();
+  if (!/^\d{1,10}$/.test(appId)) return null;
+  const formula = `{Travelify App ID}=${appId}`;
+  const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${CLIENTS_TABLE}`
+    + `?filterByFormula=${encodeURIComponent(formula)}&returnFieldsByFieldId=true&maxRecords=10`;
+  const data = await airtableRequest(url, { headers: airtableHeaders() }, 'sibling-clients');
+  let fallback = null;
+  for (const rec of (data.records || [])) {
+    if (!rec || rec.id === application.recordId) continue;
+    const f = rec.fields || {};
+    const apiKey = String(f[CLIENT_FIELDS.apiKey] || '').trim();
+    if (!apiKey) continue;
+    const sibling = {
+      appId: String(f[CLIENT_FIELDS.appId] || appId).trim(),
+      apiKey,
+      clientName: String(f[CLIENT_FIELDS.clientName] || '').trim(),
+      recordId: rec.id,
+    };
+    const branding = await resolveBranding(sibling);
+    if (!branding || !branding.widgetId) continue;
+    if (branding.confirmation && branding.confirmation.enabled) return { application: sibling, branding };
+    if (!fallback) fallback = { application: sibling, branding };
+  }
+  return fallback;
 }
 
 // ── Locks ────────────────────────────────────────────────────────────────────
@@ -356,20 +424,6 @@ export async function findByIdempotencyKey(idemKey) {
   return (data.records || [])[0] || null;
 }
 
-/**
- * The confirmation for this booking that is still on its way or already sent:
- * a row with the key that is Accepted, Fetched (waiting to send) or Sent. A
- * Skipped or Failed row sent nothing, so it does not count, which is what lets
- * a direct request try again.
- */
-export async function findLiveConfirmation(idemKey) {
-  const formula = `AND({IdempotencyKey}='${sanitiseForFormula(idemKey)}',`
-    + `OR({Status}='Accepted',{Status}='Fetched',{Status}='Sent'))`;
-  const url = `${tableUrl()}?filterByFormula=${encodeURIComponent(formula)}&maxRecords=1`;
-  const data = await airtableRequest(url, { headers: airtableHeaders() }, 'duplicate-check');
-  return (data.records || [])[0] || null;
-}
-
 /** Queue one accepted notification. */
 export async function createConfirmationRecord({ reference, value, idemKey, receivedAt, clientName }) {
   const fields = {
@@ -385,6 +439,10 @@ export async function createConfirmationRecord({ reference, value, idemKey, rece
     ClientName: clientName || '',
   };
   if (value.customerEmail) fields.CustomerEmail = value.customerEmail;
+  // The address the core asked us to send to (direct request only). Kept apart
+  // from CustomerEmail, which is the order's own address and what the booking
+  // is looked up by.
+  if (value.toEmail) fields.ToEmail = value.toEmail;
   if (value.currency) fields.Currency = value.currency;
   if (value.amount != null) fields.Amount = value.amount;
 

@@ -26,8 +26,17 @@
  * sends, the client has not switched confirmations on in their My Booking
  * editor, they have no My Booking widget, the push is older than twelve hours
  * (a queue drained late must not become a surprise email about a trip already
- * taken), the order carries no customer email, or the notification came from
- * a demo application. The reason lands in LastError prefixed "skipped:".
+ * taken), or the order carries no customer email, departure date or reference.
+ * The reason lands in LastError prefixed "skipped:".
+ *
+ * THE DEMO APPLICATION (250) SENDS (Andy, 25 Sep 2026: "on App 250, set it up
+ * to send so we can do a full test - please make sure there are no other
+ * blocks to sending"). It is treated as a test application: it sends while the
+ * global switch is off, and BOOKING_CONFIRMATION_TEST_RECIPIENT, when set,
+ * redirects it to a test inbox. From 16 to 25 Sep it stopped at Fetched and
+ * never emailed anyone. Its App ID is held by two Clients rows, and only one of
+ * them has a My Booking widget, so a client with no widget now falls through to
+ * another client holding the same App ID that has one (resolveSiblingClient).
  *
  * NOTHING SENDS until BOOKING_CONFIRMATION_SEND_ENABLED=true in Vercel. Until
  * then a row reaches Fetched and stops, which is the state to watch while each
@@ -62,6 +71,8 @@ import {
   isConfirmationTestApp,
   confirmationTestRecipient,
   isDemoApp,
+  resolveSiblingClient,
+  isRecipientEmail,
 } from '../_lib/booking-confirmations.js';
 
 const BATCH_SIZE = 25;
@@ -183,7 +194,19 @@ async function processRecord(record) {
   if (!orderRef) return suppress('order carries no booking reference');
 
   // ── 3. Has this client asked for confirmations? ───────────────────────────
-  const branding = await resolveClientBranding(application);
+  let branding = await resolveClientBranding(application);
+  if (!branding.widgetId) {
+    // An App ID held by more than one Clients row (app 250 is: "Travelgenix"
+    // and "Travel Demo Tes Ltd") resolves to whichever Airtable returns first,
+    // which may be the one without a My Booking widget. Same application, same
+    // credentials, so use the row that has one.
+    try {
+      const sibling = await resolveSiblingClient(application, resolveClientBranding);
+      if (sibling) { application = sibling.application; branding = sibling.branding; }
+    } catch (err) {
+      console.warn('[booking-confirmations:worker] sibling client lookup failed:', err.message);
+    }
+  }
   if (!branding.widgetId) {
     return suppress('client has no My Booking widget to send the confirmation from');
   }
@@ -191,24 +214,12 @@ async function processRecord(record) {
     return suppress('confirmation emails are not switched on for this client');
   }
 
-  // ── 4. The demo application, and the global switch ───────────────────────
-  // The demo app check sits HERE rather than at the top (17 Sep 2026). Its job
-  // is "never email a real person from the demo application", which is a
-  // decision about SENDING. Making it the first thing that happens meant a demo
-  // push was marked Skipped before the order was ever fetched, so wiring the
-  // demo application up taught you nothing — and the demo application is the
-  // obvious place to make test bookings without touching a real client's
-  // account. Everything above this line is exactly what a test needs to
-  // exercise: the signature, the client lookup, and the order fetch on the
-  // id + key path that no live call has ever confirmed.
-  if (isDemoApp(f.ApplicationId)) {
-    return stamp(
-      { Status: 'Fetched', Attempts: 0, LastError: `demo application ${f.ApplicationId}: fetched, never emailed`, CustomerEmail: customerEmail },
-      'fetched',
-    );
-  }
-
-  const isTestApp = isConfirmationTestApp(f.ApplicationId);
+  // ── 4. The global switch, which test applications and the demo pass ──────
+  // The demo application (250) is a test application (Andy, 25 Sep 2026: "on
+  // App 250, set it up to send so we can do a full test"), so a booking on it
+  // runs the whole chain AND sends, whatever the global switch says. Until
+  // then it stopped here at Fetched. The redirect below still applies to it.
+  const isTestApp = isConfirmationTestApp(f.ApplicationId) || isDemoApp(f.ApplicationId);
   if (!sendingEnabled() && !isTestApp) {
     return stamp(
       { Status: 'Fetched', Attempts: 0, LastError: '', CustomerEmail: customerEmail },
@@ -216,8 +227,13 @@ async function processRecord(record) {
     );
   }
 
+  // Who it goes to. A test application's redirect wins, so a test can never
+  // reach a real person; then the address the core asked for (ToEmail, the
+  // direct request's `email`, 25 Sep 2026); then the customer on the order.
+  // The booking is looked up by the ORDER's email whatever the recipient.
   const redirect = confirmationTestRecipient();
-  const recipient = (isTestApp && redirect) ? redirect : customerEmail;
+  const requested = String(f.ToEmail || '').trim().toLowerCase();
+  const recipient = (isTestApp && redirect) ? redirect : (isRecipientEmail(requested) ? requested : customerEmail);
 
   const guard = await claimSendGuard(reference);
   if (guard === 'exists') {
