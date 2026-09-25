@@ -452,7 +452,7 @@ console.log('\nThe page: the form in the flight card');
   ok('while the widget itself still has it', inst2.state.order.items.some((i) => i.passports));
 }
 
-console.log('\nThe staff inspector answers the spec\'s first open point, without the numbers');
+console.log('\nThe staff inspector reports the passport field names, without the numbers');
 {
   const { buildOrderShapeReport } = await import('../api/admin/order-shape.js');
   const withPass = Object.assign({}, DANIEL, { foidType: 'Passport', foidNumber: 'P9988776', FOIDIssuingCountry: 'IE', foidStartDate: '2019-05-01', foidExpiryDate: '2029-04-30' });
