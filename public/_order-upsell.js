@@ -463,17 +463,49 @@ export function partySize(order) {
   return { adults, children, infants, childAges, counted: true };
 }
 
+const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Today's calendar day, YYYY-MM-DD, read from the UTC fields like every booking day here. */
+function todayDay() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/**
+ * True when a tile's search starts today or later.
+ *
+ * Andy, 25 Sep 2026: "You should not show upsell options for dates in the
+ * past". Order 119221 (app 250) had a ticket whose date had passed. Its
+ * Things to do link takes the stay's own days as fr/to, nothing here moves a
+ * date, and the search Andy landed on was for a month ahead: Travelify's deep
+ * linker evidently puts its own default in place of a past date. A link that
+ * searches for something other than what the tile says is worse than no tile,
+ * so the tile goes.
+ *
+ * Compared by CALENDAR DAY. A tile's `fr` is a booking day (a stay's check-in)
+ * or an airport-local clock dressed as UTC (car hire's pickup), so its first
+ * ten characters are the day as the booking states it, and they are compared
+ * with today's day as a string. No Date is built from a booking value (the
+ * booking-dates rule in CLAUDE.md). A search starting today is still offered.
+ * A trip already under way has a start in the past and loses its tiles too.
+ */
+export function upsellStartsInTime(anchor, today) {
+  const start = String((anchor && anchor.fr) || '').slice(0, 10);
+  const day = (typeof today === 'string' && DAY_RE.test(today)) ? today : todayDay();
+  return DAY_RE.test(start) && start >= day;
+}
+
 /**
  * The tiles to show, in order.
  *
  * @param order  a trimmed Travelify order, as /api/retrieve-order returns it
- * @param opts   { enabled: { TicketsAttractions: true, ... } } from the widget config
+ * @param opts   { enabled: { TicketsAttractions: true, ... } } from the widget config,
+ *               and `today` (YYYY-MM-DD) for the tests; the API leaves it out
  *
  * A tile is offered only when Travelify's upsellsActive allows it (see
  * allowedUpsells), and then dropped when our link for it is unproved, when the
- * client has switched it off, or when the trip carries nothing to anchor its
- * search to. That last one is the difference between a useful link and a dead
- * one.
+ * client has switched it off, when the trip carries nothing to anchor its
+ * search to, or when that search would start before today (upsellStartsInTime).
+ * The last two are the difference between a useful link and a dead one.
  */
 export function upsellTiles(order, opts = {}) {
   if (!order) return [];
@@ -488,6 +520,7 @@ export function upsellTiles(order, opts = {}) {
   if (!allowed.length) return [];
   const trip = tripShape(order);
   const party = partySize(order);
+  const today = (opts && typeof opts.today === 'string' && DAY_RE.test(opts.today)) ? opts.today : todayDay();
 
   // Attractions and transfers work off the stay when there is one and the
   // flight when there is not, so a flight-only booking still gets offers.
@@ -554,6 +587,7 @@ export function upsellTiles(order, opts = {}) {
     }
 
     if (!anchor) continue;   // nothing to search for beats a link that dead-ends
+    if (!upsellStartsInTime(anchor, today)) continue;
     tiles.push({
       product,
       st: SEARCH_TYPE[product],

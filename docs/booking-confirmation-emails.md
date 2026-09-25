@@ -335,6 +335,16 @@ of that, block by block.
   checks. A client who had already SAVED their own layout keeps it exactly as
   they arranged it; the block is in their palette to add.
 
+  **No tile for a search that would start in the past** (Andy, 25 Sep 2026: "You
+  should not show upsell options for dates in the past"). Order 119221 on app
+  250 had a ticket whose date had gone. Its Things to do link carried the stay's
+  own days, and the search Andy landed on was for a month ahead: Travelify's
+  deep linker puts its own default in place of a past date. `upsellTiles` now
+  drops any tile whose `fr` falls before today, compared as a calendar day
+  (`upsellStartsInTime`), so the page and the email lose it together. A search
+  starting today is still offered. A trip already under way loses its tiles too,
+  because its searches would start on days that have passed.
+
 ### Where the destination pack comes from
 
 `api/_lib/booking-destination.js` resolves it on the server. A Travelify order
