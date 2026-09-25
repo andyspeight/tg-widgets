@@ -7145,7 +7145,14 @@
         this._pp[id] = { open: false, values: {}, errors: {}, msg: null, busy: false, saved: true };
         this._fireEvent('passport-saved', { itemId: String(id), count: data.saved || 0 });
         const refreshed = await this._refreshOrder();
-        if (!refreshed) paint();
+        if (!refreshed) {
+          // The save landed but the booking could not be read back: still
+          // clear what was typed out of the page, back to what it was drawn with.
+          const live = this._ppSection(id);
+          const f = live && live.querySelector('[data-tgm-pp-form]');
+          if (f) f.reset();
+          paint();
+        }
         return;
       }
       if (status === 429) st.msg = { kind: 'error', text: this.t('passportRateLimited') };

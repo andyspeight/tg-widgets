@@ -403,6 +403,18 @@ console.log('\nThe page: the form in the flight card');
     && JSON.stringify(w.inst._pp).indexOf('AB123456') === -1 && JSON.stringify(w.inst._pp).indexOf('ab123456') === -1);
   ok('nothing about a passport was ever written to browser storage', !w.stored.some((x) => /AB123456|ab123456|P9988776|passport/i.test(x)), w.stored.join(' | '));
 
+  // A save that lands while the read-back fails still clears what was typed.
+  const lost = await mount(await orderFor([DANIEL]));
+  lost.$('[data-tgm-pp-open]').click();
+  lost.set(0, 'number', 'ZZ998877'); lost.set(0, 'country', 'GB'); lost.set(0, 'issued', '2020-10-01'); lost.set(0, 'expires', day(60));
+  lost.answer({ success: true, saved: 1 });
+  lost.refreshWith(null);   // the re-fetch answers without a booking
+  await lost.save();
+  await sleep(20);
+  ok('a save whose read-back fails still confirms, and clears the typed number from the page',
+    /Passport details saved/.test(lost.$('[data-tgm-pp-result]').textContent) && lost.$('[data-pp-f="number"]').value === ''
+    && JSON.stringify(lost.inst._pp).indexOf('ZZ998877') === -1);
+
   const pre = await mount(await orderFor([withPass]));
   pre.$('[data-tgm-pp-open]').click();
   ok('[9] a passport on file opens the form pre-filled', pre.$('[data-pp-f="number"]').value === 'P9988776' && pre.$('[data-pp-f="country"]').value === 'IE'
