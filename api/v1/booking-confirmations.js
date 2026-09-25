@@ -44,6 +44,7 @@
 
 import crypto from 'node:crypto';
 import { rateLimit, getClientIp } from '../_lib/travelify.js';
+import { afterResponse } from '../_lib/after-response.js';
 import { resolveApplication, timingSafeMatch } from '../_lib/payment-reminders.js';
 import {
   resolveConfirmationApiKey,
@@ -151,6 +152,8 @@ export default async function handler(req, res) {
   });
 
   // The 202 is already on the wire; this nudge costs the caller nothing.
-  await kickWorker();
+  // Held open with waitUntil: without it Vercel freezes the function once the
+  // answer has gone, and the nudge never left (25 Sep 2026).
+  await afterResponse(kickWorker());
   return undefined;
 }

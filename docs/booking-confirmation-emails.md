@@ -69,6 +69,14 @@ the same email a customer gets when they press Email, so the worker works out
 the three details that endpoint needs and calls it. One send path, whoever
 asked for it.
 
+**The kick is held open with `waitUntil` (25 Sep 2026).** Vercel freezes a
+function once it has answered, so the kick, which runs after the answer, never
+left until then: every booking waited for the five-minute sweep. Darren's first
+real request was accepted at 10:51:43 UTC and sent at 10:55:01, and in no log
+did a kick ever arrive. All three intake endpoints (this webhook, the direct
+request and the payment reminders) now hand the kick to `waitUntil` through
+`api/_lib/after-response.js`. Guarded in `test:booking-confirmation-api`.
+
 **Why the order is fetched first.** The webhook carries an order id and a
 security key but no departure date, and every booking lookup we have takes
 email + departure date + reference. The fetch is where those come from.
