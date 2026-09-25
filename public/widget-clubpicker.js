@@ -1,5 +1,5 @@
 /**
- * Travelgenix Club Picker Widget v1.0.0
+ * Travelgenix Club Picker Widget v1.2.0
  * Self-contained, embeddable widget
  * Zero dependencies — works on any website via a single script tag
  *
@@ -15,6 +15,19 @@
  * Generated monograms on a colour hashed from the entity key, not club crests.
  * Real crests are licensed artwork the feed does not carry. The hash matches
  * the server's, so a club is the same colour in every widget and on every page.
+ * The monogram and the name carry translate="no" (25 Sep 2026): on a Swedish
+ * client's page a browser translation turned Manchester City's MC into
+ * "Motorcycle", MC being the Swedish short form of motorcykel.
+ *
+ * FEATURED CLUBS (25 Sep 2026)
+ * Andy: a client had built their own row of buttons for their six biggest
+ * clubs above this grid. `featured` lists the clubs a client wants first, in
+ * their own order, under their own heading ("Featured clubs" unless they say
+ * otherwise), and takes them out of the grid below so no club appears twice.
+ * Each section can be drawn as the usual badge tiles or as BANNERS, the
+ * client's own design: a dark photo card, the name in white, a white round
+ * arrow. A banner's photo is the client's own (featured[].image, then
+ * photos[], then bannerImage); without one it is a plain card in bannerColor.
  *
  * WHY THIS IS NOT A SETTING ON EVENT TICKETS
  * It is a navigation shape, not a list: two states, and the second state is the
@@ -54,7 +67,7 @@
   }
 
 
-  var VERSION = '1.1.0';
+  var VERSION = '1.2.0';
 
   function resolveOrigin() {
     if (typeof window === 'undefined') return '';
@@ -105,7 +118,20 @@
     radius: 12,
     fontFamily: '',
     appId: '',
+    // Featured clubs (25 Sep 2026). See the header.
+    featured: [],              // [{ key, name, image }] in the client's order
+    featuredHeading: '',       // '' = "Featured clubs" (artists, venues)
+    restHeading: '',           // optional heading over the rest once some are featured
+    featuredStyle: 'banner',   // banner | tile
+    gridStyle: 'tile',         // tile | banner, for the rest of the grid
+    photos: [],                // [{ key, name, image }] banner photos for other clubs
+    bannerImage: '',           // the photo behind any banner without its own
+    bannerColor: '#0B1330',
+    bannerTextColor: '#FFFFFF',
   };
+
+  var MAX_FEATURED = 12;
+  var MAX_PHOTOS = 60;
 
   var IC = {
     clock: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM12 6v6l4 2',
@@ -117,6 +143,7 @@
     cal: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z',
     back: 'M19 12H5M12 19l-7-7 7-7',
     chev: 'M6 9l6 6 6-6',
+    arrow: 'M7 17 17 7M7 7h10v10',
   };
 
   function icon(name, cls) {
@@ -591,6 +618,62 @@
     return isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback;
   }
 
+  /**
+   * A banner photo: https only, one URL, nothing that could close the src
+   * attribute or be read as anything but an address. Anything else is dropped
+   * and the banner falls back to its colour.
+   */
+  function safeImage(u) {
+    var s = String(u == null ? '' : u).trim();
+    return s.length <= 1000 && /^https:\/\/[^\s"'<>()\\]+$/i.test(s) ? s : '';
+  }
+
+  /**
+   * Featured and photo rows from the config: a feed key each, no repeats, a
+   * name to show before the grid has loaded, and a safe photo or none.
+   */
+  function cleanRows(rows, max) {
+    var out = [];
+    var seen = {};
+    if (!Array.isArray(rows)) return out;
+    for (var i = 0; i < rows.length && out.length < max; i++) {
+      var r = rows[i] || {};
+      var key = String(r.key || '').trim().toLowerCase();
+      if (!/^[a-z0-9-]{1,80}$/.test(key) || seen[key]) continue;
+      seen[key] = 1;
+      out.push({ key: key, name: String(r.name || '').trim().slice(0, 80), image: safeImage(r.image) });
+    }
+    return out;
+  }
+
+  /**
+   * The feed's own monogram and hue, for a featured club the grid has not
+   * brought back (still loading, or beyond its limit). Same rules as
+   * initialsFor and hueFor in api/_lib/events/event-indexes.js, so the badge
+   * does not change when the grid arrives.
+   */
+  function initialsFor(name) {
+    var words = String(name || '').replace(/\([^)]*\)/g, ' ').split(/[\s.]+/)
+      .filter(function (w) { return w && !/^(fc|afc|cf|sc|ac|the|of|and|&)$/i.test(w); });
+    if (!words.length) return '??';
+    if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+    return (words[0][0] + words[1][0]).toUpperCase();
+  }
+  function hueFor(key) {
+    var h = 0x811c9dc5;
+    var s = String(key);
+    for (var i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h % 360;
+  }
+
+  /** The featured section's standard heading for this kind of grid. */
+  function featuredHeadingFor(gridOf) {
+    return gridOf === 'performer' ? 'Featured artists' : gridOf === 'venue' ? 'Featured venues' : 'Featured clubs';
+  }
+
   var DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -641,6 +724,13 @@
     var grid = cols
       ? 'repeat(' + cols + ',minmax(0,1fr))'
       : 'repeat(auto-fill,minmax(190px,1fr))';
+    // Banners sit three to a row at most, as on the client's own page, and
+    // fewer as the column narrows. The Columns setting overrides it here too.
+    var bannerGrid = cols
+      ? 'repeat(' + cols + ',minmax(0,1fr))'
+      : 'repeat(auto-fill,minmax(max(240px,calc((100% - 40px) / 3)),1fr))';
+    var bnBg = safeColour(cfg.bannerColor, DEFAULTS.bannerColor);
+    var bnInk = safeColour(cfg.bannerTextColor, DEFAULTS.bannerTextColor);
 
     return ':host{all:initial;display:block;width:100%;min-width:0;}:host::before{content:"";display:block;width:280px;max-width:100%;height:0;}'
       // container-type makes the breakpoint below a @container query rather than
@@ -653,6 +743,7 @@
       + '--tgcp-bg:#FFFFFF;--tgcp-bg2:#F8FAFC;--tgcp-bg3:#F1F5F9;--tgcp-border:#E2E8F0;'
       + '--tgcp-text:#0F172A;--tgcp-sub:#475569;--tgcp-mute:#64748B;--tgcp-on-accent:' + btnText + ';'
       + '--tgcp-badge-l:92%;--tgcp-badge-t:34%;'
+      + '--tgcp-bn-bg:' + bnBg + ';--tgcp-bn-ink:' + bnInk + ';'
       + 'font-size:15px;line-height:1.6;color:var(--tgcp-text);box-sizing:border-box;'
       + '-webkit-font-smoothing:antialiased;}'
       + '.tgcp-root *,.tgcp-root *::before,.tgcp-root *::after{box-sizing:border-box;}'
@@ -700,6 +791,40 @@
       + '.tgcp-tname{display:block;font-size:14.5px;font-weight:600;line-height:1.3;overflow-wrap:anywhere;}'
       + '.tgcp-tmeta{display:block;font-size:12px;color:var(--tgcp-mute);'
       + 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'
+
+      // Featured clubs, and the heading over the rest once there are some.
+      + '.tgcp-feat{margin:0 0 26px;}'
+      + '.tgcp-sh{margin:0 0 12px;font-size:18px;font-weight:700;line-height:1.3;letter-spacing:-.01em;}'
+
+      // Banners: the client's own button design (25 Sep 2026). A dark card,
+      // their photo under a wash of the banner colour, the name in white and a
+      // white round arrow on the right. The photo is an <img> rather than a CSS
+      // url(), so a config value is only ever an attribute, never a stylesheet.
+      + '.tgcp-bgrid{display:grid;grid-template-columns:' + bannerGrid + ';gap:20px;}'
+      + '.tgcp-banner{position:relative;isolation:isolate;overflow:hidden;min-width:0;width:100%;min-height:80px;'
+      + 'display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 20px;'
+      + 'border:0;border-radius:calc(var(--tgcp-radius) + 4px);color:var(--tgcp-bn-ink);'
+      + 'background:radial-gradient(130% 160% at 88% 0%,color-mix(in srgb,var(--tgcp-bn-bg) 78%,#fff) 0%,var(--tgcp-bn-bg) 62%);'
+      + 'font:inherit;text-align:left;cursor:pointer;'
+      + 'transition:transform .22s cubic-bezier(.2,.7,.2,1),box-shadow .22s ease-out;}'
+      + '.tgcp-banner.has-img{background:var(--tgcp-bn-bg);}'
+      + '.tgcp-banner-img{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover;'
+      + 'transition:transform .6s cubic-bezier(.2,.7,.2,1);}'
+      + '.tgcp-banner.has-img::before{content:"";position:absolute;inset:0;z-index:-1;'
+      + 'background:linear-gradient(90deg,color-mix(in srgb,var(--tgcp-bn-bg) 86%,transparent) 0%,'
+      + 'color-mix(in srgb,var(--tgcp-bn-bg) 64%,transparent) 55%,color-mix(in srgb,var(--tgcp-bn-bg) 80%,transparent) 100%);}'
+      + '.tgcp-banner-name{min-width:0;font-size:20px;font-weight:500;line-height:1.25;letter-spacing:-.01em;'
+      + 'overflow-wrap:anywhere;}'
+      + '.tgcp-banner-go{flex:none;display:inline-flex;align-items:center;justify-content:center;'
+      + 'width:40px;height:40px;border-radius:50%;background:var(--tgcp-bn-ink);color:var(--tgcp-bn-bg);'
+      + 'transition:transform .22s cubic-bezier(.2,.7,.2,1);}'
+      + '.tgcp-banner-go svg{width:18px;height:18px;stroke-width:2.2;}'
+      + '.tgcp-banner:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(8,12,32,.22);}'
+      + '.tgcp-banner:hover .tgcp-banner-img{transform:scale(1.04);}'
+      + '.tgcp-banner:hover .tgcp-banner-go{transform:translate(2px,-2px);}'
+      + '.tgcp-banner:active{transform:translateY(0) scale(.99);}'
+      + '.tgcp-banner:focus-visible{outline:2px solid var(--tgcp-accent);outline-offset:3px;}'
+      + '.tgcp-banner[aria-expanded="true"]{box-shadow:0 0 0 3px var(--tgcp-accent);}'
 
       // The expanded panel. It sits under the grid rather than replacing it, so
       // a visitor can compare clubs without losing their place.
@@ -769,7 +894,9 @@
       + '@keyframes tgcp-sh{0%{background-position:200% 0}100%{background-position:-200% 0}}'
 
       + '@container (max-width:520px){'
-      + '.tgcp-grid{grid-template-columns:minmax(0,1fr);}'
+      + '.tgcp-grid,.tgcp-bgrid{grid-template-columns:minmax(0,1fr);}'
+      + '.tgcp-bgrid{gap:12px;}.tgcp-banner{min-height:68px;padding:12px 16px;}'
+      + '.tgcp-banner-name{font-size:18px;}.tgcp-banner-go{width:36px;height:36px;}'
       + '.tgcp-row{grid-template-columns:48px minmax(0,1fr);row-gap:9px;}'
       + '.tgcp-actions{grid-column:1/-1;}.tgcp-btn{flex:1 1 auto;}}'
       + '@media (prefers-reduced-motion:reduce){.tgcp-root *{animation-duration:.01ms !important;'
@@ -917,12 +1044,13 @@
     var open = this.openKey === x.key;
     var h = typeof x.hue === 'number' ? x.hue : 210;
     var badge = c.showBadges
-      ? '<span class="tgcp-badge" aria-hidden="true" style="background:hsl(' + h + ' 48% var(--tgcp-badge-l));'
+      ? '<span class="tgcp-badge" translate="no" aria-hidden="true" style="background:hsl(' + h + ' 48% var(--tgcp-badge-l));'
         + 'color:hsl(' + h + ' 62% var(--tgcp-badge-t))">' + esc(x.initials || '??') + '</span>'
       : '';
 
     var meta = [];
-    if (c.showCounts) {
+    // A featured club the grid has not brought back has no numbers to show.
+    if (c.showCounts && x.known !== false) {
       var n = c.gridOf === 'performer' ? x.events + ' dates'
         : c.gridOf === 'venue' ? x.events + ' events'
           : (x.home + x.away) + ' games';
@@ -936,9 +1064,66 @@
       + ' aria-controls="tgcp-panel"'
       + ' title="' + esc(x.name + (meta.length ? ' — ' + meta.join(' · ') : '')) + '">'
       + badge
-      + '<span class="tgcp-tbody"><span class="tgcp-tname">' + esc(x.name) + '</span>'
+      + '<span class="tgcp-tbody"><span class="tgcp-tname" translate="no">' + esc(x.name) + '</span>'
       + (meta.length ? '<span class="tgcp-tmeta">' + esc(meta.join(' · ')) + '</span>' : '')
       + '</span></button>';
+  };
+
+  /** A club as a banner: the client's own design. */
+  TGClubPickerWidget.prototype._bannerHtml = function (x, image, lazy) {
+    var open = this.openKey === x.key;
+    return '<button class="tgcp-banner' + (image ? ' has-img' : '') + '" type="button" data-key="' + esc(x.key) + '"'
+      + ' aria-expanded="' + (open ? 'true' : 'false') + '" aria-controls="tgcp-panel">'
+      + (image ? '<img class="tgcp-banner-img" src="' + esc(image) + '" alt=""' + (lazy ? ' loading="lazy"' : '') + '>' : '')
+      + '<span class="tgcp-banner-name" translate="no">' + esc(x.name) + '</span>'
+      + '<span class="tgcp-banner-go" aria-hidden="true">' + icon('arrow') + '</span>'
+      + '</button>';
+  };
+
+  /** A set of clubs in the chosen style: badge tiles, or banners. */
+  TGClubPickerWidget.prototype._cardsHtml = function (list, style, lazy) {
+    var self = this;
+    if (style === 'banner') {
+      return '<div class="tgcp-bgrid">' + list.map(function (x) {
+        return self._bannerHtml(x, self._photoFor(x), lazy);
+      }).join('') + '</div>';
+    }
+    return '<div class="tgcp-grid">' + list.map(function (x) { return self._tileHtml(x); }).join('') + '</div>';
+  };
+
+  TGClubPickerWidget.prototype._entity = function (key) {
+    var list = this.entities || [];
+    for (var i = 0; i < list.length; i++) if (list[i].key === key) return list[i];
+    return null;
+  };
+
+  /**
+   * The featured clubs, in the client's order. Each takes the feed's own
+   * details once the grid has them, and the name the editor saved until then,
+   * so the section is there from the first paint rather than after the fetch.
+   */
+  TGClubPickerWidget.prototype._featured = function () {
+    var self = this;
+    return cleanRows(this.cfg.featured, MAX_FEATURED).map(function (r) {
+      var x = self._entity(r.key);
+      var name = (x && x.name) || r.name || r.key;
+      return Object.assign({ home: 0, away: 0, events: 0 }, x || {}, {
+        key: r.key,
+        name: name,
+        initials: (x && x.initials) || initialsFor(name),
+        hue: (x && typeof x.hue === 'number') ? x.hue : hueFor(r.key),
+        image: r.image,
+        known: !!x,
+      });
+    });
+  };
+
+  /** A banner's photo: the club's own, then the shared one, then none. */
+  TGClubPickerWidget.prototype._photoFor = function (x) {
+    if (x && x.image) return x.image;
+    var rows = cleanRows(this.cfg.photos, MAX_PHOTOS);
+    for (var i = 0; i < rows.length; i++) if (rows[i].key === x.key && rows[i].image) return rows[i].image;
+    return safeImage(this.cfg.bannerImage);
   };
 
   TGClubPickerWidget.prototype._rowHtml = function (ev) {
@@ -1104,6 +1289,24 @@
         + '</div>';
     }
 
+    var featured = this._featured();
+    var featKeys = {};
+    for (var fi = 0; fi < featured.length; fi++) featKeys[featured[fi].key] = 1;
+    var featHtml = '';
+    if (featured.length) {
+      var fh = (typeof c.featuredHeading === 'string' && c.featuredHeading.trim())
+        ? c.featuredHeading.trim().slice(0, 90) : featuredHeadingFor(c.gridOf);
+      featHtml = '<section class="tgcp-feat" aria-label="' + esc(fh) + '">'
+        + '<h3 class="tgcp-sh">' + esc(fh) + '</h3>'
+        + this._cardsHtml(featured, c.featuredStyle === 'tile' ? 'tile' : 'banner', false)
+        + '</section>';
+    }
+    // The rest: every club not already featured, so none appears twice.
+    var rest = (this.entities || []).filter(function (x) { return !featKeys[x.key]; });
+    var restStyle = c.gridStyle === 'banner' ? 'banner' : 'tile';
+    var restHead = featured.length && typeof c.restHeading === 'string' && c.restHeading.trim()
+      ? '<h3 class="tgcp-sh">' + esc(c.restHeading.trim().slice(0, 90)) + '</h3>' : '';
+
     var grid;
     if (this.gridState === 'loading') {
       grid = '<div class="tgcp-grid" aria-busy="true">'
@@ -1116,25 +1319,27 @@
       grid = '<div class="tgcp-state" role="status">' + icon('cal')
         + '<p>Could not load the list. Please try again shortly.</p></div>';
     } else if (!this.entities || !this.entities.length) {
-      grid = '<div class="tgcp-state" role="status">' + icon('cal')
+      grid = featured.length ? '' : '<div class="tgcp-state" role="status">' + icon('cal')
         + '<p>Nothing to show here just yet.</p></div>';
     } else {
-      var self = this;
       var mode = (c.selectorMode === 'dropdown' || c.selectorMode === 'both') ? c.selectorMode : 'grid';
-      var gridHtml = '<div class="tgcp-grid">' + this.entities.map(function (x) { return self._tileHtml(x); }).join('') + '</div>';
+      // The dropdown keeps every club, featured ones included: it is where a
+      // visitor looks a club up, and a club missing from it reads as absent.
+      var gridHtml = rest.length ? this._cardsHtml(rest, restStyle, true) : '';
       if (mode === 'dropdown') {
         // The dropdown's placeholder option carries the prompt, so no paragraph.
         grid = this._selectHtml();
       } else if (mode === 'both') {
         grid = this._selectHtml() + gridHtml;
       } else {
-        grid = (c.prompt ? '<p class="tgcp-prompt">' + esc(c.prompt) + '</p>' : '') + gridHtml;
+        grid = gridHtml ? (c.prompt ? '<p class="tgcp-prompt">' + esc(c.prompt) + '</p>' : '') + gridHtml : '';
       }
     }
+    if (!grid) restHead = '';
 
     this.shadow.innerHTML = '<style>' + styles(c) + FLY_CSS + STAY_CSS + '</style>'
       + '<div class="tgcp-root" data-theme="' + esc(this._theme()) + '">'
-      + head + grid + this._panelHtml() + '</div>';
+      + head + featHtml + restHead + grid + this._panelHtml() + '</div>';
 
     this._bind();
   };
@@ -1145,9 +1350,10 @@
   // update() per keystroke and a focus grab would steal the cursor).
   TGClubPickerWidget.prototype._openEntity = function (key) {
     this._side = 'all';           // a fresh club starts on "All games"
-    var found = null;
-    for (var j = 0; j < (this.entities || []).length; j++) {
-      if (this.entities[j].key === key) { found = this.entities[j]; break; }
+    var found = this._entity(key);
+    if (!found) {
+      var fl = this._featured();
+      for (var j = 0; j < fl.length; j++) if (fl[j].key === key) { found = fl[j]; break; }
     }
     this.openKey = key;
     this.openLabel = found ? found.name : key;
@@ -1158,7 +1364,7 @@
 
   TGClubPickerWidget.prototype._bind = function () {
     var self = this;
-    var tiles = this.shadow.querySelectorAll('.tgcp-tile');
+    var tiles = this.shadow.querySelectorAll('.tgcp-tile,.tgcp-banner');
     for (var i = 0; i < tiles.length; i++) {
       tiles[i].addEventListener('click', function () {
         var key = this.getAttribute('data-key');
@@ -1254,8 +1460,8 @@
     this._side = 'all';
     this._eventsReq++;
     this._render();
-    // Send focus back to the badge they came from, not to the top of the page.
-    var tile = this.shadow.querySelector('.tgcp-tile[data-key="' + (key || '').replace(/"/g, '') + '"]');
+    // Send focus back to the badge or banner they came from, not to the top of the page.
+    var tile = this.shadow.querySelector('[data-key="' + (key || '').replace(/"/g, '') + '"]');
     if (tile && typeof tile.focus === 'function') tile.focus({ preventScroll: true });
   };
 
@@ -1309,6 +1515,7 @@
   window.TGClubPickerWidget = TGClubPickerWidget;
 
   TGClubPickerWidget.dropdownPromptFor = dropdownPromptFor;
+  TGClubPickerWidget.featuredHeadingFor = featuredHeadingFor;
   window.__TG_CLUBPICKER_VERSION__ = VERSION;
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

@@ -192,6 +192,10 @@
       class: 'ev-badge' + (size ? ' ev-badge-' + size : ''),
       style: '--hue:' + (entity && typeof entity.hue === 'number' ? entity.hue : 210),
       'aria-hidden': 'true',
+      // Two letters are not a word to translate (Andy, 25 Sep 2026: Manchester
+      // City's MC came out as "Motorcycle" on a Swedish page, MC being the
+      // Swedish short form of motorcykel).
+      translate: 'no',
     }, [entity && entity.initials ? entity.initials : '??']);
   }
 
