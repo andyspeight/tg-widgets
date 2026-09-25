@@ -21,10 +21,14 @@
  *   5. Every non-FOID field of a passenger comes from OUR fetch of the order,
  *      never from the browser, so the page cannot change a name or a date of
  *      birth through this door.
+ *   6. The emergency contact (the spec's second revision, the same day) is
+ *      checked again and sent with every save, but is never a reason to save
+ *      on its own: with no passenger to send, nothing is sent.
  *
  * Travelify contract:
  *   POST https://api.travelify.io/updatepaxfoid/{orderId}/{orderKey}/{itemId}
- *   { "Passengers": [ { Type, Title, Firstname, ..., FOIDType: "Passport",
+ *   { "EmailAddress": "...", "Telephone": { "CountryPrefix": "44", "Number": "0123..." },
+ *     "Passengers": [ { Type, Title, Firstname, ..., FOIDType: "Passport",
  *     FOIDNumber, FOIDIssuingCountry, FOIDStartDate, FOIDExpiryDate } ] }
  *   success → { "success": true }
  *   failure → { "success": false, "error": "Could not update order" }
@@ -34,18 +38,24 @@
  *
  * Request (POST /api/update-passport):
  *   { widgetId, emailAddress, departDate, orderRef, itemId,
+ *     contact: { email, prefix, number },
  *     passengers: [ { index, number, country, issued, expires } ] }
  *   `index` is the person's position in the flight item's own travellers list,
- *   as /api/retrieve-order reported it.
+ *   as /api/retrieve-order reported it. `emailAddress` is the customer's lookup
+ *   detail; `contact.email` is the emergency contact, which may differ. A
+ *   request with no `contact` at all (a page still running the widget from
+ *   before the contact existed) is sent with the contact the form would have
+ *   started from, when the booking holds a complete one.
  *
  * Response (HTTP 200 unless rate-limited or a bad method):
  *   ok:       { success: true, saved: <n> }
  *   nothing:  { success: false, nothing: true, error }   nothing had changed
- *   invalid:  { success: false, error, fields: { <index>: { <field>: <code> } } }
+ *   invalid:  { success: false, error, fields: { <index>: { <field>: <code> },
+ *                                                  contact: { <field>: <code> } } }
  *   closed:   { success: false, closed: true, error }    no longer editable
  *   fail:     { success: false, error }                  Travelify's words, or ours
  *
- * Passport numbers are never logged, anywhere in here.
+ * Passport numbers and contact details are never logged, anywhere in here.
  */
 
 import { setCors } from './_auth.js';
@@ -62,15 +72,15 @@ import {
 } from './_lib/travelify.js';
 import { classifyItem } from './_lib/travelify-items.js';
 import {
-  ppField, ppEligibility, ppExisting, ppValidate, ppChanged, ppIsInfant, ppToday,
-  passengerBody, callUpdatePaxFoid,
+  ppField, ppList, ppEligibility, ppExisting, ppValidate, ppChanged, ppIsInfant, ppToday,
+  ppContactExisting, ppValidateContact, passengerBody, contactBody, callUpdatePaxFoid,
 } from './_lib/passport-foid.js';
 
 const GENERIC_FAIL = "We couldn't save your passport details just now. Please try again, or contact us if it keeps happening.";
 const NOT_FOUND = "We couldn't find that booking. Please check your details and try again.";
 const CLOSED = 'Passport details for this flight can no longer be changed online. Please contact us if they need updating.';
 const NOTHING = 'Nothing has changed, so there is nothing to save.';
-const INVALID = 'Please check the details marked below.';
+const INVALID = 'Please check the details marked above.';
 const MAX_PASSENGERS = 12;
 
 function fail(res, message, extra) {
@@ -150,7 +160,15 @@ export default async function handler(req, res) {
     const e = ppEligibility(dataObject, today);
     if (!e.editable) return fail(res, CLOSED, { closed: true });
 
-    const travellers = Array.isArray(ppField(dataObject, 'travellers')) ? ppField(dataObject, 'travellers') : [];
+    const travellers = ppList(ppField(dataObject, 'travellers'));
+
+    // The emergency contact: checked like any field when the page sent one;
+    // when it sent none at all, the one the form would have started from.
+    let contact = null;
+    const sentContact = body.contact && typeof body.contact === 'object' ? body.contact : null;
+    const contactCheck = ppValidateContact(sentContact || ppContactExisting(raw, travellers[0]));
+    if (!Object.keys(contactCheck.errors).length) contact = contactBody(contactCheck.value);
+
     const fields = {};
     const passengers = [];
     const seen = new Set();
@@ -166,10 +184,14 @@ export default async function handler(req, res) {
       if (!ppChanged(ppExisting(traveller), value)) continue;
       passengers.push(passengerBody(traveller, value));
     }
+    // A changed contact alone is not a save (the spec, pending Travelify on
+    // whether an empty Passengers list is accepted), so with nobody to send
+    // the answer is "nothing to save", whatever the contact says.
+    if (!Object.keys(fields).length && !passengers.length) return fail(res, NOTHING, { nothing: true });
+    if (sentContact && !contact) fields.contact = contactCheck.errors;
     if (Object.keys(fields).length) return fail(res, INVALID, { fields });
-    if (!passengers.length) return fail(res, NOTHING, { nothing: true });
 
-    const r = await callUpdatePaxFoid(creds, { orderId, orderKey, itemId }, passengers);
+    const r = await callUpdatePaxFoid(creds, { orderId, orderKey, itemId }, passengers, contact);
     const ok = !!(r.ok && r.json && r.json.success === true);
     console.log('[update-passport] order', orderId, 'item', itemId, passengers.length, 'passenger(s):', ok ? 'saved' : 'failed', 'HTTP', r.status);
     if (ok) return res.status(200).json({ success: true, saved: passengers.length });

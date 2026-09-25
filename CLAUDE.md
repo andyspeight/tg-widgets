@@ -47,12 +47,13 @@ Owner: Andy Speight, CEO, Travelgenix.
   block vocabulary in `public/_booking-email-template.js`.
 
 - **Passport details (FOID) in My Booking** (customers add or change the passport
-  details of the people on a flight, sent to Travelify's `updatepaxfoid`):
-  `docs/mybooking-passports.md`. Read it before touching `api/update-passport.js`,
-  `public/_passport-rules.js` (the rules, copied verbatim into the widget and
+  details of the people on a flight, with one emergency contact per flight's
+  form, sent to Travelify's `updatepaxfoid`): `docs/mybooking-passports.md`.
+  Read it before touching `api/update-passport.js`, `public/_passport-rules.js`
+  (the rules and the dialling-code list, copied verbatim into the widget and
   held by `test:passport-rules-drift`) or the passport block in
-  `widget-mybooking.js`. A passport number is never logged, never stored in the
-  browser and never handed to the host page.
+  `widget-mybooking.js`. A passport number or contact detail is never logged,
+  never stored in the browser and never handed to the host page.
 
 - **ATOL certificates in My Booking** (the CAA's own certificate, filled in for
   a booking and attached to the page and the confirmation email):
