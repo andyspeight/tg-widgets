@@ -233,7 +233,7 @@
 
   <section>
     <h2>Request body</h2>
-    <p>A single JSON object with three fields, all <span class="req">required</span>. Everything the email shows comes from the live order, so nothing else is needed and any other field is ignored. A missing or invalid field rejects the whole request with <span class="pill crit">400</span> and a per&#8209;field message.</p>
+    <p>A single JSON object: the three <span class="req">required</span> fields that identify the order, and the address to send to. Everything the email shows comes from the live order, so nothing else is needed and any other field is ignored. A missing or invalid field rejects the whole request with <span class="pill crit">400</span> and a per&#8209;field message.</p>
     <div class="tbl-wrap">
       <table>
         <thead><tr><th>Field</th><th>Type</th><th>Rules</th></tr></thead>
@@ -252,6 +252,11 @@
             <td class="field">orderKey <span class="req">*</span></td>
             <td class="type">string</td>
             <td class="rule">The order's 36&#8209;character GUID (e.g. <code class="inline">3f2504e0-4f89-41d3-9a0c-0305e82c3301</code>). We use it on our server to fetch the live order. It is never shown to the customer.</td>
+          </tr>
+          <tr>
+            <td class="field">email <span class="opt">optional</span></td>
+            <td class="type">string</td>
+            <td class="rule">The address to send this confirmation to: one plain address, e.g. <code class="inline">jo.smith@example.com</code>. Send it every time. If you leave it out we send to the customer email on the order. An invalid address returns <span class="pill crit">400</span>. We still find the booking by the order's own details, so this can be anyone.</td>
           </tr>
         </tbody>
       </table>
@@ -311,7 +316,7 @@
     <ul class="clean">
       <li><strong>The client's own confirmation email</strong>, laid out the way they built it in their My&nbsp;Booking editor, from their own sender name and reply&#8209;to address.</li>
       <li><strong>The booking documents</strong> as a PDF, and the client's ATOL certificate when they hold an ATOL and the booking includes a flight they sold.</li>
-      <li><strong>To the customer email on the order.</strong> We read the live order when we send, so the email always shows the booking as it stands.</li>
+      <li><strong>To the <code class="inline">email</code> you send</strong>, or to the customer email on the order when you leave it out. We read the live order when we send, so the email always shows the booking as it stands.</li>
       <li><strong>Usually within a minute.</strong> We start work as soon as we have answered you, and a sweep every five minutes picks up anything that did not go first time. A failed send is retried for several hours.</li>
     </ul>
   </section>
@@ -321,7 +326,7 @@
     <p>These are accepted with <span class="pill ok">202</span>, recorded, and then stopped on our side without an email. None of them needs anything from you.</p>
     <ul class="clean">
       <li>The client has not switched <strong>Booking confirmation emails</strong> on in their My&nbsp;Booking editor, or has no My&nbsp;Booking widget.</li>
-      <li>The order has no customer email, no departure date or no booking reference.</li>
+      <li>The order has no customer email, no departure date or no booking reference. We look the booking up by those, whatever address you ask us to send to.</li>
       <li>The request is more than 12 hours old by the time we reach it. A confirmation is only useful while it is news.</li>
     </ul>
   </section>
@@ -337,7 +342,8 @@
 {
   <span class="k">"applicationId"</span>: <span class="n">295</span>,
   <span class="k">"orderId"</span>: <span class="n">100482113</span>,
-  <span class="k">"orderKey"</span>: <span class="s">"3f2504e0-4f89-41d3-9a0c-0305e82c3301"</span>
+  <span class="k">"orderKey"</span>: <span class="s">"3f2504e0-4f89-41d3-9a0c-0305e82c3301"</span>,
+  <span class="k">"email"</span>: <span class="s">"jo.smith@example.com"</span>
 }</pre>
     </div>
     <div class="code">

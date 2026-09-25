@@ -194,6 +194,12 @@ console.log('\nThe door: method, key and body\n');
   ok('a body that is not JSON is a validation error, not a crash', r.out.code === 400 && r.out.body.error === 'validation_failed');
   r = await post([BODY]);
   ok('an array is not a request', r.out.code === 400);
+  r = await post({ ...BODY, email: 'not an address' });
+  ok('an email that is not an address is named', r.out.code === 400 && !!r.out.body.fields.email);
+  r = await post({ ...BODY, email: 'a@example.com, b@example.com' });
+  ok('a list of addresses is refused (one recipient per request)', r.out.code === 400 && !!r.out.body.fields.email);
+  r = await post({ ...BODY, email: 42 });
+  ok('an email that is not a string is refused', r.out.code === 400 && !!r.out.body.fields.email);
   ok('and nothing invalid was ever recorded', r.net.created.length === 0);
 
   r = await post(BODY, {}, { client: null });
@@ -215,6 +221,12 @@ console.log('\nAccepted: one row, queued for the worker\n');
   ok('with the client named', row.ClientName === 'Sunrise Travel');
   ok('the reference in the answer is the one on the row', row.Reference === r.out.body.reference);
   ok('extra fields are ignored rather than stored', !('ReminderType' in row) && !('AmountDue' in row));
+  ok('with no email given, no ToEmail is stored (the order\'s own email will be used)', !('ToEmail' in row));
+  const withEmail = await post({ ...BODY, email: '  Jo.Smith@Example.com ' });
+  ok('the address Darren sends is accepted and stored as ToEmail, tidied',
+    withEmail.out.code === 202 && withEmail.net.created[0].ToEmail === 'jo.smith@example.com');
+  ok('and kept apart from CustomerEmail (the order\'s address, which the booking is looked up by)',
+    !('CustomerEmail' in withEmail.net.created[0]));
   const kick = r.net.calls.find((c) => c.url.includes('/api/cron/booking-confirmations'));
   ok('the worker is nudged with the cron secret', !!kick && kick.headers.Authorization === 'Bearer cron-secret-value');
   ok('only after the answer has gone back', kick && kick.answeredYet === true);
@@ -293,6 +305,22 @@ console.log('\nThe worker sends it exactly as it sends a webhook booking\n');
     send && send.body.emailAddress === 'demo@travelgenix.io' && send.body.departDate === '2027-02-03'
     && send.body.orderRef === 'ST24189' && send.body.toEmail === 'demo@travelgenix.io' && send.body.widgetId === 'tgw_mybooking_1',
     send && JSON.stringify(send.body));
+
+  r = await sweep([row({ ToEmail: 'jo.smith@example.com' })]);
+  const toReq = r.net.calls.find((c) => c.url.includes('booking-email'));
+  ok('a row with the address Darren sent goes to that address',
+    toReq && toReq.body.toEmail === 'jo.smith@example.com' && r.net.patched[0].SentTo === 'jo.smith@example.com');
+  ok('while the booking is still looked up by the order\'s own email', toReq && toReq.body.emailAddress === 'demo@travelgenix.io');
+  r = await sweep([row({ ToEmail: 'not an address' })]);
+  ok('a stored address that is not one falls back to the order\'s email rather than failing',
+    r.net.calls.find((c) => c.url.includes('booking-email')).body.toEmail === 'demo@travelgenix.io');
+  process.env.BOOKING_CONFIRMATION_TEST_APP_IDS = '100';
+  process.env.BOOKING_CONFIRMATION_TEST_RECIPIENT = 'inbox@travelgenix.example';
+  r = await sweep([row({ ToEmail: 'jo.smith@example.com' })]);
+  ok('for a test application the test inbox wins over the requested address, so a test never reaches a real person',
+    r.net.calls.find((c) => c.url.includes('booking-email')).body.toEmail === 'inbox@travelgenix.example');
+  delete process.env.BOOKING_CONFIRMATION_TEST_APP_IDS;
+  delete process.env.BOOKING_CONFIRMATION_TEST_RECIPIENT;
 
   const offClient = { ...CLIENT, widget: { ...CLIENT.widget, fields: { ...CLIENT.widget.fields,
     Config: JSON.stringify({ confirmationEmail: { enabled: false } }) } } };
@@ -411,8 +439,9 @@ console.log('\nThe published contract matches the code\n');
   const doc = readFileSync(new URL('../public/booking-confirmations-api.html', import.meta.url), 'utf8');
   const vercel = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
   ok('the page names this endpoint', doc.includes('/api/v1/booking-confirmations'));
-  ok('and the three fields, and no others', ['applicationId', 'orderId', 'orderKey'].every((f) => doc.includes('>' + f + ' <'))
+  ok('and its four fields, and no others', ['applicationId', 'orderId', 'orderKey', 'email'].every((f) => doc.includes('>' + f + ' <'))
     && !/reminderType|amountDue/.test(doc.replace(/Payment Reminders/g, '')));
+  ok('the example sends an email address', /"email"<\/span>:\s*<span class="s">"[^"@]+@[^"]+"/.test(doc));
   ok('and every status the endpoint answers with, and no 409 (repeats send)',
     ['202', '400', '401', '429', '500'].every((c) => doc.includes('>' + c + '<')) && !doc.includes('>409<') && !/status:\s*"duplicate"|"duplicate"<\/span>/.test(doc));
   ok('it tells the caller that every request sends', /every (accepted )?request sends/i.test(doc));

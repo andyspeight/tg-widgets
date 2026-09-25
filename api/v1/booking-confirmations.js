@@ -19,7 +19,10 @@
  *   Auth      X-Api-Key: <shared secret>   (env BOOKING_CONFIRMATION_API_KEY,
  *             else PAYMENT_REMINDER_API_KEY; timing-safe compare, 401 with no
  *             detail on any mismatch)
- *   Body      { applicationId, orderId, orderKey }
+ *   Body      { applicationId, orderId, orderKey, email? }
+ *             email: the address to send to (Andy, 25 Sep 2026: "Darren will
+ *             send you the email address to send to"). Without it, the
+ *             customer email on the order.
  *   202       { status: 'accepted', reference, receivedAtUtc }
  *   400       { error: 'validation_failed', fields: { <field>: <message> } }
  *   401       {}                            missing/wrong key

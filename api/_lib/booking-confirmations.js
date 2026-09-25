@@ -217,11 +217,14 @@ export function validateWebhookPayload(body) {
 }
 
 /**
- * Validate a direct request from the Travelify core. The same three fields, and
- * the same rules, as /api/v1/payment-reminders uses for an order: applicationId
- * and orderId as JSON numbers, orderKey as the order's GUID. Everything else the
- * email prints comes from the live order, so nothing else is asked for, and any
- * other field is ignored.
+ * Validate a direct request from the Travelify core. The same three order
+ * fields, and the same rules, as /api/v1/payment-reminders: applicationId and
+ * orderId as JSON numbers, orderKey as the order's GUID. Plus `email`, the
+ * address to send to (Andy, 25 Sep 2026: "Darren will send you the email
+ * address to send to - so you need to accommodate that in the API as well").
+ * It is optional: without it the confirmation goes to the customer email on
+ * the order, as it always has. Everything the email prints still comes from
+ * the live order, and any other field is ignored.
  */
 export function validateConfirmationRequest(body) {
   const errors = {};
@@ -235,6 +238,11 @@ export function validateConfirmationRequest(body) {
   if (typeof b.orderKey !== 'string' || !GUID_RE.test(b.orderKey.trim())) {
     errors.orderKey = 'orderKey must be a 36-character GUID';
   }
+  let toEmail = '';
+  if (b.email !== undefined && b.email !== null && b.email !== '') {
+    toEmail = typeof b.email === 'string' ? b.email.trim().toLowerCase() : '';
+    if (!isRecipientEmail(toEmail)) errors.email = 'email must be a single valid email address';
+  }
   if (Object.keys(errors).length) return { errors, value: null };
   return {
     errors,
@@ -243,8 +251,15 @@ export function validateConfirmationRequest(body) {
       applicationId: b.applicationId,
       orderId: b.orderId,
       orderKey: b.orderKey.trim(),
+      toEmail,
     },
   };
+}
+
+/** One plain address: no display name, no list, no spaces, a dotted domain. */
+export function isRecipientEmail(v) {
+  return typeof v === 'string' && v.length <= 254
+    && /^[^@\s,;<>"]{1,64}@[^@\s,;<>"]+\.[^@\s,;<>".]{2,}$/.test(v);
 }
 
 /**
@@ -424,6 +439,10 @@ export async function createConfirmationRecord({ reference, value, idemKey, rece
     ClientName: clientName || '',
   };
   if (value.customerEmail) fields.CustomerEmail = value.customerEmail;
+  // The address the core asked us to send to (direct request only). Kept apart
+  // from CustomerEmail, which is the order's own address and what the booking
+  // is looked up by.
+  if (value.toEmail) fields.ToEmail = value.toEmail;
   if (value.currency) fields.Currency = value.currency;
   if (value.amount != null) fields.Amount = value.amount;
 

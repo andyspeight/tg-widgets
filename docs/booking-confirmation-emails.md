@@ -88,7 +88,8 @@ Travelify core              us
 "confirm order N" ──POST──▶  /api/v1/booking-confirmations
   X-Api-Key                  key checked before anything else
   { applicationId,           validate; applicationId → client (400 if unknown)
-    orderId, orderKey }      write one Airtable row (EventType api.confirmation)
+    orderId, orderKey,       write one Airtable row (EventType api.confirmation,
+    email? }                   the address in ToEmail)
                              → 202 { status, reference, receivedAtUtc }
                              kick the worker
                                     │
@@ -100,7 +101,8 @@ What it shares with the reminders, and where it differs:
 | | Payment reminders | Direct confirmation |
 |---|---|---|
 | Auth | `X-Api-Key` = `PAYMENT_REMINDER_API_KEY` | `X-Api-Key` = `BOOKING_CONFIRMATION_API_KEY`, or the reminder key while that is unset |
-| Body | applicationId, orderId, orderKey, reminderType, amountDue, currency, dueDate? | applicationId, orderId, orderKey |
+| Body | applicationId, orderId, orderKey, reminderType, amountDue, currency, dueDate? | applicationId, orderId, orderKey, email? |
+| Sent to | the customer email on the order | `email` when given, else the customer email on the order |
 | Unknown application | 400 `Unknown applicationId` | the same |
 | A repeat | sends again: the caller decides | sends again: the caller decides |
 | Answer | 202 accepted + reference | the same |
@@ -116,6 +118,18 @@ enforced, for audit and for one reason: the WEBHOOK checks it, so a client wired
 up both ways does not get an automatic second email from the webhook for a
 booking the core has already asked us to confirm. The webhook's own
 one-per-push rule is unchanged.
+
+**The address to send to (Andy, 25 Sep 2026: "Darren will send you the email
+address to send to - so you need to accommodate that in the API as well").**
+The request takes an optional `email`, one plain address. It is stored in the
+`ToEmail` field (added to the table the same day) and the worker sends there;
+without it, the customer email on the order, as before. The booking is still
+looked up by the ORDER's email, departure date and reference, because that is
+what `/api/booking-email` finds it by, so an order with no customer email is
+still skipped. Order of precedence for the recipient: a test application's
+redirect (`BOOKING_CONFIRMATION_TEST_RECIPIENT`), then `ToEmail`, then the
+order's email. The send endpoint accepts a recipient other than the booking's
+customer only from our own worker (the internal key).
 
 **Everything after intake is unchanged.** `api.confirmation` is a sending event;
 the worker fetches the order, checks the global switch, the client's own switch

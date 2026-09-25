@@ -72,6 +72,7 @@ import {
   confirmationTestRecipient,
   isDemoApp,
   resolveSiblingClient,
+  isRecipientEmail,
 } from '../_lib/booking-confirmations.js';
 
 const BATCH_SIZE = 25;
@@ -226,8 +227,13 @@ async function processRecord(record) {
     );
   }
 
+  // Who it goes to. A test application's redirect wins, so a test can never
+  // reach a real person; then the address the core asked for (ToEmail, the
+  // direct request's `email`, 25 Sep 2026); then the customer on the order.
+  // The booking is looked up by the ORDER's email whatever the recipient.
   const redirect = confirmationTestRecipient();
-  const recipient = (isTestApp && redirect) ? redirect : customerEmail;
+  const requested = String(f.ToEmail || '').trim().toLowerCase();
+  const recipient = (isTestApp && redirect) ? redirect : (isRecipientEmail(requested) ? requested : customerEmail);
 
   const guard = await claimSendGuard(reference);
   if (guard === 'exists') {
