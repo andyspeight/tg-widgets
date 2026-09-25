@@ -33,6 +33,7 @@ import { travelifyAuthHeaders } from './_lib/travelify.js';
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
 import { moneyOf, moneyOptsFromEnv } from './_lib/order-money.js';
 import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape, trimFlightSeating } from './_lib/travelify-items.js';
+import { passportState } from './_lib/passport-foid.js';
 import { upsellTiles, upsellUrl, orderLinkRef } from '../public/_order-upsell.js';
 import { normaliseAtolSettings, atolCertificateType, ATOL_TYPES } from './_lib/atol-certificate.js';
 import { bookingMoment } from '../public/_order-stays.js';
@@ -1030,6 +1031,12 @@ function trimItem(item) {
     out.accommodation = trimAccommodation(dataObject);
   } else if (productType === 'Flights' && dataObject) {
     out.flights = trimFlights(dataObject);
+    // Passport details for the people on this flight (25 Sep 2026): whether
+    // the page may offer the form today, and what to fill it with. Flights
+    // items only, never a package's flights, per the spec. Absent when there
+    // is nothing to show. See api/_lib/passport-foid.js.
+    const passports = passportState(dataObject);
+    if (passports) out.passports = passports;
   } else if (productType === 'AirportExtras' && dataObject) {
     out.airportExtras = trimAirportExtras(dataObject);
   } else if (productType === 'Transfers' && dataObject) {
@@ -1530,7 +1537,9 @@ export default async function handler(req, res) {
         status: travelifyRes.status,
         statusText: travelifyRes.statusText,
         contentType: travelifyRes.headers.get('content-type'),
-        bodyPreview: rawText.slice(0, 1500),
+        // Passport values never reach a log (25 Sep 2026): a flight's
+        // travellers can carry them, and this preview is the raw body.
+        bodyPreview: rawText.replace(/("foid[a-z]*"\s*:\s*)"[^"]*"/gi, '$1"[redacted]"').slice(0, 1500),
       });
     }
 
@@ -1615,6 +1624,9 @@ export default async function handler(req, res) {
       console.error('[retrieve-order] ATOL decision failed, booking returned without it:', err && err.message);
     }
 
+    // A flight's passports can be in here while the customer may still edit
+    // them, so nothing on the way may keep a copy.
+    res.setHeader('Cache-Control', 'no-store');
     return res.status(200).json({ order, upsell, atol });
   } catch (err) {
     console.error('retrieve-order error:', err.message);
