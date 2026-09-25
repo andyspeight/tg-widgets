@@ -6,6 +6,10 @@ passport details of the people on each flight, and we send them to Travelify's
 `updatepaxfoid` endpoint. FOID is Travelify's name for a form of identification.
 The type is always `Passport`.
 
+The spec was revised the same day, after client feedback, to add an emergency
+contact: one email address and one telephone number per flight's form, sent
+with every save. See "The emergency contact" below. Widget 1.17.0.
+
 ## Where it lives
 
 | Piece | File |
@@ -47,6 +51,55 @@ Edit the rules in the module, copy the block into the widget, then run
 - Every field name is read either way round (`canEditFOID` / `CanEditFOID`,
   `foidNumber` / `FOIDNumber`), as the Travelify API treats them.
 
+## The emergency contact
+
+Added by the spec's second revision (25 Sep 2026). One block at the top of
+each flight's form, above the passengers, not one per person:
+
+- **Email address**: required, a real email format, trimmed, kept as written
+  (no lower-casing).
+- **Country code**: a list of every country's dialling code, shown as
+  "United Kingdom (+44)" in the page's language. The value sent is the digits
+  only, `44`. The list is `DIAL_CODES` in `public/_passport-rules.js`: 244
+  entries, generated from libphonenumber-js 1.13.14 on 25 Sep 2026 (the
+  platform had no list of its own). Ascension Island and Kosovo are in it; the
+  seven passport countries with no code of their own (AQ BV GS HM PN TF UM)
+  are not.
+- **Telephone number**: required, digits only, 4 to 15 of them, sent exactly as
+  entered, a leading zero included. A typed letter or symbol never lands, a
+  pasted "+44 (0)7777 777 72" arrives as `440777777772`, and anything that gets
+  past both (autofill, a drop) is cut to digits.
+
+**Where it starts from.** Email and telephone are decided separately. Each is
+the primary passenger's own (`travellers[0].emailAddress`, and
+`travellers[0].telephone` with its `countryPrefix` and `number`, counted only
+when the number is filled), otherwise the booking's (`customerEmail`,
+`customerTelPrefix`, `customerTelNum`). Several countries share a code, so a
+code alone pre-selects the principal one (`DIAL_PRINCIPAL`: 1 is the United
+States, 44 the United Kingdom, 7 Russia and so on); the code sent is the same
+whichever the customer picks. A code no country has leaves the list unselected.
+
+**What is sent.** `EmailAddress` and `Telephone { CountryPrefix, Number }`, both
+parts strings, with every save, whether or not the customer changed them, in
+front of `Passengers`. They are never a reason to save on their own: with no
+passport change, nothing is sent, and the customer is told the contact is saved
+together with passport details. The server answers "nothing to save" in that
+case whatever the contact says, and only marks contact mistakes when there is a
+passenger to send.
+
+**A page from before the contact existed** (a cached widget, for the few minutes
+the old script lives on) sends no `contact` at all. The server then sends the
+contact the form would have started from, when the booking holds a complete
+one, and the passengers alone when it does not.
+
+**Privacy**, as for the passport: the contact reaches the page only while the
+form can be used (it rides inside the passport block, which the host page's
+`booking-loaded` event never carries), it is never written to browser storage
+or a log, and the typed values are dropped once a save has landed. The demo
+account's debug preview of the raw order now blanks `emailAddress`,
+`customerEmail`, `customerTel*` and the whole `telephone` object as well as
+every `foid*` value.
+
 ## What the server does that the page cannot be trusted to
 
 `/api/update-passport` takes the customer's three details (email, departure
@@ -84,10 +137,10 @@ values stay in the form either way.
   raw order blanks every `foid*` value.
 - `retrieve-order` and `update-passport` answer with `Cache-Control: no-store`.
 
-## The spec's open points, settled 25 Sep 2026
+## The spec's open points
 
-Andy put the spec's open points to Darren at Travelify on 25 Sep 2026, the day
-this went live. His answers:
+Andy put the first version's open points to Darren at Travelify on 25 Sep 2026,
+the day it went live. His answers:
 
 1. **The FOID property names on a traveller who already has passport
    details** are `foidNumber`, `foidIssuingCountry`, `foidStartDate` and
@@ -111,10 +164,26 @@ passport field names (`passports[].foidKeys`) and who has a number
 (`withPassportValue`), never a value. It is now a support check rather than an
 open question.
 
+The second revision (the emergency contact) added two open points of its own.
+Andy put them to Darren the same day, and both answers matched what was built:
+
+5. **The primary passenger's `telephone` is `{ countryPrefix, number }`**, the
+   keys `ppContactExisting` reads (in any case). Darren: "Yes". The inspector's
+   `passports[].emergencyContact.primaryTelephone` still lists the keys really
+   there on any booking, and whether each email and number is filled, never a
+   value.
+6. **A contact change alone is not savable.** Darren: "No, it is sent as part
+   of the passport updates, you can't update one and not the other". So the
+   contact always rides with a passenger change and never goes alone, which is
+   what `_submitPassport` in the widget and the "nothing to save" line in
+   `api/update-passport.js` do, and what the tests pin. Do not add a
+   contact-only save.
+
 ## Tests
 
-- `npm run test:mybooking-passport`: the spec's twelve acceptance criteria,
-  numbered [1] to [12] in the output, through the rules module (on the spec's
+- `npm run test:mybooking-passport`: the spec's nineteen acceptance criteria,
+  numbered [1] to [19] in the output ([13] to [19] are the emergency contact,
+  and [17] also runs with real keys and a real paste in Chromium), through the rules module (on the spec's
   own dates), the real `retrieve-order` and `update-passport` handlers against
   a stand-in Travelify, and the real widget in jsdom. Also the privacy points
   above and the staff inspector.

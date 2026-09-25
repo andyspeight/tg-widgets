@@ -176,7 +176,7 @@ const ATOLISH = /(atol|protect|bond|licen[cs]e|caa|abta|pkgtype|packagetype|cont
  * because the form only appears for boolean true, and Travelify confirmed it
  * is the only switch.
  */
-function passportShape(items) {
+function passportShape(items, order) {
   return (Array.isArray(items) ? items : []).slice(0, 12).map((it, index) => {
     if (!isPlainObject(it) || !/^flights$/i.test(String(it.product || ''))) return null;
     const d = isPlainObject(it.dataObject) ? it.dataObject : null;
@@ -193,8 +193,36 @@ function passportShape(items) {
       travellers: people.length,
       foidKeys: [...foidKeys].sort(),
       withPassportValue: people.map((p) => Object.keys(p).some((k) => /foidnumber/i.test(k) && p[k] != null && String(p[k]).trim() !== '')),
+      emergencyContact: contactShape(people[0], order),
     };
   }).filter(Boolean);
+}
+
+/**
+ * The emergency contact behind the passport form (25 Sep 2026, the spec's
+ * second revision). Built to settle its open point, the shape of the primary
+ * passenger's telephone; Travelify confirmed the same day that it is
+ * { countryPrefix, number }, so this is now a support check. It reports the
+ * key names really there and whether each value is filled, never a value.
+ */
+function contactShape(primary, order) {
+  const has = (v) => v != null && String(v).trim() !== '';
+  const key = (obj, re) => (isPlainObject(obj) ? Object.keys(obj).find((k) => re.test(k)) : undefined);
+  const p = isPlainObject(primary) ? primary : {};
+  const o = isPlainObject(order) ? order : {};
+  const emailKey = key(p, /^emailaddress$/i);
+  const telKey = key(p, /^telephone$/i);
+  const tel = telKey ? p[telKey] : undefined;
+  const numKey = key(tel, /^number$/i);
+  return {
+    primaryEmailKey: emailKey || '(missing)',
+    primaryHasEmail: !!emailKey && has(p[emailKey]),
+    primaryTelephone: tel === undefined ? '(missing)' : (isPlainObject(tel) ? '{' + Object.keys(tel).slice(0, 12).join(', ') + '}' : '(' + typeof tel + ')'),
+    primaryHasTelephoneNumber: !!numKey && has(tel[numKey]),
+    orderHasEmail: has(o[key(o, /^customeremail$/i)]),
+    orderHasTelPrefix: has(o[key(o, /^customertelprefix$/i)]),
+    orderHasTelNum: has(o[key(o, /^customertelnum$/i)]),
+  };
 }
 export function atolTrail(root, maxDepth = 8) {
   const out = [];
@@ -263,7 +291,7 @@ export function buildOrderShapeReport(raw, opts) {
     })),
     party: partyShape(items),
     // Passport details on each flight: field names and flags only.
-    passports: passportShape(items),
+    passports: passportShape(items, r),
     // Travelify's upsellsActive (24 Sep 2026): which upsells the application is
     // selling against this order. Product type names, nothing personal, so it
     // is shown as it came. If My Booking's "Add to your trip" has vanished,

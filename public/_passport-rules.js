@@ -31,6 +31,11 @@
 //      the issue date). The type is always Passport.
 //    - Only people whose details are new or changed are sent. Nothing changed,
 //      nothing sent.
+//    - One emergency contact per flight's form (the spec's second revision,
+//      the same day): an email address and a telephone number, pre-filled from
+//      the primary passenger or else the booking, always sent with a save but
+//      never a reason to save on its own (Travelify: "you can't update one and
+//      not the other").
 //
 //  "Today" is the UTC calendar day, the same day the upsell rule uses
 //  (upsellStartsInTime in public/_order-upsell.js). Booking days are read from
@@ -212,9 +217,119 @@ function ppMask(number) {
   if (!n) return '';
   return '••••' + (n.length > 4 ? n.slice(-4) : '');
 }
+
+/*
+ * EMERGENCY CONTACT (the spec's second revision, 25 Sep 2026). One email
+ * address and one telephone number for the booking, asked once in each
+ * flight's form and sent with every save as EmailAddress and Telephone
+ * { CountryPrefix, Number }. They start from the primary passenger's own
+ * (travellers[0].emailAddress and .telephone) and fall back to the booking's
+ * (customerEmail, customerTelPrefix, customerTelNum).
+ */
+
+/** "GB:44 US:1 ..." into { GB: '44', US: '1', ... }. */
+function ppPairs(s) {
+  const out = {};
+  s.split(' ').forEach((p) => { const i = p.indexOf(':'); if (i > 0) out[p.slice(0, i)] = p.slice(i + 1); });
+  return out;
+}
+
+/**
+ * Every country's dialling code, by the country it belongs to, as the ITU
+ * assigns them (generated from libphonenumber-js 1.13.14 on 25 Sep 2026; the
+ * platform had no list of its own). The passport countries that have a code,
+ * plus Ascension Island (AC) and Kosovo (XK), which have codes of their own but
+ * are not ISO passport countries. AQ BV GS HM PN TF UM have no code of their
+ * own and are left out. 244 entries.
+ */
+const DIAL_CODES = ppPairs('AC:247 AD:376 AE:971 AF:93 AG:1 AI:1 AL:355 AM:374 AO:244 AR:54 AS:1 AT:43 AU:61 AW:297 AX:358 AZ:994'
+  + ' BA:387 BB:1 BD:880 BE:32 BF:226 BG:359 BH:973 BI:257 BJ:229 BL:590 BM:1 BN:673 BO:591 BQ:599 BR:55 BS:1'
+  + ' BT:975 BW:267 BY:375 BZ:501 CA:1 CC:61 CD:243 CF:236 CG:242 CH:41 CI:225 CK:682 CL:56 CM:237 CN:86 CO:57'
+  + ' CR:506 CU:53 CV:238 CW:599 CX:61 CY:357 CZ:420 DE:49 DJ:253 DK:45 DM:1 DO:1 DZ:213 EC:593 EE:372 EG:20'
+  + ' EH:212 ER:291 ES:34 ET:251 FI:358 FJ:679 FK:500 FM:691 FO:298 FR:33 GA:241 GB:44 GD:1 GE:995 GF:594'
+  + ' GG:44 GH:233 GI:350 GL:299 GM:220 GN:224 GP:590 GQ:240 GR:30 GT:502 GU:1 GW:245 GY:592 HK:852 HN:504'
+  + ' HR:385 HT:509 HU:36 ID:62 IE:353 IL:972 IM:44 IN:91 IO:246 IQ:964 IR:98 IS:354 IT:39 JE:44 JM:1 JO:962'
+  + ' JP:81 KE:254 KG:996 KH:855 KI:686 KM:269 KN:1 KP:850 KR:82 KW:965 KY:1 KZ:7 LA:856 LB:961 LC:1 LI:423'
+  + ' LK:94 LR:231 LS:266 LT:370 LU:352 LV:371 LY:218 MA:212 MC:377 MD:373 ME:382 MF:590 MG:261 MH:692 MK:389'
+  + ' ML:223 MM:95 MN:976 MO:853 MP:1 MQ:596 MR:222 MS:1 MT:356 MU:230 MV:960 MW:265 MX:52 MY:60 MZ:258 NA:264'
+  + ' NC:687 NE:227 NF:672 NG:234 NI:505 NL:31 NO:47 NP:977 NR:674 NU:683 NZ:64 OM:968 PA:507 PE:51 PF:689'
+  + ' PG:675 PH:63 PK:92 PL:48 PM:508 PR:1 PS:970 PT:351 PW:680 PY:595 QA:974 RE:262 RO:40 RS:381 RU:7 RW:250'
+  + ' SA:966 SB:677 SC:248 SD:249 SE:46 SG:65 SH:290 SI:386 SJ:47 SK:421 SL:232 SM:378 SN:221 SO:252 SR:597'
+  + ' SS:211 ST:239 SV:503 SX:1 SY:963 SZ:268 TC:1 TD:235 TG:228 TH:66 TJ:992 TK:690 TL:670 TM:993 TN:216'
+  + ' TO:676 TR:90 TT:1 TV:688 TW:886 TZ:255 UA:380 UG:256 US:1 UY:598 UZ:998 VA:39 VC:1 VE:58 VG:1 VI:1 VN:84'
+  + ' VU:678 WF:681 WS:685 XK:383 YE:967 YT:262 ZA:27 ZM:260 ZW:263'
+);
+
+/**
+ * Where countries share a code, the one a code alone pre-selects (the spec:
+ * "44 selects United Kingdom"). The code sent is the same whichever is chosen.
+ * test:mybooking-passport fails if a shared code is missing from here.
+ */
+const DIAL_PRINCIPAL = {
+  1: 'US', 7: 'RU', 39: 'IT', 44: 'GB', 47: 'NO', 61: 'AU', 212: 'MA', 262: 'RE', 358: 'FI', 590: 'GP', 599: 'CW',
+};
+
+const CONTACT_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const CONTACT_NUMBER_RE = /^\d{4,15}$/;
+
+/** Digits only: all a telephone field keeps of anything typed or pasted. */
+function ppDigits(v) {
+  return (v == null ? '' : String(v)).replace(/\D+/g, '');
+}
+
+/** A dialling code as the API takes it: digits, no "+", no leading "00". */
+function ppDialPrefix(v) {
+  return ppDigits(v).replace(/^0+/, '');
+}
+
+/** The country a dialling code pre-selects, or '' when no country has that code. */
+function ppDialCountry(prefix) {
+  const code = ppDialPrefix(prefix);
+  if (!code) return '';
+  if (DIAL_PRINCIPAL[code]) return DIAL_PRINCIPAL[code];
+  const keys = Object.keys(DIAL_CODES);
+  for (let i = 0; i < keys.length; i++) if (DIAL_CODES[keys[i]] === code) return keys[i];
+  return '';
+}
+
+/**
+ * The emergency contact the form starts from. Email and telephone are decided
+ * separately: each is the primary passenger's own when they carry one (a
+ * telephone counts only with a number), otherwise the booking's.
+ */
+function ppContactExisting(order, primary) {
+  const s = (v) => (v == null ? '' : String(v)).trim();
+  const email = s(ppField(primary, 'emailAddress')) || s(ppField(order, 'customerEmail'));
+  const tel = ppField(primary, 'telephone');
+  const own = tel && typeof tel === 'object' ? ppDigits(ppField(tel, 'number')) : '';
+  if (own) return { email, prefix: ppDialPrefix(ppField(tel, 'countryPrefix')), number: own };
+  return { email, prefix: ppDialPrefix(ppField(order, 'customerTelPrefix')), number: ppDigits(ppField(order, 'customerTelNum')) };
+}
+
+/**
+ * Check the emergency contact. Returns the tidied value and an error code per
+ * field that fails: email (required, email), prefix (required, dialCode),
+ * number (required, digits, phoneLength). The number is kept exactly as
+ * entered, a leading zero included.
+ */
+function ppValidateContact(v) {
+  const s = (x) => (x == null ? '' : String(x)).trim();
+  const rawPrefix = s(v && v.prefix);
+  const value = { email: s(v && v.email), prefix: ppDialPrefix(rawPrefix), number: s(v && v.number) };
+  const errors = {};
+  if (!value.email) errors.email = 'required';
+  else if (value.email.length > 254 || !CONTACT_EMAIL_RE.test(value.email)) errors.email = 'email';
+  if (!rawPrefix) errors.prefix = 'required';
+  else if (!/^\+?\d{1,4}$/.test(rawPrefix) || !ppDialCountry(value.prefix)) errors.prefix = 'dialCode';
+  if (!value.number) errors.number = 'required';
+  else if (!/^\d+$/.test(value.number)) errors.number = 'digits';
+  else if (!CONTACT_NUMBER_RE.test(value.number)) errors.number = 'phoneLength';
+  return { value, errors };
+}
 // <<< passport rules
 
 export {
-  PASSPORT_COUNTRIES, PASSPORT_NUMBER_RE, ppField, ppRealDay, ppDay, ppToday, ppIsInfant, ppExisting,
+  PASSPORT_COUNTRIES, PASSPORT_NUMBER_RE, ppField, ppList, ppRealDay, ppDay, ppToday, ppIsInfant, ppExisting,
   ppComplete, ppFlightDays, ppEligibility, ppClean, ppBlank, ppValidate, ppChanged, ppMask,
+  DIAL_CODES, DIAL_PRINCIPAL, ppDigits, ppDialPrefix, ppDialCountry, ppContactExisting, ppValidateContact,
 };

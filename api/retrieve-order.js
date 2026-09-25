@@ -996,7 +996,7 @@ function trimExtras(dataObject) {
   return { groups, travellers };
 }
 
-function trimItem(item) {
+function trimItem(item, order) {
   if (!item || typeof item !== 'object') return null;
 
   // Robustly resolve the product type and normalise the detail payload.
@@ -1034,8 +1034,10 @@ function trimItem(item) {
     // Passport details for the people on this flight (25 Sep 2026): whether
     // the page may offer the form today, and what to fill it with. Flights
     // items only, never a package's flights, per the spec. Absent when there
-    // is nothing to show. See api/_lib/passport-foid.js.
-    const passports = passportState(dataObject);
+    // is nothing to show. The order is passed for the emergency contact the
+    // form starts from (the booking's own email and telephone when the
+    // primary passenger has none). See api/_lib/passport-foid.js.
+    const passports = passportState(dataObject, undefined, order);
     if (passports) out.passports = passports;
   } else if (productType === 'AirportExtras' && dataObject) {
     out.airportExtras = trimAirportExtras(dataObject);
@@ -1111,7 +1113,7 @@ function trimOrder(raw) {
   if (!raw || typeof raw !== 'object') return null;
 
   const items = Array.isArray(raw.items)
-    ? raw.items.slice(0, 8).map(trimItem).filter(Boolean)
+    ? raw.items.slice(0, 8).map((it) => trimItem(it, raw)).filter(Boolean)
     : [];
 
   // Genuine product matches (exact label or known alias) take precedence over
@@ -1537,9 +1539,13 @@ export default async function handler(req, res) {
         status: travelifyRes.status,
         statusText: travelifyRes.statusText,
         contentType: travelifyRes.headers.get('content-type'),
-        // Passport values never reach a log (25 Sep 2026): a flight's
-        // travellers can carry them, and this preview is the raw body.
-        bodyPreview: rawText.replace(/("foid[a-z]*"\s*:\s*)"[^"]*"/gi, '$1"[redacted]"').slice(0, 1500),
+        // Passport values and contact details never reach a log (25 Sep
+        // 2026): a flight's travellers can carry them, and this preview is
+        // the raw body. A traveller's telephone is an object, so it goes whole.
+        bodyPreview: rawText
+          .replace(/("(?:foid[a-z]*|emailaddress|customeremail|customertel[a-z]*)"\s*:\s*)(?:"[^"]*"|\d+)/gi, '$1"[redacted]"')
+          .replace(/("telephone"\s*:\s*)\{[^}]*\}/gi, '$1"[redacted]"')
+          .slice(0, 1500),
       });
     }
 

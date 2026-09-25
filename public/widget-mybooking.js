@@ -3,6 +3,18 @@
  * Self-contained, embeddable widget for retrieving and displaying confirmed bookings
  * Zero dependencies — works on any website via a single script tag
  *
+ * v1.17.0 changes (25 Sep 2026, the passport spec's second revision after
+ * client feedback):
+ *   - An emergency contact in each flight's passport form: one email address
+ *     and one telephone number (a country dialling code from a list, and a
+ *     number that takes digits only, a pasted one cut to its digits). It
+ *     starts from the primary passenger's own, else the booking's, and goes
+ *     with every save, but is never a reason to save on its own.
+ *   - The "check the details" message says "marked above": it sits under
+ *     the form, beside Save. And it is always the page's own words, in the
+ *     page's language, never the server's English.
+ *   See docs/mybooking-passports.md.
+ *
  * v1.16.1 changes (25 Sep 2026):
  *   - "Request a change" and "Pay balance" now leave the screen when pressed.
  *     Each hides itself with the hidden attribute, and its class's
@@ -289,7 +301,7 @@
   // Passport details for the people on a flight (25 Sep 2026). See api/update-passport.js.
   const API_PASSPORT = (typeof window !== 'undefined' && window.__TG_PASSPORT_API__) || (API_BASE + '/api/update-passport');
   const AMEND_MAX = 1000; // matches the server cap in /api/amend-order
-  const VERSION = '1.16.1';
+  const VERSION = '1.17.0';
 
   // ── Payment deep link ──
   // The balance reminder email links to the client's booking page with
@@ -551,7 +563,7 @@
       passportSaved: 'Passport details saved',
       passportSavedBody: 'Your booking now holds the details shown above.',
       passportNothing: 'Nothing has changed, so there is nothing to save.',
-      passportCheck: 'Please check the details marked below.',
+      passportCheck: 'Please check the details marked above.',
       passportFailed: 'We couldn\'t save your passport details just now. Please try again, or contact us if it keeps happening.',
       passportRateLimited: 'Too many attempts. Please wait a few minutes and try again.',
       passportErrRequired: 'Please fill this in.',
@@ -561,6 +573,17 @@
       passportErrNotPast: 'The issue date must be before today.',
       passportErrTooSoon: 'The passport must still be valid after {date}, when this trip ends.',
       passportErrBeforeIssue: 'The expiry date must be after the issue date.',
+      passportContactTitle: 'Emergency contact',
+      passportContactSub: 'One contact for everyone on this flight, in case the airline needs to reach someone. It is sent each time passport details are saved.',
+      passportContactEmail: 'Email address',
+      passportContactDial: 'Country code',
+      passportContactDialChoose: 'Choose a country code',
+      passportContactPhone: 'Telephone number',
+      passportContactOnly: 'The emergency contact is saved together with passport details. No passport details have changed, so there is nothing to save yet.',
+      passportErrEmail: 'Please enter a full email address, like name@example.com.',
+      passportErrDialCode: 'Please choose a country code from the list.',
+      passportErrDigits: 'Please use numbers only.',
+      passportErrPhoneLength: 'Please enter between 4 and 15 digits.',
       payNextBtn: 'Pay next payment',
       payBalanceBtn: 'Pay balance',
       payConfirm: 'Pay',
@@ -851,7 +874,7 @@
       passportSaved: 'Informations de passeport enregistrées',
       passportSavedBody: 'Votre réservation contient désormais les informations affichées ci-dessus.',
       passportNothing: 'Rien n\'a changé, il n\'y a donc rien à enregistrer.',
-      passportCheck: 'Veuillez vérifier les informations signalées ci-dessous.',
+      passportCheck: 'Veuillez vérifier les informations signalées ci-dessus.',
       passportFailed: 'Nous n\'avons pas pu enregistrer vos informations de passeport pour le moment. Veuillez réessayer ou nous contacter si le problème persiste.',
       passportRateLimited: 'Trop de tentatives. Veuillez patienter quelques minutes avant de réessayer.',
       passportErrRequired: 'Veuillez remplir ce champ.',
@@ -861,6 +884,17 @@
       passportErrNotPast: 'La date de délivrance doit être antérieure à aujourd\'hui.',
       passportErrTooSoon: 'Le passeport doit être valide après le {date}, date de fin de ce voyage.',
       passportErrBeforeIssue: 'La date d\'expiration doit être postérieure à la date de délivrance.',
+      passportContactTitle: 'Contact en cas d\'urgence',
+      passportContactSub: 'Un seul contact pour tous les voyageurs de ce vol, au cas où la compagnie aérienne aurait besoin de joindre quelqu\'un. Il est envoyé à chaque enregistrement des informations de passeport.',
+      passportContactEmail: 'Adresse e-mail',
+      passportContactDial: 'Indicatif du pays',
+      passportContactDialChoose: 'Choisissez un indicatif',
+      passportContactPhone: 'Numéro de téléphone',
+      passportContactOnly: 'Le contact en cas d\'urgence est enregistré avec les informations de passeport. Aucune information de passeport n\'a changé, il n\'y a donc rien à enregistrer pour l\'instant.',
+      passportErrEmail: 'Veuillez saisir une adresse e-mail complète, par exemple nom@exemple.com.',
+      passportErrDialCode: 'Veuillez choisir un indicatif dans la liste.',
+      passportErrDigits: 'Veuillez utiliser uniquement des chiffres.',
+      passportErrPhoneLength: 'Veuillez saisir entre 4 et 15 chiffres.',
       payNextBtn: 'Payer le prochain versement',
       payBalanceBtn: 'Payer le solde',
       payConfirm: 'Payer',
@@ -1151,7 +1185,7 @@
       passportSaved: 'Reisepassdaten gespeichert',
       passportSavedBody: 'Ihre Buchung enthält jetzt die oben angezeigten Daten.',
       passportNothing: 'Es hat sich nichts geändert, daher gibt es nichts zu speichern.',
-      passportCheck: 'Bitte prüfen Sie die unten markierten Angaben.',
+      passportCheck: 'Bitte prüfen Sie die oben markierten Angaben.',
       passportFailed: 'Wir konnten Ihre Reisepassdaten gerade nicht speichern. Bitte versuchen Sie es erneut oder kontaktieren Sie uns, wenn das Problem weiter besteht.',
       passportRateLimited: 'Zu viele Versuche. Bitte warten Sie einige Minuten und versuchen Sie es erneut.',
       passportErrRequired: 'Bitte füllen Sie dieses Feld aus.',
@@ -1161,6 +1195,17 @@
       passportErrNotPast: 'Das Ausstellungsdatum muss vor dem heutigen Tag liegen.',
       passportErrTooSoon: 'Der Reisepass muss nach dem {date}, dem Ende dieser Reise, noch gültig sein.',
       passportErrBeforeIssue: 'Das Ablaufdatum muss nach dem Ausstellungsdatum liegen.',
+      passportContactTitle: 'Notfallkontakt',
+      passportContactSub: 'Ein Kontakt für alle Reisenden auf diesem Flug, falls die Fluggesellschaft jemanden erreichen muss. Er wird bei jedem Speichern der Reisepassdaten mitgesendet.',
+      passportContactEmail: 'E-Mail-Adresse',
+      passportContactDial: 'Ländervorwahl',
+      passportContactDialChoose: 'Ländervorwahl wählen',
+      passportContactPhone: 'Telefonnummer',
+      passportContactOnly: 'Der Notfallkontakt wird zusammen mit den Reisepassdaten gespeichert. Es haben sich keine Reisepassdaten geändert, daher gibt es noch nichts zu speichern.',
+      passportErrEmail: 'Bitte geben Sie eine vollständige E-Mail-Adresse ein, zum Beispiel name@beispiel.de.',
+      passportErrDialCode: 'Bitte wählen Sie eine Ländervorwahl aus der Liste.',
+      passportErrDigits: 'Bitte verwenden Sie nur Ziffern.',
+      passportErrPhoneLength: 'Bitte geben Sie 4 bis 15 Ziffern ein.',
       payNextBtn: 'Nächste Zahlung leisten',
       payBalanceBtn: 'Restbetrag zahlen',
       payConfirm: 'Zahlen',
@@ -1451,7 +1496,7 @@
       passportSaved: 'Datos del pasaporte guardados',
       passportSavedBody: 'Tu reserva ya contiene los datos que se muestran arriba.',
       passportNothing: 'No ha cambiado nada, así que no hay nada que guardar.',
-      passportCheck: 'Revisa los datos marcados abajo.',
+      passportCheck: 'Revisa los datos marcados arriba.',
       passportFailed: 'No hemos podido guardar los datos del pasaporte ahora mismo. Inténtalo de nuevo o contáctanos si el problema continúa.',
       passportRateLimited: 'Demasiados intentos. Espera unos minutos y vuelve a intentarlo.',
       passportErrRequired: 'Rellena este campo.',
@@ -1461,6 +1506,17 @@
       passportErrNotPast: 'La fecha de expedición debe ser anterior a hoy.',
       passportErrTooSoon: 'El pasaporte debe seguir siendo válido después del {date}, cuando termina este viaje.',
       passportErrBeforeIssue: 'La fecha de caducidad debe ser posterior a la de expedición.',
+      passportContactTitle: 'Contacto de emergencia',
+      passportContactSub: 'Un solo contacto para todos los viajeros de este vuelo, por si la aerolínea necesita comunicarse con alguien. Se envía cada vez que se guardan los datos del pasaporte.',
+      passportContactEmail: 'Correo electrónico',
+      passportContactDial: 'Prefijo del país',
+      passportContactDialChoose: 'Elige un prefijo',
+      passportContactPhone: 'Número de teléfono',
+      passportContactOnly: 'El contacto de emergencia se guarda junto con los datos del pasaporte. No ha cambiado ningún dato del pasaporte, así que todavía no hay nada que guardar.',
+      passportErrEmail: 'Introduce una dirección de correo completa, por ejemplo nombre@ejemplo.com.',
+      passportErrDialCode: 'Elige un prefijo de la lista.',
+      passportErrDigits: 'Usa solo números.',
+      passportErrPhoneLength: 'Introduce entre 4 y 15 dígitos.',
       payNextBtn: 'Pagar el próximo pago',
       payBalanceBtn: 'Pagar saldo',
       payConfirm: 'Pagar',
@@ -1751,7 +1807,7 @@
       passportSaved: 'Dati del passaporto salvati',
       passportSavedBody: 'La tua prenotazione ora contiene i dati mostrati sopra.',
       passportNothing: 'Non è cambiato nulla, quindi non c\'è niente da salvare.',
-      passportCheck: 'Controlla i dati evidenziati qui sotto.',
+      passportCheck: 'Controlla i dati evidenziati qui sopra.',
       passportFailed: 'Non siamo riusciti a salvare i dati del passaporto in questo momento. Riprova o contattaci se il problema continua.',
       passportRateLimited: 'Troppi tentativi. Attendi qualche minuto e riprova.',
       passportErrRequired: 'Compila questo campo.',
@@ -1761,6 +1817,17 @@
       passportErrNotPast: 'La data di rilascio deve essere precedente a oggi.',
       passportErrTooSoon: 'Il passaporto deve essere ancora valido dopo il {date}, quando finisce questo viaggio.',
       passportErrBeforeIssue: 'La data di scadenza deve essere successiva a quella di rilascio.',
+      passportContactTitle: 'Contatto di emergenza',
+      passportContactSub: 'Un solo contatto per tutti i passeggeri di questo volo, nel caso in cui la compagnia aerea debba raggiungere qualcuno. Viene inviato ogni volta che si salvano i dati del passaporto.',
+      passportContactEmail: 'Indirizzo email',
+      passportContactDial: 'Prefisso internazionale',
+      passportContactDialChoose: 'Scegli un prefisso',
+      passportContactPhone: 'Numero di telefono',
+      passportContactOnly: 'Il contatto di emergenza viene salvato insieme ai dati del passaporto. Nessun dato del passaporto è cambiato, quindi non c\'è ancora niente da salvare.',
+      passportErrEmail: 'Inserisci un indirizzo email completo, ad esempio nome@esempio.it.',
+      passportErrDialCode: 'Scegli un prefisso dall\'elenco.',
+      passportErrDigits: 'Usa solo numeri.',
+      passportErrPhoneLength: 'Inserisci da 4 a 15 cifre.',
       payNextBtn: 'Paga la prossima rata',
       payBalanceBtn: 'Paga il saldo',
       payConfirm: 'Paga',
@@ -2051,7 +2118,7 @@
       passportSaved: 'Datele pașaportului au fost salvate',
       passportSavedBody: 'Rezervarea ta conține acum datele afișate mai sus.',
       passportNothing: 'Nu s-a schimbat nimic, deci nu este nimic de salvat.',
-      passportCheck: 'Verifică datele marcate mai jos.',
+      passportCheck: 'Verifică datele marcate mai sus.',
       passportFailed: 'Nu am putut salva datele pașaportului acum. Încearcă din nou sau contactează-ne dacă problema continuă.',
       passportRateLimited: 'Prea multe încercări. Așteaptă câteva minute și încearcă din nou.',
       passportErrRequired: 'Completează acest câmp.',
@@ -2061,6 +2128,17 @@
       passportErrNotPast: 'Data emiterii trebuie să fie înainte de ziua de azi.',
       passportErrTooSoon: 'Pașaportul trebuie să fie valabil și după {date}, când se încheie această călătorie.',
       passportErrBeforeIssue: 'Data expirării trebuie să fie după data emiterii.',
+      passportContactTitle: 'Contact de urgență',
+      passportContactSub: 'Un singur contact pentru toți pasagerii acestui zbor, în cazul în care compania aeriană trebuie să ia legătura cu cineva. Se trimite de fiecare dată când se salvează datele pașaportului.',
+      passportContactEmail: 'Adresă de e-mail',
+      passportContactDial: 'Prefixul țării',
+      passportContactDialChoose: 'Alege un prefix',
+      passportContactPhone: 'Număr de telefon',
+      passportContactOnly: 'Contactul de urgență se salvează împreună cu datele pașaportului. Nu s-a schimbat nicio dată a pașaportului, deci nu este încă nimic de salvat.',
+      passportErrEmail: 'Introdu o adresă de e-mail completă, de exemplu nume@exemplu.ro.',
+      passportErrDialCode: 'Alege un prefix din listă.',
+      passportErrDigits: 'Folosește doar cifre.',
+      passportErrPhoneLength: 'Introdu între 4 și 15 cifre.',
       payNextBtn: 'Plătește următoarea rată',
       payBalanceBtn: 'Plătește soldul',
       payConfirm: 'Plătește',
@@ -2936,6 +3014,8 @@
     .tgm-pp-person legend { padding: 0 6px; font-size: 14px; font-weight: 600; color: var(--tgm-text); }
     .tgm-pp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
     .tgm-pp-field { display: block; min-width: 0; }
+    .tgm-pp-wide { grid-column: 1 / -1; }
+    .tgm-pp-hint { margin: 0 0 12px; font-size: 13px; line-height: 1.5; color: var(--tgm-text-2); }
     .tgm-pp-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--tgm-text-2); }
     .tgm-pp-input { width: 100%; height: 44px; padding: 0 12px; box-sizing: border-box; font-family: inherit; font-size: 15px; color: var(--tgm-text); background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-md); transition: border-color .15s, box-shadow .15s; }
     input.tgm-pp-input[data-pp-f="number"] { text-transform: uppercase; letter-spacing: .04em; }
@@ -3742,6 +3822,23 @@
     const hit = ppCountryOptions(lang).find((x) => x.code === code);
     return hit ? hit.name : code;
   }
+  let ppDialCache = null;
+  /** Every dialling code as "United Kingdom (+44)", named in the page's language and sorted by country. */
+  function ppDialOptions(lang) {
+    const want = lang || 'en';
+    if (ppDialCache && ppDialCache.lang === want) return ppDialCache.list;
+    let dn = null;
+    try { dn = new Intl.DisplayNames([want, 'en'], { type: 'region' }); } catch (e) { dn = null; }
+    const list = Object.keys(DIAL_CODES).map((iso) => {
+      let name = iso;
+      try { name = (dn && dn.of(iso)) || iso; } catch (e) { name = iso; }
+      return { iso, code: DIAL_CODES[iso], name };
+    });
+    try { list.sort((a, b) => a.name.localeCompare(b.name, want, { sensitivity: 'base' })); }
+    catch (e) { list.sort((a, b) => (a.name < b.name ? -1 : 1)); }
+    ppDialCache = { lang: want, list };
+    return list;
+  }
   /** A calendar day moved by n days, as a string, with no local clock involved. */
   function ppShiftDay(day, n) {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(day || ''));
@@ -3785,9 +3882,9 @@
       const maxIssued = ppShiftDay(ppToday(), -1);
       const minExpires = ppShiftDay(pp.lastDay, 1);
       const countries = ppCountryOptions(lang);
-      const field = (p, f, label, control) => {
+      const field = (p, f, label, control, wide) => {
         const base = `tgm-pp-${id}-${p.index}-${f}`;
-        return `<label class="tgm-pp-field"><span class="tgm-pp-label">${esc(label)}</span>${control(base)}`
+        return `<label class="tgm-pp-field${wide ? ' tgm-pp-wide' : ''}"><span class="tgm-pp-label">${esc(label)}</span>${control(base)}`
           + `<span class="tgm-pp-err" id="${base}-err" data-pp-err="${f}" hidden></span></label>`;
       };
       const person = (p) => {
@@ -3803,9 +3900,25 @@
             </div>
           </fieldset>`;
       };
+      // The emergency contact, once for the flight, above the passengers (the
+      // spec's second revision). Pre-filled from the primary passenger or the
+      // booking; a dialling code no country has is left for the customer to choose.
+      const k = pp.contact || {};
+      const dialIso = ppDialCountry(k.prefix);
+      const contact = `
+          <fieldset class="tgm-pp-person tgm-pp-contact" data-pp-index="contact">
+            <legend>${esc(c.t('passportContactTitle'))}</legend>
+            <p class="tgm-pp-hint">${esc(c.t('passportContactSub'))}</p>
+            <div class="tgm-pp-grid">
+              ${field({ index: 'contact' }, 'email', c.t('passportContactEmail'), (b) => `<input class="tgm-pp-input" id="${b}" type="email" inputmode="email" data-pp-f="email" value="${esc(k.email || '')}" maxlength="254" autocomplete="email" spellcheck="false" translate="no" aria-describedby="${b}-err">`, true)}
+              ${field({ index: 'contact' }, 'dial', c.t('passportContactDial'), (b) => `<select class="tgm-pp-input" id="${b}" data-pp-f="dial" aria-describedby="${b}-err"><option value="">${esc(c.t('passportContactDialChoose'))}</option>${ppDialOptions(lang).map((o) => `<option value="${o.iso}"${o.iso === dialIso ? ' selected' : ''}>${esc(o.name)} (+${o.code})</option>`).join('')}</select>`)}
+              ${field({ index: 'contact' }, 'phone', c.t('passportContactPhone'), (b) => `<input class="tgm-pp-input" id="${b}" type="tel" inputmode="numeric" data-pp-f="phone" value="${esc(ppDigits(k.number))}" autocomplete="tel-national" spellcheck="false" translate="no" aria-describedby="${b}-err">`)}
+            </div>
+          </fieldset>`;
       form = `
         <button type="button" class="tgm-amend-open tgm-pp-open" data-tgm-pp-open>${svg(IC.passport, 2, 18)}<span>${esc(people.some((p) => p.passport) ? c.t('passportEdit') : c.t('passportAdd'))}</span></button>
         <form class="tgm-pp-form" data-tgm-pp-form hidden novalidate>
+          ${contact}
           ${people.map(person).join('')}
           <div class="tgm-pp-msg" data-tgm-pp-msg></div>
           <div class="tgm-amend-actions">
@@ -5101,6 +5214,115 @@
     const n = String(number || '');
     if (!n) return '';
     return '••••' + (n.length > 4 ? n.slice(-4) : '');
+  }
+
+  /*
+   * EMERGENCY CONTACT (the spec's second revision, 25 Sep 2026). One email
+   * address and one telephone number for the booking, asked once in each
+   * flight's form and sent with every save as EmailAddress and Telephone
+   * { CountryPrefix, Number }. They start from the primary passenger's own
+   * (travellers[0].emailAddress and .telephone) and fall back to the booking's
+   * (customerEmail, customerTelPrefix, customerTelNum).
+   */
+
+  /** "GB:44 US:1 ..." into { GB: '44', US: '1', ... }. */
+  function ppPairs(s) {
+    const out = {};
+    s.split(' ').forEach((p) => { const i = p.indexOf(':'); if (i > 0) out[p.slice(0, i)] = p.slice(i + 1); });
+    return out;
+  }
+
+  /**
+   * Every country's dialling code, by the country it belongs to, as the ITU
+   * assigns them (generated from libphonenumber-js 1.13.14 on 25 Sep 2026; the
+   * platform had no list of its own). The passport countries that have a code,
+   * plus Ascension Island (AC) and Kosovo (XK), which have codes of their own but
+   * are not ISO passport countries. AQ BV GS HM PN TF UM have no code of their
+   * own and are left out. 244 entries.
+   */
+  const DIAL_CODES = ppPairs('AC:247 AD:376 AE:971 AF:93 AG:1 AI:1 AL:355 AM:374 AO:244 AR:54 AS:1 AT:43 AU:61 AW:297 AX:358 AZ:994'
+    + ' BA:387 BB:1 BD:880 BE:32 BF:226 BG:359 BH:973 BI:257 BJ:229 BL:590 BM:1 BN:673 BO:591 BQ:599 BR:55 BS:1'
+    + ' BT:975 BW:267 BY:375 BZ:501 CA:1 CC:61 CD:243 CF:236 CG:242 CH:41 CI:225 CK:682 CL:56 CM:237 CN:86 CO:57'
+    + ' CR:506 CU:53 CV:238 CW:599 CX:61 CY:357 CZ:420 DE:49 DJ:253 DK:45 DM:1 DO:1 DZ:213 EC:593 EE:372 EG:20'
+    + ' EH:212 ER:291 ES:34 ET:251 FI:358 FJ:679 FK:500 FM:691 FO:298 FR:33 GA:241 GB:44 GD:1 GE:995 GF:594'
+    + ' GG:44 GH:233 GI:350 GL:299 GM:220 GN:224 GP:590 GQ:240 GR:30 GT:502 GU:1 GW:245 GY:592 HK:852 HN:504'
+    + ' HR:385 HT:509 HU:36 ID:62 IE:353 IL:972 IM:44 IN:91 IO:246 IQ:964 IR:98 IS:354 IT:39 JE:44 JM:1 JO:962'
+    + ' JP:81 KE:254 KG:996 KH:855 KI:686 KM:269 KN:1 KP:850 KR:82 KW:965 KY:1 KZ:7 LA:856 LB:961 LC:1 LI:423'
+    + ' LK:94 LR:231 LS:266 LT:370 LU:352 LV:371 LY:218 MA:212 MC:377 MD:373 ME:382 MF:590 MG:261 MH:692 MK:389'
+    + ' ML:223 MM:95 MN:976 MO:853 MP:1 MQ:596 MR:222 MS:1 MT:356 MU:230 MV:960 MW:265 MX:52 MY:60 MZ:258 NA:264'
+    + ' NC:687 NE:227 NF:672 NG:234 NI:505 NL:31 NO:47 NP:977 NR:674 NU:683 NZ:64 OM:968 PA:507 PE:51 PF:689'
+    + ' PG:675 PH:63 PK:92 PL:48 PM:508 PR:1 PS:970 PT:351 PW:680 PY:595 QA:974 RE:262 RO:40 RS:381 RU:7 RW:250'
+    + ' SA:966 SB:677 SC:248 SD:249 SE:46 SG:65 SH:290 SI:386 SJ:47 SK:421 SL:232 SM:378 SN:221 SO:252 SR:597'
+    + ' SS:211 ST:239 SV:503 SX:1 SY:963 SZ:268 TC:1 TD:235 TG:228 TH:66 TJ:992 TK:690 TL:670 TM:993 TN:216'
+    + ' TO:676 TR:90 TT:1 TV:688 TW:886 TZ:255 UA:380 UG:256 US:1 UY:598 UZ:998 VA:39 VC:1 VE:58 VG:1 VI:1 VN:84'
+    + ' VU:678 WF:681 WS:685 XK:383 YE:967 YT:262 ZA:27 ZM:260 ZW:263'
+  );
+
+  /**
+   * Where countries share a code, the one a code alone pre-selects (the spec:
+   * "44 selects United Kingdom"). The code sent is the same whichever is chosen.
+   * test:mybooking-passport fails if a shared code is missing from here.
+   */
+  const DIAL_PRINCIPAL = {
+    1: 'US', 7: 'RU', 39: 'IT', 44: 'GB', 47: 'NO', 61: 'AU', 212: 'MA', 262: 'RE', 358: 'FI', 590: 'GP', 599: 'CW',
+  };
+
+  const CONTACT_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const CONTACT_NUMBER_RE = /^\d{4,15}$/;
+
+  /** Digits only: all a telephone field keeps of anything typed or pasted. */
+  function ppDigits(v) {
+    return (v == null ? '' : String(v)).replace(/\D+/g, '');
+  }
+
+  /** A dialling code as the API takes it: digits, no "+", no leading "00". */
+  function ppDialPrefix(v) {
+    return ppDigits(v).replace(/^0+/, '');
+  }
+
+  /** The country a dialling code pre-selects, or '' when no country has that code. */
+  function ppDialCountry(prefix) {
+    const code = ppDialPrefix(prefix);
+    if (!code) return '';
+    if (DIAL_PRINCIPAL[code]) return DIAL_PRINCIPAL[code];
+    const keys = Object.keys(DIAL_CODES);
+    for (let i = 0; i < keys.length; i++) if (DIAL_CODES[keys[i]] === code) return keys[i];
+    return '';
+  }
+
+  /**
+   * The emergency contact the form starts from. Email and telephone are decided
+   * separately: each is the primary passenger's own when they carry one (a
+   * telephone counts only with a number), otherwise the booking's.
+   */
+  function ppContactExisting(order, primary) {
+    const s = (v) => (v == null ? '' : String(v)).trim();
+    const email = s(ppField(primary, 'emailAddress')) || s(ppField(order, 'customerEmail'));
+    const tel = ppField(primary, 'telephone');
+    const own = tel && typeof tel === 'object' ? ppDigits(ppField(tel, 'number')) : '';
+    if (own) return { email, prefix: ppDialPrefix(ppField(tel, 'countryPrefix')), number: own };
+    return { email, prefix: ppDialPrefix(ppField(order, 'customerTelPrefix')), number: ppDigits(ppField(order, 'customerTelNum')) };
+  }
+
+  /**
+   * Check the emergency contact. Returns the tidied value and an error code per
+   * field that fails: email (required, email), prefix (required, dialCode),
+   * number (required, digits, phoneLength). The number is kept exactly as
+   * entered, a leading zero included.
+   */
+  function ppValidateContact(v) {
+    const s = (x) => (x == null ? '' : String(x)).trim();
+    const rawPrefix = s(v && v.prefix);
+    const value = { email: s(v && v.email), prefix: ppDialPrefix(rawPrefix), number: s(v && v.number) };
+    const errors = {};
+    if (!value.email) errors.email = 'required';
+    else if (value.email.length > 254 || !CONTACT_EMAIL_RE.test(value.email)) errors.email = 'email';
+    if (!rawPrefix) errors.prefix = 'required';
+    else if (!/^\+?\d{1,4}$/.test(rawPrefix) || !ppDialCountry(value.prefix)) errors.prefix = 'dialCode';
+    if (!value.number) errors.number = 'required';
+    else if (!/^\d+$/.test(value.number)) errors.number = 'digits';
+    else if (!CONTACT_NUMBER_RE.test(value.number)) errors.number = 'phoneLength';
+    return { value, errors };
   }
   // <<< passport rules
 
@@ -6990,9 +7212,19 @@
       const key = {
         required: 'passportErrRequired', format: 'passportErrFormat', country: 'passportErrCountry',
         date: 'passportErrDate', notPast: 'passportErrNotPast', tooSoon: 'passportErrTooSoon',
-        beforeIssue: 'passportErrBeforeIssue',
+        beforeIssue: 'passportErrBeforeIssue', email: 'passportErrEmail', dialCode: 'passportErrDialCode',
+        digits: 'passportErrDigits', phoneLength: 'passportErrPhoneLength',
       }[code] || 'passportErrRequired';
       return this.t(key, { date: pp && pp.lastDay ? fmtDate(pp.lastDay) : '' });
+    }
+
+    /** The contact's error codes keyed by the form's own field names (prefix is the dial list, number the phone box). */
+    _ppContactFields(errs) {
+      const out = {};
+      if (errs && errs.email) out.email = errs.email;
+      if (errs && errs.prefix) out.dial = errs.prefix;
+      if (errs && errs.number) out.phone = errs.number;
+      return out;
     }
 
     _bindPassports(root) {
@@ -7015,6 +7247,23 @@
           form.addEventListener('input', onEdit);
           form.addEventListener('change', onEdit);
           form.addEventListener('submit', (e) => { e.preventDefault(); this._submitPassport(id); });
+          // The emergency telephone number takes digits and nothing else: a
+          // typed letter or symbol never lands, and a pasted "+44 (0)7777 777 72"
+          // arrives as its digits. _ppInput tidies anything else that gets in.
+          const isPhone = (t) => !!(t && t.getAttribute && t.getAttribute('data-pp-f') === 'phone');
+          form.addEventListener('beforeinput', (e) => {
+            if (isPhone(e.target) && e.inputType === 'insertText' && e.data && /\D/.test(e.data)) e.preventDefault();
+          });
+          form.addEventListener('paste', (e) => {
+            const t = e.target;
+            const text = isPhone(t) && e.clipboardData ? e.clipboardData.getData('text') : null;
+            if (text == null) return;
+            e.preventDefault();
+            const start = typeof t.selectionStart === 'number' ? t.selectionStart : t.value.length;
+            const end = typeof t.selectionEnd === 'number' ? t.selectionEnd : start;
+            t.setRangeText(ppDigits(text), start, end, 'end');
+            t.dispatchEvent(new Event('input', { bubbles: true }));
+          });
         }
         const cancel = sec.querySelector('[data-tgm-pp-cancel]');
         if (cancel) cancel.addEventListener('click', () => {
@@ -7033,6 +7282,13 @@
       const fs = target.closest('[data-pp-index]');
       if (!fs) return;
       const index = fs.getAttribute('data-pp-index');
+      if (f === 'phone' && /\D/.test(target.value)) {
+        // Whatever slipped past the key and paste filters (autofill, a drop):
+        // digits only, with the caret kept after the same digit.
+        const at = typeof target.selectionStart === 'number' ? ppDigits(target.value.slice(0, target.selectionStart)).length : null;
+        target.value = ppDigits(target.value);
+        if (at !== null) { try { target.setSelectionRange(at, at); } catch (e) { /* not focused */ } }
+      }
       const st = this._ppState(sec.getAttribute('data-tgm-pp'));
       if (!st.values[index]) st.values[index] = {};
       st.values[index][f] = target.value;
@@ -7135,17 +7391,29 @@
         if (Object.keys(r.errors).length) errors[p.index] = r.errors;
         else entries.push(Object.assign({ index: p.index }, r.value));
       });
+      // The emergency contact goes with every save but is never a reason to
+      // save on its own (the spec's second revision): with no passenger to
+      // send, say so, and say why if the contact is what changed.
+      const cf = form && form.querySelector('[data-pp-index="contact"]');
+      const read = (f) => { const el = cf && cf.querySelector('[data-pp-f="' + f + '"]'); return el ? el.value : ''; };
+      const dialIso = read('dial');
+      const contact = { email: read('email'), prefix: dialIso ? (DIAL_CODES[dialIso] || '') : '', number: ppDigits(read('phone')) };
+      if (!Object.keys(errors).length && !entries.length) {
+        const k = pp.contact || {};
+        const moved = contact.email.trim() !== (k.email || '') || contact.prefix !== ppDialPrefix(k.prefix) || contact.number !== ppDigits(k.number);
+        st.errors = {};
+        st.msg = { kind: 'note', text: this.t(moved ? 'passportContactOnly' : 'passportNothing') };
+        paint();
+        return;
+      }
+      const kc = ppValidateContact(contact);
+      if (Object.keys(kc.errors).length) errors.contact = this._ppContactFields(kc.errors);
       st.errors = errors;
       if (Object.keys(errors).length) {
         st.msg = { kind: 'error', text: this.t('passportCheck') };
         paint();
         const firstBad = sec.querySelector('[aria-invalid="true"]');
         if (firstBad) firstBad.focus();   // the customer pressed Save, so this is theirs to see
-        return;
-      }
-      if (!entries.length) {
-        st.msg = { kind: 'note', text: this.t('passportNothing') };
-        paint();
         return;
       }
 
@@ -7164,6 +7432,7 @@
             departDate: this.lookup.date,
             orderRef: this.lookup.ref,
             itemId: String(id),
+            contact: kc.value,
             passengers: entries,
           }),
         });
@@ -7173,6 +7442,7 @@
         data = null;
       }
       entries.length = 0;
+      kc.value = null;
       st.busy = false;
 
       if (data && data.success === true) {
@@ -7193,8 +7463,10 @@
       }
       if (status === 429) st.msg = { kind: 'error', text: this.t('passportRateLimited') };
       else if (data && data.fields && typeof data.fields === 'object') {
-        st.errors = data.fields;
-        st.msg = { kind: 'error', text: data.error || this.t('passportCheck') };
+        st.errors = Object.assign({}, data.fields);
+        if (st.errors.contact) st.errors.contact = this._ppContactFields(st.errors.contact);
+        // Our own words, in the page's language: the server's are English.
+        st.msg = { kind: 'error', text: this.t('passportCheck') };
       } else if (data && data.nothing) st.msg = { kind: 'note', text: this.t('passportNothing') };
       else if (data && typeof data.error === 'string' && data.error) st.msg = { kind: 'error', text: data.error };
       else st.msg = { kind: 'error', text: this.t('passportFailed') };
