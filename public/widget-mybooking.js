@@ -272,8 +272,10 @@
   const API_CANCEL = (typeof window !== 'undefined' && window.__TG_CANCEL_API__) || (API_BASE + '/api/cancel-product');
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
   const API_AMEND = (typeof window !== 'undefined' && window.__TG_AMEND_API__) || (API_BASE + '/api/amend-order');
+  // Passport details for the people on a flight (25 Sep 2026). See api/update-passport.js.
+  const API_PASSPORT = (typeof window !== 'undefined' && window.__TG_PASSPORT_API__) || (API_BASE + '/api/update-passport');
   const AMEND_MAX = 1000; // matches the server cap in /api/amend-order
-  const VERSION = '1.15.0';
+  const VERSION = '1.16.0';
 
   // ── Payment deep link ──
   // The balance reminder email links to the client's booking page with
@@ -516,6 +518,35 @@
       amendDoneTitle: 'Request sent',
       amendDoneBody: 'We\'ve passed your request to the team. Nothing on your booking has changed yet, and we\'ll be in touch to confirm.',
       amendFailed: 'We couldn\'t send your request just now. Please try again, or contact us.',
+      passportTitle: 'Passport details',
+      passportSub: 'Your airline needs passport details for everyone on this flight. You can add or change them up to the day before you fly.',
+      passportClosedSub: 'Passport details for this flight can no longer be changed online. Please contact us if they need updating.',
+      passportAdd: 'Add passport details',
+      passportEdit: 'Update passport details',
+      passportNotAdded: 'Not added yet',
+      passportOnFile: 'Passport {masked}',
+      passportExpiresOn: 'expires {date}',
+      passportNumber: 'Passport number',
+      passportCountry: 'Issuing country',
+      passportCountryChoose: 'Choose a country',
+      passportIssued: 'Issue date',
+      passportExpires: 'Expiry date',
+      passportSave: 'Save passport details',
+      passportSaving: 'Saving…',
+      passportCancel: 'Cancel',
+      passportSaved: 'Passport details saved',
+      passportSavedBody: 'Your booking now holds the details shown above.',
+      passportNothing: 'Nothing has changed, so there is nothing to save.',
+      passportCheck: 'Please check the details marked below.',
+      passportFailed: 'We couldn\'t save your passport details just now. Please try again, or contact us if it keeps happening.',
+      passportRateLimited: 'Too many attempts. Please wait a few minutes and try again.',
+      passportErrRequired: 'Please fill this in.',
+      passportErrFormat: 'Use letters and numbers only, with no spaces (5 to 20 characters).',
+      passportErrCountry: 'Please choose a country from the list.',
+      passportErrDate: 'Please enter a real date.',
+      passportErrNotPast: 'The issue date must be before today.',
+      passportErrTooSoon: 'The passport must still be valid after {date}, when this trip ends.',
+      passportErrBeforeIssue: 'The expiry date must be after the issue date.',
       payNextBtn: 'Pay next payment',
       payBalanceBtn: 'Pay balance',
       payConfirm: 'Pay',
@@ -787,6 +818,35 @@
       amendDoneTitle: 'Demande envoyée',
       amendDoneBody: 'Nous avons transmis votre demande à l\'équipe. Rien n\'a encore changé sur votre réservation et nous vous contacterons pour confirmer.',
       amendFailed: 'Nous n\'avons pas pu envoyer votre demande pour le moment. Veuillez réessayer ou nous contacter.',
+      passportTitle: 'Informations de passeport',
+      passportSub: 'Votre compagnie aérienne a besoin des informations de passeport de chaque voyageur sur ce vol. Vous pouvez les ajouter ou les modifier jusqu\'à la veille du départ.',
+      passportClosedSub: 'Les informations de passeport de ce vol ne peuvent plus être modifiées en ligne. Contactez-nous si elles doivent être mises à jour.',
+      passportAdd: 'Ajouter les informations de passeport',
+      passportEdit: 'Mettre à jour les informations de passeport',
+      passportNotAdded: 'Pas encore ajouté',
+      passportOnFile: 'Passeport {masked}',
+      passportExpiresOn: 'expire le {date}',
+      passportNumber: 'Numéro de passeport',
+      passportCountry: 'Pays de délivrance',
+      passportCountryChoose: 'Choisissez un pays',
+      passportIssued: 'Date de délivrance',
+      passportExpires: 'Date d\'expiration',
+      passportSave: 'Enregistrer les informations',
+      passportSaving: 'Enregistrement…',
+      passportCancel: 'Annuler',
+      passportSaved: 'Informations de passeport enregistrées',
+      passportSavedBody: 'Votre réservation contient désormais les informations affichées ci-dessus.',
+      passportNothing: 'Rien n\'a changé, il n\'y a donc rien à enregistrer.',
+      passportCheck: 'Veuillez vérifier les informations signalées ci-dessous.',
+      passportFailed: 'Nous n\'avons pas pu enregistrer vos informations de passeport pour le moment. Veuillez réessayer ou nous contacter si le problème persiste.',
+      passportRateLimited: 'Trop de tentatives. Veuillez patienter quelques minutes avant de réessayer.',
+      passportErrRequired: 'Veuillez remplir ce champ.',
+      passportErrFormat: 'Lettres et chiffres uniquement, sans espaces (5 à 20 caractères).',
+      passportErrCountry: 'Veuillez choisir un pays dans la liste.',
+      passportErrDate: 'Veuillez saisir une date valide.',
+      passportErrNotPast: 'La date de délivrance doit être antérieure à aujourd\'hui.',
+      passportErrTooSoon: 'Le passeport doit être valide après le {date}, date de fin de ce voyage.',
+      passportErrBeforeIssue: 'La date d\'expiration doit être postérieure à la date de délivrance.',
       payNextBtn: 'Payer le prochain versement',
       payBalanceBtn: 'Payer le solde',
       payConfirm: 'Payer',
@@ -1058,6 +1118,35 @@
       amendDoneTitle: 'Anfrage gesendet',
       amendDoneBody: 'Wir haben Ihre Anfrage an das Team weitergeleitet. An Ihrer Buchung hat sich noch nichts geändert, und wir melden uns zur Bestätigung.',
       amendFailed: 'Wir konnten Ihre Anfrage gerade nicht senden. Bitte versuchen Sie es erneut oder kontaktieren Sie uns.',
+      passportTitle: 'Reisepassdaten',
+      passportSub: 'Ihre Fluggesellschaft benötigt die Reisepassdaten aller Reisenden auf diesem Flug. Sie können sie bis einen Tag vor dem Abflug hinzufügen oder ändern.',
+      passportClosedSub: 'Die Reisepassdaten für diesen Flug können online nicht mehr geändert werden. Bitte kontaktieren Sie uns, wenn sie aktualisiert werden müssen.',
+      passportAdd: 'Reisepassdaten hinzufügen',
+      passportEdit: 'Reisepassdaten aktualisieren',
+      passportNotAdded: 'Noch nicht hinzugefügt',
+      passportOnFile: 'Reisepass {masked}',
+      passportExpiresOn: 'gültig bis {date}',
+      passportNumber: 'Reisepassnummer',
+      passportCountry: 'Ausstellungsland',
+      passportCountryChoose: 'Land auswählen',
+      passportIssued: 'Ausstellungsdatum',
+      passportExpires: 'Ablaufdatum',
+      passportSave: 'Reisepassdaten speichern',
+      passportSaving: 'Wird gespeichert…',
+      passportCancel: 'Abbrechen',
+      passportSaved: 'Reisepassdaten gespeichert',
+      passportSavedBody: 'Ihre Buchung enthält jetzt die oben angezeigten Daten.',
+      passportNothing: 'Es hat sich nichts geändert, daher gibt es nichts zu speichern.',
+      passportCheck: 'Bitte prüfen Sie die unten markierten Angaben.',
+      passportFailed: 'Wir konnten Ihre Reisepassdaten gerade nicht speichern. Bitte versuchen Sie es erneut oder kontaktieren Sie uns, wenn das Problem weiter besteht.',
+      passportRateLimited: 'Zu viele Versuche. Bitte warten Sie einige Minuten und versuchen Sie es erneut.',
+      passportErrRequired: 'Bitte füllen Sie dieses Feld aus.',
+      passportErrFormat: 'Nur Buchstaben und Ziffern, ohne Leerzeichen (5 bis 20 Zeichen).',
+      passportErrCountry: 'Bitte wählen Sie ein Land aus der Liste.',
+      passportErrDate: 'Bitte geben Sie ein gültiges Datum ein.',
+      passportErrNotPast: 'Das Ausstellungsdatum muss vor dem heutigen Tag liegen.',
+      passportErrTooSoon: 'Der Reisepass muss nach dem {date}, dem Ende dieser Reise, noch gültig sein.',
+      passportErrBeforeIssue: 'Das Ablaufdatum muss nach dem Ausstellungsdatum liegen.',
       payNextBtn: 'Nächste Zahlung leisten',
       payBalanceBtn: 'Restbetrag zahlen',
       payConfirm: 'Zahlen',
@@ -1329,6 +1418,35 @@
       amendDoneTitle: 'Solicitud enviada',
       amendDoneBody: 'Hemos pasado tu solicitud al equipo. Aún no ha cambiado nada de tu reserva y nos pondremos en contacto para confirmar.',
       amendFailed: 'No hemos podido enviar tu solicitud ahora mismo. Inténtalo de nuevo o contáctanos.',
+      passportTitle: 'Datos del pasaporte',
+      passportSub: 'Tu aerolínea necesita los datos del pasaporte de todos los pasajeros de este vuelo. Puedes añadirlos o cambiarlos hasta el día antes de volar.',
+      passportClosedSub: 'Los datos del pasaporte de este vuelo ya no se pueden cambiar en línea. Contáctanos si necesitas actualizarlos.',
+      passportAdd: 'Añadir datos del pasaporte',
+      passportEdit: 'Actualizar datos del pasaporte',
+      passportNotAdded: 'Aún no añadido',
+      passportOnFile: 'Pasaporte {masked}',
+      passportExpiresOn: 'caduca el {date}',
+      passportNumber: 'Número de pasaporte',
+      passportCountry: 'País de expedición',
+      passportCountryChoose: 'Elige un país',
+      passportIssued: 'Fecha de expedición',
+      passportExpires: 'Fecha de caducidad',
+      passportSave: 'Guardar datos del pasaporte',
+      passportSaving: 'Guardando…',
+      passportCancel: 'Cancelar',
+      passportSaved: 'Datos del pasaporte guardados',
+      passportSavedBody: 'Tu reserva ya contiene los datos que se muestran arriba.',
+      passportNothing: 'No ha cambiado nada, así que no hay nada que guardar.',
+      passportCheck: 'Revisa los datos marcados abajo.',
+      passportFailed: 'No hemos podido guardar los datos del pasaporte ahora mismo. Inténtalo de nuevo o contáctanos si el problema continúa.',
+      passportRateLimited: 'Demasiados intentos. Espera unos minutos y vuelve a intentarlo.',
+      passportErrRequired: 'Rellena este campo.',
+      passportErrFormat: 'Solo letras y números, sin espacios (de 5 a 20 caracteres).',
+      passportErrCountry: 'Elige un país de la lista.',
+      passportErrDate: 'Introduce una fecha válida.',
+      passportErrNotPast: 'La fecha de expedición debe ser anterior a hoy.',
+      passportErrTooSoon: 'El pasaporte debe seguir siendo válido después del {date}, cuando termina este viaje.',
+      passportErrBeforeIssue: 'La fecha de caducidad debe ser posterior a la de expedición.',
       payNextBtn: 'Pagar el próximo pago',
       payBalanceBtn: 'Pagar saldo',
       payConfirm: 'Pagar',
@@ -1600,6 +1718,35 @@
       amendDoneTitle: 'Richiesta inviata',
       amendDoneBody: 'Abbiamo inoltrato la tua richiesta al team. Nulla della tua prenotazione è ancora cambiato e ti contatteremo per confermare.',
       amendFailed: 'Non siamo riusciti a inviare la tua richiesta in questo momento. Riprova o contattaci.',
+      passportTitle: 'Dati del passaporto',
+      passportSub: 'La compagnia aerea ha bisogno dei dati del passaporto di tutti i passeggeri di questo volo. Puoi aggiungerli o modificarli fino al giorno prima della partenza.',
+      passportClosedSub: 'I dati del passaporto per questo volo non possono più essere modificati online. Contattaci se devono essere aggiornati.',
+      passportAdd: 'Aggiungi i dati del passaporto',
+      passportEdit: 'Aggiorna i dati del passaporto',
+      passportNotAdded: 'Non ancora aggiunto',
+      passportOnFile: 'Passaporto {masked}',
+      passportExpiresOn: 'scade il {date}',
+      passportNumber: 'Numero del passaporto',
+      passportCountry: 'Paese di rilascio',
+      passportCountryChoose: 'Scegli un paese',
+      passportIssued: 'Data di rilascio',
+      passportExpires: 'Data di scadenza',
+      passportSave: 'Salva i dati del passaporto',
+      passportSaving: 'Salvataggio…',
+      passportCancel: 'Annulla',
+      passportSaved: 'Dati del passaporto salvati',
+      passportSavedBody: 'La tua prenotazione ora contiene i dati mostrati sopra.',
+      passportNothing: 'Non è cambiato nulla, quindi non c\'è niente da salvare.',
+      passportCheck: 'Controlla i dati evidenziati qui sotto.',
+      passportFailed: 'Non siamo riusciti a salvare i dati del passaporto in questo momento. Riprova o contattaci se il problema continua.',
+      passportRateLimited: 'Troppi tentativi. Attendi qualche minuto e riprova.',
+      passportErrRequired: 'Compila questo campo.',
+      passportErrFormat: 'Solo lettere e numeri, senza spazi (da 5 a 20 caratteri).',
+      passportErrCountry: 'Scegli un paese dall\'elenco.',
+      passportErrDate: 'Inserisci una data valida.',
+      passportErrNotPast: 'La data di rilascio deve essere precedente a oggi.',
+      passportErrTooSoon: 'Il passaporto deve essere ancora valido dopo il {date}, quando finisce questo viaggio.',
+      passportErrBeforeIssue: 'La data di scadenza deve essere successiva a quella di rilascio.',
       payNextBtn: 'Paga la prossima rata',
       payBalanceBtn: 'Paga il saldo',
       payConfirm: 'Paga',
@@ -1871,6 +2018,35 @@
       amendDoneTitle: 'Cerere trimisă',
       amendDoneBody: 'Am transmis cererea ta echipei. Nimic din rezervarea ta nu s-a schimbat încă și te vom contacta pentru confirmare.',
       amendFailed: 'Nu am putut trimite cererea ta acum. Încearcă din nou sau contactează-ne.',
+      passportTitle: 'Datele pașaportului',
+      passportSub: 'Compania aeriană are nevoie de datele pașaportului pentru toți pasagerii acestui zbor. Le poți adăuga sau modifica până cu o zi înainte de plecare.',
+      passportClosedSub: 'Datele pașaportului pentru acest zbor nu mai pot fi modificate online. Contactează-ne dacă trebuie actualizate.',
+      passportAdd: 'Adaugă datele pașaportului',
+      passportEdit: 'Actualizează datele pașaportului',
+      passportNotAdded: 'Neadăugat încă',
+      passportOnFile: 'Pașaport {masked}',
+      passportExpiresOn: 'expiră pe {date}',
+      passportNumber: 'Numărul pașaportului',
+      passportCountry: 'Țara emitentă',
+      passportCountryChoose: 'Alege o țară',
+      passportIssued: 'Data emiterii',
+      passportExpires: 'Data expirării',
+      passportSave: 'Salvează datele pașaportului',
+      passportSaving: 'Se salvează…',
+      passportCancel: 'Anulează',
+      passportSaved: 'Datele pașaportului au fost salvate',
+      passportSavedBody: 'Rezervarea ta conține acum datele afișate mai sus.',
+      passportNothing: 'Nu s-a schimbat nimic, deci nu este nimic de salvat.',
+      passportCheck: 'Verifică datele marcate mai jos.',
+      passportFailed: 'Nu am putut salva datele pașaportului acum. Încearcă din nou sau contactează-ne dacă problema continuă.',
+      passportRateLimited: 'Prea multe încercări. Așteaptă câteva minute și încearcă din nou.',
+      passportErrRequired: 'Completează acest câmp.',
+      passportErrFormat: 'Doar litere și cifre, fără spații (între 5 și 20 de caractere).',
+      passportErrCountry: 'Alege o țară din listă.',
+      passportErrDate: 'Introdu o dată validă.',
+      passportErrNotPast: 'Data emiterii trebuie să fie înainte de ziua de azi.',
+      passportErrTooSoon: 'Pașaportul trebuie să fie valabil și după {date}, când se încheie această călătorie.',
+      passportErrBeforeIssue: 'Data expirării trebuie să fie după data emiterii.',
       payNextBtn: 'Plătește următoarea rată',
       payBalanceBtn: 'Plătește soldul',
       payConfirm: 'Plătește',
@@ -2128,6 +2304,7 @@
     ref:     'M3 3h18v18H3zM9 9h6M9 13h6M9 17h4',
     refresh: 'M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-7.07 3M3 4v5h5',
     alert:   'M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01',
+    passport: 'M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM9 13a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM6.2 16.5a3 3 0 0 1 5.6 0M15 10h3M15 14h3',
     plane:   'M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z',
     bag:     'M16 3h-1V1h-2v2H7V1H5v2H4a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zM4 8h12v12H4V8z',
     bed:     'M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4M12 4v6M2 18h20',
@@ -2725,6 +2902,34 @@
     .tgm-amend-done-icon svg { width: 16px; height: 16px; }
     .tgm-amend-done-text { font-size: 13.5px; color: var(--tgm-text); line-height: 1.5; }
     .tgm-amend-done-text strong { display: block; margin-bottom: 2px; }
+
+    /* Passport details on a flight (25 Sep 2026). */
+    .tgm-pp { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--tgm-border); }
+    .tgm-pp [hidden] { display: none !important; }
+    .tgm-pp-title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; color: var(--tgm-text); }
+    .tgm-pp-title svg { flex: none; color: var(--tgm-accent-dark); }
+    .tgm-pp-sub { margin: 4px 0 12px; font-size: 13.5px; line-height: 1.5; color: var(--tgm-text-2); }
+    .tgm-pp-people { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 6px; }
+    .tgm-pp-people li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; padding: 10px 12px; background: var(--tgm-bg-2); border-radius: var(--tgm-radius-md); font-size: 13.5px; }
+    .tgm-pp-name { font-weight: 600; color: var(--tgm-text); }
+    .tgm-pp-status { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--tgm-text-2); }
+    .tgm-pp-status.is-done svg { flex: none; color: var(--tgm-success); }
+    .tgm-pp-form { margin-top: 12px; }
+    .tgm-pp-person { min-width: 0; margin: 0 0 12px; padding: 14px 16px 16px; border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); }
+    .tgm-pp-person legend { padding: 0 6px; font-size: 14px; font-weight: 600; color: var(--tgm-text); }
+    .tgm-pp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
+    .tgm-pp-field { display: block; min-width: 0; }
+    .tgm-pp-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--tgm-text-2); }
+    .tgm-pp-input { width: 100%; height: 44px; padding: 0 12px; box-sizing: border-box; font-family: inherit; font-size: 15px; color: var(--tgm-text); background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-md); transition: border-color .15s, box-shadow .15s; }
+    input.tgm-pp-input[data-pp-f="number"] { text-transform: uppercase; letter-spacing: .04em; }
+    .tgm-pp-input:focus { outline: 0; border-color: var(--tgm-accent); box-shadow: 0 0 0 3px rgba(0,180,216,.18); }
+    .tgm-pp-input[aria-invalid="true"] { border-color: var(--tgm-error); }
+    .tgm-root[data-theme="dark"] .tgm-pp-input { color-scheme: dark; }
+    .tgm-pp-err { display: block; margin-top: 5px; font-size: 12.5px; line-height: 1.4; color: color-mix(in srgb, var(--tgm-error) 78%, var(--tgm-text)); }
+    .tgm-pp-note { display: flex; gap: 8px; align-items: center; margin-top: 10px; padding: 9px 12px; font-size: 13px; color: var(--tgm-text-2); background: var(--tgm-bg-2); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-md); }
+    .tgm-pp-note svg { flex: none; }
+    .tgm-pp .tgm-amend-done { margin-top: 12px; }
+    .tgm-root.tgm-narrow .tgm-pp-grid { grid-template-columns: minmax(0, 1fr); }
 
     /* ----- Pay balance ----- */
     .tgm-pay-action { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--tgm-border-light); }
@@ -3421,6 +3626,7 @@
             </div>
           </div>
         ` : ''}
+        ${renderPassportSection(item, c)}
         ${meaningfulFareInfo.length ? `
           <div class="tgm-collapse" style="margin-top:16px; margin-bottom:0;">
             <button class="tgm-collapse-trig" type="button" aria-expanded="false">
@@ -3439,6 +3645,150 @@
         ` : ''}
       </div>
     `;
+  }
+
+  /** The found view's state, from a /api/retrieve-order answer. */
+  function foundStateFrom(data) {
+    const atol = data.atol && typeof data.atol === 'object' && typeof data.atol.type === 'string' ? { type: data.atol.type, label: String(data.atol.label || '') } : null;
+    return { stage: 'found', order: data.order, upsell: Array.isArray(data.upsell) ? data.upsell : [], atol, error: null };
+  }
+
+  /**
+   * The booking as the host page may see it in the booking-loaded event. The
+   * page is the client's own site and anything on it (analytics included) can
+   * read that event, so a flight's passport block, which carries full passport
+   * numbers while they can still be edited, stays inside the widget.
+   */
+  function orderForHostPage(order) {
+    if (!order || !Array.isArray(order.items) || !order.items.some((it) => it && it.passports)) return order;
+    return Object.assign({}, order, {
+      items: order.items.map((it) => {
+        if (!it || !it.passports) return it;
+        const copy = Object.assign({}, it);
+        delete copy.passports;
+        return copy;
+      }),
+    });
+  }
+
+  // ----- Passport details on a flight (25 Sep 2026) -----
+  //
+  // The spec "My Booking widget: passenger FOID (passport) capture for
+  // flights": each Flights item offers a passport block per person, infants
+  // aside, while Travelify's canEditFOID says yes and departure is at least a
+  // day away. /api/retrieve-order works that out and hands over item.passports;
+  // this draws it. Once editing has closed, whatever is on file shows read-only
+  // with only the last four characters of the number.
+  //
+  // The form is drawn from the booking. What the customer has typed lives on
+  // the instance (this._pp), never in storage, so a re-render for some other
+  // reason puts it straight back, and it is dropped once a save has landed.
+  const PP_FIELDS = ['number', 'country', 'issued', 'expires'];
+  let ppCountryCache = null;
+
+  /** Every issuing country, named in the page's language and sorted by that name. */
+  function ppCountryOptions(lang) {
+    const want = lang || 'en';
+    if (ppCountryCache && ppCountryCache.lang === want) return ppCountryCache.list;
+    let dn = null;
+    try { dn = new Intl.DisplayNames([want, 'en'], { type: 'region' }); } catch (e) { dn = null; }
+    const list = PASSPORT_COUNTRIES.map((code) => {
+      let name = code;
+      try { name = (dn && dn.of(code)) || code; } catch (e) { name = code; }
+      return { code, name };
+    });
+    try { list.sort((a, b) => a.name.localeCompare(b.name, want, { sensitivity: 'base' })); }
+    catch (e) { list.sort((a, b) => (a.name < b.name ? -1 : 1)); }
+    ppCountryCache = { lang: want, list };
+    return list;
+  }
+  function ppCountryName(code, lang) {
+    const hit = ppCountryOptions(lang).find((x) => x.code === code);
+    return hit ? hit.name : code;
+  }
+  /** A calendar day moved by n days, as a string, with no local clock involved. */
+  function ppShiftDay(day, n) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(day || ''));
+    if (!m) return '';
+    return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3] + n)).toISOString().slice(0, 10);
+  }
+  function ppPersonName(p) {
+    return [p.title, p.firstname, p.surname].filter(Boolean).join(' ');
+  }
+  /**
+   * Editable right now: the server said so when the page was drawn, AND today
+   * is still before departure. A page left open overnight into departure day
+   * stops offering the form even before anyone presses Save.
+   */
+  function ppOpenNow(pp) {
+    return !!(pp && pp.editable && pp.departDay && ppToday() < pp.departDay);
+  }
+
+  function renderPassportSection(item, c) {
+    const pp = item && item.passports;
+    if (!pp || !Array.isArray(pp.travellers) || !pp.travellers.length) return '';
+    const people = pp.travellers;
+    const open = ppOpenNow(pp);
+    if (!open && !people.some((p) => p.passport)) return '';
+    const lang = (c.t && c.t.lang) || 'en';
+    const id = String(item.id);
+
+    const status = (p) => {
+      const pass = p.passport;
+      if (!pass || !(pass.number || pass.masked)) {
+        return `<span class="tgm-pp-status">${esc(c.t('passportNotAdded'))}</span>`;
+      }
+      const bits = [c.t('passportOnFile', { masked: pass.masked || ppMask(pass.number) })];
+      if (pass.country) bits.push(ppCountryName(pass.country, lang));
+      if (pass.expires) bits.push(c.t('passportExpiresOn', { date: fmtDate(pass.expires) }));
+      return `<span class="tgm-pp-status is-done" translate="no">${svg(IC.check, 2.4, 14)}<span>${esc(bits.join(' · '))}</span></span>`;
+    };
+
+    let form = '';
+    if (open) {
+      const maxIssued = ppShiftDay(ppToday(), -1);
+      const minExpires = ppShiftDay(pp.lastDay, 1);
+      const countries = ppCountryOptions(lang);
+      const field = (p, f, label, control) => {
+        const base = `tgm-pp-${id}-${p.index}-${f}`;
+        return `<label class="tgm-pp-field"><span class="tgm-pp-label">${esc(label)}</span>${control(base)}`
+          + `<span class="tgm-pp-err" id="${base}-err" data-pp-err="${f}" hidden></span></label>`;
+      };
+      const person = (p) => {
+        const v = p.passport || {};
+        return `
+          <fieldset class="tgm-pp-person" data-pp-index="${esc(String(p.index))}">
+            <legend translate="no">${esc(ppPersonName(p))}</legend>
+            <div class="tgm-pp-grid">
+              ${field(p, 'number', c.t('passportNumber'), (b) => `<input class="tgm-pp-input" id="${b}" type="text" data-pp-f="number" value="${esc(v.number || '')}" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false" translate="no" aria-describedby="${b}-err">`)}
+              ${field(p, 'country', c.t('passportCountry'), (b) => `<select class="tgm-pp-input" id="${b}" data-pp-f="country" aria-describedby="${b}-err"><option value="">${esc(c.t('passportCountryChoose'))}</option>${countries.map((o) => `<option value="${o.code}"${o.code === v.country ? ' selected' : ''}>${esc(o.name)}</option>`).join('')}</select>`)}
+              ${field(p, 'issued', c.t('passportIssued'), (b) => `<input class="tgm-pp-input" id="${b}" type="date" data-pp-f="issued" value="${esc(v.issued || '')}"${maxIssued ? ` max="${maxIssued}"` : ''} aria-describedby="${b}-err">`)}
+              ${field(p, 'expires', c.t('passportExpires'), (b) => `<input class="tgm-pp-input" id="${b}" type="date" data-pp-f="expires" value="${esc(v.expires || '')}"${minExpires ? ` min="${minExpires}"` : ''} aria-describedby="${b}-err">`)}
+            </div>
+          </fieldset>`;
+      };
+      form = `
+        <button type="button" class="tgm-amend-open tgm-pp-open" data-tgm-pp-open>${svg(IC.passport, 2, 18)}<span>${esc(people.some((p) => p.passport) ? c.t('passportEdit') : c.t('passportAdd'))}</span></button>
+        <form class="tgm-pp-form" data-tgm-pp-form hidden novalidate>
+          ${people.map(person).join('')}
+          <div class="tgm-pp-msg" data-tgm-pp-msg></div>
+          <div class="tgm-amend-actions">
+            <button type="button" class="tgm-amend-cancel" data-tgm-pp-cancel>${esc(c.t('passportCancel'))}</button>
+            <button type="submit" class="tgm-amend-submit" data-tgm-pp-save>${svg(IC.check)}<span>${esc(c.t('passportSave'))}</span></button>
+          </div>
+        </form>`;
+    }
+
+    return `
+      <div class="tgm-pp" data-tgm-pp="${esc(id)}">
+        <div class="tgm-pp-title">${svg(IC.passport, 2, 18)}<span>${esc(c.t('passportTitle'))}</span></div>
+        <p class="tgm-pp-sub">${esc(open ? c.t('passportSub') : c.t('passportClosedSub'))}</p>
+        <ul class="tgm-pp-people">
+          ${people.map((p) => `<li><span class="tgm-pp-name" translate="no">${esc(ppPersonName(p))}</span>${status(p)}</li>`).join('')}
+        </ul>
+        ${form}
+        <div data-tgm-pp-result role="status"></div>
+      </div>`;
   }
 
   /**
@@ -4537,6 +4887,187 @@
   }
   // <<< order-money core
 
+  // ----- Passports: the rules, shared with the server -----
+  //
+  // A verbatim copy of the core of public/_passport-rules.js, the module
+  // /api/retrieve-order and /api/update-passport use. The widget is a single
+  // script on customer sites and cannot import, so the copy is held in step by
+  // test/passport-rules-drift-smoke.mjs. Edit the module, then copy the block;
+  // never edit here alone. The server checks everything again before it sends.
+  // >>> passport rules (verbatim copy lives in public/widget-mybooking.js)
+  /**
+   * Every ISO 3166-1 alpha-2 country, the codes Travelify takes for the issuing
+   * country. The platform names countries with Intl.DisplayNames (see
+   * countryName in api/_lib/fill/_source.js) but had no list of the codes
+   * themselves, so this is it. 249 codes.
+   */
+  const PASSPORT_COUNTRIES = ('AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ'
+    + ' BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER'
+    + ' ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM'
+    + ' IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF'
+    + ' MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK'
+    + ' PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD'
+    + ' TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW').split(' ');
+
+  const PASSPORT_NUMBER_RE = /^[A-Z0-9]{5,20}$/;
+  const PASSPORT_DAY_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+  /**
+   * A field read the way Travelify writes it. Its API treats canEditFOID and
+   * CanEditFOID, firstname and Firstname as the same field, so we read either.
+   */
+  function ppField(obj, name) {
+    if (!obj || typeof obj !== 'object') return undefined;
+    if (Object.prototype.hasOwnProperty.call(obj, name)) return obj[name];
+    const want = String(name).toLowerCase();
+    const keys = Object.keys(obj);
+    for (let i = 0; i < keys.length; i++) if (keys[i].toLowerCase() === want) return obj[keys[i]];
+    return undefined;
+  }
+
+  function ppList(v) { return Array.isArray(v) ? v : []; }
+
+  /** True for a real calendar day written YYYY-MM-DD (so 2027-02-30 is not). */
+  function ppRealDay(s) {
+    const m = PASSPORT_DAY_RE.exec(String(s || ''));
+    if (!m) return false;
+    const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+    return d.getUTCFullYear() === +m[1] && d.getUTCMonth() === +m[2] - 1 && d.getUTCDate() === +m[3];
+  }
+
+  /** The calendar day a supplier value names: its first ten characters, or ''. */
+  function ppDay(v) {
+    if (typeof v !== 'string') return '';
+    const s = v.trim().slice(0, 10);
+    return ppRealDay(s) ? s : '';
+  }
+
+  /** Today's calendar day, from the UTC fields like every booking day here. */
+  function ppToday() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function ppIsInfant(t) {
+    return String(ppField(t, 'type') || '').trim().toLowerCase() === 'infant';
+  }
+
+  /** The passport a traveller already has on the booking, tidied. Empty strings where there is none. */
+  function ppExisting(t) {
+    const s = (v) => (v == null ? '' : String(v)).trim();
+    return {
+      number: s(ppField(t, 'foidNumber')).toUpperCase(),
+      country: s(ppField(t, 'foidIssuingCountry')).toUpperCase(),
+      issued: ppDay(s(ppField(t, 'foidStartDate'))),
+      expires: ppDay(s(ppField(t, 'foidExpiryDate'))),
+    };
+  }
+
+  /** All four details present, so there is nothing to ask for. */
+  function ppComplete(p) {
+    return !!(p && p.number && p.country && p.issued && p.expires);
+  }
+
+  /**
+   * The two days the rules turn on: when they fly out (the earliest outbound
+   * departure) and the day the passport must outlast (the last inbound arrival,
+   * or the last outbound arrival on a one-way flight).
+   */
+  function ppFlightDays(d) {
+    const routes = ppList(ppField(d, 'routes'));
+    const dir = (r) => String(ppField(r, 'direction') || '').trim().toLowerCase();
+    let out = routes.filter((r) => dir(r) === 'outbound');
+    let back = routes.filter((r) => dir(r) === 'inbound');
+    // A flight whose routes carry no direction at all: the first is the way out.
+    if (!out.length && !back.length && routes.length) { out = [routes[0]]; back = routes.slice(1); }
+    const segs = (rs) => rs.reduce((acc, r) => acc.concat(ppList(ppField(r, 'segments'))), []);
+    const days = (list, field) => list.map((s) => ppDay(ppField(s, field))).filter(Boolean).sort();
+    const outDeparts = days(segs(out), 'depart');
+    const departDay = outDeparts[0] || '';
+    const lastArrivals = days(segs(back.length ? back : out), 'arrive');
+    const lastDay = lastArrivals[lastArrivals.length - 1] || outDeparts[outDeparts.length - 1] || '';
+    return { departDay, lastDay };
+  }
+
+  /**
+   * May this flight's passports be added or changed today?
+   * `people` lists the travellers who would get a passport block (no infants),
+   * each with its index in the item's own travellers array.
+   */
+  function ppEligibility(d, today) {
+    const day = PASSPORT_DAY_RE.test(String(today || '')) ? String(today) : ppToday();
+    const canEdit = ppField(d, 'canEditFOID') === true;
+    const days = ppFlightDays(d);
+    const people = [];
+    ppList(ppField(d, 'travellers')).forEach((t, index) => {
+      if (t && typeof t === 'object' && !ppIsInfant(t)) people.push({ index, traveller: t });
+    });
+    const inTime = !!days.departDay && day < days.departDay;
+    return {
+      canEdit,
+      inTime,
+      departDay: days.departDay,
+      lastDay: days.lastDay,
+      today: day,
+      people,
+      editable: canEdit && inTime && people.length > 0,
+    };
+  }
+
+  /** What the customer typed, tidied the way it will be stored. */
+  function ppClean(v) {
+    const s = (x) => (x == null ? '' : String(x)).trim();
+    return {
+      number: s(v && v.number).toUpperCase(),
+      country: s(v && v.country).toUpperCase(),
+      issued: s(v && v.issued),
+      expires: s(v && v.expires),
+    };
+  }
+
+  /** Nothing typed in any of the four. */
+  function ppBlank(v) {
+    return !v || (!v.number && !v.country && !v.issued && !v.expires);
+  }
+
+  /**
+   * Check one person's four details. Returns the tidied value and an error code
+   * per field that fails: required, format, country, date, notPast, tooSoon,
+   * beforeIssue. The page words each code in its own language.
+   */
+  function ppValidate(v, lastDay, today) {
+    const day = PASSPORT_DAY_RE.test(String(today || '')) ? String(today) : ppToday();
+    const value = ppClean(v);
+    const errors = {};
+    if (!value.number) errors.number = 'required';
+    else if (!PASSPORT_NUMBER_RE.test(value.number)) errors.number = 'format';
+    if (!value.country) errors.country = 'required';
+    else if (PASSPORT_COUNTRIES.indexOf(value.country) === -1) errors.country = 'country';
+    if (!value.issued) errors.issued = 'required';
+    else if (!ppRealDay(value.issued)) errors.issued = 'date';
+    else if (value.issued >= day) errors.issued = 'notPast';
+    if (!value.expires) errors.expires = 'required';
+    else if (!ppRealDay(value.expires)) errors.expires = 'date';
+    else if (lastDay && value.expires <= lastDay) errors.expires = 'tooSoon';
+    else if (!errors.issued && value.expires <= value.issued) errors.expires = 'beforeIssue';
+    return { value, errors };
+  }
+
+  /** Has anything changed from what the booking already holds? */
+  function ppChanged(existing, value) {
+    const e = existing || {};
+    const v = value || {};
+    return (e.number || '') !== (v.number || '') || (e.country || '') !== (v.country || '')
+      || (e.issued || '') !== (v.issued || '') || (e.expires || '') !== (v.expires || '');
+  }
+
+  /** A passport number as the page may show it when it cannot be edited: the last four only. */
+  function ppMask(number) {
+    const n = String(number || '');
+    if (!n) return '';
+    return '••••' + (n.length > 4 ? n.slice(-4) : '');
+  }
+  // <<< passport rules
+
   // >>> order-stays core (verbatim copy lives in public/widget-mybooking.js)
   /** Products that put a roof over someone's head for the night. */
   const STAY_PRODUCTS = ['Accommodation', 'Packages'];
@@ -5532,6 +6063,7 @@
       this.lookup = null;
       this._lastAttempt = null;            // pre-fills form on retry / try-again
       this._cancel = null;                 // active per-product cancellation flow state
+      this._pp = {};                       // passport forms by flight item id; memory only, never storage
       this._toastTimers = new Map();
       this._pdfBlob = null;          // cached blob, shared by preview & download
       this._pdfPreviewUrl = null;    // object URL for the inline iframe
@@ -5842,6 +6374,8 @@
       });
       const amendSubmit = root.querySelector('[data-tgm-amend-submit]');
       if (amendSubmit) amendSubmit.addEventListener('click', () => this._submitAmend(amendSubmit.closest('[data-tgm-amend]')));
+      // Passport details on each flight that offers them.
+      this._bindPassports(root);
       // If a cancellation flow was mid-way when the view re-rendered, paint it.
       if (this._cancel && this._cancel.open) this._renderCancelModal();
 
@@ -5993,8 +6527,8 @@
         // What else they could book, worked out by the API from the order it
         // just trimmed. The widget only draws it: deciding here would mean a
         // second copy of "which products are already on this booking".
-        const atol = data.atol && typeof data.atol === 'object' && typeof data.atol.type === 'string' ? { type: data.atol.type, label: String(data.atol.label || '') } : null;
-        this.state = { stage: 'found', order: data.order, upsell: Array.isArray(data.upsell) ? data.upsell : [], atol, error: null };
+        this._pp = {};   // a different booking: no passport form carries over
+        this.state = foundStateFrom(data);
         this._render();
         // The booking is up, so the details have done their job and come out of
         // the address bar. Only after success: a failed link is left in place so
@@ -6004,7 +6538,7 @@
           stripBookingDeepLink();
           rememberBookingLink(this.c.widgetId, { email, date, ref });
         }
-        this._fireEvent('booking-loaded', { order: data.order });
+        this._fireEvent('booking-loaded', { order: orderForHostPage(data.order) });
       } catch (err) {
         this.state = { stage: 'form', order: null, error: this.t('genericError') };
         this._render();
@@ -6390,6 +6924,273 @@
         showErr(this.c.labels?.amendFailed || this.t('amendFailed'));
       } catch (_) {
         showErr(this.c.labels?.amendFailed || this.t('amendFailed'));
+      }
+    }
+
+    // ===== Passport details on a flight (25 Sep 2026) =====
+    //
+    // State per flight item id in this._pp: { open, values, errors, msg, busy,
+    // saved }. `values` holds only what the customer has typed, so a re-render
+    // for any other reason puts it back; it never leaves memory, and it goes
+    // once a save has landed and the refreshed booking is on screen.
+
+    _ppState(id) {
+      if (!this._pp[id]) this._pp[id] = { open: false, values: {}, errors: {}, msg: null, busy: false, saved: false };
+      return this._pp[id];
+    }
+
+    _ppItem(id) {
+      const items = (this.state && this.state.order && Array.isArray(this.state.order.items)) ? this.state.order.items : [];
+      return items.find((it) => it && String(it.id) === String(id) && it.passports) || null;
+    }
+
+    _ppSection(id) {
+      const all = this.shadow.querySelectorAll('[data-tgm-pp]');
+      for (let i = 0; i < all.length; i++) if (all[i].getAttribute('data-tgm-pp') === String(id)) return all[i];
+      return null;
+    }
+
+    _ppErrText(code, pp) {
+      const key = {
+        required: 'passportErrRequired', format: 'passportErrFormat', country: 'passportErrCountry',
+        date: 'passportErrDate', notPast: 'passportErrNotPast', tooSoon: 'passportErrTooSoon',
+        beforeIssue: 'passportErrBeforeIssue',
+      }[code] || 'passportErrRequired';
+      return this.t(key, { date: pp && pp.lastDay ? fmtDate(pp.lastDay) : '' });
+    }
+
+    _bindPassports(root) {
+      root.querySelectorAll('[data-tgm-pp]').forEach((sec) => {
+        const id = sec.getAttribute('data-tgm-pp');
+        const form = sec.querySelector('[data-tgm-pp-form]');
+        const openBtn = sec.querySelector('[data-tgm-pp-open]');
+        if (openBtn && form) openBtn.addEventListener('click', () => {
+          const st = this._ppState(id);
+          st.open = true;
+          st.saved = false;
+          st.msg = null;
+          this._ppPaint(sec);
+          // A real click, so moving the cursor into the form is right.
+          const first = form.querySelector('[data-pp-f]');
+          if (first) first.focus();
+        });
+        if (form) {
+          const onEdit = (e) => this._ppInput(sec, e.target);
+          form.addEventListener('input', onEdit);
+          form.addEventListener('change', onEdit);
+          form.addEventListener('submit', (e) => { e.preventDefault(); this._submitPassport(id); });
+        }
+        const cancel = sec.querySelector('[data-tgm-pp-cancel]');
+        if (cancel) cancel.addEventListener('click', () => {
+          delete this._pp[id];
+          if (form) form.reset();   // back to what the booking holds
+          this._ppPaint(sec);
+          if (openBtn) openBtn.focus();
+        });
+        this._ppPaint(sec);   // whatever survived a re-render
+      });
+    }
+
+    _ppInput(sec, target) {
+      const f = target && target.getAttribute ? target.getAttribute('data-pp-f') : null;
+      if (!f) return;
+      const fs = target.closest('[data-pp-index]');
+      if (!fs) return;
+      const index = fs.getAttribute('data-pp-index');
+      const st = this._ppState(sec.getAttribute('data-tgm-pp'));
+      if (!st.values[index]) st.values[index] = {};
+      st.values[index][f] = target.value;
+      let repaint = !!st.msg;
+      if (st.errors[index] && st.errors[index][f]) { delete st.errors[index][f]; repaint = true; }
+      st.msg = null;
+      if (repaint) this._ppPaint(sec);
+    }
+
+    /** Put the in-memory state onto the section. Never touches a field that already says the same. */
+    _ppPaint(sec) {
+      const id = sec.getAttribute('data-tgm-pp');
+      const st = this._pp[id] || null;
+      const pp = (this._ppItem(id) || {}).passports || null;
+      const form = sec.querySelector('[data-tgm-pp-form]');
+      const openBtn = sec.querySelector('[data-tgm-pp-open]');
+      const msg = sec.querySelector('[data-tgm-pp-msg]');
+      const result = sec.querySelector('[data-tgm-pp-result]');
+      const isOpen = !!(st && st.open);
+      if (form) form.hidden = !isOpen;
+      if (openBtn) openBtn.hidden = isOpen;
+      // The form names each person, so the summary above it would only repeat them.
+      const people = sec.querySelector('.tgm-pp-people');
+      if (people && form) people.hidden = isOpen;
+      if (form && st) {
+        Object.keys(st.values).forEach((index) => {
+          const fs = form.querySelector('[data-pp-index="' + index + '"]');
+          if (!fs) return;
+          Object.keys(st.values[index]).forEach((f) => {
+            const el = fs.querySelector('[data-pp-f="' + f + '"]');
+            if (el && el.value !== st.values[index][f]) el.value = st.values[index][f];
+          });
+        });
+      }
+      if (form) {
+        form.querySelectorAll('[data-pp-err]').forEach((errEl) => {
+          const fs = errEl.closest('[data-pp-index]');
+          const index = fs ? fs.getAttribute('data-pp-index') : '';
+          const f = errEl.getAttribute('data-pp-err');
+          const code = st && st.errors[index] ? st.errors[index][f] : null;
+          errEl.hidden = !code;
+          errEl.textContent = code ? this._ppErrText(code, pp) : '';
+          const input = fs ? fs.querySelector('[data-pp-f="' + f + '"]') : null;
+          if (input) {
+            if (code) input.setAttribute('aria-invalid', 'true');
+            else input.removeAttribute('aria-invalid');
+          }
+        });
+        const save = form.querySelector('[data-tgm-pp-save]');
+        const label = save && save.querySelector('span');
+        if (save) save.disabled = !!(st && st.busy);
+        if (label) label.textContent = st && st.busy ? this.t('passportSaving') : this.t('passportSave');
+      }
+      if (msg) {
+        const m = st && st.msg;
+        msg.setAttribute('role', m && m.kind === 'error' ? 'alert' : 'status');
+        msg.innerHTML = !m ? ''
+          : m.kind === 'error'
+            ? `<div class="tgm-pay-error">${svg(IC.alert)}<span>${esc(m.text)}</span></div>`
+            : `<div class="tgm-pp-note">${svg(IC.info, 2, 16)}<span>${esc(m.text)}</span></div>`;
+      }
+      if (result) {
+        result.innerHTML = st && st.saved ? `
+          <div class="tgm-amend-done">
+            <div class="tgm-amend-done-icon">${svg(IC.check)}</div>
+            <div class="tgm-amend-done-text"><strong>${esc(this.t('passportSaved'))}</strong>${esc(this.t('passportSavedBody'))}</div>
+          </div>` : '';
+      }
+    }
+
+    async _submitPassport(id) {
+      const item = this._ppItem(id);
+      const pp = item && item.passports;
+      const st = this._ppState(id);
+      let sec = this._ppSection(id);
+      if (!pp || !sec || st.busy || !this.lookup || !this.c.widgetId) return;
+      const paint = () => { const live = this._ppSection(id); if (live) this._ppPaint(live); };
+
+      // Checked again now, not only when the page was drawn: a page left open
+      // past the cut-off must not submit (the server refuses it too).
+      if (!ppOpenNow(pp)) {
+        st.msg = { kind: 'error', text: this.t('passportClosedSub') };
+        paint();
+        return;
+      }
+
+      const today = ppToday();
+      const form = sec.querySelector('[data-tgm-pp-form]');
+      const entries = [];
+      const errors = {};
+      pp.travellers.forEach((p) => {
+        const fs = form && form.querySelector('[data-pp-index="' + p.index + '"]');
+        if (!fs) return;
+        const typed = {};
+        PP_FIELDS.forEach((f) => { const el = fs.querySelector('[data-pp-f="' + f + '"]'); typed[f] = el ? el.value : ''; });
+        const held = p.passport && !p.passport.masked ? p.passport : {};
+        // Untouched, or put back to what the booking already holds: not sent.
+        if (!ppChanged(ppClean(held), ppClean(typed))) return;
+        const r = ppValidate(typed, pp.lastDay, today);
+        if (Object.keys(r.errors).length) errors[p.index] = r.errors;
+        else entries.push(Object.assign({ index: p.index }, r.value));
+      });
+      st.errors = errors;
+      if (Object.keys(errors).length) {
+        st.msg = { kind: 'error', text: this.t('passportCheck') };
+        paint();
+        const firstBad = sec.querySelector('[aria-invalid="true"]');
+        if (firstBad) firstBad.focus();   // the customer pressed Save, so this is theirs to see
+        return;
+      }
+      if (!entries.length) {
+        st.msg = { kind: 'note', text: this.t('passportNothing') };
+        paint();
+        return;
+      }
+
+      st.busy = true;
+      st.msg = null;
+      paint();
+      let status = 0;
+      let data = null;
+      try {
+        const res = await fetch(API_PASSPORT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            widgetId: this.c.widgetId,
+            emailAddress: this.lookup.email,
+            departDate: this.lookup.date,
+            orderRef: this.lookup.ref,
+            itemId: String(id),
+            passengers: entries,
+          }),
+        });
+        status = res.status;
+        data = await res.json().catch(() => null);
+      } catch (e) {
+        data = null;
+      }
+      entries.length = 0;
+      st.busy = false;
+
+      if (data && data.success === true) {
+        // Saved. The typed values go now; the refreshed booking shows what
+        // Travelify holds, and the form is drawn from that.
+        this._pp[id] = { open: false, values: {}, errors: {}, msg: null, busy: false, saved: true };
+        this._fireEvent('passport-saved', { itemId: String(id), count: data.saved || 0 });
+        const refreshed = await this._refreshOrder();
+        if (!refreshed) {
+          // The save landed but the booking could not be read back: still
+          // clear what was typed out of the page, back to what it was drawn with.
+          const live = this._ppSection(id);
+          const f = live && live.querySelector('[data-tgm-pp-form]');
+          if (f) f.reset();
+          paint();
+        }
+        return;
+      }
+      if (status === 429) st.msg = { kind: 'error', text: this.t('passportRateLimited') };
+      else if (data && data.fields && typeof data.fields === 'object') {
+        st.errors = data.fields;
+        st.msg = { kind: 'error', text: data.error || this.t('passportCheck') };
+      } else if (data && data.nothing) st.msg = { kind: 'note', text: this.t('passportNothing') };
+      else if (data && typeof data.error === 'string' && data.error) st.msg = { kind: 'error', text: data.error };
+      else st.msg = { kind: 'error', text: this.t('passportFailed') };
+      paint();
+    }
+
+    /**
+     * Fetch the booking again without the loading screen, after something on
+     * it has changed. Returns true when the new booking is on screen.
+     */
+    async _refreshOrder() {
+      if (!this.lookup || !this.c.widgetId) return false;
+      try {
+        const res = await fetch(API_RETRIEVE, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            widgetId: this.c.widgetId,
+            emailAddress: this.lookup.email,
+            departDate: this.lookup.date,
+            orderRef: this.lookup.ref,
+          }),
+        });
+        if (!res.ok) return false;
+        const data = await res.json().catch(() => null);
+        if (!data || !data.order) return false;
+        this._discardPdfCache();
+        this.state = foundStateFrom(data);
+        this._render();
+        return true;
+      } catch (e) {
+        return false;
       }
     }
 

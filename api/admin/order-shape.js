@@ -164,6 +164,35 @@ function partyShape(items) {
  * person's name, so it is reported by its length only, in a list as well.
  */
 const ATOLISH = /(atol|protect|bond|licen[cs]e|caa|abta|pkgtype|packagetype|contracttype)/i;
+
+/**
+ * Passport details on each Flights item (25 Sep 2026), to settle the spec's
+ * first open point: which field names Travelify uses for a passport already on
+ * a booking. Field NAMES and whether each person has a value, never a value:
+ * a passport number does not belong in a support report. canEditFOID is shown
+ * as it came (a boolean, or its type when it is anything else), because the
+ * form only appears for boolean true.
+ */
+function passportShape(items) {
+  return (Array.isArray(items) ? items : []).slice(0, 12).map((it, index) => {
+    if (!isPlainObject(it) || !/^flights$/i.test(String(it.product || ''))) return null;
+    const d = isPlainObject(it.dataObject) ? it.dataObject : null;
+    if (!d) return { index, itemId: str(it.id), dataObject: typeof it.dataObject };
+    const flagKey = Object.keys(d).find((k) => /^caneditfoid$/i.test(k));
+    const flag = flagKey ? d[flagKey] : undefined;
+    const travellersKey = Object.keys(d).find((k) => /^travellers$/i.test(k));
+    const people = Array.isArray(d[travellersKey]) ? d[travellersKey].filter(isPlainObject) : [];
+    const foidKeys = new Set();
+    for (const p of people) for (const k of Object.keys(p)) if (/foid|passport/i.test(k)) foidKeys.add(k);
+    return {
+      index, itemId: str(it.id),
+      canEditFOID: flag === undefined ? '(missing)' : (typeof flag === 'boolean' ? flag : '(' + typeof flag + ')'),
+      travellers: people.length,
+      foidKeys: [...foidKeys].sort(),
+      withPassportValue: people.map((p) => Object.keys(p).some((k) => /foidnumber/i.test(k) && p[k] != null && String(p[k]).trim() !== '')),
+    };
+  }).filter(Boolean);
+}
 export function atolTrail(root, maxDepth = 8) {
   const out = [];
   const code = (x) => (/^[A-Za-z0-9_.\/-]{1,40}$/.test(x) ? x : '(text, ' + x.length + ' characters)');
@@ -230,6 +259,8 @@ export function buildOrderShapeReport(raw, opts) {
       status: str(it && it.status, 30), pricingFlags: isPlainObject(it) ? pricingFlags(it) : {},
     })),
     party: partyShape(items),
+    // Passport details on each flight: field names and flags only.
+    passports: passportShape(items),
     // Travelify's upsellsActive (24 Sep 2026): which upsells the application is
     // selling against this order. Product type names, nothing personal, so it
     // is shown as it came. If My Booking's "Add to your trip" has vanished,

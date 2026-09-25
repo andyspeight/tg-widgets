@@ -1,0 +1,104 @@
+// =============================================================================
+//  /api/_lib/passport-foid.js — passports on a flight, the server's half
+// =============================================================================
+//
+//  The rules live in public/_passport-rules.js (read that first). This file is
+//  the server-only part:
+//    - passportState(): what /api/retrieve-order puts on a Flights item so the
+//      My Booking page knows whether to offer the form and what to fill it with;
+//    - passengerBody(): one passenger for Travelify's updatepaxfoid body;
+//    - callUpdatePaxFoid(): the call itself.
+//
+//  A passport number reaches the page in full only while the customer may
+//  still edit it, because the form opens pre-filled with it. Once editing has
+//  closed, the page gets the last four characters and nothing more. A number
+//  is never logged (the spec: "Do not write passport numbers to console
+//  output, analytics or client-side logs").
+
+import { travelifyAuthHeaders } from './travelify.js';
+import {
+  ppField, ppEligibility, ppExisting, ppComplete, ppMask,
+} from '../../public/_passport-rules.js';
+
+export * from '../../public/_passport-rules.js';
+
+const UPDATE_PAX_FOID_BASE = 'https://api.travelify.io/updatepaxfoid';
+
+function str(v, max) {
+  if (v == null) return '';
+  return String(v).slice(0, max);
+}
+
+/**
+ * The passport block for a Flights item's dataObject, or null when the page
+ * has nothing to show (no form to offer and no passport already on file).
+ *
+ *   { editable, departDay, lastDay,
+ *     travellers: [{ index, type, title, firstname, surname,
+ *                    passport: { number, country, issued, expires }   // editable
+ *                           or { masked, country, expires } | null }] }  // read-only
+ */
+export function passportState(dataObject, today) {
+  const e = ppEligibility(dataObject, today);
+  const travellers = e.people.map(({ index, traveller }) => {
+    const p = ppExisting(traveller);
+    const has = !!(p.number || p.country || p.issued || p.expires);
+    return {
+      index,
+      type: str(ppField(traveller, 'type'), 30),
+      title: str(ppField(traveller, 'title'), 30),
+      firstname: str(ppField(traveller, 'firstname'), 80),
+      surname: str(ppField(traveller, 'surname'), 80),
+      complete: ppComplete(p),
+      passport: !has ? null
+        : e.editable ? { number: p.number, country: p.country, issued: p.issued, expires: p.expires }
+          : { masked: ppMask(p.number), country: p.country, expires: p.expires },
+    };
+  });
+  if (!e.editable && !travellers.some((t) => t.passport)) return null;
+  return {
+    editable: e.editable,
+    departDay: e.departDay,
+    lastDay: e.lastDay,
+    travellers,
+  };
+}
+
+/**
+ * One passenger for the request: every field the order holds for them, as
+ * the order holds it, under PascalCase names (the spec's own mapping:
+ * firstname to Firstname, middleNames to MiddleNames, dateOfBirth to
+ * DateOfBirth), then the five FOID fields from the form. The API reads either
+ * case, and one convention per request is the spec's rule, so every key is
+ * PascalCase. Nothing that is not a FOID field is changed, reformatted or
+ * dropped; any FOID field the order already carried is replaced, not doubled.
+ */
+export function passengerBody(traveller, value) {
+  const out = {};
+  for (const k of Object.keys(traveller || {})) {
+    if (/^foid/i.test(k)) continue;
+    const pascal = k.charAt(0).toUpperCase() + k.slice(1);
+    if (!Object.prototype.hasOwnProperty.call(out, pascal)) out[pascal] = traveller[k];
+  }
+  out.FOIDType = 'Passport';
+  out.FOIDNumber = value.number;
+  out.FOIDIssuingCountry = value.country;
+  out.FOIDStartDate = value.issued;
+  out.FOIDExpiryDate = value.expires;
+  return out;
+}
+
+/** POST https://api.travelify.io/updatepaxfoid/{orderId}/{orderKey}/{itemId}. */
+export async function callUpdatePaxFoid({ appId, apiKey }, { orderId, orderKey, itemId }, passengers) {
+  const url = `${UPDATE_PAX_FOID_BASE}/${encodeURIComponent(orderId)}/${encodeURIComponent(orderKey)}/${encodeURIComponent(itemId)}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: travelifyAuthHeaders(appId, apiKey),
+    body: JSON.stringify({ Passengers: passengers }),
+    signal: AbortSignal.timeout(15000),
+  });
+  const text = await res.text();
+  let json = null;
+  try { json = text ? JSON.parse(text) : null; } catch { json = null; }
+  return { status: res.status, ok: res.ok, json };
+}
