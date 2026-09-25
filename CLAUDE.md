@@ -41,8 +41,10 @@ Owner: Andy Speight, CEO, Travelgenix.
 - **Booking confirmation emails** (the Travelgenix webhook, the queue, the
   worker and the block-built email we are taking over from Travelify):
   `docs/booking-confirmation-emails.md`. Read it before touching
-  `api/v1/booking-webhook.js`, `api/cron/booking-confirmations.js` or the block
-  vocabulary in `public/_booking-email-template.js`.
+  `api/v1/booking-webhook.js`, `api/v1/booking-confirmations.js` (the direct
+  request the Travelify core posts to, 25 Sep 2026; its contract is published
+  at `/booking-confirmations-api`), `api/cron/booking-confirmations.js` or the
+  block vocabulary in `public/_booking-email-template.js`.
 
 - **ATOL certificates in My Booking** (the CAA's own certificate, filled in for
   a booking and attached to the page and the confirmation email):

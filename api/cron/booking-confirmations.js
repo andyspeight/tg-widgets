@@ -3,7 +3,10 @@
  *
  * Consumes the durable queue: Booking Confirmations rows with Status=Accepted
  * or Fetched, written by /api/v1/booking-webhook when the Travelgenix platform
- * pushes an order.complete. For each row it resolves the client's Travelify
+ * pushes an order.complete, or by /api/v1/booking-confirmations when the
+ * Travelify core asks for a confirmation directly (EventType api.confirmation,
+ * 25 Sep 2026). Both kinds are handled identically from here on: same switches,
+ * same send. For each row it resolves the client's Travelify
  * credentials from the applicationId, fetches the full order on the id + key
  * path, and asks /api/booking-email to send.
  *

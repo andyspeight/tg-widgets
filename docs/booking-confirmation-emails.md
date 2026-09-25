@@ -6,8 +6,16 @@ A4 pack attached. Travelify used to send this email; we are taking it over,
 client by client.
 
 Read this before touching anything under `api/v1/booking-webhook.js`,
-`api/cron/booking-confirmations.js`, `api/_lib/booking-confirmations.js` or the
-block vocabulary in `public/_booking-email-template.js`.
+`api/v1/booking-confirmations.js`, `api/cron/booking-confirmations.js`,
+`api/_lib/booking-confirmations.js` or the block vocabulary in
+`public/_booking-email-template.js`.
+
+**Two ways in, one email (25 Sep 2026).** A confirmation can now be asked for in
+two ways: the signed Travelgenix webhook each client connects in Travelify (the
+original route, below), or a direct request from the Travelify core to
+`POST /api/v1/booking-confirmations`, built the way `/api/v1/payment-reminders`
+is. Both land in the same table and are sent by the same worker. See **The
+direct request** below.
 
 ## The decisions, and who made them
 
@@ -64,6 +72,60 @@ asked for it.
 **Why the order is fetched first.** The webhook carries an order id and a
 security key but no departure date, and every booking lookup we have takes
 email + departure date + reference. The fetch is where those come from.
+
+## The direct request (25 Sep 2026)
+
+Andy: "We did an balance reminder API endpoint and now we want to add similar
+functionality for sending the booking confirmation. We need an endpoint that
+Darren can post to and then we will send the email." Darren is on the Travelify
+side; the contract he builds against is published at
+`https://widgets.travelify.io/booking-confirmations-api`
+(`public/booking-confirmations-api.html`).
+
+```
+Travelify core              us
+────────────────────────────────────────────────────────────────────────
+"confirm order N" ──POST──▶  /api/v1/booking-confirmations
+  X-Api-Key                  key checked before anything else
+  { applicationId,           validate; applicationId → client (400 if unknown)
+    orderId, orderKey }      this booking already queued or sent? → 409
+                             write one Airtable row (EventType api.confirmation)
+                             → 202 { status, reference, receivedAtUtc }
+                             kick the worker
+                                    │
+                             the SAME worker, the SAME switches, the SAME send
+```
+
+What it shares with the reminders, and where it differs:
+
+| | Payment reminders | Direct confirmation |
+|---|---|---|
+| Auth | `X-Api-Key` = `PAYMENT_REMINDER_API_KEY` | `X-Api-Key` = `BOOKING_CONFIRMATION_API_KEY`, or the reminder key while that is unset |
+| Body | applicationId, orderId, orderKey, reminderType, amountDue, currency, dueDate? | applicationId, orderId, orderKey |
+| Unknown application | 400 `Unknown applicationId` | the same |
+| A repeat | sends again: the caller decides | **409 duplicate** with the original reference |
+| Answer | 202 accepted + reference | the same |
+
+**One email per booking, across both doors.** The rule in the library ("a
+confirmation must never go twice") holds for the direct request, and across the
+two routes: the direct request stores the webhook's own key,
+`applicationId|orderId|order.complete`, so a booking queued or sent by either
+door is a duplicate at the other. A client wired up both ways therefore still
+sends one email. The one difference: the webhook treats ANY earlier row as a
+duplicate, while the direct request only counts rows that are Accepted, Fetched
+or Sent (`findLiveConfirmation`). A Skipped or Failed row sent nothing, so the
+core can ask again once whatever stopped it (usually the client's switch) is put
+right.
+
+**Everything after intake is unchanged.** `api.confirmation` is a sending event;
+the worker fetches the order, checks the global switch, the client's own switch,
+the demo application and the twelve-hour age limit exactly as for a webhook row,
+and sends through `/api/booking-email`.
+
+**Testing it end to end.** App 250 runs the chain and stops at Fetched (the rule
+above). To see a real email, put a Travelgenix-owned client's App ID in
+`BOOKING_CONFIRMATION_TEST_APP_IDS` and a test inbox in
+`BOOKING_CONFIRMATION_TEST_RECIPIENT`; the page tells Darren to ask us for this.
 
 ## The five-second rule
 
@@ -138,6 +200,7 @@ the other way round they get none.
 
 | Name | What it is |
 |---|---|
+| `BOOKING_CONFIRMATION_API_KEY` | Optional. The `X-Api-Key` for the direct request. While unset, the direct request accepts `PAYMENT_REMINDER_API_KEY`, the key the Travelify core already holds. Set it to give confirmations a key of their own; the reminder key then stops opening this door. |
 | `BOOKING_WEBHOOK_SECRET` | The Security Key set on every webhook connection. One platform key today; `resolveWebhookSecret` takes the application id so per-client keys can arrive later without the endpoint changing. |
 | `BOOKING_CONFIRMATION_SEND_ENABLED` | `true` to let emails leave. |
 | `BOOKING_CONFIRMATION_TEST_APP_IDS` | App IDs that may send while the above is off. |
@@ -270,6 +333,7 @@ Magazine sees what those blocks do.
 | Command | What it holds |
 |---|---|
 | `npm run test:booking-webhook` | The published payloads, the signature, the endpoint's answers, and every reason the worker does or does not send. |
+| `npm run test:booking-confirmation-api` | The direct request: the key, the body, the 202, the one-email rule across both doors (including Skipped/Failed not blocking a new request), the worker sending it like a webhook row, and the published page matching the code. |
 | `npm run test:confirmation-blocks` | The block vocabulary, the four starter styles, and that every block draws from a booking that has its material and draws nothing from one that does not. |
 | `npm run test:confirmation-layout` | The layout builder in the editor, driven for real. |
 | `npm run test:booking-email-drift` | One renderer for the preview and the send. |
