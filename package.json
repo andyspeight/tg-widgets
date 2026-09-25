@@ -264,7 +264,8 @@
     "test:order-shape-atol": "node test/order-shape-atol-smoke.mjs",
     "test:atol-certificate": "node test/atol-certificate-smoke.mjs",
     "test:runtime-selfcheck": "node test/runtime-selfcheck-smoke.mjs",
-    "test:api-esm": "node test/api-esm-smoke.mjs"
+    "test:api-esm": "node test/api-esm-smoke.mjs",
+    "test:mybooking-hidden-legs": "node test/mybooking-hidden-legs-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
