@@ -303,6 +303,15 @@ Swedish page Manchester City's MC badge read "Motorcycle" (MC is Swedish for
 motorcykel). Generated initials, and the proper names beside them, carry
 `translate="no"`. Guarded by `npm run test:clubpicker-featured`.
 
+**Hidden must mean hidden** (25 Sep 2026, fourth time). A class that sets
+`display` (`inline-flex`, `flex`, `grid`) beats the browser's own `[hidden]`
+rule, so `el.hidden = true` silently does nothing and a pressed button stays on
+screen. It bit the TG Slicer panel, Testimonials, the destinations dashboard and
+then My Booking's "Request a change" and "Pay balance". Give any stylesheet that
+toggles `hidden` one line near the top: `[hidden] { display: none !important; }`.
+Guarded for My Booking by `npm run test:mybooking-hidden-legs`; other widgets
+have not been swept.
+
 **Render must not grab the host page.** A widget's render/`update()` path must
 be side-effect-free for the page: never call `.focus()`, `.select()` or
 `scrollIntoView()` (nor autofocus) as part of drawing itself. Those belong ONLY

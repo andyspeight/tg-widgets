@@ -3,6 +3,20 @@
  * Self-contained, embeddable widget for retrieving and displaying confirmed bookings
  * Zero dependencies — works on any website via a single script tag
  *
+ * v1.16.1 changes (25 Sep 2026):
+ *   - "Request a change" and "Pay balance" now leave the screen when pressed.
+ *     Each hides itself with the hidden attribute, and its class's
+ *     display:inline-flex beat the browser's own [hidden] rule. One rule at
+ *     the top of STYLES makes hidden mean hidden across the widget.
+ *   - On a phone (and in a narrow container) the line between a leg's two
+ *     ends runs down the page with the duration and stops reading normally
+ *     beside it. It was the desktop line turned 90 degrees in a 24px box,
+ *     which put the words on their side and clipped the plane.
+ *   Guarded by test/mybooking-hidden-legs-smoke.mjs.
+ *
+ * v1.16.0 changes (25 Sep 2026): passport details for the people on a flight.
+ *   See docs/mybooking-passports.md.
+ *
  * v1.14.0 changes (21 Sep 2026, Exclusively Travel ET122149):
  *   - The seats and bags the customer chose now show. Travelify sends the
  *     WHOLE menu for a flight in dataObject.extraGroups (109 seats on
@@ -275,7 +289,7 @@
   // Passport details for the people on a flight (25 Sep 2026). See api/update-passport.js.
   const API_PASSPORT = (typeof window !== 'undefined' && window.__TG_PASSPORT_API__) || (API_BASE + '/api/update-passport');
   const AMEND_MAX = 1000; // matches the server cap in /api/amend-order
-  const VERSION = '1.16.0';
+  const VERSION = '1.16.1';
 
   // ── Payment deep link ──
   // The balance reminder email links to the client's booking page with
@@ -2537,6 +2551,10 @@
   // ----- Styles -----
   const STYLES = `
     :host { all: initial; display: block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+    /* A class that sets display beats the browser's own [hidden] rule, so
+       "Request a change" and "Pay balance" stayed on screen after they were
+       pressed. Hidden always means hidden in here. */
+    [hidden] { display: none !important; }
     *, *::before, *::after { box-sizing: border-box; }
 
     .tgm-root {
@@ -2905,7 +2923,6 @@
 
     /* Passport details on a flight (25 Sep 2026). */
     .tgm-pp { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--tgm-border); }
-    .tgm-pp [hidden] { display: none !important; }
     .tgm-pp-title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; color: var(--tgm-text); }
     .tgm-pp-title svg { flex: none; color: var(--tgm-accent-dark); }
     .tgm-pp-sub { margin: 4px 0 12px; font-size: 13.5px; line-height: 1.5; color: var(--tgm-text-2); }
@@ -3163,10 +3180,22 @@
     .tgm-seg-flight { font-size: 11px; color: var(--tgm-text-3); margin-top: 2px; }
     .tgm-stop-marker { padding: 8px 0 8px 12px; font-size: 12px; color: var(--tgm-text-3); border-left: 2px solid var(--tgm-border); margin-left: 26px; font-style: italic; }
 
+    /* On a phone the leg stacks, departure above arrival, and the line between
+       them runs down the page with the duration and stops reading normally
+       beside it. It used to be the desktop line turned 90 degrees in a 24px
+       box, which put the words on their side and clipped the plane. The same
+       rules are repeated for .tgm-narrow below. */
     @media (max-width: 480px) {
       .tgm-leg-route { grid-template-columns: 1fr; gap: 12px; }
       .tgm-leg-end.dest { text-align: left; }
-      .tgm-leg-line { transform: rotate(90deg); height: 24px; min-width: 0; width: 24px; align-self: center; }
+      .tgm-leg-line { display: grid; grid-template-columns: 14px auto; grid-template-rows: auto auto; column-gap: 12px; row-gap: 2px; min-width: 0; justify-self: start; }
+      .tgm-leg-line-bar { grid-column: 1; grid-row: 1 / 3; width: 2px; height: 48px; justify-self: center; }
+      .tgm-leg-line-bar::before { left: 50%; top: 0; transform: translateX(-50%); }
+      .tgm-leg-line-bar::after { left: 50%; right: auto; top: auto; bottom: 0; transform: translateX(-50%); }
+      .tgm-leg-line-icon { display: flex; padding: 4px 0; }
+      .tgm-leg-line-icon svg { transform: rotate(135deg); }
+      .tgm-leg-line-dur { grid-column: 2; grid-row: 1; margin: 0; align-self: end; font-size: 12px; }
+      .tgm-leg-stops { grid-column: 2; grid-row: 2; margin: 0; align-self: start; font-size: 12px; }
     }
 
     .tgm-extra-card { background: var(--tgm-bg); border: 1px solid var(--tgm-border); border-radius: var(--tgm-radius-lg); padding: 20px; margin-bottom: 16px; }
@@ -3280,7 +3309,14 @@
 
     .tgm-root.tgm-narrow .tgm-leg-route { grid-template-columns: 1fr; gap: 12px; }
     .tgm-root.tgm-narrow .tgm-leg-end.dest { text-align: left; }
-    .tgm-root.tgm-narrow .tgm-leg-line { transform: rotate(90deg); height: 24px; min-width: 0; width: 24px; align-self: center; }
+    .tgm-root.tgm-narrow .tgm-leg-line { display: grid; grid-template-columns: 14px auto; grid-template-rows: auto auto; column-gap: 12px; row-gap: 2px; min-width: 0; justify-self: start; }
+    .tgm-root.tgm-narrow .tgm-leg-line-bar { grid-column: 1; grid-row: 1 / 3; width: 2px; height: 48px; justify-self: center; }
+    .tgm-root.tgm-narrow .tgm-leg-line-bar::before { left: 50%; top: 0; transform: translateX(-50%); }
+    .tgm-root.tgm-narrow .tgm-leg-line-bar::after { left: 50%; right: auto; top: auto; bottom: 0; transform: translateX(-50%); }
+    .tgm-root.tgm-narrow .tgm-leg-line-icon { display: flex; padding: 4px 0; }
+    .tgm-root.tgm-narrow .tgm-leg-line-icon svg { transform: rotate(135deg); }
+    .tgm-root.tgm-narrow .tgm-leg-line-dur { grid-column: 2; grid-row: 1; margin: 0; align-self: end; font-size: 12px; }
+    .tgm-root.tgm-narrow .tgm-leg-stops { grid-column: 2; grid-row: 2; margin: 0; align-self: start; font-size: 12px; }
     .tgm-root.tgm-narrow .tgm-seg { grid-template-columns: 48px 1fr 48px; gap: 8px; font-size: 12px; }
     .tgm-root.tgm-narrow .tgm-kv { grid-template-columns: 1fr; gap: 4px 0; font-size: 13px; }
     .tgm-root.tgm-narrow .tgm-kv > div + div { margin-top: 8px; }
