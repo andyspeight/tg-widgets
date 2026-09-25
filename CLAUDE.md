@@ -289,6 +289,12 @@ carries its seat number instead of initials, the chip is "Seat 2C" with no
 trailing separator, and the party list still reads. All guarded by
 `npm run test:mybooking-seats`.
 
+**A monogram is not a word** (25 Sep 2026). A client's page may be read through
+the browser's translator, and it rewrites whatever looks like a word: on a
+Swedish page Manchester City's MC badge read "Motorcycle" (MC is Swedish for
+motorcykel). Generated initials, and the proper names beside them, carry
+`translate="no"`. Guarded by `npm run test:clubpicker-featured`.
+
 **Render must not grab the host page.** A widget's render/`update()` path must
 be side-effect-free for the page: never call `.focus()`, `.select()` or
 `scrollIntoView()` (nor autofocus) as part of drawing itself. Those belong ONLY

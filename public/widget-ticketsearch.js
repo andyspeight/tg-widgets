@@ -875,9 +875,9 @@
     var ini = String(name || '?').replace(/\([^)]*\)/g, ' ').split(/[^A-Za-z0-9]+/)
       .filter(function (w) { return w && !/^(fc|afc|the|of|and)$/i.test(w); });
     var initials = ini.length > 1 ? (ini[0][0] + ini[1][0]) : (ini[0] || '?').slice(0, 2);
-    var body = '<span class="tgts-badge" aria-hidden="true" style="background:hsl(' + h + ' 48% var(--tgts-badge-l));'
+    var body = '<span class="tgts-badge" translate="no" aria-hidden="true" style="background:hsl(' + h + ' 48% var(--tgts-badge-l));'
       + 'color:hsl(' + h + ' 62% var(--tgts-badge-t))">' + esc(initials.toUpperCase()) + '</span>'
-      + '<span class="tgts-cbody"><span class="tgts-cname">' + esc(name) + '</span>'
+      + '<span class="tgts-cbody"><span class="tgts-cname" translate="no">' + esc(name) + '</span>'
       + '<span class="tgts-cmeta">' + esc(meta) + '</span></span>';
     // A card with a filter target narrows the results to that entity's
     // events on click; a card with a link goes there; otherwise it is a

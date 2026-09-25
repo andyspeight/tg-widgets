@@ -42,6 +42,12 @@
     <button type="button" data-src="venues">Venues</button>
   </div>
 
+  <div class="controls" id="feat-controls">
+    <strong>Featured</strong>
+    <button type="button" data-feat="none" aria-pressed="true">None</button>
+    <button type="button" data-feat="banners">Six clubs as banners</button>
+    <button type="button" data-feat="all">Everything as banners</button>
+  </div>
   <div class="controls">
     <strong>Theme</strong>
     <button type="button" data-theme="light" aria-pressed="true">Light</button>
@@ -60,7 +66,8 @@
   <p class="note">
     <b>Badges are generated monograms, not crests.</b> Real club badges are licensed artwork the feed
     does not carry. The colour is hashed from the club's key, so a club looks the same in every widget
-    and on every page. Swapping in real assets later is one function.
+    and on every page. Swapping in real assets later is one function. Banners take the client's own
+    photos, set per club in the editor; without one, a banner is a plain card in the banner colour.
   </p>
 
 </div>
@@ -83,13 +90,25 @@
                heading: 'Great venues', subheading: 'Pick a ground to see what is on.' },
   };
 
-  var state = { src: 'pl', theme: 'light' };
+  // Featured clubs (25 Sep 2026): a client's six biggest clubs above the rest,
+  // drawn as banners like their own buttons, and taken out of the grid below.
+  var FEATURED = [
+    { key: 'arsenal', name: 'Arsenal' }, { key: 'liverpool', name: 'Liverpool' },
+    { key: 'manchester-city', name: 'Manchester City' }, { key: 'manchester-united', name: 'Manchester United' },
+    { key: 'chelsea', name: 'Chelsea' }, { key: 'tottenham-hotspur', name: 'Tottenham Hotspur' },
+  ];
+  var state = { src: 'pl', theme: 'light', feat: 'none' };
   var widget = null;
   var mount = document.getElementById('mount');
   var page = document.getElementById('page');
 
   function config() {
+    var feat = state.src === 'pl' && state.feat !== 'none';
     return Object.assign({}, SOURCES[state.src], {
+      featured: feat ? FEATURED : [],
+      featuredStyle: 'banner',
+      gridStyle: feat && state.feat === 'all' ? 'banner' : 'tile',
+      restHeading: feat ? 'All Premier League clubs' : '',
       theme: state.theme,
       appId: '250',
       accent: '#00B4D8',
@@ -110,6 +129,8 @@
 
   function apply() {
     page.className = 'page' + (state.theme === 'dark' ? ' dark' : '');
+    // Featured clubs are Premier League clubs, so the switch only means something there.
+    document.getElementById('feat-controls').style.display = state.src === 'pl' ? '' : 'none';
     if (widget) widget.update(config());
     snippet();
   }
@@ -130,7 +151,7 @@
   function boot() {
     if (!window.TGClubPickerWidget) { setTimeout(boot, 40); return; }
     widget = new window.TGClubPickerWidget(mount, config());
-    group('src', 'src'); group('theme', 'theme');
+    group('src', 'src'); group('theme', 'theme'); group('feat', 'feat');
     snippet();
   }
 

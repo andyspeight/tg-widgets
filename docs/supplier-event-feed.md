@@ -505,6 +505,42 @@ and the in-widget panel, so a client's own script can take the choice.
 The three Event Menu widgets that existed before 8 Sep 2026 all carry the old
 default address explicitly and keep linking to pages until it is cleared.
 
+### Club Picker: featured clubs and banners (25 Sep 2026)
+
+Andy, from a Swedish client's page, where the client had built their own row of
+buttons for their six biggest clubs above our grid: "Be able to select a number
+of teams as 'featured', and then they would sit above the rest and be marked as
+'featured Clubs'. They would be removed from the all clubs listing. Have a design
+option so that just the preferred teams and / or all the teams have the exact
+layout as the design in the client's buttons."
+
+- `featured: [{ key, name, image }]`, up to twelve, in the client's own order,
+  under `featuredHeading` ("Featured clubs", artists or venues when blank). They
+  leave the grid below, so no club appears twice. The dropdown still lists every
+  club: it is where a visitor looks a club up.
+- `restHeading` sits over the rest, and only when something is featured, so a
+  client can reproduce their own page ("Utvalda klubbar" above, "Alla klubbar i
+  Premier League" below) inside the one widget.
+- `featuredStyle` (default `banner`) and `gridStyle` (default `tile`) pick the
+  card for each section. A banner is the client's design: a dark card, their
+  photo under a wash of `bannerColor`, the name in `bannerTextColor` and a round
+  arrow. Its photo is the club's own (`featured[].image`, then `photos[]`), then
+  `bannerImage`, then none. Photos are https only and drawn as an `<img>`, never
+  a CSS `url()`. Upload in the editor goes through `/api/upload-photo`, the same
+  route the Tour and Offer Builder editors use.
+- A featured club shows by the name saved with it until the grid has loaded,
+  and still opens by its key if the grid never brings it back.
+- Guarded by `test:clubpicker-featured` (the widget, jsdom) and
+  `test:clubpicker-featured-editor` (the editor, Chromium).
+
+### Monograms are not words: translate="no" (25 Sep 2026)
+
+On that same Swedish page, Manchester City's badge read "Motorcycle". Our
+monogram is MC, and MC is the Swedish short form of motorcykel, so the
+browser's page translation rewrote it. Every monogram (Club Picker, Ticket
+Search, our own events pages) and the club names beside them now carry
+`translate="no"`. A new badge anywhere needs the same.
+
 ### Breakpoints are container queries, not media queries
 
 Every layout breakpoint in these widgets is `@container`, with

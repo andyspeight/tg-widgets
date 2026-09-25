@@ -7,6 +7,38 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/editor-shell.css">
 <link rel="stylesheet" href="/editor-events-kit.css">
+<style>
+  /* Featured clubs and banner photos (25 Sep 2026). One row per club: its
+     name and order controls on top, its photo underneath when banners use it. */
+  .fr-row { padding: 9px 10px; margin-bottom: 8px; border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); background: var(--tgse-panel); }
+  .fr-top { display: flex; align-items: center; gap: 8px; }
+  .fr-badge { flex: none; width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; }
+  .fr-name { flex: 1; min-width: 0; font-size: 13px; font-weight: 600; color: var(--tgse-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fr-ctl { flex: none; display: inline-flex; gap: 4px; }
+  .fr-ctl button { background: none; border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-sm); color: var(--tgse-ink-3); font: inherit; font-size: 13px; line-height: 1; width: 28px; height: 28px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+  .fr-ctl button:hover:not(:disabled) { color: var(--tgse-ink); border-color: var(--tgse-border-strong); }
+  .fr-ctl button:disabled { opacity: .4; cursor: default; }
+  .fr-ctl .fr-del:hover { color: var(--tgse-danger); border-color: var(--tgse-danger); }
+  .fr-ctl button:focus-visible, .fr-up:focus-visible { outline: 2px solid var(--tgse-brand); outline-offset: 1px; }
+  .fr-ctl svg { width: 14px; height: 14px; }
+  .fr-photo { display: flex; gap: 6px; margin-top: 8px; }
+  .fr-photo .input { flex: 1; min-width: 0; font-size: 12px; }
+  .fr-up { flex: none; display: inline-flex; align-items: center; gap: 5px; padding: 0 10px; border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); background: var(--tgse-panel); color: var(--tgse-ink-2); font: inherit; font-size: 12px; font-weight: 500; cursor: pointer; }
+  .fr-up:hover:not(:disabled) { border-color: var(--tgse-brand); color: var(--tgse-ink); }
+  .fr-up:disabled { opacity: .6; cursor: progress; }
+  .fr-up svg { width: 14px; height: 14px; }
+  .fr-warn { font-size: 11.5px; color: var(--tgse-warning); margin-top: 5px; }
+  .fr-pick { margin-top: 4px; }
+  .fr-list { max-height: 260px; overflow: auto; margin-top: 6px; border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); background: var(--tgse-panel); }
+  .fr-list:empty { display: none; }
+  .fr-opt { display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 10px; border: 0; border-bottom: 1px solid var(--tgse-border); background: none; font: inherit; font-size: 12.5px; color: var(--tgse-ink); text-align: left; cursor: pointer; }
+  .fr-opt:last-child { border-bottom: 0; }
+  .fr-opt:hover { background: var(--tgse-hover); }
+  .fr-opt:focus-visible { outline: 2px solid var(--tgse-brand); outline-offset: -2px; }
+  .fr-note { padding: 9px 10px; font-size: 12px; color: var(--tgse-ink-3); }
+  .fr-add-row { display: flex; gap: 8px; margin-top: 2px; }
+  .fr-hint { margin: 0 0 10px; }
+</style>
 </head>
 <body>
 
@@ -94,6 +126,29 @@
                 <input type="range" id="f-max" min="4" max="60" step="2">
                 <span class="slider-val" id="v-max">24</span>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section" id="sec-featured">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <span class="tgse-section-label">Featured</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <div class="field-help fr-hint" id="feat-hint">Pick the clubs to show first, in the order you want them. They sit above the rest and come out of the grid below, so none appears twice.</div>
+              <div id="feat-rows"></div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-featHeading">Heading over them</label>
+              <input class="input" type="text" id="f-featHeading" maxlength="90" placeholder="Featured clubs">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-restHeading">Heading over the others</label>
+              <input class="input" type="text" id="f-restHeading" maxlength="90" placeholder="Optional, for example All clubs">
+              <div class="field-help">Shown only when something is featured.</div>
             </div>
           </div>
         </div>
@@ -188,6 +243,59 @@
             <div class="toggle-row">
               <div><div class="toggle-label">Home ground</div></div>
               <button class="switch is-on" id="t-homev" type="button" role="switch" aria-checked="true" aria-label="Show home ground"></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section" id="sec-cardstyle">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M15 12h3M16.5 10.5 18 12l-1.5 1.5"/></svg>
+            <span class="tgse-section-label">Card style</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Featured</label>
+              <div class="seg" id="f-featstyle" role="group" aria-label="Featured card style">
+                <button type="button" data-v="banner" aria-pressed="true">Banner</button>
+                <button type="button" data-v="tile">Badge tile</button>
+              </div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Everything else</label>
+              <div class="seg" id="f-gridstyle" role="group" aria-label="Card style for the rest of the grid">
+                <button type="button" data-v="tile" aria-pressed="true">Badge tile</button>
+                <button type="button" data-v="banner">Banner</button>
+              </div>
+              <div class="field-help">A banner is a dark photo card with the name in large type and a round arrow.</div>
+            </div>
+            <div id="banner-opts">
+              <div class="tgse-field">
+                <label class="tgse-field-label" for="f-bncolor">Banner colour</label>
+                <div class="colour-row">
+                  <input type="color" id="f-bncolor-swatch" aria-label="Pick banner colour">
+                  <input class="input" type="text" id="f-bncolor" maxlength="7" spellcheck="false">
+                </div>
+                <div class="field-help">The card itself, and the wash over any photo so the name stays readable.</div>
+              </div>
+              <div class="tgse-field">
+                <label class="tgse-field-label" for="f-bntext">Banner text</label>
+                <div class="colour-row">
+                  <input type="color" id="f-bntext-swatch" aria-label="Pick banner text colour">
+                  <input class="input" type="text" id="f-bntext" maxlength="7" spellcheck="false">
+                </div>
+                <div class="field-help">The name and the round arrow button.</div>
+              </div>
+              <div class="tgse-field">
+                <label class="tgse-field-label" for="f-bnimage">Background photo</label>
+                <div id="bn-image"></div>
+                <div class="field-help">Behind any banner that has no photo of its own. Use photos you have the rights to.</div>
+              </div>
+              <div class="tgse-field" id="photos-field" hidden>
+                <label class="tgse-field-label">Photos for other clubs</label>
+                <div class="field-help fr-hint">Give any club in the rest of the grid its own photo. The others use the background photo.</div>
+                <div id="photo-rows"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -400,6 +508,15 @@
     radius: 12,
     fontFamily: 'Inter',
     appId: '250',
+    featured: [],
+    featuredHeading: '',
+    restHeading: '',
+    featuredStyle: 'banner',
+    gridStyle: 'tile',
+    photos: [],
+    bannerImage: '',
+    bannerColor: '#0B1330',
+    bannerTextColor: '#FFFFFF',
   };
 
   var widget = null;
@@ -410,13 +527,16 @@
     widgetTag: 'clubpicker',
     scriptFile: 'widget-clubpicker.js',
     getConfig: function () { return C; },
-    setConfig: function (c) { C = Object.assign({}, C, c); syncForm(); render(); },
+    // In place, never a new object: K.controls holds on to C as it was when it
+    // was wired, so replacing C left every control after a template writing to
+    // a copy nobody reads (found 25 Sep 2026).
+    setConfig: function (c) { Object.assign(C, c); syncForm(); render(); },
     fontPickerEl: '#fontPickerMount',
     onFontChange: function (f) { C.fontFamily = f; changed(); },
     onAIBuild: function () { tgse.toast('AI builder is not wired for this widget yet — use Templates', 'ok'); },
     onTemplates: function () {
       K.templates(TEMPLATES, function (cfg) {
-        C = Object.assign({}, C, cfg); syncForm(); changed(); tgse.toast('Template applied', 'ok');
+        Object.assign(C, cfg); syncForm(); changed(); tgse.toast('Template applied', 'ok');
       });
     },
     onThemeToggle: function (isDark) { C.theme = isDark ? 'dark' : 'light'; changed(); },
@@ -475,6 +595,319 @@
     if (picker) picker.sync();
   }
 
+  // ── Featured clubs and banner photos (25 Sep 2026) ──────────────────────
+  //
+  // Andy: "Be able to select a number of teams as 'featured', and then they
+  // would sit above the rest ... Have a design option so that just the
+  // preferred teams and / or all the teams have the exact layout as the design
+  // in the client's buttons." The clubs to choose from are the ones this grid
+  // shows (the competition's own), so a featured club is always one that
+  // belongs here. Photos go through the suite's existing upload (the Tour and
+  // Offer Builder editors use it), and only the returned https address is kept.
+
+  var MAX_FEATURED = 12;
+  var MAX_PHOTOS = 60;
+  var HTTPS_IMG = /^https:\/\/[^\s"'<>()\\]+$/i;   // the widget's own rule (safeImage)
+  var SVG = function (inner) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>';
+  };
+  var ICO = {
+    up: SVG('<polyline points="18 15 12 9 6 15"/>'),
+    down: SVG('<polyline points="6 9 12 15 18 9"/>'),
+    del: SVG('<path d="M18 6 6 18M6 6l12 12"/>'),
+    upload: SVG('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>'),
+  };
+
+  function mk(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  function noun() {
+    return C.gridOf === 'performer' ? 'artists' : C.gridOf === 'venue' ? 'venues' : 'clubs';
+  }
+
+  var blobMod = null;
+  function blobClient() {
+    if (blobMod) return Promise.resolve(blobMod);
+    return import('https://esm.sh/@vercel/blob@0.27.0/client').then(function (m) { blobMod = m; return m; });
+  }
+  function uploadPhoto(file) {
+    if (!file || !/^image\/(jpeg|png|webp|gif|avif)$/i.test(file.type)) return Promise.reject(new Error('type'));
+    if (file.size > 8 * 1024 * 1024) return Promise.reject(new Error('size'));
+    var clean = String(file.name || 'photo').replace(/[^a-zA-Z0-9._-]/g, '-').slice(-64);
+    return blobClient().then(function (m) {
+      return m.upload('offer-photos/clubpicker-' + Date.now() + '-' + clean, file,
+        { access: 'public', contentType: file.type, handleUploadUrl: '/api/upload-photo' });
+    }).then(function (b) {
+      if (!b || !b.url) throw new Error('no url');
+      return b.url;
+    });
+  }
+
+  /** A photo address with an Upload button beside it. Typing never redraws the list. */
+  function photoField(getUrl, setUrl, label) {
+    var wrap = mk('div');
+    var line = mk('div', 'fr-photo');
+    var input = mk('input', 'input');
+    input.type = 'url';
+    input.maxLength = 1000;
+    input.placeholder = 'https://… or upload a photo';
+    input.setAttribute('aria-label', label);
+    input.value = getUrl() || '';
+    var warn = mk('div', 'fr-warn', 'Use a full https:// address, or this photo will not show.');
+    function check() {
+      var v = input.value.trim();
+      warn.hidden = !v || HTTPS_IMG.test(v);
+    }
+    input.addEventListener('input', function () { setUrl(input.value.trim()); check(); });
+
+    var file = mk('input');
+    file.type = 'file';
+    file.accept = 'image/jpeg,image/png,image/webp,image/gif';
+    file.hidden = true;
+    var btn = mk('button', 'fr-up');
+    btn.type = 'button';
+    btn.innerHTML = ICO.upload;
+    var lbl = mk('span', '', 'Upload');
+    btn.appendChild(lbl);
+    btn.addEventListener('click', function () { file.click(); });
+    file.addEventListener('change', function () {
+      var f = file.files && file.files[0];
+      file.value = '';
+      if (!f) return;
+      btn.disabled = true;
+      lbl.textContent = 'Uploading…';
+      uploadPhoto(f).then(function (url) {
+        input.value = url;
+        setUrl(url);
+        check();
+        tgse.toast('Photo uploaded', 'ok');
+      }).catch(function (e) {
+        var m = e && e.message;
+        tgse.toast(m === 'type' ? 'Choose a JPG, PNG, WebP or GIF image'
+          : m === 'size' ? 'That photo is over 8MB. Please pick a smaller one'
+            : 'Upload failed. You can paste the photo address instead', 'err');
+      }).then(function () {
+        btn.disabled = false;
+        lbl.textContent = 'Upload';
+      });
+    });
+
+    line.appendChild(input);
+    line.appendChild(btn);
+    line.appendChild(file);
+    wrap.appendChild(line);
+    wrap.appendChild(warn);
+    check();
+    return wrap;
+  }
+
+  /** The clubs this grid shows, to choose from: the competition's own, A to Z. */
+  var gridCache = {};
+  function gridClubs() {
+    var view = C.gridOf === 'performer' ? 'performers' : C.gridOf === 'venue' ? 'venues' : 'teams';
+    var q = 'view=' + view + '&limit=200&sort=name';
+    if (C.gridOf === 'team') {
+      if (!C.competition) return Promise.resolve(null);
+      q += '&competition=' + encodeURIComponent(C.competition);
+    }
+    if (C.gridOf === 'venue' && C.category) q += '&category=' + encodeURIComponent(C.category);
+    if (!gridCache[q]) {
+      gridCache[q] = fetch(K.FEED + '?' + q)
+        .then(function (r) { if (!r.ok) throw new Error('grid ' + r.status); return r.json(); })
+        .then(function (d) { return (d && d.items) || []; })
+        .catch(function (e) { delete gridCache[q]; throw e; });
+    }
+    return gridCache[q];
+  }
+
+  /**
+   * A list of chosen clubs, each with its photo when banners use one. Featured
+   * clubs are ordered (up and down), photos are not. Adding opens this grid's
+   * own clubs, filtered as you type, and stays open so six can be added in a row.
+   */
+  function clubRows(hostId, o) {
+    var host = $(hostId);
+    var picking = false;
+    var term = '';
+    function rows() { return (o.get() || []).slice(); }
+    function commit(next) { o.set(next); draw(); }
+
+    function ctlBtn(svg, label, cls, disabled, onClick) {
+      var b = mk('button', cls || '');
+      b.type = 'button';
+      b.innerHTML = svg;
+      b.setAttribute('aria-label', label);
+      b.title = label;
+      b.disabled = !!disabled;
+      b.addEventListener('click', onClick);
+      return b;
+    }
+
+    function picker() {
+      var box = mk('div', 'fr-pick');
+      var input = mk('input', 'input');
+      input.type = 'search';
+      input.placeholder = 'Type to find one';
+      input.setAttribute('aria-label', 'Find ' + noun() + ' to add');
+      input.value = term;
+      var list = mk('div', 'fr-list');
+      list.appendChild(mk('div', 'fr-note', 'Loading ' + noun() + '…'));
+
+      function fill(all) {
+        list.textContent = '';
+        if (all === null) { list.appendChild(mk('div', 'fr-note', 'Choose a competition first.')); return; }
+        var taken = {};
+        rows().forEach(function (r) { taken[r.key] = 1; });
+        (o.exclude ? o.exclude() : []).forEach(function (k) { taken[k] = 1; });
+        var t = term.trim().toLowerCase();
+        var shown = all.filter(function (x) {
+          return !taken[x.key] && (!t || String(x.name).toLowerCase().indexOf(t) !== -1);
+        });
+        if (!shown.length) {
+          list.appendChild(mk('div', 'fr-note', t ? 'Nothing matches that.' : 'All of them are already on the list.'));
+          return;
+        }
+        shown.forEach(function (x) {
+          var b = mk('button', 'fr-opt');
+          b.type = 'button';
+          var badge = K.badgeEl(x.name, typeof x.hue === 'number' ? x.hue : K.hue(x.key));
+          badge.className = 'fr-badge';
+          b.appendChild(badge);
+          b.appendChild(mk('span', 'fr-name', x.name));
+          b.addEventListener('click', function () {
+            var next = rows();
+            if (next.length >= o.max || next.some(function (r) { return r.key === x.key; })) return;
+            next.push({ key: x.key, name: x.name, image: '' });
+            o._refocus = true;   // back to the search box, to add the next one
+            commit(next);
+          });
+          list.appendChild(b);
+        });
+      }
+
+      function load() {
+        gridClubs().then(fill).catch(function () {
+          list.textContent = '';
+          list.appendChild(mk('div', 'fr-note', 'Could not load the list. Close this and try again.'));
+        });
+      }
+      input.addEventListener('input', K.debounce(function () { term = input.value; load(); }, 120));
+      box.appendChild(input);
+      box.appendChild(list);
+      load();
+      return { box: box, input: input };
+    }
+
+    function draw() {
+      if (!host) return;
+      var focusPicker = !!(document.activeElement && host.contains(document.activeElement)
+        && document.activeElement.type === 'search');
+      host.textContent = '';
+      var list = rows();
+      var photo = o.withPhoto();
+
+      list.forEach(function (row, i) {
+        var box = mk('div', 'fr-row');
+        var top = mk('div', 'fr-top');
+        var badge = K.badgeEl(row.name || row.key, K.hue(row.key));
+        badge.className = 'fr-badge';
+        top.appendChild(badge);
+        top.appendChild(mk('span', 'fr-name', row.name || row.key));
+        var ctl = mk('span', 'fr-ctl');
+        if (o.ordered) {
+          ctl.appendChild(ctlBtn(ICO.up, 'Move ' + (row.name || row.key) + ' up', '', i === 0, function () {
+            var next = rows();
+            next.splice(i - 1, 0, next.splice(i, 1)[0]);
+            commit(next);
+          }));
+          ctl.appendChild(ctlBtn(ICO.down, 'Move ' + (row.name || row.key) + ' down', '', i === list.length - 1, function () {
+            var next = rows();
+            next.splice(i + 1, 0, next.splice(i, 1)[0]);
+            commit(next);
+          }));
+        }
+        ctl.appendChild(ctlBtn(ICO.del, 'Remove ' + (row.name || row.key), 'fr-del', false, function () {
+          var next = rows();
+          next.splice(i, 1);
+          commit(next);
+        }));
+        top.appendChild(ctl);
+        box.appendChild(top);
+        if (photo) {
+          box.appendChild(photoField(
+            function () { return row.image; },
+            function (url) {
+              // Straight into the config, no redraw, so the cursor stays put.
+              var next = rows();
+              if (next[i] && next[i].key === row.key) { next[i] = Object.assign({}, next[i], { image: url }); o.set(next); }
+            },
+            'Photo for ' + (row.name || row.key)
+          ));
+        }
+        host.appendChild(box);
+      });
+
+      if (picking) {
+        var p = picker();
+        host.appendChild(p.box);
+        var done = mk('button', 'tgse-btn tgse-btn--sm', 'Done');
+        done.type = 'button';
+        done.style.marginTop = '8px';
+        done.addEventListener('click', function () { picking = false; term = ''; draw(); });
+        host.appendChild(done);
+        if (focusPicker || o._refocus) { o._refocus = false; try { p.input.focus(); } catch (e) { /* gone */ } }
+        return;
+      }
+
+      var add = mk('button', 'tgse-btn tgse-btn--sm', o.addLabel(list.length));
+      add.type = 'button';
+      add.disabled = list.length >= o.max;
+      add.addEventListener('click', function () { picking = true; o._refocus = true; draw(); });
+      var line = mk('div', 'fr-add-row');
+      line.appendChild(add);
+      host.appendChild(line);
+      if (list.length >= o.max) host.appendChild(mk('div', 'field-help', 'Up to ' + o.max + '.'));
+    }
+
+    draw();
+    return { draw: function () { picking = false; term = ''; draw(); } };
+  }
+
+  var featRows = null;
+  var photoRows = null;
+
+  function mountBannerImage() {
+    var host = $('bn-image');
+    if (!host) return;
+    host.textContent = '';
+    host.appendChild(photoField(
+      function () { return C.bannerImage; },
+      function (url) { C.bannerImage = url; changed(); },
+      'Background photo for banners'
+    ));
+  }
+
+  /** The featured wording follows the kind of grid: clubs, artists or venues. */
+  function syncFeaturedUi() {
+    var std = window.TGClubPickerWidget && window.TGClubPickerWidget.featuredHeadingFor;
+    if (std) $('f-featHeading').placeholder = std(C.gridOf);
+    $('feat-hint').textContent = 'Pick the ' + noun() + ' to show first, in the order you want them. They sit above the rest'
+      + ' and come out of the grid below, so none appears twice.';
+  }
+
+  /** Banner settings show when either section is drawn as banners. */
+  function syncBannerUi() {
+    var anyBanner = C.featuredStyle !== 'tile' || C.gridStyle === 'banner';
+    $('banner-opts').hidden = !anyBanner;
+    $('photos-field').hidden = C.gridStyle !== 'banner';
+    if (featRows) featRows.draw();
+    if (photoRows) photoRows.draw();
+  }
+
   function wire() {
     var c = K.controls(C, changed);
 
@@ -500,7 +933,16 @@
       pickedId: 'picked-host', searchId: 'f-search', resultsId: 'results',
     });
 
-    c.seg('f-gridof', 'gridOf', function () { syncSourceUi(); syncPromptUi(); });
+    c.seg('f-gridof', 'gridOf', function () {
+      // A featured club means nothing in a grid of artists, and the other way
+      // round, so the lists go with the kind of grid they were chosen from.
+      if ((C.featured && C.featured.length) || (C.photos && C.photos.length)) {
+        C.featured = [];
+        C.photos = [];
+        tgse.toast('Featured list cleared, it belonged to the old grid', 'ok');
+      }
+      syncSourceUi(); syncPromptUi(); syncFeaturedUi(); syncBannerUi();
+    });
     c.seg('f-selector', 'selectorMode', function () { syncPromptUi(); });
     c.seg('f-side', 'side');
     c.select('f-category', 'category');
@@ -526,6 +968,32 @@
     c.toggle('t-homev', 'showHomeVenue');
     c.toggle('t-time', 'showTime');
     c.toggle('t-venue', 'showVenue');
+
+    c.text('f-featHeading', 'featuredHeading');
+    c.text('f-restHeading', 'restHeading');
+    c.seg('f-featstyle', 'featuredStyle', syncBannerUi);
+    c.seg('f-gridstyle', 'gridStyle', syncBannerUi);
+    c.colour('f-bncolor-swatch', 'f-bncolor', 'bannerColor');
+    c.colour('f-bntext-swatch', 'f-bntext', 'bannerTextColor');
+    featRows = clubRows('feat-rows', {
+      get: function () { return C.featured; },
+      set: function (rows) { C.featured = rows; changed(); },
+      max: MAX_FEATURED,
+      ordered: true,
+      withPhoto: function () { return C.featuredStyle !== 'tile'; },
+      addLabel: function (n) { return n ? 'Add another' : 'Choose ' + noun() + ' to feature'; },
+    });
+    photoRows = clubRows('photo-rows', {
+      get: function () { return C.photos; },
+      set: function (rows) { C.photos = rows; changed(); },
+      max: MAX_PHOTOS,
+      ordered: false,
+      withPhoto: function () { return true; },
+      // A featured club already has its photo on its own row.
+      exclude: function () { return (C.featured || []).map(function (r) { return r.key; }); },
+      addLabel: function (n) { return n ? 'Add another' : 'Give one a photo'; },
+    });
+    mountBannerImage();
 
   /** Show the arrival airport field only when a flight is actually booked. */
   function syncArrivalField() {
@@ -576,6 +1044,15 @@
     c.toggleSync('t-homev', C.showHomeVenue);
     c.toggleSync('t-time', C.showTime);
     c.toggleSync('t-venue', C.showVenue);
+    $('f-featHeading').value = C.featuredHeading || '';
+    $('f-restHeading').value = C.restHeading || '';
+    c.segSync('f-featstyle', C.featuredStyle === 'tile' ? 'tile' : 'banner');
+    c.segSync('f-gridstyle', C.gridStyle === 'banner' ? 'banner' : 'tile');
+    c.colourSync('f-bncolor-swatch', 'f-bncolor', C.bannerColor || '#0B1330');
+    c.colourSync('f-bntext-swatch', 'f-bntext', C.bannerTextColor || '#FFFFFF');
+    mountBannerImage();
+    syncFeaturedUi();
+    syncBannerUi();
     syncSourceUi();
   }
 
